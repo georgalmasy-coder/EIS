@@ -6,6 +6,7 @@ import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider.Custo
 import com.bepa.eis.server.api.external.virk.cvr.CvrCompanyDto;
 import com.bepa.eis.server.api.external.virk.cvr.CvrLookupService;
 import com.bepa.eis.server.api.external.virk.cvr.CvrapiDkLookupService;
+import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -27,7 +28,8 @@ import java.util.regex.Pattern;
         "/api/customers/cvr",
         "/api/customers"
 })
-public class CustomerRegistrationServlet extends HttpServlet {
+
+public class CustomerRegistrationServlet extends AbstractAdminServlet {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerRegistrationServlet.class);
 
@@ -54,20 +56,19 @@ public class CustomerRegistrationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(
-            HttpServletRequest req,
-            HttpServletResponse resp
-    ) throws IOException {
-        if (!"/api/customers/cvr".equals(req.getServletPath())) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+    public void processGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        if (!"/api/customers/cvr".equals(request.getServletPath())) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        String cvrNumber = normalize(req.getParameter("cvrNumber"));
+        String cvrNumber = normalize(request.getParameter("cvrNumber"));
 
         if (!isValidCvr(cvrNumber)) {
             sendJsonError(
-                    resp,
+                    response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     "CVR number must contain exactly 8 digits."
             );
@@ -79,7 +80,7 @@ public class CustomerRegistrationServlet extends HttpServlet {
 
             if (company.isEmpty()) {
                 sendJsonError(
-                        resp,
+                        response,
                         HttpServletResponse.SC_NOT_FOUND,
                         "No company was found for the entered CVR number."
                 );
@@ -87,19 +88,19 @@ public class CustomerRegistrationServlet extends HttpServlet {
             }
 
             sendJson(
-                    resp,
+                    response,
                     HttpServletResponse.SC_OK,
                     company.get()
             );
         } catch (IllegalArgumentException e) {
             sendJsonError(
-                    resp,
+                    response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     safeMessage(e, "Invalid CVR lookup request.")
             );
         } catch (Exception e) {
             sendJsonError(
-                    resp,
+                    response,
                     HttpServletResponse.SC_BAD_GATEWAY,
                     "Could not lookup company by CVR number."
             );
@@ -107,7 +108,7 @@ public class CustomerRegistrationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(
+    public void processPost(
             HttpServletRequest req,
             HttpServletResponse resp
     ) throws IOException {
@@ -253,11 +254,11 @@ public class CustomerRegistrationServlet extends HttpServlet {
         }
 
         if (isBlank(request.administratorEmail())) {
-            return "Administrator email is required.";
+            return "Contact email is required.";
         }
 
         if (!EMAIL_PATTERN.matcher(request.administratorEmail().trim()).matches()) {
-            return "Administrator email must be valid.";
+            return "Contact email must be valid.";
         }
 
         if (request.payment() == null) {

@@ -23,8 +23,13 @@ public class CustomerRecordProvider extends GenericProvider {
     private static final String SELECT_NEXT_CUSTOMER_ID_SQL =
             "SELECT ISNULL(MAX(CustomerId), 0) + 1 AS NextCustomerId " +
                     "FROM [dbo].[CUSTOMER] WITH (UPDLOCK, HOLDLOCK) " +
+                    "WHERE Latest = 1 ";
+/* GFA
+            "SELECT ISNULL(MAX(CustomerId), 0) + 1 AS NextCustomerId " +
+                    "FROM [dbo].[CUSTOMER] WITH (UPDLOCK, HOLDLOCK) " +
                     "WHERE Version = 1 " +
                     "  AND Latest = 1 ";
+ */
 
     private static final String SELECT_ALL_LATEST_CUSTOMERS_SQL =
             "SELECT " +

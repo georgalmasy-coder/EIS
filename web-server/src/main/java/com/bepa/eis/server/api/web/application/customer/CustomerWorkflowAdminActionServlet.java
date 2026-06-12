@@ -12,6 +12,7 @@ import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
 import com.bepa.eis.common.utilities.JsonUtil;
 import com.bepa.eis.common.utilities.ValueUtil;
 import com.bepa.eis.common.utilities.HtmlUtil;
+import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -24,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 @WebServlet(name = "CustomerWorkflowAdminActionServlet", urlPatterns = {
         "/api/customer-workflow/admin-action"
 })
-public class CustomerWorkflowAdminActionServlet extends HttpServlet {
+public class CustomerWorkflowAdminActionServlet extends AbstractAdminServlet {
 
     private static final String ACTION_SUSPEND = "suspend";
     private static final String ACTION_REACTIVATE = "reactivate";
@@ -32,7 +33,7 @@ public class CustomerWorkflowAdminActionServlet extends HttpServlet {
     private static final String ACTION_CANCEL = "cancel";
 
     @Override
-    protected void doGet(
+    public void processGet(
             HttpServletRequest request,
             HttpServletResponse response
     ) throws ServletException, IOException {
@@ -40,10 +41,10 @@ public class CustomerWorkflowAdminActionServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(
+    public void processPost(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws ServletException, IOException {
+    ) throws IOException {
         processRequest(request, response);
     }
 

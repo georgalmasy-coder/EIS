@@ -31,7 +31,7 @@
 <nav id="sideMenu" class="side-menu" aria-label="Side menu">
     <h2>Menu</h2>
     <div id="menuStatus" class="menu-status">Loading menu…</div>
-    <ul id="menuRoot" aria-label="Menu root" class="menu-root"></ul>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
 </nav>
 
 <main class="app customer-administration-app">
@@ -155,16 +155,16 @@
             <button class="tab-btn page-tab-btn" id="tabBtnPaymentMethod" type="button" role="tab" aria-selected="false" aria-controls="tabPanelPaymentMethod">Payment Method</button>
             <button class="tab-btn page-tab-btn" id="tabBtnModules" type="button" role="tab" aria-selected="false" aria-controls="tabPanelModules">Modules</button>
             <button class="tab-btn page-tab-btn" id="tabBtnWorkflow" type="button" role="tab" aria-selected="false" aria-controls="tabPanelWorkflow">Workflow</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnWorkflowEvents" type="button" role="tab" aria-selected="false" aria-controls="tabPanelWorkflowEvents">Workflow Events</button>
         </div>
 
         <div class="tab-panels page-dialog-panels customer-dialog-panels">
             <section class="tab-panel is-active" id="tabPanelBasis" role="tabpanel" aria-labelledby="tabBtnBasis">
-                <div class="customer-field-grid">
-                    <input id="fieldCustomerId" type="hidden" />
-                    <input id="fieldCustomerPK" type="hidden" />
-                    <input id="fieldVersion" type="hidden" />
-                    <input id="fieldChangedByUserId" type="hidden" />
+                <input id="fieldCustomerId" type="hidden" />
+                <input id="fieldCustomerPK" type="hidden" />
+                <input id="fieldVersion" type="hidden" />
 
+                <div class="customer-field-grid">
                     <label>
                         <span>Customer name</span>
                         <input id="fieldCustomerName" type="text" required />
@@ -224,17 +224,26 @@
                         <span>Changed</span>
                         <input id="fieldChangedDateTime" type="text" readonly />
                     </label>
+
+                    <label>
+                        <span>Changed By</span>
+                        <input id="fieldChangedByUserId" type="text" readonly />
+                    </label>
                 </div>
             </section>
 
             <section class="tab-panel" id="tabPanelSubscription" role="tabpanel" aria-labelledby="tabBtnSubscription">
-                <div class="customer-field-grid">
-                    <input id="fieldSubscriptionId" type="hidden" />
-                    <input id="fieldSubscriptionPlanId" type="hidden" />
+                <input id="fieldSubscriptionId" type="hidden" />
 
+                <div class="customer-field-grid">
                     <label>
                         <span>Subscription status</span>
                         <select id="fieldSubscriptionStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Subscription plan ID</span>
+                        <input id="fieldSubscriptionPlanId" type="number" />
                     </label>
 
                     <label>
@@ -300,9 +309,9 @@
             </section>
 
             <section class="tab-panel" id="tabPanelPayment" role="tabpanel" aria-labelledby="tabBtnPayment">
-                <div class="customer-field-grid">
-                    <input id="fieldPaymentId" type="hidden" />
+                <input id="fieldPaymentId" type="hidden" />
 
+                <div class="customer-field-grid">
                     <label>
                         <span>Payment status</span>
                         <select id="fieldPaymentStatus"></select>
@@ -386,9 +395,9 @@
             </section>
 
             <section class="tab-panel" id="tabPanelPaymentMethod" role="tabpanel" aria-labelledby="tabBtnPaymentMethod">
-                <div class="customer-field-grid">
-                    <input id="fieldCustomerPaymentMethodId" type="hidden" />
+                <input id="fieldCustomerPaymentMethodId" type="hidden" />
 
+                <div class="customer-field-grid">
                     <label>
                         <span>Payment provider</span>
                         <input id="fieldPaymentMethodProvider" type="text" />
@@ -446,9 +455,9 @@
                 </div>
             </section>
 
-            <section class="tab-panel" id="tabPanelModules" role="tabpanel" aria-labelledby="tabBtnModules">
-                <div class="table-frame customer-dialog-table-frame">
-                    <div class="table-scroll">
+            <section class="tab-panel customer-list-tab-panel" id="tabPanelModules" role="tabpanel" aria-labelledby="tabBtnModules">
+                <div class="table-frame customer-dialog-table-frame customer-fill-table-frame">
+                    <div class="table-scroll customer-dialog-table-scroll">
                         <table class="data-table customer-modules-table" aria-label="Customer modules">
                             <thead>
                             <tr>
@@ -467,6 +476,8 @@
             </section>
 
             <section class="tab-panel" id="tabPanelWorkflow" role="tabpanel" aria-labelledby="tabBtnWorkflow">
+                <input id="fieldWorkflowId" type="hidden" />
+
                 <div class="customer-field-grid">
                     <label>
                         <span>Workflow type</span>
@@ -522,12 +533,17 @@
                         <span>Created</span>
                         <input id="fieldWorkflowCreatedAt" type="text" readonly />
                     </label>
+
+                    <label>
+                        <span>Updated</span>
+                        <input id="fieldWorkflowUpdatedAt" type="text" readonly />
+                    </label>
                 </div>
+            </section>
 
-                <h4 class="customer-subsection-title">Workflow Events</h4>
-
-                <div class="table-frame customer-dialog-table-frame">
-                    <div class="table-scroll">
+            <section class="tab-panel customer-list-tab-panel" id="tabPanelWorkflowEvents" role="tabpanel" aria-labelledby="tabBtnWorkflowEvents">
+                <div class="table-frame customer-dialog-table-frame customer-fill-table-frame">
+                    <div class="table-scroll customer-dialog-table-scroll">
                         <table class="data-table customer-workflow-events-table" aria-label="Customer workflow events">
                             <thead>
                             <tr>

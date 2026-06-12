@@ -15,6 +15,7 @@ import com.bepa.eis.common.enums.customer.CustomerSubscriptionStatus;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowEventType;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowState;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowStatus;
+import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.customer.CustomerModuleProvider;
 import com.bepa.eis.common.providers.customer.CustomerPaymentMethodProvider;
 import com.bepa.eis.common.providers.customer.CustomerPaymentProvider;
@@ -558,6 +559,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "contactEmail", customer == null ? null : customer.getContactEmail());
         appendElement(xml, "customerStatus", customer == null ? null : customer.getCustomerStatusCode());
         appendElement(xml, "changedByUserId", customer == null ? null : customer.getChangedByUserId());
+        appendElement(xml, "changedBy", displayNameByUserId(customer == null ? null : customer.getChangedByUserId()));
         appendElement(xml, "createdDateTime", customer == null ? null : customer.getCreatedDateTime());
         appendElement(xml, "changedDateTime", customer == null ? null : customer.getChangedDateTime());
 
@@ -721,6 +723,11 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         }
 
         xml.append("</workflowEvents>");
+    }
+
+    private String displayNameByUserId(Integer userId) {
+        UserProvider userProvider = new UserProvider(null);
+        return userProvider.getUserDisplayNameById(userId);
     }
 
     private Element firstElement(

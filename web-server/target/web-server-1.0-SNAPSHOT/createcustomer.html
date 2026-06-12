@@ -821,7 +821,7 @@
                     </div>
 
                     <div class="form-field field-zipcode">
-                        <label for="customerZipCode">Zip Code</label>
+                        <label for="customerZipCode">ZipCode</label>
                         <input
                                 type="text"
                                 id="customerZipCode"
@@ -851,9 +851,11 @@
                                 type="text"
                                 id="customerPhone"
                                 name="customerPhone"
-                                maxlength="15"
+                                maxlength="20"
                                 inputmode="tel"
+                                autocomplete="tel-national"
                                 required>
+                        <p class="field-help" id="customerPhoneHelp">Select country code and enter phone number.</p>
                     </div>
 
                     <div class="form-field field-email">
@@ -989,7 +991,7 @@
                             <dd id="summaryCustomerName">-</dd>
                             <dt>Address</dt>
                             <dd id="summaryCustomerAddress">-</dd>
-                            <dt>Zip Code</dt>
+                            <dt>ZipCode</dt>
                             <dd id="summaryCustomerZipCode">-</dd>
                             <dt>City</dt>
                             <dd id="summaryCustomerCity">-</dd>
@@ -1046,7 +1048,7 @@
                     <p>
                         The customer has been created successfully.
                     </p>
-                    <p>
+                    <p id="customerCreatedReceiptText">
                         An email has been sent to the administrator. The administrator must confirm the customer creation
                         by following the instructions in the email.
                     </p>
@@ -1088,27 +1090,36 @@
         ];
 
         const phoneCountryCodes = [
-            { country: "Denmark", code: "+45" },
-            { country: "Sweden", code: "+46" },
-            { country: "Norway", code: "+47" },
-            { country: "Germany", code: "+49" },
-            { country: "United Kingdom", code: "+44" },
-            { country: "United States", code: "+1" },
-            { country: "France", code: "+33" },
-            { country: "Netherlands", code: "+31" },
-            { country: "Belgium", code: "+32" },
-            { country: "Spain", code: "+34" },
-            { country: "Italy", code: "+39" },
-            { country: "Finland", code: "+358" },
-            { country: "Poland", code: "+48" },
-            { country: "Portugal", code: "+351" },
-            { country: "Switzerland", code: "+41" },
-            { country: "Austria", code: "+43" },
-            { country: "Ireland", code: "+353" },
-            { country: "Iceland", code: "+354" },
-            { country: "Faroe Islands", code: "+298" },
-            { country: "Greenland", code: "+299" }
+            { country: "Denmark", code: "+45", min: 8, max: 8, example: "12 34 56 78" },
+            { country: "Sweden", code: "+46", min: 7, max: 10, example: "70 123 45 67" },
+            { country: "Norway", code: "+47", min: 8, max: 8, example: "123 45 678" },
+            { country: "Germany", code: "+49", min: 7, max: 13, example: "151 23456789" },
+            { country: "United Kingdom", code: "+44", min: 10, max: 10, example: "7123 456789" },
+            { country: "United States", code: "+1", min: 10, max: 10, example: "(123) 456-7890" },
+            { country: "Canada", code: "+1", min: 10, max: 10, example: "(123) 456-7890" },
+            { country: "France", code: "+33", min: 9, max: 9, example: "6 12 34 56 78" },
+            { country: "Netherlands", code: "+31", min: 9, max: 9, example: "6 12345678" },
+            { country: "Belgium", code: "+32", min: 8, max: 9, example: "470 12 34 56" },
+            { country: "Spain", code: "+34", min: 9, max: 9, example: "612 34 56 78" },
+            { country: "Italy", code: "+39", min: 8, max: 11, example: "312 345 6789" },
+            { country: "Finland", code: "+358", min: 7, max: 10, example: "40 1234567" },
+            { country: "Poland", code: "+48", min: 9, max: 9, example: "123 456 789" },
+            { country: "Portugal", code: "+351", min: 9, max: 9, example: "912 345 678" },
+            { country: "Switzerland", code: "+41", min: 9, max: 9, example: "79 123 45 67" },
+            { country: "Austria", code: "+43", min: 7, max: 13, example: "664 1234567" },
+            { country: "Ireland", code: "+353", min: 7, max: 9, example: "85 123 4567" },
+            { country: "Iceland", code: "+354", min: 7, max: 7, example: "123 4567" },
+            { country: "Faroe Islands", code: "+298", min: 6, max: 6, example: "123456" },
+            { country: "Greenland", code: "+299", min: 6, max: 6, example: "123456" }
         ];
+
+        const DEFAULT_PHONE_RULE = {
+            country: "Selected country",
+            code: "",
+            min: 4,
+            max: 15,
+            example: "Enter phone number"
+        };
 
         const wizardForm = document.getElementById("createCustomerWizard");
         const progressSteps = Array.from(document.querySelectorAll("[data-progress-step]"));
@@ -1125,6 +1136,7 @@
             country: document.getElementById("customerCountry"),
             phoneCountryCode: document.getElementById("customerPhoneCountryCode"),
             phone: document.getElementById("customerPhone"),
+            phoneHelp: document.getElementById("customerPhoneHelp"),
             administratorEmail: document.getElementById("customerAdministratorEmail")
         };
 
@@ -1143,6 +1155,7 @@
         const termsAccepted = document.getElementById("termsAccepted");
         const createCustomerButton = document.getElementById("createCustomerButton");
         const submitWarning = document.getElementById("submitWarning");
+        const customerCreatedReceiptText = document.getElementById("customerCreatedReceiptText");
 
         const summary = {
             module: document.getElementById("summaryModule"),
@@ -1205,6 +1218,15 @@
             return (value || "").replace(/\D/g, "");
         }
 
+        function escapeHtml(value) {
+            return String(value == null ? "" : value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
         function fillCountries() {
             const displayNames = typeof Intl !== "undefined" && Intl.DisplayNames
                 ? new Intl.DisplayNames(["en"], { type: "region" })
@@ -1247,6 +1269,7 @@
                     const option = document.createElement("option");
                     option.value = entry.code;
                     option.textContent = `${entry.country} (${entry.code})`;
+                    option.dataset.country = entry.country;
 
                     if (entry.country === "Denmark" && entry.code === "+45") {
                         option.selected = true;
@@ -1256,15 +1279,139 @@
                 });
         }
 
-        function getFullPhoneNumber() {
-            const countryCode = customerFields.phoneCountryCode.value.trim();
-            const phone = customerFields.phone.value.trim();
+        function selectedPhoneRule() {
+            const selectedOption = customerFields.phoneCountryCode.options[customerFields.phoneCountryCode.selectedIndex];
 
-            if (!countryCode && !phone) {
+            if (!selectedOption) {
+                return DEFAULT_PHONE_RULE;
+            }
+
+            const country = selectedOption.dataset.country || "";
+            const code = selectedOption.value || "";
+
+            return phoneCountryCodes.find(function (rule) {
+                return rule.country === country && rule.code === code;
+            }) || {
+                ...DEFAULT_PHONE_RULE,
+                country,
+                code
+            };
+        }
+
+        function formatPhoneDigits(digits, rule) {
+            const safeDigits = onlyDigits(digits).slice(0, rule.max || 15);
+
+            if (!safeDigits) {
                 return "";
             }
 
-            return `${countryCode} ${phone}`.trim();
+            if (rule.code === "+45" && safeDigits.length <= 8) {
+                return safeDigits.replace(/(\d{2})(?=\d)/g, "$1 ").trim();
+            }
+
+            if (rule.code === "+47" && safeDigits.length <= 8) {
+                return safeDigits.replace(/^(\d{3})(\d{0,2})(\d{0,3}).*/, function (_match, first, second, third) {
+                    return [first, second, third].filter(Boolean).join(" ");
+                });
+            }
+
+            if (rule.code === "+1" && safeDigits.length <= 10) {
+                if (safeDigits.length <= 3) {
+                    return safeDigits;
+                }
+
+                if (safeDigits.length <= 6) {
+                    return `(${safeDigits.slice(0, 3)}) ${safeDigits.slice(3)}`;
+                }
+
+                return `(${safeDigits.slice(0, 3)}) ${safeDigits.slice(3, 6)}-${safeDigits.slice(6)}`;
+            }
+
+            if (rule.code === "+44" && safeDigits.length <= 10) {
+                return safeDigits.replace(/^(\d{4})(\d{0,6}).*/, function (_match, first, second) {
+                    return [first, second].filter(Boolean).join(" ");
+                });
+            }
+
+            if (rule.code === "+33" && safeDigits.length <= 9) {
+                return safeDigits.replace(/^(\d)(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2}).*/, function (_match, first, second, third, fourth, fifth) {
+                    return [first, second, third, fourth, fifth].filter(Boolean).join(" ");
+                });
+            }
+
+            if (rule.code === "+48" && safeDigits.length <= 9) {
+                return safeDigits.replace(/^(\d{3})(\d{0,3})(\d{0,3}).*/, function (_match, first, second, third) {
+                    return [first, second, third].filter(Boolean).join(" ");
+                });
+            }
+
+            if (safeDigits.length <= 6) {
+                return safeDigits;
+            }
+
+            if (safeDigits.length <= 10) {
+                return safeDigits.replace(/^(\d{3})(\d{0,3})(\d{0,4}).*/, function (_match, first, second, third) {
+                    return [first, second, third].filter(Boolean).join(" ");
+                });
+            }
+
+            return safeDigits.replace(/^(\d{3})(\d{0,4})(\d{0,4})(\d{0,4}).*/, function (_match, first, second, third, fourth) {
+                return [first, second, third, fourth].filter(Boolean).join(" ");
+            });
+        }
+
+        function updatePhoneHelp() {
+            const rule = selectedPhoneRule();
+
+            if (!customerFields.phoneHelp) {
+                return;
+            }
+
+            if (rule.min === rule.max) {
+                customerFields.phoneHelp.textContent = `${rule.country}: exactly ${rule.min} digits. Example: ${rule.example}`;
+            } else {
+                customerFields.phoneHelp.textContent = `${rule.country}: ${rule.min}-${rule.max} digits. Example: ${rule.example}`;
+            }
+        }
+
+        function formatCurrentPhoneValue() {
+            const rule = selectedPhoneRule();
+            const digits = onlyDigits(customerFields.phone.value);
+
+            customerFields.phone.value = formatPhoneDigits(digits, rule);
+            customerFields.phone.maxLength = Math.max((rule.max || 15) + 6, 15);
+
+            updatePhoneHelp();
+        }
+
+        function validatePhoneNumber() {
+            const rule = selectedPhoneRule();
+            const digits = onlyDigits(customerFields.phone.value);
+
+            if (!digits) {
+                return "Phone is required.";
+            }
+
+            if (rule.min === rule.max && digits.length !== rule.min) {
+                return `Phone number for ${rule.country} must contain exactly ${rule.min} digits.`;
+            }
+
+            if (digits.length < rule.min || digits.length > rule.max) {
+                return `Phone number for ${rule.country} must contain between ${rule.min} and ${rule.max} digits.`;
+            }
+
+            return null;
+        }
+
+        function getFullPhoneNumber() {
+            const rule = selectedPhoneRule();
+            const phone = customerFields.phone.value.trim();
+
+            if (!rule.code && !phone) {
+                return "";
+            }
+
+            return `${rule.code} ${phone}`.trim();
         }
 
         function fillExpiryYears() {
@@ -1427,7 +1574,12 @@
             setIfBlank(customerFields.zipCode, company.postalCode || company.zipCode);
             setIfBlank(customerFields.city, company.city);
             setIfBlank(customerFields.country, company.country);
-            setIfBlank(customerFields.phone, onlyDigits(company.phone || "").slice(0, 15));
+
+            if (customerFields.phone && isBlank(customerFields.phone.value) && company.phone) {
+                customerFields.phone.value = onlyDigits(company.phone || "");
+                formatCurrentPhoneValue();
+            }
+
             setIfBlank(customerFields.administratorEmail, company.email || company.administratorEmail);
 
             updateCustomerInfoButtonState();
@@ -1493,6 +1645,13 @@
                 return false;
             }
 
+            const phoneValidationError = validatePhoneNumber();
+
+            if (phoneValidationError) {
+                setStepError(2, phoneValidationError);
+                return false;
+            }
+
             if (!isValidEmail(customerFields.administratorEmail.value)) {
                 setStepError(2, "Administrator email must be a valid email address.");
                 return false;
@@ -1508,9 +1667,10 @@
             const allFilled = getCustomerRequiredFields().every(function (field) {
                 return !isBlank(field.value);
             });
+            const phoneValid = validatePhoneNumber() === null;
             const emailValid = isValidEmail(customerFields.administratorEmail.value);
 
-            customerInfoNextButton.disabled = !(cvrValid && allFilled && emailValid);
+            customerInfoNextButton.disabled = !(cvrValid && allFilled && phoneValid && emailValid);
             updateFetchFromVirkButtonState();
 
             if (!customerInfoNextButton.disabled) {
@@ -1633,6 +1793,26 @@
             }
         }
 
+        function updateCreatedReceiptText() {
+            const contactName = customerFields.name.value.trim() || "the administrator";
+            const contactEmail = customerFields.administratorEmail.value.trim();
+
+            if (!customerCreatedReceiptText) {
+                return;
+            }
+
+            if (contactEmail) {
+                customerCreatedReceiptText.innerHTML =
+                    `An email has been sent to the administrator <strong>${escapeHtml(contactName)}</strong> at ` +
+                    `<strong>${escapeHtml(contactEmail)}</strong>. The administrator must confirm the customer creation ` +
+                    `by following the instructions in the email.`;
+            } else {
+                customerCreatedReceiptText.innerHTML =
+                    `An email has been sent to <strong>${escapeHtml(contactName)}</strong>. The administrator must confirm the customer creation ` +
+                    `by following the instructions in the email.`;
+            }
+        }
+
         function buildCreateCustomerPayload() {
             const selectedModule = getSelectedModule();
 
@@ -1717,6 +1897,7 @@
 
                 try {
                     await submitCustomer();
+                    updateCreatedReceiptText();
                     customerCreated = true;
                     goToStep(5);
                 } catch (error) {
@@ -1760,8 +1941,13 @@
             updateCustomerInfoButtonState();
         });
 
+        customerFields.phoneCountryCode.addEventListener("change", function () {
+            formatCurrentPhoneValue();
+            updateCustomerInfoButtonState();
+        });
+
         customerFields.phone.addEventListener("input", function () {
-            customerFields.phone.value = onlyDigits(customerFields.phone.value).slice(0, 15);
+            formatCurrentPhoneValue();
             updateCustomerInfoButtonState();
         });
 
@@ -1796,6 +1982,8 @@
         fillCountries();
         fillPhoneCountryCodes();
         fillExpiryYears();
+        updatePhoneHelp();
+        formatCurrentPhoneValue();
         updateProgress();
         updateCustomerInfoButtonState();
         updatePaymentButtonState();

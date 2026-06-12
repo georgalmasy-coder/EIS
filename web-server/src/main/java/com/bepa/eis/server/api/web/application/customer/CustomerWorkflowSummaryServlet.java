@@ -4,9 +4,8 @@ import com.bepa.eis.common.dto.customer.CustomerWorkflowSummary;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowSummaryProvider;
 import com.bepa.eis.common.utilities.JsonUtil;
 import com.bepa.eis.common.utilities.ValueUtil;
-import jakarta.servlet.ServletException;
+import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -16,21 +15,21 @@ import java.util.List;
 @WebServlet(name = "CustomerWorkflowSummaryServlet", urlPatterns = {
         "/api/customer-workflow/summary"
 })
-public class CustomerWorkflowSummaryServlet extends HttpServlet {
+public class CustomerWorkflowSummaryServlet extends AbstractAdminServlet {
 
     @Override
-    protected void doGet(
+    public void processGet(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws ServletException, IOException {
+    ) throws IOException {
         processRequest(request, response);
     }
 
     @Override
-    protected void doPost(
+    public void processPost(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws ServletException, IOException {
+    ) throws IOException {
         processRequest(request, response);
     }
 

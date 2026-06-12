@@ -150,6 +150,15 @@ package com.bepa.eis.common.providers;
 
  ---
 
+ ## `getUserDisplayNameById(Integer userId)`
+
+ Looks up a display-friendly user name for a given internal user ID.
+ Returns the user's name when available, otherwise email, otherwise an empty string.
+
+ This is read-only and is useful in administration screens where technical IDs should not be shown directly.
+
+ ---
+
  ## Suggested admin dialog actions
 
  Typical administrator actions could map like this:
@@ -192,6 +201,14 @@ public class UserProvider extends GenericProvider {
 
     private static final String SELECT_EMAIL_BY_USER_ID_SQL = """
             SELECT Email
+            FROM [dbo].[USERS]
+            WHERE UserId = ?
+            """;
+
+    private static final String SELECT_USER_DISPLAY_NAME_BY_ID_SQL = """
+            SELECT
+                Name,
+                Email
             FROM [dbo].[USERS]
             WHERE UserId = ?
             """;
@@ -901,6 +918,38 @@ public class UserProvider extends GenericProvider {
         }
 
         return "unknown";
+    }
+
+    public String getUserDisplayNameById(Integer userId) {
+        if (userId == null) {
+            return "";
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_USER_DISPLAY_NAME_BY_ID_SQL)) {
+
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String name = resultSet.getString("Name");
+
+                    if (name != null && !name.isBlank()) {
+                        return name.trim();
+                    }
+
+                    String email = resultSet.getString("Email");
+
+                    if (email != null && !email.isBlank()) {
+                        return email.trim();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Could not load display name for userId: {}", userId, e);
+        }
+
+        return "";
     }
 
     private UserMfaState mapUserMfaState(ResultSet resultSet) throws SQLException {

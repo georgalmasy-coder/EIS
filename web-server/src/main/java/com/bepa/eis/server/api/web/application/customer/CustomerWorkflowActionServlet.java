@@ -4,9 +4,9 @@ import com.bepa.eis.common.providers.customer.CustomerWorkflowActionProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowActionProvider.CustomerWorkflowActionResult;
 import com.bepa.eis.common.utilities.HtmlUtil;
 import com.bepa.eis.common.utilities.ValueUtil;
+import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
         "/renew-subscription",
         "/reactivate-customer"
 })
-public class CustomerWorkflowActionServlet extends HttpServlet {
+public class CustomerWorkflowActionServlet extends AbstractAdminServlet {
 
     private static final String ACTION_CONFIRM_CUSTOMER = "confirm-customer";
     private static final String ACTION_CONTINUE_SUBSCRIPTION = "continue-subscription";
@@ -28,18 +28,18 @@ public class CustomerWorkflowActionServlet extends HttpServlet {
     private static final String ACTION_REACTIVATE_CUSTOMER = "reactivate-customer";
 
     @Override
-    protected void doGet(
+    public void processGet(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws ServletException, IOException {
+    ) throws IOException {
         processAction(request, response);
     }
 
     @Override
-    protected void doPost(
+    public void processPost(
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws ServletException, IOException {
+    ) throws IOException {
         processAction(request, response);
     }
 

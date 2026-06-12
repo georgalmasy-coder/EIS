@@ -115,8 +115,10 @@ async function loadCustomers() {
         const doc = await fetchXml(API_URL);
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
+
         state.customers = parseCustomerList(doc);
         applyFilterSortAndRender();
+
         setLoadStatus(`Loaded ${state.customers.length} customers`);
     } catch (error) {
         console.error(error);
@@ -143,8 +145,10 @@ async function openCustomerDetail(customerId) {
         const doc = await fetchXml(`${API_URL}?customerId=${encodeURIComponent(customerId)}`);
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
+
         state.customerDetail = parseCustomerDetail(doc);
         fillDialog(state.customerDetail);
+
         setDialogStatus("Loaded.", "is-ok");
     } catch (error) {
         console.error(error);
@@ -186,6 +190,7 @@ async function saveCustomerAdministration() {
             const detailDoc = await fetchXml(`${API_URL}?customerId=${encodeURIComponent(state.selectedCustomerId)}`);
             state.lookups = parseLookups(detailDoc);
             fillAllLookupSelects();
+
             state.customerDetail = parseCustomerDetail(detailDoc);
             fillDialog(state.customerDetail);
         }
@@ -290,10 +295,7 @@ function fillAllLookupSelects() {
     fillSelectFromLookup("fieldPaymentMethodStatus", "paymentMethodStatus");
 }
 
-function fillSelectFromLookup(
-    selectId,
-    lookupName
-) {
+function fillSelectFromLookup(selectId, lookupName) {
     const select = document.getElementById(selectId);
 
     if (!select) {
@@ -518,6 +520,14 @@ function renderCustomers() {
     }).join("");
 
     els.customersBody.querySelectorAll("tr[data-customer-id]").forEach(function (row) {
+        row.addEventListener("click", function () {
+            els.customersBody.querySelectorAll("tr.is-selected").forEach(function (selectedRow) {
+                selectedRow.classList.remove("is-selected");
+            });
+
+            row.classList.add("is-selected");
+        });
+
         row.addEventListener("dblclick", function () {
             const customerId = parseInt(row.getAttribute("data-customer-id"), 10);
             openCustomerDetail(customerId);
@@ -527,7 +537,7 @@ function renderCustomers() {
 
 function renderStatus(status, label) {
     const safeStatus = status || "";
-    const safeLabel = label || humanReadableCode(safeStatus);
+    const safeLabel = label || safeStatus;
     const statusClass = `status-${safeStatus.toLowerCase().replaceAll("_", "-")}`;
 
     return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "—")}</span>`;
@@ -650,7 +660,7 @@ function fillDialog(detail) {
     setValue("fieldCustomerStatus", customer.customerStatus);
     setValue("fieldCreatedDateTime", formatDanishDateTime(customer.createdDateTime));
     setValue("fieldChangedDateTime", formatDanishDateTime(customer.changedDateTime));
-    setValue("fieldChangedByUserId", customer.changedByUserId);
+    setValue("fieldChangedByUserId", customer.changedBy || "");
 
     setValue("fieldSubscriptionId", subscription.subscriptionId);
     setValue("fieldSubscriptionStatus", subscription.subscriptionStatus);
@@ -699,6 +709,7 @@ function fillDialog(detail) {
     setValue("fieldPaymentMethodCreatedAt", formatDanishDateTime(paymentMethod.createdAt));
     setValue("fieldPaymentMethodUpdatedAt", formatDanishDateTime(paymentMethod.updatedAt));
 
+    setValue("fieldWorkflowId", workflow.workflowId);
     setValue("fieldWorkflowType", lookupLabel("workflowType", workflow.workflowType));
     setValue("fieldWorkflowStatus", lookupLabel("workflowStatus", workflow.workflowStatus));
     setValue("fieldCurrentState", lookupLabel("workflowState", workflow.currentState));
@@ -753,11 +764,11 @@ function renderModules(modules) {
     els.modulesBody.innerHTML = modules.map(function (module, index) {
         return `
             <tr data-module-index="${index}">
-                <td class="customer-technical-field">
-                    <input data-module-field="customerModuleId" value="${escapeAttribute(module.customerModuleId)}" />
-                    <input data-module-field="subscriptionPlanId" value="${escapeAttribute(module.subscriptionPlanId)}" />
+                <td>
+                    <input data-module-field="customerModuleId" type="hidden" value="${escapeAttribute(module.customerModuleId)}" />
+                    <input data-module-field="subscriptionPlanId" type="hidden" value="${escapeAttribute(module.subscriptionPlanId)}" />
+                    <input data-module-field="moduleCode" value="${escapeAttribute(module.moduleCode)}" />
                 </td>
-                <td><input data-module-field="moduleCode" value="${escapeAttribute(module.moduleCode)}" /></td>
                 <td><input data-module-field="moduleName" value="${escapeAttribute(module.moduleName)}" /></td>
                 <td>${renderLookupSelect("customerModuleStatus", "customerModuleStatus", module.customerModuleStatus)}</td>
                 <td>${escapeHtml(formatDanishDateTime(module.createdAt))}</td>
@@ -767,11 +778,7 @@ function renderModules(modules) {
     }).join("");
 }
 
-function renderLookupSelect(
-    lookupName,
-    dataFieldName,
-    selectedValue
-) {
+function renderLookupSelect(lookupName, dataFieldName, selectedValue) {
     const options = state.lookups[lookupName] || [];
 
     const optionHtml = options.map(function (lookupOption) {
@@ -850,7 +857,6 @@ function appendCustomerXml(xml) {
     appendXmlElement(xml, "contactName", value("fieldContactName"));
     appendXmlElement(xml, "contactEmail", value("fieldContactEmail"));
     appendXmlElement(xml, "customerStatus", value("fieldCustomerStatus"));
-    appendXmlElement(xml, "changedByUserId", value("fieldChangedByUserId"));
 
     xml.push("</customer>");
 }
@@ -1030,10 +1036,7 @@ function intText(node, selector) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function lookupLabel(
-    lookupName,
-    code
-) {
+function lookupLabel(lookupName, code) {
     if (!code) {
         return "";
     }
@@ -1043,23 +1046,7 @@ function lookupLabel(
         return lookupOption.code === code;
     });
 
-    return option ? option.label : humanReadableCode(code);
-}
-
-function humanReadableCode(code) {
-    if (!code) {
-        return "";
-    }
-
-    return String(code)
-        .trim()
-        .toLowerCase()
-        .split("_")
-        .filter(Boolean)
-        .map(function (part) {
-            return part.charAt(0).toUpperCase() + part.slice(1);
-        })
-        .join(" ");
+    return option ? option.label : code;
 }
 
 function normalize(itemValue) {
@@ -1086,6 +1073,10 @@ function dateTimeMillis(itemValue) {
     return date.getTime();
 }
 
+function pad2(itemValue) {
+    return String(itemValue).padStart(2, "0");
+}
+
 function formatDanishDateTime(itemValue) {
     const millis = dateTimeMillis(itemValue);
 
@@ -1093,13 +1084,9 @@ function formatDanishDateTime(itemValue) {
         return "";
     }
 
-    return new Intl.DateTimeFormat("da-DK", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-    }).format(new Date(millis));
+    const date = new Date(millis);
+
+    return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
 }
 
 function toIsoDateTime(itemValue) {
@@ -1109,11 +1096,11 @@ function toIsoDateTime(itemValue) {
         return "";
     }
 
-    const danishMatch = rawValue.match(/^(\d{2})[./-](\d{2})[./-](\d{4}),?\s+(\d{2})[.:](\d{2})$/);
+    const danishMatch = rawValue.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
 
     if (danishMatch) {
-        const [, day, month, year, hour, minute] = danishMatch;
-        return `${year}-${month}-${day}T${hour}:${minute}`;
+        const [, day, month, year, hour, minute, second] = danishMatch;
+        return `${year}-${month}-${day}T${hour}:${minute}:${second || "00"}`;
     }
 
     return rawValue;
