@@ -1,0 +1,99 @@
+Subject: Payment failed for {{customerName}}
+Content-Type: text/html; charset=UTF-8
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment failed</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#1f2933;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f8;margin:0;padding:24px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:640px;max-width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #d9e2ec;">
+                <tr>
+                    <td style="padding:24px 32px;background-color:#9b1c1c;color:#ffffff;">
+                        <h1 style="margin:0;font-size:22px;line-height:1.3;font-weight:700;">Payment failed</h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:32px;">
+                        <p style="margin:0 0 16px 0;font-size:16px;line-height:1.5;">
+                            Hello {{customerContactName}},
+                        </p>
+
+                        <p style="margin:0 0 16px 0;font-size:16px;line-height:1.5;">
+                            We were unable to complete the payment for <strong>{{customerName}}</strong>.
+                        </p>
+
+                        <p style="margin:0 0 20px 0;font-size:16px;line-height:1.5;">
+                            Your subscription for {{applicationName}} may not be activated or renewed until the payment
+                            has been completed successfully.
+                        </p>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-collapse:collapse;border:1px solid #d9e2ec;">
+                            <tr>
+                                <td style="padding:12px 16px;background-color:#f8fafc;border-bottom:1px solid #d9e2ec;font-size:14px;font-weight:700;">
+                                    Payment details
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:16px;font-size:14px;line-height:1.6;">
+                                    <strong>Customer:</strong> {{customerName}}<br>
+                                    <strong>Plan:</strong> {{subscriptionPlanName}}<br>
+                                    <strong>Amount:</strong> {{paymentAmount}} {{paymentCurrency}}<br>
+                                    <strong>Due date:</strong> {{paymentDueDate}}<br>
+                                    <strong>Payment reference:</strong> {{paymentReference}}<br>
+                                    <strong>Failure reason:</strong> {{paymentFailureReason}}
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:0 0 20px 0;font-size:16px;line-height:1.5;">
+                            Please try again or update your payment information.
+                        </p>
+
+                        <table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0;">
+                            <tr>
+                                <td style="border-radius:6px;background-color:#0b69a3;">
+                                    <a href="{{paymentLink}}"
+                                       style="display:inline-block;padding:14px 22px;font-size:16px;line-height:1.2;color:#ffffff;text-decoration:none;font-weight:700;border-radius:6px;">
+                                        Retry payment
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:0 0 16px 0;font-size:14px;line-height:1.5;color:#52606d;">
+                            If the button does not work, copy and paste this link into your browser:
+                        </p>
+
+                        <p style="margin:0 0 20px 0;font-size:14px;line-height:1.5;word-break:break-all;">
+                            <a href="{{paymentLink}}" style="color:#0b69a3;text-decoration:underline;">{{paymentLink}}</a>
+                        </p>
+
+                        <p style="margin:0 0 16px 0;font-size:14px;line-height:1.5;color:#52606d;">
+                            If payment is not completed before <strong>{{paymentGracePeriodEndsAt}}</strong>,
+                            access for the customer account may be suspended.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:20px 32px;background-color:#f8fafc;border-top:1px solid #d9e2ec;">
+                        <p style="margin:0;font-size:12px;line-height:1.5;color:#7b8794;">
+                            This email was sent automatically by {{applicationName}}. Please do not reply to this email.
+                        </p>
+                        <p style="margin:8px 0 0 0;font-size:12px;line-height:1.5;color:#7b8794;">
+                            Customer ID: {{customerId}} · Workflow ID: {{workflowId}} · Payment ID: {{paymentId}}
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

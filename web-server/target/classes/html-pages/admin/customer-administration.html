@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Customer Administration</title>
+
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/tabs-list.css" />
+    <link rel="stylesheet" href="../../css/generel.css" />
+    <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/customer-administration.css" />
+</head>
+
+<body>
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" aria-label="Menu root" class="menu-root"></ul>
+</nav>
+
+<main class="app customer-administration-app">
+    <div class="content customer-administration-content">
+        <header class="topbar customer-administration-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout customer-administration-layout" aria-label="Customer administration">
+            <div class="section-header customer-administration-section-header">
+                <h2>Customer Administration</h2>
+
+                <div class="section-header-actions customer-administration-toolbar">
+                    <input
+                            id="customerFilter"
+                            class="customer-administration-filter"
+                            type="search"
+                            placeholder="Filter customers..."
+                            autocomplete="off"
+                            aria-label="Filter customers"
+                    />
+
+                    <button
+                            id="btnRefreshCustomers"
+                            class="page-icon-button customer-administration-refresh-button"
+                            type="button"
+                            aria-label="Refresh customer list"
+                            title="Refresh customer list"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h8V3z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body customer-administration-body">
+                <div class="table-frame page-frame customer-administration-frame" aria-label="Customer list frame">
+                    <div class="table-scroll customer-administration-scroll" id="tableScroll">
+                        <table class="data-table page-table customer-administration-table" aria-label="Customer list">
+                            <colgroup id="customerColGroup">
+                                <col data-col-key="customerName" />
+                                <col data-col-key="cvrNumber" />
+                                <col data-col-key="contactName" />
+                                <col data-col-key="contactEmail" />
+                                <col data-col-key="contactPhone" />
+                                <col data-col-key="customerStatus" />
+                                <col data-col-key="createdDateTime" />
+                            </colgroup>
+                            <thead>
+                            <tr id="customerHeaderRow">
+                                <th data-key="customerName">
+                                    <span class="sort">Customer name <span class="sort-indicator" id="si-customerName"></span></span>
+                                    <span class="col-resizer" data-resize-key="customerName" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="cvrNumber">
+                                    <span class="sort">CVR number <span class="sort-indicator" id="si-cvrNumber"></span></span>
+                                    <span class="col-resizer" data-resize-key="cvrNumber" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="contactName">
+                                    <span class="sort">Contact name <span class="sort-indicator" id="si-contactName"></span></span>
+                                    <span class="col-resizer" data-resize-key="contactName" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="contactEmail">
+                                    <span class="sort">Contact email <span class="sort-indicator" id="si-contactEmail"></span></span>
+                                    <span class="col-resizer" data-resize-key="contactEmail" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="contactPhone">
+                                    <span class="sort">Contact Phone <span class="sort-indicator" id="si-contactPhone"></span></span>
+                                    <span class="col-resizer" data-resize-key="contactPhone" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="customerStatus">
+                                    <span class="sort">Customer status <span class="sort-indicator" id="si-customerStatus"></span></span>
+                                    <span class="col-resizer" data-resize-key="customerStatus" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="createdDateTime">
+                                    <span class="sort">Created <span class="sort-indicator" id="si-createdDateTime"></span></span>
+                                    <span class="col-resizer" data-resize-key="createdDateTime" aria-hidden="true"></span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody id="customersBody"></tbody>
+                        </table>
+
+                        <div class="empty page-empty" id="customersEmpty">Loading customers…</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="customerEditDialog" class="customer-edit-dialog" aria-label="Customer edit dialog">
+    <form id="customerEditForm" method="dialog" class="dlg customer-edit-form">
+        <div class="page-dialog-head">
+            <h3 id="customerDialogTitle">Customer Administration</h3>
+        </div>
+
+        <div class="page-dialog-status" id="customerDialogStatus">Idle</div>
+
+        <div class="page-tab-bar" role="tablist" aria-label="Customer administration tabs">
+            <button class="tab-btn page-tab-btn is-active" id="tabBtnBasis" type="button" role="tab" aria-selected="true" aria-controls="tabPanelBasis">Basis</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnSubscription" type="button" role="tab" aria-selected="false" aria-controls="tabPanelSubscription">Subscription</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnPayment" type="button" role="tab" aria-selected="false" aria-controls="tabPanelPayment">Payment</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnPaymentMethod" type="button" role="tab" aria-selected="false" aria-controls="tabPanelPaymentMethod">Payment Method</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnModules" type="button" role="tab" aria-selected="false" aria-controls="tabPanelModules">Modules</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnWorkflow" type="button" role="tab" aria-selected="false" aria-controls="tabPanelWorkflow">Workflow</button>
+        </div>
+
+        <div class="tab-panels page-dialog-panels customer-dialog-panels">
+            <section class="tab-panel is-active" id="tabPanelBasis" role="tabpanel" aria-labelledby="tabBtnBasis">
+                <div class="customer-field-grid">
+                    <input id="fieldCustomerId" type="hidden" />
+                    <input id="fieldCustomerPK" type="hidden" />
+                    <input id="fieldVersion" type="hidden" />
+                    <input id="fieldChangedByUserId" type="hidden" />
+
+                    <label>
+                        <span>Customer name</span>
+                        <input id="fieldCustomerName" type="text" required />
+                    </label>
+
+                    <label>
+                        <span>CVR number</span>
+                        <input id="fieldCvrNumber" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Phone / Contact Phone</span>
+                        <input id="fieldPhone" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Address</span>
+                        <input id="fieldAddress" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Zip code</span>
+                        <input id="fieldZipCode" type="text" />
+                    </label>
+
+                    <label>
+                        <span>City</span>
+                        <input id="fieldCity" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Country</span>
+                        <input id="fieldCountry" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Contact name</span>
+                        <input id="fieldContactName" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Contact email</span>
+                        <input id="fieldContactEmail" type="email" />
+                    </label>
+
+                    <label>
+                        <span>Customer status</span>
+                        <select id="fieldCustomerStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Created</span>
+                        <input id="fieldCreatedDateTime" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Changed</span>
+                        <input id="fieldChangedDateTime" type="text" readonly />
+                    </label>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelSubscription" role="tabpanel" aria-labelledby="tabBtnSubscription">
+                <div class="customer-field-grid">
+                    <input id="fieldSubscriptionId" type="hidden" />
+                    <input id="fieldSubscriptionPlanId" type="hidden" />
+
+                    <label>
+                        <span>Subscription status</span>
+                        <select id="fieldSubscriptionStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Subscription plan name</span>
+                        <input id="fieldSubscriptionPlanName" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Trial start</span>
+                        <input id="fieldTrialStartAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Trial end</span>
+                        <input id="fieldTrialEndAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Trial reminder sent</span>
+                        <input id="fieldTrialReminderSentAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Period start</span>
+                        <input id="fieldPeriodStartAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Period end</span>
+                        <input id="fieldPeriodEndAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Renewal reminder sent</span>
+                        <input id="fieldRenewalReminderSentAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Continuation confirmed</span>
+                        <input id="fieldContinuationConfirmedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Renewal confirmed</span>
+                        <input id="fieldRenewalConfirmedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Grace period ends</span>
+                        <input id="fieldSubscriptionGracePeriodEndsAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Created</span>
+                        <input id="fieldSubscriptionCreatedAt" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Updated</span>
+                        <input id="fieldSubscriptionUpdatedAt" type="text" readonly />
+                    </label>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelPayment" role="tabpanel" aria-labelledby="tabBtnPayment">
+                <div class="customer-field-grid">
+                    <input id="fieldPaymentId" type="hidden" />
+
+                    <label>
+                        <span>Payment status</span>
+                        <select id="fieldPaymentStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Payment provider</span>
+                        <input id="fieldPaymentProvider" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Payment provider reference</span>
+                        <input id="fieldPaymentProviderReference" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Amount</span>
+                        <input id="fieldPaymentAmount" type="number" step="0.01" min="0" />
+                    </label>
+
+                    <label>
+                        <span>Currency</span>
+                        <input id="fieldPaymentCurrency" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Payment due</span>
+                        <input id="fieldPaymentDueAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Grace period ends</span>
+                        <input id="fieldPaymentGracePeriodEndsAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Requested</span>
+                        <input id="fieldRequestedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Authorized</span>
+                        <input id="fieldAuthorizedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Captured</span>
+                        <input id="fieldCapturedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Succeeded</span>
+                        <input id="fieldSucceededAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Failed</span>
+                        <input id="fieldFailedAt" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Cancelled</span>
+                        <input id="fieldCancelledAt" type="text" />
+                    </label>
+
+                    <label class="customer-field-wide">
+                        <span>Failure reason</span>
+                        <textarea id="fieldFailureReason" rows="3"></textarea>
+                    </label>
+
+                    <label>
+                        <span>Created</span>
+                        <input id="fieldPaymentCreatedAt" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Updated</span>
+                        <input id="fieldPaymentUpdatedAt" type="text" readonly />
+                    </label>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelPaymentMethod" role="tabpanel" aria-labelledby="tabBtnPaymentMethod">
+                <div class="customer-field-grid">
+                    <input id="fieldCustomerPaymentMethodId" type="hidden" />
+
+                    <label>
+                        <span>Payment provider</span>
+                        <input id="fieldPaymentMethodProvider" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Provider payment method reference</span>
+                        <input id="fieldProviderPaymentMethodReference" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Cardholder name</span>
+                        <input id="fieldCardholderName" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Card brand</span>
+                        <input id="fieldCardBrand" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Masked card number</span>
+                        <input id="fieldMaskedCardNumber" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Expiry month</span>
+                        <input id="fieldExpiryMonth" type="number" min="1" max="12" />
+                    </label>
+
+                    <label>
+                        <span>Expiry year</span>
+                        <input id="fieldExpiryYear" type="number" min="2000" />
+                    </label>
+
+                    <label>
+                        <span>Billing zip code</span>
+                        <input id="fieldBillingZipCode" type="text" />
+                    </label>
+
+                    <label>
+                        <span>Payment method status</span>
+                        <select id="fieldPaymentMethodStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Created</span>
+                        <input id="fieldPaymentMethodCreatedAt" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Updated</span>
+                        <input id="fieldPaymentMethodUpdatedAt" type="text" readonly />
+                    </label>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelModules" role="tabpanel" aria-labelledby="tabBtnModules">
+                <div class="table-frame customer-dialog-table-frame">
+                    <div class="table-scroll">
+                        <table class="data-table customer-modules-table" aria-label="Customer modules">
+                            <thead>
+                            <tr>
+                                <th>Module code</th>
+                                <th>Module name</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Updated</th>
+                            </tr>
+                            </thead>
+                            <tbody id="modulesBody"></tbody>
+                        </table>
+                        <div class="empty" id="modulesEmpty">No modules.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelWorkflow" role="tabpanel" aria-labelledby="tabBtnWorkflow">
+                <div class="customer-field-grid">
+                    <label>
+                        <span>Workflow type</span>
+                        <input id="fieldWorkflowType" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Workflow status</span>
+                        <input id="fieldWorkflowStatus" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Current state</span>
+                        <input id="fieldCurrentState" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Next action</span>
+                        <input id="fieldNextActionAt" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Retry count</span>
+                        <input id="fieldRetryCount" type="number" readonly />
+                    </label>
+
+                    <label>
+                        <span>Last event type</span>
+                        <input id="fieldLastEventType" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Last event at</span>
+                        <input id="fieldLastEventAt" type="text" readonly />
+                    </label>
+
+                    <label class="customer-field-wide">
+                        <span>Last error</span>
+                        <textarea id="fieldLastError" rows="3" readonly></textarea>
+                    </label>
+
+                    <label>
+                        <span>Locked at</span>
+                        <input id="fieldLockedAt" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Locked by</span>
+                        <input id="fieldLockedBy" type="text" readonly />
+                    </label>
+
+                    <label>
+                        <span>Created</span>
+                        <input id="fieldWorkflowCreatedAt" type="text" readonly />
+                    </label>
+                </div>
+
+                <h4 class="customer-subsection-title">Workflow Events</h4>
+
+                <div class="table-frame customer-dialog-table-frame">
+                    <div class="table-scroll">
+                        <table class="data-table customer-workflow-events-table" aria-label="Customer workflow events">
+                            <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Created by</th>
+                            </tr>
+                            </thead>
+                            <tbody id="workflowEventsBody"></tbody>
+                        </table>
+                        <div class="empty" id="workflowEventsEmpty">No workflow events.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="btnSaveCustomer" class="primary" type="button">Save</button>
+            <button id="btnCancelCustomer" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../../js/pages/customer-administration-page.js"></script>
+</body>
+</html>

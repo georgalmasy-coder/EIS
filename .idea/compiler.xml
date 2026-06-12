@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="EIS Web Server" />
+        <module name="EIS Integration server" />
+        <module name="common" />
+        <module name="integration-server" />
+        <module name="web-server" />
+        <module name="udv" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

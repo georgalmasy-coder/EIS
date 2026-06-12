@@ -1,0 +1,1435 @@
+CUSTOMER SERVLETS - SHORT OVERVIEW
+==================================
+
+CustomerRegistrationServlet
+---------------------------
+Servlet for customer self-registration from the public/web customer creation page.
+It exposes CVR lookup and customer creation request endpoints.
+The CVR endpoint is used to lookup company information before registration.
+The customer creation endpoint validates customer, module, administrator and payment input.
+The current implementation accepts and validates the request, but does not yet persist the customer.
+It is intended to become the entry point where a real customer is created in the database.
+After customer persistence is implemented, this servlet should trigger the onboarding workflow.
+It should eventually call CustomerWorkflowStarterProvider after successful customer creation.
+This servlet is part of the web-facing registration flow, not the integration server cron job.
+It should remain strict about validation because it receives user-entered data.
+It currently validates CVR number, customer data, email, payment card format and terms acceptance.
+
+CustomerWorkflowStartServlet
+----------------------------
+Servlet for manually starting a customer onboarding workflow for an existing customer.
+It is mainly useful for administration, testing and integration recovery.
+It expects a customerId and creates a CUSTOMER_WORKFLOW record if no active workflow exists.
+If an active workflow already exists, the existing workflow id is returned.
+The workflow is created in CREATED state and marked as due immediately.
+The integration server cron job will then pick it up and continue processing.
+Typical use is after a customer has been created but the automatic event integration is missing.
+It can be called with GET or POST.
+This endpoint should normally be admin-only.
+It is not intended as the public customer registration endpoint.
+
+CustomerWorkflowActionServlet
+-----------------------------
+Servlet for public action links sent in workflow emails.
+It handles confirmation links such as account confirmation and subscription continuation.
+The customer reaches this servlet by clicking a secure token link in an email.
+It validates the token, marks it as used and updates the workflow state.
+It supports customer confirmation, subscription continuation, subscription renewal and reactivation.
+It returns a simple HTML success/error page to the customer.
+It does not require normal login, because the token itself is the authorization mechanism.
+It is used by links in mail templates such as customer-confirmation.mail.
+It should only be used over HTTPS in production.
+The token is stored hashed in the database and compared through CustomerTokenProvider.
+
+CustomerPaymentCallbackServlet
+------------------------------
+Servlet for payment status callbacks from a payment provider or test tool.
+It receives paymentId and payment status, then updates CUSTOMER_PAYMENT.
+After updating payment status, it wakes the related workflow by setting next action to now.
+The integration server will then process the payment result during the next workflow run.
+It supports statuses such as SUCCEEDED, FAILED, CANCELLED and TIMED_OUT.
+It does not itself activate or suspend the customer; it only records payment status.
+The actual business transition is handled by the workflow processor.
+In production this endpoint must be secured with provider signature validation or similar.
+It can also be used manually during development to simulate payment callbacks.
+It is part of the bridge between external payment and the internal workflow.
+
+CustomerWorkflowStatusServlet
+-----------------------------
+Servlet for retrieving detailed status for a single workflow.
+It can load workflow by workflowId or by active workflow for a customerId.
+It returns workflow data plus related subscription and payment data when available.
+This endpoint is useful for debugging, administration and support views.
+It shows current state, workflow status, next action time, retry count and last error.
+It also includes subscription trial dates, period dates and payment due dates.
+It is a read-only endpoint.
+It does not change workflow state.
+It is intended for internal/admin usage rather than public customer use.
+It helps answer “where is this customer in the process right now?”
+
+CustomerWorkflowEventsServlet
+-----------------------------
+Servlet for retrieving workflow event history.
+It can return events by workflowId or customerId.
+It is used to see what happened to a workflow over time.
+Events include state transitions, payment events, mail events and errors.
+It returns event type, category, from-state, to-state, description and payload.
+This is useful for audit, support and debugging.
+It is a read-only endpoint.
+It should be used when investigating why a customer was suspended or why a workflow stopped.
+It complements CustomerWorkflowStatusServlet by showing the historical timeline.
+It is intended for admin/support views.
+
+CustomerWorkflowSummaryServlet
+------------------------------
+Servlet for retrieving a list of workflow summaries.
+It is intended for dashboard and admin overview pages.
+It can list latest workflows, workflows for one customer or workflows by status.
+It returns compact information such as customer, state, subscription status and payment status.
+It also returns flags like hasError, locked, suspended and requiresManualAttention.
+This endpoint is useful for monitoring many workflows at once.
+It is read-only and does not change state.
+It can be used to build tables showing active, suspended or failed workflows.
+It should be used by admin dashboards rather than public pages.
+It gives a high-level overview without loading full event history.
+
+CustomerWorkflowAdminActionServlet
+----------------------------------
+Servlet for manual administrative workflow actions.
+It supports suspend, reactivate, retry and cancel operations.
+Suspend disables customer access and moves the workflow/customer into suspended state.
+Reactivate enables customer access and can move workflow back to active subscription state.
+Retry wakes a workflow by setting next action to now.
+Cancel terminates the workflow and clears future processing.
+This servlet is intended for admin/support users only.
+It should not be exposed to normal customers.
+It is useful when automatic workflow processing fails or needs manual correction.
+All actions should ideally be audited and protected by admin authorization.
+
+AuthFilter customer workflow impact
+-----------------------------------
+AuthFilter is not a customer servlet, but it is important for the workflow.
+It blocks access for users belonging to a suspended customer.
+When a customer is suspended by the workflow, login/session access should be denied.
+For API requests, suspended customers receive HTTP 403.
+For normal web requests, suspended customers are redirected to login with an error flag.
+This is how workflow suspension becomes effective in the web application.
+The filter checks customer access through CustomerAccessProvider.
+It protects secured URLs and API endpoints.
+It is the enforcement point for “users cannot log in when customer is suspended.”
+Without this check, suspension would only be a database status without effect.
+
+
+CUSTOMER WORKFLOW API OVERVIEW
+==============================
+
+This document describes the customer-related servlet APIs that have been added for customer registration,
+customer onboarding workflow, subscription confirmation, payment callbacks, workflow administration,
+workflow status, workflow history and workflow summaries.
+
+All API endpoints returning JSON use:
+
+    Content-Type: application/json; charset=UTF-8
+
+Most /api/... endpoints are protected by the normal AuthFilter because they contain "/api/" in the URI.
+Public customer action links such as /confirm-customer and /continue-subscription are intentionally not
+under /api/ and are intended to be callable from email links without an authenticated session.
+
+
+--------------------------------------------------------------------------------
+1. CustomerRegistrationServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerRegistrationServlet
+
+Servlet mappings:
+    GET  /api/customers/cvr
+    POST /api/customers
+
+Purpose:
+    Handles customer registration related requests.
+
+    It currently supports:
+    - CVR lookup by CVR number.
+    - Receiving/validating a customer creation request.
+
+Important:
+    The POST /api/customers implementation currently validates the request and returns an accepted
+    customer creation response, but according to the current implementation it does not yet persist the
+    customer or start the customer onboarding workflow directly.
+
+-------------------------------------------------------------------------------
+1.1 GET /api/customers/cvr
+-------------------------------------------------------------------------------
+
+Purpose:
+    Looks up company information by CVR number.
+
+Method:
+    GET
+
+URL:
+    /api/customers/cvr
+
+Required query parameters:
+    cvrNumber
+        Type: string
+        Format: exactly 8 digits
+        Example: 12345678
+
+Optional query parameters:
+    None
+
+Example:
+    GET /api/customers/cvr?cvrNumber=12345678
+
+Success response:
+    HTTP 200 OK
+
+    Returns the CVR company DTO from the CVR lookup provider.
+
+Error responses:
+    HTTP 400 Bad Request
+        Returned when cvrNumber is missing or invalid.
+
+    HTTP 404 Not Found
+        Returned when no company is found for the CVR number.
+
+    HTTP 502 Bad Gateway
+        Returned when the external CVR lookup fails.
+
+Notes:
+    The CVR number is normalized by removing whitespace before validation.
+
+-------------------------------------------------------------------------------
+1.2 POST /api/customers
+-------------------------------------------------------------------------------
+
+Purpose:
+    Receives a customer creation request from the web frontend.
+
+Method:
+    POST
+
+URL:
+    /api/customers
+
+Request body:
+    JSON
+
+Required JSON fields:
+    moduleCode
+        Type: string
+        Required: yes
+        Known values:
+            BASIS_REQUIREMENTS
+            PRO_REQUIREMENTS
+            MASTER_REQUIREMENTS
+        Currently available value:
+            BASIS_REQUIREMENTS
+
+    name
+        Type: string
+        Required: yes
+
+    address
+        Type: string
+        Required: yes
+
+    zipCode
+        Type: string
+        Required: yes
+
+    city
+        Type: string
+        Required: yes
+
+    country
+        Type: string
+        Required: yes
+
+    phone
+        Type: string
+        Required: yes
+
+    administratorEmail
+        Type: string
+        Required: yes
+        Must be a valid email format.
+
+    payment
+        Type: object
+        Required: yes
+
+    termsAccepted
+        Type: boolean
+        Required: yes
+        Must be true.
+
+Optional JSON fields:
+    moduleName
+        Type: string
+
+    modulePrice
+        Type: string
+
+    cvrNumber
+        Type: string
+        Required: no
+        If present, must be exactly 8 digits after whitespace is removed.
+
+Payment object fields:
+    cardholderName
+        Type: string
+        Required: yes
+
+    cardNumber
+        Type: string
+        Required: yes
+        Digits only after normalization.
+        Must contain between 13 and 19 digits.
+
+    expiryMonth
+        Type: string
+        Required: yes
+        Numeric, between 1 and 12.
+
+    expiryYear
+        Type: string
+        Required: yes
+        Numeric.
+
+    cvc
+        Type: string
+        Required: yes
+        Digits only after normalization.
+        Must contain 3 or 4 digits.
+
+    billingZipCode
+        Type: string
+        Required: yes
+
+Example request:
+    POST /api/customers
+
+    {
+      "moduleCode": "BASIS_REQUIREMENTS",
+      "moduleName": "Basis Requirements",
+      "modulePrice": "99.00",
+      "cvrNumber": "12345678",
+      "name": "Example Company A/S",
+      "address": "Example Street 1",
+      "zipCode": "1000",
+      "city": "Copenhagen",
+      "country": "Denmark",
+      "phone": "+4512345678",
+      "administratorEmail": "admin@example.com",
+      "payment": {
+        "cardholderName": "Example Admin",
+        "cardNumber": "4111111111111111",
+        "expiryMonth": "12",
+        "expiryYear": "2030",
+        "cvc": "123",
+        "billingZipCode": "1000"
+      },
+      "termsAccepted": true
+    }
+
+Success response:
+    HTTP 201 Created
+
+    {
+      "cvrNumber": "12345678",
+      "name": "Example Company A/S",
+      "administratorEmail": "admin@example.com",
+      "moduleCode": "BASIS_REQUIREMENTS",
+      "message": "Customer creation request accepted. Confirmation email must be sent to administrator."
+    }
+
+Error responses:
+    HTTP 400 Bad Request
+        Returned when JSON is invalid or validation fails.
+
+    HTTP 404 Not Found
+        Returned if an unsupported servlet path is used.
+
+Important implementation note:
+    This endpoint currently validates the request but does not yet persist the customer or automatically
+    start CustomerWorkflowStarterProvider. That integration still needs to be connected when the real
+    customer persistence logic is implemented.
+
+
+--------------------------------------------------------------------------------
+2. CustomerWorkflowStartServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowStartServlet
+
+Servlet mapping:
+    GET  /api/customer-workflow/start
+    POST /api/customer-workflow/start
+
+Purpose:
+    Manually starts a customer onboarding workflow for an existing customer.
+
+    This is useful for:
+    - admin/manual testing
+    - starting onboarding after a customer has been created
+    - retrying the initial workflow creation step if the event from web to integration was missed
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+
+Methods:
+    GET
+    POST
+
+Required parameters:
+    customerId
+        Type: integer
+        Description: ID of the customer for which the onboarding workflow should be started.
+
+Optional parameters:
+    None
+
+Example:
+    POST /api/customer-workflow/start?customerId=123
+
+Success response:
+    HTTP 200 OK
+
+    {
+      "success": true,
+      "customerId": 123,
+      "workflowId": 456
+    }
+
+Error responses:
+    HTTP 400 Bad Request
+        Returned when customerId is missing or invalid.
+
+        {
+          "success": false,
+          "message": "customerId is required"
+        }
+
+    HTTP 500 Internal Server Error
+        Returned when workflow could not be started.
+
+        {
+          "success": false,
+          "message": "Workflow could not be started"
+        }
+
+Business behavior:
+    Uses CustomerWorkflowStarterProvider.
+
+    If an active workflow already exists for the customer, the existing workflowId is returned.
+
+    If no active workflow exists:
+    - creates CUSTOMER_WORKFLOW row
+    - creates CUSTOMER_WORKFLOW_EVENT row with CUSTOMER_CREATED
+    - sets workflow state to CREATED
+    - sets NextActionAt to now, so integration server can pick it up
+
+
+--------------------------------------------------------------------------------
+3. CustomerWorkflowActionServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowActionServlet
+
+Servlet mappings:
+    GET  /customer-workflow-action
+    POST /customer-workflow-action
+
+    GET  /confirm-customer
+    POST /confirm-customer
+
+    GET  /continue-subscription
+    POST /continue-subscription
+
+    GET  /renew-subscription
+    POST /renew-subscription
+
+    GET  /reactivate-customer
+    POST /reactivate-customer
+
+Purpose:
+    Handles public customer workflow action links from emails.
+
+    This servlet is intended to be called by the customer clicking a link in an email.
+    It validates the token and performs the requested workflow action.
+
+Security:
+    These endpoints are intentionally not all under /api/.
+    The public action URLs are meant to work without an authenticated session.
+    Security is provided by the signed/random token stored as a hash in CUSTOMER_TOKEN.
+
+Supported actions:
+    confirm-customer
+    continue-subscription
+    renew-subscription
+    reactivate-customer
+
+Action can be resolved in two ways:
+    1. From explicit query parameter:
+        /customer-workflow-action?action=confirm-customer&token=...
+
+    2. From servlet path:
+        /confirm-customer?token=...
+        /continue-subscription?token=...
+        /renew-subscription?token=...
+        /reactivate-customer?token=...
+
+Required parameters:
+    token
+        Type: string
+        Description: Raw token from the email link.
+
+Required parameters when using /customer-workflow-action:
+    action
+        Type: string
+        Allowed values:
+            confirm-customer
+            continue-subscription
+            renew-subscription
+            reactivate-customer
+
+Optional parameters:
+    None
+
+-------------------------------------------------------------------------------
+3.1 Confirm customer email
+-------------------------------------------------------------------------------
+
+URLs:
+    GET /confirm-customer?token=...
+    GET /customer-workflow-action?action=confirm-customer&token=...
+
+Purpose:
+    Confirms the customer account/email after customer creation.
+
+Expected token type:
+    EMAIL_CONFIRMATION
+
+Provider method:
+    CustomerWorkflowActionProvider.confirmCustomerEmail(token)
+
+Workflow effect:
+    - validates token
+    - marks token as used
+    - moves workflow to EMAIL_CONFIRMED
+    - sets workflow active
+    - sets NextActionAt to now
+    - integration server will then pick it up and start the trial
+
+Success page:
+    HTML page with title:
+        Account confirmed
+
+Error page:
+    HTML page with title:
+        The request could not be completed
+
+-------------------------------------------------------------------------------
+3.2 Confirm subscription continuation
+-------------------------------------------------------------------------------
+
+URLs:
+    GET /continue-subscription?token=...
+    GET /customer-workflow-action?action=continue-subscription&token=...
+
+Purpose:
+    Customer confirms that subscription should continue after trial.
+
+Expected token type:
+    SUBSCRIPTION_CONTINUATION
+
+Provider method:
+    CustomerWorkflowActionProvider.confirmSubscriptionContinuation(token)
+
+Workflow effect:
+    - validates token
+    - marks token as used
+    - requests payment through CustomerPaymentRequestProvider
+    - creates CUSTOMER_PAYMENT row
+    - sets workflow state to PAYMENT_PENDING
+    - sets NextActionAt to payment grace period end
+    - integration server waits for payment callback/status
+
+Success page:
+    HTML page with title:
+        Subscription continuation confirmed
+
+-------------------------------------------------------------------------------
+3.3 Confirm subscription renewal
+-------------------------------------------------------------------------------
+
+URLs:
+    GET /renew-subscription?token=...
+    GET /customer-workflow-action?action=renew-subscription&token=...
+
+Purpose:
+    Customer confirms renewal of an existing subscription.
+
+Expected token type:
+    SUBSCRIPTION_RENEWAL
+
+Provider method:
+    CustomerWorkflowActionProvider.confirmSubscriptionRenewal(token)
+
+Workflow effect:
+    - validates token
+    - marks token as used
+    - requests payment through CustomerPaymentRequestProvider
+    - creates CUSTOMER_PAYMENT row
+    - sets workflow state to PAYMENT_PENDING
+    - sets NextActionAt to payment grace period end
+
+Success page:
+    HTML page with title:
+        Subscription renewal confirmed
+
+-------------------------------------------------------------------------------
+3.4 Reactivate customer
+-------------------------------------------------------------------------------
+
+URLs:
+    GET /reactivate-customer?token=...
+    GET /customer-workflow-action?action=reactivate-customer&token=...
+
+Purpose:
+    Customer uses a reactivation link to reactivate a suspended account.
+
+Expected token type:
+    REACTIVATION
+
+Provider method:
+    CustomerWorkflowActionProvider.reactivateCustomer(token)
+
+Workflow effect:
+    - validates token
+    - marks token as used
+    - updates workflow to SUBSCRIPTION_ACTIVE
+    - calls CustomerAccessProvider.reactivateCustomer(customerId)
+
+Success page:
+    HTML page with title:
+        Account reactivated
+
+Common error reasons:
+    - Action is missing.
+    - Token is missing.
+    - Token was not found.
+    - Token type is invalid.
+    - Token is expired or already used.
+    - Workflow was not found.
+    - Workflow could not be updated.
+    - Payment request could not be created.
+
+
+--------------------------------------------------------------------------------
+4. CustomerPaymentCallbackServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerPaymentCallbackServlet
+
+Servlet mapping:
+    GET  /api/customer-payment/callback
+    POST /api/customer-payment/callback
+
+Purpose:
+    Receives payment status updates from a payment provider or test tool.
+
+    It updates CUSTOMER_PAYMENT and wakes the related workflow so the integration server can process
+    the new payment state.
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+    Important: for a real external payment provider webhook, this may need separate authentication,
+    signature validation or a whitelist, because external providers may not have a normal web session.
+
+Methods:
+    GET
+    POST
+
+Required parameters:
+    paymentId
+        Type: integer
+        Description: ID of the CUSTOMER_PAYMENT row.
+
+    status
+        Type: string
+        Description: New payment status.
+
+Allowed status values:
+    NONE
+    CREATED
+    REQUESTED
+    PENDING
+    AUTHORIZED
+    CAPTURED
+    SUCCEEDED
+    FAILED
+    CANCELLED
+    REJECTED
+    EXPIRED
+    TIMED_OUT
+    REFUNDED
+    PARTIALLY_REFUNDED
+    DISPUTED
+    OVERDUE
+    MANUAL_REVIEW
+
+Optional parameters:
+    failureReason
+        Type: string
+        Description: Failure reason when status indicates a failed/rejected/expired payment.
+
+Examples:
+    POST /api/customer-payment/callback?paymentId=123&status=SUCCEEDED
+
+    POST /api/customer-payment/callback?paymentId=123&status=FAILED&failureReason=Card%20declined
+
+Success response:
+    HTTP 200 OK
+
+    {
+      "success": true,
+      "paymentId": 123,
+      "paymentStatus": "SUCCEEDED",
+      "workflowId": 456,
+      "customerId": 789
+    }
+
+Error responses:
+    HTTP 400 Bad Request
+        Missing paymentId:
+
+        {
+          "success": false,
+          "message": "paymentId is required"
+        }
+
+        Invalid status:
+
+        {
+          "success": false,
+          "message": "valid status is required"
+        }
+
+    HTTP 404 Not Found
+        Payment does not exist:
+
+        {
+          "success": false,
+          "message": "Payment was not found"
+        }
+
+    HTTP 500 Internal Server Error
+        Payment status could not be updated:
+
+        {
+          "success": false,
+          "message": "Payment status could not be updated"
+        }
+
+Workflow effect:
+    - updates payment status
+    - finds active workflow for payment.customerId
+    - sets workflow NextActionAt to now
+    - writes a workflow event:
+        PAYMENT_SUCCEEDED
+        PAYMENT_FAILED
+        PAYMENT_CANCELLED
+        PAYMENT_TIMED_OUT
+        PAYMENT_REQUESTED
+
+Important:
+    This servlet does not itself activate/suspend customer. It only wakes the workflow.
+    The integration server workflow processor performs the next state transition.
+
+
+--------------------------------------------------------------------------------
+5. CustomerWorkflowStatusServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowStatusServlet
+
+Servlet mapping:
+    GET  /api/customer-workflow/status
+    POST /api/customer-workflow/status
+
+Purpose:
+    Returns detailed status for a single workflow, including related subscription and payment records.
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+
+Methods:
+    GET
+    POST
+
+Required parameters:
+    Either workflowId or customerId must be supplied.
+
+Parameters:
+    workflowId
+        Type: integer
+        Required: conditional
+        Description: Load a specific workflow by WorkflowId.
+
+    customerId
+        Type: integer
+        Required: conditional
+        Description: Load the active workflow for a customer.
+
+Examples:
+    GET /api/customer-workflow/status?workflowId=456
+
+    GET /api/customer-workflow/status?customerId=123
+
+Success response:
+    HTTP 200 OK
+
+    {
+      "success": true,
+      "workflow": {
+        "workflowId": 456,
+        "customerId": 123,
+        "workflowType": "CUSTOMER_ONBOARDING",
+        "workflowStatus": "ACTIVE",
+        "currentState": "TRIAL_ACTIVE",
+        "subscriptionId": 1001,
+        "paymentId": null,
+        "nextActionAt": "2026-06-07 12:00:00.0",
+        "retryCount": 0,
+        "lastEventType": "TRIAL_STARTED",
+        "lastEventAt": "2026-06-05 12:00:00.0",
+        "lastError": "",
+        "lockedAt": null,
+        "lockedBy": "",
+        "createdAt": "2026-06-05 12:00:00.0",
+        "updatedAt": "2026-06-05 12:00:00.0"
+      },
+      "subscription": {
+        ...
+      },
+      "payment": null
+    }
+
+Error responses:
+    HTTP 400 Bad Request
+        Neither workflowId nor customerId was supplied.
+
+        {
+          "success": false,
+          "message": "workflowId or customerId is required"
+        }
+
+    HTTP 404 Not Found
+        Workflow was not found.
+
+        {
+          "success": false,
+          "message": "Customer workflow was not found"
+        }
+
+Returned workflow fields:
+    workflowId
+    customerId
+    workflowType
+    workflowStatus
+    currentState
+    subscriptionId
+    paymentId
+    nextActionAt
+    retryCount
+    lastEventType
+    lastEventAt
+    lastError
+    lockedAt
+    lockedBy
+    createdAt
+    updatedAt
+
+Returned subscription fields when subscription exists:
+    subscriptionId
+    customerId
+    subscriptionStatus
+    subscriptionPlanId
+    subscriptionPlanName
+    trialStartAt
+    trialEndAt
+    trialReminderSentAt
+    periodStartAt
+    periodEndAt
+    renewalReminderSentAt
+    continuationConfirmedAt
+    renewalConfirmedAt
+    gracePeriodEndsAt
+    createdAt
+    updatedAt
+
+Returned payment fields when payment exists:
+    paymentId
+    customerId
+    subscriptionId
+    paymentStatus
+    paymentProvider
+    paymentProviderReference
+    amount
+    currency
+    paymentDueAt
+    gracePeriodEndsAt
+    requestedAt
+    authorizedAt
+    capturedAt
+    succeededAt
+    failedAt
+    cancelledAt
+    failureReason
+    createdAt
+    updatedAt
+
+
+--------------------------------------------------------------------------------
+6. CustomerWorkflowEventsServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowEventsServlet
+
+Servlet mapping:
+    GET  /api/customer-workflow/events
+    POST /api/customer-workflow/events
+
+Purpose:
+    Returns workflow event history for either a specific workflow or all workflow events for a customer.
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+
+Methods:
+    GET
+    POST
+
+Required parameters:
+    Either workflowId or customerId must be supplied.
+
+Parameters:
+    workflowId
+        Type: integer
+        Required: conditional
+        Description: Returns events for this workflow.
+
+    customerId
+        Type: integer
+        Required: conditional
+        Description: Returns events for this customer.
+
+    maxRows
+        Type: integer
+        Required: no
+        Default: 100
+        Min: 1
+        Max: 1000
+        Description: Max number of events returned.
+
+Examples:
+    GET /api/customer-workflow/events?workflowId=456
+
+    GET /api/customer-workflow/events?customerId=123
+
+    GET /api/customer-workflow/events?workflowId=456&maxRows=200
+
+Success response:
+    HTTP 200 OK
+
+    {
+      "success": true,
+      "count": 2,
+      "events": [
+        {
+          "workflowEventId": 1,
+          "workflowId": 456,
+          "customerId": 123,
+          "eventType": "CUSTOMER_CREATED",
+          "eventCategory": "CUSTOMER",
+          "fromState": "",
+          "toState": "CREATED",
+          "description": "Customer onboarding workflow started.",
+          "payloadJson": {},
+          "createdAt": "2026-06-05 12:00:00.0",
+          "createdByUserId": null
+        }
+      ]
+    }
+
+Error response:
+    HTTP 400 Bad Request
+        Neither workflowId nor customerId was supplied.
+
+        {
+          "success": false,
+          "message": "workflowId or customerId is required"
+        }
+
+Returned event fields:
+    workflowEventId
+    workflowId
+    customerId
+    eventType
+    eventCategory
+    fromState
+    toState
+    description
+    payloadJson
+    createdAt
+    createdByUserId
+
+
+--------------------------------------------------------------------------------
+7. CustomerWorkflowSummaryServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowSummaryServlet
+
+Servlet mapping:
+    GET  /api/customer-workflow/summary
+    POST /api/customer-workflow/summary
+
+Purpose:
+    Returns workflow summaries for admin/dashboard/list views.
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+
+Methods:
+    GET
+    POST
+
+Parameters:
+    customerId
+        Type: integer
+        Required: no
+        Description: If supplied, returns summaries for this customer.
+
+    status
+        Type: string
+        Required: no
+        Description: If supplied, returns summaries filtered by workflow status.
+        Typical values:
+            ACTIVE
+            COMPLETED
+            CANCELLED
+            SUSPENDED
+            WAITING_FOR_MANUAL_ATTENTION
+
+    maxRows
+        Type: integer
+        Required: no
+        Default: 100
+        Min: 1
+        Max: 1000
+
+Filtering behavior:
+    If customerId is supplied:
+        filter by customerId.
+
+    Else if status is supplied:
+        filter by workflow status.
+
+    Else:
+        return latest workflow summaries.
+
+Examples:
+    GET /api/customer-workflow/summary
+
+    GET /api/customer-workflow/summary?status=ACTIVE
+
+    GET /api/customer-workflow/summary?customerId=123
+
+    GET /api/customer-workflow/summary?maxRows=200
+
+Success response:
+    HTTP 200 OK
+
+    {
+      "success": true,
+      "count": 1,
+      "items": [
+        {
+          "workflowId": 456,
+          "customerId": 123,
+          "customerName": "Example Company A/S",
+          "contactEmail": "admin@example.com",
+          "workflowType": "CUSTOMER_ONBOARDING",
+          "workflowStatus": "ACTIVE",
+          "currentState": "TRIAL_ACTIVE",
+          "subscriptionId": 1001,
+          "subscriptionStatus": "TRIAL",
+          "trialEndAt": "2026-06-19 12:00:00.0",
+          "periodEndAt": null,
+          "paymentId": null,
+          "paymentStatus": "",
+          "paymentDueAt": null,
+          "paymentGracePeriodEndsAt": null,
+          "nextActionAt": "2026-06-17 12:00:00.0",
+          "retryCount": 0,
+          "lastEventType": "TRIAL_STARTED",
+          "lastEventAt": "2026-06-05 12:00:00.0",
+          "lastError": "",
+          "lockedAt": null,
+          "lockedBy": "",
+          "createdAt": "2026-06-05 12:00:00.0",
+          "updatedAt": "2026-06-05 12:00:00.0",
+          "hasError": false,
+          "locked": false,
+          "requiresManualAttention": false,
+          "suspended": false
+        }
+      ]
+    }
+
+Returned summary fields:
+    workflowId
+    customerId
+    customerName
+    contactEmail
+    workflowType
+    workflowStatus
+    currentState
+    subscriptionId
+    subscriptionStatus
+    trialEndAt
+    periodEndAt
+    paymentId
+    paymentStatus
+    paymentDueAt
+    paymentGracePeriodEndsAt
+    nextActionAt
+    retryCount
+    lastEventType
+    lastEventAt
+    lastError
+    lockedAt
+    lockedBy
+    createdAt
+    updatedAt
+    hasError
+    locked
+    requiresManualAttention
+    suspended
+
+
+--------------------------------------------------------------------------------
+8. CustomerWorkflowAdminActionServlet
+--------------------------------------------------------------------------------
+
+Class:
+    com.bepa.eis.server.api.web.application.customer.CustomerWorkflowAdminActionServlet
+
+Servlet mapping:
+    GET  /api/customer-workflow/admin-action
+    POST /api/customer-workflow/admin-action
+
+Purpose:
+    Provides administrative/manual workflow actions.
+
+Security:
+    Protected by AuthFilter because URI contains /api/.
+
+Supported actions:
+    suspend
+    reactivate
+    retry
+    cancel
+
+Methods:
+    GET
+    POST
+
+-------------------------------------------------------------------------------
+8.1 Suspend customer
+-------------------------------------------------------------------------------
+
+URL:
+    POST /api/customer-workflow/admin-action?action=suspend&customerId=123
+
+Purpose:
+    Manually suspends a customer.
+
+Required parameters:
+    action=suspend
+    customerId
+        Type: integer
+
+Optional parameters:
+    reason
+        Type: string
+        Default: Customer manually suspended.
+
+Example:
+    POST /api/customer-workflow/admin-action?action=suspend&customerId=123&reason=Manual%20admin%20suspension
+
+Behavior:
+    - calls CustomerAccessProvider.suspendCustomer(customerId, reason)
+    - if an active workflow exists:
+        - sets workflowStatus = SUSPENDED
+        - sets currentState = SUSPENDED
+        - clears NextActionAt
+        - writes CUSTOMER_MANUALLY_SUSPENDED event
+
+Success response:
+    {
+      "success": true,
+      "message": "Customer suspended",
+      "workflowId": 456,
+      "customerId": 123
+    }
+
+-------------------------------------------------------------------------------
+8.2 Reactivate customer
+-------------------------------------------------------------------------------
+
+URL:
+    POST /api/customer-workflow/admin-action?action=reactivate&customerId=123
+
+Purpose:
+    Manually reactivates a suspended customer.
+
+Required parameters:
+    action=reactivate
+    customerId
+        Type: integer
+
+Optional parameters:
+    None
+
+Behavior:
+    - calls CustomerAccessProvider.reactivateCustomer(customerId)
+    - if an active workflow exists:
+        - sets workflowStatus = ACTIVE
+        - sets currentState = SUBSCRIPTION_ACTIVE
+        - sets NextActionAt = now
+        - writes CUSTOMER_MANUALLY_REACTIVATED event
+
+Success response:
+    {
+      "success": true,
+      "message": "Customer reactivated",
+      "workflowId": 456,
+      "customerId": 123
+    }
+
+-------------------------------------------------------------------------------
+8.3 Retry workflow
+-------------------------------------------------------------------------------
+
+URL:
+    POST /api/customer-workflow/admin-action?action=retry&workflowId=456
+
+Purpose:
+    Requests retry of a workflow.
+
+Required parameters:
+    action=retry
+    workflowId
+        Type: integer
+
+Optional parameters:
+    None
+
+Behavior:
+    - loads workflow
+    - sets workflowStatus = ACTIVE
+    - if currentState is WAITING_FOR_MANUAL_ATTENTION, sets currentState = CREATED
+    - sets NextActionAt = now
+    - clears lastError
+    - writes WORKFLOW_RETRY_REQUESTED event
+
+Success response:
+    {
+      "success": true,
+      "message": "Workflow retry requested",
+      "workflowId": 456,
+      "customerId": 123
+    }
+
+Important:
+    The retry behavior currently resets WAITING_FOR_MANUAL_ATTENTION workflows to CREATED.
+    This may need refinement if retry should continue from the previous state instead.
+
+-------------------------------------------------------------------------------
+8.4 Cancel workflow
+-------------------------------------------------------------------------------
+
+URL:
+    POST /api/customer-workflow/admin-action?action=cancel&workflowId=456
+
+Purpose:
+    Cancels a workflow.
+
+Required parameters:
+    action=cancel
+    workflowId
+        Type: integer
+
+Optional parameters:
+    reason
+        Type: string
+        Default: Workflow manually cancelled.
+
+Behavior:
+    - sets workflowStatus = CANCELLED
+    - sets currentState = CANCELLED
+    - clears NextActionAt
+    - writes CUSTOMER_MANUALLY_CANCELLED event
+
+Success response:
+    {
+      "success": true,
+      "message": "Workflow cancelled",
+      "workflowId": 456,
+      "customerId": 123
+    }
+
+Common error responses:
+    Missing action:
+        {
+          "success": false,
+          "message": "action is required",
+          "workflowId": null,
+          "customerId": null
+        }
+
+    Unsupported action:
+        {
+          "success": false,
+          "message": "Unsupported action: xyz",
+          "workflowId": null,
+          "customerId": null
+        }
+
+    Missing workflowId:
+        {
+          "success": false,
+          "message": "workflowId is required",
+          "workflowId": null,
+          "customerId": null
+        }
+
+    Missing customerId:
+        {
+          "success": false,
+          "message": "customerId is required",
+          "workflowId": null,
+          "customerId": null
+        }
+
+
+--------------------------------------------------------------------------------
+9. API Authentication and AuthFilter behavior
+--------------------------------------------------------------------------------
+
+Most customer workflow API endpoints are under /api/ and are therefore treated as API requests by
+AuthFilter.
+
+Protected endpoints include:
+    /api/customers/cvr
+    /api/customers
+    /api/customer-workflow/start
+    /api/customer-workflow/status
+    /api/customer-workflow/events
+    /api/customer-workflow/summary
+    /api/customer-workflow/admin-action
+    /api/customer-payment/callback
+
+Public token endpoints include:
+    /confirm-customer
+    /continue-subscription
+    /renew-subscription
+    /reactivate-customer
+
+AuthFilter behavior:
+    If user is not authenticated and path contains /api/:
+        HTTP 401 Unauthorized
+        {"message":"Unauthorized"}
+
+    If user is authenticated but customer is suspended:
+        HTTP 403 Forbidden
+        {"message":"Customer account is suspended"}
+
+    If non-API page request is unauthenticated:
+        Redirects to /login.html
+
+    If non-API page request belongs to suspended customer:
+        Redirects to /login.html?error=customer-suspended
+
+
+--------------------------------------------------------------------------------
+10. Typical End-to-End Flow
+--------------------------------------------------------------------------------
+
+1. Customer is created in web application.
+2. Web/integration starts workflow:
+       POST /api/customer-workflow/start?customerId=123
+
+3. Integration server cron job picks up workflow in CREATED state.
+4. Integration server creates email confirmation token.
+5. Integration server queues customer-confirmation.mail.
+6. Customer clicks:
+       /confirm-customer?token=...
+
+7. CustomerWorkflowActionServlet confirms token and moves workflow to EMAIL_CONFIRMED.
+8. Integration server starts 14-day trial.
+9. Two days before trial expiry, integration sends trial-expiring.mail.
+10. Customer clicks:
+       /continue-subscription?token=...
+
+11. Payment request is created and workflow moves to PAYMENT_PENDING.
+12. Payment provider calls:
+       /api/customer-payment/callback?paymentId=...&status=SUCCEEDED
+
+13. Integration server processes payment status and activates subscription.
+14. Before subscription expiry, workflow sends renewal mail.
+15. Customer clicks:
+       /renew-subscription?token=...
+
+16. If customer does not confirm/pay in time:
+       workflow suspends customer
+       AuthFilter blocks login
+
+
+--------------------------------------------------------------------------------
+11. Known Gaps / Important Notes
+--------------------------------------------------------------------------------
+
+1. CustomerRegistrationServlet does not yet persist a customer or start workflow automatically.
+   It currently validates and accepts the request only.
+
+2. CustomerContactInfoProvider maps CUSTOMER columns defensively.
+   The real CUSTOMER table column names must be verified.
+
+3. CustomerAccessProvider updates CUSTOMER columns defensively.
+   The real CUSTOMER table must have supported columns for suspension/reactivation to work.
+
+4. Payment provider integration is still generic/manual.
+   CustomerPaymentCallbackServlet is a simple callback endpoint and should be secured properly
+   before use with a real external payment provider.
+
+5. Amount/currency for payment request currently defaults in CustomerWorkflowActionProvider / CustomerPaymentRequestProvider.
+   Real subscription pricing must be connected later.
+
+6. Public token endpoints rely on secure random tokens and hashed token storage.
+   Token URLs should always be sent over HTTPS in production.
+
+7. Admin endpoints should eventually enforce admin authorization, not just normal login.

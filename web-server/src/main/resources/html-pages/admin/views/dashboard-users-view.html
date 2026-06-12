@@ -1,0 +1,146 @@
+<section class="dashboard-view-page" data-view="users">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">Users</h1>
+            <p class="dashboard-page-description">
+                User activity, login behavior, roles, locked accounts and inactive users.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon"></div>
+            <div class="dashboard-kpi-label">Active Users</div>
+            <div class="dashboard-kpi-help">Users active today</div>
+            <div class="dashboard-kpi-value" data-field="activeUsers">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="activeUsers"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">↪</div>
+            <div class="dashboard-kpi-label">Logins Today</div>
+            <div class="dashboard-kpi-help">Successful logins today</div>
+            <div class="dashboard-kpi-value" data-field="loginsToday">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="loginsToday"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">⚠</div>
+            <div class="dashboard-kpi-label">Failed Logins</div>
+            <div class="dashboard-kpi-help">Failed logins last 24 hours</div>
+            <div class="dashboard-kpi-value" data-field="failedLogins">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="failedLogins"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon"></div>
+            <div class="dashboard-kpi-label">Locked Accounts</div>
+            <div class="dashboard-kpi-help">Currently locked users</div>
+            <div class="dashboard-kpi-value" data-field="lockedAccounts">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="lockedAccounts"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">＋</div>
+            <div class="dashboard-kpi-label">New Users</div>
+            <div class="dashboard-kpi-help">New users this week</div>
+            <div class="dashboard-kpi-value" data-field="newUsers">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="newUsers"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Login Activity</h2>
+                <span class="dashboard-card-subtitle">Successful logins trend</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="loginActivity"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Users by Role</h2>
+                <span class="dashboard-card-subtitle">Role distribution</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="usersByRole"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Users by role donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="usersByRole"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Users by Customer</h2>
+                <span class="dashboard-card-subtitle">Top customer accounts</span>
+            </div>
+
+            <div class="dashboard-status-list" data-list="usersByCustomer"></div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Login Health</h2>
+                <span class="dashboard-card-subtitle">Successful vs failed logins</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="loginHealth"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Login health donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="loginHealth"></div>
+            </div>
+        </article>
+    </section>
+
+    <article class="dashboard-card dashboard-card-pad">
+        <div class="dashboard-card-header">
+            <h2 class="dashboard-card-title">Inactive Users</h2>
+            <span class="dashboard-card-subtitle">Users requiring review</span>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+            <tr>
+                <th>User</th>
+                <th>Customer</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody data-table="inactiveUsers"></tbody>
+        </table>
+    </article>
+</section>

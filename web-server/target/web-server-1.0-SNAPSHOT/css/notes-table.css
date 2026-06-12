@@ -1,0 +1,132 @@
+/*
+ * Hard override for note dialog sizing.
+ * The shared .dlg class sets height: 100%, which makes this dialog too tall.
+ */
+#noteDialog{
+    width: min(680px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+    height: fit-content;
+    max-height: calc(100vh - 48px);
+    padding: 0;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+#noteDialog .note-dlg{
+    width: 100%;
+    max-width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 22px;
+    display: block;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+#noteDialog .page-dialog-head,
+#noteDialog .page-dialog-status,
+#noteDialog .note-editor,
+#noteDialog .dlg-footer{
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+#noteDialog .page-dialog-head h3{
+    margin: 0 0 8px;
+}
+
+#noteDialog .page-dialog-status{
+    margin-bottom: 14px;
+}
+
+#noteDialog .note-editor{
+    display: block;
+    width: 100%;
+    margin: 0;
+    overflow: visible;
+}
+
+#noteDialog .note-editor-label{
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+#noteDialog .note-textarea{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 300px !important;
+    min-height: 180px !important;
+    max-height: 300px !important;
+    resize: vertical;
+    overflow: auto;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+#noteDialog .note-textarea:focus{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+
+#noteDialog .dlg-footer{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(35,52,84,.65);
+    overflow: visible;
+}
+
+#noteDialog .dlg-footer button{
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-height: 620px){
+    #noteDialog .note-textarea{
+        height: 220px !important;
+        max-height: 220px !important;
+    }
+
+    #noteDialog .note-dlg{
+        padding: 18px;
+    }
+}
+
+@media (max-width: 560px){
+    #noteDialog{
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+    }
+
+    #noteDialog .note-dlg{
+        padding: 16px;
+    }
+
+    #noteDialog .note-textarea{
+        height: 220px !important;
+        max-height: 220px !important;
+    }
+
+    #noteDialog .dlg-footer{
+        justify-content: stretch;
+    }
+
+    #noteDialog .dlg-footer button{
+        flex: 1 1 0;
+    }
+}

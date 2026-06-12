@@ -1,0 +1,148 @@
+<section class="dashboard-view-page" data-view="customer-creation">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">Customer Creation</h1>
+            <p class="dashboard-page-description">
+                Registration funnel, CVR lookups, confirmation status and failed customer creation attempts.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-flow">
+        <div class="dashboard-flow-step">
+            <div class="dashboard-flow-label">Started</div>
+            <div class="dashboard-flow-value" data-field="started">—</div>
+        </div>
+
+        <div class="dashboard-flow-step">
+            <div class="dashboard-flow-label">Customer Info</div>
+            <div class="dashboard-flow-value" data-field="customerInfo">—</div>
+        </div>
+
+        <div class="dashboard-flow-step">
+            <div class="dashboard-flow-label">Payment</div>
+            <div class="dashboard-flow-value" data-field="payment">—</div>
+        </div>
+
+        <div class="dashboard-flow-step">
+            <div class="dashboard-flow-label">Confirmed</div>
+            <div class="dashboard-flow-value" data-field="confirmed">—</div>
+        </div>
+
+        <div class="dashboard-flow-step">
+            <div class="dashboard-flow-label">Activated</div>
+            <div class="dashboard-flow-value" data-field="activated">—</div>
+        </div>
+    </section>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">⏳</div>
+            <div class="dashboard-kpi-label">Pending Confirmations</div>
+            <div class="dashboard-kpi-help">Customers awaiting email/admin confirmation</div>
+            <div class="dashboard-kpi-value" data-field="pendingConfirmations">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="pendingConfirmations"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">CVR</div>
+            <div class="dashboard-kpi-label">CVR Lookups</div>
+            <div class="dashboard-kpi-help">CVR lookup requests today</div>
+            <div class="dashboard-kpi-value" data-field="cvrLookupsToday">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="cvrLookupsToday"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✓</div>
+            <div class="dashboard-kpi-label">CVR Success</div>
+            <div class="dashboard-kpi-help">Successful CVR lookups</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="cvrSuccessRate">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="cvrSuccessRate"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon"></div>
+            <div class="dashboard-kpi-label">Payment Validation</div>
+            <div class="dashboard-kpi-help">Successful payment validation rate</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="paymentValidationRate">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="paymentValidationRate"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">⚠</div>
+            <div class="dashboard-kpi-label">Failed Creations</div>
+            <div class="dashboard-kpi-help">Customer creation failures today</div>
+            <div class="dashboard-kpi-value" data-field="failedCreations">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="failedCreations"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Creation Trend</h2>
+                <span class="dashboard-card-subtitle">Daily registrations</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="creationTrend"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">CVR Lookup Result</h2>
+                <span class="dashboard-card-subtitle">Success / failure distribution</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="cvrLookup"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="CVR lookup result donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="cvrLookup"></div>
+            </div>
+        </article>
+    </section>
+
+    <article class="dashboard-card dashboard-card-pad">
+        <div class="dashboard-card-header">
+            <h2 class="dashboard-card-title">Failed Customer Creation Attempts</h2>
+            <span class="dashboard-card-subtitle">Errors requiring follow-up</span>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Step</th>
+                <th>Error</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody data-table="failedCreationAttempts"></tbody>
+        </table>
+    </article>
+</section>

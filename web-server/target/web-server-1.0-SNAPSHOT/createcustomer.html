@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Customer | BEPA EIS</title>
+
+    <style>
+        :root {
+            --primary: #046bd2;
+            --primary-dark: #045cb4;
+            --wizard: #1f6f73;
+            --wizard-muted: #cbd5d1;
+            --text-dark: #1e293b;
+            --text: #334155;
+            --text-muted: #64748b;
+            --border: #d1d5db;
+            --surface: #f8fafc;
+            --white: #ffffff;
+            --danger: #dc2626;
+            --success: #15803d;
+            --warning: #b45309;
+            --shadow: 0 20px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            color: var(--text);
+            background: linear-gradient(135deg, #f8fafc 0%, #eef6ff 100%);
+            line-height: 1.65;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover,
+        a:focus {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .site-header {
+            background: var(--white);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            min-height: 76px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .logo:hover,
+        .logo:focus {
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        .back-home {
+            font-size: 15px;
+            font-weight: 650;
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 36px 24px 60px;
+        }
+
+        .page-title {
+            margin: 0 0 10px;
+            color: var(--text-dark);
+            font-size: clamp(32px, 4vw, 46px);
+            line-height: 1.16;
+            letter-spacing: -0.035em;
+        }
+
+        .page-description {
+            max-width: 780px;
+            margin: 0 0 34px;
+            color: var(--text-muted);
+            font-size: 17px;
+        }
+
+        .wizard-status {
+            margin: 0 0 34px;
+            padding: 22px 12px 12px;
+            border-radius: 18px;
+            background: var(--white);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .wizard-progress {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0;
+        }
+
+        .wizard-progress-step {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .wizard-progress-step::before,
+        .wizard-progress-step::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            width: 50%;
+            height: 3px;
+            background: var(--wizard-muted);
+            z-index: 1;
+        }
+
+        .wizard-progress-step::before {
+            left: 0;
+        }
+
+        .wizard-progress-step::after {
+            right: 0;
+        }
+
+        .wizard-progress-step:first-child::before {
+            display: none;
+        }
+
+        .wizard-progress-step:last-child::after {
+            display: none;
+        }
+
+        .wizard-progress-step.is-complete::before,
+        .wizard-progress-step.is-complete::after,
+        .wizard-progress-step.is-current::before,
+        .wizard-progress-step.is-complete + .wizard-progress-step::before {
+            background: var(--wizard);
+        }
+
+        .wizard-progress-number {
+            position: relative;
+            z-index: 2;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 2px solid var(--wizard-muted);
+            background: var(--white);
+            color: var(--wizard);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .wizard-progress-step.is-current .wizard-progress-number,
+        .wizard-progress-step.is-complete .wizard-progress-number {
+            border-color: var(--wizard);
+            background: var(--wizard);
+            color: var(--white);
+        }
+
+        .wizard-progress-label {
+            margin-top: 8px;
+            max-width: 145px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 1.25;
+        }
+
+        .wizard-progress-step.is-current .wizard-progress-label {
+            color: var(--wizard);
+            font-weight: 800;
+        }
+
+        .wizard-card {
+            padding: 34px;
+            border-radius: 20px;
+            background: var(--white);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow);
+        }
+
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.is-active {
+            display: block;
+        }
+
+        .wizard-step h2 {
+            margin: 0 0 8px;
+            color: var(--text-dark);
+            font-size: 28px;
+            line-height: 1.25;
+        }
+
+        .step-description {
+            margin: 0 0 28px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .module-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .module-option {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 22px;
+            align-items: start;
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+        }
+
+        .module-option.is-disabled {
+            opacity: 0.62;
+        }
+
+        .module-option h3 {
+            margin: 0 0 10px;
+            color: var(--text-dark);
+            font-size: 20px;
+        }
+
+        .module-option p {
+            margin: 0 0 14px;
+        }
+
+        .module-price {
+            color: var(--text-dark);
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .module-radio {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 230px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            font-weight: 750;
+        }
+
+        .module-radio input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 18px 20px;
+        }
+
+        .form-field {
+            margin: 0;
+        }
+
+        .span-4 {
+            grid-column: span 4;
+        }
+
+        .span-6 {
+            grid-column: span 6;
+        }
+
+        .span-12 {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            height: 44px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 16px;
+            background: var(--white);
+        }
+
+        .form-field input:focus,
+        .form-field select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(4, 107, 210, 0.12);
+        }
+
+        .customer-cvr-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+            grid-column: 1 / -1;
+        }
+
+        .field-cvr {
+            width: 150px;
+            max-width: 100%;
+        }
+
+        .field-cvr input {
+            width: 150px;
+            max-width: 100%;
+        }
+
+        .customer-cvr-action {
+            padding-top: 31px;
+        }
+
+        .field-zipcode {
+            grid-column: span 2;
+        }
+
+        .field-zipcode input {
+            width: 150px;
+            max-width: 100%;
+        }
+
+        .field-city {
+            grid-column: span 5;
+        }
+
+        .field-country {
+            grid-column: span 5;
+        }
+
+        .field-country-code {
+            grid-column: span 3;
+        }
+
+        .field-phone {
+            grid-column: span 3;
+        }
+
+        .field-phone input {
+            width: 190px;
+            max-width: 100%;
+        }
+
+        .field-email {
+            grid-column: span 6;
+        }
+
+        .field-help {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .payment-box {
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+        }
+
+        .confirmation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .confirmation-section {
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+        }
+
+        .confirmation-section.full {
+            grid-column: 1 / -1;
+        }
+
+        .confirmation-section h3 {
+            margin: 0 0 14px;
+            color: var(--text-dark);
+            font-size: 18px;
+        }
+
+        .summary-list {
+            margin: 0;
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            gap: 8px 14px;
+            font-size: 14px;
+        }
+
+        .summary-list dt {
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .summary-list dd {
+            margin: 0;
+            color: var(--text-dark);
+            word-break: break-word;
+        }
+
+        .terms-box {
+            margin-top: 22px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--white);
+        }
+
+        .terms-box label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-weight: 650;
+            color: var(--text-dark);
+        }
+
+        .terms-box input {
+            width: 18px;
+            height: 18px;
+            margin-top: 4px;
+            flex: 0 0 auto;
+        }
+
+        .success-panel {
+            text-align: center;
+            padding: 34px 16px;
+        }
+
+        .success-icon {
+            width: 74px;
+            height: 74px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: var(--success);
+            font-size: 42px;
+            font-weight: 900;
+        }
+
+        .success-panel h2 {
+            font-size: 32px;
+        }
+
+        .success-panel p {
+            max-width: 680px;
+            margin: 0 auto 12px;
+            color: var(--text-muted);
+            font-size: 17px;
+        }
+
+        .message {
+            min-height: 22px;
+            margin: 18px 0 0;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .message-error {
+            color: var(--danger);
+        }
+
+        .message-warning {
+            color: var(--warning);
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 30px;
+        }
+
+        .button-row.align-end {
+            justify-content: flex-end;
+        }
+
+        .button {
+            min-height: 46px;
+            padding: 0 22px;
+            border: 0;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .button:hover,
+        .button:focus {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .button-primary:hover,
+        .button-primary:focus {
+            background: var(--primary-dark);
+        }
+
+        .button-secondary {
+            background: #e5e7eb;
+            color: var(--text-dark);
+        }
+
+        .button-secondary:hover,
+        .button-secondary:focus {
+            background: #d1d5db;
+        }
+
+        .button:disabled {
+            background: #94a3b8;
+            color: var(--white);
+            cursor: not-allowed;
+            opacity: 0.75;
+            transform: none;
+        }
+
+        @media (max-width: 900px) {
+            .wizard-progress {
+                overflow-x: auto;
+                display: flex;
+                padding-bottom: 10px;
+            }
+
+            .wizard-progress-step {
+                min-width: 150px;
+            }
+
+            .module-option {
+                grid-template-columns: 1fr;
+            }
+
+            .module-radio {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .form-grid,
+            .confirmation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .span-4,
+            .span-6,
+            .span-12,
+            .field-zipcode,
+            .field-city,
+            .field-country,
+            .field-country-code,
+            .field-phone,
+            .field-email,
+            .confirmation-section.full {
+                grid-column: auto;
+            }
+
+            .customer-cvr-row {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .customer-cvr-action {
+                padding-top: 0;
+            }
+
+            .field-cvr,
+            .field-cvr input,
+            .field-zipcode input,
+            .field-phone input {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+
+            .page {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .wizard-card {
+                padding: 24px 18px;
+            }
+
+            .button-row {
+                flex-direction: column-reverse;
+            }
+
+            .button-row.align-end {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .summary-list {
+                grid-template-columns: 1fr;
+                gap: 2px 0;
+            }
+
+            .summary-list dd {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="/" class="logo" aria-label="BEPA home">BEPA EIS</a>
+        <a href="/index.html" class="back-home">Back to front page</a>
+    </div>
+</header>
+
+<main class="page">
+    <h1 class="page-title">Create Customer</h1>
+    <p class="page-description">
+        Follow the steps below to create a new customer. You cannot skip steps, and your customer will only be created
+        after the final confirmation.
+    </p>
+
+    <section class="wizard-status" aria-label="Wizard progress">
+        <div class="wizard-progress" id="wizardProgress">
+            <div class="wizard-progress-step is-current" data-progress-step="1">
+                <span class="wizard-progress-number">1</span>
+                <span class="wizard-progress-label">Select module</span>
+            </div>
+            <div class="wizard-progress-step" data-progress-step="2">
+                <span class="wizard-progress-number">2</span>
+                <span class="wizard-progress-label">Customer information</span>
+            </div>
+            <div class="wizard-progress-step" data-progress-step="3">
+                <span class="wizard-progress-number">3</span>
+                <span class="wizard-progress-label">Payment</span>
+            </div>
+            <div class="wizard-progress-step" data-progress-step="4">
+                <span class="wizard-progress-number">4</span>
+                <span class="wizard-progress-label">Confirmation</span>
+            </div>
+            <div class="wizard-progress-step" data-progress-step="5">
+                <span class="wizard-progress-number">5</span>
+                <span class="wizard-progress-label">Customer created</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="wizard-card">
+        <form id="createCustomerWizard" novalidate>
+            <section class="wizard-step is-active" data-step="1">
+                <h2>1. Select module</h2>
+                <p class="step-description">
+                    Select the module that should be enabled for the new customer.
+                </p>
+
+                <div class="module-options">
+                    <article class="module-option">
+                        <div>
+                            <h3>Basis Module Requirements</h3>
+                            <p>
+                                Basis Module is to support the complete lifecycle of requirements: from capturing
+                                stakeholder needs, deriving system-level specifications, establishing traceability,
+                                to verifying compliance.
+                            </p>
+                            <p>
+                                This software should help product managers, engineers, QA, and business stakeholders
+                                collaborate efficiently and ensure full requirement coverage, traceability, and testability.
+                            </p>
+                            <div class="module-price">Price XXXX kr/monthly</div>
+                        </div>
+
+                        <label class="module-radio">
+                            <input type="radio" name="module" value="BASIS-MODULE" checked>
+                            Select Basis Module
+                        </label>
+                    </article>
+
+                    <article class="module-option is-disabled">
+                        <div>
+                            <h3>Pro Module Requirements</h3>
+                            <p>
+                                Pro Module is to support and integrate the complete lifecycle of full RFLP methodologies:
+                                (R) from capturing stakeholder and system requirements, establishing traceability between
+                                stakeholder and system requirement, including all functions in Basis Module.
+                            </p>
+                            <div class="module-price">Price YYYYY kr/monthly</div>
+                        </div>
+
+                        <label class="module-radio">
+                            <input type="radio" name="module" value="PRO-MODULE" disabled>
+                            Pro Module coming soon
+                        </label>
+                    </article>
+
+                    <article class="module-option is-disabled">
+                        <div>
+                            <h3>Master Module</h3>
+                            <p>
+                                Master Module includes all functionality from Pro Module plus TRL, IRL, DRL and
+                                Configuration / Modularisation architectures.
+                            </p>
+                            <p>
+                                This module is intended for organisations that need extended architecture management,
+                                maturity tracking and advanced configuration support across complex product platforms.
+                            </p>
+                            <div class="module-price">Price ZZZZZ kr/monthly</div>
+                        </div>
+
+                        <label class="module-radio">
+                            Master Module coming soon
+                            <input type="radio" name="module" value="MASTER-MODULE" disabled>
+                        </label>
+                    </article>
+                </div>
+
+                <p class="message message-error" data-error-for-step="1"></p>
+
+                <div class="button-row align-end">
+                    <button type="button" class="button button-primary" data-next-step>
+                        Continue
+                    </button>
+                </div>
+            </section>
+
+            <section class="wizard-step" data-step="2">
+                <h2>2. Customer information</h2>
+                <p class="step-description">
+                    Enter customer information. CVR number is optional. If entered, you can fetch available company data
+                    from Virk.dk.
+                </p>
+
+                <div class="form-grid">
+                    <div class="customer-cvr-row">
+                        <div class="form-field field-cvr">
+                            <label for="customerCvrNumber">CVR nr optional</label>
+                            <input
+                                    type="text"
+                                    id="customerCvrNumber"
+                                    name="customerCvrNumber"
+                                    inputmode="numeric"
+                                    maxlength="8"
+                                    pattern="[0-9]{8}"
+                                    autocomplete="off">
+                            <p class="field-help">Optional. Exactly 8 digits.</p>
+                        </div>
+
+                        <div class="customer-cvr-action">
+                            <button type="button" class="button button-secondary" id="fetchFromVirkButton" disabled>
+                                Fetch from Virk.dk
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-field span-6">
+                        <label for="customerName">Name</label>
+                        <input type="text" id="customerName" name="customerName" required>
+                    </div>
+
+                    <div class="form-field span-6">
+                        <label for="customerAddress">Address</label>
+                        <input type="text" id="customerAddress" name="customerAddress" required>
+                    </div>
+
+                    <div class="form-field field-zipcode">
+                        <label for="customerZipCode">Zip Code</label>
+                        <input
+                                type="text"
+                                id="customerZipCode"
+                                name="customerZipCode"
+                                maxlength="10"
+                                required>
+                    </div>
+
+                    <div class="form-field field-city">
+                        <label for="customerCity">City</label>
+                        <input type="text" id="customerCity" name="customerCity" required>
+                    </div>
+
+                    <div class="form-field field-country">
+                        <label for="customerCountry">Country</label>
+                        <select id="customerCountry" name="customerCountry" required></select>
+                    </div>
+
+                    <div class="form-field field-country-code">
+                        <label for="customerPhoneCountryCode">Country Code</label>
+                        <select id="customerPhoneCountryCode" name="customerPhoneCountryCode" required></select>
+                    </div>
+
+                    <div class="form-field field-phone">
+                        <label for="customerPhone">Phone</label>
+                        <input
+                                type="text"
+                                id="customerPhone"
+                                name="customerPhone"
+                                maxlength="15"
+                                inputmode="tel"
+                                required>
+                    </div>
+
+                    <div class="form-field field-email">
+                        <label for="customerAdministratorEmail">Administrator email</label>
+                        <input type="email" id="customerAdministratorEmail" name="customerAdministratorEmail" required>
+                    </div>
+                </div>
+
+                <p class="message message-error" data-error-for-step="2"></p>
+
+                <div class="button-row">
+                    <button type="button" class="button button-secondary" data-previous-step>
+                        Back
+                    </button>
+                    <button type="button" class="button button-primary" id="customerInfoNextButton" data-next-step disabled>
+                        Continue
+                    </button>
+                </div>
+            </section>
+
+            <section class="wizard-step" data-step="3">
+                <h2>3. Payment</h2>
+                <p class="step-description">
+                    Enter credit card payment information. The first version only validates the entered payment data.
+                </p>
+
+                <div class="payment-box">
+                    <div class="form-grid">
+                        <div class="form-field span-12">
+                            <label for="cardholderName">Cardholder name</label>
+                            <input type="text" id="cardholderName" name="cardholderName" autocomplete="cc-name" required>
+                        </div>
+
+                        <div class="form-field span-12">
+                            <label for="cardNumber">Card number</label>
+                            <input
+                                    type="text"
+                                    id="cardNumber"
+                                    name="cardNumber"
+                                    inputmode="numeric"
+                                    maxlength="19"
+                                    autocomplete="cc-number"
+                                    placeholder="1234 1234 1234 1234"
+                                    required>
+                        </div>
+
+                        <div class="form-field span-4">
+                            <label for="expiryMonth">Expiry month</label>
+                            <select id="expiryMonth" name="expiryMonth" autocomplete="cc-exp-month" required>
+                                <option value="">Select month</option>
+                                <option value="01">01 - January</option>
+                                <option value="02">02 - February</option>
+                                <option value="03">03 - March</option>
+                                <option value="04">04 - April</option>
+                                <option value="05">05 - May</option>
+                                <option value="06">06 - June</option>
+                                <option value="07">07 - July</option>
+                                <option value="08">08 - August</option>
+                                <option value="09">09 - September</option>
+                                <option value="10">10 - October</option>
+                                <option value="11">11 - November</option>
+                                <option value="12">12 - December</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field span-4">
+                            <label for="expiryYear">Expiry year</label>
+                            <select id="expiryYear" name="expiryYear" autocomplete="cc-exp-year" required>
+                                <option value="">Select year</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field span-4">
+                            <label for="cardCvc">CVC</label>
+                            <input
+                                    type="text"
+                                    id="cardCvc"
+                                    name="cardCvc"
+                                    inputmode="numeric"
+                                    maxlength="4"
+                                    autocomplete="cc-csc"
+                                    required>
+                        </div>
+
+                        <div class="form-field span-4">
+                            <label for="billingZipCode">Billing zip code</label>
+                            <input type="text" id="billingZipCode" name="billingZipCode" autocomplete="postal-code" required>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="message message-error" data-error-for-step="3"></p>
+
+                <div class="button-row">
+                    <button type="button" class="button button-secondary" data-previous-step>
+                        Back
+                    </button>
+                    <button type="button" class="button button-primary" id="paymentNextButton" data-next-step disabled>
+                        Continue
+                    </button>
+                </div>
+            </section>
+
+            <section class="wizard-step" data-step="4">
+                <h2>4. Confirmation</h2>
+                <p class="step-description">
+                    Please review all information and accept the terms and conditions before creating the customer.
+                </p>
+
+                <div class="confirmation-grid">
+                    <article class="confirmation-section">
+                        <h3>Module</h3>
+                        <dl class="summary-list">
+                            <dt>Selected module</dt>
+                            <dd id="summaryModule">-</dd>
+                            <dt>Price</dt>
+                            <dd id="summaryPrice">-</dd>
+                        </dl>
+                    </article>
+
+                    <article class="confirmation-section">
+                        <h3>CVR</h3>
+                        <dl class="summary-list">
+                            <dt>CVR number</dt>
+                            <dd id="summaryCvrNumber">-</dd>
+                        </dl>
+                    </article>
+
+                    <article class="confirmation-section full">
+                        <h3>Customer information</h3>
+                        <dl class="summary-list">
+                            <dt>Name</dt>
+                            <dd id="summaryCustomerName">-</dd>
+                            <dt>Address</dt>
+                            <dd id="summaryCustomerAddress">-</dd>
+                            <dt>Zip Code</dt>
+                            <dd id="summaryCustomerZipCode">-</dd>
+                            <dt>City</dt>
+                            <dd id="summaryCustomerCity">-</dd>
+                            <dt>Country</dt>
+                            <dd id="summaryCustomerCountry">-</dd>
+                            <dt>Phone</dt>
+                            <dd id="summaryCustomerPhone">-</dd>
+                            <dt>Administrator email</dt>
+                            <dd id="summaryCustomerAdministratorEmail">-</dd>
+                        </dl>
+                    </article>
+
+                    <article class="confirmation-section full">
+                        <h3>Payment</h3>
+                        <dl class="summary-list">
+                            <dt>Cardholder</dt>
+                            <dd id="summaryCardholderName">-</dd>
+                            <dt>Card number</dt>
+                            <dd id="summaryCardNumber">-</dd>
+                            <dt>Expiry</dt>
+                            <dd id="summaryCardExpiry">-</dd>
+                            <dt>Billing zip code</dt>
+                            <dd id="summaryBillingZipCode">-</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <div class="terms-box">
+                    <label for="termsAccepted">
+                        <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                        <span>
+                            I accept the terms and conditions and confirm that the entered information is correct.
+                        </span>
+                    </label>
+                </div>
+
+                <p class="message message-error" data-error-for-step="4"></p>
+                <p class="message message-warning" id="submitWarning"></p>
+
+                <div class="button-row">
+                    <button type="button" class="button button-secondary" data-previous-step>
+                        Back
+                    </button>
+                    <button type="button" class="button button-primary" id="createCustomerButton" data-next-step disabled>
+                        Create Customer
+                    </button>
+                </div>
+            </section>
+
+            <section class="wizard-step" data-step="5">
+                <div class="success-panel">
+                    <div class="success-icon">✓</div>
+                    <h2>Customer created</h2>
+                    <p>
+                        The customer has been created successfully.
+                    </p>
+                    <p>
+                        An email has been sent to the administrator. The administrator must confirm the customer creation
+                        by following the instructions in the email.
+                    </p>
+
+                    <div class="button-row align-end">
+                        <a href="/index.html" class="button button-primary" style="display:inline-flex;align-items:center;text-decoration:none;">
+                            Back to front page
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </form>
+    </section>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const totalSteps = 5;
+        let currentStep = 1;
+        let customerCreated = false;
+
+        const countryCodes = [
+            "AF", "AX", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
+            "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR",
+            "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA", "KY", "CF", "TD", "CL", "CN", "CX", "CC",
+            "CO", "KM", "CG", "CD", "CK", "CR", "CI", "HR", "CU", "CW", "CY", "CZ", "DK", "DJ", "DM", "DO",
+            "EC", "EG", "SV", "GQ", "ER", "EE", "SZ", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF",
+            "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW", "GY",
+            "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL", "IT", "JM",
+            "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB", "LS", "LR", "LY",
+            "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ", "MR", "MU", "YT", "MX",
+            "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR", "NP", "NL", "NC", "NZ", "NI",
+            "NE", "NG", "NU", "NF", "MK", "MP", "NO", "OM", "PK", "PW", "PS", "PA", "PG", "PY", "PE", "PH",
+            "PN", "PL", "PT", "PR", "QA", "RE", "RO", "RU", "RW", "BL", "SH", "KN", "LC", "MF", "PM", "VC",
+            "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG", "SX", "SK", "SI", "SB", "SO", "ZA", "GS",
+            "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK",
+            "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU",
+            "VE", "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW"
+        ];
+
+        const phoneCountryCodes = [
+            { country: "Denmark", code: "+45" },
+            { country: "Sweden", code: "+46" },
+            { country: "Norway", code: "+47" },
+            { country: "Germany", code: "+49" },
+            { country: "United Kingdom", code: "+44" },
+            { country: "United States", code: "+1" },
+            { country: "France", code: "+33" },
+            { country: "Netherlands", code: "+31" },
+            { country: "Belgium", code: "+32" },
+            { country: "Spain", code: "+34" },
+            { country: "Italy", code: "+39" },
+            { country: "Finland", code: "+358" },
+            { country: "Poland", code: "+48" },
+            { country: "Portugal", code: "+351" },
+            { country: "Switzerland", code: "+41" },
+            { country: "Austria", code: "+43" },
+            { country: "Ireland", code: "+353" },
+            { country: "Iceland", code: "+354" },
+            { country: "Faroe Islands", code: "+298" },
+            { country: "Greenland", code: "+299" }
+        ];
+
+        const wizardForm = document.getElementById("createCustomerWizard");
+        const progressSteps = Array.from(document.querySelectorAll("[data-progress-step]"));
+        const wizardSteps = Array.from(document.querySelectorAll("[data-step]"));
+
+        const fetchFromVirkButton = document.getElementById("fetchFromVirkButton");
+
+        const customerFields = {
+            cvrNumber: document.getElementById("customerCvrNumber"),
+            name: document.getElementById("customerName"),
+            address: document.getElementById("customerAddress"),
+            zipCode: document.getElementById("customerZipCode"),
+            city: document.getElementById("customerCity"),
+            country: document.getElementById("customerCountry"),
+            phoneCountryCode: document.getElementById("customerPhoneCountryCode"),
+            phone: document.getElementById("customerPhone"),
+            administratorEmail: document.getElementById("customerAdministratorEmail")
+        };
+
+        const customerInfoNextButton = document.getElementById("customerInfoNextButton");
+
+        const paymentFields = {
+            cardholderName: document.getElementById("cardholderName"),
+            cardNumber: document.getElementById("cardNumber"),
+            expiryMonth: document.getElementById("expiryMonth"),
+            expiryYear: document.getElementById("expiryYear"),
+            cardCvc: document.getElementById("cardCvc"),
+            billingZipCode: document.getElementById("billingZipCode")
+        };
+
+        const paymentNextButton = document.getElementById("paymentNextButton");
+        const termsAccepted = document.getElementById("termsAccepted");
+        const createCustomerButton = document.getElementById("createCustomerButton");
+        const submitWarning = document.getElementById("submitWarning");
+
+        const summary = {
+            module: document.getElementById("summaryModule"),
+            price: document.getElementById("summaryPrice"),
+            cvrNumber: document.getElementById("summaryCvrNumber"),
+            customerName: document.getElementById("summaryCustomerName"),
+            customerAddress: document.getElementById("summaryCustomerAddress"),
+            customerZipCode: document.getElementById("summaryCustomerZipCode"),
+            customerCity: document.getElementById("summaryCustomerCity"),
+            customerCountry: document.getElementById("summaryCustomerCountry"),
+            customerPhone: document.getElementById("summaryCustomerPhone"),
+            customerAdministratorEmail: document.getElementById("summaryCustomerAdministratorEmail"),
+            cardholderName: document.getElementById("summaryCardholderName"),
+            cardNumber: document.getElementById("summaryCardNumber"),
+            cardExpiry: document.getElementById("summaryCardExpiry"),
+            billingZipCode: document.getElementById("summaryBillingZipCode")
+        };
+
+        function getApplicationBaseUrl() {
+            return `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, "")}`;
+        }
+
+        function getCustomerApiBaseUrl() {
+            return `${getApplicationBaseUrl()}/api/customers`;
+        }
+
+        function getStepErrorElement(step) {
+            return document.querySelector(`[data-error-for-step="${step}"]`);
+        }
+
+        function setStepError(step, message) {
+            const errorElement = getStepErrorElement(step);
+
+            if (errorElement) {
+                errorElement.textContent = message || "";
+                errorElement.hidden = !message;
+                errorElement.style.display = message ? "block" : "";
+                errorElement.style.color = "var(--danger)";
+                errorElement.style.backgroundColor = "transparent";
+            }
+        }
+
+        function clearStepError(step) {
+            setStepError(step, "");
+        }
+
+        function isBlank(value) {
+            return !value || value.trim().length === 0;
+        }
+
+        function isValidCvr(value) {
+            return /^\d{8}$/.test((value || "").trim());
+        }
+
+        function isValidEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || "").trim());
+        }
+
+        function onlyDigits(value) {
+            return (value || "").replace(/\D/g, "");
+        }
+
+        function fillCountries() {
+            const displayNames = typeof Intl !== "undefined" && Intl.DisplayNames
+                ? new Intl.DisplayNames(["en"], { type: "region" })
+                : null;
+
+            const countries = countryCodes
+                .map(function (code) {
+                    return {
+                        code,
+                        name: displayNames ? displayNames.of(code) : code
+                    };
+                })
+                .filter(function (country) {
+                    return country.name;
+                })
+                .sort(function (a, b) {
+                    return a.name.localeCompare(b.name);
+                });
+
+            countries.forEach(function (country) {
+                const option = document.createElement("option");
+                option.value = country.name;
+                option.textContent = country.name;
+
+                if (country.code === "DK") {
+                    option.selected = true;
+                }
+
+                customerFields.country.appendChild(option);
+            });
+        }
+
+        function fillPhoneCountryCodes() {
+            phoneCountryCodes
+                .slice()
+                .sort(function (a, b) {
+                    return a.country.localeCompare(b.country);
+                })
+                .forEach(function (entry) {
+                    const option = document.createElement("option");
+                    option.value = entry.code;
+                    option.textContent = `${entry.country} (${entry.code})`;
+
+                    if (entry.country === "Denmark" && entry.code === "+45") {
+                        option.selected = true;
+                    }
+
+                    customerFields.phoneCountryCode.appendChild(option);
+                });
+        }
+
+        function getFullPhoneNumber() {
+            const countryCode = customerFields.phoneCountryCode.value.trim();
+            const phone = customerFields.phone.value.trim();
+
+            if (!countryCode && !phone) {
+                return "";
+            }
+
+            return `${countryCode} ${phone}`.trim();
+        }
+
+        function fillExpiryYears() {
+            const currentYear = new Date().getFullYear();
+
+            for (let i = 0; i < 12; i++) {
+                const year = String(currentYear + i);
+                const option = document.createElement("option");
+                option.value = year;
+                option.textContent = year;
+                paymentFields.expiryYear.appendChild(option);
+            }
+        }
+
+        function getSelectedModule() {
+            const selected = wizardForm.querySelector('input[name="module"]:checked');
+
+            if (!selected) {
+                return null;
+            }
+
+            if (selected.value === "BASIS-MODULE") {
+                return {
+                    code: "BASIS-MODULE",
+                    name: "Basis Module",
+                    price: "XXXX kr/monthly"
+                };
+            }
+
+            if (selected.value === "PRO-MODULE") {
+                return {
+                    code: "PRO-MODULE",
+                    name: "Pro Module",
+                    price: "YYYYY kr/monthly"
+                };
+            }
+
+            if (selected.value === "MASTER-MODULE") {
+                return {
+                    code: "MASTER-MODULE",
+                    name: "Master Module",
+                    price: "ZZZZZ kr/monthly"
+                };
+            }
+
+            return null;
+        }
+
+        function updateProgress() {
+            progressSteps.forEach(function (progressStep) {
+                const stepNumber = Number(progressStep.dataset.progressStep);
+
+                progressStep.classList.toggle("is-current", stepNumber === currentStep);
+                progressStep.classList.toggle("is-complete", stepNumber < currentStep);
+            });
+
+            wizardSteps.forEach(function (stepElement) {
+                const stepNumber = Number(stepElement.dataset.step);
+                stepElement.classList.toggle("is-active", stepNumber === currentStep);
+            });
+        }
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) {
+                return;
+            }
+
+            if (customerCreated && step !== totalSteps) {
+                return;
+            }
+
+            currentStep = step;
+
+            if (currentStep === 4) {
+                updateConfirmationSummary();
+                updateCreateCustomerButtonState();
+            }
+
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function validateStep1() {
+            const selectedModule = getSelectedModule();
+
+            if (!selectedModule) {
+                setStepError(1, "Please select a module.");
+                return false;
+            }
+
+            clearStepError(1);
+            return true;
+        }
+
+        async function parseErrorMessage(response, fallbackMessage) {
+            try {
+                const contentType = response.headers.get("Content-Type") || "";
+                const rawText = await response.text();
+
+                if (!rawText || !rawText.trim()) {
+                    return fallbackMessage;
+                }
+
+                if (contentType.toLowerCase().includes("application/json")) {
+                    try {
+                        const body = JSON.parse(rawText);
+
+                        if (body && body.message && String(body.message).trim()) {
+                            return String(body.message).trim();
+                        }
+                    } catch (_jsonError) {
+                        return fallbackMessage;
+                    }
+                }
+
+                return fallbackMessage;
+            } catch (_error) {
+                return fallbackMessage;
+            }
+        }
+
+        function getErrorMessage(error, fallbackMessage) {
+            if (error && error.message && String(error.message).trim()) {
+                return String(error.message).trim();
+            }
+
+            return fallbackMessage;
+        }
+
+        async function lookupCompanyByCvr(cvrNumber) {
+            const response = await fetch(`${getCustomerApiBaseUrl()}/cvr?cvrNumber=${encodeURIComponent(cvrNumber)}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                const message = await parseErrorMessage(
+                    response,
+                    `CVR lookup failed with HTTP ${response.status}`
+                );
+
+                throw new Error(message);
+            }
+
+            return response.json();
+        }
+
+        function setIfBlank(field, value) {
+            if (field && isBlank(field.value) && value) {
+                field.value = value;
+            }
+        }
+
+        function fillBlankCustomerFieldsFromCompany(company) {
+            setIfBlank(customerFields.name, company.name);
+            setIfBlank(customerFields.address, company.address);
+            setIfBlank(customerFields.zipCode, company.postalCode || company.zipCode);
+            setIfBlank(customerFields.city, company.city);
+            setIfBlank(customerFields.country, company.country);
+            setIfBlank(customerFields.phone, onlyDigits(company.phone || "").slice(0, 15));
+            setIfBlank(customerFields.administratorEmail, company.email || company.administratorEmail);
+
+            updateCustomerInfoButtonState();
+        }
+
+        function updateFetchFromVirkButtonState() {
+            const cvr = customerFields.cvrNumber.value.trim();
+
+            fetchFromVirkButton.disabled = cvr.length === 0 || !isValidCvr(cvr);
+        }
+
+        async function fetchFromVirk() {
+            const cvr = customerFields.cvrNumber.value.trim();
+
+            if (!isValidCvr(cvr)) {
+                setStepError(2, "CVR number must contain exactly 8 digits before fetching from Virk.dk.");
+                updateFetchFromVirkButtonState();
+                return;
+            }
+
+            fetchFromVirkButton.disabled = true;
+            fetchFromVirkButton.textContent = "Fetching...";
+
+            try {
+                const company = await lookupCompanyByCvr(cvr);
+                fillBlankCustomerFieldsFromCompany(company);
+                clearStepError(2);
+            } catch (error) {
+                setStepError(2, getErrorMessage(error, "Could not fetch company information from Virk.dk."));
+            } finally {
+                fetchFromVirkButton.textContent = "Fetch from Virk.dk";
+                updateFetchFromVirkButtonState();
+            }
+        }
+
+        function getCustomerRequiredFields() {
+            return [
+                customerFields.name,
+                customerFields.address,
+                customerFields.zipCode,
+                customerFields.city,
+                customerFields.country,
+                customerFields.phoneCountryCode,
+                customerFields.phone,
+                customerFields.administratorEmail
+            ];
+        }
+
+        function validateStep2() {
+            const cvr = customerFields.cvrNumber.value.trim();
+
+            if (cvr.length > 0 && !isValidCvr(cvr)) {
+                setStepError(2, "CVR number must contain exactly 8 digits when entered.");
+                return false;
+            }
+
+            const allFilled = getCustomerRequiredFields().every(function (field) {
+                return !isBlank(field.value);
+            });
+
+            if (!allFilled) {
+                setStepError(2, "All required customer information fields must be filled.");
+                return false;
+            }
+
+            if (!isValidEmail(customerFields.administratorEmail.value)) {
+                setStepError(2, "Administrator email must be a valid email address.");
+                return false;
+            }
+
+            clearStepError(2);
+            return true;
+        }
+
+        function updateCustomerInfoButtonState() {
+            const cvr = customerFields.cvrNumber.value.trim();
+            const cvrValid = cvr.length === 0 || isValidCvr(cvr);
+            const allFilled = getCustomerRequiredFields().every(function (field) {
+                return !isBlank(field.value);
+            });
+            const emailValid = isValidEmail(customerFields.administratorEmail.value);
+
+            customerInfoNextButton.disabled = !(cvrValid && allFilled && emailValid);
+            updateFetchFromVirkButtonState();
+
+            if (!customerInfoNextButton.disabled) {
+                clearStepError(2);
+            }
+        }
+
+        function getPaymentRequiredFields() {
+            return [
+                paymentFields.cardholderName,
+                paymentFields.cardNumber,
+                paymentFields.expiryMonth,
+                paymentFields.expiryYear,
+                paymentFields.cardCvc,
+                paymentFields.billingZipCode
+            ];
+        }
+
+        function validateStep3() {
+            const allFilled = getPaymentRequiredFields().every(function (field) {
+                return !isBlank(field.value);
+            });
+
+            if (!allFilled) {
+                setStepError(3, "All payment fields must be filled.");
+                return false;
+            }
+
+            const cardNumberDigits = onlyDigits(paymentFields.cardNumber.value);
+            if (cardNumberDigits.length < 13 || cardNumberDigits.length > 19) {
+                setStepError(3, "Card number must contain between 13 and 19 digits.");
+                return false;
+            }
+
+            const cvcDigits = onlyDigits(paymentFields.cardCvc.value);
+            if (cvcDigits.length < 3 || cvcDigits.length > 4) {
+                setStepError(3, "CVC must contain 3 or 4 digits.");
+                return false;
+            }
+
+            clearStepError(3);
+            return true;
+        }
+
+        function updatePaymentButtonState() {
+            const allFilled = getPaymentRequiredFields().every(function (field) {
+                return !isBlank(field.value);
+            });
+
+            const cardNumberDigits = onlyDigits(paymentFields.cardNumber.value);
+            const cvcDigits = onlyDigits(paymentFields.cardCvc.value);
+
+            paymentNextButton.disabled = !(
+                allFilled &&
+                cardNumberDigits.length >= 13 &&
+                cardNumberDigits.length <= 19 &&
+                cvcDigits.length >= 3 &&
+                cvcDigits.length <= 4
+            );
+
+            if (!paymentNextButton.disabled) {
+                clearStepError(3);
+            }
+        }
+
+        function maskCardNumber(cardNumber) {
+            const digits = onlyDigits(cardNumber);
+
+            if (digits.length <= 4) {
+                return digits;
+            }
+
+            return `**** **** **** ${digits.slice(-4)}`;
+        }
+
+        function formatCardNumber(value) {
+            return onlyDigits(value)
+                .slice(0, 19)
+                .replace(/(.{4})/g, "$1 ")
+                .trim();
+        }
+
+        function updateConfirmationSummary() {
+            const selectedModule = getSelectedModule();
+
+            summary.module.textContent = selectedModule ? selectedModule.name : "-";
+            summary.price.textContent = selectedModule ? selectedModule.price : "-";
+            summary.cvrNumber.textContent = customerFields.cvrNumber.value || "-";
+            summary.customerName.textContent = customerFields.name.value || "-";
+            summary.customerAddress.textContent = customerFields.address.value || "-";
+            summary.customerZipCode.textContent = customerFields.zipCode.value || "-";
+            summary.customerCity.textContent = customerFields.city.value || "-";
+            summary.customerCountry.textContent = customerFields.country.value || "-";
+            summary.customerPhone.textContent = getFullPhoneNumber() || "-";
+            summary.customerAdministratorEmail.textContent = customerFields.administratorEmail.value || "-";
+            summary.cardholderName.textContent = paymentFields.cardholderName.value || "-";
+            summary.cardNumber.textContent = maskCardNumber(paymentFields.cardNumber.value) || "-";
+            summary.cardExpiry.textContent =
+                paymentFields.expiryMonth.value && paymentFields.expiryYear.value
+                    ? `${paymentFields.expiryMonth.value}/${paymentFields.expiryYear.value}`
+                    : "-";
+            summary.billingZipCode.textContent = paymentFields.billingZipCode.value || "-";
+        }
+
+        function validateStep4() {
+            if (!termsAccepted.checked) {
+                setStepError(4, "You must accept the terms and conditions.");
+                return false;
+            }
+
+            clearStepError(4);
+            return true;
+        }
+
+        function updateCreateCustomerButtonState() {
+            createCustomerButton.disabled = !termsAccepted.checked;
+
+            if (termsAccepted.checked) {
+                clearStepError(4);
+            }
+        }
+
+        function buildCreateCustomerPayload() {
+            const selectedModule = getSelectedModule();
+
+            return {
+                moduleCode: selectedModule ? selectedModule.code : "",
+                moduleName: selectedModule ? selectedModule.name : "",
+                modulePrice: selectedModule ? selectedModule.price : "",
+                cvrNumber: customerFields.cvrNumber.value.trim(),
+                name: customerFields.name.value.trim(),
+                address: customerFields.address.value.trim(),
+                zipCode: customerFields.zipCode.value.trim(),
+                city: customerFields.city.value.trim(),
+                country: customerFields.country.value.trim(),
+                phone: getFullPhoneNumber(),
+                administratorEmail: customerFields.administratorEmail.value.trim(),
+                payment: {
+                    cardholderName: paymentFields.cardholderName.value.trim(),
+                    cardNumber: onlyDigits(paymentFields.cardNumber.value),
+                    expiryMonth: paymentFields.expiryMonth.value,
+                    expiryYear: paymentFields.expiryYear.value,
+                    cvc: onlyDigits(paymentFields.cardCvc.value),
+                    billingZipCode: paymentFields.billingZipCode.value.trim()
+                },
+                termsAccepted: termsAccepted.checked
+            };
+        }
+
+        async function submitCustomer() {
+            const response = await fetch(getCustomerApiBaseUrl(), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify(buildCreateCustomerPayload())
+            });
+
+            if (!response.ok) {
+                const message = await parseErrorMessage(
+                    response,
+                    "Error occurred - please correct the error before trying again."
+                );
+
+                throw new Error(message);
+            }
+
+            return response.json();
+        }
+
+        async function validateAndMoveNext() {
+            if (currentStep === 1) {
+                if (validateStep1()) {
+                    goToStep(2);
+                }
+                return;
+            }
+
+            if (currentStep === 2) {
+                if (validateStep2()) {
+                    goToStep(3);
+                }
+                return;
+            }
+
+            if (currentStep === 3) {
+                if (validateStep3()) {
+                    goToStep(4);
+                }
+                return;
+            }
+
+            if (currentStep === 4) {
+                if (!validateStep4()) {
+                    return;
+                }
+
+                createCustomerButton.disabled = true;
+                createCustomerButton.textContent = "Creating customer...";
+                submitWarning.textContent = "";
+                clearStepError(4);
+
+                try {
+                    await submitCustomer();
+                    customerCreated = true;
+                    goToStep(5);
+                } catch (error) {
+                    const message = getErrorMessage(
+                        error,
+                        "Error occurred - please correct the error before trying again."
+                    );
+
+                    setStepError(4, message);
+                    submitWarning.textContent = "";
+                    createCustomerButton.disabled = false;
+                } finally {
+                    createCustomerButton.textContent = "Create Customer";
+                }
+            }
+        }
+
+        function movePrevious() {
+            if (currentStep <= 1 || currentStep >= totalSteps) {
+                return;
+            }
+
+            goToStep(currentStep - 1);
+        }
+
+        document.querySelectorAll("[data-next-step]").forEach(function (button) {
+            button.addEventListener("click", validateAndMoveNext);
+        });
+
+        document.querySelectorAll("[data-previous-step]").forEach(function (button) {
+            button.addEventListener("click", movePrevious);
+        });
+
+        customerFields.cvrNumber.addEventListener("input", function () {
+            customerFields.cvrNumber.value = onlyDigits(customerFields.cvrNumber.value).slice(0, 8);
+            updateCustomerInfoButtonState();
+        });
+
+        customerFields.zipCode.addEventListener("input", function () {
+            customerFields.zipCode.value = customerFields.zipCode.value.slice(0, 10);
+            updateCustomerInfoButtonState();
+        });
+
+        customerFields.phone.addEventListener("input", function () {
+            customerFields.phone.value = onlyDigits(customerFields.phone.value).slice(0, 15);
+            updateCustomerInfoButtonState();
+        });
+
+        fetchFromVirkButton.addEventListener("click", fetchFromVirk);
+
+        getCustomerRequiredFields().forEach(function (field) {
+            field.addEventListener("input", updateCustomerInfoButtonState);
+            field.addEventListener("change", updateCustomerInfoButtonState);
+        });
+
+        paymentFields.cardNumber.addEventListener("input", function () {
+            paymentFields.cardNumber.value = formatCardNumber(paymentFields.cardNumber.value);
+            updatePaymentButtonState();
+        });
+
+        paymentFields.cardCvc.addEventListener("input", function () {
+            paymentFields.cardCvc.value = onlyDigits(paymentFields.cardCvc.value).slice(0, 4);
+            updatePaymentButtonState();
+        });
+
+        getPaymentRequiredFields().forEach(function (field) {
+            field.addEventListener("input", updatePaymentButtonState);
+            field.addEventListener("change", updatePaymentButtonState);
+        });
+
+        termsAccepted.addEventListener("change", updateCreateCustomerButtonState);
+
+        wizardForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+        });
+
+        fillCountries();
+        fillPhoneCountryCodes();
+        fillExpiryYears();
+        updateProgress();
+        updateCustomerInfoButtonState();
+        updatePaymentButtonState();
+        updateCreateCustomerButtonState();
+    });
+</script>
+</body>
+</html>

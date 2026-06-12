@@ -1,0 +1,149 @@
+<section class="dashboard-view-page" data-view="alerts">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">System Alerts</h1>
+            <p class="dashboard-page-description">
+                Critical errors, warnings, incidents, failed jobs, failed emails and operational alerts.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">!</div>
+            <div class="dashboard-kpi-label">Critical</div>
+            <div class="dashboard-kpi-help">Critical alerts today</div>
+            <div class="dashboard-kpi-value" data-field="critical">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="critical"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">H</div>
+            <div class="dashboard-kpi-label">High</div>
+            <div class="dashboard-kpi-help">High severity alerts today</div>
+            <div class="dashboard-kpi-value" data-field="high">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="high"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">M</div>
+            <div class="dashboard-kpi-label">Medium</div>
+            <div class="dashboard-kpi-help">Medium severity alerts today</div>
+            <div class="dashboard-kpi-value" data-field="medium">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="medium"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✉</div>
+            <div class="dashboard-kpi-label">Failed Emails</div>
+            <div class="dashboard-kpi-help">Email delivery failures today</div>
+            <div class="dashboard-kpi-value" data-field="failedEmails">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="failedEmails"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">⚙</div>
+            <div class="dashboard-kpi-label">Failed Jobs</div>
+            <div class="dashboard-kpi-help">Background job failures today</div>
+            <div class="dashboard-kpi-value" data-field="failedJobs">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="failedJobs"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Alerts Over Time</h2>
+                <span class="dashboard-card-subtitle" data-field="alertsTrendSubtitle">Incident trend for the last 10 days</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="alertsTrend"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Severity Distribution</h2>
+                <span class="dashboard-card-subtitle">Severity distribution today</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="severity"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Alert severity distribution donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="severity"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Affected Services</h2>
+                <span class="dashboard-card-subtitle">Services with alerts in the last 10 days</span>
+            </div>
+
+            <div class="dashboard-status-list" data-list="affectedServices"></div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Alert Health</h2>
+                <span class="dashboard-card-subtitle">Open vs resolved today</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="alertHealth"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Alert health donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="alertHealth"></div>
+            </div>
+        </article>
+    </section>
+
+    <article class="dashboard-card dashboard-card-pad">
+        <div class="dashboard-card-header">
+            <h2 class="dashboard-card-title">Recent Incidents</h2>
+            <span class="dashboard-card-subtitle">Incidents detected in the last 10 days</span>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+            <tr>
+                <th>Incident Created</th>
+                <th>Customer</th>
+                <th>Project</th>
+                <th>User</th>
+                <th>Service</th>
+                <th>Severity</th>
+                <th>Module</th>
+                <th>Message</th>
+            </tr>
+            </thead>
+            <tbody data-table="openIncidents"></tbody>
+        </table>
+    </article>
+</section>

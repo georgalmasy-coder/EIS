@@ -1,0 +1,117 @@
+package com.bepa.eis.server.api.DTO;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a menu structure with main menu items and their sub-items.
+ */
+public class Menu {
+
+    private final List<MainMenuItem> mainMenuItems = new ArrayList<>();
+
+    public MainMenuItem addMainMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int displayOrder) {
+        MainMenuItem mainMenuItem = new MainMenuItem(menuItemId, menuItemText, menuItemUrl, displayOrder);
+        mainMenuItems.add(mainMenuItem);
+        return mainMenuItem;
+    }
+
+    /**
+     * Converts the menu structure to an XML document.
+     * @return
+     * @throws ParserConfigurationException
+     */
+    public Document toXmlDocument() throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+
+        Element root = doc.createElement("menu");
+        doc.appendChild(root);
+
+        for (MainMenuItem m : mainMenuItems) {
+            Element mainMenuEl = doc.createElement("main-menu-item");
+            root.appendChild(mainMenuEl);
+
+            Element displayEL = doc.createElement("display");
+            displayEL.setTextContent(String.valueOf(m.menuItemText));
+            mainMenuEl.appendChild(displayEL);
+
+            if (m.menuItemUrl != null && ! m.menuItemUrl.isEmpty()) {
+                Element urlEL = doc.createElement("url");
+                urlEL.setTextContent(String.valueOf(m.menuItemUrl));
+                mainMenuEl.appendChild(urlEL);
+            }
+
+            Element displayOrderEL = doc.createElement("displayOrder");
+            displayOrderEL.setTextContent(String.valueOf(m.displayOrder));
+            mainMenuEl.appendChild(displayOrderEL);
+
+            for (SubMenuItem s : m.subMenuItems) {
+                Element subMenuEl = doc.createElement("submain-menu-item");
+                mainMenuEl.appendChild(subMenuEl);
+
+                Element subMenuDdisplayEL = doc.createElement("display");
+                subMenuDdisplayEL.setTextContent(String.valueOf(s.menuItemText));
+                subMenuEl.appendChild(subMenuDdisplayEL);
+
+                Element subMenuUrlEL = doc.createElement("url");
+                subMenuUrlEL.setTextContent(String.valueOf(s.menuItemUrl));
+                subMenuEl.appendChild(subMenuUrlEL);
+
+                Element subMenuDisplayOrderEL = doc.createElement("displayOrder");
+                subMenuDisplayOrderEL.setTextContent(String.valueOf(s.displayOrder));
+                subMenuEl.appendChild(subMenuDisplayOrderEL);
+            }
+
+        }
+
+        return doc;
+    }
+
+    public class MainMenuItem {
+        private final int menuItemId;
+        private final String menuItemText;
+        private final String menuItemUrl;
+        private final int displayOrder;
+        private final List<SubMenuItem> subMenuItems = new ArrayList<>();
+
+        private MainMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int displayOrder) {
+            this.menuItemId = menuItemId;
+            this.menuItemText = menuItemText;
+            this.menuItemUrl = menuItemUrl;
+            this.displayOrder = displayOrder;
+        }
+
+        public int getMenuItemId() {
+            return menuItemId;
+        }
+
+        public void addSubMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int parentMenuItemId, int displayOrder) {
+            SubMenuItem subMenuItem = new SubMenuItem(menuItemId, menuItemText, menuItemUrl, parentMenuItemId, displayOrder);
+            subMenuItems.add(subMenuItem);
+        }
+    }
+
+    private class SubMenuItem {
+        private final int menuItemId;
+        private final String menuItemText;
+        private final String menuItemUrl;
+        private final int parentMenuItemId;
+        private final int displayOrder;
+        private SubMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int parentMenuItemId, int displayOrder) {
+            this.menuItemId = menuItemId;
+            this.menuItemText = menuItemText;
+            this.menuItemUrl = menuItemUrl;
+            this.parentMenuItemId = parentMenuItemId;
+            this.displayOrder = displayOrder;
+        }
+    }
+
+}

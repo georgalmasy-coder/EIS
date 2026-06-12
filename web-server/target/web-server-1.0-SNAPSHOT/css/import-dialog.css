@@ -1,0 +1,199 @@
+.import-dialog {
+    width: min(520px, calc(100vw - 32px));
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    color: #111827;
+    background: #ffffff;
+    box-shadow:
+            0 24px 70px rgba(15, 23, 42, 0.28),
+            0 8px 24px rgba(15, 23, 42, 0.16);
+}
+
+.import-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.import-dialog form {
+    margin: 0;
+}
+
+.import-dialog-shell {
+    padding: 24px 24px 18px 24px;
+}
+
+.import-dialog-head h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.import-dialog-description {
+    margin: 18px 0 18px 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.import-dialog-section {
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+
+.import-dialog-section-title {
+    margin-bottom: 12px;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.import-file-native-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+}
+
+.import-file-picker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 76px;
+    box-sizing: border-box;
+    padding: 16px 18px;
+    border: 1px dashed #9ca3af;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #111827;
+    cursor: pointer;
+    transition:
+            border-color 120ms ease,
+            background-color 120ms ease,
+            box-shadow 120ms ease,
+            transform 120ms ease;
+}
+
+.import-file-picker:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.13);
+}
+
+.import-file-picker:active {
+    transform: translateY(1px);
+}
+
+.import-file-native-input:focus-visible + .import-file-picker {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 3px;
+    border-color: #2563eb;
+}
+
+.import-file-picker-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 23px;
+}
+
+.import-file-picker-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.25;
+}
+
+.import-file-picker-text strong {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.import-file-picker-text span {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.import-selected-file {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.import-selected-file.has-file {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.import-selected-file.is-error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.import-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 20px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 0 0 16px 16px;
+}
+
+.import-primary-btn,
+.import-secondary-btn {
+    min-width: 96px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.import-primary-btn {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.import-primary-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.import-primary-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    box-shadow: none;
+}
+
+.import-secondary-btn {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #111827;
+}
+
+.import-secondary-btn:hover {
+    background: #f3f4f6;
+}

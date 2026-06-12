@@ -1,0 +1,49 @@
+<!-- src/main/webapp/META-INF/context.xml -->
+<Context>
+    <!--
+      JNDI DataSource name: java:comp/env/jdbc/EISDatabaseDB
+
+      Security notes:
+      - encrypt=true enables TLS to SQL Server
+      - trustServerCertificate=false enforces proper certificate validation
+      - Use environment variables for secrets
+
+
+
+    -->
+    <!--
+    username="${env.DB_USERNAME}"
+    password="${env.DB_PASSWORD}"
+    -->
+    <Resource
+            name="jdbc/EISDatabase"
+            auth="Container"
+            type="javax.sql.DataSource"
+            factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+
+            driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+            url="jdbc:sqlserver://localhost:1433;databaseName=EISDB;instanceName=EISDB;encrypt=false;trustServerCertificate=false;loginTimeout=5;"
+
+            username="EISDB"
+            password="s3cret"
+
+            initialSize="2"
+            maxActive="20"
+            minIdle="2"
+            maxIdle="10"
+            maxWait="10000"
+
+            testOnBorrow="true"
+            validationQuery="SELECT 1"
+            validationInterval="30000"
+            removeAbandoned="true"
+            removeAbandonedTimeout="60"
+            logAbandoned="false"
+
+            HttpOnly="true"
+            Secure="false"
+            SameSite="Lax"
+
+    />
+</Context>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/basissystemrequirementdiagram.css" />
+</head>
+
+<body class="systemrequirementdiagram-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app systemrequirementdiagram-app">
+    <div class="content systemrequirementdiagram-content">
+        <header class="topbar systemrequirementdiagram-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout systemrequirementdiagram-layout" aria-label="System requirement hierarchy diagram">
+            <div class="section-header systemrequirementdiagram-section-header">
+                <h2>System Requirement Hierarchy Diagram</h2>
+            </div>
+
+            <div class="systemrequirementdiagram-info-bar" aria-label="Diagram information">
+                <div class="systemrequirementdiagram-info-item">
+                    <span class="systemrequirementdiagram-info-label">System requirements:</span>
+                    <strong id="systemRequirementCount">—</strong>
+                </div>
+
+                <div class="systemrequirementdiagram-legend" aria-label="Requirement status color legend">
+                    <span class="systemrequirementdiagram-legend-title">Requirement Status:</span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-new"></span>
+                        New
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-changed"></span>
+                        Changed
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-validated"></span>
+                        Validated
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-approved"></span>
+                        Approved
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-deprecated"></span>
+                        Deprecated
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-potential-duplicate"></span>
+                        Potential Duplicate
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-incomplete"></span>
+                        Incomplete
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-sample"></span>
+                        Sample
+                    </span>
+
+                    <span class="systemrequirementdiagram-legend-item">
+                        <span class="systemrequirementdiagram-legend-swatch status-out-of-scope"></span>
+                        Out of Scope
+                    </span>
+                </div>
+            </div>
+
+            <div class="systemrequirementdiagram-toolbar" aria-label="Diagram toolbar">
+                <label class="systemrequirementdiagram-search-filter" for="filterRequirementText">
+                    <span class="systemrequirementdiagram-search-label">Søg</span>
+                    <span class="systemrequirementdiagram-search-box">
+                        <input
+                                id="filterRequirementText"
+                                class="systemrequirementdiagram-search-input"
+                                type="search"
+                                placeholder="Search in ID, name, description or status..."
+                                autocomplete="off"
+                                aria-label="Search in system requirements"
+                        >
+                        <span class="systemrequirementdiagram-search-icon" aria-hidden="true">⌕</span>
+                    </span>
+                </label>
+
+                <button id="btnClearFilter" class="systemrequirementdiagram-secondary-button" type="button">
+                    Clear filter
+                </button>
+            </div>
+
+            <div class="page-body systemrequirementdiagram-body">
+                <div class="systemrequirementdiagram-frame" id="systemRequirementDiagramFrame" aria-label="System requirement hierarchy frame">
+                    <div class="systemrequirementdiagram-canvas" id="systemRequirementDiagramCanvas">
+                        <svg class="systemrequirementdiagram-svg" id="systemRequirementDiagramSvg" aria-hidden="true"></svg>
+                        <div class="systemrequirementdiagram-nodes" id="systemRequirementDiagramNodes"></div>
+                    </div>
+
+                    <div class="systemrequirementdiagram-empty is-visible" id="systemRequirementDiagramEmptyState">
+                        Loading system requirement hierarchy diagram…
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="requirementDialog" class="systemrequirementdiagram-dialog" aria-label="System requirement details dialog">
+    <form method="dialog" class="systemrequirementdiagram-dialog-form">
+        <div class="systemrequirementdiagram-dialog-head">
+            <h3 id="dialogTitle">System Requirement</h3>
+        </div>
+
+        <div class="systemrequirementdiagram-dialog-content">
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">ID</div>
+                <div class="systemrequirementdiagram-dialog-value" id="dialogRequirementId">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">Name</div>
+                <div class="systemrequirementdiagram-dialog-value" id="dialogRequirementName">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">Description</div>
+                <div class="systemrequirementdiagram-dialog-value systemrequirementdiagram-dialog-description" id="dialogRequirementDescription">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">Verification Status</div>
+                <div class="systemrequirementdiagram-dialog-value" id="dialogVerificationStatus">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">Business Priority</div>
+                <div class="systemrequirementdiagram-dialog-value" id="dialogBusinessPriority">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-label">Requirement Status</div>
+                <div class="systemrequirementdiagram-dialog-value" id="dialogRequirementStatus">—</div>
+            </div>
+        </div>
+
+        <div class="systemrequirementdiagram-dialog-footer">
+            <button id="dialogCloseButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="diagramContextMenu" class="systemrequirementdiagram-context-menu" role="menu" aria-hidden="true">
+    <button id="contextMenuProjectHello" type="button" data-context-action="project-hello" role="menuitem">
+        Hello Projekt
+    </button>
+    <button id="contextMenuRequirementHello" type="button" data-context-action="requirement-hello" role="menuitem">
+        Hello child
+    </button>
+</div>
+
+<dialog id="temporaryHelloDialog" class="systemrequirementdiagram-dialog" aria-label="Temporary hello dialog">
+    <form method="dialog" class="systemrequirementdiagram-dialog-form">
+        <div class="systemrequirementdiagram-dialog-head">
+            <h3 id="temporaryHelloDialogTitle">Temporary dialog</h3>
+        </div>
+
+        <div class="systemrequirementdiagram-dialog-content">
+            <div class="systemrequirementdiagram-dialog-field">
+                <div class="systemrequirementdiagram-dialog-value" id="temporaryHelloDialogMessage">—</div>
+            </div>
+
+            <div class="systemrequirementdiagram-dialog-field" id="temporaryHelloRequirementInfo">
+                <div class="systemrequirementdiagram-dialog-label">System Requirement</div>
+                <div class="systemrequirementdiagram-dialog-value" id="temporaryHelloRequirementValue">—</div>
+            </div>
+        </div>
+
+        <div class="systemrequirementdiagram-dialog-footer">
+            <button id="temporaryHelloCancelButton" class="primary" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/basissystemrequirementdiagram-page.js"></script>
+</body>
+</html>

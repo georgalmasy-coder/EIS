@@ -1,0 +1,137 @@
+<section class="dashboard-view-page" data-view="system-status">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">System Status</h1>
+            <p class="dashboard-page-description">
+                Technical status for server, JVM, API, database, queue, disk, memory and response time.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">▣</div>
+            <div class="dashboard-kpi-label">CPU</div>
+            <div class="dashboard-kpi-help">System CPU load</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="cpu">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="cpu"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">▦</div>
+            <div class="dashboard-kpi-label">Memory</div>
+            <div class="dashboard-kpi-help">JVM memory usage</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="memory">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="memory"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">▰</div>
+            <div class="dashboard-kpi-label">Disk</div>
+            <div class="dashboard-kpi-help">Server disk usage</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="disk">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="disk"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">↔</div>
+            <div class="dashboard-kpi-label">Response</div>
+            <div class="dashboard-kpi-help">Dashboard API response</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="response">—</span><span class="dashboard-kpi-unit">ms</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="response"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✓</div>
+            <div class="dashboard-kpi-label">Availability</div>
+            <div class="dashboard-kpi-help">Current uptime score</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="availability">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="availability"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Memory Details</h2>
+                <span class="dashboard-card-subtitle">Committed / limit / available / used</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="memoryDetails"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+
+            <div class="dashboard-legend" style="margin-top: 12px;">
+                <div class="dashboard-legend-item">
+                    <span class="dashboard-legend-swatch" style="background:#2f9cff"></span>
+                    <span>Committed GB</span>
+                </div>
+                <div class="dashboard-legend-item">
+                    <span class="dashboard-legend-swatch" style="background:#84d64b"></span>
+                    <span>Limit GB</span>
+                </div>
+                <div class="dashboard-legend-item">
+                    <span class="dashboard-legend-swatch" style="background:#f7c948"></span>
+                    <span>Available GB</span>
+                </div>
+                <div class="dashboard-legend-item">
+                    <span class="dashboard-legend-swatch" style="background:#ef4444"></span>
+                    <span>Used GB</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Service Health</h2>
+                <span class="dashboard-card-subtitle">Current technical status</span>
+            </div>
+
+            <div class="dashboard-status-list">
+                <div class="dashboard-status-row">
+                    <span class="dashboard-status-label">API</span>
+                    <strong class="dashboard-status-value" data-field="apiStatus">—</strong>
+                </div>
+
+                <div class="dashboard-status-row">
+                    <span class="dashboard-status-label">Database</span>
+                    <strong class="dashboard-status-value" data-field="databaseStatus">—</strong>
+                </div>
+
+                <div class="dashboard-status-row">
+                    <span class="dashboard-status-label">Queue</span>
+                    <strong class="dashboard-status-value" data-field="queueStatus">—</strong>
+                </div>
+
+                <div class="dashboard-status-row">
+                    <span class="dashboard-status-label">Open incidents</span>
+                    <strong class="dashboard-status-value" data-field="incidentCount">—</strong>
+                </div>
+            </div>
+        </article>
+    </section>
+</section>

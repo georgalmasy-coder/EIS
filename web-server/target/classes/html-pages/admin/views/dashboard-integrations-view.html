@@ -1,0 +1,137 @@
+<section class="dashboard-view-page" data-view="integrations">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">Integrations</h1>
+            <p class="dashboard-page-description">
+                External service status, latency, success rate, failure rate and dependency overview.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">CVR</div>
+            <div class="dashboard-kpi-label">Virk.dk / CVR</div>
+            <div class="dashboard-kpi-help">Company lookup integration</div>
+            <div class="dashboard-kpi-value" data-field="virkStatus">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="virkHealth"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✉</div>
+            <div class="dashboard-kpi-label">Email</div>
+            <div class="dashboard-kpi-help">Email provider status</div>
+            <div class="dashboard-kpi-value" data-field="emailStatus">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="emailHealth"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon"></div>
+            <div class="dashboard-kpi-label">Payment</div>
+            <div class="dashboard-kpi-help">Payment provider status</div>
+            <div class="dashboard-kpi-value" data-field="paymentStatus">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="paymentHealthScore"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">SSO</div>
+            <div class="dashboard-kpi-label">SSO</div>
+            <div class="dashboard-kpi-help">Login provider status</div>
+            <div class="dashboard-kpi-value" data-field="ssoStatus">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="ssoHealth"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">API</div>
+            <div class="dashboard-kpi-label">External APIs</div>
+            <div class="dashboard-kpi-help">Aggregated external API status</div>
+            <div class="dashboard-kpi-value" data-field="externalApiStatus">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="externalApiHealth"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Integration Latency</h2>
+                <span class="dashboard-card-subtitle">Latency trend in milliseconds</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="latency"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Success / Failure</h2>
+                <span class="dashboard-card-subtitle">External call distribution</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="successFailure"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Integration success failure donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="successFailure"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Integration Status</h2>
+                <span class="dashboard-card-subtitle">External service health</span>
+            </div>
+
+            <div class="dashboard-status-list" data-list="integrationStatus"></div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Call Volume</h2>
+                <span class="dashboard-card-subtitle">External calls by integration</span>
+            </div>
+
+            <div class="dashboard-status-list" data-list="callVolume"></div>
+        </article>
+    </section>
+
+    <article class="dashboard-card dashboard-card-pad">
+        <div class="dashboard-card-header">
+            <h2 class="dashboard-card-title">Recent Integration Events</h2>
+            <span class="dashboard-card-subtitle">Latest external service events</span>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Integration</th>
+                <th>Operation</th>
+                <th>Latency</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody data-table="integrationEvents"></tbody>
+        </table>
+    </article>
+</section>

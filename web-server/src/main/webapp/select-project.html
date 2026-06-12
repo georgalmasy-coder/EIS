@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Select project</title>
+    <link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+<main class="card">
+    <h1>Select project</h1>
+
+    <form id="selectProjectForm" autocomplete="off" novalidate>
+        <label>
+            Customer
+            <select id="customerSelect" name="customerId" required></select>
+        </label>
+
+        <label>
+            Project
+            <select id="projectSelect" name="projectId" required></select>
+        </label>
+
+        <button type="submit" id="selectProjectBtn" disabled>Select project</button>
+
+        <p id="error" class="error" role="alert" aria-live="polite"></p>
+    </form>
+</main>
+
+<script src="js/selectproject.js"></script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+html,
+body{
+    min-height: 100%;
+}
+
+body.stakeholderrequirement-main-document{
+    overflow: hidden;
+}
+
+.stakeholderrequirement-main-app{
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-main-content{
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.stakeholderrequirement-main-topbar{
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.stakeholderrequirement-main-layout{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-main-section-header{
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.stakeholderrequirement-main-section-header h2{
+    margin: 0;
+    min-width: 0;
+}
+
+.stakeholderrequirement-view-switcher{
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.stakeholderrequirement-view-button{
+    width: 42px;
+    height: 38px;
+    min-width: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .08s ease;
+}
+
+.stakeholderrequirement-view-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.stakeholderrequirement-view-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.stakeholderrequirement-view-button:active{
+    transform: translateY(1px);
+}
+
+.stakeholderrequirement-view-button.is-active,
+.stakeholderrequirement-view-button[aria-pressed="true"]{
+    background: rgba(96,165,250,.22);
+    border-color: rgba(96,165,250,.70);
+    color: #bfdbfe;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.16);
+}
+
+/*
+ * Hidden for now.
+ * Remove this rule later if count/current-view information should be visible again.
+ */
+.stakeholderrequirement-main-info-bar{
+    display: none;
+}
+
+.stakeholderrequirement-main-info-item{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.stakeholderrequirement-main-info-label{
+    color: var(--muted);
+}
+
+.stakeholderrequirement-main-info-item strong{
+    color: var(--text);
+}
+
+.stakeholderrequirement-main-toolbar{
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.stakeholderrequirement-filter-group{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+
+.stakeholderrequirement-action-group{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.stakeholderrequirement-search-filter{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(420px, 100%);
+    flex: 0 1 520px;
+}
+
+.stakeholderrequirement-filter-label{
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.stakeholderrequirement-search-box{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 220px;
+}
+
+.stakeholderrequirement-search-input{
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 34px 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.stakeholderrequirement-search-input:focus{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+
+.stakeholderrequirement-search-icon{
+    position: absolute;
+    right: 11px;
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.stakeholderrequirement-active-filter{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 13px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.stakeholderrequirement-active-filter input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.stakeholderrequirement-secondary-button{
+    min-height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    padding: 7px 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.stakeholderrequirement-secondary-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.stakeholderrequirement-icon-button{
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+/*
+ * Important:
+ * The icon buttons use display:inline-flex.
+ * Without this rule, the class display value can override the HTML hidden attribute,
+ * causing list-only and diagram-only action buttons to be visible at the same time.
+ */
+.stakeholderrequirement-icon-button[hidden],
+.stakeholderrequirement-list-action[hidden],
+.stakeholderrequirement-diagram-action[hidden],
+.stakeholderrequirement-action-group [hidden]{
+    display: none !important;
+}
+
+.stakeholderrequirement-icon-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.stakeholderrequirement-icon-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.stakeholderrequirement-icon-button:active{
+    transform: translateY(1px);
+}
+
+.stakeholderrequirement-help-button{
+    color: var(--text);
+}
+
+.stakeholderrequirement-help-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.stakeholderrequirement-pdf-button svg{
+    width: 27px;
+    height: 27px;
+    fill: none;
+}
+
+.stakeholderrequirement-pdf-button svg rect{
+    fill: currentColor;
+}
+
+.stakeholderrequirement-pdf-button svg text{
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: .25px;
+    dominant-baseline: auto;
+}
+
+.stakeholderrequirement-main-body{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-view-panel{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-view-panel.is-active{
+    display: flex;
+    flex-direction: column;
+}
+
+.stakeholderrequirement-list-frame{
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-list-scroll{
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.page-table,
+.stakeholderrequirement-table{
+    width: 100%;
+    min-width: 1420px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.stakeholderrequirement-table th{
+    white-space: nowrap;
+}
+
+.stakeholderrequirement-table td{
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    vertical-align: top;
+}
+
+.stakeholderrequirement-table thead th{
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.stakeholderrequirement-table tbody tr{
+    cursor: default;
+}
+
+.stakeholderrequirement-table tbody tr[data-entity-id]{
+    cursor: pointer;
+}
+
+.stakeholderrequirement-table tbody tr[data-entity-id]:hover{
+    background: rgba(96,165,250,.08);
+}
+
+.stakeholderrequirement-resizable-th{
+    position: sticky;
+}
+
+.stakeholderrequirement-resizable-th .sort{
+    padding-right: 10px;
+}
+
+.stakeholderrequirement-column-resizer{
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+    z-index: 8;
+}
+
+.stakeholderrequirement-column-resizer::after{
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 3px;
+    width: 1px;
+    background: rgba(148,163,184,.35);
+}
+
+.stakeholderrequirement-column-resizer:hover::after{
+    background: rgba(96,165,250,.85);
+}
+
+body.stakeholderrequirement-column-resizing{
+    cursor: col-resize;
+    user-select: none;
+}
+
+body.stakeholderrequirement-column-resizing *{
+    cursor: col-resize !important;
+}
+
+.stakeholderrequirement-active-state{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 26px;
+}
+
+.stakeholderrequirement-active-dot{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 1px solid rgba(148,163,184,.55);
+}
+
+.stakeholderrequirement-active-dot.is-active{
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148,163,184,.12);
+}
+
+.stakeholderrequirement-active-dot.is-inactive{
+    background: #ef4444;
+    border-color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.14);
+}
+
+.stakeholderrequirement-empty{
+    color: var(--muted);
+    padding: 16px;
+    font-size: 13px;
+}
+
+.stakeholderrequirement-diagram-frame{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background:
+            radial-gradient(circle at top left, rgba(96,165,250,.10), transparent 34%),
+            rgba(15,23,42,.35);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.stakeholderrequirement-diagram-canvas{
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.stakeholderrequirement-horizontal-diagram-canvas{
+    min-width: 1400px;
+}
+
+.stakeholderrequirement-vertical-diagram-canvas{
+    min-width: 1100px;
+}
+
+.stakeholderrequirement-diagram-svg{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.stakeholderrequirement-diagram-nodes{
+    position: relative;
+    z-index: 2;
+}
+
+.stakeholderrequirement-diagram-node{
+    position: absolute;
+    width: 260px;
+    min-height: 120px;
+    border: 1px solid rgba(148,163,184,.35);
+    border-radius: 14px;
+    background: rgba(15,23,42,.88);
+    color: var(--text);
+    box-shadow: 0 14px 32px rgba(0,0,0,.24);
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+}
+
+.stakeholderrequirement-diagram-node:hover{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 18px 40px rgba(0,0,0,.30), 0 0 0 3px rgba(96,165,250,.14);
+}
+
+.stakeholderrequirement-diagram-node.is-project-node{
+    cursor: default;
+    background:
+            linear-gradient(135deg, rgba(96,165,250,.18), rgba(15,23,42,.88)),
+            rgba(15,23,42,.88);
+    border-color: rgba(96,165,250,.55);
+}
+
+.stakeholderrequirement-diagram-node-head{
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid rgba(148,163,184,.22);
+}
+
+.stakeholderrequirement-diagram-node-code{
+    font-size: 12px;
+    color: #bfdbfe;
+    font-weight: 700;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+}
+
+.stakeholderrequirement-diagram-node-title{
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.stakeholderrequirement-diagram-node-body{
+    padding: 9px 12px 12px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--muted);
+    max-height: 96px;
+    overflow: hidden;
+}
+
+.stakeholderrequirement-diagram-edge{
+    stroke: rgba(148,163,184,.55);
+    stroke-width: 1.6;
+    fill: none;
+}
+
+.stakeholderrequirement-diagram-edge-highlight{
+    stroke: rgba(96,165,250,.85);
+    stroke-width: 2.1;
+}
+
+.stakeholderrequirement-context-menu{
+    position: fixed;
+    z-index: 2000;
+    min-width: 250px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(15,23,42,.97);
+    box-shadow: 0 20px 45px rgba(0,0,0,.36);
+    display: none;
+}
+
+.stakeholderrequirement-context-menu.is-open{
+    display: grid;
+    gap: 4px;
+}
+
+.stakeholderrequirement-context-menu button{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.stakeholderrequirement-context-menu button:hover{
+    background: rgba(96,165,250,.16);
+}
+
+.stakeholderrequirement-context-menu button[hidden]{
+    display: none !important;
+}
+
+@media (max-width: 1100px){
+    .stakeholderrequirement-main-content{
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .stakeholderrequirement-main-layout{
+        padding: 12px;
+    }
+
+    .stakeholderrequirement-main-section-header{
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .stakeholderrequirement-main-toolbar{
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .stakeholderrequirement-filter-group{
+        gap: 8px;
+    }
+
+    .page-table,
+    .stakeholderrequirement-table{
+        min-width: 1320px;
+    }
+}
+
+@media (max-width: 900px){
+    .stakeholderrequirement-main-section-header{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stakeholderrequirement-view-switcher{
+        justify-content: flex-start;
+    }
+
+    .stakeholderrequirement-main-toolbar{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stakeholderrequirement-filter-group{
+        width: 100%;
+    }
+
+    .stakeholderrequirement-search-filter{
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .stakeholderrequirement-search-box{
+        min-width: 0;
+    }
+
+    .stakeholderrequirement-action-group{
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 700px){
+    .stakeholderrequirement-main-content{
+        padding: 8px;
+    }
+
+    .stakeholderrequirement-main-layout{
+        padding: 10px;
+    }
+
+    .stakeholderrequirement-filter-group{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stakeholderrequirement-active-filter{
+        justify-content: flex-start;
+    }
+
+    .stakeholderrequirement-secondary-button{
+        width: 100%;
+    }
+
+    .stakeholderrequirement-action-group{
+        width: 100%;
+    }
+
+    .stakeholderrequirement-icon-button,
+    .stakeholderrequirement-view-button{
+        width: 40px;
+        min-width: 40px;
+        height: 38px;
+    }
+
+    .page-table,
+    .stakeholderrequirement-table{
+        min-width: 1220px;
+    }
+
+    .stakeholderrequirement-horizontal-diagram-canvas,
+    .stakeholderrequirement-vertical-diagram-canvas{
+        min-width: 900px;
+    }
+}

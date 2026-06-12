@@ -1,0 +1,539 @@
+:root {
+    --systemrequirementdiagram-border-color: #c9d2df;
+    --systemrequirementdiagram-header-bg: #eef3f8;
+    --systemrequirementdiagram-canvas-bg: #202040;
+    --systemrequirementdiagram-node-bg: #3f3f46;
+    --systemrequirementdiagram-node-border: #565f73;
+    --systemrequirementdiagram-node-text: #ffffff;
+    --systemrequirementdiagram-connection: #aeb8c8;
+    --systemrequirementdiagram-blue: #1976d2;
+    --systemrequirementdiagram-text: #1f2937;
+    --systemrequirementdiagram-muted-text: #64748b;
+}
+
+html,
+body.systemrequirementdiagram-document {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-app {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-topbar {
+    flex: 0 0 auto;
+}
+
+.systemrequirementdiagram-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-section-header {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+}
+
+.systemrequirementdiagram-section-header h2 {
+    margin-bottom: 0;
+}
+
+.systemrequirementdiagram-info-bar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.35rem 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: #f8fafc;
+    font-size: 0.875rem;
+}
+
+.systemrequirementdiagram-info-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #243447;
+    white-space: nowrap;
+}
+
+.systemrequirementdiagram-info-label {
+    color: #526273;
+}
+
+.systemrequirementdiagram-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.systemrequirementdiagram-legend-title {
+    color: #526273;
+    font-weight: 700;
+}
+
+.systemrequirementdiagram-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.systemrequirementdiagram-legend-swatch {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--systemrequirementdiagram-border-color);
+    border-radius: 0.15rem;
+}
+
+.systemrequirementdiagram-toolbar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    font-size: 0.9rem;
+}
+
+.systemrequirementdiagram-search-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--systemrequirementdiagram-text);
+    white-space: nowrap;
+}
+
+.systemrequirementdiagram-search-label {
+    color: #526273;
+    font-weight: 600;
+}
+
+.systemrequirementdiagram-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.systemrequirementdiagram-search-input {
+    width: min(380px, 42vw);
+    min-width: 250px;
+    border: 1px solid var(--systemrequirementdiagram-border-color);
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: var(--systemrequirementdiagram-text);
+    padding: 0.38rem 2rem 0.38rem 0.6rem;
+    font: inherit;
+}
+
+.systemrequirementdiagram-search-input:focus {
+    border-color: var(--systemrequirementdiagram-blue);
+    outline: 3px solid rgba(25, 118, 210, 0.16);
+    outline-offset: 1px;
+}
+
+.systemrequirementdiagram-search-icon {
+    position: absolute;
+    right: 0.65rem;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.systemrequirementdiagram-secondary-button {
+    border: 1px solid var(--systemrequirementdiagram-border-color);
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: var(--systemrequirementdiagram-text);
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+}
+
+.systemrequirementdiagram-secondary-button:hover {
+    background: #f1f5f9;
+}
+
+.systemrequirementdiagram-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+.systemrequirementdiagram-frame {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--systemrequirementdiagram-border-color);
+    border-radius: 0.35rem;
+    background: var(--systemrequirementdiagram-canvas-bg);
+}
+
+.systemrequirementdiagram-canvas {
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    background:
+            radial-gradient(circle at 20px 20px, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            var(--systemrequirementdiagram-canvas-bg);
+    background-size: 28px 28px;
+}
+
+.systemrequirementdiagram-svg {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.systemrequirementdiagram-connection {
+    fill: none;
+    stroke: var(--systemrequirementdiagram-connection);
+    stroke-width: 1.4;
+    opacity: 0.9;
+}
+
+.systemrequirementdiagram-nodes {
+    position: absolute;
+    inset: 0;
+}
+
+.systemrequirementdiagram-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    padding: 0;
+    border: 1px solid var(--systemrequirementdiagram-node-border);
+    border-radius: 0.18rem;
+    background: var(--systemrequirementdiagram-node-bg);
+    color: var(--systemrequirementdiagram-node-text);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-requirement-node {
+    cursor: pointer;
+    transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease,
+            filter 120ms ease;
+}
+
+.systemrequirementdiagram-requirement-node:hover {
+    transform: translateY(-2px);
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
+    filter: brightness(1.08);
+}
+
+.systemrequirementdiagram-project-node {
+    background: #4b5563;
+    border-color: #7c8798;
+    cursor: default;
+}
+
+.systemrequirementdiagram-node-code {
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.25rem 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: left;
+}
+
+.systemrequirementdiagram-node-name {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.22;
+    overflow: hidden;
+}
+
+.systemrequirementdiagram-node-footer {
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.24rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-new .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-new {
+    background: #2563eb;
+}
+
+.status-changed .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-changed {
+    background: #f97316;
+}
+
+.status-validated .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-validated {
+    background: #0891b2;
+}
+
+.status-approved .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-approved {
+    background: #16a34a;
+}
+
+.status-deprecated .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-deprecated {
+    background: #7f1d1d;
+}
+
+.status-potential-duplicate .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-potential-duplicate {
+    background: #9333ea;
+}
+
+.status-incomplete .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-incomplete {
+    background: #dc2626;
+}
+
+.status-sample .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-sample {
+    background: #64748b;
+}
+
+.status-out-of-scope .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-out-of-scope {
+    background: #a16207;
+}
+
+.status-unknown .systemrequirementdiagram-node-footer,
+.systemrequirementdiagram-legend-swatch.status-unknown {
+    background: #475569;
+}
+
+.systemrequirementdiagram-project-node .systemrequirementdiagram-node-footer {
+    background: #6d28d9;
+}
+
+.systemrequirementdiagram-empty {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.88);
+    color: #526273;
+    font-size: 0.95rem;
+}
+
+.systemrequirementdiagram-empty.is-visible {
+    display: flex;
+}
+
+.systemrequirementdiagram-dialog {
+    width: min(720px, calc(100vw - 2rem));
+    border: 1px solid var(--systemrequirementdiagram-border-color);
+    border-radius: 0.6rem;
+    padding: 0;
+    color: var(--systemrequirementdiagram-text);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);
+}
+
+.systemrequirementdiagram-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.systemrequirementdiagram-dialog-form {
+    display: flex;
+    flex-direction: column;
+    max-height: min(760px, calc(100vh - 2rem));
+    margin: 0;
+    background: #ffffff;
+}
+
+.systemrequirementdiagram-dialog-head {
+    flex: 0 0 auto;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--systemrequirementdiagram-border-color);
+    background: var(--systemrequirementdiagram-header-bg);
+}
+
+.systemrequirementdiagram-dialog-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.systemrequirementdiagram-dialog-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 1rem;
+}
+
+.systemrequirementdiagram-dialog-field {
+    margin-bottom: 1rem;
+}
+
+.systemrequirementdiagram-dialog-label {
+    margin-bottom: 0.25rem;
+    color: var(--systemrequirementdiagram-muted-text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.systemrequirementdiagram-dialog-value {
+    color: var(--systemrequirementdiagram-text);
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.systemrequirementdiagram-dialog-description {
+    padding: 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.4rem;
+    background: #f8fafc;
+}
+
+.systemrequirementdiagram-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--systemrequirementdiagram-border-color);
+    background: #f8fafc;
+}
+
+.systemrequirementdiagram-dialog-footer .primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.5rem;
+    border: 1px solid #0f5fa8;
+    border-radius: 0.35rem;
+    background: #1976d2;
+    color: #ffffff;
+    padding: 0.45rem 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.16);
+}
+
+.systemrequirementdiagram-dialog-footer .primary:hover {
+    background: #1565c0;
+    border-color: #0d5595;
+}
+
+.systemrequirementdiagram-context-menu {
+    position: fixed;
+    z-index: 3000;
+    display: none;
+    min-width: 180px;
+    padding: 0.35rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.45rem;
+    background: #ffffff;
+    color: #1f2937;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+}
+
+.systemrequirementdiagram-context-menu.is-visible {
+    display: block;
+}
+
+.systemrequirementdiagram-context-menu button {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0.3rem;
+    background: transparent;
+    color: inherit;
+    padding: 0.45rem 0.65rem;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.systemrequirementdiagram-context-menu button:hover,
+.systemrequirementdiagram-context-menu button:focus {
+    background: #eff6ff;
+    color: #0f172a;
+    outline: none;
+}
+
+.systemrequirementdiagram-context-menu button:active {
+    background: #dbeafe;
+}
+
+.systemrequirementdiagram-context-menu button[hidden] {
+    display: none;
+}
+
+body.systemrequirementdiagram-document .left-hover-zone {
+    z-index: 1000;
+}
+
+body.systemrequirementdiagram-document .side-menu {
+    z-index: 1001;
+}
+
+@media (max-width: 720px) {
+    .systemrequirementdiagram-legend {
+        margin-left: 0;
+    }
+
+    .systemrequirementdiagram-search-input {
+        width: 100%;
+        min-width: 180px;
+    }
+}

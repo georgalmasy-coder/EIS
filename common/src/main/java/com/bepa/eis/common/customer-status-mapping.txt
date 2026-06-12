@@ -1,0 +1,112 @@
+CUSTOMER STATUS / MODULE STATUS / PAYMENT METHOD STATUS MAPPING
+===============================================================
+
+This file documents the integer status values used by the customer-related
+database tables.
+
+The Java enums are the source of the semantic meaning, while the database stores
+integer values.
+
+
+CUSTOMER.CustomerStatus
+-----------------------
+
+1  CREATED
+   Customer has been created, but onboarding has not yet started.
+
+2  PENDING_CONFIRMATION
+   Customer must confirm account creation before access is enabled.
+
+3  TRIAL_ACTIVE
+   Customer is in the trial period and access is allowed.
+
+4  PENDING_SUBSCRIPTION_CONFIRMATION
+   Customer must confirm continuation of the subscription.
+
+5  PAYMENT_PENDING
+   Payment has been requested and the system is waiting for payment confirmation.
+
+6  SUBSCRIPTION_ACTIVE
+   Customer has an active subscription and access is allowed.
+
+7  SUBSCRIPTION_EXPIRING
+   Customer subscription is close to expiry.
+
+8  PAYMENT_OVERDUE
+   Payment is overdue, but customer may still be inside the grace period.
+
+9  SUSPENDED
+   Customer is suspended and access is not allowed.
+
+10 CANCELLED
+   Customer has been cancelled.
+
+
+CUSTOMER_MODULE.CustomerModuleStatus
+------------------------------------
+
+1  ACTIVE
+   Customer module is active.
+
+2  TRIAL
+   Customer module is active during trial period.
+
+3  SUSPENDED
+   Customer module has been suspended.
+
+4  CANCELLED
+   Customer module has been cancelled.
+
+5  EXPIRED
+   Customer module has expired.
+
+
+CUSTOMER_PAYMENT_METHOD.PaymentMethodStatus
+-------------------------------------------
+
+1  ACTIVE
+   Payment method is active and can be used for payments.
+
+2  EXPIRED
+   Payment method has expired and should not be used.
+
+3  DISABLED
+   Payment method has been disabled and should not be used.
+
+4  DELETED
+   Payment method has been deleted or removed from active use.
+
+
+IMPORTANT DESIGN RULES
+======================
+
+1. CUSTOMER.CustomerStatus is the primary source of truth for customer access.
+
+2. Do not reintroduce separate Active or Suspended columns on CUSTOMER.
+
+3. Login/access checks must be based on CUSTOMER.CustomerStatus.
+
+4. CUSTOMER history is handled by:
+   - CustomerPK as technical primary key
+   - CustomerId as logical customer id
+   - Version as record version
+   - Latest = 1 for current version
+   - Latest = 0 for historical versions
+
+5. When updating CUSTOMER:
+   - set Latest = 0 on the current row
+   - insert a new row with same CustomerId
+   - increment Version
+   - set Latest = 1 on the new row
+
+6. Payment card CVC and full card number must never be stored.
+
+7. CUSTOMER_PAYMENT_METHOD may store:
+   - cardholder name
+   - card brand
+   - masked card number
+   - expiry month/year
+   - payment provider reference
+
+8. USERS table will later be used for administrator user creation.
+   No CUSTOMER_ADMIN_USER table is used.

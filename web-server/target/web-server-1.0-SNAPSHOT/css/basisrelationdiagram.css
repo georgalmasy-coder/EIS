@@ -1,0 +1,553 @@
+:root {
+    --relationdiagram-border-color: #c9d2df;
+    --relationdiagram-header-bg: #eef3f8;
+    --relationdiagram-panel-bg: #ffffff;
+    --relationdiagram-list-bg: #f8fafc;
+    --relationdiagram-card-bg: #ffffff;
+    --relationdiagram-card-hover-bg: #eff6ff;
+    --relationdiagram-card-active-bg: #dbeafe;
+    --relationdiagram-card-related-bg: #dcfce7;
+    --relationdiagram-card-muted-opacity: 0.35;
+
+    --relationdiagram-line-normal: #6b7280;
+    --relationdiagram-line-muted: #e5e7eb;
+    --relationdiagram-line-active: #1976d2;
+
+    --relationdiagram-text: #1f2937;
+    --relationdiagram-muted-text: #64748b;
+    --relationdiagram-blue: #1976d2;
+    --relationdiagram-green: #16a34a;
+}
+
+html,
+body.relationdiagram-document {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.relationdiagram-app {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+.relationdiagram-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.relationdiagram-topbar {
+    flex: 0 0 auto;
+}
+
+.relationdiagram-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.relationdiagram-section-header {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+}
+
+.relationdiagram-section-header h2 {
+    margin-bottom: 0;
+}
+
+.relationdiagram-info-bar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.35rem 0.75rem;
+    margin-top: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: #f8fafc;
+    font-size: 0.875rem;
+}
+
+.relationdiagram-info-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #243447;
+    white-space: nowrap;
+}
+
+.relationdiagram-info-label {
+    color: #526273;
+}
+
+.relationdiagram-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.relationdiagram-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.relationdiagram-legend-swatch {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.15rem;
+}
+
+.relationdiagram-legend-swatch-normal {
+    background: var(--relationdiagram-line-normal);
+}
+
+.relationdiagram-legend-swatch-active {
+    background: var(--relationdiagram-line-active);
+}
+
+.relationdiagram-legend-swatch-selected {
+    background: var(--relationdiagram-card-active-bg);
+}
+
+.relationdiagram-filter-bar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    font-size: 0.9rem;
+}
+
+.relationdiagram-filter-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--relationdiagram-text);
+    cursor: pointer;
+    user-select: none;
+}
+
+.relationdiagram-filter-option input {
+    cursor: pointer;
+}
+
+.relationdiagram-search-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--relationdiagram-text);
+    white-space: nowrap;
+}
+
+.relationdiagram-search-label {
+    color: #526273;
+    font-weight: 600;
+}
+
+.relationdiagram-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.relationdiagram-search-input {
+    width: min(320px, 32vw);
+    min-width: 230px;
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: var(--relationdiagram-text);
+    padding: 0.38rem 2rem 0.38rem 0.6rem;
+    font: inherit;
+}
+
+.relationdiagram-search-input:focus {
+    border-color: var(--relationdiagram-blue);
+    outline: 3px solid rgba(25, 118, 210, 0.16);
+    outline-offset: 1px;
+}
+
+.relationdiagram-search-icon {
+    position: absolute;
+    right: 0.65rem;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.relationdiagram-secondary-button {
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: var(--relationdiagram-text);
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+}
+
+.relationdiagram-secondary-button:hover {
+    background: #f1f5f9;
+}
+
+.relationdiagram-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+.relationdiagram-frame {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(160px, 260px) minmax(260px, 1fr);
+    gap: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.35rem;
+    background: var(--relationdiagram-panel-bg);
+}
+
+.relationdiagram-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    background: var(--relationdiagram-list-bg);
+}
+
+.relationdiagram-column-left {
+    border-right: 1px solid var(--relationdiagram-border-color);
+}
+
+.relationdiagram-column-right {
+    border-left: 1px solid var(--relationdiagram-border-color);
+}
+
+.relationdiagram-column-header {
+    flex: 0 0 auto;
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid var(--relationdiagram-border-color);
+    background: var(--relationdiagram-header-bg);
+    color: #1f2937;
+    font-weight: 800;
+    letter-spacing: 0.015em;
+}
+
+.relationdiagram-list {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 0.65rem;
+}
+
+.relationdiagram-requirement-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0 0 0.55rem 0;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid #d5deea;
+    border-left: 4px solid #94a3b8;
+    border-radius: 0.45rem;
+    background: var(--relationdiagram-card-bg);
+    color: var(--relationdiagram-text);
+    text-align: left;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition:
+            background-color 120ms ease,
+            border-color 120ms ease,
+            opacity 120ms ease,
+            box-shadow 120ms ease,
+            transform 120ms ease;
+}
+
+.relationdiagram-requirement-card:hover {
+    background: var(--relationdiagram-card-hover-bg);
+    border-color: #93c5fd;
+    box-shadow: 0 2px 7px rgba(25, 118, 210, 0.16);
+}
+
+.relationdiagram-requirement-card.is-selected {
+    background: var(--relationdiagram-card-active-bg);
+    border-color: var(--relationdiagram-blue);
+    border-left-color: var(--relationdiagram-blue);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.22);
+}
+
+.relationdiagram-requirement-card.is-related {
+    background: var(--relationdiagram-card-related-bg);
+    border-color: #86efac;
+    border-left-color: var(--relationdiagram-green);
+}
+
+.relationdiagram-requirement-card.is-muted {
+    opacity: var(--relationdiagram-card-muted-opacity);
+}
+
+.relationdiagram-requirement-card.is-hidden-by-filter {
+    display: none;
+}
+
+.relationdiagram-requirement-code {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.92rem;
+    line-height: 1.15;
+}
+
+.relationdiagram-requirement-name {
+    display: -webkit-box;
+    color: #334155;
+    font-size: 0.86rem;
+    line-height: 1.22;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.relationdiagram-canvas-wrap {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background:
+            linear-gradient(90deg, rgba(248, 250, 252, 0.88), rgba(255, 255, 255, 1), rgba(248, 250, 252, 0.88));
+}
+
+.relationdiagram-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.relationdiagram-line {
+    stroke: var(--relationdiagram-line-normal);
+    stroke-width: 1.8;
+    opacity: 0.9;
+    fill: none;
+    transition:
+            stroke 120ms ease,
+            stroke-width 120ms ease,
+            opacity 120ms ease;
+}
+
+.relationdiagram-line.is-muted {
+    stroke: var(--relationdiagram-line-muted);
+    stroke-width: 1;
+    opacity: 0.18;
+}
+
+.relationdiagram-line.is-active {
+    stroke: var(--relationdiagram-line-active);
+    stroke-width: 3;
+    opacity: 1;
+}
+
+.relationdiagram-empty {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.88);
+    color: #526273;
+    font-size: 0.95rem;
+}
+
+.relationdiagram-empty.is-visible {
+    display: flex;
+}
+
+.relationdiagram-dialog {
+    width: min(720px, calc(100vw - 2rem));
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.6rem;
+    padding: 0;
+    color: var(--relationdiagram-text);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);
+}
+
+.relationdiagram-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.relationdiagram-dialog-form {
+    display: flex;
+    flex-direction: column;
+    max-height: min(760px, calc(100vh - 2rem));
+    margin: 0;
+    background: #ffffff;
+}
+
+.relationdiagram-dialog-head {
+    flex: 0 0 auto;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--relationdiagram-border-color);
+    background: var(--relationdiagram-header-bg);
+}
+
+.relationdiagram-dialog-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.relationdiagram-dialog-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 1rem;
+}
+
+.relationdiagram-dialog-field {
+    margin-bottom: 1rem;
+}
+
+.relationdiagram-dialog-label {
+    margin-bottom: 0.25rem;
+    color: var(--relationdiagram-muted-text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.relationdiagram-dialog-value {
+    color: var(--relationdiagram-text);
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.relationdiagram-dialog-description {
+    padding: 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.4rem;
+    background: #f8fafc;
+}
+
+.relationdiagram-related-list {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.relationdiagram-related-list li {
+    margin-bottom: 0.35rem;
+}
+
+.relationdiagram-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--relationdiagram-border-color);
+    background: #f8fafc;
+}
+
+.relationdiagram-dialog-footer .primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.5rem;
+    border: 1px solid #0f5fa8;
+    border-radius: 0.35rem;
+    background: #1976d2;
+    color: #ffffff;
+    padding: 0.45rem 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.16);
+}
+
+.relationdiagram-dialog-footer .primary:hover {
+    background: #1565c0;
+    border-color: #0d5595;
+}
+
+.relationdiagram-dialog-footer .primary:active {
+    background: #0f5fa8;
+    border-color: #0b4f8a;
+}
+
+.relationdiagram-dialog-footer .primary:focus-visible {
+    outline: 3px solid rgba(25, 118, 210, 0.28);
+    outline-offset: 2px;
+}
+
+body.relationdiagram-document .left-hover-zone {
+    z-index: 1000;
+}
+
+body.relationdiagram-document .side-menu {
+    z-index: 1001;
+}
+
+@media (max-width: 1000px) {
+    .relationdiagram-frame {
+        grid-template-columns: minmax(220px, 1fr) minmax(110px, 170px) minmax(220px, 1fr);
+    }
+
+    .relationdiagram-legend {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    .relationdiagram-frame {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(220px, 1fr) 90px minmax(220px, 1fr);
+    }
+
+    .relationdiagram-column-left {
+        border-right: none;
+        border-bottom: 1px solid var(--relationdiagram-border-color);
+    }
+
+    .relationdiagram-column-right {
+        border-left: none;
+        border-top: 1px solid var(--relationdiagram-border-color);
+    }
+
+    .relationdiagram-search-input {
+        width: 100%;
+        min-width: 180px;
+    }
+}

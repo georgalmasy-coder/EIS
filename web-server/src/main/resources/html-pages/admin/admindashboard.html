@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>Admin Dashboard | BEPA EIS</title>
+
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/menu.css">
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+</head>
+
+<body>
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false">
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<div class="admin-dashboard-shell">
+    <header class="admin-dashboard-header">
+        <div class="admin-dashboard-brand">
+            <div class="admin-dashboard-title">BEPA EIS Admin</div>
+            <div class="admin-dashboard-subtitle">System monitoring and administration dashboard</div>
+        </div>
+
+        <div class="admin-dashboard-header-actions">
+            <span class="admin-dashboard-status">
+                View: <strong id="activeViewTitle">Overview</strong>
+            </span>
+            <span class="admin-dashboard-status">
+                Data: <strong id="loadStatus">Idle</strong>
+            </span>
+            <span class="admin-dashboard-status">
+                Last refresh: <strong id="lastRefresh">—</strong>
+            </span>
+            <button id="refreshButton" class="admin-dashboard-icon-button" type="button" title="Refresh active view" aria-label="Refresh active view">
+                ↻
+            </button>
+        </div>
+    </header>
+
+    <nav class="admin-dashboard-tabs" aria-label="Admin dashboard views">
+        <button class="admin-dashboard-tab is-active" type="button" data-dashboard-view="overview">Overview</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="system-status">System Status</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="customers">Customers</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="users">Users</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="customer-creation">Customer Creation</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="subscriptions-payments">Subscriptions & Payments</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="alerts">Alerts</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="integrations">Integrations</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="modules">Modules</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="performance">Performance</button>
+        <button class="admin-dashboard-tab" type="button" data-dashboard-view="audit-security">Audit & Security</button>
+    </nav>
+
+    <main class="admin-dashboard-main">
+        <section id="dashboardView" class="admin-dashboard-view" aria-live="polite">
+            <div class="dashboard-loading-card">Loading dashboard view…</div>
+        </section>
+    </main>
+</div>
+
+<script type="module" src="/js/admin-dashboard/admindashboard.js"></script>
+</body>
+</html>

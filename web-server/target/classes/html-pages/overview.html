@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/pie-chart.css" />
+    <link rel="stylesheet" href="../css/project-fields.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/overview.css" />
+</head>
+
+<body>
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app">
+    <div class="content">
+        <header class="topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="overview-layout" aria-label="Project overview">
+            <section class="panel overview-project" aria-label="Project details">
+                <div id="projectFields" class="details-grid">
+                    <div class="empty">Loading project details…</div>
+                </div>
+            </section>
+
+            <section class="panel overview-irls" aria-label="IRL distribution">
+                <div class="section-header">
+                    <h2>SRL status</h2>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-wrap">
+                        <svg id="irlChart" class="pie-chart" viewBox="0 0 220 220" role="img" aria-label="IRL pie chart">
+                            <circle cx="110" cy="110" r="70" class="pie-chart-track"></circle>
+                            <g id="irlSlices"></g>
+                            <circle cx="110" cy="110" r="25" class="pie-chart-inner"></circle>
+                        </svg>
+                    </div>
+
+                    <div id="irlLegend" class="chart-legend" aria-label="IRL legend">
+                        <div class="empty">No IRL data loaded.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel overview-notifications" aria-label="Notifications">
+                <div class="section-header">
+                    <h2>Notifications</h2>
+                </div>
+
+                <div class="table-frame notifications-frame" aria-label="Notifications frame">
+                    <div class="table-scroll">
+                        <table class="data-table notifications-table" aria-label="Notifications">
+                            <thead id="notificationsHead"></thead>
+                            <tbody id="notificationsBody"></tbody>
+                        </table>
+
+                        <div class="empty" id="notificationsEmpty">Loading notifications…</div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+</main>
+
+<script type="module" src="../js/pages/overview-page.js"></script>
+</body>
+</html>

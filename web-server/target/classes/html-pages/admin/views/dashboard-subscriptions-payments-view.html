@@ -1,0 +1,161 @@
+<section class="dashboard-view-page" data-view="subscriptions-payments">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">Subscriptions & Payments</h1>
+            <p class="dashboard-page-description">
+                Revenue, active subscriptions, failed payments, trials, churn and revenue distribution by module.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">kr</div>
+            <div class="dashboard-kpi-label">MRR</div>
+            <div class="dashboard-kpi-help">Monthly recurring revenue</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="mrr">—</span><span class="dashboard-kpi-unit"> kr.</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="mrr"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">Σ</div>
+            <div class="dashboard-kpi-label">ARR</div>
+            <div class="dashboard-kpi-help">Annual recurring revenue</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="arr">—</span><span class="dashboard-kpi-unit"> kr.</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="arr"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon"></div>
+            <div class="dashboard-kpi-label">Payment Errors</div>
+            <div class="dashboard-kpi-help">Payments requiring action</div>
+            <div class="dashboard-kpi-value" data-field="paymentErrors">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="paymentErrors"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">⏳</div>
+            <div class="dashboard-kpi-label">Trials Expiring</div>
+            <div class="dashboard-kpi-help">Trial periods expiring within 7 days</div>
+            <div class="dashboard-kpi-value" data-field="trialsExpiring">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="trialsExpiring"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">↘</div>
+            <div class="dashboard-kpi-label">Churn</div>
+            <div class="dashboard-kpi-help">Current monthly churn rate</div>
+            <div class="dashboard-kpi-value">
+                <span data-field="churn">—</span><span class="dashboard-kpi-unit">%</span>
+            </div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="churn"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">MRR Trend</h2>
+                <span class="dashboard-card-subtitle">Revenue development</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="mrrTrend"
+                        width="900"
+                        height="320"></canvas>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Revenue by Module</h2>
+                <span class="dashboard-card-subtitle">Basis / Pro / Master</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="revenueByModule"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Revenue by module donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="revenueByModule"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-2">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Subscription Status</h2>
+                <span class="dashboard-card-subtitle">Active / trial / suspended / cancelled</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="subscriptionStatus"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Subscription status donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="subscriptionStatus"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Payment Health</h2>
+                <span class="dashboard-card-subtitle">Successful vs failed payments</span>
+            </div>
+
+            <div class="dashboard-donut-wrap">
+                <svg
+                        class="dashboard-donut"
+                        data-chart="paymentHealth"
+                        viewBox="0 0 180 180"
+                        role="img"
+                        aria-label="Payment health donut chart"></svg>
+
+                <div class="dashboard-legend" data-legend="paymentHealth"></div>
+            </div>
+        </article>
+    </section>
+
+    <article class="dashboard-card dashboard-card-pad">
+        <div class="dashboard-card-header">
+            <h2 class="dashboard-card-title">Failed Payments</h2>
+            <span class="dashboard-card-subtitle">Payments requiring follow-up</span>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody data-table="failedPayments"></tbody>
+        </table>
+    </article>
+</section>

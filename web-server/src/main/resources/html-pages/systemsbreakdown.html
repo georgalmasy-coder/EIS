@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/history-table.css" />
+    <link rel="stylesheet" href="../css/notes-table.css" />
+    <link rel="stylesheet" href="../css/attachments-table.css" />
+    <link rel="stylesheet" href="../css/systemsbreakdown.css" />
+    <link rel="stylesheet" href="../css/export-dialog.css" />
+    <link rel="stylesheet" href="../css/import-dialog.css" />
+</head>
+
+<body>
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app systemsbreakdown-app">
+    <div class="content systemsbreakdown-content">
+        <header class="topbar systemsbreakdown-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout systemsbreakdown-layout" aria-label="System breakdown">
+            <div class="section-header systemsbreakdown-section-header">
+                <h2>Systems Breakdown</h2>
+
+                <div class="section-header-actions">
+                    <button id="btnImport" class="page-icon-button" type="button" aria-label="Import systems breakdown" title="Import systems breakdown">
+                        <span aria-hidden="true">Import</span>
+                    </button>
+
+                    <button id="btnExport" class="page-icon-button" type="button" aria-label="Export systems breakdown" title="Export systems breakdown">
+                        <span aria-hidden="true">Export</span>
+                    </button>
+
+                    <button id="btnAddNew" class="page-icon-button" type="button" aria-label="Add new system" title="Add new system">
+                        <span aria-hidden="true">Add System</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body systemsbreakdown-body">
+                <div class="table-frame page-frame systemsbreakdown-frame" aria-label="Systems breakdown list frame">
+                    <div class="table-scroll systemsbreakdown-scroll" id="tableScroll">
+                        <table class="data-table page-table systemsbreakdown-table" aria-label="Systems breakdown list">
+                            <colgroup id="mainColGroup"></colgroup>
+                            <thead>
+                            <tr id="mainHeaderRow"></tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+
+                        <div class="empty page-empty" id="emptyState">Loading XML from web service…</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="editDialog" aria-label="System breakdown edit dialog">
+    <form id="editForm" method="dialog" class="dlg">
+        <div class="page-dialog-head">
+            <h3 id="dlgTitle">Systems Breakdown</h3>
+        </div>
+
+        <div class="page-dialog-status" id="dlgStatus">Idle</div>
+
+        <div class="page-tab-bar" role="tablist" aria-label="System breakdown tabs">
+            <button class="tab-btn page-tab-btn is-active" id="tabBtn1" type="button" role="tab" aria-selected="true" aria-controls="tabPanel1">Basis Info</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn2" type="button" role="tab" aria-selected="false" aria-controls="tabPanel2">History</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn3" type="button" role="tab" aria-selected="false" aria-controls="tabPanel3">Attachments</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn4" type="button" role="tab" aria-selected="false" aria-controls="tabPanel4">Notes</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn5" type="button" role="tab" aria-selected="false" aria-controls="tabPanel5">Links</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn6" type="button" role="tab" aria-selected="false" aria-controls="tabPanel6">Subsystem Owners</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn7" type="button" role="tab" aria-selected="false" aria-controls="tabPanel7">Supplier</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn8" type="button" role="tab" aria-selected="false" aria-controls="tabPanel8">Contractor</button>
+            <button class="tab-btn page-tab-btn" id="tabBtn9" type="button" role="tab" aria-selected="false" aria-controls="tabPanel9">Linked To ...</button>
+        </div>
+
+        <div class="tab-panels page-dialog-panels">
+            <section class="tab-panel is-active" id="tabPanel1" role="tabpanel" aria-labelledby="tabBtn1">
+                <div id="basisInfoFields" class="page-field-grid"></div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel2" role="tabpanel" aria-labelledby="tabBtn2">
+                <div class="table-frame history-table-frame page-history-frame">
+                    <div class="table-scroll">
+                        <table class="data-table history-table" aria-label="System breakdown history">
+                            <thead>
+                            <tr>
+                                <th data-key="changedDateTime">
+                                    <span class="sort">Changed <span class="sort-indicator" id="si-h-changedDateTime"></span></span>
+                                </th>
+                                <th data-key="changedByUserId">
+                                    <span class="sort">Changed By <span class="sort-indicator" id="si-h-changedByUserId"></span></span>
+                                </th>
+                                <th data-key="version">
+                                    <span class="sort">Version <span class="sort-indicator" id="si-h-version"></span></span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                        <div class="empty history-table-empty" id="historyEmpty">No history rows.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel3" role="tabpanel" aria-labelledby="tabBtn3">
+                <div class="attachments-toolbar">
+                    <button id="attachmentsAddNew" class="primary attachments-add-btn" type="button" aria-label="Add attachment" title="Add attachment">
+                        Add Attachment
+                    </button>
+                </div>
+
+                <div class="table-frame attachments-table-frame">
+                    <div class="table-scroll">
+                        <table class="data-table attachments-table" aria-label="System breakdown attachments">
+                            <colgroup>
+                                <col style="width: 34%;">
+                                <col style="width: 28%;">
+                                <col style="width: 12%;">
+                                <col style="width: 18%;">
+                                <col style="width: 8%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Description</th>
+                                <th>File Size</th>
+                                <th>Created</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="attachmentsBody"></tbody>
+                        </table>
+                        <div class="empty attachments-table-empty" id="attachmentsEmpty">No attachment rows.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel4" role="tabpanel" aria-labelledby="tabBtn4">
+                <div class="notes-toolbar">
+                    <button id="notesAddNew" class="primary notes-add-btn" type="button" aria-label="Add new note" title="Add new note">
+                        Add Note
+                    </button>
+                </div>
+
+                <div class="table-frame notes-table-frame">
+                    <div class="table-scroll">
+                        <table class="data-table notes-table" aria-label="System breakdown notes">
+                            <colgroup>
+                                <col style="width: 60%;">
+                                <col style="width: 30%;">
+                                <col style="width: 18%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>Note</th>
+                                <th>Created By</th>
+                                <th>Created</th>
+                            </tr>
+                            </thead>
+                            <tbody id="notesBody"></tbody>
+                        </table>
+                        <div class="empty notes-table-empty" id="notesEmpty">No notes rows.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel5" role="tabpanel" aria-labelledby="tabBtn5">
+                <div class="placeholder-text">Under Construction</div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel6" role="tabpanel" aria-labelledby="tabBtn6">
+                <div class="placeholder-text">Under Construction</div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel7" role="tabpanel" aria-labelledby="tabBtn7">
+                <div class="placeholder-text">Under Construction</div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel8" role="tabpanel" aria-labelledby="tabBtn8">
+                <div class="placeholder-text">Under Construction</div>
+            </section>
+
+            <section class="tab-panel" id="tabPanel9" role="tabpanel" aria-labelledby="tabBtn9">
+                <div class="placeholder-text">Under Construction</div>
+            </section>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="btnSave" class="primary" type="button">Save</button>
+            <button id="btnCancel" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="exportDialog" class="export-dialog" aria-label="Export dialog">
+    <form id="exportForm" method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head">
+                <h3>Export Systems Breakdown</h3>
+            </div>
+
+            <p class="export-dialog-description">
+                Choose the format for the export and whether inactive systems should be included.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="export-format-title">
+                <div class="export-dialog-section-title" id="export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xlsx" value="xlsx" checked>
+                        <span class="export-format-label">
+                            <strong>XLSX</strong>
+                            <span>Best for Excel and analysis</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="csv" value="csv">
+                        <span class="export-format-label">
+                            <strong>CSV</strong>
+                            <span>Simple tabular export</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="pdf" value="pdf">
+                        <span class="export-format-label">
+                            <strong>PDF</strong>
+                            <span>Readable report format</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xml" value="xml">
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured integration format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="export-dialog-section" aria-labelledby="export-options-title">
+                <div class="export-dialog-section-title" id="export-options-title">Options</div>
+
+                <div class="export-check-row">
+                    <input id="exportIncludeInactive" type="checkbox" data-export-include-inactive="true">
+                    <label for="exportIncludeInactive">Include inactive systems</label>
+                </div>
+            </section>
+        </div>
+
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="importDialog" class="import-dialog" aria-label="Import dialog">
+    <form id="importForm" method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head">
+                <h3>Import Systems Breakdown</h3>
+            </div>
+
+            <p class="import-dialog-description">
+                Select a file containing systems breakdown data. The file must be XML, XLSX or CSV.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="import-file-title">
+                <div class="import-dialog-section-title" id="import-file-title">Import file</div>
+
+                <input id="importFileInput" class="import-file-native-input" type="file" accept=".xml,.xlsx,.csv" data-import-file>
+
+                <label class="import-file-picker" for="importFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">📄</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML, XLSX or CSV</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="noteDialog" aria-label="Note dialog">
+    <form id="noteForm" method="dialog" class="dlg note-dlg">
+        <div class="page-dialog-head">
+            <h3 id="noteDlgTitle">Note</h3>
+        </div>
+
+        <div class="page-dialog-status" id="noteDlgStatus">Idle</div>
+
+        <div class="note-editor">
+            <label for="noteTextArea" class="note-editor-label">Note text</label>
+            <textarea id="noteTextArea" rows="30" cols="100" class="note-textarea"></textarea>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="noteSaveBtn" class="primary" type="button">Save</button>
+            <button id="noteCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="attachmentDialog" aria-label="Attachment dialog">
+    <form id="attachmentForm" method="dialog" class="dlg attachment-dlg">
+        <div class="page-dialog-head">
+            <h3 id="attachmentDlgTitle">Attachment</h3>
+        </div>
+
+        <div class="page-dialog-status" id="attachmentDlgStatus">Idle</div>
+
+        <div class="attachment-editor">
+            <div class="attachment-editor-row">
+                <label class="attachment-editor-label" for="attachmentFileInput">File</label>
+                <input id="attachmentFileInput" class="attachment-input" type="file" />
+            </div>
+
+            <div class="attachment-editor-row">
+                <label class="attachment-editor-label" for="attachmentDescriptionInput">
+                    Description <span aria-hidden="true">*</span>
+                </label>
+                <textarea id="attachmentDescriptionInput" class="attachment-textarea" rows="5" maxlength="255" required></textarea>
+            </div>
+
+            <div class="attachment-editor-row">
+                <div class="attachment-editor-label" id="attachmentFileInfo">No file selected.</div>
+            </div>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="attachmentSaveBtn" class="primary" type="button">Save</button>
+            <button id="attachmentCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/systemsbreakdown-page.js"></script>
+</body>
+</html>

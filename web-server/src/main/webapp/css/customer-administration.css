@@ -1,0 +1,776 @@
+.customer-administration-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.customer-administration-content {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.customer-administration-topbar {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.customer-administration-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.customer-administration-section-header {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.customer-administration-section-header h2 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.1;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.customer-administration-section-header .section-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    min-width: 0;
+    margin-left: auto;
+}
+
+.customer-administration-toolbar {
+    gap: 8px;
+}
+
+.customer-administration-filter {
+    min-width: 280px;
+    height: 38px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.customer-administration-filter::placeholder {
+    color: var(--muted);
+}
+
+.customer-administration-filter:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.customer-administration-refresh-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.customer-administration-refresh-button svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.customer-administration-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.customer-administration-frame {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.customer-administration-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-x: auto !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    padding-right: 2px;
+}
+
+.customer-administration-scroll::-webkit-scrollbar,
+.customer-dialog-table-frame .table-scroll::-webkit-scrollbar,
+.customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar,
+.customer-edit-form .page-tab-bar::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+.customer-administration-scroll::-webkit-scrollbar-track,
+.customer-dialog-table-frame .table-scroll::-webkit-scrollbar-track,
+.customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-track,
+.customer-edit-form .page-tab-bar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, .80);
+    border-left: 1px solid rgba(148, 163, 184, .35);
+}
+
+.customer-administration-scroll::-webkit-scrollbar-thumb,
+.customer-dialog-table-frame .table-scroll::-webkit-scrollbar-thumb,
+.customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-thumb,
+.customer-edit-form .page-tab-bar::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border: 3px solid rgba(15, 23, 42, .80);
+    border-radius: 999px;
+}
+
+.customer-administration-scroll::-webkit-scrollbar-thumb:hover,
+.customer-dialog-table-frame .table-scroll::-webkit-scrollbar-thumb:hover,
+.customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-thumb:hover,
+.customer-edit-form .page-tab-bar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+.customer-administration-scroll::-webkit-scrollbar-corner,
+.customer-dialog-table-frame .table-scroll::-webkit-scrollbar-corner,
+.customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-corner,
+.customer-edit-form .page-tab-bar::-webkit-scrollbar-corner {
+    background: rgba(15, 23, 42, .80);
+}
+
+.customer-administration-table {
+    width: 100%;
+    min-width: 1180px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.customer-administration-table th,
+.customer-administration-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.customer-administration-table th {
+    position: relative;
+    user-select: none;
+}
+
+.customer-administration-table th[data-key] {
+    cursor: pointer;
+}
+
+.customer-administration-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.customer-administration-table tbody td {
+    border-bottom: 1px solid rgba(35, 52, 84, .55);
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.customer-administration-table tbody tr {
+    cursor: default;
+    color: var(--text);
+}
+
+.customer-administration-table tbody tr:hover,
+.customer-administration-table tbody tr:focus-within {
+    background: rgba(96, 165, 250, .12);
+    color: var(--text);
+}
+
+.customer-administration-table tbody tr:hover td,
+.customer-administration-table tbody tr:focus-within td {
+    color: var(--text);
+}
+
+.customer-administration-table tbody tr.is-selected,
+.customer-administration-table tbody tr.is-selected td {
+    background: inherit;
+    color: var(--text);
+}
+
+.customer-administration-table .sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100% - 10px);
+}
+
+.customer-administration-table .sort-indicator {
+    display: inline-block;
+    min-width: 10px;
+    color: var(--muted);
+    font-size: 11px;
+    opacity: .85;
+}
+
+.customer-administration-table .col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+}
+
+.customer-administration-table .col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    right: 3px;
+    width: 1px;
+    height: 60%;
+    background: rgba(170, 180, 194, .35);
+}
+
+.customer-administration-table .col-resizer:hover::after {
+    background: rgba(96, 165, 250, .75);
+}
+
+.customer-status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(170, 180, 194, .35);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.customer-status-pill.status-active,
+.customer-status-pill.status-trial,
+.customer-status-pill.status-trial-active,
+.customer-status-pill.status-created,
+.customer-status-pill.status-subscription-active,
+.customer-status-pill.status-succeeded,
+.customer-status-pill.status-authorized,
+.customer-status-pill.status-captured {
+    border-color: rgba(74, 222, 128, .55);
+    background: rgba(22, 101, 52, .28);
+    color: #bbf7d0;
+}
+
+.customer-status-pill.status-suspended,
+.customer-status-pill.status-payment-required,
+.customer-status-pill.status-payment-failed,
+.customer-status-pill.status-payment-pending,
+.customer-status-pill.status-payment-overdue,
+.customer-status-pill.status-pending-confirmation,
+.customer-status-pill.status-pending-subscription-confirmation,
+.customer-status-pill.status-subscription-expiring,
+.customer-status-pill.status-expiring,
+.customer-status-pill.status-grace-period {
+    border-color: rgba(250, 204, 21, .55);
+    background: rgba(113, 63, 18, .32);
+    color: #fef3c7;
+}
+
+.customer-status-pill.status-cancelled,
+.customer-status-pill.status-deleted,
+.customer-status-pill.status-disabled,
+.customer-status-pill.status-expired,
+.customer-status-pill.status-failed {
+    border-color: rgba(248, 113, 113, .55);
+    background: rgba(127, 29, 29, .30);
+    color: #fecaca;
+}
+
+.customer-edit-dialog {
+    width: min(1040px, 96vw);
+    height: min(90vh, 900px);
+    height: min(90dvh, 900px);
+    max-width: 96vw;
+    max-height: 96vh;
+    max-height: 96dvh;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    padding: 0;
+}
+
+.customer-edit-dialog::backdrop {
+    background: rgba(0, 0, 0, .55);
+}
+
+.customer-edit-form {
+    padding: 14px 14px 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+}
+
+.customer-edit-form .page-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-top: 2px;
+    flex: 0 0 auto;
+}
+
+.customer-edit-form .page-dialog-head h3 {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.customer-edit-form .page-dialog-status {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.25;
+    min-height: 16px;
+    flex: 0 0 auto;
+}
+
+.customer-edit-form .page-tab-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+}
+
+.customer-edit-form .page-tab-btn,
+.customer-edit-form .tab-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.customer-edit-form .page-tab-btn:hover,
+.customer-edit-form .tab-btn:hover {
+    filter: brightness(1.08);
+}
+
+.customer-edit-form .page-tab-btn.is-active,
+.customer-edit-form .tab-btn.is-active {
+    background: rgba(96, 165, 250, .20);
+    border-color: rgba(96, 165, 250, .55);
+    color: var(--text);
+}
+
+.customer-dialog-panels {
+    margin-top: 8px;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-dialog-panels .tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.customer-dialog-panels .tab-panel.is-active {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    padding-right: 10px;
+}
+
+.customer-field-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 14px 16px;
+    align-items: start;
+    min-height: 0;
+}
+
+.customer-field-grid label {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.customer-field-grid label span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.customer-field-grid input,
+.customer-field-grid select,
+.customer-field-grid textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.customer-field-grid input,
+.customer-field-grid select {
+    height: 36px;
+}
+
+.customer-field-grid textarea {
+    resize: vertical;
+    min-height: 78px;
+    font-family: inherit;
+    line-height: 1.4;
+}
+
+.customer-field-grid input:focus,
+.customer-field-grid select:focus,
+.customer-field-grid textarea:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.customer-field-grid input[readonly],
+.customer-field-grid textarea[readonly] {
+    background: rgba(15, 23, 42, .42);
+    color: var(--muted);
+}
+
+.customer-field-grid input[type="hidden"] {
+    display: none;
+}
+
+.customer-field-wide {
+    grid-column: 1 / -1;
+}
+
+.customer-dialog-table-frame {
+    height: 300px;
+    min-height: 240px;
+    max-height: 300px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--panel2);
+    overflow: hidden;
+    position: relative;
+}
+
+#tabPanelWorkflow .customer-dialog-table-frame,
+#tabPanelModules .customer-dialog-table-frame {
+    height: 300px;
+    min-height: 240px;
+    max-height: 300px;
+}
+
+.customer-dialog-table-frame .table-scroll {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    overflow-x: auto !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    padding-right: 2px;
+}
+
+.customer-modules-table,
+.customer-workflow-events-table {
+    width: 100%;
+    min-width: 760px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: transparent;
+    color: var(--text);
+}
+
+.customer-modules-table th,
+.customer-workflow-events-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(17, 28, 51, .98);
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.customer-modules-table td,
+.customer-workflow-events-table td {
+    border-bottom: 1px solid rgba(35, 52, 84, .55);
+    padding: 10px 12px;
+    vertical-align: top;
+    color: var(--text);
+    font-size: 13px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.customer-modules-table tbody tr:hover,
+.customer-workflow-events-table tbody tr:hover {
+    background: rgba(96, 165, 250, .12);
+}
+
+.customer-modules-table input,
+.customer-modules-table select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.customer-modules-table input:focus,
+.customer-modules-table select:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.customer-technical-field {
+    display: none !important;
+}
+
+.customer-subsection-title {
+    margin: 22px 0 10px 0;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.customer-edit-form .dlg-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(35, 52, 84, .65);
+    flex: 0 0 auto;
+}
+
+.customer-edit-form .dlg-footer button {
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.customer-edit-form .dlg-footer button.primary,
+.customer-edit-form .dlg-footer #btnSaveCustomer {
+    background: rgba(96, 165, 250, .20);
+    border-color: rgba(96, 165, 250, .55);
+    color: var(--text);
+}
+
+.customer-edit-form .dlg-footer button:hover {
+    filter: brightness(1.08);
+}
+
+.customer-edit-form .dlg-footer button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    filter: none;
+}
+
+#customerDialogStatus {
+    min-height: 16px;
+}
+
+#customerDialogStatus.is-error {
+    color: #fecaca;
+}
+
+#customerDialogStatus.is-ok {
+    color: #bbf7d0;
+}
+
+#customerDialogStatus.is-loading {
+    color: #bfdbfe;
+}
+
+@media (max-width: 1100px) {
+    .customer-administration-content {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .customer-administration-layout {
+        padding: 12px;
+    }
+
+    .customer-administration-section-header {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .customer-administration-section-header .section-header-actions {
+        gap: 6px;
+    }
+
+    .customer-administration-table {
+        min-width: 1120px;
+    }
+}
+
+@media (max-width: 980px) {
+    .customer-administration-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .customer-administration-section-header .section-header-actions {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .customer-administration-filter {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .customer-field-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .customer-administration-content {
+        padding: 8px;
+    }
+
+    .customer-administration-layout {
+        padding: 10px;
+    }
+
+    .customer-administration-section-header .section-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .customer-administration-filter {
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .customer-edit-dialog {
+        width: 96vw;
+        height: 92dvh;
+    }
+
+    .customer-field-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-administration-table {
+        min-width: 1040px;
+    }
+}

@@ -1,0 +1,21 @@
+normal login
+UPDATE [dbo].[USERS]
+SET
+    UserMfaPolicy = 'DEFAULT',
+    MfaEnabled = 0,
+    MfaVerified = 0,
+    MfaSecretEncrypted = NULL,
+    MfaResetRequired = 0
+WHERE Email = 'din-bruger@example.com';
+
+mfa login
+UPDATE [dbo].[USERS]
+SET
+    UserMfaPolicy = 'REQUIRED',
+    MfaEnabled = 0,
+    MfaVerified = 0,
+    MfaSecretEncrypted = NULL,
+    MfaResetRequired = 0,
+    MfaEnabledAt = NULL,
+    MfaLastVerifiedAt = NULL
+WHERE Email = 'din-bruger@example.com';

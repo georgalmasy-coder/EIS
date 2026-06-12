@@ -1,0 +1,296 @@
+.attachments-toolbar{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+}
+
+.attachments-add-btn{
+    min-width: 110px;
+}
+
+.attachments-table-frame{
+    min-height: 240px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.attachments-table-frame .table-scroll{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.attachments-table{
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.attachments-table th{
+    white-space: nowrap;
+}
+
+.attachments-table td{
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+.attachments-table tr.is-openable{
+    background: rgba(96, 165, 250, .08);
+}
+
+.attachments-table tr.is-muted{
+    opacity: .75;
+}
+
+.attachments-table tr.is-deleted{
+    opacity: .45;
+    text-decoration: line-through;
+}
+
+.attachments-table-empty{
+    color: var(--muted);
+    padding: 16px;
+    font-size: 13px;
+}
+
+.attachment-actions{
+    text-align: center;
+    white-space: nowrap;
+}
+
+.attachment-action-group{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.attachment-delete-btn,
+.attachment-download-btn{
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 16px;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attachment-download-btn{
+    color: var(--text);
+}
+
+.attachment-delete-btn{
+    color: var(--danger, #ef4444);
+}
+
+/*
+ * Attachment dialog
+ *
+ * The shared .dlg class sets height: 100%.
+ * For this dialog that creates excessive height and can push the footer/buttons
+ * outside the visible area. These rules make the dialog content-sized.
+ */
+#attachmentDialog{
+    width: min(560px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+    height: fit-content;
+    max-height: calc(100vh - 48px);
+    padding: 0;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+#attachmentDialog,
+#attachmentDialog *{
+    box-sizing: border-box;
+}
+
+#attachmentDialog .attachment-dlg{
+    width: 100%;
+    max-width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 22px;
+    display: block;
+    overflow: visible;
+}
+
+#attachmentDialog .page-dialog-head,
+#attachmentDialog .page-dialog-status,
+#attachmentDialog .attachment-editor,
+#attachmentDialog .attachment-editor-row,
+#attachmentDialog .dlg-footer{
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+#attachmentDialog .page-dialog-head h3{
+    margin: 0 0 8px;
+}
+
+#attachmentDialog .page-dialog-status{
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.attachment-editor{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: block;
+    overflow: visible;
+}
+
+.attachment-editor-row{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: block;
+    margin: 0 0 14px;
+    overflow: visible;
+}
+
+.attachment-editor-label{
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.attachment-input{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+}
+
+.attachment-input:focus{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+
+.attachment-textarea{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 120px;
+    min-height: 90px;
+    max-height: 220px;
+    resize: vertical;
+    overflow: auto;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    line-height: 1.4;
+}
+
+.attachment-textarea:focus{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+
+#attachmentFileInfo{
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#attachmentDialog .dlg-footer{
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(35,52,84,.65);
+    overflow: visible;
+}
+
+#attachmentDialog .dlg-footer button{
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* Add System button should match Add Attachment */
+#btnAddNew{
+    min-width: 110px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    font-size: inherit;
+    line-height: 1;
+    padding-inline: 14px;
+    padding-block: 8px;
+}
+
+@media (max-width: 560px){
+    #attachmentDialog{
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+    }
+
+    #attachmentDialog .attachment-dlg{
+        padding: 16px;
+    }
+
+    .attachment-textarea{
+        height: 100px;
+        max-height: 160px;
+    }
+
+    #attachmentDialog .dlg-footer{
+        justify-content: stretch;
+    }
+
+    #attachmentDialog .dlg-footer button{
+        flex: 1 1 0;
+    }
+}
+
+@media (max-height: 560px){
+    #attachmentDialog .attachment-dlg{
+        padding: 16px;
+    }
+
+    .attachment-editor-row{
+        margin-bottom: 10px;
+    }
+
+    .attachment-textarea{
+        height: 90px;
+        max-height: 120px;
+    }
+
+    #attachmentDialog .dlg-footer{
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+}
