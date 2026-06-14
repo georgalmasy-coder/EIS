@@ -467,6 +467,12 @@
     padding-right: 10px;
 }
 
+.customer-dialog-panels .tab-panel.customer-list-tab-panel.is-active {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    padding-right: 0;
+}
+
 .customer-field-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(220px, 1fr));
@@ -549,11 +555,11 @@
     position: relative;
 }
 
-#tabPanelWorkflow .customer-dialog-table-frame,
-#tabPanelModules .customer-dialog-table-frame {
-    height: 300px;
-    min-height: 240px;
-    max-height: 300px;
+.customer-dialog-panels .tab-panel.customer-list-tab-panel.is-active .customer-dialog-table-frame {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
 }
 
 .customer-dialog-table-frame .table-scroll {

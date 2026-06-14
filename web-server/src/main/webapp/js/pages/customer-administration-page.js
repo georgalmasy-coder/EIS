@@ -1,3 +1,5 @@
+import { initMenu } from "../components/menu.js";
+
 const API_URL = "/api/admin/customers";
 
 const STORAGE_PREFIX = "customerAdministration";
@@ -33,6 +35,7 @@ const els = {};
 document.addEventListener("DOMContentLoaded", initialize);
 
 function initialize() {
+    initMenu();
     collectElements();
     applyColumnWidths();
     bindEvents();
@@ -666,15 +669,15 @@ function fillDialog(detail) {
     setValue("fieldSubscriptionStatus", subscription.subscriptionStatus);
     setValue("fieldSubscriptionPlanId", subscription.subscriptionPlanId);
     setValue("fieldSubscriptionPlanName", subscription.subscriptionPlanName);
-    setValue("fieldTrialStartAt", formatDanishDateTime(subscription.trialStartAt));
-    setValue("fieldTrialEndAt", formatDanishDateTime(subscription.trialEndAt));
-    setValue("fieldTrialReminderSentAt", formatDanishDateTime(subscription.trialReminderSentAt));
-    setValue("fieldPeriodStartAt", formatDanishDateTime(subscription.periodStartAt));
-    setValue("fieldPeriodEndAt", formatDanishDateTime(subscription.periodEndAt));
-    setValue("fieldRenewalReminderSentAt", formatDanishDateTime(subscription.renewalReminderSentAt));
-    setValue("fieldContinuationConfirmedAt", formatDanishDateTime(subscription.continuationConfirmedAt));
-    setValue("fieldRenewalConfirmedAt", formatDanishDateTime(subscription.renewalConfirmedAt));
-    setValue("fieldSubscriptionGracePeriodEndsAt", formatDanishDateTime(subscription.gracePeriodEndsAt));
+    setValue("fieldTrialStartAt", toDateTimeLocalValue(subscription.trialStartAt));
+    setValue("fieldTrialEndAt", toDateTimeLocalValue(subscription.trialEndAt));
+    setValue("fieldTrialReminderSentAt", toDateTimeLocalValue(subscription.trialReminderSentAt));
+    setValue("fieldPeriodStartAt", toDateTimeLocalValue(subscription.periodStartAt));
+    setValue("fieldPeriodEndAt", toDateTimeLocalValue(subscription.periodEndAt));
+    setValue("fieldRenewalReminderSentAt", toDateTimeLocalValue(subscription.renewalReminderSentAt));
+    setValue("fieldContinuationConfirmedAt", toDateTimeLocalValue(subscription.continuationConfirmedAt));
+    setValue("fieldRenewalConfirmedAt", toDateTimeLocalValue(subscription.renewalConfirmedAt));
+    setValue("fieldSubscriptionGracePeriodEndsAt", toDateTimeLocalValue(subscription.gracePeriodEndsAt));
     setValue("fieldSubscriptionCreatedAt", formatDanishDateTime(subscription.createdAt));
     setValue("fieldSubscriptionUpdatedAt", formatDanishDateTime(subscription.updatedAt));
 
@@ -684,14 +687,14 @@ function fillDialog(detail) {
     setValue("fieldPaymentProviderReference", payment.paymentProviderReference);
     setValue("fieldPaymentAmount", payment.amount);
     setValue("fieldPaymentCurrency", payment.currency);
-    setValue("fieldPaymentDueAt", formatDanishDateTime(payment.paymentDueAt));
-    setValue("fieldPaymentGracePeriodEndsAt", formatDanishDateTime(payment.gracePeriodEndsAt));
-    setValue("fieldRequestedAt", formatDanishDateTime(payment.requestedAt));
-    setValue("fieldAuthorizedAt", formatDanishDateTime(payment.authorizedAt));
-    setValue("fieldCapturedAt", formatDanishDateTime(payment.capturedAt));
-    setValue("fieldSucceededAt", formatDanishDateTime(payment.succeededAt));
-    setValue("fieldFailedAt", formatDanishDateTime(payment.failedAt));
-    setValue("fieldCancelledAt", formatDanishDateTime(payment.cancelledAt));
+    setValue("fieldPaymentDueAt", toDateTimeLocalValue(payment.paymentDueAt));
+    setValue("fieldPaymentGracePeriodEndsAt", toDateTimeLocalValue(payment.gracePeriodEndsAt));
+    setValue("fieldRequestedAt", toDateTimeLocalValue(payment.requestedAt));
+    setValue("fieldAuthorizedAt", toDateTimeLocalValue(payment.authorizedAt));
+    setValue("fieldCapturedAt", toDateTimeLocalValue(payment.capturedAt));
+    setValue("fieldSucceededAt", toDateTimeLocalValue(payment.succeededAt));
+    setValue("fieldFailedAt", toDateTimeLocalValue(payment.failedAt));
+    setValue("fieldCancelledAt", toDateTimeLocalValue(payment.cancelledAt));
     setValue("fieldFailureReason", payment.failureReason);
     setValue("fieldPaymentCreatedAt", formatDanishDateTime(payment.createdAt));
     setValue("fieldPaymentUpdatedAt", formatDanishDateTime(payment.updatedAt));
@@ -1089,6 +1092,36 @@ function formatDanishDateTime(itemValue) {
     return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()} ${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
 }
 
+function toDateTimeLocalValue(itemValue) {
+    if (!itemValue) {
+        return "";
+    }
+
+    const rawValue = String(itemValue).trim();
+
+    if (!rawValue) {
+        return "";
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(rawValue)) {
+        return rawValue;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(rawValue)) {
+        return `${rawValue}:00`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(rawValue)) {
+        return rawValue.replace(" ", "T");
+    }
+
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(rawValue)) {
+        return `${rawValue.replace(" ", "T")}:00`;
+    }
+
+    return "";
+}
+
 function toIsoDateTime(itemValue) {
     const rawValue = String(itemValue || "").trim();
 
@@ -1096,11 +1129,12 @@ function toIsoDateTime(itemValue) {
         return "";
     }
 
-    const danishMatch = rawValue.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(rawValue)) {
+        return rawValue;
+    }
 
-    if (danishMatch) {
-        const [, day, month, year, hour, minute, second] = danishMatch;
-        return `${year}-${month}-${day}T${hour}:${minute}:${second || "00"}`;
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(rawValue)) {
+        return `${rawValue}:00`;
     }
 
     return rawValue;

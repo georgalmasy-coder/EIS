@@ -24,7 +24,8 @@ export function createViewController(context) {
             criticalAlerts: 1,
             paymentErrors: 3,
             pendingCustomerConfirmations: 5,
-            failedEmails: 2,
+            retryingEmails: 0,
+            undeliveredEmails: 3,
             failedIntegrations: 0,
             lockedUsers: 3,
             activityTrend: [40, 44, 48, 52, 49, 55, 62, 68, 65, 72, 78, 83],
@@ -60,7 +61,7 @@ export function createViewController(context) {
                 { label: "API", status: "OK" },
                 { label: "Database", status: "OK" },
                 { label: "Queue", status: "OK" },
-                { label: "Email", status: "Warning" }
+                { label: "Email", status: "Critical" }
             ]
         };
     }
@@ -126,7 +127,8 @@ export function createViewController(context) {
         setText(root, '[data-field="criticalAlerts"]', data.criticalAlerts ?? "—");
         setText(root, '[data-field="paymentErrors"]', data.paymentErrors ?? "—");
         setText(root, '[data-field="pendingCustomerConfirmations"]', data.pendingCustomerConfirmations ?? "—");
-        setText(root, '[data-field="failedEmails"]', data.failedEmails ?? "—");
+        setText(root, '[data-field="retryingEmails"]', data.retryingEmails ?? data.failedEmails ?? "—");
+        setText(root, '[data-field="undeliveredEmails"]', data.undeliveredEmails ?? "—");
         setText(root, '[data-field="failedIntegrations"]', data.failedIntegrations ?? "—");
         setText(root, '[data-field="lockedUsers"]', data.lockedUsers ?? "—");
 

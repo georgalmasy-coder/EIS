@@ -1,11 +1,11 @@
 package com.bepa.eis.common.providers.mail;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.mail.MailQueueItem;
 import com.bepa.eis.common.dto.mail.MailQueueStatistics;
 import com.bepa.eis.common.dto.mail.MailRecipient;
 import com.bepa.eis.common.dto.mail.MailTemplate;
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.mail.MailStatus;
 import com.bepa.eis.common.enums.mail.MailTemplateType;
 import com.bepa.eis.common.providers.GenericProvider;
@@ -34,227 +34,321 @@ public class MailProvider extends GenericProvider {
     private static final String INSERT_MAIL_SQL =
             "INSERT INTO [dbo].[MAIL_QUEUE] ( " +
                     "TemplateType, " +
-                "FromName, " +
-                "FromEmail, " +
-                        "ToName, " +
-                        "ToEmail, " +
-                        "CcEmails, " +
-                        "BccEmails, " +
-                        "Subject, " +
-                        "BodyText, " +
-                        "BodyHtml, " +
-                        "ParametersJson,  " +
-                        "Status, " +
-                        "AttemptCount, " +
-                        "MaxAttempts, " +
-                        "CreatedByUserId " +
-                        ") " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?) ";
-
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson,  " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "CreatedByUserId " +
+                    ") " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?) ";
 
     private static final String SELECT_MAIL_BY_ID_SQL =
             "SELECT " +
-                "MailId, " +
-                "TemplateType, " +
-                "FromName, " +
-                "FromEmail, " +
-                "ToName, " +
-                "ToEmail, " +
-                "CcEmails, " +
-                "BccEmails, " +
-                "Subject, " +
-                "BodyText, " +
-                "BodyHtml, " +
-                "ParametersJson, " +
-                "Status, " +
-                "AttemptCount, " +
-                "MaxAttempts, " +
-                "NextAttemptAt, " +
-                "CreatedAt, " +
-                "CreatedByUserId, " +
-                "LastAttemptAt, " +
-                "SentAt, " +
-                "LastError, " +
-                "SmtpMessageId, " +
-                "LockedAt, " +
-                "LockedBy " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE MailId = ? ";
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE MailId = ? ";
 
     private static final String SELECT_PENDING_MAILS_SQL =
             "SELECT TOP (?) " +
-            "    MailId, " +
-            "    TemplateType, " +
-            "    FromName, " +
-            "    FromEmail, " +
-            "    ToName, " +
-            "    ToEmail, " +
-            "    CcEmails, " +
-            "    BccEmails, " +
-            "    Subject, " +
-            "    BodyText, " +
-            "    BodyHtml, " +
-            "    ParametersJson, " +
-            "    Status, " +
-            "    AttemptCount, " +
-            "    MaxAttempts, " +
-            "    NextAttemptAt, " +
-            "    CreatedAt, " +
-            "    CreatedByUserId, " +
-            "    LastAttemptAt, " +
-            "    SentAt, " +
-            "    LastError, " +
-            "    SmtpMessageId, " +
-            "    LockedAt, " +
-            "    LockedBy " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status IN ('QUEUED', 'FAILED') " +
-            "  AND NextAttemptAt <= SYSUTCDATETIME() " +
-            "  AND AttemptCount < MaxAttempts " +
-           " ORDER BY NextAttemptAt ASC, MailId ASC ";
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status IN ('QUEUED', 'FAILED') " +
+                    "  AND NextAttemptAt <= SYSUTCDATETIME() " +
+                    "  AND AttemptCount < MaxAttempts " +
+                    "ORDER BY NextAttemptAt ASC, MailId ASC ";
 
     private static final String MARK_AS_SENDING_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = 'SENDING', " +
-            "    LockedAt = SYSUTCDATETIME(), " +
-            "    LockedBy = ?, " +
-            "    LastAttemptAt = SYSUTCDATETIME() " +
-            "WHERE MailId = ? " +
-            "  AND Status IN ('QUEUED', 'FAILED') " +
-            "  AND NextAttemptAt <= SYSUTCDATETIME() " +
-            "  AND AttemptCount < MaxAttempts ";
+                    "SET " +
+                    "Status = 'SENDING', " +
+                    "LockedAt = SYSUTCDATETIME(), " +
+                    "LockedBy = ?, " +
+                    "LastAttemptAt = SYSUTCDATETIME() " +
+                    "WHERE MailId = ? " +
+                    "  AND Status IN ('QUEUED', 'FAILED') " +
+                    "  AND NextAttemptAt <= SYSUTCDATETIME() " +
+                    "  AND AttemptCount < MaxAttempts ";
 
     private static final String MARK_AS_SENT_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = 'SENT', " +
-            "    SentAt = SYSUTCDATETIME(), " +
-            "    SmtpMessageId = ?, " +
-            "    LastError = NULL, " +
-            "    LockedAt = NULL, " +
-            "    LockedBy = NULL " +
-            "WHERE MailId = ? ";
+                    "SET " +
+                    "Status = 'SENT', " +
+                    "SentAt = SYSUTCDATETIME(), " +
+                    "SmtpMessageId = ?, " +
+                    "LastError = NULL, " +
+                    "LockedAt = NULL, " +
+                    "LockedBy = NULL " +
+                    "WHERE MailId = ? ";
 
     private static final String MARK_AS_FAILED_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = CASE " +
-            "        WHEN AttemptCount + 1 >= MaxAttempts THEN 'UNDELIVERED' " +
-            "        ELSE 'FAILED' " +
-            "    END, " +
-            "    AttemptCount = AttemptCount + 1, " +
-            "    LastError = ?, " +
-            "    NextAttemptAt = DATEADD(MINUTE, ?, SYSUTCDATETIME()), " +
-            "    LockedAt = NULL, " +
-            "    LockedBy = NULL " +
-            "WHERE MailId = ? ";
+                    "SET " +
+                    "Status = CASE " +
+                    "    WHEN AttemptCount + 1 >= MaxAttempts THEN 'UNDELIVERED' " +
+                    "    ELSE 'FAILED' " +
+                    "END, " +
+                    "AttemptCount = AttemptCount + 1, " +
+                    "LastError = ?, " +
+                    "NextAttemptAt = DATEADD(MINUTE, ?, SYSUTCDATETIME()), " +
+                    "LockedAt = NULL, " +
+                    "LockedBy = NULL " +
+                    "WHERE MailId = ? ";
 
     private static final String MARK_AS_UNDELIVERED_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = 'UNDELIVERED', " +
-            "    LastError = ?, " +
-            "    LockedAt = NULL, " +
-            "    LockedBy = NULL " +
-            "WHERE MailId = ? ";
+                    "SET " +
+                    "Status = 'UNDELIVERED', " +
+                    "LastError = ?, " +
+                    "LockedAt = NULL, " +
+                    "LockedBy = NULL " +
+                    "WHERE MailId = ? ";
 
     private static final String CANCEL_MAIL_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = 'CANCELLED', " +
-            "    LastError = ?, " +
-            "    LockedAt = NULL, " +
-            "    LockedBy = NULL " +
-            "WHERE MailId = ? " +
-            "  AND Status IN ('QUEUED', 'FAILED') ";
+                    "SET " +
+                    "Status = 'CANCELLED', " +
+                    "LastError = ?, " +
+                    "LockedAt = NULL, " +
+                    "LockedBy = NULL " +
+                    "WHERE MailId = ? " +
+                    "  AND Status IN ('QUEUED', 'FAILED') ";
 
     private static final String RELEASE_STUCK_SENDING_MAILS_SQL =
             "UPDATE [dbo].[MAIL_QUEUE] " +
-            "SET " +
-            "    Status = 'FAILED', " +
-            "    LastError = 'Mail sending lock timed out', " +
-            "    NextAttemptAt = SYSUTCDATETIME(), " +
-            "    LockedAt = NULL, " +
-            "    LockedBy = NULL " +
-            "WHERE Status = 'SENDING' " +
-            "  AND LockedAt < DATEADD(MINUTE, -?, SYSUTCDATETIME()) ";
+                    "SET " +
+                    "Status = 'FAILED', " +
+                    "LastError = 'Mail sending lock timed out', " +
+                    "NextAttemptAt = SYSUTCDATETIME(), " +
+                    "LockedAt = NULL, " +
+                    "LockedBy = NULL " +
+                    "WHERE Status = 'SENDING' " +
+                    "  AND LockedAt < DATEADD(MINUTE, -?, SYSUTCDATETIME()) ";
 
     private static final String COUNT_BY_STATUS_SQL =
             "SELECT COUNT(*) AS MailCount " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status = ?";
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = ?";
 
     private static final String COUNT_SENT_LAST_24_HOURS_SQL =
             "SELECT COUNT(*) AS MailCount " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status = 'SENT' " +
-            "  AND SentAt >= DATEADD(HOUR, -24, SYSUTCDATETIME()) ";
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'SENT' " +
+                    "  AND SentAt >= DATEADD(HOUR, -24, SYSUTCDATETIME()) ";
+
+    private static final String COUNT_SENT_LAST_7_DAYS_SQL =
+            "SELECT COUNT(*) AS MailCount " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'SENT' " +
+                    "  AND SentAt >= DATEADD(DAY, -7, SYSUTCDATETIME()) ";
+
+    private static final String COUNT_ERRORS_LAST_7_DAYS_SQL =
+            "SELECT COUNT(*) AS MailCount " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status IN ('FAILED', 'UNDELIVERED') " +
+                    "  AND COALESCE(LastAttemptAt, CreatedAt) >= DATEADD(DAY, -7, SYSUTCDATETIME()) ";
+
+    private static final String SELECT_MAIL_HOURLY_STATUS_LAST_24_HOURS_SQL =
+            "WITH Hours AS ( " +
+                    "    SELECT 23 AS HourOffset " +
+                    "    UNION ALL " +
+                    "    SELECT HourOffset - 1 FROM Hours WHERE HourOffset > 0 " +
+                    "), HourBuckets AS ( " +
+                    "    SELECT " +
+                    "        DATEADD(HOUR, DATEDIFF(HOUR, 0, DATEADD(HOUR, -HourOffset, SYSUTCDATETIME())), 0) AS BucketStart " +
+                    "    FROM Hours " +
+                    ") " +
+                    "SELECT " +
+                    "    CONVERT(VARCHAR(16), hb.BucketStart, 120) AS HourLabel, " +
+                    "    SUM(CASE WHEN mq.Status = 'SENT' THEN 1 ELSE 0 END) AS SentCount, " +
+                    "    SUM(CASE WHEN mq.Status IN ('FAILED', 'UNDELIVERED') THEN 1 ELSE 0 END) AS ErrorCount " +
+                    "FROM HourBuckets hb " +
+                    "LEFT JOIN [dbo].[MAIL_QUEUE] mq " +
+                    "    ON COALESCE(mq.SentAt, mq.LastAttemptAt, mq.CreatedAt) >= hb.BucketStart " +
+                    "   AND COALESCE(mq.SentAt, mq.LastAttemptAt, mq.CreatedAt) < DATEADD(HOUR, 1, hb.BucketStart) " +
+                    "   AND mq.Status IN ('SENT', 'FAILED', 'UNDELIVERED') " +
+                    "GROUP BY hb.BucketStart " +
+                    "ORDER BY hb.BucketStart ASC " +
+                    "OPTION (MAXRECURSION 24) ";
 
     private static final String OLDEST_QUEUED_AT_SQL =
             "SELECT MIN(CreatedAt) AS OldestQueuedAt " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status = 'QUEUED'";
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'QUEUED'";
+
+    private static final String SELECT_LATEST_SENT_MAILS_SQL =
+            "SELECT TOP (?) " +
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'SENT' " +
+                    "ORDER BY SentAt DESC, MailId DESC";
 
     private static final String SELECT_LATEST_FAILED_MAILS_SQL =
             "SELECT TOP (?) " +
-            "    MailId, " +
-            "    TemplateType, " +
-            "    FromName, " +
-            "    FromEmail, " +
-            "    ToName, " +
-            "    ToEmail, " +
-            "    CcEmails, " +
-            "    BccEmails, " +
-            "    Subject, " +
-            "    BodyText, " +
-            "    BodyHtml, " +
-            "    ParametersJson, " +
-            "    Status, " +
-            "    AttemptCount, " +
-            "    MaxAttempts, " +
-            "    NextAttemptAt, " +
-            "    CreatedAt, " +
-            "    CreatedByUserId, " +
-            "    LastAttemptAt, " +
-            "    SentAt, " +
-            "    LastError, " +
-            "    SmtpMessageId, " +
-            "    LockedAt, " +
-            "    LockedBy " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status = 'FAILED' " +
-            "ORDER BY LastAttemptAt DESC, MailId DESC";
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'FAILED' " +
+                    "ORDER BY LastAttemptAt DESC, MailId DESC";
 
     private static final String SELECT_LATEST_UNDELIVERED_MAILS_SQL =
             "SELECT TOP (?) " +
-                "MailId, " +
-                "TemplateType, " +
-                "FromName, " +
-                "FromEmail, " +
-                "ToName, " +
-                "ToEmail, " +
-                "CcEmails, " +
-                "BccEmails, " +
-                "Subject, " +
-                "BodyText, " +
-                "BodyHtml, " +
-                "ParametersJson, " +
-                "Status, " +
-                "AttemptCount, " +
-                "MaxAttempts, " +
-                "NextAttemptAt, " +
-                "CreatedAt, " +
-                "CreatedByUserId, " +
-                "LastAttemptAt, " +
-                "SentAt, " +
-                "LastError, " +
-                "SmtpMessageId, " +
-                "LockedAt, " +
-                "LockedBy " +
-            "FROM [dbo].[MAIL_QUEUE] " +
-            "WHERE Status = 'UNDELIVERED' " +
-            "ORDER BY LastAttemptAt DESC, MailId DESC";
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'UNDELIVERED' " +
+                    "ORDER BY LastAttemptAt DESC, MailId DESC";
+
+    private static final String SELECT_LATEST_ERROR_MAILS_SQL =
+            "SELECT TOP (?) " +
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status IN ('FAILED', 'UNDELIVERED') " +
+                    "ORDER BY LastAttemptAt DESC, MailId DESC";
 
     private final MailTemplateRenderer mailTemplateRenderer;
 
@@ -542,6 +636,14 @@ public class MailProvider extends GenericProvider {
         return getCountByStatus(MailStatus.CANCELLED);
     }
 
+    public int getSentLast7DaysCount() {
+        return getSingleCount(COUNT_SENT_LAST_7_DAYS_SQL, "sent mails last 7 days");
+    }
+
+    public int getErrorsLast7DaysCount() {
+        return getSingleCount(COUNT_ERRORS_LAST_7_DAYS_SQL, "mail errors last 7 days");
+    }
+
     public MailQueueStatistics getMailQueueStatistics() {
         MailQueueStatistics statistics = new MailQueueStatistics();
 
@@ -556,12 +658,41 @@ public class MailProvider extends GenericProvider {
         return statistics;
     }
 
+    public List<MailHourlyStatusPoint> getMailHourlyStatusLast24Hours() {
+        List<MailHourlyStatusPoint> points = new ArrayList<>();
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_MAIL_HOURLY_STATUS_LAST_24_HOURS_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                points.add(new MailHourlyStatusPoint(
+                        resultSet.getString("HourLabel"),
+                        resultSet.getInt("SentCount"),
+                        resultSet.getInt("ErrorCount")
+                ));
+            }
+        } catch (SQLException e) {
+            log.error("Error loading mail hourly status last 24 hours", e);
+        }
+
+        return points;
+    }
+
+    public List<MailQueueItem> getLatestSentMails(int maxRows) {
+        return getLatestMails(SELECT_LATEST_SENT_MAILS_SQL, maxRows);
+    }
+
     public List<MailQueueItem> getLatestFailedMails(int maxRows) {
         return getLatestMails(SELECT_LATEST_FAILED_MAILS_SQL, maxRows);
     }
 
     public List<MailQueueItem> getLatestUndeliveredMails(int maxRows) {
         return getLatestMails(SELECT_LATEST_UNDELIVERED_MAILS_SQL, maxRows);
+    }
+
+    public List<MailQueueItem> getLatestErrorMails(int maxRows) {
+        return getLatestMails(SELECT_LATEST_ERROR_MAILS_SQL, maxRows);
     }
 
     private Integer insertMail(
@@ -690,19 +821,23 @@ public class MailProvider extends GenericProvider {
         return 0;
     }
 
-    private int getSentLast24HoursCount() {
+    private int getSingleCount(String sql, String operationName) {
         try (Connection connection = getDataSource().getConnection();
-             PreparedStatement statement = connection.prepareStatement(COUNT_SENT_LAST_24_HOURS_SQL);
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             if (resultSet.next()) {
                 return resultSet.getInt("MailCount");
             }
         } catch (SQLException e) {
-            log.error("Error counting sent mails last 24 hours", e);
+            log.error("Error counting {}", operationName, e);
         }
 
         return 0;
+    }
+
+    private int getSentLast24HoursCount() {
+        return getSingleCount(COUNT_SENT_LAST_24_HOURS_SQL, "sent mails last 24 hours");
     }
 
     private Timestamp getOldestQueuedAt() {
@@ -884,5 +1019,12 @@ public class MailProvider extends GenericProvider {
         }
 
         return value.substring(0, maxLength);
+    }
+
+    public record MailHourlyStatusPoint(
+            String hour,
+            int sent,
+            int error
+    ) {
     }
 }

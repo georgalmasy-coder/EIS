@@ -2,7 +2,7 @@ package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.mail.EmailSender;
+import com.bepa.eis.server.api.web.application.baseline.Baseline;
 import com.bepa.eis.server.dataprovider.entities.common.*;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
@@ -11,6 +11,7 @@ import com.bepa.eis.server.dataprovider.fields.booleans.Latest;
 import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
+import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.AbstractParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Date;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -228,6 +230,31 @@ abstract public class EntityProvider extends GenericProvider {
                     "  ChangedByUserId, " +
                     "  ChangedDateTime" +
                     ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
+            "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
+                    "FROM ENTITY E " +
+                    "WHERE E.CustomerId = ? " +
+                    "AND E.ProjectId = ? " +
+                    "AND E.EntityType = ? " +
+                    "AND E.ChangedDateTime > ? " +
+                    "AND E.ChangedDateTime <= ? " +
+                    "ORDER BY E.ProjectId, E.EntityType, E.EntityId, E.Version";
+
+    private static final String SELECT_COLUMN_FROM_ENTITY_SQL =
+            "SELECT E.EntityId, EE.StringValue AS StringValue " +
+                    "FROM ENTITY E, ENTITY_ELEMENT EE " +
+                    "WHERE E.CustomerId = EE.CustomerId " +
+                    "AND E.ProjectId = EE.ProjectId " +
+                    "AND E.EntityType = EE.EntityType " +
+                    "AND E.EntityId = EE.EntityId " +
+                    "AND E.Version = EE.Version " +
+                    "AND E.LATEST = 1 " +
+                    "AND E.CustomerId = ? " +
+                    "AND E.ProjectId = ? " +
+                    "AND E.EntityType = ? " +
+                    "AND E.EntityId = ? " +
+                    "AND EE.EntityDataElementType = ?";
 
 
     public List<AbstractEntity> getListOfEntities(EntityType entityType, boolean includeInactive) throws SQLException {
@@ -716,15 +743,7 @@ abstract public class EntityProvider extends GenericProvider {
                 changedBy = systemBreakdownEntity.getChangedByUser().getUser();
             }
 
-            User ownerUser = null;
-            if (systemBreakdownEntity.getSystemOwner() != null) {
-                ownerUser = systemBreakdownEntity.getSystemOwner().getUser();
-
-                EmailSender emailSender = new EmailSender();
-                emailSender.sendNotificationEmail(ownerUser, sbs, name, entity.getEntityType(), changedBy);
-            }
-
-            log.debug("sendNotification : {} by id {} sbs {} name {} change {} owner {]", entity.getEntityType().getDescription(), entity.getEntityId(), sbs, name, changedBy, ownerUser);
+            //GFAlog.debug("sendNotification : {} by id {} sbs {} name {} change {} owner {]", entity.getEntityType().getDescription(), entity.getEntityId(), sbs, name, changedBy, ownerUser);
         }
 
     }
@@ -1084,5 +1103,79 @@ abstract public class EntityProvider extends GenericProvider {
 
             }
         }
+    }
+
+    public List<EntityRecord> getEntityRecords(EntityType entityType, Baseline baseline) throws SQLException {
+        Timestamp start;
+        Timestamp end;
+
+        if (baseline.getPreviousBaselineDateTime() != null) {
+            start = baseline.getPreviousBaselineDateTime();
+        } else {
+            start = Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 0));
+        }
+
+        if (baseline.getChangedDateTime() != null) {
+            end = baseline.getChangedDateTime();
+        } else {
+            end = Timestamp.valueOf(LocalDateTime.now());
+        }
+
+        List<EntityRecord> listOfEntityRecords = new ArrayList<>();
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL)) {
+
+            setInt(ps, getWebSession().getCustomerId(), 1);
+            setInt(ps, getWebSession().getProjectId(), 2);
+            setInt(ps, entityType.getId(), 3);
+            setTimestamp(ps, start, 4);
+            setTimestamp(ps, end, 5);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+
+                    EntityRecord entityRecord = new EntityRecord(
+                            getWebSession(),
+                            rs.getInt(CustomerId.FIELD_NAME),
+                            rs.getInt(ProjectId.FIELD_NAME),
+                            rs.getInt(EntityId.FIELD_NAME),
+                            rs.getInt(EntityTypeId.FIELD_NAME),
+                            rs.getInt(Version.FIELD_NAME),
+                            rs.getInt(ChangedBy.FIELD_NAME),
+                            rs.getTimestamp(ChangedDateTime.FIELD_NAME),
+                            rs.getBoolean(Latest.FIELD_NAME),
+                            rs.getBoolean(Active.FIELD_NAME)
+                    );
+
+                    listOfEntityRecords.add(entityRecord);
+
+                }
+            }
+        }
+
+        return listOfEntityRecords;
+    }
+
+    public String getEntityColumnValue(EntityType entityType, EntityDataElement entityDataElement, Integer entityId) throws SQLException {
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ENTITY_SQL)) {
+
+            ps.setInt(1, getWebSession().getCustomerId());
+            ps.setInt(2, getWebSession().getProjectId());
+            ps.setInt(3, entityType.getId());
+            ps.setInt(4, entityId);
+            ps.setInt(5, entityDataElement.getId());
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                return rs.getString("StringValue");
+            }
+
+        } catch (SQLException e) {
+            log.error("Error loading all entities including Code : {}", e.getMessage());
+        }
+        return "";
     }
 }

@@ -19,11 +19,26 @@ public final class GlobalConfiguration {
     private static final String CONFIG_DIR_SYSTEM_PROPERTY = "eis.config.dir";
     private static final String CONFIG_DIR_ENVIRONMENT_VARIABLE = "EIS_CONFIG_DIR";
 
+    private static final String APPLICATION_NAME_SYSTEM_PROPERTY = "eis.application.name";
+    private static final String APPLICATION_NAME_ENVIRONMENT_VARIABLE = "EIS_APPLICATION_NAME";
+
+    private static final String DEFAULT_APPLICATION_NAME = "web-server";
+    private static final String INTEGRATION_SERVER_APPLICATION_NAME = "integration-server";
+    private static final String WEB_SERVER_APPLICATION_NAME = "web-server";
+
+    private static final String DEFAULT_EIS_HOME = "C:/EIS";
+    private static final String DEFAULT_EIS_CONF_DIR = "C:/EIS/conf";
+    private static final String DEFAULT_EIS_LOGS_DIR = "C:/EIS/logs";
+
     private static final boolean DEFAULT_UDV_MODE = false;
     private static final int DEFAULT_CUSTOMER_ID = 1;
     private static final int DEFAULT_PROJECT_ID = 1;
 
+    private static final String DEFAULT_DATABASE_DATASOURCE_MODE = "jndi";
     private static final String DEFAULT_JNDI_NAME = "java:comp/env/jdbc/EISDatabase";
+    private static final String DEFAULT_DATABASE_JDBC_URL = "";
+    private static final String DEFAULT_DATABASE_JDBC_USERNAME = "";
+    private static final String DEFAULT_DATABASE_JDBC_PASSWORD = "";
 
     private static final boolean DEFAULT_MAIL_QUEUE_JOB_ENABLED = true;
     private static final int DEFAULT_MAIL_QUEUE_JOB_INTERVAL_SECONDS = 60;
@@ -55,7 +70,7 @@ public final class GlobalConfiguration {
 
     private static final String DEFAULT_MAIL_FROM_EMAIL = "no-reply@example.com";
     private static final String DEFAULT_MAIL_FROM_NAME = "BEPA EIS";
-    private static final String DEFAULT_MAIL_TEMPLATE_FOLDER = "eis/mail-templates";
+    private static final String DEFAULT_MAIL_TEMPLATE_FOLDER = "C:/EIS/conf/mail-templates";
     private static final String DEFAULT_MAIL_CONTENT_TYPE = "text/html; charset=UTF-8";
 
     private static final long FILE_LISTENER_INTERVAL_MILLIS = 5000L;
@@ -76,6 +91,54 @@ public final class GlobalConfiguration {
     private GlobalConfiguration() {
     }
 
+    public static String getApplicationName() {
+        String configuredApplicationName = System.getProperty(APPLICATION_NAME_SYSTEM_PROPERTY);
+
+        if (!isEmpty(configuredApplicationName)) {
+            return configuredApplicationName.trim();
+        }
+
+        configuredApplicationName = System.getenv(APPLICATION_NAME_ENVIRONMENT_VARIABLE);
+
+        if (!isEmpty(configuredApplicationName)) {
+            return configuredApplicationName.trim();
+        }
+
+        return getString("eis.application.name", DEFAULT_APPLICATION_NAME);
+    }
+
+    public static boolean isIntegrationServerApplication() {
+        return INTEGRATION_SERVER_APPLICATION_NAME.equalsIgnoreCase(getApplicationName());
+    }
+
+    public static boolean isWebServerApplication() {
+        return WEB_SERVER_APPLICATION_NAME.equalsIgnoreCase(getApplicationName());
+    }
+
+    public static String getEisHome() {
+        return getString("eis.home", DEFAULT_EIS_HOME);
+    }
+
+    public static File getEisHomeDirectory() {
+        return new File(getEisHome());
+    }
+
+    public static String getEisConfigurationDirectoryPath() {
+        return getString("eis.conf.dir", DEFAULT_EIS_CONF_DIR);
+    }
+
+    public static File getEisConfigurationDirectory() {
+        return new File(getEisConfigurationDirectoryPath());
+    }
+
+    public static String getEisLogsDirectoryPath() {
+        return getString("eis.logs.dir", DEFAULT_EIS_LOGS_DIR);
+    }
+
+    public static File getEisLogsDirectory() {
+        return new File(getEisLogsDirectoryPath());
+    }
+
     public static boolean isUdvMode() {
         return getBoolean("udv.mode", DEFAULT_UDV_MODE);
     }
@@ -89,7 +152,46 @@ public final class GlobalConfiguration {
     }
 
     public static String getJndiName() {
-        return getString("database.jndi.name", DEFAULT_JNDI_NAME);
+        return getApplicationSpecificString(
+                "database.jndi.name",
+                DEFAULT_JNDI_NAME
+        );
+    }
+
+    public static String getDatabaseDatasourceMode() {
+        return getApplicationSpecificString(
+                "database.datasource.mode",
+                DEFAULT_DATABASE_DATASOURCE_MODE
+        );
+    }
+
+    public static String getDatabaseJdbcUrl() {
+        return getApplicationSpecificString(
+                "database.jdbc.url",
+                DEFAULT_DATABASE_JDBC_URL
+        );
+    }
+
+    public static String getDatabaseJdbcUsername() {
+        return getApplicationSpecificString(
+                "database.jdbc.username",
+                DEFAULT_DATABASE_JDBC_USERNAME
+        );
+    }
+
+    public static String getDatabaseJdbcPassword() {
+        return getApplicationSpecificString(
+                "database.jdbc.password",
+                DEFAULT_DATABASE_JDBC_PASSWORD
+        );
+    }
+
+    public static boolean isDatabaseJdbcMode() {
+        return "jdbc".equalsIgnoreCase(getDatabaseDatasourceMode());
+    }
+
+    public static boolean isDatabaseJndiMode() {
+        return "jndi".equalsIgnoreCase(getDatabaseDatasourceMode());
     }
 
     public static boolean isMailQueueJobEnabled() {
@@ -334,6 +436,21 @@ public final class GlobalConfiguration {
         }
     }
 
+    private static String getApplicationSpecificString(String baseKey, String defaultValue) {
+        String applicationName = getApplicationName();
+
+        if (!isEmpty(applicationName)) {
+            String applicationSpecificKey = applicationName + "." + baseKey;
+            String applicationSpecificValue = getProperties().getProperty(applicationSpecificKey);
+
+            if (!isEmpty(applicationSpecificValue)) {
+                return applicationSpecificValue.trim();
+            }
+        }
+
+        return getString(baseKey, defaultValue);
+    }
+
     private static Properties getProperties() {
         return PROPERTIES.get();
     }
@@ -469,36 +586,11 @@ public final class GlobalConfiguration {
 
         content.append("###############################################################################").append(lineSeparator);
         content.append("# EIS Global Configuration").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("# Configuration file resolution order:").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   1. Java system property:").append(lineSeparator);
-        content.append("#      -Deis.config.file=/opt/eis/conf/eis-global.properties").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   2. Environment variable:").append(lineSeparator);
-        content.append("#      EIS_CONFIG_FILE=/opt/eis/conf/eis-global.properties").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   3. Java system property directory:").append(lineSeparator);
-        content.append("#      -Deis.config.dir=/opt/eis/conf").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   4. Environment variable directory:").append(lineSeparator);
-        content.append("#      EIS_CONFIG_DIR=/opt/eis/conf").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   5. Tomcat fallback:").append(lineSeparator);
-        content.append("#      ${catalina.base}/conf/eis-global.properties").append(lineSeparator);
-        content.append("#      ${catalina.home}/conf/eis-global.properties").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("#   6. Local fallback:").append(lineSeparator);
-        content.append("#      ./conf/eis-global.properties").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("# If a property is missing or has an invalid value, the application will use").append(lineSeparator);
-        content.append("# the default value defined in the Java configuration classes.").append(lineSeparator);
-        content.append("#").append(lineSeparator);
-        content.append("# This file is reloaded automatically at runtime when changed.").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
 
         appendGeneralConfiguration(content, lineSeparator);
+        appendPathConfiguration(content, lineSeparator);
         appendDatabaseConfiguration(content, lineSeparator);
         appendMailConfiguration(content, lineSeparator);
         appendCustomerWorkflowConfiguration(content, lineSeparator);
@@ -512,20 +604,22 @@ public final class GlobalConfiguration {
         content.append("# General configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# Development mode.").append(lineSeparator);
-        content.append("# Allowed values: true, false, yes, no, 1, 0, on, off").append(lineSeparator);
-        content.append("# Default: false").append(lineSeparator);
+        content.append("eis.application.name=web-server").append(lineSeparator);
+        content.append(lineSeparator);
         content.append("udv.mode=false").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Default customer id used in development mode.").append(lineSeparator);
-        content.append("# Default: 1").append(lineSeparator);
-        content.append("# Allowed range: 1 - 100").append(lineSeparator);
         content.append("udv.customerid=1").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Default project id used in development mode.").append(lineSeparator);
-        content.append("# Default: 1").append(lineSeparator);
-        content.append("# Allowed range: 1 - 100").append(lineSeparator);
         content.append("udv.projectid=1").append(lineSeparator);
+        content.append(lineSeparator);
+    }
+
+    private static void appendPathConfiguration(StringBuilder content, String lineSeparator) {
+        content.append("###############################################################################").append(lineSeparator);
+        content.append("# Path configuration").append(lineSeparator);
+        content.append("###############################################################################").append(lineSeparator);
+        content.append(lineSeparator);
+        content.append("eis.home=C:/EIS").append(lineSeparator);
+        content.append("eis.conf.dir=C:/EIS/conf").append(lineSeparator);
+        content.append("eis.logs.dir=C:/EIS/logs").append(lineSeparator);
         content.append(lineSeparator);
     }
 
@@ -534,9 +628,28 @@ public final class GlobalConfiguration {
         content.append("# Database configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# JNDI name for the EIS database datasource.").append(lineSeparator);
-        content.append("# Default: java:comp/env/jdbc/EISDatabase").append(lineSeparator);
+
+        content.append("# Legacy fallback").append(lineSeparator);
+        content.append("database.datasource.mode=jndi").append(lineSeparator);
         content.append("database.jndi.name=java:comp/env/jdbc/EISDatabase").append(lineSeparator);
+        content.append("database.jdbc.url=").append(lineSeparator);
+        content.append("database.jdbc.username=").append(lineSeparator);
+        content.append("database.jdbc.password=").append(lineSeparator);
+        content.append(lineSeparator);
+
+        content.append("# Web server database configuration").append(lineSeparator);
+        content.append("web-server.database.datasource.mode=jndi").append(lineSeparator);
+        content.append("web-server.database.jndi.name=java:comp/env/jdbc/EISDatabase").append(lineSeparator);
+        content.append("web-server.database.jdbc.url=").append(lineSeparator);
+        content.append("web-server.database.jdbc.username=").append(lineSeparator);
+        content.append("web-server.database.jdbc.password=").append(lineSeparator);
+        content.append(lineSeparator);
+
+        content.append("# Integration server database configuration").append(lineSeparator);
+        content.append("integration-server.database.datasource.mode=jdbc").append(lineSeparator);
+        content.append("integration-server.database.jdbc.url=jdbc:sqlserver://localhost:1433;databaseName=EIS;encrypt=true;trustServerCertificate=true").append(lineSeparator);
+        content.append("integration-server.database.jdbc.username=CHANGE_ME").append(lineSeparator);
+        content.append("integration-server.database.jdbc.password=CHANGE_ME").append(lineSeparator);
         content.append(lineSeparator);
     }
 
@@ -545,34 +658,11 @@ public final class GlobalConfiguration {
         content.append("# Mail queue configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# Enables or disables the mail queue job in the integration server.").append(lineSeparator);
-        content.append("# Allowed values: true, false, yes, no, 1, 0, on, off").append(lineSeparator);
-        content.append("# Default: true").append(lineSeparator);
         content.append("mail.queue.job.enabled=true").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of seconds between mail queue job runs.").append(lineSeparator);
-        content.append("# Default: 60").append(lineSeparator);
-        content.append("# Allowed range: 10 - 86400").append(lineSeparator);
         content.append("mail.queue.job.interval.seconds=60").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Maximum number of mails processed per job run.").append(lineSeparator);
-        content.append("# Default: 25").append(lineSeparator);
-        content.append("# Allowed range: 1 - 500").append(lineSeparator);
         content.append("mail.queue.batch.size=25").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of minutes before a failed mail is retried.").append(lineSeparator);
-        content.append("# Default: 60").append(lineSeparator);
-        content.append("# Allowed range: 1 - 1440").append(lineSeparator);
         content.append("mail.queue.retry.delay.minutes=60").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Maximum number of delivery attempts before status becomes UNDELIVERED.").append(lineSeparator);
-        content.append("# Default: 5").append(lineSeparator);
-        content.append("# Allowed range: 1 - 50").append(lineSeparator);
         content.append("mail.queue.max.attempts=5").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of minutes before a mail stuck in SENDING is released for retry.").append(lineSeparator);
-        content.append("# Default: 15").append(lineSeparator);
-        content.append("# Allowed range: 1 - 1440").append(lineSeparator);
         content.append("mail.queue.stuck.sending.timeout.minutes=15").append(lineSeparator);
         content.append(lineSeparator);
 
@@ -580,60 +670,19 @@ public final class GlobalConfiguration {
         content.append("# SMTP configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# SMTP server host.").append(lineSeparator);
-        content.append("# Default: localhost").append(lineSeparator);
         content.append("mail.smtp.host=localhost").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# SMTP server port.").append(lineSeparator);
-        content.append("# Default: 25").append(lineSeparator);
-        content.append("# Allowed range: 1 - 65535").append(lineSeparator);
         content.append("mail.smtp.port=25").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# SMTP username. Leave empty if authentication is disabled.").append(lineSeparator);
         content.append("mail.smtp.username=").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# SMTP password. Leave empty if authentication is disabled.").append(lineSeparator);
         content.append("mail.smtp.password=").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Whether SMTP authentication is enabled.").append(lineSeparator);
-        content.append("# Default: false").append(lineSeparator);
         content.append("mail.smtp.auth=false").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Whether STARTTLS is enabled.").append(lineSeparator);
-        content.append("# Default: false").append(lineSeparator);
         content.append("mail.smtp.starttls=false").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Whether SSL is enabled.").append(lineSeparator);
-        content.append("# Default: false").append(lineSeparator);
         content.append("mail.smtp.ssl=false").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# SMTP connection timeout in milliseconds.").append(lineSeparator);
-        content.append("# Default: 10000").append(lineSeparator);
-        content.append("# Allowed range: 1000 - 120000").append(lineSeparator);
         content.append("mail.smtp.connection.timeout.ms=10000").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# SMTP read timeout in milliseconds.").append(lineSeparator);
-        content.append("# Default: 10000").append(lineSeparator);
-        content.append("# Allowed range: 1000 - 120000").append(lineSeparator);
         content.append("mail.smtp.read.timeout.ms=10000").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# Default sender email used if no sender is supplied.").append(lineSeparator);
         content.append("mail.default.from.email=no-reply@example.com").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Default sender name used if no sender is supplied.").append(lineSeparator);
         content.append("mail.default.from.name=BEPA EIS").append(lineSeparator);
-        content.append(lineSeparator);
-
-        content.append("###############################################################################").append(lineSeparator);
-        content.append("# Mail template configuration").append(lineSeparator);
-        content.append("###############################################################################").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Relative path under EIS config directory, or absolute path.").append(lineSeparator);
-        content.append("# Default: eis/mail-templates").append(lineSeparator);
-        content.append("mail.template.folder=eis/mail-templates").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Default content type if template does not specify one.").append(lineSeparator);
-        content.append("# Default: text/html; charset=UTF-8").append(lineSeparator);
+        content.append("mail.template.folder=C:/EIS/conf/mail-templates").append(lineSeparator);
         content.append("mail.default.content.type=text/html; charset=UTF-8").append(lineSeparator);
         content.append(lineSeparator);
     }
@@ -643,53 +692,15 @@ public final class GlobalConfiguration {
         content.append("# Customer workflow configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# Enables or disables the customer workflow job in the integration server.").append(lineSeparator);
-        content.append("# Allowed values: true, false, yes, no, 1, 0, on, off").append(lineSeparator);
-        content.append("# Default: true").append(lineSeparator);
         content.append("customer.workflow.job.enabled=true").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of seconds between customer workflow job runs.").append(lineSeparator);
-        content.append("# Default: 600").append(lineSeparator);
-        content.append("# Allowed range: 60 - 86400").append(lineSeparator);
         content.append("customer.workflow.job.interval.seconds=600").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Public base URL used when generating customer workflow action links.").append(lineSeparator);
-        content.append("# Default: http://localhost:8080").append(lineSeparator);
         content.append("customer.workflow.portal.base.url=http://localhost:8080").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days in the customer trial period.").append(lineSeparator);
-        content.append("# Default: 14").append(lineSeparator);
-        content.append("# Allowed range: 1 - 365").append(lineSeparator);
         content.append("customer.workflow.trial.days=14").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days before trial expiry where the reminder is sent.").append(lineSeparator);
-        content.append("# Default: 2").append(lineSeparator);
-        content.append("# Allowed range: 0 - 365").append(lineSeparator);
         content.append("customer.workflow.trial.reminder.days.before.expiry=2").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days after payment due date before suspension.").append(lineSeparator);
-        content.append("# Default: 14").append(lineSeparator);
-        content.append("# Allowed range: 0 - 365").append(lineSeparator);
         content.append("customer.workflow.payment.grace.period.days=14").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days account confirmation tokens are valid.").append(lineSeparator);
-        content.append("# Default: 7").append(lineSeparator);
-        content.append("# Allowed range: 1 - 365").append(lineSeparator);
         content.append("customer.workflow.confirmation.token.valid.days=7").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days payment tokens are valid.").append(lineSeparator);
-        content.append("# Default: 14").append(lineSeparator);
-        content.append("# Allowed range: 1 - 365").append(lineSeparator);
         content.append("customer.workflow.payment.token.valid.days=14").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days reactivation tokens are valid.").append(lineSeparator);
-        content.append("# Default: 14").append(lineSeparator);
-        content.append("# Allowed range: 1 - 365").append(lineSeparator);
         content.append("customer.workflow.reactivation.token.valid.days=14").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of days before subscription expiry where renewal reminder is sent.").append(lineSeparator);
-        content.append("# Default: 14").append(lineSeparator);
-        content.append("# Allowed range: 0 - 365").append(lineSeparator);
         content.append("customer.workflow.subscription.renewal.reminder.days.before.expiry=14").append(lineSeparator);
         content.append(lineSeparator);
     }
@@ -699,59 +710,16 @@ public final class GlobalConfiguration {
         content.append("# MFA configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
-        content.append("# MFA issuer used in authenticator apps in normal mode.").append(lineSeparator);
-        content.append("# Default: BEPA EIS").append(lineSeparator);
         content.append("mfa.issuer=BEPA EIS").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# MFA issuer used in authenticator apps when udv.mode=true.").append(lineSeparator);
-        content.append("# Default: BEPA EIS DEV").append(lineSeparator);
         content.append("mfa.issuer.dev=BEPA EIS DEV").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Global MFA mode.").append(lineSeparator);
-        content.append("# Allowed values: DISABLED, OPTIONAL, REQUIRED").append(lineSeparator);
-        content.append("# Default: OPTIONAL").append(lineSeparator);
         content.append("mfa.mode=OPTIONAL").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of digits in the generated TOTP code.").append(lineSeparator);
-        content.append("# Allowed range: 4 - 10").append(lineSeparator);
-        content.append("# Default: 6").append(lineSeparator);
         content.append("mfa.code.length=6").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of seconds each TOTP code is valid.").append(lineSeparator);
-        content.append("# Allowed range: 10 - 300").append(lineSeparator);
-        content.append("# Default: 30").append(lineSeparator);
         content.append("mfa.code.valid.seconds=30").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of minutes a pre-authentication MFA token/session is valid.").append(lineSeparator);
-        content.append("# Allowed range: 1 - 60").append(lineSeparator);
-        content.append("# Default: 5").append(lineSeparator);
         content.append("mfa.pre.auth.token.valid.minutes=5").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Maximum number of MFA verification attempts before verification is blocked.").append(lineSeparator);
-        content.append("# Allowed range: 1 - 20").append(lineSeparator);
-        content.append("# Default: 5").append(lineSeparator);
         content.append("mfa.max.verification.attempts=5").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of minutes an MFA lockout should last.").append(lineSeparator);
-        content.append("# Allowed range: 1 - 1440").append(lineSeparator);
-        content.append("# Default: 10").append(lineSeparator);
         content.append("mfa.lockout.minutes=10").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of MFA recovery codes generated for a user.").append(lineSeparator);
-        content.append("# Allowed range: 1 - 50").append(lineSeparator);
-        content.append("# Default: 10").append(lineSeparator);
         content.append("mfa.recovery.code.count=10").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Allowed TOTP time-window drift.").append(lineSeparator);
-        content.append("# 0 = only current time window is accepted").append(lineSeparator);
-        content.append("# 1 = previous, current and next time window are accepted").append(lineSeparator);
-        content.append("# Allowed range: 0 - 10").append(lineSeparator);
-        content.append("# Default: 1").append(lineSeparator);
         content.append("mfa.allowed.time.window.drift=1").append(lineSeparator);
-        content.append(lineSeparator);
-        content.append("# Number of random bytes used when generating an MFA shared secret.").append(lineSeparator);
-        content.append("# Allowed range: 16 - 64").append(lineSeparator);
-        content.append("# Default: 20").append(lineSeparator);
         content.append("mfa.secret.bytes=20").append(lineSeparator);
     }
 

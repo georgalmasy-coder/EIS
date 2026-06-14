@@ -18,15 +18,15 @@ public class CustomerProjectProvider extends GenericProvider {
             "SELECT P.ProjectId, P.ProjectName, C.CustomerId, C.CustomerName  FROM PROJECT P, CUSTOMER C " +
                     "WHERE P.ProjectId IN (SELECT ProjectId FROM USER_PROJECT WHERE UserId IN (SELECT UserId FROM USERS WHERE Email = ?)) " +
                     "AND P.Active = 1 " +
-                    "AND P.CustomerId = C.CustomerId " +
-                    "AND C.Active = 1";
+                    "AND P.CustomerId = C.CustomerId "; // +
+                    //"AND C.Active = 1";
 
     private static final String CUSTOMER_ID_BY_PROJECT_ID_SQL =
             "SELECT C.CustomerId FROM PROJECT P, CUSTOMER C " +
                     "WHERE P.ProjectId = ? " +
                     "AND P.Active = 1 " +
-                    "AND P.CustomerId = C.CustomerId " +
-                    "AND C.Active = 1";
+                    "AND P.CustomerId = C.CustomerId "; // +
+                    //"AND C.Active = 1";
 
 
     public CustomerProjectProvider(WebSession webSession) {

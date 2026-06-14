@@ -1,6 +1,11 @@
 package com.bepa.eis.server.api.web.application.admin;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.mail.MailQueueItem;
+import com.bepa.eis.common.dto.mail.MailQueueStatistics;
+import com.bepa.eis.common.enums.mail.MailStatus;
+import com.bepa.eis.common.enums.mail.MailTemplateType;
+import com.bepa.eis.common.providers.mail.MailProvider;
 import com.bepa.eis.common.providers.misc.EventProvider;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
@@ -23,7 +28,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.time.Instant;
+import java.sql.Timestamp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -36,6 +41,7 @@ import java.util.List;
         "/admin/api/dashboard/users",
         "/admin/api/dashboard/customer-creation",
         "/admin/api/dashboard/subscriptions-payments",
+        "/admin/api/dashboard/mail-status",
         "/admin/api/dashboard/alerts",
         "/admin/api/dashboard/integrations",
         "/admin/api/dashboard/modules",
@@ -48,10 +54,10 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
     private static final int MEMORY_HISTORY_LIMIT = 48;
     private static final int ALERT_DASHBOARD_DAYS = 10;
+    private static final int CUSTOMER_DASHBOARD_TREND_DAYS = 10;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Deque<MemoryPoint> memoryHistory = new ArrayDeque<>();
-    private final Instant startedAt = Instant.now();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -65,6 +71,7 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             case "/admin/api/dashboard/users" -> buildUsersResponse();
             case "/admin/api/dashboard/customer-creation" -> buildCustomerCreationResponse();
             case "/admin/api/dashboard/subscriptions-payments" -> buildSubscriptionsPaymentsResponse();
+            case "/admin/api/dashboard/mail-status" -> buildMailStatusResponse();
             case "/admin/api/dashboard/alerts" -> buildAlertsResponse();
             case "/admin/api/dashboard/integrations" -> buildIntegrationsResponse();
             case "/admin/api/dashboard/modules" -> buildModulesResponse();
@@ -87,6 +94,7 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
     private OverviewResponse buildOverviewResponse() {
         List<EventRow> latestEvents = loadLatestEvents();
+        MailOverviewCounts mailOverviewCounts = loadMailOverviewCounts();
 
         return new OverviewResponse(
                 98,
@@ -95,7 +103,8 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                 1,
                 3,
                 5,
-                2,
+                mailOverviewCounts.retryingEmails(),
+                mailOverviewCounts.undeliveredEmails(),
                 0,
                 3,
                 List.of(40, 44, 48, 52, 49, 55, 62, 68, 65, 72, 78, 83),
@@ -109,9 +118,43 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                         new StatusRow("API", "OK"),
                         new StatusRow("Database", "OK"),
                         new StatusRow("Queue", "OK"),
-                        new StatusRow("Email", "Warning")
+                        new StatusRow("Email", mailOverviewCounts.emailStatus())
                 )
         );
+    }
+
+    private MailOverviewCounts loadMailOverviewCounts() {
+        try {
+            MailProvider mailProvider = new MailProvider(null);
+            MailQueueStatistics statistics = mailProvider.getMailQueueStatistics();
+
+            int retryingEmails = safeInt(statistics.getFailedCount());
+            int undeliveredEmails = safeInt(statistics.getUndeliveredCount());
+
+            String emailStatus = undeliveredEmails > 0
+                    ? "Critical"
+                    : retryingEmails > 0
+                      ? "Warning"
+                      : "OK";
+
+            return new MailOverviewCounts(
+                    retryingEmails,
+                    undeliveredEmails,
+                    emailStatus
+            );
+        } catch (RuntimeException e) {
+            log.warn("Could not load mail queue statistics from database. Using empty mail overview counts.", e);
+
+            return new MailOverviewCounts(
+                    0,
+                    0,
+                    "Unknown"
+            );
+        }
+    }
+
+    private int safeInt(Integer value) {
+        return value == null ? 0 : value;
     }
 
     private List<EventRow> loadLatestEvents() {
@@ -154,41 +197,35 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                 "OK",
                 "OK",
                 0,
-                new ArrayList<>(memoryHistory)
+                new ArrayList<>(memoryHistory),
+                AdminDashboardCpuLoadSampler.getCpuLoadHistory()
         );
     }
 
     private CustomersResponse buildCustomersResponse() {
-        return new CustomersResponse(
-                128,
-                14,
-                5,
-                2,
-                7,
-                List.of(82, 88, 91, 97, 102, 108, 113, 119, 123, 128),
-                List.of(
-                        new ChartItem("Basis", 104, "#2f9cff"),
-                        new ChartItem("Pro", 21, "#8b5cf6"),
-                        new ChartItem("Master", 3, "#84d64b")
-                ),
-                List.of(
-                        new ChartItem("Healthy", 110, "#84d64b"),
-                        new ChartItem("Warning", 13, "#f7c948"),
-                        new ChartItem("Critical", 5, "#ef4444")
-                ),
-                List.of(
-                        new CountryCustomerRow("Denmark", 82),
-                        new CountryCustomerRow("Sweden", 14),
-                        new CountryCustomerRow("Germany", 11),
-                        new CountryCustomerRow("United Kingdom", 9),
-                        new CountryCustomerRow("United States", 6)
-                ),
-                List.of(
-                        new CustomerProblemRow("Nordic Systems A/S", "Denmark", "Basis", "Warning", "Email confirmation missing"),
-                        new CustomerProblemRow("Global Engineering Ltd.", "United Kingdom", "Pro", "Critical", "Payment failed"),
-                        new CustomerProblemRow("ACME GmbH", "Germany", "Basis", "Warning", "Admin verification required")
-                )
-        );
+        try {
+            AdminDashboardCustomerProvider provider = new AdminDashboardCustomerProvider(null);
+            return provider.loadCustomersDashboardData();
+        } catch (SQLException e) {
+            log.warn("Could not load customers dashboard data from database. Using empty customers dashboard data.", e);
+
+            return new CustomersResponse(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    emptyIntegerList(CUSTOMER_DASHBOARD_TREND_DAYS),
+                    List.of(),
+                    List.of(
+                            new ChartItem("Healthy", 0, "#84d64b"),
+                            new ChartItem("Warning", 0, "#f7c948"),
+                            new ChartItem("Critical", 0, "#ef4444")
+                    ),
+                    List.of(),
+                    List.of()
+            );
+        }
     }
 
     private UsersResponse buildUsersResponse() {
@@ -224,59 +261,165 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
     }
 
     private CustomerCreationResponse buildCustomerCreationResponse() {
-        return new CustomerCreationResponse(
-                120,
-                92,
-                74,
-                68,
-                58,
-                5,
-                44,
-                88,
-                91,
-                4,
-                List.of(4, 8, 6, 10, 12, 9, 14, 18, 16, 22),
-                List.of(
-                        new ChartItem("Success", 88, "#84d64b"),
-                        new ChartItem("Failed", 12, "#ef4444")
-                ),
-                List.of(
-                        new FailedCreationAttemptRow("11:18", "Global Engineering Ltd.", "Payment", "Card validation failed", "Open"),
-                        new FailedCreationAttemptRow("10:42", "Nordic Systems A/S", "Email Confirmation", "Confirmation email could not be sent", "Warning"),
-                        new FailedCreationAttemptRow("09:55", "Unknown", "CVR Lookup", "CVR lookup returned no company", "Handled")
-                )
-        );
+        try {
+            AdminDashboardCustomerProvider provider = new AdminDashboardCustomerProvider(null);
+            return provider.loadCustomerCreationDashboardData();
+        } catch (SQLException e) {
+            log.warn("Could not load customer creation dashboard data from database. Using empty customer creation dashboard data.", e);
+
+            return new CustomerCreationResponse(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    emptyIntegerList(CUSTOMER_DASHBOARD_TREND_DAYS),
+                    List.of(
+                            new ChartItem("Success", 0, "#84d64b"),
+                            new ChartItem("Failed", 0, "#ef4444")
+                    ),
+                    List.of()
+            );
+        }
     }
 
     private SubscriptionsPaymentsResponse buildSubscriptionsPaymentsResponse() {
-        return new SubscriptionsPaymentsResponse(
-                184500,
-                2214000,
-                6,
-                9,
-                1.8,
-                List.of(130000, 138000, 145000, 151000, 160000, 166000, 172000, 178000, 181000, 184500),
-                List.of(
-                        new ChartItem("Basis", 114000, "#2f9cff"),
-                        new ChartItem("Pro", 52000, "#8b5cf6"),
-                        new ChartItem("Master", 18500, "#84d64b")
-                ),
-                List.of(
-                        new ChartItem("Active", 118, "#84d64b"),
-                        new ChartItem("Trial", 8, "#2f9cff"),
-                        new ChartItem("Suspended", 2, "#f7c948"),
-                        new ChartItem("Cancelled", 1, "#ef4444")
-                ),
-                List.of(
-                        new ChartItem("Successful", 96, "#84d64b"),
-                        new ChartItem("Failed", 4, "#ef4444")
-                ),
-                List.of(
-                        new FailedPaymentRow("11:21", "Global Engineering Ltd.", "4.900 kr.", "Card declined", "Open"),
-                        new FailedPaymentRow("10:44", "ACME GmbH", "1.900 kr.", "Insufficient funds", "Retrying"),
-                        new FailedPaymentRow("09:18", "Nordic Systems A/S", "990 kr.", "Expired card", "Customer contacted")
-                )
+        try {
+            AdminDashboardCustomerProvider provider = new AdminDashboardCustomerProvider(null);
+            return provider.loadSubscriptionsPaymentsDashboardData();
+        } catch (SQLException e) {
+            log.warn("Could not load subscriptions and payments dashboard data from database. Using empty subscriptions and payments dashboard data.", e);
+
+            return new SubscriptionsPaymentsResponse(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0.0,
+                    emptyIntegerList(CUSTOMER_DASHBOARD_TREND_DAYS),
+                    List.of(),
+                    List.of(),
+                    List.of(
+                            new ChartItem("Successful", 0, "#84d64b"),
+                            new ChartItem("Failed", 0, "#ef4444")
+                    ),
+                    List.of()
+            );
+        }
+    }
+
+    private MailStatusResponse buildMailStatusResponse() {
+        try {
+            MailProvider mailProvider = new MailProvider(null);
+            MailQueueStatistics statistics = mailProvider.getMailQueueStatistics();
+
+            return new MailStatusResponse(
+                    mailProvider.getSentLast7DaysCount(),
+                    mailProvider.getErrorsLast7DaysCount(),
+                    safeInt(statistics.getQueuedCount()),
+                    safeInt(statistics.getFailedCount()),
+                    safeInt(statistics.getUndeliveredCount()),
+                    safeInt(statistics.getCancelledCount()),
+                    mailProvider.getMailHourlyStatusLast24Hours()
+                            .stream()
+                            .map(point -> new MailHourlyPoint(
+                                    point.hour(),
+                                    point.sent(),
+                                    point.error()
+                            ))
+                            .toList(),
+                    mailProvider.getLatestSentMails(10)
+                            .stream()
+                            .map(this::toMailDashboardRow)
+                            .toList(),
+                    mailProvider.getLatestErrorMails(20)
+                            .stream()
+                            .map(this::toMailDashboardRow)
+                            .toList()
+            );
+        } catch (RuntimeException e) {
+            log.warn("Could not load mail status dashboard data from database. Using empty mail status dashboard data.", e);
+
+            return new MailStatusResponse(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    List.of(),
+                    List.of(),
+                    List.of()
+            );
+        }
+    }
+
+    private MailDashboardRow toMailDashboardRow(MailQueueItem mail) {
+        if (mail == null) {
+            return new MailDashboardRow(
+                    null,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    0,
+                    0,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+            );
+        }
+
+        MailTemplateType templateType = mail.getTemplateType();
+        MailStatus status = mail.getStatus();
+
+        return new MailDashboardRow(
+                mail.getMailId(),
+                mail.getTemplateTypeName(),
+                templateType == null ? "" : templateType.getDescription(),
+                mail.getFromName(),
+                mail.getFromEmail(),
+                mail.getToName(),
+                mail.getToEmail(),
+                mail.getSubject(),
+                mail.getBodyText(),
+                mail.getBodyHtml(),
+                mail.getStatusName(),
+                status == null ? "" : status.getDescription(),
+                mail.getAttemptCount() == null ? 0 : mail.getAttemptCount(),
+                mail.getMaxAttempts() == null ? 0 : mail.getMaxAttempts(),
+                formatTimestamp(mail.getCreatedAt()),
+                formatTimestamp(mail.getLastAttemptAt()),
+                formatTimestamp(mail.getNextAttemptAt()),
+                formatTimestamp(mail.getSentAt()),
+                mail.getLastError(),
+                mail.getSmtpMessageId(),
+                mail.getParametersJson()
         );
+    }
+
+    private String formatTimestamp(Timestamp timestamp) {
+        if (timestamp == null) {
+            return "";
+        }
+
+        return timestamp.toLocalDateTime().toString();
     }
 
     private AlertsResponse buildAlertsResponse() {
@@ -440,36 +583,25 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
     }
 
     private ModulesResponse buildModulesResponse() {
-        return new ModulesResponse(
-                104,
-                21,
-                3,
-                6,
-                1,
-                List.of(82, 88, 91, 96, 102, 108, 114, 119, 124, 128),
-                List.of(
-                        new ChartItem("Basis", 104, "#2f9cff"),
-                        new ChartItem("Pro", 21, "#8b5cf6"),
-                        new ChartItem("Master", 3, "#84d64b")
-                ),
-                List.of(
-                        new FeatureUsageRow("Requirements Management", 118),
-                        new FeatureUsageRow("System Breakdown", 94),
-                        new FeatureUsageRow("Attachments", 72),
-                        new FeatureUsageRow("Notes", 63),
-                        new FeatureUsageRow("Export", 41)
-                ),
-                List.of(
-                        new ModuleStatusRow("Basis", "Available"),
-                        new ModuleStatusRow("Pro", "Coming Soon"),
-                        new ModuleStatusRow("Master", "Coming Soon")
-                ),
-                List.of(
-                        new ModuleChangeRow("11:32", "Nordic Systems A/S", "Upgrade requested", "Basis", "Pro", "Pending"),
-                        new ModuleChangeRow("10:18", "ACME GmbH", "Module enabled", "None", "Basis", "OK"),
-                        new ModuleChangeRow("09:44", "Global Engineering Ltd.", "Downgrade requested", "Pro", "Basis", "Review")
-                )
-        );
+        try {
+            AdminDashboardCustomerProvider provider = new AdminDashboardCustomerProvider(null);
+            return provider.loadModulesDashboardData();
+        } catch (SQLException e) {
+            log.warn("Could not load modules dashboard data from database. Using empty modules dashboard data.", e);
+
+            return new ModulesResponse(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    emptyIntegerList(CUSTOMER_DASHBOARD_TREND_DAYS),
+                    List.of(),
+                    List.of(),
+                    List.of(),
+                    List.of()
+            );
+        }
     }
 
     private PerformanceResponse buildPerformanceResponse() {
@@ -710,6 +842,13 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
     private record ErrorResponse(String message) {
     }
 
+    private record MailOverviewCounts(
+            int retryingEmails,
+            int undeliveredEmails,
+            String emailStatus
+    ) {
+    }
+
     private record MemoryMetrics(
             double memoryPercent,
             double committedGb,
@@ -759,7 +898,8 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             int criticalAlerts,
             int paymentErrors,
             int pendingCustomerConfirmations,
-            int failedEmails,
+            int retryingEmails,
+            int undeliveredEmails,
             int failedIntegrations,
             int lockedUsers,
             List<Integer> activityTrend,
@@ -779,7 +919,8 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             String databaseStatus,
             String queueStatus,
             int incidentCount,
-            List<MemoryPoint> memorySeries
+            List<MemoryPoint> memorySeries,
+            List<AdminDashboardCpuLoadSampler.CpuLoadPoint> cpuLoadSeries
     ) {
     }
 
@@ -857,6 +998,51 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             List<ChartItem> subscriptionStatus,
             List<ChartItem> paymentHealth,
             List<FailedPaymentRow> failedPayments
+    ) {
+    }
+
+    public record MailStatusResponse(
+            int sentLast7Days,
+            int errorsLast7Days,
+            int queuedCount,
+            int retryingCount,
+            int undeliveredCount,
+            int cancelledCount,
+            List<MailHourlyPoint> hourlySeries,
+            List<MailDashboardRow> latestSentEmails,
+            List<MailDashboardRow> latestErrorEmails
+    ) {
+    }
+
+    public record MailHourlyPoint(
+            String hour,
+            int sent,
+            int error
+    ) {
+    }
+
+    public record MailDashboardRow(
+            Integer mailId,
+            String templateType,
+            String templateTypeLabel,
+            String fromName,
+            String fromEmail,
+            String toName,
+            String toEmail,
+            String subject,
+            String bodyText,
+            String bodyHtml,
+            String status,
+            String statusLabel,
+            int attemptCount,
+            int maxAttempts,
+            String createdAt,
+            String lastAttemptAt,
+            String nextAttemptAt,
+            String sentAt,
+            String lastError,
+            String smtpMessageId,
+            String parametersJson
     ) {
     }
 
@@ -1006,12 +1192,10 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
     }
 
     @Override
     public void handleSave(WebSession webSession, HttpServletRequest request, Element rootElement) throws Exception {
-
     }
 
     @Override
@@ -1031,7 +1215,6 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
     @Override
     public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
-
     }
 
     @Override

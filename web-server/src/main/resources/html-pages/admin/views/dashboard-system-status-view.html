@@ -107,29 +107,22 @@
 
         <article class="dashboard-card dashboard-card-pad">
             <div class="dashboard-card-header">
-                <h2 class="dashboard-card-title">Service Health</h2>
-                <span class="dashboard-card-subtitle">Current technical status</span>
+                <h2 class="dashboard-card-title">System CPU load</h2>
+                <span class="dashboard-card-subtitle">Last 8 hours, sampled every 10 seconds</span>
             </div>
 
-            <div class="dashboard-status-list">
-                <div class="dashboard-status-row">
-                    <span class="dashboard-status-label">API</span>
-                    <strong class="dashboard-status-value" data-field="apiStatus">—</strong>
-                </div>
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="cpuLoad8Hours"
+                        width="900"
+                        height="320"></canvas>
+            </div>
 
-                <div class="dashboard-status-row">
-                    <span class="dashboard-status-label">Database</span>
-                    <strong class="dashboard-status-value" data-field="databaseStatus">—</strong>
-                </div>
-
-                <div class="dashboard-status-row">
-                    <span class="dashboard-status-label">Queue</span>
-                    <strong class="dashboard-status-value" data-field="queueStatus">—</strong>
-                </div>
-
-                <div class="dashboard-status-row">
-                    <span class="dashboard-status-label">Open incidents</span>
-                    <strong class="dashboard-status-value" data-field="incidentCount">—</strong>
+            <div class="dashboard-legend" style="margin-top: 12px;">
+                <div class="dashboard-legend-item">
+                    <span class="dashboard-legend-swatch" style="background:#2f9cff"></span>
+                    <span>System CPU load %</span>
                 </div>
             </div>
         </article>

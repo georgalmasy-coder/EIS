@@ -1,17 +1,5 @@
 package com.bepa.eis.common.enums.mail;
 
-/*
-## Status-flow
-Den er tænkt sådan her:``` text
-QUEUED -> SENDING -> SENT
-QUEUED -> SENDING -> FAILED -> SENDING -> SENT
-QUEUED -> SENDING -> FAILED -> UNDELIVERED
-QUEUED -> CANCELLED
-FAILED -> CANCELLED
-```
-
- */
-
 public enum MailStatus {
 
     QUEUED("Queued"),

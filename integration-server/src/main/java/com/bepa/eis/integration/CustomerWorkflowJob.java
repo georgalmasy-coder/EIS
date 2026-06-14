@@ -65,6 +65,8 @@ public class CustomerWorkflowJob implements Runnable {
     }
 
     public void runOnce() {
+        log.debug("Running customer workflow job.");
+
         if (!GlobalConfiguration.isCustomerWorkflowJobEnabled()) {
             log.debug("Customer workflow job is disabled.");
             return;

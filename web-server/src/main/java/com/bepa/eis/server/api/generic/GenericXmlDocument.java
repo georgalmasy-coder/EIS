@@ -34,19 +34,6 @@ public class GenericXmlDocument {
 
     private ListOfElements listOfElements = null;
 
-/*
-    private GenericXmlDocument() {
-        try {
-            dbf = DocumentBuilderFactory.newInstance();
-            db = dbf.newDocumentBuilder();
-            doc = db.newDocument();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
- */
-
     public GenericXmlDocument(WebSession webSession) {
         try {
             this.webSession = webSession;

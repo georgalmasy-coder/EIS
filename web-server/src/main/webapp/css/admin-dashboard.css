@@ -303,6 +303,12 @@ button {
     transition: width 0.35s ease;
 }
 
+.dashboard-grid-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
 .dashboard-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -379,7 +385,8 @@ button {
     gap: 8px;
 }
 
-.dashboard-legend-item {
+.dashboard-legend-item,
+.dashboard-legend-row {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -387,7 +394,8 @@ button {
     font-size: 12px;
 }
 
-.dashboard-legend-swatch {
+.dashboard-legend-swatch,
+.dashboard-legend-dot {
     width: 12px;
     height: 12px;
     border-radius: 3px;
@@ -462,6 +470,15 @@ button {
     background: rgba(47, 156, 255, 0.045);
 }
 
+.dashboard-table tbody tr[data-mail-id] {
+    cursor: pointer;
+}
+
+.dashboard-table tbody tr[data-mail-id]:focus {
+    outline: 2px solid var(--admin-blue);
+    outline-offset: -2px;
+}
+
 .dashboard-pill {
     display: inline-flex;
     align-items: center;
@@ -527,6 +544,121 @@ button {
     font-weight: 900;
 }
 
+.dashboard-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.62);
+}
+
+.dashboard-modal-backdrop[hidden] {
+    display: none;
+}
+
+.dashboard-modal {
+    width: min(1180px, 100%);
+    max-height: calc(100vh - 48px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border: 1px solid var(--admin-panel-border);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(31, 38, 48, 0.98), rgba(20, 25, 31, 0.98));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+
+.dashboard-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px;
+    border-bottom: 1px solid var(--admin-panel-border);
+}
+
+.dashboard-modal-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.dashboard-modal-subtitle {
+    margin: 4px 0 0;
+    color: var(--admin-text-muted);
+    font-size: 12px;
+}
+
+.dashboard-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--admin-panel-border);
+    border-radius: 8px;
+    background: var(--admin-panel-light);
+    color: var(--admin-text);
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dashboard-modal-close:hover {
+    background: #283241;
+}
+
+.dashboard-modal-body {
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+    overflow: auto;
+}
+
+.dashboard-modal-section {
+    display: grid;
+    gap: 10px;
+}
+
+.dashboard-modal-section-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.dashboard-mail-preview {
+    min-height: 180px;
+    max-height: 420px;
+    padding: 16px;
+    border: 1px solid var(--admin-panel-border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #111827;
+    overflow: auto;
+}
+
+.dashboard-mail-preview pre {
+    margin: 0;
+    color: #111827;
+    white-space: pre-wrap;
+    font-family: inherit;
+}
+
+.dashboard-error-details {
+    min-height: 90px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #fecaca;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+}
+
 @media (max-width: 1280px) {
     .dashboard-kpi-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -538,6 +670,7 @@ button {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .dashboard-grid-1,
     .dashboard-grid-2,
     .dashboard-grid-3 {
         grid-template-columns: 1fr;
@@ -592,5 +725,21 @@ button {
     .dashboard-chart-wrap-lg,
     .dashboard-card:has([data-chart="hourlyLoginActivity7Days"]) .dashboard-chart-wrap {
         height: 260px;
+    }
+
+    .dashboard-modal-backdrop {
+        padding: 10px;
+    }
+
+    .dashboard-modal {
+        max-height: calc(100vh - 20px);
+    }
+
+    .dashboard-modal-header {
+        padding: 14px;
+    }
+
+    .dashboard-modal-body {
+        padding: 14px;
     }
 }

@@ -1,7 +1,7 @@
 # BackupResources.ps1
 
-$sourceFolder1 = "C:\udv\web-server\src\main\resources"
-$sourceFolder2 = "C:\udv\web-server\src\main\webapp"
+$sourceFolder1 = "C:\udv\EIS\web-server\src\main\resources"
+$sourceFolder2 = "C:\udv\EIS\web-server\src\main\webapp"
 $backupRoot = "C:\udv\backup"
 
 # Lav timestamp til mappenavn, fx: resources_backup_2026-06-05_14-30-25

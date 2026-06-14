@@ -1,11 +1,9 @@
 package com.bepa.eis.integration;
 
-import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.providers.EisDataSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,9 +21,9 @@ public class IntegrationDatabaseInstaller {
     private static final Logger log = LoggerFactory.getLogger(IntegrationDatabaseInstaller.class);
 
     private static final String[] INSTALLATION_SCRIPTS = {
-            "com/bepa/eis/common/XX-create-mail-queue-table.sql",
-            "com/bepa/eis/common/XX-create-customer-master-tables.sql",
-            "com/bepa/eis/common/XX-create-customer-workflow-tables.sql"
+//            "com/bepa/eis/common/XX-create-mail-queue-table.sql",
+//            "com/bepa/eis/common/XX-create-customer-master-tables.sql",
+//            "com/bepa/eis/common/XX-create-customer-workflow-tables.sql"
     };
 
     public IntegrationDatabaseInstaller() {
@@ -191,15 +189,7 @@ public class IntegrationDatabaseInstaller {
     }
 
     private DataSource getDataSource() {
-        try {
-            InitialContext context = new InitialContext();
-            return (DataSource) context.lookup(GlobalConfiguration.getJndiName());
-        } catch (NamingException e) {
-            throw new IllegalStateException(
-                    "Failed to lookup DataSource via JNDI name: " + GlobalConfiguration.getJndiName(),
-                    e
-            );
-        }
+        return EisDataSourceProvider.getDataSource();
     }
 
     private String truncate(

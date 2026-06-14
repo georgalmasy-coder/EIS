@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.admin;
+package com.bepa.eis.server.api.web.application.customer;
 
 import com.bepa.eis.common.dto.customer.CustomerModule;
 import com.bepa.eis.common.dto.customer.CustomerPayment;
@@ -23,6 +23,7 @@ import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.common.providers.customer.CustomerSubscriptionProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowEventProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
+import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

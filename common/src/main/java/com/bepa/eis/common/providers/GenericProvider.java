@@ -1,11 +1,8 @@
 package com.bepa.eis.common.providers;
 
-import com.bepa.eis.common.GlobalConfiguration;import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.WebSession;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -24,12 +21,7 @@ public class GenericProvider {
     }
 
     protected static DataSource getDataSource() {
-        try {
-            InitialContext ctx = new InitialContext();
-            return (DataSource) ctx.lookup(GlobalConfiguration.getJndiName());
-        } catch (NamingException e) {
-            throw new IllegalStateException("Failed to lookup DataSource via JNDI name: " + GlobalConfiguration.getJndiName(), e);
-        }
+        return EisDataSourceProvider.getDataSource();
     }
 
     protected WebSession getWebSession() {
@@ -40,11 +32,11 @@ public class GenericProvider {
         return (date == null) ? null : new Timestamp(date.getTime());
     }
 
-    protected void setString(PreparedStatement ps, String value, int index ) throws SQLException {
+    protected void setString(PreparedStatement ps, String value, int index) throws SQLException {
         ps.setString(index, value);
     }
 
-    protected void setInt(PreparedStatement ps, Integer value, int index ) throws SQLException {
+    protected void setInt(PreparedStatement ps, Integer value, int index) throws SQLException {
         if (value == null) {
             ps.setNull(index, Types.INTEGER);
         } else {
@@ -52,12 +44,11 @@ public class GenericProvider {
         }
     }
 
-    protected void setTimestamp(PreparedStatement ps, Date value, int index ) throws SQLException {
+    protected void setTimestamp(PreparedStatement ps, Date value, int index) throws SQLException {
         if (value == null) {
             ps.setNull(index, Types.TIMESTAMP);
         } else {
             ps.setTimestamp(index, getTimestamp(value));
         }
     }
-
 }

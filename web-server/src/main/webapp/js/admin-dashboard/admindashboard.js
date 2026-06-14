@@ -41,6 +41,11 @@ const views = {
         htmlUrl: "/web/view?page=dashboard-subscriptions-payments-view",
         moduleUrl: "/js/views/subscriptions-payments-view.js"
     },
+    "mail-status": {
+        title: "Mail Status",
+        htmlUrl: "/web/view?page=dashboard-mail-status-view",
+        moduleUrl: "/js/views/mail-status-view.js"
+    },
     "alerts": {
         title: "Alerts",
         htmlUrl: "/web/view?page=dashboard-alerts-view",

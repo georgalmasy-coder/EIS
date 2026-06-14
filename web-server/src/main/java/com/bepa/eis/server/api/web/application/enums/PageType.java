@@ -13,7 +13,6 @@ public enum PageType {
     SYSTEM_REQUIREMENT_DIAGRAM_PAGE("systemrequirementdiagram","html-pages/systemrequirementdiagram.html", "System Requirement Hierarchy Diagram"),
     SYSTEM_REQUIREMENT_DIAGRAM_V2_PAGE("systemrequirementdiagramV2","html-pages/systemrequirementdiagramV2.html", "System Requirement Hierarchy Diagram"),
 
-
     NEW_SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
     NEW_SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit"),
 
@@ -37,9 +36,12 @@ public enum PageType {
     ADMIN_DASHBOARD_SUBSCRIPTIONS_PAYMENTS_PAGE("dashboard-subscriptions-payments-view","html-pages/admin/views/dashboard-subscriptions-payments-view.html", ""),
     ADMIN_DASHBOARD_SYSTEM_STATUS_PAGE("dashboard-system-status-view","html-pages/admin/views/dashboard-system-status-view.html", ""),
     ADMIN_DASHBOARD_USERS_PAGE("dashboard-users-view","html-pages/admin/views/dashboard-users-view.html", ""),
+    ADMIN_DASHBOARD_MAILS_PAGE("dashboard-mail-status-view","html-pages/admin/views/dashboard-mail-status-view.html", ""),
 
     ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS"),
 
+    BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines"),
+    BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail"),
 
     NONE("invalid", "", "") ;
 

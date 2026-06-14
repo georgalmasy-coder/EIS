@@ -1,0 +1,253 @@
+<section class="dashboard-view-page" data-view="mail-status">
+    <header class="dashboard-page-header">
+        <div>
+            <h1 class="dashboard-page-title">Mail Status</h1>
+            <p class="dashboard-page-description">
+                Operational overview of sent, retrying and undelivered emails from the mail queue.
+            </p>
+        </div>
+    </header>
+
+    <section class="dashboard-kpi-grid">
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✓</div>
+            <div class="dashboard-kpi-label">Sent last 7 days</div>
+            <div class="dashboard-kpi-help">Successfully sent emails</div>
+            <div class="dashboard-kpi-value" data-field="sentLast7Days">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="sentLast7Days"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">!</div>
+            <div class="dashboard-kpi-label">Errors last 7 days</div>
+            <div class="dashboard-kpi-help">Retrying and undelivered emails</div>
+            <div class="dashboard-kpi-value" data-field="errorsLast7Days">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="errorsLast7Days"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">…</div>
+            <div class="dashboard-kpi-label">Queued</div>
+            <div class="dashboard-kpi-help">Waiting to be sent</div>
+            <div class="dashboard-kpi-value" data-field="queuedCount">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="queuedCount"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">↻</div>
+            <div class="dashboard-kpi-label">Retrying</div>
+            <div class="dashboard-kpi-help">Failed emails with attempts left</div>
+            <div class="dashboard-kpi-value" data-field="retryingCount">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="retryingCount"></div>
+            </div>
+        </article>
+
+        <article class="dashboard-card dashboard-kpi-card">
+            <div class="dashboard-kpi-icon">✕</div>
+            <div class="dashboard-kpi-label">Undelivered</div>
+            <div class="dashboard-kpi-help">Permanently failed emails</div>
+            <div class="dashboard-kpi-value" data-field="undeliveredCount">—</div>
+            <div class="dashboard-mini-bar">
+                <div class="dashboard-mini-bar-fill" data-bar="undeliveredCount"></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-1">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Mail delivery by hour</h2>
+                <span class="dashboard-card-subtitle">Sent and error emails hour by hour</span>
+            </div>
+
+            <div class="dashboard-chart-wrap">
+                <canvas
+                        class="dashboard-chart-canvas"
+                        data-chart="mailHourlyChart"
+                        width="1200"
+                        height="360"></canvas>
+            </div>
+
+            <div class="dashboard-legend" data-legend="mailHourlyLegend">
+                <div class="dashboard-legend-row">
+                    <span class="dashboard-legend-dot" style="background:#84d64b"></span>
+                    <span>Sent</span>
+                </div>
+                <div class="dashboard-legend-row">
+                    <span class="dashboard-legend-dot" style="background:#ef4444"></span>
+                    <span>Error</span>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-1">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Latest sent emails</h2>
+                <span class="dashboard-card-subtitle">Latest 10 successfully sent emails</span>
+            </div>
+
+            <table class="dashboard-table">
+                <thead>
+                <tr>
+                    <th>ToEmail</th>
+                    <th>ToName</th>
+                    <th>FromName</th>
+                    <th>Template</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>AttemptCount</th>
+                </tr>
+                </thead>
+                <tbody data-table="latestSentEmails"></tbody>
+            </table>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-1">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Latest error emails</h2>
+                <span class="dashboard-card-subtitle">Latest 20 retrying or undelivered emails</span>
+            </div>
+
+            <table class="dashboard-table">
+                <thead>
+                <tr>
+                    <th>ToEmail</th>
+                    <th>ToName</th>
+                    <th>FromName</th>
+                    <th>Template</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>AttemptCount</th>
+                </tr>
+                </thead>
+                <tbody data-table="latestErrorEmails"></tbody>
+            </table>
+        </article>
+    </section>
+
+    <div class="dashboard-modal-backdrop" data-modal="mailDetails" hidden>
+        <div class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="mailDetailsTitle">
+            <div class="dashboard-modal-header">
+                <div>
+                    <h2 class="dashboard-modal-title" id="mailDetailsTitle">Email details</h2>
+                    <p class="dashboard-modal-subtitle" data-field="modalMailSubtitle">—</p>
+                </div>
+
+                <button class="dashboard-modal-close" type="button" data-action="closeMailDetails" aria-label="Close email details">
+                    ×
+                </button>
+            </div>
+
+            <div class="dashboard-modal-body">
+                <section class="dashboard-modal-section">
+                    <h3 class="dashboard-modal-section-title">Message</h3>
+
+                    <div class="dashboard-status-list">
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">Subject</span>
+                            <strong class="dashboard-status-value" data-field="modalSubject">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-mail-preview" data-field="modalBodyPreview">
+                        —
+                    </div>
+                </section>
+
+                <section class="dashboard-modal-section">
+                    <h3 class="dashboard-modal-section-title">Delivery information</h3>
+
+                    <div class="dashboard-status-list">
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">MailId</span>
+                            <strong class="dashboard-status-value" data-field="modalMailId">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">Template</span>
+                            <strong class="dashboard-status-value" data-field="modalTemplate">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">Status</span>
+                            <strong class="dashboard-status-value" data-field="modalStatus">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">Attempts</span>
+                            <strong class="dashboard-status-value" data-field="modalAttempts">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">CreatedAt</span>
+                            <strong class="dashboard-status-value" data-field="modalCreatedAt">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">LastAttemptAt</span>
+                            <strong class="dashboard-status-value" data-field="modalLastAttemptAt">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">NextAttemptAt</span>
+                            <strong class="dashboard-status-value" data-field="modalNextAttemptAt">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">SentAt</span>
+                            <strong class="dashboard-status-value" data-field="modalSentAt">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">SmtpMessageId</span>
+                            <strong class="dashboard-status-value" data-field="modalSmtpMessageId">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-modal-section">
+                    <h3 class="dashboard-modal-section-title">Sender and recipient</h3>
+
+                    <div class="dashboard-status-list">
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">ToName</span>
+                            <strong class="dashboard-status-value" data-field="modalToName">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">ToEmail</span>
+                            <strong class="dashboard-status-value" data-field="modalToEmail">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">FromName</span>
+                            <strong class="dashboard-status-value" data-field="modalFromName">—</strong>
+                        </div>
+
+                        <div class="dashboard-status-row">
+                            <span class="dashboard-status-label">FromEmail</span>
+                            <strong class="dashboard-status-value" data-field="modalFromEmail">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-modal-section">
+                    <h3 class="dashboard-modal-section-title">Error details</h3>
+
+                    <pre class="dashboard-error-details" data-field="modalLastError">—</pre>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
