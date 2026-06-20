@@ -26,6 +26,7 @@ form.addEventListener("submit", async (e) => {
         if (res.ok) {
             // Session-cookie er sat af serveren. Redirect til ny side.
             window.location.href = "select-project.html";
+//GFA            window.location.href = "/api/projectselected";
             return;
         }
 

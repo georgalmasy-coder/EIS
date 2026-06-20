@@ -31,6 +31,11 @@ public class SystemRequirementProvider extends EntityProvider {
         super(webSession);
     }
 
+    @Override
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
     public Entities getListOfSystemRequirements() throws SQLException {
         return getListOfEntitiesByProjectId(entityType, getEntityDataElementForList());
     }

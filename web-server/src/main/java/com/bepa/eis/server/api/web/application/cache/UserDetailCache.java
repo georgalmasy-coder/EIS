@@ -26,8 +26,8 @@ public class UserDetailCache extends GenericLookup {
             "AND   UC.CustomerId=? " +
             "ORDER BY U.Name";
 
-    public UserDetailCache(WebSession webSession) {
-        setLookupSql(LOOKUP_SQL, webSession);
+    public UserDetailCache(Integer customerId, Integer projectId) {
+        setLookupSql(LOOKUP_SQL, customerId, projectId);
         reloadCache();
     }
 

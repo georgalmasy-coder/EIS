@@ -6,7 +6,9 @@ public class DepartmentCache extends GenericLookup {
 
     private static final String LOOKUP_SQL =
 
-            "SELECT DEPARTMENTID AS LookupId, " +
+            "SELECT CustomerId, " +
+            "null AS ProjectId, " +
+            "DEPARTMENTID AS LookupId, " +
             "CONCAT( CONCAT( DEPARTMENTNAME,' - '), DEPARTMENTDESCRIPTION) AS LookupCode, " +
             "DEPARTMENTDESCRIPTION AS LookupDescription, " +
             "ACTIVE "  +
@@ -14,8 +16,8 @@ public class DepartmentCache extends GenericLookup {
             "WHERE CustomerId=? " +
             "ORDER BY DepartmentName";
 
-    public DepartmentCache(WebSession webSession) {
-        setLookupSql(LOOKUP_SQL, webSession);
+    public DepartmentCache(Integer customerId, Integer projectId) {
+        setLookupSql(LOOKUP_SQL, customerId, projectId);
         reloadCache();
     }
 

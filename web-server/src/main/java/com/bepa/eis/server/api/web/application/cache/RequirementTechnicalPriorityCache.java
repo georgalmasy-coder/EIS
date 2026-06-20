@@ -4,7 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 
 public class RequirementTechnicalPriorityCache extends GenericLookup {
 
-    public RequirementTechnicalPriorityCache(WebSession webSession) {
+    public RequirementTechnicalPriorityCache(Integer customerId, Integer projectId) {
         setLookupSqlByType(5);
         reloadCache();
     }

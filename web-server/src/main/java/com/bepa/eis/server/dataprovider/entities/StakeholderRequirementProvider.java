@@ -28,6 +28,11 @@ public class StakeholderRequirementProvider extends EntityProvider {
         super(webSession);
     }
 
+    @Override
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
     public Entities getListOfBasisRequirements() throws SQLException {
         return getListOfEntitiesByProjectId(entityType, getEntityDataElementForList());
     }

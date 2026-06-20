@@ -1,6 +1,5 @@
 package com.bepa.eis.server.dataprovider.fields.lookups.system;
 
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
 import org.slf4j.Logger;
@@ -27,11 +26,12 @@ public class SBSCodeType extends AbstractLookup {
     @Override
     public List<LookupValue> getListOfActiveLookupValues() {
         if (lookupValues.isEmpty()) {
-            lookupValues.add(new LookupValue(1, "= Function", "Function", true));
-            lookupValues.add(new LookupValue(2, "+ Location", "Location", true));
-            lookupValues.add(new LookupValue(3, "- Product", "Product", true));
-            lookupValues.add(new LookupValue(4, "% Type or classification", "Type or classification", true));
-            lookupValues.add(new LookupValue(5, "# Other", "Other", true));
+
+            lookupValues.add(new LookupValue(getWebSession().getCustomerId(), getWebSession().getProjectId(), 1, "= Function", "Function", true));
+            lookupValues.add(new LookupValue(getWebSession().getCustomerId(), getWebSession().getProjectId(), 2, "+ Location", "Location", true));
+            lookupValues.add(new LookupValue(getWebSession().getCustomerId(), getWebSession().getProjectId(), 3, "- Product", "Product", true));
+            lookupValues.add(new LookupValue(getWebSession().getCustomerId(), getWebSession().getProjectId(), 4, "% Type or classification", "Type or classification", true));
+            lookupValues.add(new LookupValue(getWebSession().getCustomerId(), getWebSession().getProjectId(), 5, "# Other", "Other", true));
         }
         return lookupValues;
     }

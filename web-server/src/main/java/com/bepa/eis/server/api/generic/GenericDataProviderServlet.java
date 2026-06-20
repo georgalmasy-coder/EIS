@@ -44,6 +44,8 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(GenericDataProviderServlet.class);
 
+    private WebSession webSession;
+
     abstract public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception;
     abstract public void handleSave(WebSession webSession, HttpServletRequest request, Element rootElement) throws Exception;
 
@@ -60,6 +62,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         long startTime = System.currentTimeMillis();
 
         WebSession webSession = getWebSessionFromRequest(request);
+        setWebSession(webSession);
 
         try {
             processGetRequest(webSession, request, response);
@@ -78,7 +81,6 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     public void processGetRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
         String command = getCommandParameter(request);
         String module = request.getServletPath() +  "." + getCommandParameter(request);
-        long startTime = System.currentTimeMillis();
 
         try {
             switch (command) {
@@ -130,6 +132,8 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 
         WebSession webSession = getWebSessionFromRequest(request);
+        setWebSession(webSession);
+
         String module = request.getServletPath() +  "." + getCommandParameter(request);
         long startTime = System.currentTimeMillis();
 
@@ -502,6 +506,14 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
         return webSession;
+    }
+
+    public WebSession getWebSession() {
+        return webSession;
+    }
+
+    private void setWebSession(WebSession webSession) {
+        this.webSession = webSession;
     }
 
 }

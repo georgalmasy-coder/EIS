@@ -15,7 +15,8 @@ public enum EntityDataElement {
     TRLID(9, "Trl", "TrlId", INTEGER),
     DEADLINENEXTTRL(10, "Deadline Next TRL", "DeadlineNextTRL", LOCAL_DATE),
     DEADLINEFINALIZED(11, "Deadline Finalized", "DeadlineFinalized", LOCAL_DATE),
-    //NOTE(12, "Notes", "Notes", STRING, new Notes(null)),
+
+    PROJECTNAME(12, "Project Name", "ProjectName", STRING),
 
 //    RBSCODE(13,"RBS code", "RBSCode", STRING),
     REQRELEVANTTOSTAKEHOLDER(14,"Is Requirement Relevant To Stakeholder", "RelevantToStakeholderRequirement", BOOLEAN),

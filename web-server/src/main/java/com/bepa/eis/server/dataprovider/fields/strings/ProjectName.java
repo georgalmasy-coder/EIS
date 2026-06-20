@@ -1,10 +1,10 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
-import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
-
 public class ProjectName extends AbstractString {
 
     public static String FIELD_NAME = "ProjectName";
+
+    public ProjectName() { }
 
     public ProjectName(String value) {
         setValue(value);

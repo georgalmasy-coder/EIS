@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class GenericProvider {
@@ -51,4 +52,13 @@ public class GenericProvider {
             ps.setTimestamp(index, getTimestamp(value));
         }
     }
+
+    protected void setTimestamp(PreparedStatement ps, LocalDate value, int index) throws SQLException {
+        if (value != null) {
+            ps.setDate(index, java.sql.Date.valueOf(value));
+        } else {
+            ps.setNull(index, java.sql.Types.DATE);
+        }
+    }
+
 }

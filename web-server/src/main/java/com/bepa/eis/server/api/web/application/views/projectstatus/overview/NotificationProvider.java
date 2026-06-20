@@ -21,10 +21,16 @@ public class NotificationProvider extends GenericProvider {
 
     private static final String GET_NOTIFICATIONS_BY_USER_ID_SQL =
             "SELECT * FROM NOTIFICATION " +
-            "WHERE CustomerId = ? " +
-            "AND  ProjectId = ? " +
-            "AND  RecipientId = ? " +
-            "ORDER BY CreatedTime DESC";
+                    "WHERE CustomerId = ? " +
+                    "AND  ProjectId = ? " +
+                    "AND  RecipientId = ? " +
+                    "ORDER BY CreatedTime DESC";
+
+    private static final String GET_MY_NOTIFICATION_COUNT_SQL =
+            "SELECT COUNT(1) AS MY_NOTIFICATION_COUNT FROM NOTIFICATION " +
+                    "WHERE CustomerId = ? " +
+                    "AND  ProjectId = ? " +
+                    "AND  RecipientId = ? ";
 
     public NotificationProvider(WebSession webSession) {
         super(webSession);
@@ -67,5 +73,25 @@ public class NotificationProvider extends GenericProvider {
             }
         }
         return notifications;
+    }
+
+    public int getMyNotificationCount(Integer customerId, Integer projectId, Integer userId)  {
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(GET_MY_NOTIFICATION_COUNT_SQL)) {
+
+            setInt(ps, customerId, 1);
+            setInt(ps, projectId, 2);
+            setInt(ps, userId, 3);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                return rs.next() ? rs.getInt("MY_NOTIFICATION_COUNT") : 0;
+            }
+
+        } catch (SQLException e) {
+            log.error("Could not load notification count from database.", e);
+        }
+        return 0;
     }
 }

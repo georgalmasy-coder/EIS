@@ -38,6 +38,10 @@ public class CustomerLookupCache {
         return getLookupCache(webSession).getTrlLookupValue(lookupId);
     }
 
+    public static LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+        return getLookupCache(customerId, projectId).getTrlLookupValue(lookupId);
+    }
+
     public static List<LookupValue> getTrlLookupValues(WebSession webSession) {
         return getLookupCache(webSession).getTrlLookupValues();
     }
@@ -47,7 +51,7 @@ public class CustomerLookupCache {
     }
 
     public static List<LookupValue> getProjectCategoryLookupValues(WebSession webSession) {
-        return getLookupCache(webSession).getProjectPriorityLookupValues();
+        return getLookupCache(webSession).getProjectCategoryLookupValues();
     }
 
     public static LookupValue getProjectPriorityLookupValue(WebSession webSession, Integer priorityId) {
@@ -138,25 +142,46 @@ public class CustomerLookupCache {
             reloadCache(webSession);
             lookupCache = getCache().get(webSession.getCustomerId());
             if (lookupCache == null) {
-                throw new IllegalStateException("Failed to load requirement business priority lookup cache for customer: " + webSession.getCustomerId());
+                throw new IllegalStateException("Failed to load cache: " + CACHE_ALIAS);
             }
         }
         return lookupCache;
     }
 
+    private static LookupCache getLookupCache(Integer customerId, Integer projectId) {
+        LookupCache lookupCache;
+        try {
+            lookupCache = getCache().get(customerId);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load cache: " + CACHE_ALIAS);
+        }
+
+        if (lookupCache == null) {
+            reloadCache(customerId, projectId);
+            lookupCache = getCache().get(customerId);
+            if (lookupCache == null) {
+                throw new IllegalStateException("Failed to load cache: " + CACHE_ALIAS);
+            }
+        }
+        return lookupCache;
+    }
+
+
     private static void reloadCache(WebSession webSession) {
+        if ( webSession != null  ) {
+            reloadCache(webSession.getCustomerId(), webSession.getProjectId());
+        }
+    }
+
+    private static void reloadCache(Integer customerId, Integer projectId) {
         BULK_LOAD_LOCK.lock();
         try {
-            if ( webSession != null /*&& ! isCacheLoaded()*/ ) {
-                getCache().put(webSession.getCustomerId(), new LookupCache(webSession));
-            } else {
-                log.debug("Cache for requirement business priority {} found.", webSession.getCustomerId());
+            if ( customerId != null  ) {
+                getCache().put(customerId, new LookupCache(customerId, projectId));
             }
-
         } finally {
             BULK_LOAD_LOCK.unlock();
         }
-
     }
 
     private static Cache<Integer, LookupCache> getCache() {

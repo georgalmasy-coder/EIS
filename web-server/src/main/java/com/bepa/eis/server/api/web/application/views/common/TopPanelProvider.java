@@ -25,10 +25,16 @@ public class TopPanelProvider extends GenericProvider {
     private final TopPanel topPanel = new TopPanel(getWebSession());
 
     private static final String GET_CUSTOMER_BY_CUSTOMER_ID_SQL =
-            "SELECT * FROM CUSTOMER WHERE CustomerId = ?";
+            "SELECT * " +
+            "FROM CUSTOMER " +
+            "WHERE CustomerId = ? " +
+            "AND Latest=1";
 
     private static final String GET_PROJECT_BY_PROJECT_ID_SQL =
-            "SELECT * FROM PROJECT WHERE ProjectId = ?";
+            "SELECT * " +
+            "FROM PROJECT " +
+            "WHERE ProjectId = ? " +
+            "AND Latest=1";
 
     private static final String GET_USER_BY_USER_ID_SQL =
             "SELECT * FROM USERS WHERE UserId = ?";
@@ -112,49 +118,51 @@ public class TopPanelProvider extends GenericProvider {
     }
 
     public String getUserName() throws SQLException {
-        if (userId == null && getWebSession().getUserId() != null) {
-            loadProjectInfo();
+        if (userName == null && getWebSession().getUserId() != null) {
+            loadUserInfo();
         }
         return userName != null ? userName.getValue() : "";
     }
 
     private void loadCustomerInfo() throws SQLException {
         /* Get customer info */
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(GET_CUSTOMER_BY_CUSTOMER_ID_SQL)) {
+        if (getWebSession() != null && getWebSession().getCustomerId() != null) {
+            try (Connection con = getDataSource().getConnection();
+                 PreparedStatement ps = con.prepareStatement(GET_CUSTOMER_BY_CUSTOMER_ID_SQL)) {
 
-            setInt(ps, getWebSession().getCustomerId(), 1);
+                setInt(ps, getWebSession().getCustomerId(), 1);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    log.error("No customer found for customerId: {}", getWebSession().getCustomerId());
-                    throw new SQLException("No customer found for customerId: " + getWebSession().getCustomerId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        log.error("No customer found for customerId: {}", getWebSession().getCustomerId());
+                        throw new SQLException("No customer found for customerId: " + getWebSession().getCustomerId());
+                    }
+
+                    customerId = new CustomerId(rs.getInt(CustomerId.FIELD_NAME));
+                    customerName = new CustomerName(rs.getString(CustomerName.FIELD_NAME));
                 }
-
-                customerId = new CustomerId(rs.getInt(CustomerId.FIELD_NAME));
-                customerName = new CustomerName(rs.getString(CustomerName.FIELD_NAME));
             }
         }
     }
 
     private void loadProjectInfo() throws SQLException {
         /* Get project info */
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(GET_PROJECT_BY_PROJECT_ID_SQL)) {
+        if (getWebSession() != null && getWebSession().getProjectId() != null) {
+            try (Connection con = getDataSource().getConnection();
+                 PreparedStatement ps = con.prepareStatement(GET_PROJECT_BY_PROJECT_ID_SQL)) {
 
-            setInt(ps, getWebSession().getProjectId(), 1);
+                setInt(ps, getWebSession().getProjectId(), 1);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    log.error("No project found for projectId: {}", getWebSession().getProjectId());
-                    throw new SQLException("No project found for projectId: " + getWebSession().getProjectId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        log.debug("No project found for projectId: {}", getWebSession().getProjectId());
+                    } else {
+                        projectId = new ProjectId(rs.getInt(ProjectId.FIELD_NAME));
+                        projectName = new ProjectName(rs.getString(ProjectName.FIELD_NAME));
+                    }
                 }
-
-                projectId = new ProjectId(rs.getInt(ProjectId.FIELD_NAME));
-                projectName = new ProjectName(rs.getString(ProjectName.FIELD_NAME));
             }
         }
-
     }
 
     private void loadUserInfo() throws SQLException {

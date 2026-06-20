@@ -3,6 +3,7 @@ package com.bepa.eis.common.enums.entity;
 import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
 
 public enum EntityType {
+
     SYSTEMS_BREAKDOWN(2, "SBS", "Systems breakdown", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
             new EntityDataElement[]{
                     SBSCODE,
@@ -65,6 +66,12 @@ public enum EntityType {
             },
             SYSTEMREQCODE,
             REQNAME
+    ),
+
+    PROJECT(7, "PRJ", "Project", "projectDocument", "projects", "project",
+           new EntityDataElement[]{ PROJECTNAME},
+           null,
+           PROJECTNAME
     );
 
 

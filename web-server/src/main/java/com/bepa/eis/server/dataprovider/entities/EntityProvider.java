@@ -11,7 +11,6 @@ import com.bepa.eis.server.dataprovider.fields.booleans.Latest;
 import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
-import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.AbstractParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
@@ -24,6 +23,7 @@ import com.bepa.eis.server.entites.configuration.EntityConfiguration;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
+import com.bepa.eis.server.entites.project.ProjectEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.slf4j.Logger;
@@ -45,6 +45,8 @@ abstract public class EntityProvider extends GenericProvider {
     public EntityProvider(WebSession webSession) {
         super(webSession);
     }
+
+    abstract public EntityType getEntityType();
 
     abstract public EntityDataElement[] getEntityDataElementForList();
 
@@ -92,10 +94,6 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND E.ProjectId = EE.ProjectId " +
                     "AND E.EntityType = EE.EntityType " +
                     "AND E.EntityId = EE.EntityId " +
-
-//                    "AND E.EntityId = 2 " +
-//                    "AND EE.EntityDataElementType = 5 " +
-
                     "AND E.Version = EE.Version " +
                     "AND E.LATEST = 1 " +
                     "#TYPE_CONDITION# " +
@@ -113,12 +111,7 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND E.EntityId = EE.EntityId " +
                     "AND E.Version = EE.Version " +
                     "#VERSION_CONDITION# " +
-//                    "AND E.LATEST = 1 " +
                     "#TYPE_CONDITION# " +
-
-//                    "AND E.EntityId = 1 " +
-//                    "AND EE.EntityDataElementType = 5 " +
-
                     "AND E.CustomerId = ? " +
                     "AND E.ProjectId = ? " +
                     "AND E.EntityType = ? " +
@@ -148,6 +141,16 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND ProjectId = ? " +
                     "AND EntityType = ? " +
                     "AND EntityId = ? ";
+
+    private static final String SELECT_ACTIVE_ENTITY_COUNT_SQL =
+            "SELECT COUNT(EntityId) AS ACTIVE_ENTITY_COUNT " +
+                    "FROM ENTITY " +
+                    "WHERE CustomerId = ? " +
+                    "AND ProjectId = ? " +
+                    "AND EntityType = ? " +
+                    "AND Active = 1 " +
+                    "AND Latest = 1 ";
+
 
     private static final String GET_ACTIVE_STATUS_SQL =
             "SELECT Active " +
@@ -255,6 +258,7 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND E.EntityType = ? " +
                     "AND E.EntityId = ? " +
                     "AND EE.EntityDataElementType = ?";
+
 
 
     public List<AbstractEntity> getListOfEntities(EntityType entityType, boolean includeInactive) throws SQLException {
@@ -372,9 +376,11 @@ abstract public class EntityProvider extends GenericProvider {
 
             /* And finally add another 3 default entity data elements */
             ChangedDateTime changedDateTime = new ChangedDateTime(entityRecord.getChangedDateTime());
+            changedDateTime.setFieldNotEditable();
 
             ChangedBy changedBy = new ChangedBy(getWebSession());
             changedBy.setValue(entityRecord.getChangedByUserId());
+            changedBy.setFieldNotEditable();
 
             if (historyVersion == null) {
                 changedBy.setTableWidth("175x");
@@ -692,9 +698,6 @@ abstract public class EntityProvider extends GenericProvider {
 
     public EntityKey persist(AbstractEntity entity) throws Exception {
 
-        /* GFA */
-        //if (true) { return null; }
-
         EntityKey entityKey = null;
         Integer currentEntityId;
         Integer currentVersion;
@@ -812,14 +815,16 @@ abstract public class EntityProvider extends GenericProvider {
         return nextAvailableVersion;
     }
 
-
-
     private void insertOrUpdateEntity(AbstractEntity entity) throws SQLException {
 
         try (Connection con = getDataSource().getConnection()) {
             con.setAutoCommit(false);
 
             clearLatestIndicatorOnEntity(con, entity);
+
+            if (entity.getEntityId() > 1) {
+                log.debug("update : {} by id {}", entity.getEntityType().getDescription(), entity.getEntityId());
+            }
 
             try {
                 insertNewEntity(con, entity);
@@ -828,6 +833,11 @@ abstract public class EntityProvider extends GenericProvider {
                 insertEntityAttachment(con, entity);
                 insertEntityRelations(con, entity);
                 updateActiveStatus(con, entity);
+
+                if (entity instanceof ProjectEntity) {
+                    ProjectEntity projectEntity = (ProjectEntity) entity;
+                    projectEntity.persistProject();
+                }
 
                 con.commit();
                 log.info("Entity successfully updated {}", entity.getEntityId());
@@ -971,7 +981,6 @@ abstract public class EntityProvider extends GenericProvider {
                 }
             }
         }
-//        throw new SQLException("TEST FAILED for entityId=" + entity.getEntityId());
     }
 
     private void insertEntityNotes(Connection con, AbstractEntity entity) throws SQLException {
@@ -1103,6 +1112,25 @@ abstract public class EntityProvider extends GenericProvider {
 
             }
         }
+    }
+
+    public int getActiveEntityCount(Integer customerId, Integer projectId, EntityType entityType) {
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(SELECT_ACTIVE_ENTITY_COUNT_SQL)) {
+
+            setInt(ps, customerId, 1);
+            setInt(ps, projectId, 2);
+            setInt(ps, entityType.getId(), 3);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("ACTIVE_ENTITY_COUNT") : 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<EntityRecord> getEntityRecords(EntityType entityType, Baseline baseline) throws SQLException {

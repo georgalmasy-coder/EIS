@@ -28,21 +28,21 @@ public class GenericLookup {
     private String lookupSql = null;
 
     public void setLookupSqlByType(Integer lookupType) {
-        lookupSql = "SELECT LookupId, LookupCode, LookupDescription, Active FROM LOOKUP_TABLE WHERE LookupType = " + lookupType + " ORDER BY LookupCode";
+        lookupSql = "SELECT null AS CustomerId, null AS ProjectId, LookupId, LookupCode, LookupDescription, Active FROM LOOKUP_TABLE WHERE LookupType = " + lookupType + " ORDER BY LookupCode";
     }
 
-    public void setLookupSql(String sql, WebSession webSession) {
+    public void setLookupSql(String sql, Integer customerId, Integer projectId) {
         lookupSql = sql != null ? sql.toUpperCase() : null;
 
         if (GlobalConfiguration.isUdvMode()) {
-            Integer customerId = GlobalConfiguration.isUdvMode() ? 1 : webSession.getCustomerId();
-            Integer projectId = GlobalConfiguration.isUdvMode() ? 1 : webSession.getProjectId();
+            customerId = GlobalConfiguration.isUdvMode() ? 1 : customerId;
+            projectId = GlobalConfiguration.isUdvMode() ? 1 : projectId;
 
             lookupSql = lookupSql.replace("CUSTOMERID=?", "CUSTOMERID=" +customerId);
             lookupSql = lookupSql.replace("PROJECTID=?", "PROJECTID=" + projectId);
         } else {
-            lookupSql = lookupSql.replace("CUSTOMERID=?", "CUSTOMERID=" + webSession.getCustomerId());
-            lookupSql = lookupSql.replace("PROJECTID=?", "PROJECTID=" + webSession.getProjectId());
+            lookupSql = lookupSql.replace("CUSTOMERID=?", "CUSTOMERID=" + customerId);
+            lookupSql = lookupSql.replace("PROJECTID=?", "PROJECTID=" + projectId);
         }
     }
 
@@ -87,25 +87,30 @@ public class GenericLookup {
              PreparedStatement ps = con.prepareStatement(getLookupSql());
              ResultSet rs = ps.executeQuery()) {
 
-            int count = 0;
             while (rs.next()) {
                 LookupValue lookupValue = new LookupValue(
+                        rs.getInt("CustomerId"),
+                        rs.getInt("ProjectId"),
                         rs.getInt("LookupId"),
                         rs.getString("LookupCode"),
                         rs.getString("LookupDescription"),
                         rs.getBoolean("Active"));
 
-                listOfAllLookupValues.add(lookupValue);
-                if (lookupValue.isActive()) {
-                    listOfActiveLookupValues.add(lookupValue);
-                }
-                mapOfValues.put(lookupValue.getLookupId(), lookupValue);
+                addLookupValue(lookupValue);
             }
 
-            log.debug("Bulk-loaded {} status rows into Ehcache", mapOfValues.size());
+            log.debug("Bulk-loaded {} {} rows into Ehcache", this.getClass().getSimpleName(), mapOfValues.size());
         } catch (SQLException e) {
-            log.error("Error bulk-loading status lookup data: {}", e.getMessage());
+            log.error("Error bulk-loading {} lookup data: {}", this.getClass().getSimpleName(), e.getMessage());
         }
+    }
+
+    public void addLookupValue(LookupValue lookupValue) {
+        listOfAllLookupValues.add(lookupValue);
+        if (lookupValue.isActive()) {
+            listOfActiveLookupValues.add(lookupValue);
+        }
+        mapOfValues.put(lookupValue.getLookupId(), lookupValue);
     }
 
 

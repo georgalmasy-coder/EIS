@@ -2,17 +2,17 @@ package com.bepa.eis.server.api.DTO;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
-import com.bepa.eis.server.dataprovider.fields.booleans.Active;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
+import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
-import com.bepa.eis.server.dataprovider.fields.lookups.*;
+import com.bepa.eis.server.dataprovider.fields.lookups.CustomerDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectStatus;
-import com.bepa.eis.server.dataprovider.fields.strings.Notes;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
+import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
 import com.bepa.eis.server.dataprovider.fields.timestamp.StartDate;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
@@ -21,25 +21,22 @@ public class Project {
 
     private ListOfElements projectElements = null;
 
-    private WebSession webSession;
-    private ProjectId projectId;
-    private ProjectName projectName;
+    private final WebSession webSession;
 
+    private ProjectId projectId;
+    private Version version;
+    private ProjectName projectName;
     private CustomerId customerId;
     private ProjectOwner ownerId;
     private ProjectCategory categoryId;
     private ProjectPriority priorityId;
-    private ProjectStatus statusId;
+    private ProjectStatus projectStatus;
     private StartDate startDate;
     private EndDate endDate;
     private BudgetInDays budgetInDays;
     private BudgetInValue budgetInValue;
-    private Notes notes;
-    /*
-    private Attachments attachments;
-    */
     private CustomerDepartment departmentId;
-    private Active active;
+    private ChangedDateTime changedDateTime;
 
     public Project(WebSession webSession) {
         this.webSession = webSession;
@@ -51,8 +48,12 @@ public class Project {
 
     public ListOfElements getProjectElements() {
         if (projectElements == null) {
-            projectElements = new ListOfElements(getWebSession(), this.getClass().getSimpleName());
+            projectElements = new ListOfElements(
+                    getWebSession(),
+                    this.getClass().getSimpleName()
+            );
         }
+
         return projectElements;
     }
 
@@ -62,6 +63,14 @@ public class Project {
 
     public ProjectId getProjectId() {
         return projectId;
+    }
+
+    public void setVersion(Version version) {
+        this.version = version;
+    }
+
+    public Version getVersion() {
+        return version;
     }
 
     public void setProjectName(ProjectName projectName) {
@@ -104,12 +113,12 @@ public class Project {
         return priorityId;
     }
 
-    public void setProjectStatusId(ProjectStatus statusId) {
-        this.statusId = statusId;
+    public void setProjectStatus(ProjectStatus projectStatus) {
+        this.projectStatus = projectStatus;
     }
 
-    public ProjectStatus getProjectStatusId() {
-        return statusId;
+    public ProjectStatus getProjectStatus() {
+        return projectStatus;
     }
 
     public void setProjectStartDate(StartDate startDate) {
@@ -144,14 +153,6 @@ public class Project {
         return budgetInValue;
     }
 
-    public void setNotes(Notes notes) {
-        this.notes = notes;
-    }
-
-    public Notes getNotes() {
-        return notes;
-    }
-
     public void setDepartment(CustomerDepartment departmentId) {
         this.departmentId = departmentId;
     }
@@ -160,12 +161,11 @@ public class Project {
         return departmentId;
     }
 
-    public void setActive(Active active) {
-        this.active = active;
+    public void setChangedDateTime(ChangedDateTime changedDateTime) {
+        this.changedDateTime = changedDateTime;
     }
 
-    public Active getActive() {
-        return active;
+    public ChangedDateTime getChangedDateTime() {
+        return changedDateTime;
     }
-
 }

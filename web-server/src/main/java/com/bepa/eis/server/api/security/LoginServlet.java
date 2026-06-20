@@ -1,6 +1,9 @@
 package com.bepa.eis.server.api.security;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.customer.CustomerRecord;
+import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.security.GeoIpService;
@@ -8,9 +11,9 @@ import com.bepa.eis.common.providers.security.LoginActivityLogger;
 import com.bepa.eis.common.providers.security.MfaConfig;
 import com.bepa.eis.common.providers.security.MfaTotpService;
 import com.bepa.eis.common.providers.security.SessionManager;
+import com.bepa.eis.server.api.generic.GenericServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @WebServlet(
@@ -34,7 +38,7 @@ import java.util.UUID;
                 "/api/login/mfa/setup/verify"
         }
 )
-public class LoginServlet extends HttpServlet {
+public class LoginServlet extends GenericServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
@@ -115,7 +119,7 @@ public class LoginServlet extends HttpServlet {
         handlePasswordLogin(req, resp);
     }
 
-    private void handlePasswordLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void handlePasswordLogin(HttpServletRequest req, HttpServletResponse response) throws IOException {
         String body = new String(req.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         String username = extractJsonString(body, "username");
         String password = extractJsonString(body, "password");
@@ -144,7 +148,7 @@ public class LoginServlet extends HttpServlet {
                     "Warning"
             );
 
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -171,7 +175,7 @@ public class LoginServlet extends HttpServlet {
                     "Warning"
             );
 
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -187,7 +191,7 @@ public class LoginServlet extends HttpServlet {
                     "Warning"
             );
 
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -214,7 +218,7 @@ public class LoginServlet extends HttpServlet {
         if (mfaRequired) {
             startMfaFlow(
                     req,
-                    resp,
+                    response,
                     validationResult,
                     userMfaState,
                     username,
@@ -244,10 +248,118 @@ public class LoginServlet extends HttpServlet {
                 "OK"
         );
 
-        resp.setHeader("Cache-Control", "no-store");
-        resp.setHeader("Pragma", "no-cache");
-        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        WebSession webSession = getSession(req);
+
+        if (webSession != null && webSession.getUserId() != null) {
+            redirectToPage(response, webSession, username);
+/*
+            if (webSession.getCustomerId() != null) {
+                log.info(
+                        "User '{}' logged in with customerId: {}",
+                        username,
+                        webSession.getCustomerId()
+                );
+            } else {
+                log.info("User '{}' logged in", username);
+                resp.sendRedirect("/select-project.html");
+                return;
+            }
+
+            if (webSession.getProjectId() == null) {
+                log.info(
+                        "User '{}' logged in with projectId: {}",
+                        username,
+                        webSession.getProjectId()
+                );
+                resp.sendRedirect("/web/view?page=myprojects");
+            }
+*/
+
+        }
+
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
+
+    private void redirectToPage(HttpServletResponse response, WebSession webSession, String username) throws IOException {
+
+        UserProvider userProvider = new UserProvider(webSession);
+        List<CustomerRecord> customers = userProvider.getCustomersByUserId(webSession.getUserId());
+
+        try {
+            if (customers.size() == 1) {
+
+                CustomerRecord customer = customers.get(0);
+                webSession.setCustomerId(customer.getCustomerId() );
+                SessionProvider sessionProvider = new SessionProvider(webSession);
+                sessionProvider.updateSessionInfo(webSession);
+                response.sendRedirect("/web/view?page=myprojects");
+                return;
+            } else {
+                log.info("User '{}' logged in", username);
+                response.sendRedirect("/select-project.html");
+                return;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        /* GFA
+        if (customers.isEmpty()) {
+            log.info(
+                    "User '{}' logged in with customerId: {}",
+                    username,
+                    webSession.getCustomerId()
+            );
+        }
+
+
+        if (webSession.getCustomerId() != null) {
+            log.info(
+                    "User '{}' logged in with customerId: {}",
+                    username,
+                    webSession.getCustomerId()
+            );
+        } else {
+        }
+
+        if (webSession.getProjectId() == null) {
+            log.info(
+                    "User '{}' logged in with projectId: {}",
+                    username,
+                    webSession.getProjectId()
+            );
+            response.sendRedirect("/web/view?page=myprojects");
+        }
+
+        */
+    }
+/*
+    private void redirectToPage(WebSession webSession) {
+        if (webSession.getCustomerId() != null) {
+            log.info(
+                    "User '{}' logged in with customerId: {}",
+                    username,
+                    webSession.getCustomerId()
+            );
+        } else {
+            log.info("User '{}' logged in", username);
+            resp.sendRedirect("/select-project.html");
+            return;
+        }
+
+        if (webSession.getProjectId() == null) {
+            log.info(
+                    "User '{}' logged in with projectId: {}",
+                    username,
+                    webSession.getProjectId()
+            );
+            resp.sendRedirect("/web/view?page=myprojects");
+        }
+    )
+*/
+
 
     private void startMfaFlow(
             HttpServletRequest req,

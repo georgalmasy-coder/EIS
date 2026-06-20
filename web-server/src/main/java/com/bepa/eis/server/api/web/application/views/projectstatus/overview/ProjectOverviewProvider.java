@@ -1,109 +1,165 @@
 package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
-import com.bepa.eis.server.api.DTO.Project;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.providers.GenericProvider;
+import com.bepa.eis.server.api.DTO.Project;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
-import com.bepa.eis.server.dataprovider.fields.booleans.Active;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
+import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
-import com.bepa.eis.server.dataprovider.fields.lookups.*;
+import com.bepa.eis.server.dataprovider.fields.lookups.CustomerDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectStatus;
-import com.bepa.eis.server.dataprovider.fields.strings.Notes;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
+import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
 import com.bepa.eis.server.dataprovider.fields.timestamp.StartDate;
-import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ProjectOverviewProvider extends GenericProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectOverviewProvider.class);
 
-    Project project = new Project(getWebSession());
+    private final Project project = new Project(getWebSession());
 
-    private static final String GET_PROJECT_BY_PROJECT_ID_SQL =
-            "SELECT * FROM Project WHERE ProjectId = ?";
+    private static final String GET_LATEST_PROJECT_BY_PROJECT_ID_SQL = """
+            SELECT
+                [ProjectPK],
+                [ProjectId],
+                [Version],
+                [Latest],
+                [ProjectName],
+                [CustomerId],
+                [OwnerId],
+                [CategoryId],
+                [PriorityId],
+                [ProjectStatus],
+                [StartDate],
+                [EndDate],
+                [BudgetInDays],
+                [BudgetInValue],
+                [DepartmentId],
+                [ChangedByUserId],
+                [ChangedDateTime]
+            FROM [dbo].[PROJECT]
+            WHERE [ProjectId] = ?
+              AND [Latest] = 1
+            """;
 
     public ProjectOverviewProvider(WebSession webSession) {
         super(webSession);
     }
 
-
     /**
-     * Retrieves a {@code Project} object associated with the specified project ID
-     * from the database. The project ID is obtained from the provided {@code webSession}.
-     * If no project is found for the provided project ID, an exception is thrown.
+     * Retrieves the latest Project version for the project id stored in the current web session.
      *
-     * @return the {@code Project} object corresponding to the specified project ID
-     * @throws Exception if there is an error during the database operation or if no project is found
+     * @return Project DTO containing XML field elements for the overview page
+     * @throws Exception if no project is selected, no project is found, or the database lookup fails
      */
     public Project getProjectByProjectId() throws Exception {
+        if (getWebSession() == null || getWebSession().getProjectId() == null) {
+            log.error("No webSession or projectId found: {}", getWebSession());
+            throw new SQLException("No project selected in web session.");
+        }
 
-        if (getWebSession() != null && getWebSession().getProjectId() != null) {
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(GET_LATEST_PROJECT_BY_PROJECT_ID_SQL)) {
 
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(GET_PROJECT_BY_PROJECT_ID_SQL)) {
+            setInt(ps, getWebSession().getProjectId(), 1);
 
-                setInt(ps, getWebSession().getProjectId(), 1);
-
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
-                        log.error("No project found for projectId: {}", getWebSession().getProjectId());
-                        throw new SQLException("No project found for projectId: " + getWebSession().getProjectId());
-                    }
-
-                    getProjectElement().addElement(new ProjectId(rs.getInt(ProjectId.FIELD_NAME)));
-                    getProjectElement().addElement(new ProjectName(rs.getString(ProjectName.FIELD_NAME)));
-                    getProjectElement().addElement(new CustomerId(rs.getInt(CustomerId.FIELD_NAME)));
-                    getProjectElement().addElement(new Active( rs.getBoolean(Active.FIELD_NAME)));
-
-                    ProjectOwner projectOwner = new ProjectOwner(getWebSession());
-                    projectOwner.setValue(rs.getInt(ProjectOwner.FIELD_NAME));
-                    projectOwner.setFieldNotEditable();
-                    getProjectElement().addElement(projectOwner);
-
-                    ProjectCategory projectCategory = new ProjectCategory(getWebSession());
-                    projectCategory.setValue(rs.getInt(ProjectCategory.FIELD_NAME));
-                    projectCategory.setFieldNotEditable();
-                    getProjectElement().addElement(projectCategory);
-
-/*WEBX */
-                    ProjectPriority projectPriority = new ProjectPriority(getWebSession());
-                    projectPriority.setValue(rs.getInt(ProjectPriority.FIELD_NAME));
-                    projectPriority.setFieldNotEditable();
-                    getProjectElement().addElement(projectPriority);
-
-                    ProjectStatus projectStatus = new ProjectStatus(getWebSession());
-                    projectStatus.setValue(rs.getInt(ProjectStatus.FIELD_NAME));
-                    projectStatus.setFieldNotEditable();
-                    getProjectElement().addElement(projectStatus);
-
-                    getProjectElement().addElement(new StartDate(rs.getTimestamp( StartDate.FIELD_NAME)));
-                    getProjectElement().addElement(new EndDate(rs.getTimestamp(EndDate.FIELD_NAME)));
-                    getProjectElement().addElement(new BudgetInDays(rs.getInt( BudgetInDays.FIELD_NAME)));
-                    getProjectElement().addElement(new BudgetInValue(rs.getBigDecimal( BudgetInValue.FIELD_NAME)));
-                    getProjectElement().addElement(new Notes(rs.getString( Notes.FIELD_NAME)));
-
-                    CustomerDepartment customerDepartment = new CustomerDepartment(getWebSession());
-                    customerDepartment.setValue(rs.getInt(CustomerDepartment.FIELD_NAME));
-                    customerDepartment.setFieldNotEditable();
-                    getProjectElement().addElement(customerDepartment);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    log.error("No latest project found for projectId: {}", getWebSession().getProjectId());
+                    throw new SQLException("No latest project found for projectId: " + getWebSession().getProjectId());
                 }
-            }
 
-        } else {
-            log.error("No webSession found : {}", getWebSession());
+                addProjectFields(rs);
+            }
         }
 
         return project;
+    }
+
+    private void addProjectFields(ResultSet rs) throws SQLException {
+        ProjectId projectId = new ProjectId(rs.getInt(ProjectId.FIELD_NAME));
+        projectId.setFieldNotEditable();
+        getProjectElement().addElement(projectId);
+
+        Version version = new Version(rs.getInt(Version.FIELD_NAME));
+        version.setFieldNotEditable();
+        getProjectElement().addElement(version);
+
+        ProjectName projectName = new ProjectName(rs.getString(ProjectName.FIELD_NAME));
+        projectName.setFieldNotEditable();
+        getProjectElement().addElement(projectName);
+
+        CustomerId customerId = new CustomerId(rs.getInt(CustomerId.FIELD_NAME));
+        customerId.setFieldNotEditable();
+        getProjectElement().addElement(customerId);
+
+        ProjectOwner projectOwner = new ProjectOwner(getWebSession());
+        projectOwner.setValue(getNullableInteger(rs, ProjectOwner.FIELD_NAME));
+        projectOwner.setFieldNotEditable();
+        getProjectElement().addElement(projectOwner);
+
+        ProjectCategory projectCategory = new ProjectCategory(getWebSession());
+        projectCategory.setValue(getNullableInteger(rs, ProjectCategory.FIELD_NAME));
+        projectCategory.setFieldNotEditable();
+        getProjectElement().addElement(projectCategory);
+
+        ProjectPriority projectPriority = new ProjectPriority(getWebSession());
+        projectPriority.setValue(getNullableInteger(rs, ProjectPriority.FIELD_NAME));
+        projectPriority.setFieldNotEditable();
+        getProjectElement().addElement(projectPriority);
+
+        ProjectStatus projectStatus = new ProjectStatus(getWebSession());
+        projectStatus.setValue(getNullableInteger(rs, ProjectStatus.FIELD_NAME));
+        projectStatus.setFieldNotEditable();
+        getProjectElement().addElement(projectStatus);
+
+        StartDate startDate = new StartDate(rs.getTimestamp(StartDate.FIELD_NAME));
+        startDate.setFieldNotEditable();
+        getProjectElement().addElement(startDate);
+
+        EndDate endDate = new EndDate(rs.getTimestamp(EndDate.FIELD_NAME));
+        endDate.setFieldNotEditable();
+        getProjectElement().addElement(endDate);
+
+        BudgetInDays budgetInDays = new BudgetInDays(getNullableInteger(rs, BudgetInDays.FIELD_NAME));
+        budgetInDays.setFieldNotEditable();
+        getProjectElement().addElement(budgetInDays);
+
+        BudgetInValue budgetInValue = new BudgetInValue(rs.getBigDecimal(BudgetInValue.FIELD_NAME));
+        budgetInValue.setFieldNotEditable();
+        getProjectElement().addElement(budgetInValue);
+
+        CustomerDepartment customerDepartment = new CustomerDepartment(getWebSession());
+        customerDepartment.setValue(getNullableInteger(rs, CustomerDepartment.FIELD_NAME));
+        customerDepartment.setFieldNotEditable();
+        getProjectElement().addElement(customerDepartment);
+
+        ChangedDateTime changedDateTime = new ChangedDateTime(rs.getTimestamp(ChangedDateTime.FIELD_NAME));
+        changedDateTime.setFieldNotEditable();
+        getProjectElement().addElement(changedDateTime);
+    }
+
+    private Integer getNullableInteger(
+            ResultSet resultSet,
+            String columnName
+    ) throws SQLException {
+        int value = resultSet.getInt(columnName);
+
+        return resultSet.wasNull() ? null : value;
     }
 
     private ListOfElements getProjectElement() {

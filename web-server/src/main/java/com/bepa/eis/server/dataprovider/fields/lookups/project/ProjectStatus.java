@@ -4,16 +4,12 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class ProjectStatus extends AbstractLookup {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectStatus.class);
-
-    public static String FIELD_NAME = "StatusId";
+    public static String FIELD_NAME = "ProjectStatus";
 
     public ProjectStatus(WebSession webSession) {
         super(webSession);
@@ -46,12 +42,28 @@ public class ProjectStatus extends AbstractLookup {
 
     @Override
     public void setValue(Integer statusId) {
-        LookupValue lookupValue = CustomerLookupCache.getProjectStatusLookupValue(getWebSession(), statusId);
-        setLookupValue(lookupValue);
+        com.bepa.eis.common.enums.project.ProjectStatus status =
+                com.bepa.eis.common.enums.project.ProjectStatus.fromIdOrDefault(
+                        statusId,
+                        com.bepa.eis.common.enums.project.ProjectStatus.CREATED
+                );
+
+        setLookupValue(toLookupValue(status));
     }
 
     @Override
     public String getDropdownSelectText() {
         return "Select project status ...";
+    }
+
+    private LookupValue toLookupValue(com.bepa.eis.common.enums.project.ProjectStatus status) {
+        return new LookupValue(
+                null,
+                null,
+                status.getId(),
+                status.getCode(),
+                status.getLabel(),
+                true
+        );
     }
 }

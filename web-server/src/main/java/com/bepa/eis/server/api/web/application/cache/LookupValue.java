@@ -2,6 +2,8 @@ package com.bepa.eis.server.api.web.application.cache;
 
 public class LookupValue {
 
+    private Integer customerId;
+    private Integer projectId;
     private Integer lookupId;
     private String lookupCode;
     private String lookupDescription;
@@ -23,7 +25,9 @@ public class LookupValue {
         return active != null && active;
     }
 
-    public LookupValue(Integer lookupId, String lookupCode, String lookupDescription, Boolean active) {
+    public LookupValue(Integer customerId, Integer projectId, Integer lookupId, String lookupCode, String lookupDescription, Boolean active) {
+        this.customerId = customerId;
+        this.projectId = projectId;
         this.lookupId = lookupId;
         this.lookupCode = lookupCode;
         this.lookupDescription = lookupDescription;

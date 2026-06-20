@@ -96,10 +96,9 @@ public class PerformanceProvider extends GenericProvider {
         try {
             try (Connection con = getDataSource().getConnection();
                  PreparedStatement ps = con.prepareStatement(INSERT_PERFORMANCE_SQL)) {
-
-                ps.setInt(1, getWebSession().getCustomerId());
-                ps.setInt(2, getWebSession().getProjectId());
-                ps.setInt(3, getWebSession().getUserId());
+                setNullableInt(ps, 1, getWebSession().getCustomerId());
+                setNullableInt(ps, 2, getWebSession().getProjectId());
+                setNullableInt(ps, 3, getWebSession().getUserId());
                 ps.setString(4, module);
                 ps.setInt(5, (int) durationMs);
                 ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
@@ -246,4 +245,17 @@ public class PerformanceProvider extends GenericProvider {
             String performanceInterval
     ) {
     }
+
+    private void setNullableInt(
+            PreparedStatement statement,
+            int parameterIndex,
+            Integer value
+    ) throws SQLException {
+        if (value == null) {
+            statement.setNull(parameterIndex, Types.INTEGER);
+            return;
+        }
+        statement.setInt(parameterIndex, value);
+    }
+
 }

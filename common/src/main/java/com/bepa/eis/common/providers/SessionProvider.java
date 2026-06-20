@@ -258,8 +258,8 @@ public class SessionProvider extends GenericProvider {
 
         ws.setId(rs.getInt("ID"));
         ws.setSessionId(rs.getString("SessionId"));
-        ws.setCustomerId(rs.getInt("CustomerId"));
-        ws.setProjectId(rs.getInt("ProjectId"));
+        ws.setCustomerId(getNullableInt(rs, "CustomerId"));
+        ws.setProjectId(getNullableInt(rs, "ProjectId"));
         ws.setUserId(rs.getInt("UserId"));
         ws.setCreated(toDate(rs.getTimestamp("Created")));
         ws.setLastAccessed(toDate(rs.getTimestamp("LastAccessed")));
@@ -295,6 +295,16 @@ public class SessionProvider extends GenericProvider {
         }
 
         return value;
+    }
+
+    private Integer getNullableInt(ResultSet rs, String columnName) throws SQLException {
+        int intValue = rs.getInt(columnName);
+
+        if (rs.wasNull()) {
+            return null;
+        }
+
+        return intValue;
     }
 
     private void setNullableInt(

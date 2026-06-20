@@ -23,21 +23,21 @@ public class LookupCache {
     private final RequirementVerificationStatementCache requirementVerificationStatementCache;
 
 
-    public LookupCache(WebSession webSession) {
-        requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(webSession);
-        requirementVerificationCache = new RequirementVerificationCache(webSession);
-        trlCache = new TrlCache(webSession);
-        projectCategoryCache = new ProjectCategoryCache(webSession);
-        projectPriorityCache = new ProjectPriorityCache(webSession);
-        requirementStatusCache = new RequirementStatusCache(webSession);
-        projectStatusCache = new ProjectStatusCache(webSession);
-        userCache = new UserCache(webSession);
-        userDetailCache = new UserDetailCache(webSession) ;
-        departmentCache = new DepartmentCache(webSession);
-        requirementTypeCache = new RequirementTypeCache(webSession);
-        requirementFrequencyCache = new RequirementFrequencyCache(webSession);
-        requirementTechnicalPriorityCache = new RequirementTechnicalPriorityCache(webSession);
-        requirementVerificationStatementCache = new RequirementVerificationStatementCache(webSession);
+    public LookupCache(Integer customerId, Integer projectId) {
+        requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(customerId, projectId);
+        requirementVerificationCache = new RequirementVerificationCache(customerId, projectId);
+        trlCache = new TrlCache(customerId, projectId);
+        projectCategoryCache = new ProjectCategoryCache(customerId, projectId);
+        projectPriorityCache = new ProjectPriorityCache(customerId, projectId);
+        requirementStatusCache = new RequirementStatusCache(customerId, projectId);
+        projectStatusCache = new ProjectStatusCache(customerId, projectId);
+        userCache = new UserCache(customerId, projectId);
+        userDetailCache = new UserDetailCache(customerId, projectId) ;
+        departmentCache = new DepartmentCache(customerId, projectId);
+        requirementTypeCache = new RequirementTypeCache(customerId, projectId);
+        requirementFrequencyCache = new RequirementFrequencyCache(customerId, projectId);
+        requirementTechnicalPriorityCache = new RequirementTechnicalPriorityCache(customerId, projectId);
+        requirementVerificationStatementCache = new RequirementVerificationStatementCache(customerId, projectId);
     }
 
     public LookupValue getRequirementBusinessPriorityLookupValue(Integer lookupId) {

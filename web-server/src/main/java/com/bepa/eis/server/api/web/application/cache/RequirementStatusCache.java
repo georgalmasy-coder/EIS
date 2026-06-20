@@ -4,7 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 
 public class RequirementStatusCache extends GenericLookup {
 
-    public RequirementStatusCache(WebSession webSession) {
+    public RequirementStatusCache(Integer customerId, Integer projectId) {
         setLookupSqlByType(4);
         reloadCache();
     }

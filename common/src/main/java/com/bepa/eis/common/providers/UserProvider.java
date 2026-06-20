@@ -174,6 +174,9 @@ package com.bepa.eis.common.providers;
 
  */
 
+import com.bepa.eis.common.dto.customer.CustomerRecord;
+import com.bepa.eis.common.enums.customer.CustomerStatus;
+import com.bepa.eis.common.enums.project.ProjectStatus;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.security.MfaConfig;
 import com.bepa.eis.common.dto.WebSession;
@@ -184,6 +187,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserProvider extends GenericProvider {
 
@@ -313,6 +318,47 @@ public class UserProvider extends GenericProvider {
             WHERE UserId = ?
             """;
 
+    private static final String ACTIVE_PROJECT_STATUS_IDS =
+            ProjectStatus.CREATED.getId() + ", " +
+                    ProjectStatus.PLANNED.getId() + ", " +
+                    ProjectStatus.IN_PROGRESS.getId() + ", " +
+                    ProjectStatus.ON_HOLD.getId() + ", " +
+                    ProjectStatus.AT_RISK.getId();
+
+
+    private static final String CUSTOMER_PROJECT_SQL =
+            "SELECT P.ProjectId, P.ProjectName, C.CustomerId, C.CustomerName " +
+                    "FROM PROJECT P, CUSTOMER C " +
+                    "WHERE P.ProjectId IN ( " +
+                    "    SELECT ProjectId " +
+                    "    FROM USER_PROJECT " +
+                    "    WHERE UserId IN ( " +
+                    "        SELECT UserId " +
+                    "        FROM USERS " +
+                    "        WHERE Email = ? " +
+                    "    ) " +
+                    ") " +
+                    "AND P.Latest = 1 " +
+                    "AND P.ProjectStatus IN (" + ACTIVE_PROJECT_STATUS_IDS + ") " +
+                    "AND P.CustomerId = C.CustomerId " +
+                    "AND C.Latest = 1 ";
+
+    private static final String ACTIVE_CUSTOMER_STATUS_IDS =
+            CustomerStatus.PENDING_CONFIRMATION.getId() + ", " +
+                    CustomerStatus.TRIAL_ACTIVE.getId() + ", " +
+                    CustomerStatus.PENDING_SUBSCRIPTION_CONFIRMATION.getId() + ", " +
+                    CustomerStatus.PAYMENT_PENDING.getId() + ", " +
+                    CustomerStatus.SUBSCRIPTION_ACTIVE.getId() + ", " +
+                    CustomerStatus.SUBSCRIPTION_EXPIRING.getId() + ", " +
+                    CustomerStatus.PAYMENT_OVERDUE.getId();
+
+    private static final String CUSTOMER_BY_USER_ID_SQL =
+            "SELECT C.CustomerId, C.CustomerName, C.CustomerStatus " +
+                    "FROM CUSTOMER C " +
+                    "WHERE C.Latest = 1 " +
+                    "AND C.CustomerStatus IN (" + ACTIVE_CUSTOMER_STATUS_IDS + ") " +
+                    "AND C.CustomerId IN (SELECT CustomerId FROM USER_CUSTOMER WHERE UserId = ?) ";
+
     public UserProvider(WebSession webSession) {
         super(webSession);
     }
@@ -363,6 +409,35 @@ public class UserProvider extends GenericProvider {
             log.error("Error validating login for email: {}", email, e);
             return LoginValidationResult.failed(null, "Login validation error");
         }
+    }
+
+    public List<CustomerRecord> getCustomersByUserId(Integer userId) {
+        List<CustomerRecord> customers = new ArrayList<>();
+
+        if (userId != null) {
+            try (Connection connection = getDataSource().getConnection();
+                 PreparedStatement statement = connection.prepareStatement(CUSTOMER_BY_USER_ID_SQL)) {
+
+                statement.setInt(1, userId);
+
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        CustomerRecord customer = new CustomerRecord();
+                        customer.setCustomerId(resultSet.getInt("CustomerId"));
+                        customer.setCustomerName(resultSet.getString("CustomerName"));
+
+                        CustomerStatus customerStatus = CustomerStatus.fromId(resultSet.getInt("CustomerStatus"));
+                        customer.setCustomerStatus(customerStatus);
+
+                        customers.add(customer);
+                    }
+                }
+            } catch (SQLException e) {
+                log.error("Error loading customers for userId: {}", userId, e);
+            }
+        }
+
+        return customers;
     }
 
     public UserMfaState getUserMfaStateByUserId(Integer userId) {

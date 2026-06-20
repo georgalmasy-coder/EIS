@@ -26,9 +26,4 @@ public class BudgetInDays extends AbstractInteger {
         return "Budget Days";
     }
 
-    @Override
-    public String toString() {
-        return getValue().toString();
-    }
-
 }

@@ -1,0 +1,212 @@
+.project-edit-document {
+    min-height: 100vh;
+}
+
+.project-edit-app {
+    min-height: 100vh;
+}
+
+.project-edit-content {
+    min-height: 100vh;
+}
+
+.project-edit-topbar {
+    margin-bottom: 10px;
+}
+
+.project-edit-layout {
+    min-height: calc(100vh - 92px);
+    display: flex;
+    flex-direction: column;
+}
+
+.project-edit-section-header {
+    align-items: flex-start;
+}
+
+.project-edit-title-group {
+    display: grid;
+    gap: 4px;
+}
+
+.project-edit-title-group h2 {
+    margin: 0;
+}
+
+.project-edit-mode-label {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.project-edit-help-button {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.025);
+    cursor: pointer;
+}
+
+.project-edit-help-button:hover {
+    color: var(--accent);
+    border-color: rgba(47, 156, 255, 0.55);
+    background: rgba(47, 156, 255, 0.08);
+}
+
+.project-edit-help-button svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+}
+
+.project-readonly-banner {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(247, 201, 72, 0.45);
+    border-radius: 8px;
+    color: #f7c948;
+    background: rgba(247, 201, 72, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.project-edit-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.project-edit-entity-meta {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.project-edit-tab-bar {
+    margin-top: 12px;
+}
+
+.project-edit-panels {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.project-basis-info-fields {
+    align-items: start;
+}
+
+.project-basis-info-fields .page-field {
+    min-width: 0;
+}
+
+.project-basis-info-fields input[type="hidden"] {
+    display: none;
+}
+
+.project-basis-info-fields .field-required {
+    margin-left: 3px;
+    color: #ef4444;
+}
+
+.project-notes-frame,
+.project-attachments-frame {
+    min-height: 330px;
+}
+
+.project-edit-footer {
+    margin-top: auto;
+}
+
+.project-edit-readonly #btnSave {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.project-edit-column-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.project-edit-resizable-th {
+    position: relative;
+}
+
+.project-edit-column-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    z-index: 2;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.project-edit-column-resizer:hover {
+    background: rgba(47, 156, 255, 0.22);
+}
+
+.note-dlg,
+.attachment-dlg {
+    width: min(920px, calc(100vw - 36px));
+}
+
+.note-editor,
+.attachment-editor {
+    display: grid;
+    gap: 12px;
+}
+
+.note-editor-label,
+.attachment-editor-label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.note-textarea,
+.attachment-textarea,
+.attachment-input {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.045);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.note-textarea:focus,
+.attachment-textarea:focus,
+.attachment-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(47, 156, 255, 0.12);
+}
+
+.attachment-editor-row {
+    display: grid;
+    gap: 6px;
+}
+
+@media (max-width: 760px) {
+    .project-edit-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .project-edit-entity-meta {
+        white-space: normal;
+    }
+}

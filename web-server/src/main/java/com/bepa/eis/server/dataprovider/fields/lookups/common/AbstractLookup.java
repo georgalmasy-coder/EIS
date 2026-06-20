@@ -90,7 +90,7 @@ abstract public class AbstractLookup extends AbstractInteger {
     }
 
     public void addAllActiveOptions(WebSession webSession) {
-        if (isFieldRequired()) {
+        if (/*isFieldRequired() ||*/ true) {
             Integer lookupId = null;
             String selectText = getDropdownSelectText() != null ? getDropdownSelectText() : "Select ...";
             addOption(lookupId, selectText, false);
