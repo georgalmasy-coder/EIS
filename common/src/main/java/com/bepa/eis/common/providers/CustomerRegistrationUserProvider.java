@@ -33,6 +33,13 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
                     ") " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?) ";
 
+    private static final String INSERT_USER_CUSTOMER_SQL =
+            "INSERT INTO [dbo].[USER_CUSTOMER] ( " +
+                    "UserId, " +
+                    "CustomerId " +
+                    ") " +
+                    "VALUES (?, ?) ";
+
     public CustomerRegistrationUserProvider(WebSession webSession) {
         super(webSession);
     }
@@ -104,6 +111,32 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
         } catch (SQLException e) {
             log.error("Error creating active user. email={}", email, e);
             return null;
+        }
+    }
+
+    public boolean linkUserToCustomer(
+            Integer userId,
+            Integer customerId
+    ) {
+        if (userId == null || customerId == null) {
+            return false;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERT_USER_CUSTOMER_SQL)) {
+
+            statement.setInt(1, userId);
+            statement.setInt(2, customerId);
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            log.error(
+                    "Error linking user to customer. userId={}, customerId={}",
+                    userId,
+                    customerId,
+                    e
+            );
+            return false;
         }
     }
 

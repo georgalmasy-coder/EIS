@@ -15,6 +15,7 @@ const DEFAULT_COLUMN_WIDTHS = {
     contactEmail: "240px",
     contactPhone: "150px",
     customerStatus: "160px",
+    customerMfaPolicy: "130px",
     createdDateTime: "180px"
 };
 
@@ -293,6 +294,7 @@ function parseLookups(doc) {
 
 function fillAllLookupSelects() {
     fillSelectFromLookup("fieldCustomerStatus", "customerStatus");
+    fillSelectFromLookup("fieldCustomerMfaPolicy", "customerMfaPolicy");
     fillSelectFromLookup("fieldSubscriptionStatus", "subscriptionStatus");
     fillSelectFromLookup("fieldPaymentStatus", "paymentStatus");
     fillSelectFromLookup("fieldPaymentMethodStatus", "paymentMethodStatus");
@@ -330,6 +332,7 @@ function parseCustomerList(doc) {
 
     return Array.from(doc.querySelectorAll("customers > customer")).map(function (node) {
         const customerStatus = text(node, "customerStatus");
+        const customerMfaPolicy = text(node, "customerMfaPolicy");
 
         return {
             customerId: intText(node, "customerId"),
@@ -342,6 +345,8 @@ function parseCustomerList(doc) {
             contactPhone: text(node, "contactPhone"),
             customerStatus,
             customerStatusLabel: lookupLabel("customerStatus", customerStatus),
+            customerMfaPolicy,
+            customerMfaPolicyLabel: lookupLabel("customerMfaPolicy", customerMfaPolicy),
             createdDateTime: text(node, "createdDateTime"),
             changedDateTime: text(node, "changedDateTime")
         };
@@ -414,6 +419,8 @@ function applyFilterSortAndRender() {
             customer.contactPhone,
             customer.customerStatus,
             customer.customerStatusLabel,
+            customer.customerMfaPolicy,
+            customer.customerMfaPolicyLabel,
             customer.createdDateTime,
             formatDanishDateTime(customer.createdDateTime)
         ].some(function (itemValue) {
@@ -457,6 +464,10 @@ function valueForSort(row, key) {
 
     if (key === "customerStatus") {
         return String(row.customerStatusLabel || row.customerStatus || "").toLowerCase();
+    }
+
+    if (key === "customerMfaPolicy") {
+        return String(row.customerMfaPolicyLabel || row.customerMfaPolicy || "").toLowerCase();
     }
 
     const itemValue = row[key];
@@ -517,6 +528,7 @@ function renderCustomers() {
                 <td title="${escapeAttribute(customer.contactEmail)}">${escapeHtml(customer.contactEmail)}</td>
                 <td title="${escapeAttribute(customer.contactPhone)}">${escapeHtml(customer.contactPhone)}</td>
                 <td>${renderStatus(customer.customerStatus, customer.customerStatusLabel)}</td>
+                <td>${renderMfaPolicy(customer.customerMfaPolicy, customer.customerMfaPolicyLabel)}</td>
                 <td title="${escapeAttribute(createdLocal)}">${escapeHtml(createdLocal)}</td>
             </tr>
         `;
@@ -544,6 +556,14 @@ function renderStatus(status, label) {
     const statusClass = `status-${safeStatus.toLowerCase().replaceAll("_", "-")}`;
 
     return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "—")}</span>`;
+}
+
+function renderMfaPolicy(policy, label) {
+    const safePolicy = policy || "";
+    const safeLabel = label || safePolicy || "—";
+    const policyClass = `mfa-${safePolicy.toLowerCase().replaceAll("_", "-")}`;
+
+    return `<span class="customer-mfa-pill ${escapeAttribute(policyClass)}" title="${escapeAttribute(safePolicy)}">${escapeHtml(safeLabel)}</span>`;
 }
 
 function updateSortIndicators() {
@@ -661,6 +681,7 @@ function fillDialog(detail) {
     setValue("fieldContactName", customer.contactName);
     setValue("fieldContactEmail", customer.contactEmail);
     setValue("fieldCustomerStatus", customer.customerStatus);
+    setValue("fieldCustomerMfaPolicy", customer.customerMfaPolicy || "OPTIONAL");
     setValue("fieldCreatedDateTime", formatDanishDateTime(customer.createdDateTime));
     setValue("fieldChangedDateTime", formatDanishDateTime(customer.changedDateTime));
     setValue("fieldChangedByUserId", customer.changedBy || "");
@@ -860,6 +881,7 @@ function appendCustomerXml(xml) {
     appendXmlElement(xml, "contactName", value("fieldContactName"));
     appendXmlElement(xml, "contactEmail", value("fieldContactEmail"));
     appendXmlElement(xml, "customerStatus", value("fieldCustomerStatus"));
+    appendXmlElement(xml, "customerMfaPolicy", value("fieldCustomerMfaPolicy") || "OPTIONAL");
 
     xml.push("</customer>");
 }

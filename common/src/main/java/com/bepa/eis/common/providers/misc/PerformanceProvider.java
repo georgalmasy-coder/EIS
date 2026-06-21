@@ -96,9 +96,19 @@ public class PerformanceProvider extends GenericProvider {
         try {
             try (Connection con = getDataSource().getConnection();
                  PreparedStatement ps = con.prepareStatement(INSERT_PERFORMANCE_SQL)) {
-                setNullableInt(ps, 1, getWebSession().getCustomerId());
-                setNullableInt(ps, 2, getWebSession().getProjectId());
-                setNullableInt(ps, 3, getWebSession().getUserId());
+
+                Integer customerId = null;
+                Integer projectId = null;
+                Integer userId = null;
+                if (getWebSession() != null) {
+                    customerId = getWebSession().getCustomerId();
+                    projectId = getWebSession().getProjectId();
+                    userId = getWebSession().getUserId();
+                }
+
+                setNullableInt(ps, 1, customerId);
+                setNullableInt(ps, 2, projectId);
+                setNullableInt(ps, 3, userId);
                 ps.setString(4, module);
                 ps.setInt(5, (int) durationMs);
                 ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));

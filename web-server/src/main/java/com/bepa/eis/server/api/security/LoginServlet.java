@@ -4,8 +4,8 @@ import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
 import com.bepa.eis.common.providers.SessionProvider;
-import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.security.GeoIpService;
 import com.bepa.eis.common.providers.security.LoginActivityLogger;
 import com.bepa.eis.common.providers.security.MfaConfig;
@@ -59,8 +59,9 @@ public class LoginServlet extends GenericServlet {
     @Override
     public void init() throws ServletException {
         try {
-            InitialContext ctx = new InitialContext();
-            this.dataSource = (DataSource) ctx.lookup(GlobalConfiguration.getJndiName());
+            InitialContext context = new InitialContext();
+
+            this.dataSource = (DataSource) context.lookup(GlobalConfiguration.getJndiName());
             this.geoIpService = new GeoIpService();
             this.mfaTotpService = new MfaTotpService();
 
@@ -75,7 +76,10 @@ public class LoginServlet extends GenericServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doPost(
+            HttpServletRequest req,
+            HttpServletResponse resp
+    ) throws IOException {
         req.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         String servletPath = req.getServletPath();
@@ -94,7 +98,11 @@ public class LoginServlet extends GenericServlet {
                 return;
             }
 
-            handleMfaVerify(req, resp, false);
+            handleMfaVerify(
+                    req,
+                    resp,
+                    false
+            );
             return;
         }
 
@@ -112,17 +120,38 @@ public class LoginServlet extends GenericServlet {
                 return;
             }
 
-            handleMfaVerify(req, resp, true);
+            handleMfaVerify(
+                    req,
+                    resp,
+                    true
+            );
             return;
         }
 
-        handlePasswordLogin(req, resp);
+        handlePasswordLogin(
+                req,
+                resp
+        );
     }
 
-    private void handlePasswordLogin(HttpServletRequest req, HttpServletResponse response) throws IOException {
-        String body = new String(req.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        String username = extractJsonString(body, "username");
-        String password = extractJsonString(body, "password");
+    private void handlePasswordLogin(
+            HttpServletRequest req,
+            HttpServletResponse response
+    ) throws IOException {
+        String body = new String(
+                req.getInputStream().readAllBytes(),
+                StandardCharsets.UTF_8
+        );
+
+        String username = extractJsonString(
+                body,
+                "username"
+        );
+
+        String password = extractJsonString(
+                body,
+                "password"
+        );
 
         String ipAddress = getClientIpAddress(req);
         String userAgent = req.getHeader("User-Agent");
@@ -153,7 +182,11 @@ public class LoginServlet extends GenericServlet {
         }
 
         UserProvider userProvider = new UserProvider(null);
-        UserProvider.LoginValidationResult validationResult = userProvider.validateLogin(username, password);
+
+        UserProvider.LoginValidationResult validationResult = userProvider.validateLogin(
+                username,
+                password
+        );
 
         if (!validationResult.valid()) {
             logFailedLoginAttempt(
@@ -195,20 +228,21 @@ public class LoginServlet extends GenericServlet {
             return;
         }
 
-        boolean mfaRequired = false;
+        List<CustomerRecord> customers = userProvider.getCustomersByUserId(validationResult.userId());
+        MfaConfig.CustomerMfaPolicy customerMfaPolicy = resolveCustomerMfaPolicy(customers);
 
-        if (!MfaConfig.isMfaDisabled()) {
-            mfaRequired = MfaConfig.isMfaRequired(
-                    userMfaState.userMfaPolicy(),
-                    userMfaState.mfaEnabled()
-            );
-        }
+        boolean mfaRequired = MfaConfig.isMfaRequired(
+                customerMfaPolicy,
+                userMfaState.userMfaPolicy(),
+                userMfaState.mfaEnabled()
+        );
 
         log.info(
-                "MFA login decision for user '{}': configFile={}, mode={}, userPolicy={}, userMfaEnabled={}, userMfaConfigured={}, mfaRequired={}",
+                "MFA login decision for user '{}': configFile={}, globalMode={}, customerPolicy={}, userPolicy={}, userMfaEnabled={}, userMfaConfigured={}, mfaRequired={}",
                 username,
                 GlobalConfiguration.getConfigurationFile().getAbsolutePath(),
                 MfaConfig.getMfaMode(),
+                customerMfaPolicy,
                 userMfaState.userMfaPolicy(),
                 userMfaState.mfaEnabled(),
                 userMfaState.isMfaConfigured(),
@@ -251,7 +285,11 @@ public class LoginServlet extends GenericServlet {
         WebSession webSession = getSession(req);
 
         if (webSession != null && webSession.getUserId() != null) {
-            redirectToPage(response, webSession, username);
+            redirectToPage(
+                    response,
+                    webSession,
+                    username
+            );
 /*
             if (webSession.getCustomerId() != null) {
                 log.info(
@@ -274,92 +312,87 @@ public class LoginServlet extends GenericServlet {
                 resp.sendRedirect("/web/view?page=myprojects");
             }
 */
-
         }
 
-        response.setHeader("Cache-Control", "no-store");
-        response.setHeader("Pragma", "no-cache");
+        response.setHeader(
+                "Cache-Control",
+                "no-store"
+        );
+
+        response.setHeader(
+                "Pragma",
+                "no-cache"
+        );
+
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    private void redirectToPage(HttpServletResponse response, WebSession webSession, String username) throws IOException {
+    private MfaConfig.CustomerMfaPolicy resolveCustomerMfaPolicy(List<CustomerRecord> customers) {
+        if (customers == null || customers.isEmpty()) {
+            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+        }
 
+        boolean hasOptional = false;
+        boolean hasDisabled = false;
+
+        for (CustomerRecord customer : customers) {
+            if (customer == null) {
+                continue;
+            }
+
+            MfaConfig.CustomerMfaPolicy customerMfaPolicy = MfaConfig.parseCustomerMfaPolicy(customer.getCustomerMfaPolicy());
+
+            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.REQUIRED) {
+                return MfaConfig.CustomerMfaPolicy.REQUIRED;
+            }
+
+            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.OPTIONAL) {
+                hasOptional = true;
+            }
+
+            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.DISABLED) {
+                hasDisabled = true;
+            }
+        }
+
+        if (hasOptional) {
+            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+        }
+
+        if (hasDisabled) {
+            return MfaConfig.CustomerMfaPolicy.DISABLED;
+        }
+
+        return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+    }
+
+    private void redirectToPage(
+            HttpServletResponse response,
+            WebSession webSession,
+            String username
+    ) throws IOException {
         UserProvider userProvider = new UserProvider(webSession);
         List<CustomerRecord> customers = userProvider.getCustomersByUserId(webSession.getUserId());
 
         try {
             if (customers.size() == 1) {
-
                 CustomerRecord customer = customers.get(0);
-                webSession.setCustomerId(customer.getCustomerId() );
+
+                webSession.setCustomerId(customer.getCustomerId());
+
                 SessionProvider sessionProvider = new SessionProvider(webSession);
                 sessionProvider.updateSessionInfo(webSession);
+
                 response.sendRedirect("/web/view?page=myprojects");
                 return;
-            } else {
-                log.info("User '{}' logged in", username);
-                response.sendRedirect("/select-project.html");
-                return;
             }
+
+            log.info("User '{}' logged in", username);
+            response.sendRedirect("/select-project.html");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        /* GFA
-        if (customers.isEmpty()) {
-            log.info(
-                    "User '{}' logged in with customerId: {}",
-                    username,
-                    webSession.getCustomerId()
-            );
-        }
-
-
-        if (webSession.getCustomerId() != null) {
-            log.info(
-                    "User '{}' logged in with customerId: {}",
-                    username,
-                    webSession.getCustomerId()
-            );
-        } else {
-        }
-
-        if (webSession.getProjectId() == null) {
-            log.info(
-                    "User '{}' logged in with projectId: {}",
-                    username,
-                    webSession.getProjectId()
-            );
-            response.sendRedirect("/web/view?page=myprojects");
-        }
-
-        */
     }
-/*
-    private void redirectToPage(WebSession webSession) {
-        if (webSession.getCustomerId() != null) {
-            log.info(
-                    "User '{}' logged in with customerId: {}",
-                    username,
-                    webSession.getCustomerId()
-            );
-        } else {
-            log.info("User '{}' logged in", username);
-            resp.sendRedirect("/select-project.html");
-            return;
-        }
-
-        if (webSession.getProjectId() == null) {
-            log.info(
-                    "User '{}' logged in with projectId: {}",
-                    username,
-                    webSession.getProjectId()
-            );
-            resp.sendRedirect("/web/view?page=myprojects");
-        }
-    )
-*/
-
 
     private void startMfaFlow(
             HttpServletRequest req,
@@ -398,8 +431,16 @@ public class LoginServlet extends GenericServlet {
                     "OK"
             );
 
-            resp.setHeader("Cache-Control", "no-store");
-            resp.setHeader("Pragma", "no-cache");
+            resp.setHeader(
+                    "Cache-Control",
+                    "no-store"
+            );
+
+            resp.setHeader(
+                    "Pragma",
+                    "no-cache"
+            );
+
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
@@ -426,19 +467,29 @@ public class LoginServlet extends GenericServlet {
         session.setAttribute(PRE_AUTH_MFA_ATTEMPTS_SESSION_KEY, 0);
         session.setMaxInactiveInterval(MfaConfig.getPreAuthTokenValidMinutes() * 60);
 
-        resp.setHeader("Cache-Control", "no-store");
-        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader(
+                "Cache-Control",
+                "no-store"
+        );
+
+        resp.setHeader(
+                "Pragma",
+                "no-cache"
+        );
+
         resp.setContentType("application/json");
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resp.setStatus(HttpServletResponse.SC_OK);
 
         if (mfaSetupRequired) {
             String setupSecret = mfaTotpService.generateSecret();
+
             String otpAuthUri = mfaTotpService.buildOtpAuthUri(
                     MfaConfig.getIssuer(),
                     username,
                     setupSecret
             );
+
             String qrCodeUrl = mfaTotpService.buildOtpAuthQrCodeDataUri(otpAuthUri);
 
             session.setAttribute(PRE_AUTH_MFA_SETUP_SECRET_SESSION_KEY, setupSecret);
@@ -502,9 +553,20 @@ public class LoginServlet extends GenericServlet {
             return;
         }
 
-        String body = new String(req.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        String mfaToken = extractJsonString(body, "mfaToken");
-        String code = extractJsonString(body, "code");
+        String body = new String(
+                req.getInputStream().readAllBytes(),
+                StandardCharsets.UTF_8
+        );
+
+        String mfaToken = extractJsonString(
+                body,
+                "mfaToken"
+        );
+
+        String code = extractJsonString(
+                body,
+                "code"
+        );
 
         HttpSession session = req.getSession(false);
 
@@ -662,8 +724,16 @@ public class LoginServlet extends GenericServlet {
                 "OK"
         );
 
-        resp.setHeader("Cache-Control", "no-store");
-        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader(
+                "Cache-Control",
+                "no-store"
+        );
+
+        resp.setHeader(
+                "Pragma",
+                "no-cache"
+        );
+
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
@@ -756,7 +826,11 @@ public class LoginServlet extends GenericServlet {
         HttpSession session = req.getSession(true);
         String sessionId = username;
 
-        session.setAttribute("sessionID", sessionId);
+        session.setAttribute(
+                "sessionID",
+                sessionId
+        );
+
         session.setMaxInactiveInterval(30 * 60);
 
         SessionManager.getInstance().login(
@@ -860,6 +934,7 @@ public class LoginServlet extends GenericServlet {
             String status
     ) {
         AuditEventProvider auditEventProvider = new AuditEventProvider(null);
+
         auditEventProvider.logLoginEvent(
                 safeActor(actorEmail),
                 eventType,
@@ -876,6 +951,7 @@ public class LoginServlet extends GenericServlet {
             String status
     ) {
         AuditEventProvider auditEventProvider = new AuditEventProvider(null);
+
         auditEventProvider.logMfaEvent(
                 safeActor(actorEmail),
                 eventType,
@@ -918,7 +994,10 @@ public class LoginServlet extends GenericServlet {
         return request.getRemoteAddr();
     }
 
-    private static String extractJsonString(String json, String key) {
+    private static String extractJsonString(
+            String json,
+            String key
+    ) {
         if (json == null || key == null) {
             return null;
         }
@@ -930,13 +1009,19 @@ public class LoginServlet extends GenericServlet {
             return null;
         }
 
-        int colonIndex = json.indexOf(':', keyIndex);
+        int colonIndex = json.indexOf(
+                ':',
+                keyIndex
+        );
 
         if (colonIndex < 0) {
             return null;
         }
 
-        int firstQuoteIndex = json.indexOf('"', colonIndex + 1);
+        int firstQuoteIndex = json.indexOf(
+                '"',
+                colonIndex + 1
+        );
 
         if (firstQuoteIndex < 0) {
             return null;
@@ -945,8 +1030,8 @@ public class LoginServlet extends GenericServlet {
         StringBuilder value = new StringBuilder();
         boolean escaped = false;
 
-        for (int i = firstQuoteIndex + 1; i < json.length(); i++) {
-            char current = json.charAt(i);
+        for (int index = firstQuoteIndex + 1; index < json.length(); index++) {
+            char current = json.charAt(index);
 
             if (escaped) {
                 value.append(current);

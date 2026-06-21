@@ -17,6 +17,7 @@ public class CustomerRegistrationProvider {
     private static final Logger log = LoggerFactory.getLogger(CustomerRegistrationProvider.class);
 
     private static final String DEFAULT_PAYMENT_PROVIDER = "MANUAL";
+    private static final String DEFAULT_CUSTOMER_MFA_POLICY = "OPTIONAL";
 
     private final WebSession webSession;
     private final CustomerRecordProvider customerRecordProvider;
@@ -102,6 +103,23 @@ public class CustomerRegistrationProvider {
             );
         }
 
+        boolean userCustomerLinked = customerRegistrationUserProvider.linkUserToCustomer(
+                userId,
+                customerId
+        );
+
+        if (!userCustomerLinked) {
+            log.warn(
+                    "Customer and user were created, but user could not be linked to customer. customerId={}, userId={}",
+                    customerId,
+                    userId
+            );
+
+            return CustomerRegistrationResult.failed(
+                    "Customer and user were created, but user could not be linked to customer."
+            );
+        }
+
         CustomerModule customerModule = buildCustomerModule(
                 customerId,
                 subscriptionPlan
@@ -171,6 +189,7 @@ public class CustomerRegistrationProvider {
         customer.setContactEmail(data.getContactEmail());
 
         customer.setCustomerStatus(CustomerStatus.CREATED);
+        customer.setCustomerMfaPolicy(DEFAULT_CUSTOMER_MFA_POLICY);
         customer.setChangedByUserId(getChangedByUserId());
         customer.setLatest(true);
 

@@ -8,6 +8,7 @@ public final class MfaConfig {
     private static final String DEFAULT_ISSUER_DEV = "BEPA EIS DEV";
 
     private static final MfaMode DEFAULT_MFA_MODE = MfaMode.OPTIONAL;
+    private static final CustomerMfaPolicy DEFAULT_CUSTOMER_MFA_POLICY = CustomerMfaPolicy.OPTIONAL;
 
     private static final int DEFAULT_CODE_LENGTH = 6;
     private static final int DEFAULT_CODE_VALID_SECONDS = 30;
@@ -126,6 +127,18 @@ public final class MfaConfig {
             UserMfaPolicy userMfaPolicy,
             boolean userMfaEnabled
     ) {
+        return isMfaRequired(
+                DEFAULT_CUSTOMER_MFA_POLICY,
+                userMfaPolicy,
+                userMfaEnabled
+        );
+    }
+
+    public static boolean isMfaRequired(
+            CustomerMfaPolicy customerMfaPolicy,
+            UserMfaPolicy userMfaPolicy,
+            boolean userMfaEnabled
+    ) {
         MfaMode mfaMode = getMfaMode();
 
         if (mfaMode == MfaMode.DISABLED) {
@@ -136,11 +149,27 @@ public final class MfaConfig {
             return true;
         }
 
-        if (userMfaPolicy == UserMfaPolicy.DISABLED) {
+        CustomerMfaPolicy safeCustomerMfaPolicy = customerMfaPolicy == null
+                ? DEFAULT_CUSTOMER_MFA_POLICY
+                : customerMfaPolicy;
+
+        UserMfaPolicy safeUserMfaPolicy = userMfaPolicy == null
+                ? UserMfaPolicy.DEFAULT
+                : userMfaPolicy;
+
+        if (safeUserMfaPolicy == UserMfaPolicy.DISABLED) {
             return false;
         }
 
-        if (userMfaPolicy == UserMfaPolicy.REQUIRED) {
+        if (safeUserMfaPolicy == UserMfaPolicy.REQUIRED) {
+            return true;
+        }
+
+        if (safeCustomerMfaPolicy == CustomerMfaPolicy.DISABLED) {
+            return false;
+        }
+
+        if (safeCustomerMfaPolicy == CustomerMfaPolicy.REQUIRED) {
             return true;
         }
 
@@ -151,7 +180,25 @@ public final class MfaConfig {
         return false;
     }
 
+    public static CustomerMfaPolicy parseCustomerMfaPolicy(String value) {
+        if (value == null || value.isBlank()) {
+            return DEFAULT_CUSTOMER_MFA_POLICY;
+        }
+
+        try {
+            return CustomerMfaPolicy.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return DEFAULT_CUSTOMER_MFA_POLICY;
+        }
+    }
+
     public enum MfaMode {
+        DISABLED,
+        OPTIONAL,
+        REQUIRED
+    }
+
+    public enum CustomerMfaPolicy {
         DISABLED,
         OPTIONAL,
         REQUIRED

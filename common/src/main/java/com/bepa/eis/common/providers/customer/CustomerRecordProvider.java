@@ -24,12 +24,6 @@ public class CustomerRecordProvider extends GenericProvider {
             "SELECT ISNULL(MAX(CustomerId), 0) + 1 AS NextCustomerId " +
                     "FROM [dbo].[CUSTOMER] WITH (UPDLOCK, HOLDLOCK) " +
                     "WHERE Latest = 1 ";
-/* GFA
-            "SELECT ISNULL(MAX(CustomerId), 0) + 1 AS NextCustomerId " +
-                    "FROM [dbo].[CUSTOMER] WITH (UPDLOCK, HOLDLOCK) " +
-                    "WHERE Version = 1 " +
-                    "  AND Latest = 1 ";
- */
 
     private static final String SELECT_ALL_LATEST_CUSTOMERS_SQL =
             "SELECT " +
@@ -46,6 +40,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.ContactName, " +
                     "C.ContactEmail, " +
                     "C.CustomerStatus, " +
+                    "C.CustomerMfaPolicy, " +
                     "C.ChangedByUserId, " +
                     "C.ChangedDateTime, " +
                     "CreatedCustomer.CreatedDateTime, " +
@@ -75,6 +70,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.ContactName, " +
                     "C.ContactEmail, " +
                     "C.CustomerStatus, " +
+                    "C.CustomerMfaPolicy, " +
                     "C.ChangedByUserId, " +
                     "C.ChangedDateTime, " +
                     "CreatedCustomer.CreatedDateTime, " +
@@ -105,6 +101,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.ContactName, " +
                     "C.ContactEmail, " +
                     "C.CustomerStatus, " +
+                    "C.CustomerMfaPolicy, " +
                     "C.ChangedByUserId, " +
                     "C.ChangedDateTime, " +
                     "CreatedCustomer.CreatedDateTime, " +
@@ -143,11 +140,12 @@ public class CustomerRecordProvider extends GenericProvider {
                     "ContactName, " +
                     "ContactEmail, " +
                     "CustomerStatus, " +
+                    "CustomerMfaPolicy, " +
                     "ChangedByUserId, " +
                     "ChangedDateTime, " +
                     "Latest " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME(), ?) ";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME(), ?) ";
 
     public CustomerRecordProvider(WebSession webSession) {
         super(webSession);
@@ -177,6 +175,8 @@ public class CustomerRecordProvider extends GenericProvider {
                     customer.setCustomerStatus(CustomerStatus.CREATED);
                 }
 
+                customer.setCustomerMfaPolicy(customer.getCustomerMfaPolicy());
+
                 Integer customerPK = insertCustomer(
                         connection,
                         customer
@@ -187,10 +187,11 @@ public class CustomerRecordProvider extends GenericProvider {
                 customer.setCustomerPK(customerPK);
 
                 log.info(
-                        "Customer created. customerPK={}, customerId={}, version={}",
+                        "Customer created. customerPK={}, customerId={}, version={}, customerMfaPolicy={}",
                         customerPK,
                         customerId,
-                        customer.getVersion()
+                        customer.getVersion(),
+                        customer.getCustomerMfaPolicy()
                 );
 
                 return customerId;
@@ -249,6 +250,7 @@ public class CustomerRecordProvider extends GenericProvider {
 
                 updatedCustomer.setVersion(nextVersion);
                 updatedCustomer.setLatest(true);
+                updatedCustomer.setCustomerMfaPolicy(updatedCustomer.getCustomerMfaPolicy());
 
                 Integer customerPK = insertCustomer(
                         connection,
@@ -260,10 +262,11 @@ public class CustomerRecordProvider extends GenericProvider {
                 updatedCustomer.setCustomerPK(customerPK);
 
                 log.info(
-                        "Customer updated. customerPK={}, customerId={}, version={}",
+                        "Customer updated. customerPK={}, customerId={}, version={}, customerMfaPolicy={}",
                         customerPK,
                         updatedCustomer.getCustomerId(),
-                        updatedCustomer.getVersion()
+                        updatedCustomer.getVersion(),
+                        updatedCustomer.getCustomerMfaPolicy()
                 );
 
                 return customerPK;
@@ -442,14 +445,15 @@ public class CustomerRecordProvider extends GenericProvider {
             statement.setString(10, nullIfBlank(customer.getContactName()));
             statement.setString(11, nullIfBlank(customer.getContactEmail()));
             statement.setInt(12, customer.getCustomerStatusId());
+            statement.setString(13, customer.getCustomerMfaPolicy());
 
             if (customer.getChangedByUserId() == null) {
-                statement.setNull(13, Types.INTEGER);
+                statement.setNull(14, Types.INTEGER);
             } else {
-                statement.setInt(13, customer.getChangedByUserId());
+                statement.setInt(14, customer.getChangedByUserId());
             }
 
-            statement.setBoolean(14, customer.isLatest());
+            statement.setBoolean(15, customer.isLatest());
 
             int updatedRows = statement.executeUpdate();
 
@@ -493,6 +497,8 @@ public class CustomerRecordProvider extends GenericProvider {
 
         int customerStatus = resultSet.getInt("CustomerStatus");
         customer.setCustomerStatusId(resultSet.wasNull() ? null : customerStatus);
+
+        customer.setCustomerMfaPolicy(resultSet.getString("CustomerMfaPolicy"));
 
         int changedByUserId = resultSet.getInt("ChangedByUserId");
         customer.setChangedByUserId(resultSet.wasNull() ? null : changedByUserId);

@@ -30,7 +30,7 @@ abstract public class AbstractAdminServlet extends HttpServlet {
             HttpServletResponse response
     ) throws ServletException, IOException {
 
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, false);
 
         String module = request.getServletPath();
         long startTime = System.currentTimeMillis();
@@ -55,7 +55,7 @@ abstract public class AbstractAdminServlet extends HttpServlet {
             HttpServletResponse response
     ) throws ServletException, IOException {
 
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, false);
 
         String module = request.getServletPath();
         long startTime = System.currentTimeMillis();
@@ -104,14 +104,25 @@ abstract public class AbstractAdminServlet extends HttpServlet {
     }
 
     public WebSession getWebSessionFromRequest(HttpServletRequest request) {
-        WebSession webSession = null;
+        return getWebSessionFromRequest(request, true);
+    }
+
+    public WebSession getWebSessionFromRequest(HttpServletRequest request, boolean isRequired) {
+        WebSession webSession = new WebSession();
         try {
             String sessionId = getSessionIdFromRequest(request);
-            webSession = getWebSession(sessionId);
+            if (isRequired) {
+                webSession = getWebSession(sessionId);
+            } else {
+                webSession = sessionId != null ? getWebSession(sessionId) : null;
+            }
         } catch (Exception e) {
-            log.error("Error getting session for page viewer: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+            if (! isRequired) {
+                log.error("Error getting session for page viewer: {}", e.getMessage(), e);
+                webSession = new WebSession();
+            }
         }
         return webSession;
     }
+
 }

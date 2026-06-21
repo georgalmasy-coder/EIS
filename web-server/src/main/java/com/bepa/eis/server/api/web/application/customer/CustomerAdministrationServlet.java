@@ -269,6 +269,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
                 text(customerElement, "customerStatus"),
                 CustomerStatus.CREATED
         ));
+        customer.setCustomerMfaPolicy(text(customerElement, "customerMfaPolicy"));
         customer.setChangedByUserId(intValue(text(customerElement, "changedByUserId")));
         customer.setLatest(true);
 
@@ -404,6 +405,23 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
                 )
         );
 
+        appendStaticLookup(
+                xml,
+                "customerMfaPolicy",
+                new LookupOption(
+                        "OPTIONAL",
+                        "Optional"
+                ),
+                new LookupOption(
+                        "REQUIRED",
+                        "Required"
+                ),
+                new LookupOption(
+                        "DISABLED",
+                        "Disabled"
+                )
+        );
+
         appendLookup(
                 xml,
                 "customerStatus",
@@ -534,6 +552,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "contactEmail", customer == null ? null : customer.getContactEmail());
         appendElement(xml, "contactPhone", customer == null ? null : customer.getPhone());
         appendElement(xml, "customerStatus", customer == null ? null : customer.getCustomerStatusCode());
+        appendElement(xml, "customerMfaPolicy", customer == null ? null : customer.getCustomerMfaPolicy());
         appendElement(xml, "createdDateTime", customer == null ? null : customer.getCreatedDateTime());
         appendElement(xml, "changedDateTime", customer == null ? null : customer.getChangedDateTime());
 
@@ -559,6 +578,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "contactName", customer == null ? null : customer.getContactName());
         appendElement(xml, "contactEmail", customer == null ? null : customer.getContactEmail());
         appendElement(xml, "customerStatus", customer == null ? null : customer.getCustomerStatusCode());
+        appendElement(xml, "customerMfaPolicy", customer == null ? null : customer.getCustomerMfaPolicy());
         appendElement(xml, "changedByUserId", customer == null ? null : customer.getChangedByUserId());
         appendElement(xml, "changedBy", displayNameByUserId(customer == null ? null : customer.getChangedByUserId()));
         appendElement(xml, "createdDateTime", customer == null ? null : customer.getCreatedDateTime());

@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 
 public class CustomerRecord {
 
+    public static final String DEFAULT_CUSTOMER_MFA_POLICY = "OPTIONAL";
+
     private Integer customerPK;
     private Integer customerId;
     private Integer version;
@@ -23,6 +25,7 @@ public class CustomerRecord {
     private String contactEmail;
 
     private CustomerStatus customerStatus;
+    private String customerMfaPolicy;
 
     private Integer changedByUserId;
     private Timestamp changedDateTime;
@@ -48,6 +51,7 @@ public class CustomerRecord {
         contactEmail = "";
 
         customerStatus = CustomerStatus.CREATED;
+        customerMfaPolicy = DEFAULT_CUSTOMER_MFA_POLICY;
 
         changedByUserId = null;
         changedDateTime = null;
@@ -175,6 +179,25 @@ public class CustomerRecord {
         return customerStatus == null ? CustomerStatus.CREATED.getCode() : customerStatus.getCode();
     }
 
+    public String getCustomerMfaPolicy() {
+        if (customerMfaPolicy == null || customerMfaPolicy.isBlank()) {
+            return DEFAULT_CUSTOMER_MFA_POLICY;
+        }
+
+        return customerMfaPolicy;
+    }
+
+    public void setCustomerMfaPolicy(String customerMfaPolicy) {
+        String safeCustomerMfaPolicy = safeText(customerMfaPolicy).toUpperCase();
+
+        if (safeCustomerMfaPolicy.isBlank()) {
+            this.customerMfaPolicy = DEFAULT_CUSTOMER_MFA_POLICY;
+            return;
+        }
+
+        this.customerMfaPolicy = safeCustomerMfaPolicy;
+    }
+
     public Integer getChangedByUserId() {
         return changedByUserId;
     }
@@ -280,6 +303,7 @@ public class CustomerRecord {
                 + ", cvrNumber=" + cvrNumber
                 + ", contactEmail=" + contactEmail
                 + ", customerStatus=" + getCustomerStatusCode()
+                + ", customerMfaPolicy=" + getCustomerMfaPolicy()
                 + ", changedByUserId=" + changedByUserId
                 + ", changedDateTime=" + changedDateTime
                 + ", createdDateTime=" + createdDateTime

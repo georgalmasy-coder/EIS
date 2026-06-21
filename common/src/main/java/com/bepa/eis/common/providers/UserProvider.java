@@ -1,185 +1,11 @@
 package com.bepa.eis.common.providers;
 
-/**
- *
- Below is a method-by-method description intended for a future **User Management / MFA administration dialog**.
-
- ---
-
- ## `resetMfa(Integer userId)`
-
- Resets MFA for the selected user using the current/session actor or system as the actor.
- Use this when an administrator wants to force the user to set up MFA again at next login.
-
- Typically used alone. Do **not** call `disableMfaForUser(...)` immediately after, because reset already clears the existing MFA setup and marks setup as required.
-
- ---
-
- ## `resetMfa(Integer userId, Integer resetByUserId)`
-
- Resets MFA for a selected user and explicitly records which administrator performed the reset.
- Use this from an admin dialog when the acting admin user ID is known.
-
- Typically used alone. The next user login should trigger MFA setup again if MFA is required globally or by user policy.
-
- ---
-
- ## `resetMfaByEmail(String email, Integer resetByUserId)`
-
- Same as `resetMfa(...)`, but looks up the user by email instead of user ID.
- Useful for admin tools where the selected user is represented by email rather than internal ID.
-
- This is an alternative to `resetMfa(userId, resetByUserId)`, not something that should be called after it.
-
- ---
-
- ## `enableMfaAfterSetup(Integer userId, String encryptedSecret)`
-
- Marks MFA as enabled and verified after the user has successfully completed authenticator setup.
- This should normally be called by the login/MFA setup flow, not manually from an admin dialog.
-
- This depends on a valid generated TOTP secret. It should be called only after the submitted authenticator code has been verified.
-
- ---
-
- ## `updateMfaLastVerified(Integer userId)`
-
- Updates the timestamp for the latest successful MFA verification.
- Use this after a user successfully enters a valid MFA code during login.
-
- This should be called after successful TOTP verification. It does not enable or reset MFA.
-
- ---
-
- ## `disableMfaForUser(Integer userId)`
-
- Completely disables MFA for the user and clears the stored MFA secret.
- Use this only if an administrator explicitly wants the user to no longer use MFA.
-
- Do not call this directly after `resetMfa(...)`. Reset means “set it up again”; disable means “do not use MFA”.
-
- ---
-
- ## `enableMfaRequiredForUser(Integer userId)`
-
- Sets the user-level MFA policy to `REQUIRED`.
- Use this when an administrator wants this specific user to always use MFA, regardless of optional global settings.
-
- This may be followed by `resetMfa(...)` only if the administrator also wants to force a fresh authenticator setup.
-
- ---
-
- ## `setUserMfaPolicyToDefault(Integer userId)`
-
- Sets the user MFA policy back to `DEFAULT`, meaning the user follows the global MFA configuration.
- Use this when removing a user-specific MFA override.
-
- Usually used alone. Whether MFA is required afterwards depends on the global MFA mode and whether the user already has MFA enabled.
-
- ---
-
- ## `setUserMfaPolicyByEmail(String email, MfaConfig.UserMfaPolicy policy)`
-
- Changes the user MFA policy by looking up the user via email.
- Useful for admin tools or batch operations where email is the primary identifier.
-
- This is an alternative to `setUserMfaPolicy(userId, policy)`, not something that should be called after it.
-
- ---
-
- ## `setUserMfaPolicy(Integer userId, MfaConfig.UserMfaPolicy policy)`
-
- Sets the user’s MFA policy to `DEFAULT`, `REQUIRED`, or `DISABLED`.
- Use this from the admin dialog when changing how MFA should apply to a specific user.
-
- If setting policy to `REQUIRED`, optionally call `resetMfa(...)` afterwards if the user must set up a new authenticator.
-
- ---
-
- ## `markMfaResetRequired(Integer userId, Integer resetByUserId)`
-
- Marks the user as requiring MFA reset, without necessarily clearing all MFA fields.
- Use this if you want to flag that the current MFA setup is no longer trusted and must be renewed.
-
- In most admin cases, `resetMfa(...)` is simpler and clearer. Use this only if you need a softer reset workflow.
-
- ---
-
- ## `clearMfaResetRequired(Integer userId)`
-
- Clears the MFA reset-required flag for the user.
- Use this if an administrator wants to cancel a previously requested MFA reset.
-
- This should not normally be called after `resetMfa(...)`, unless an admin explicitly decides that the reset requirement should be withdrawn.
-
- ---
-
- ## `isMfaConfigured(Integer userId)`
-
- Returns whether the user currently has a complete and verified MFA setup.
- Use this to decide what status to show in the user-management UI, such as “Configured” or “Not configured”.
-
- This is read-only and can be called whenever the dialog loads or refreshes.
-
- ---
-
- ## `isMfaRequiredForUser(Integer userId)`
-
- Returns whether MFA is effectively required for the user based on global configuration, user policy, and user MFA state.
- Use this to show whether the user will be asked for MFA at next login.
-
- This is read-only and useful together with `isMfaConfigured(...)` to distinguish “Required but not configured” from “Required and ready”.
-
- ---
-
- ## `getUserIdByEmail(String email)`
-
- Looks up the internal user ID for a given email address.
- Use this when the admin UI works with email but backend operations require `userId`.
-
- This is normally called before user-ID based methods, unless the selected user already has `userId` available.
-
- ---
-
- ## `getEmailByUserId(Integer userId)`
-
- Looks up the email address for a given internal user ID.
- Use this for display, audit logging, or confirmation messages.
-
- This is read-only and can be used before audit-sensitive operations to show exactly which user will be affected.
-
- ---
-
- ## `getUserDisplayNameById(Integer userId)`
-
- Looks up a display-friendly user name for a given internal user ID.
- Returns the user's name when available, otherwise email, otherwise an empty string.
-
- This is read-only and is useful in administration screens where technical IDs should not be shown directly.
-
- ---
-
- ## Suggested admin dialog actions
-
- Typical administrator actions could map like this:
-
- | Admin action | Method |
- |---|---|
- | Require MFA for user | `enableMfaRequiredForUser(userId)` |
- | Reset user MFA | `resetMfa(userId, adminUserId)` |
- | Disable MFA for user | `disableMfaForUser(userId)` |
- | Follow global MFA policy | `setUserMfaPolicyToDefault(userId)` |
- | Change MFA policy manually | `setUserMfaPolicy(userId, policy)` |
- | Show MFA status | `isMfaConfigured(userId)` + `isMfaRequiredForUser(userId)` |
-
- */
-
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import com.bepa.eis.common.enums.project.ProjectStatus;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.security.MfaConfig;
-import com.bepa.eis.common.dto.WebSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -248,6 +74,14 @@ public class UserProvider extends GenericProvider {
                 MfaResetRequired
             FROM [dbo].[USERS]
             WHERE Email = ?
+            """;
+
+    private static final String SELECT_CUSTOMER_MFA_POLICY_BY_CUSTOMER_ID_SQL = """
+            SELECT TOP (1)
+                CustomerMfaPolicy
+            FROM [dbo].[CUSTOMER]
+            WHERE CustomerId = ?
+              AND Latest = 1
             """;
 
     private static final String UPDATE_MFA_LAST_VERIFIED_SQL = """
@@ -325,7 +159,6 @@ public class UserProvider extends GenericProvider {
                     ProjectStatus.ON_HOLD.getId() + ", " +
                     ProjectStatus.AT_RISK.getId();
 
-
     private static final String CUSTOMER_PROJECT_SQL =
             "SELECT P.ProjectId, P.ProjectName, C.CustomerId, C.CustomerName " +
                     "FROM PROJECT P, CUSTOMER C " +
@@ -353,7 +186,7 @@ public class UserProvider extends GenericProvider {
                     CustomerStatus.PAYMENT_OVERDUE.getId();
 
     private static final String CUSTOMER_BY_USER_ID_SQL =
-            "SELECT C.CustomerId, C.CustomerName, C.CustomerStatus " +
+            "SELECT C.CustomerId, C.CustomerName, C.CustomerStatus, C.CustomerMfaPolicy " +
                     "FROM CUSTOMER C " +
                     "WHERE C.Latest = 1 " +
                     "AND C.CustomerStatus IN (" + ACTIVE_CUSTOMER_STATUS_IDS + ") " +
@@ -423,11 +256,14 @@ public class UserProvider extends GenericProvider {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next()) {
                         CustomerRecord customer = new CustomerRecord();
+
                         customer.setCustomerId(resultSet.getInt("CustomerId"));
                         customer.setCustomerName(resultSet.getString("CustomerName"));
 
                         CustomerStatus customerStatus = CustomerStatus.fromId(resultSet.getInt("CustomerStatus"));
                         customer.setCustomerStatus(customerStatus);
+
+                        customer.setCustomerMfaPolicy(resultSet.getString("CustomerMfaPolicy"));
 
                         customers.add(customer);
                     }
@@ -482,6 +318,28 @@ public class UserProvider extends GenericProvider {
         }
 
         return null;
+    }
+
+    public MfaConfig.CustomerMfaPolicy getCustomerMfaPolicyByCustomerId(Integer customerId) {
+        if (customerId == null) {
+            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_CUSTOMER_MFA_POLICY_BY_CUSTOMER_ID_SQL)) {
+
+            statement.setInt(1, customerId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return parseCustomerMfaPolicy(resultSet.getString("CustomerMfaPolicy"));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error loading customer MFA policy for customerId: {}", customerId, e);
+        }
+
+        return MfaConfig.CustomerMfaPolicy.OPTIONAL;
     }
 
     public boolean updateMfaLastVerified(Integer userId) {
@@ -934,13 +792,23 @@ public class UserProvider extends GenericProvider {
     }
 
     public boolean isMfaRequiredForUser(Integer userId) {
+        return isMfaRequiredForUser(userId, null);
+    }
+
+    public boolean isMfaRequiredForUser(
+            Integer userId,
+            Integer customerId
+    ) {
         UserMfaState userMfaState = getUserMfaStateByUserId(userId);
 
         if (userMfaState == null) {
             return false;
         }
 
+        MfaConfig.CustomerMfaPolicy customerMfaPolicy = getCustomerMfaPolicyByCustomerId(customerId);
+
         return MfaConfig.isMfaRequired(
+                customerMfaPolicy,
                 userMfaState.userMfaPolicy(),
                 userMfaState.mfaEnabled()
         );
@@ -1057,6 +925,19 @@ public class UserProvider extends GenericProvider {
         } catch (IllegalArgumentException e) {
             log.warn("Unknown UserMfaPolicy value: {}. Falling back to DEFAULT.", value);
             return MfaConfig.UserMfaPolicy.DEFAULT;
+        }
+    }
+
+    private MfaConfig.CustomerMfaPolicy parseCustomerMfaPolicy(String value) {
+        if (value == null || value.isBlank()) {
+            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+        }
+
+        try {
+            return MfaConfig.CustomerMfaPolicy.valueOf(value.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown CustomerMfaPolicy value: {}. Falling back to OPTIONAL.", value);
+            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
         }
     }
 

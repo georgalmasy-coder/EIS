@@ -95,6 +95,7 @@
                                 <col data-col-key="contactEmail" />
                                 <col data-col-key="contactPhone" />
                                 <col data-col-key="customerStatus" />
+                                <col data-col-key="customerMfaPolicy" />
                                 <col data-col-key="createdDateTime" />
                             </colgroup>
                             <thead>
@@ -122,6 +123,10 @@
                                 <th data-key="customerStatus">
                                     <span class="sort">Customer status <span class="sort-indicator" id="si-customerStatus"></span></span>
                                     <span class="col-resizer" data-resize-key="customerStatus" aria-hidden="true"></span>
+                                </th>
+                                <th data-key="customerMfaPolicy">
+                                    <span class="sort">MFA <span class="sort-indicator" id="si-customerMfaPolicy"></span></span>
+                                    <span class="col-resizer" data-resize-key="customerMfaPolicy" aria-hidden="true"></span>
                                 </th>
                                 <th data-key="createdDateTime">
                                     <span class="sort">Created <span class="sort-indicator" id="si-createdDateTime"></span></span>
@@ -213,6 +218,11 @@
                     <label>
                         <span>Customer status</span>
                         <select id="fieldCustomerStatus"></select>
+                    </label>
+
+                    <label>
+                        <span>Customer MFA policy</span>
+                        <select id="fieldCustomerMfaPolicy"></select>
                     </label>
 
                     <label>
