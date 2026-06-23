@@ -2,7 +2,7 @@ package com.bepa.eis.server.entites;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
-import com.bepa.eis.server.dataprovider.entities.common.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.entites.configuration.EntityConfiguration;

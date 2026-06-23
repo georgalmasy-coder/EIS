@@ -7,7 +7,6 @@ import com.bepa.eis.server.api.generic.GenericExporters;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.fields.booleans.Active;
-import com.bepa.eis.server.dataprovider.fields.booleans.RelevantToStakeholderRequirement;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
@@ -145,7 +144,6 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         Integer ownerId = intValue(requirmentElement, RequirementOwner.FIELD_NAME);
         String rationalStatement = textValue(requirmentElement, RequirementRationaleStatement.FIELD_NAME);
         String captureDate = textValue(requirmentElement, RequirementCaptureDate.FIELD_NAME);
-        Boolean relevantToStakeholderRequirement = boolValue(requirmentElement, RelevantToStakeholderRequirement.FIELD_NAME);
         Boolean active = boolValue(requirmentElement, Active.FIELD_NAME);
 
         String  requirementHighlevelCapability = textValue(requirmentElement, RequirementHighlevelCapability.FIELD_NAME);
@@ -155,18 +153,6 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         Integer requirementVerificationStatusId = intValue(requirmentElement, RequirementVerificationStatus.FIELD_NAME);
         Integer requirementVerificationStatementId = intValue(requirmentElement, RequirementVerificationStatement.FIELD_NAME);
         Integer requirementTechnicalPriorityId = intValue(requirmentElement, RequirementTechnicalPriority.FIELD_NAME);
-
-/* GFA
-        String requirementCode;
-        BasisSystemRequirementParentCodeSelector parentCodeSelector = new BasisSystemRequirementParentCodeSelector(webSession);
-        if (entityId == null) {
-            String parentCode = parentCodeSelector.fetchTextValueFromXml(requirmentElement, BasisSystemRequirementParentCodeSelector.FIELD_NAME);
-            requirementCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentCode);
-        } else {
-            requirementCode = textValue(requirmentElement, SYSTEMREQCODE.getFieldName());
-        }
-        Integer codeLevel = parentCodeSelector.getCodeLevel(requirementCode);
-*/
 
         String requirementCode;
         SystemRequirementParentCodeSelector parentCodeSelector = new SystemRequirementParentCodeSelector(webSession);
@@ -191,7 +177,6 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         systemRequirementEntity.setOwnerId(ownerId);
         systemRequirementEntity.setRationalStatement(rationalStatement);
         systemRequirementEntity.setCaptureDate(captureDate);
-        systemRequirementEntity.setRelevantToStakeholderRequirement(relevantToStakeholderRequirement);
 
         systemRequirementEntity.setRequirementHighlevelCapability(requirementHighlevelCapability);
         systemRequirementEntity.setRequirementTypeId(requirementTypeId);

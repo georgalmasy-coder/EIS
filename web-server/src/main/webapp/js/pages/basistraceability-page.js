@@ -20,13 +20,24 @@ import {
 } from "../core/css.js";
 
 const TRACEABILITY_ENDPOINT = "/basis/basistraceability?cmd=overview";
-const REMOVE_RELATION_ENDPOINT = "/basis/basistraceability/removerelation";
+
 const CONFIRM_RELATION_ENDPOINT = "/basis/basistraceability/confirmrelation";
+const REMOVE_CONFIRMED_RELATION_ENDPOINT = "/basis/basistraceability/removeconfirmedrelation";
+const MARK_RELATION_NOT_RELEVANT_ENDPOINT = "/basis/basistraceability/relationnotrelevant";
+const REMOVE_NOT_RELEVANT_RELATION_ENDPOINT = "/basis/basistraceability/removenotrelevantrelation";
+
 const SYSTEM_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=systemrequirement-edit";
 const STAKEHOLDER_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=stakeholderrequirement-edit";
 const RETURN_URL = "/web/view?page=basistraceabilitymatrix";
 
 const FALLBACK_STYLE_ID = "normal";
+
+const CELL_ACTIONS = {
+    confirmRelation: "confirmRelation",
+    removeConfirmedRelation: "removeConfirmedRelation",
+    markRelationNotRelevant: "markRelationNotRelevant",
+    removeNotRelevantRelation: "removeNotRelevantRelation"
+};
 
 const state = {
     contextCell: null,
@@ -452,7 +463,7 @@ function renderBody(tableBody, matrix) {
 
             const td = document.createElement("td");
             td.className = `traceability-cell ${getDynamicStyleClass(cell.style, "traceability-xml-style")}`;
-            td.title = buildCellTooltip(row, column, cell);
+            td.title = buildCellTooltip(row, column);
             td.setAttribute("data-row-id", row.id || "");
             td.setAttribute("data-row-code", row.code || "");
             td.setAttribute("data-row-index", String(rowIndex));
@@ -613,9 +624,9 @@ function openTraceabilityContextMenu(x, y, row, column, cell, cellElement) {
         return;
     }
 
-    const actionType = getTraceabilityCellActionType(cell);
+    const actions = getTraceabilityCellActions(cell);
 
-    if (!actionType) {
+    if (!actions.length) {
         closeTraceabilityContextMenu();
         return;
     }
@@ -627,21 +638,15 @@ function openTraceabilityContextMenu(x, y, row, column, cell, cellElement) {
 
     menu.innerHTML = "";
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.setAttribute("role", "menuitem");
+    actions.forEach((action) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("role", "menuitem");
+        button.setAttribute("data-context-action", action.action);
+        button.textContent = action.label;
 
-    if (actionType === "remove") {
-        button.setAttribute("data-context-action", "remove-relation");
-        button.textContent = "Remove relation";
-    }
-
-    if (actionType === "confirm") {
-        button.setAttribute("data-context-action", "confirm-relation");
-        button.textContent = "Confirm relation";
-    }
-
-    menu.appendChild(button);
+        menu.appendChild(button);
+    });
 
     menu.style.left = "0px";
     menu.style.top = "0px";
@@ -665,7 +670,8 @@ function openTraceabilityContextMenu(x, y, row, column, cell, cellElement) {
     menu.style.left = `${Math.max(margin, left)}px`;
     menu.style.top = `${Math.max(margin, top)}px`;
 
-    button.focus?.();
+    const firstButton = menu.querySelector("button[data-context-action]");
+    firstButton?.focus?.();
 }
 
 function closeTraceabilityContextMenu() {
@@ -694,14 +700,27 @@ async function handleTraceabilityContextAction(action) {
         return;
     }
 
-    if (action === "remove-relation") {
-        await executeTraceabilityRelationAction(REMOVE_RELATION_ENDPOINT, row, column, cell, cellElement);
+    if (action === CELL_ACTIONS.confirmRelation) {
+        await executeTraceabilityRelationAction(CONFIRM_RELATION_ENDPOINT, row, column, cell, cellElement);
         return;
     }
 
-    if (action === "confirm-relation") {
-        await executeTraceabilityRelationAction(CONFIRM_RELATION_ENDPOINT, row, column, cell, cellElement);
+    if (action === CELL_ACTIONS.removeConfirmedRelation) {
+        await executeTraceabilityRelationAction(REMOVE_CONFIRMED_RELATION_ENDPOINT, row, column, cell, cellElement);
+        return;
     }
+
+    if (action === CELL_ACTIONS.markRelationNotRelevant) {
+        await executeTraceabilityRelationAction(MARK_RELATION_NOT_RELEVANT_ENDPOINT, row, column, cell, cellElement);
+        return;
+    }
+
+    if (action === CELL_ACTIONS.removeNotRelevantRelation) {
+        await executeTraceabilityRelationAction(REMOVE_NOT_RELEVANT_RELATION_ENDPOINT, row, column, cell, cellElement);
+        return;
+    }
+
+    clearContextState();
 }
 
 async function executeTraceabilityRelationAction(endpoint, row, column, cell, cellElement) {
@@ -777,7 +796,7 @@ function updateTraceabilityCell(cell, cellElement, row, column, updatedCell) {
 
     cellElement.setAttribute("data-cell-style", nextStyle);
     cellElement.setAttribute("data-cell-value", nextValue);
-    cellElement.title = buildCellTooltip(row, column, cell);
+    cellElement.title = buildCellTooltip(row, column);
 
     renderCellValue(cellElement, nextValue);
 }
@@ -798,19 +817,49 @@ function clearContextState() {
     state.contextCellElement = null;
 }
 
-function getTraceabilityCellActionType(cell) {
-    const style = String(cell?.style || "").toLowerCase();
-    const value = String(cell?.value || "").trim().toLowerCase();
-
-    if (value === "x" && style.includes("green")) {
-        return "remove";
-    }
+function getTraceabilityCellActions(cell) {
+    const style = String(cell?.style || "").trim().toLowerCase();
 
     if (style.includes("yellow")) {
-        return "confirm";
+        return [
+            {
+                action: CELL_ACTIONS.confirmRelation,
+                label: "Mark Relation As Confirmed"
+            },
+            {
+                action: CELL_ACTIONS.markRelationNotRelevant,
+                label: "Mark Relation As Not Relevant"
+            }
+        ];
     }
 
-    return "";
+    if (style.includes("green")) {
+        return [
+            {
+                action: CELL_ACTIONS.removeConfirmedRelation,
+                label: "Remove Confirmed Relation"
+            },
+            {
+                action: CELL_ACTIONS.markRelationNotRelevant,
+                label: "Mark Relation As Not Relevant"
+            }
+        ];
+    }
+
+    if (style.includes("grayitalic") || style.includes("gray")) {
+        return [
+            {
+                action: CELL_ACTIONS.confirmRelation,
+                label: "Mark Relation As Confirmed"
+            },
+            {
+                action: CELL_ACTIONS.removeNotRelevantRelation,
+                label: "Remove Not Relevant Relation"
+            }
+        ];
+    }
+
+    return [];
 }
 
 function buildHeaderTooltip(columnGroupLabel, column) {
@@ -833,14 +882,10 @@ function buildRowTooltip(row) {
     ].filter(Boolean).join("\n");
 }
 
-function buildCellTooltip(row, column, cell) {
-    const value = cell.value ? `Value: ${cell.value}` : "Value: empty";
-
+function buildCellTooltip(row, column) {
     return [
         `Row: ${row.label || row.code || row.id}`,
         `Column: ${column.label || column.code || column.id}`,
-        value,
-        `Style: ${cell.style || FALLBACK_STYLE_ID}`,
         "Double-click to view traceability details"
     ].join("\n");
 }

@@ -215,7 +215,40 @@
                 </section>
 
                 <section class="tab-panel" id="tabPanel9" role="tabpanel" aria-labelledby="tabBtn9">
-                    <div class="placeholder-text systemsbreakdown-under-construction">Under Construction</div>
+                    <div class="relations-toolbar">
+                        <button id="relationsAddNew" class="primary relations-add-btn" type="button" aria-label="Add relation" title="Add relation">
+                            Add relation
+                        </button>
+                    </div>
+
+                    <div class="table-frame relations-table-frame systemsbreakdown-relations-frame">
+                        <div class="table-scroll">
+                            <table class="data-table relations-table" aria-label="Systems breakdown relations">
+                                <colgroup>
+                                    <col style="width: 15%;">
+                                    <col style="width: 14%;">
+                                    <col style="width: 27%;">
+                                    <col style="width: 14%;">
+                                    <col style="width: 16%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 4%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Entity Type</th>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Created By</th>
+                                    <th>Created</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody id="relationsBody"></tbody>
+                            </table>
+                            <div class="empty relations-table-empty" id="relationsEmpty">No relation rows.</div>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -295,6 +328,25 @@
         <div class="dlg-footer">
             <button id="attachmentSaveBtn" class="primary" type="button">Save</button>
             <button id="attachmentCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="relationDialog" aria-label="Relation dialog">
+    <form id="relationForm" method="dialog" class="dlg relation-dlg">
+        <div class="page-dialog-head">
+            <h3 id="relationDlgTitle">Add relation</h3>
+        </div>
+
+        <div class="page-dialog-status" id="relationDlgStatus">Dummy dialog for relation creation.</div>
+
+        <div class="relation-dummy-content">
+            This is a placeholder dialog. Content will be added later.
+        </div>
+
+        <div class="dlg-footer">
+            <button id="relationOkBtn" class="primary" type="button">OK</button>
+            <button id="relationCancelBtn" type="button">Cancel</button>
         </div>
     </form>
 </dialog>

@@ -4,7 +4,6 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.views.basis.system.BasisSystemRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.booleans.RelevantToStakeholderRequirement;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemRequirementParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
@@ -81,7 +80,6 @@ public class SystemRequirementProvider extends EntityProvider {
                 REQOWNERID,
                 REQSTATUSID,
                 REQCAPTUREDATE,
-                REQRELEVANTTOSTAKEHOLDER,
                 REQHIGHLEVELCAPABILITY,
                 REQTYPEID,
                 REQFREQUENCYID,
@@ -103,7 +101,6 @@ public class SystemRequirementProvider extends EntityProvider {
                 REQOWNERID,
                 REQSTATUSID,
                 REQCAPTUREDATE,
-                REQRELEVANTTOSTAKEHOLDER,
                 REQHIGHLEVELCAPABILITY,
                 REQTYPEID,
                 REQFREQUENCYID,
@@ -303,13 +300,6 @@ public class SystemRequirementProvider extends EntityProvider {
         requirementOwner.setFieldRequired();
         entity.addElement(requirementOwner);
 
-        RelevantToStakeholderRequirement relevantToStakeholderRequirement = (RelevantToStakeholderRequirement) mapOfLoadedFields.get(REQRELEVANTTOSTAKEHOLDER.getId());
-        if (relevantToStakeholderRequirement == null) {
-            relevantToStakeholderRequirement = new RelevantToStakeholderRequirement(true);
-        }
-        relevantToStakeholderRequirement.setFieldEditable();
-        relevantToStakeholderRequirement.setFieldNotRequired();
-        entity.addElement(relevantToStakeholderRequirement);
     }
 
     @Override
@@ -397,10 +387,6 @@ public class SystemRequirementProvider extends EntityProvider {
         requirementOwner.setFieldRequired();
         entity.addElement(requirementOwner);
 
-        RelevantToStakeholderRequirement relevantToStakeholderRequirement = new RelevantToStakeholderRequirement(true);
-        relevantToStakeholderRequirement.setFieldEditable();
-        relevantToStakeholderRequirement.setFieldNotRequired();
-        entity.addElement(relevantToStakeholderRequirement);
     }
 
     public List<SystemRequirementEntity> getAllSystemRequirement(boolean includeInactive)  {

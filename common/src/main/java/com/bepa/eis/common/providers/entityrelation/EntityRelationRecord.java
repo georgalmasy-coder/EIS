@@ -1,6 +1,7 @@
-package com.bepa.eis.server.dataprovider.entities.common;
+package com.bepa.eis.common.providers.entityrelation;
 
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.enums.entity.RelationType;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -22,6 +23,10 @@ public class EntityRelationRecord {
 
     private Integer createdByUserId;
     private LocalDateTime createdDate = LocalDateTime.now();
+
+    private RelationType relationType;
+    private Integer version;
+    private Boolean latest;
 
 
     public EntityRelationRecord(Integer customerId, Integer projectId) {
@@ -99,5 +104,44 @@ public class EntityRelationRecord {
 
     public void setCreatedByUserId(Integer createdByUserId) {
         this.createdByUserId = createdByUserId;
+    }
+
+    public RelationType getRelationType() {
+        return relationType;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public Integer getNextVersion() {
+        return version != null ? version + 1 : 1;
+    }
+
+    public void setLatest(Boolean latest) {
+        this.latest = latest;
+    }
+
+    public Boolean getLatest() {
+        return latest;
+    }
+
+    public void setRelationType(RelationType entityRelationType) {
+        this.relationType = entityRelationType;
+    }
+
+    public void setRelationTypeId(Integer entityRelationTypeId) {
+        this.relationType = RelationType.valueOf(entityRelationTypeId);
+    }
+
+    public String toString() {
+        return "EntityRelationRecord [customerId=" + customerId + ", projectId=" + projectId + ", entityId=" + entityId
+                + ", entityType=" + entityType + ", relatedEntityId=" + relatedEntityId + ", relatedEntityType="
+                + relatedEntityType + ", createdByUserId=" + createdByUserId + ", createdDate=" + createdDate
+                + ", relationType=" + relationType + ", version=" + version + ", latest=" + latest + "]";
     }
 }

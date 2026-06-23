@@ -70,6 +70,7 @@ export function parseEntityRelationsFromDoc(doc) {
             relatedEntityTypeName: textOf(node, "RelatedEntityTypeName"),
             relatedEntityCode: textOf(node, "RelatedEntityCode"),
             relatedEntityName: textOf(node, "RelatedEntityName"),
+            relationTypeName: textOf(node, "RelationTypeName"),
             link: textOf(node, "Link"),
             isDeleted: false,
             isNew: false
@@ -184,6 +185,7 @@ export function buildEntityRelationsXml(doc, relations) {
         appendTextElement(doc, entityRelation, "RelatedEntityTypeName", relation.relatedEntityTypeName ?? "");
         appendTextElement(doc, entityRelation, "RelatedEntityCode", relation.relatedEntityCode ?? "");
         appendTextElement(doc, entityRelation, "RelatedEntityName", relation.relatedEntityName ?? "");
+        appendTextElement(doc, entityRelation, "RelationTypeName", relation.relationTypeName ?? "");
         appendTextElement(doc, entityRelation, "Link", relation.link ?? "");
 
         const createdById = doc.createElement("CreatedById");

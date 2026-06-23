@@ -1,9 +1,11 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.RelationType;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.RelatedEntityTypeName;
+import com.bepa.eis.server.dataprovider.fields.strings.RelationTypeName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.common.enums.entity.EntityType;
@@ -28,6 +30,9 @@ public class EntityRelation extends ListOfElements {
     private CreatedDateTime createdDateTime;
 
     private RelatedEntityTypeName relatedEntityTypeName;
+
+    private RelationType relationType;
+    private RelationTypeName relationTypeName;
 
     public EntityRelation(WebSession webSession) {
         super(webSession);
@@ -104,6 +109,21 @@ public class EntityRelation extends ListOfElements {
 
     public CreatedDateTime getCreatedDateTime() {
         return createdDateTime;
+    }
+
+    public RelationType getRelationType() {
+        return relationType;
+    }
+
+    public void setRelationType(RelationType entityRelationType) {
+        this.relationType = entityRelationType;
+        this.relationTypeName = new RelationTypeName();
+        this.relationTypeName.setValue(entityRelationType.getDescription());
+        this.addElement(this.relationTypeName);
+    }
+
+    public void setRelationTypeId(Integer entityRelationTypeId) {
+        setRelationType(RelationType.valueOf(entityRelationTypeId));
     }
 
     public String toString() {

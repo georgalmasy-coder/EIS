@@ -1,6 +1,6 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
-import com.bepa.eis.server.dataprovider.entities.common.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 

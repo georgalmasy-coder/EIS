@@ -25,7 +25,7 @@ public class GenericProvider {
         return EisDataSourceProvider.getDataSource();
     }
 
-    protected WebSession getWebSession() {
+    public WebSession getWebSession() {
         return webSession;
     }
 
@@ -61,4 +61,11 @@ public class GenericProvider {
         }
     }
 
+    protected void setBoolean(PreparedStatement ps, Boolean value, int index) throws SQLException {
+        if (value != null) {
+            ps.setBoolean(index, value);
+        } else {
+            ps.setNull(index, Types.BOOLEAN);
+        }
+    }
 }

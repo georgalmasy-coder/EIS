@@ -1,18 +1,25 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.SeverityType;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.RelationProvider;
+import com.bepa.eis.common.providers.misc.IncidentProvider;
+import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelation;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelations;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.common.enums.entity.EntityType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -21,7 +28,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
-import static com.bepa.eis.common.enums.entity.EntityType.*;
+import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMENT;
+import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
 
 @WebServlet(
         name = "TraceabilityMatrixServlet",
@@ -35,13 +43,19 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(TraceabilityMatrixServlet.class);
 
-    private static final String REMOVE_RELATION_PATH = "/removerelation";
     private static final String CONFIRM_RELATION_PATH = "/confirmrelation";
+    private static final String REMOVE_CONFIRMED_RELATION_PATH = "/removeconfirmedrelation";
+    private static final String MARK_RELATION_NOT_RELEVANT_PATH = "/relationnotrelevant";
+    private static final String REMOVE_NOT_RELEVANT_RELATION_PATH = "/removenotrelevantrelation";
 
-    private static final String DEFAULT_STYLE = "normal";
+    private static final String STYLE_NORMAL = "normal";
     private static final String STYLE_YELLOW = "yellow";
-    private static final String CONFIRMED_STYLE = "green";
-    private static final String CONFIRMED_VALUE = "X";
+    private static final String STYLE_GREEN = "green";
+    private static final String STYLE_GRAY_ITALIC = "grayItalic";
+
+    private static final String VALUE_EMPTY = "";
+    private static final String VALUE_CONFIRMED_RELATION = "X";
+    private static final String VALUE_NOT_RELEVANT = "NR";
 
     private EntityRelationProvider entityRelationProvider = null;
 
@@ -49,23 +63,51 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         String pathInfo = normalizePathInfo(request.getPathInfo());
 
+        WebSession webSession = getWebSessionFromRequest(request);
+        setWebSession(webSession);
+
+        String module = request.getServletPath() +  "." + getCommandParameter(request);
+        long startTime = System.currentTimeMillis();
+
         try {
-            if (REMOVE_RELATION_PATH.equals(pathInfo)) {
-                handleRemoveRelationRequest(request, response);
+            if (REMOVE_CONFIRMED_RELATION_PATH.equals(pathInfo)) {
+                handleRemoveConfirmedRelationRequest(webSession, request, response);
+                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
+                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                return;
+            }
+
+            if (REMOVE_NOT_RELEVANT_RELATION_PATH.equals(pathInfo)) {
+                handleRemoveNotRelevantRelationRequest(webSession, request, response);
+                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
+                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             if (CONFIRM_RELATION_PATH.equals(pathInfo)) {
-                handleConfirmRelationRequest(request, response);
+                handleConfirmRelationRequest(webSession, request, response);
+                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
+                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                return;
+            }
+
+            if (MARK_RELATION_NOT_RELEVANT_PATH.equals(pathInfo)) {
+                handleMarkRelationNotRelevantRequest(webSession, request, response);
+                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
+                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             super.doPost(request, response);
-        } catch (Exception e) {
-            log.error("Error processing traceability matrix action: {}", e.getMessage(), e);
-            writeJsonError(response, e);
+        } catch (Throwable throwable) {
+            IncidentProvider incidentProvider = new IncidentProvider(webSession);
+            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
+            log.error("Error processing traceability matrix action: {}", throwable.getMessage(), throwable);
+            writeJsonError(response, throwable);
         }
     }
+
+
 
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
@@ -118,126 +160,116 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         return entityRelationProvider;
     }
 
-    private void handleRemoveRelationRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleConfirmRelationRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
         TraceabilityRelationActionRequest actionRequest = parseRelationActionRequest(request);
 
-        WebSession webSession = getWebSessionFromRequest(request);
-        EntityRelation entityRelation = getConfirmedRelation(webSession, actionRequest);
-
-        if (entityRelation == null) {
-            log.warn("No confirmed relation found for rowId={}, rowCode={}, columnId={}, columnCode={}",
-                    actionRequest.rowId(),
-                    actionRequest.rowCode(),
-                    actionRequest.columnId(),
-                    actionRequest.columnCode());
-        } else {
-            getProvider(webSession).removeEntityRelation(entityRelation.getEntityRelationPK().getValue());
-            log.info("Confirmed relation removed for rowId={}, rowCode={}, columnId={}, columnCode={}",
-                    actionRequest.rowId(),
-                    actionRequest.rowCode(),
-                    actionRequest.columnId(),
-                    actionRequest.columnCode());
-            writeJsonStatusResponse(response, STYLE_YELLOW, "");
-        }
+        EntityRelationRecord relationRecord =  getEntityRelationRecord(actionRequest);
+        clearLatestIfExists(relationRecord);
+        insertRelationRecord(RelationType.CONFIRMED, relationRecord, actionRequest);
 
         log.info(
-                "Remove traceability relation requested. rowId={}, rowCode={}, columnId={}, columnCode={}, rowIndex={}, columnIndex={}, style={}, value={}",
+                "Confirmed relation inserted. rowId={}, rowCode={}, columnId={}, columnCode={}",
                 actionRequest.rowId(),
                 actionRequest.rowCode(),
                 actionRequest.columnId(),
-                actionRequest.columnCode(),
-                actionRequest.rowIndex(),
-                actionRequest.columnIndex(),
-                actionRequest.style(),
-                actionRequest.value()
-        );
+                actionRequest.columnCode());
 
-        /*
-         * TODO:
-         * Persist relation removal here when the relation storage/API is ready.
-         *
-         * Current behavior:
-         * Return the new cell status so the client can update the matrix cell without reloading
-         * the complete XML matrix.
-         */
-        //writeJsonStatusResponse(response, DEFAULT_STYLE, "");
+        writeJsonStatusResponse(response, STYLE_GREEN, VALUE_CONFIRMED_RELATION);
     }
 
-    private void handleConfirmRelationRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private RelationProvider getRelationProvider() {
+        return new RelationProvider(getWebSession());
+    }
+
+    private void handleRemoveConfirmedRelationRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
         TraceabilityRelationActionRequest actionRequest = parseRelationActionRequest(request);
 
-        WebSession webSession = getWebSessionFromRequest(request);
-        EntityRelation entityRelation = getConfirmedRelation(webSession, actionRequest);
+        EntityRelationRecord relationRecord =  getEntityRelationRecord(actionRequest);
+        clearLatestIfExists(relationRecord);
+        insertRelationRecord(RelationType.DELETED, relationRecord, actionRequest);
 
-        if (entityRelation != null) {
-            // There is already a confirmed relation, so we need to confirm it again
-            log.warn("No confirmed relation found for rowId={}, rowCode={}, columnId={}, columnCode={}",
-                    actionRequest.rowId(),
-                    actionRequest.rowCode(),
-                    actionRequest.columnId(),
-                    actionRequest.columnCode());
-        } else {
-            Integer stakeholderRequirementId = Integer.parseInt(actionRequest.rowId());
-            Integer systemRequirementId = Integer.parseInt(actionRequest.columnId());
-            getProvider(webSession).insertEntityRelation(STAKEHOLDER_REQUIREMENT, stakeholderRequirementId,
-                    SYSTEM_REQUIREMENT, systemRequirementId);
-            log.info("New confirmed relation inserted rowId={}, rowCode={}, columnId={}, columnCode={}",
-                    actionRequest.rowId(),
-                    actionRequest.rowCode(),
-                    actionRequest.columnId(),
-                    actionRequest.columnCode());
-            writeJsonStatusResponse(response, CONFIRMED_STYLE, CONFIRMED_VALUE);
-        }
-/*
         log.info(
-                "Confirm traceability relation requested. rowId={}, rowCode={}, columnId={}, columnCode={}, rowIndex={}, columnIndex={}, style={}, value={}",
+                "Confirmed relation removed. rowId={}, rowCode={}, columnId={}, columnCode={}",
                 actionRequest.rowId(),
                 actionRequest.rowCode(),
                 actionRequest.columnId(),
-                actionRequest.columnCode(),
-                actionRequest.rowIndex(),
-                actionRequest.columnIndex(),
-                actionRequest.style(),
-                actionRequest.value()
+                actionRequest.columnCode()
         );
-*/
-        /*
-         * TODO:
-         * Persist relation confirmation here when the relation storage/API is ready.
-         *
-         * Current behavior:
-         * Return the new cell status so the client can update the matrix cell without reloading
-         * the complete XML matrix.
-         */
+
+        writeJsonStatusResponse(response, STYLE_YELLOW, VALUE_EMPTY);
+
     }
 
-    private EntityRelation getConfirmedRelation(WebSession webSession, TraceabilityRelationActionRequest actionRequest) {
-        EntityRelationProvider entityRelationProvider2 = new EntityRelationProvider(webSession);
-        EntityRelations entityRelations = null;
-        try {
-            entityRelations = getProvider(webSession).getEntityRelationsByEntityId(
-                    EntityType.STAKEHOLDER_REQUIREMENT,
-                    Integer.parseInt(actionRequest.rowId()));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    private void handleMarkRelationNotRelevantRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
+        TraceabilityRelationActionRequest actionRequest = parseRelationActionRequest(request);
+
+        EntityRelationRecord relationRecord =  getEntityRelationRecord(actionRequest);
+        getRelationProvider().clearLatestIfExists(relationRecord);
+        insertRelationRecord(RelationType.NOT_RELEVANT, relationRecord, actionRequest);
+
+        log.info(
+                "Not relevant relation inserted. rowId={}, rowCode={}, columnId={}, columnCode={}",
+                actionRequest.rowId(),
+                actionRequest.rowCode(),
+                actionRequest.columnId(),
+                actionRequest.columnCode()
+        );
+
+        writeJsonStatusResponse(response, STYLE_GRAY_ITALIC, VALUE_NOT_RELEVANT);
+
+    }
+
+    private void handleRemoveNotRelevantRelationRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
+        TraceabilityRelationActionRequest actionRequest = parseRelationActionRequest(request);
+
+        EntityRelationRecord relationRecord =  getEntityRelationRecord(actionRequest);
+        getRelationProvider().clearLatestIfExists(relationRecord);
+        insertRelationRecord(RelationType.DELETED, relationRecord, actionRequest);
+
+        log.info(
+                "Not relevant relation removed. rowId={}, rowCode={}, columnId={}, columnCode={}",
+                actionRequest.rowId(),
+                actionRequest.rowCode(),
+                actionRequest.columnId(),
+                actionRequest.columnCode()
+        );
+
+        writeJsonStatusResponse(response, STYLE_YELLOW, VALUE_EMPTY);
+
+    }
+
+    private void clearLatestIfExists(EntityRelationRecord relationRecord) {
+        if (relationRecord != null && relationRecord.getEntityRelationPK() != null) {
+            getRelationProvider().clearLatestIfExists(relationRecord);
+        }
+    }
+
+    private void insertRelationRecord(RelationType relationType, EntityRelationRecord relationRecord, TraceabilityRelationActionRequest actionRequest) {
+        if (relationType != null && relationRecord != null && actionRequest != null) {
+            getRelationProvider().insertRelationRecord(relationType, relationRecord);
+        }
+    }
+
+    private EntityRelationRecord getEntityRelationRecord(TraceabilityRelationActionRequest actionRequest) throws SQLException {
+        EntityRelationRecord relationRecord =  getRelationProvider().getEntityRelationByEntityTypeAndId(
+                STAKEHOLDER_REQUIREMENT,
+                toInteger(actionRequest.rowId),
+                SYSTEM_REQUIREMENT,
+                toInteger(actionRequest.columnId));
+
+        if (relationRecord == null) {
+            relationRecord = new EntityRelationRecord(getWebSession().getCustomerId(), getWebSession().getProjectId());
+            relationRecord.setCreatedByUserId(getWebSession().getUserId());
+            relationRecord.setEntityType(STAKEHOLDER_REQUIREMENT);
+            relationRecord.setEntityId(toInteger(actionRequest.rowId));
+            relationRecord.setRelatedEntityType(SYSTEM_REQUIREMENT);
+            relationRecord.setRelatedEntityId(toInteger(actionRequest.columnId));
+            relationRecord.setVersion(null);
+            relationRecord.setLatest(true);
         }
 
-        for (AbstractField field : entityRelations.getElements()) {
-            EntityRelation entityRelation = (EntityRelation) field;
+        return relationRecord;
 
-            log.debug("Entity Relation : {}", entityRelation);
-
-            if (entityRelation.getRelatedEntityType() == EntityType.SYSTEM_REQUIREMENT) {
-                if (entityRelation.getRelatedEntityId().getValue() == Integer.parseInt(actionRequest.columnId())) {
-                    log.debug("Entity Relation found: {}", entityRelation);
-                    return entityRelation;
-                }
-            }
-
-        }
-
-        log.debug("Entity Relation not found - action request: {}", actionRequest);
-        return null;
     }
 
     private TraceabilityRelationActionRequest parseRelationActionRequest(HttpServletRequest request) {
@@ -301,7 +333,7 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         );
     }
 
-    private void writeJsonError(HttpServletResponse response, Exception exception) throws ServletException {
+    private void writeJsonError(HttpServletResponse response, Throwable throwable) throws ServletException {
         try {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -311,7 +343,7 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
 
             response.getWriter().write(
                     "{"
-                            + "\"error\":\"" + escapeJson(exception.getMessage()) + "\""
+                            + "\"error\":\"" + escapeJson(throwable.getMessage()) + "\""
                             + "}"
             );
         } catch (IOException ioException) {
@@ -343,4 +375,5 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
             String value
     ) {
     }
+
 }

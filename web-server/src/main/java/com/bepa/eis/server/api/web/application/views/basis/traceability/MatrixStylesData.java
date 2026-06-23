@@ -14,8 +14,10 @@ public class MatrixStylesData {
         addStyleElement("normal", "Normal", "#FFFFFF", "#000000", null, null);
         addStyleElement("red", "No relations", "#FFC7CE", "#000000", null, null);
         addStyleElement("yellow", "Possible relations", "#FFFF99", "#000000", null, null);
-        addStyleElement("green", "Confirmed relations", "#C6EFCE", "#000000", true, null);
-        addStyleElement("whiteItalic", "Not relevant", "#FFFFFF", "#000000", null, true);
+        addStyleElement("green", "Confirmed relations", "#9dcca8", "#000000", true, null);
+        addStyleElement("grayItalic", "Not relevant", "#d4d5d6", "#000000", null, true);
+
+
     }
 
     private void addStyleElement(String id, String name, String backgroundColor, String textColor, Boolean bold, Boolean italic) {

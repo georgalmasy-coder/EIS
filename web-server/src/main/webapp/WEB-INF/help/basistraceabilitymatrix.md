@@ -1,109 +1,183 @@
-# Traceability Matrix
+# Traceability Matrix Help
 
-The Traceability Matrix shows the relationship between Stakeholder Requirements and System Requirements.
+The Traceability Matrix shows the relationship between **Stakeholder Requirements** and **System Requirements**.
 
 Rows represent Stakeholder Requirements.  
-Columns represent System Requirements.  
-Each cell shows the current traceability status between one Stakeholder Requirement and one System Requirement.
+Columns represent System Requirements.
 
-## Purpose
+Each cell indicates whether there is a relation between the requirement in the row and the requirement in the column.
 
-Use this page to:
+---
 
-- Review traceability between Stakeholder Requirements and System Requirements.
-- Identify missing or unconfirmed relations.
-- Confirm suggested relations.
-- Remove existing relations.
-- Open related requirements for editing.
+## Matrix Colors
 
-## Matrix Layout
+The matrix uses colors to show the current traceability status.
 
-The matrix is organized as follows:
+| Color | Meaning |
+|---|---|
+| White | No rule matched / no traceability suggestion |
+| Yellow | A possible relation has been identified |
+| Green | A confirmed relation exists |
+| Grey italic | The relation has been marked as not relevant |
+| Red | Missing traceability |
 
-- **Rows**: Stakeholder Requirements.
-- **Columns**: System Requirements.
-- **Cells**: Relationship status between the row requirement and the column requirement.
-- **Legend**: Explains the meaning of the cell colors.
+---
 
-The information bar above the matrix shows:
+## Cell Values
 
-- Number of rows.
-- Number of columns.
-- The column group label.
-- The color legend.
-- The Help button.
+| Value | Meaning |
+|---|---|
+| Empty | No confirmed relation |
+| `X` | Confirmed relation |
+| `NR` | Relation marked as not relevant |
 
-## Color Legend
+---
 
-The colors indicate the traceability status of each relation.
+## Working with Relations
 
-Typical meanings are:
+You can right-click a matrix cell to open the context menu.
 
-- **Green with X**: A confirmed relation exists.
-- **Yellow**: A suggested or unconfirmed relation exists.
-- **White / Normal**: No relation is currently registered.
-- **Other colors**: May indicate additional status values depending on the matrix configuration.
+The available actions depend on the current status of the cell.
 
-## Open System Requirement
+---
 
-To open a System Requirement:
+## Yellow Cells - Possible Relation
 
-1. Double-click a column header.
-2. The System Requirement edit page opens.
-3. Use **Cancel** to return to the Traceability Matrix.
+A yellow cell means that the system has identified a possible relation between the Stakeholder Requirement and the System Requirement.
 
-## Open Stakeholder Requirement
-
-To open a Stakeholder Requirement:
-
-1. Double-click a row header.
-2. The Stakeholder Requirement edit page opens.
-3. Use **Cancel** to return to the Traceability Matrix.
-
-## Cell Context Menu
-
-Right-click a matrix cell to open the context menu.
-
-The available action depends on the current cell status.
-
-### Remove relation
-
-This action is available when the cell is green and contains `X`.
-
-Use **Remove relation** to remove the existing relation between the Stakeholder Requirement and the System Requirement.
-
-When the action succeeds, the cell is updated immediately without reloading the full matrix.
+Available actions:
 
 ### Confirm relation
 
-This action is available when the cell is yellow.
+Creates a confirmed relation between the Stakeholder Requirement and the System Requirement.
 
-Use **Confirm relation** to confirm the suggested relation between the Stakeholder Requirement and the System Requirement.
+After confirmation, the cell changes to:
 
-When the action succeeds, the cell is updated immediately without reloading the full matrix.
+- Green background
+- Value `X`
 
-## Updating Cells
+### Relation Not Relevant
 
-When a relation action is completed successfully:
+Marks the relation as not relevant.
 
-- The server returns the new cell status.
-- The cell style is updated.
-- The cell value is updated.
-- The full matrix is not reloaded.
+Use this when the suggested relation is not valid or should not be treated as a traceability relation.
 
-If the update fails, an error message is shown and the cell remains unchanged.
+After marking as not relevant, the cell changes to:
 
-## Navigation
+- Grey italic background
+- Value `NR`
 
-Use the standard application menu to navigate to other pages.
+---
 
-When you open a requirement from the matrix, the edit page receives a return URL.  
-This ensures that **Cancel** returns you to the Traceability Matrix.
+## Green Cells - Confirmed Relation
 
-## Tips
+A green cell means that a confirmed relation already exists.
 
-- Use the color legend to quickly understand the matrix status.
-- Double-click column headers to inspect System Requirements.
-- Double-click row headers to inspect Stakeholder Requirements.
-- Right-click cells to confirm or remove relations.
-- If a cell does not show a context menu, no action is available for its current status.
+Available actions:
+
+### Remove Confirmed Relation
+
+Removes the confirmed relation.
+
+After removal, the cell changes back to a possible relation state when applicable.
+
+Typically, this means:
+
+- Yellow background
+- Empty value
+
+### Relation Not Relevant
+
+Changes the relation from confirmed to not relevant.
+
+Use this when an existing confirmed relation should no longer be considered valid, but should be explicitly marked as not relevant instead of simply being removed.
+
+After marking as not relevant, the cell changes to:
+
+- Grey italic background
+- Value `NR`
+
+---
+
+## Grey Italic Cells - Not Relevant Relation
+
+A grey italic cell means that the relation has been explicitly marked as not relevant.
+
+Available actions:
+
+### Confirm relation
+
+Changes the relation from not relevant to confirmed.
+
+After confirmation, the cell changes to:
+
+- Green background
+- Value `X`
+
+### Remove Not Relevant Relation
+
+Removes the not relevant relation.
+
+After removal, the cell changes back to a possible relation state when applicable.
+
+Typically, this means:
+
+- Yellow background
+- Empty value
+
+---
+
+## Opening Requirement Details
+
+Double-click a matrix cell to open the Traceability Details dialog.
+
+The dialog shows information about:
+
+- The Stakeholder Requirement
+- The System Requirement
+
+This is useful when you need to compare the requirement texts before deciding whether a relation should be confirmed or marked as not relevant.
+
+---
+
+## Opening Requirement Edit Pages
+
+You can double-click headers to open the corresponding requirement edit page.
+
+### System Requirement
+
+Double-click a column header to open the System Requirement edit page.
+
+### Stakeholder Requirement
+
+Double-click a row header to open the Stakeholder Requirement edit page.
+
+---
+
+## Tooltip Information
+
+Hover text on matrix cells shows the row and column context.
+
+Technical values such as internal cell value and style are not shown in the hover text.
+
+---
+
+## Recommended Workflow
+
+1. Review yellow cells first.
+2. Open the details dialog by double-clicking a cell.
+3. Compare the Stakeholder Requirement and System Requirement.
+4. Choose one of the available context menu actions:
+    - Confirm relation
+    - Relation Not Relevant
+5. Review existing green cells regularly.
+6. Remove or change relations if they are no longer valid.
+
+---
+
+## Notes
+
+- Confirmed relations are shown as green cells with `X`.
+- Not relevant relations are shown as grey italic cells with `NR`.
+- Context menu actions update the selected cell directly.
+- If an action fails, an error message is shown and the matrix cell is not updated.

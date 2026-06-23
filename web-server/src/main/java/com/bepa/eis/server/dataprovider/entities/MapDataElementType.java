@@ -2,7 +2,6 @@ package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.booleans.RelevantToStakeholderRequirement;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemDepartment;
@@ -26,8 +25,6 @@ public class MapDataElementType {
             case TRLID -> new TRL();
             case DEADLINENEXTTRL -> new DeadlineNextTRL();
             case DEADLINEFINALIZED -> new DeadlineFinalized();
-//GFA            case RBSCODE -> null;
-            case REQRELEVANTTOSTAKEHOLDER -> new RelevantToStakeholderRequirement();
             case REQNAME -> new RequirementName();
             case REQDESCRIPTION -> new RequirementDescription();
             case REQHIGHLEVELCAPABILITY -> new RequirementHighlevelCapability();

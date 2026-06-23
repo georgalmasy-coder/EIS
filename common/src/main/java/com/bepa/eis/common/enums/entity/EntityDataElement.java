@@ -19,7 +19,7 @@ public enum EntityDataElement {
     PROJECTNAME(12, "Project Name", "ProjectName", STRING),
 
 //    RBSCODE(13,"RBS code", "RBSCode", STRING),
-    REQRELEVANTTOSTAKEHOLDER(14,"Is Requirement Relevant To Stakeholder", "RelevantToStakeholderRequirement", BOOLEAN),
+//    REQRELEVANTTOSTAKEHOLDER(14,"Is Requirement Relevant To Stakeholder", "RelevantToStakeholderRequirement", BOOLEAN),
     REQNAME(15, "Name", "RequirementName", STRING),
     REQDESCRIPTION(16,"Description", "RequirementDescription", STRING),
     REQHIGHLEVELCAPABILITY(17, "High Level Capability", "RequirementHighlevelCapability", STRING),

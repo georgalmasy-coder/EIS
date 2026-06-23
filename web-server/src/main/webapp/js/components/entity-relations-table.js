@@ -6,6 +6,8 @@ import {
 } from "../core/xml.js";
 import { escapeHtml } from "../core/html.js";
 
+const ENTITY_RELATIONS_TABLE_VERSION = "relation-type-name-created-by-fix-2026-06-21";
+
 const DEFAULT_CONFIG = {
     bodyId: "relationsBody",
     emptyId: "relationsEmpty",
@@ -58,6 +60,7 @@ function normalizeRelation(relation = {}) {
         relatedEntityTypeName: relation.relatedEntityTypeName ?? "",
         relatedEntityCode: relation.relatedEntityCode ?? "",
         relatedEntityName: relation.relatedEntityName ?? "",
+        relationTypeName: relation.relationTypeName ?? "",
         link: relation.link ?? "",
         isDeleted: normalizeBoolean(relation.isDeleted),
         isNew: normalizeBoolean(relation.isNew)
@@ -155,6 +158,7 @@ function parseRelationsFromContainer(containerNode, relationElementName) {
             relatedEntityTypeName: textOf(node, "RelatedEntityTypeName"),
             relatedEntityCode: textOf(node, "RelatedEntityCode"),
             relatedEntityName: textOf(node, "RelatedEntityName"),
+            relationTypeName: textOf(node, "RelationTypeName"),
             link: textOf(node, "Link"),
             isDeleted: textOf(node, "IsDeleted").trim() === "true",
             isNew: false
@@ -223,6 +227,7 @@ function appendRelationXml(doc, container, relationElementName, relation) {
     appendTextElement(doc, entityRelation, "RelatedEntityTypeName", relation.relatedEntityTypeName ?? "");
     appendTextElement(doc, entityRelation, "RelatedEntityCode", relation.relatedEntityCode ?? "");
     appendTextElement(doc, entityRelation, "RelatedEntityName", relation.relatedEntityName ?? "");
+    appendTextElement(doc, entityRelation, "RelationTypeName", relation.relationTypeName ?? "");
     appendTextElement(doc, entityRelation, "Link", relation.link ?? "");
     appendTextElement(doc, entityRelation, "IsDeleted", relation.isDeleted ? "true" : "false");
 
@@ -235,6 +240,10 @@ function formatCreatedTime(value) {
     return parseDateTime(value);
 }
 
+function formatCreatedBy(relation) {
+    return relation.createdByText || relation.createdById || "";
+}
+
 function createRelationRowMarkup(relation, index, readOnly) {
     const rowClass = relation.isDeleted
         ? "is-deleted"
@@ -244,12 +253,21 @@ function createRelationRowMarkup(relation, index, readOnly) {
         ? ""
         : `<button type="button" class="relation-delete-btn" data-relation-delete="${index}" aria-label="Delete relation" title="Delete relation">🗑</button>`;
 
+    const relatedEntityTypeName = relation.relatedEntityTypeName ?? "";
+    const relatedEntityCode = relation.relatedEntityCode ?? "";
+    const relatedEntityName = relation.relatedEntityName ?? "";
+    const relationTypeName = relation.relationTypeName ?? "";
+    const createdBy = formatCreatedBy(relation);
+    const createdTime = formatCreatedTime(relation.createdTime);
+
     return `
         <tr class="${rowClass}" data-relation-index="${index}" title="Double-click to open relation">
-            <td title="${escapeHtml(relation.relatedEntityTypeName)}">${escapeHtml(relation.relatedEntityTypeName)}</td>
-            <td title="${escapeHtml(relation.relatedEntityCode)}">${escapeHtml(relation.relatedEntityCode)}</td>
-            <td title="${escapeHtml(relation.relatedEntityName)}">${escapeHtml(relation.relatedEntityName)}</td>
-            <td>${escapeHtml(formatCreatedTime(relation.createdTime))}</td>
+            <td title="${escapeHtml(relatedEntityTypeName)}">${escapeHtml(relatedEntityTypeName)}</td>
+            <td title="${escapeHtml(relatedEntityCode)}">${escapeHtml(relatedEntityCode)}</td>
+            <td title="${escapeHtml(relatedEntityName)}">${escapeHtml(relatedEntityName)}</td>
+            <td title="${escapeHtml(relationTypeName)}">${escapeHtml(relationTypeName)}</td>
+            <td title="${escapeHtml(createdBy)}">${escapeHtml(createdBy)}</td>
+            <td title="${escapeHtml(createdTime)}">${escapeHtml(createdTime)}</td>
             <td class="attachment-actions">
                 <span class="attachment-action-group">
                     ${deleteButton}
@@ -445,6 +463,8 @@ export function createEntityRelationsTable(config = {}) {
         if (!renderElements?.body || !renderElements?.empty) {
             return;
         }
+
+        renderElements.body.setAttribute("data-entity-relations-table-version", ENTITY_RELATIONS_TABLE_VERSION);
 
         renderElements.body.innerHTML = state.relations
             .map((relation, index) => createRelationRowMarkup(relation, index, state.readOnly))

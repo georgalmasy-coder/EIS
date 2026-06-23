@@ -1,5 +1,6 @@
 package com.bepa.eis.server.dataprovider.entities;
 
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.baseline.Baseline;
@@ -231,8 +232,9 @@ abstract public class EntityProvider extends GenericProvider {
                     "  RelatedEntityType, " +
                     "  RelatedEntityId, " +
                     "  ChangedByUserId, " +
-                    "  ChangedDateTime" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    "  ChangedDateTime," +
+                    "  RelationType" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
             "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
@@ -1068,6 +1070,7 @@ abstract public class EntityProvider extends GenericProvider {
                 ps.setInt(6, relationRecord.getRelatedEntityId());
                 ps.setInt(7, relationRecord.getCreatedById());
                 ps.setTimestamp(8, Timestamp.valueOf(relationRecord.getCreatedDate()));
+                ps.setInt(9, relationRecord.getRelationType().getId());
 
                 int rows = 0;
                 try {

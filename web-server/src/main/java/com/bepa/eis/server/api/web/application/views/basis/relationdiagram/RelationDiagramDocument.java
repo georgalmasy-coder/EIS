@@ -7,7 +7,7 @@ import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvid
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
-import com.bepa.eis.server.dataprovider.entities.common.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
@@ -73,7 +73,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
 
     private List<EntityRelationRecord> getEntityRelations() throws SQLException {
         EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());
-        return entityRelationProvider.getAllActiveEntityRelationRecordsByProjectId(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
+        return entityRelationProvider.getAllConfirmedEntityRelationRecordsByProjectId(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
     }
 
     private Element getStakeholderRequirementElement() {
@@ -112,11 +112,15 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         Element relationsElement = getDoc().createElement("relations");
         for (EntityRelationRecord relation : listOfEntityRelations) {
             Element relationElement = getDoc().createElement("relation");
+
             String fromId = formatEntityId(relation.getEntityType(), relation.getEntityId());
             addElement(relationElement, "from",fromId);
             String toId = formatEntityId(relation.getRelatedEntityType(), relation.getRelatedEntityId());
             addElement(relationElement, "to", toId);
+            addElement(relationElement, "type", relation.getRelationType().getDescription());
+
             relationsElement.appendChild(relationElement);
+
         }
 
         return relationsElement;

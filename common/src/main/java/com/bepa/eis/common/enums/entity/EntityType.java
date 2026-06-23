@@ -61,8 +61,7 @@ public enum EntityType {
                     REQBUSINESSPRIORITYID,
                     REQCAPTUREDATE,
                     REQOWNERID,
-                    REQSTATUSID,
-                    REQRELEVANTTOSTAKEHOLDER
+                    REQSTATUSID
             },
             SYSTEMREQCODE,
             REQNAME

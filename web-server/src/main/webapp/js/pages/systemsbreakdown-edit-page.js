@@ -4,6 +4,7 @@ import { initTabs } from "../components/tabs.js";
 import { createHistoryTable } from "../components/history-table.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
+import { createEntityRelationsTable } from "../components/entity-relations-table.js";
 import { setText } from "../core/dom.js";
 import {
     getDirectChild,
@@ -34,7 +35,8 @@ const STORAGE_KEYS = {
 const RESIZABLE_TABLES = [
     { tableSelector: ".history-table", storageKey: "history", defaultMinWidth: 520 },
     { tableSelector: ".attachments-table", storageKey: "attachments", defaultMinWidth: 760 },
-    { tableSelector: ".notes-table", storageKey: "notes", defaultMinWidth: 640 }
+    { tableSelector: ".notes-table", storageKey: "notes", defaultMinWidth: 640 },
+    { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 }
 ];
 
 const MODES = {
@@ -55,6 +57,10 @@ const notesTable = createNotesTable({
 });
 
 const attachmentsTable = createAttachmentsTable({
+    onAfterRender: initializeResizableEditTables
+});
+
+const relationsTable = createEntityRelationsTable({
     onAfterRender: initializeResizableEditTables
 });
 
@@ -130,6 +136,7 @@ function initializeRouteState() {
 
     notesTable.setReadOnly(state.readOnly, { render: false });
     attachmentsTable.setReadOnly(state.readOnly, { render: false });
+    relationsTable.setReadOnly(state.readOnly, { render: false });
 }
 
 function initializeEvents() {
@@ -152,6 +159,10 @@ function initializeEvents() {
     });
 
     attachmentsTable.bind({
+        readOnly: state.readOnly
+    });
+
+    relationsTable.bind({
         readOnly: state.readOnly
     });
 }
@@ -263,6 +274,7 @@ function applyModeUi() {
     historyTable.setReadOnly(state.readOnly);
     notesTable.setReadOnly(state.readOnly);
     attachmentsTable.setReadOnly(state.readOnly);
+    relationsTable.setReadOnly(state.readOnly);
 
     if (saveButton) {
         saveButton.disabled = state.readOnly;
@@ -354,6 +366,7 @@ function renderAllFromDoc(doc) {
     historyTable.loadFromDocument(doc);
     notesTable.loadFromDocument(doc);
     attachmentsTable.loadFromDocument(doc);
+    relationsTable.loadFromDocument(doc);
 }
 
 function findDetailNode(root) {
@@ -614,6 +627,7 @@ function buildSavePayload() {
 
     notesTable.writeToDocument(updatedDoc);
     attachmentsTable.writeToDocument(updatedDoc);
+    relationsTable.writeToDocument(updatedDoc);
 
     return serializeXml(updatedDoc);
 }

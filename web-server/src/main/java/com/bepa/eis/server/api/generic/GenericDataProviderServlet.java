@@ -184,7 +184,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         log.debug("payload : " + toXmlString(doc));
     }
 
-    private String getCommandParameter(HttpServletRequest request) {
+    public String getCommandParameter(HttpServletRequest request) {
         String command = request.getParameter("cmd");
         return command != null ? command.trim().toLowerCase() : "";
     }
@@ -512,8 +512,18 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         return webSession;
     }
 
-    private void setWebSession(WebSession webSession) {
+    public void setWebSession(WebSession webSession) {
         this.webSession = webSession;
     }
 
+    public Integer toInteger(String value) {
+        try {
+            if (value == null || value.isBlank()) {
+                return null;
+            }
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

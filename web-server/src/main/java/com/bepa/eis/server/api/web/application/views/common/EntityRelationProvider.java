@@ -1,9 +1,11 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.dataprovider.entities.common.EntityRelationRecord;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
+import com.bepa.eis.server.dataprovider.fields.lookups.common.EntityRelationType;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.common.providers.GenericProvider;
@@ -21,7 +23,7 @@ public class EntityRelationProvider extends GenericProvider {
     private static final Logger log = LoggerFactory.getLogger(EntityRelationProvider.class);
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_1 =
-            "SELECT ER.EntityRelationPK, ER.EntityType, ER.EntityId,  ER.RelatedEntityType, ER.RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
+            "SELECT ER.EntityRelationPK, ER.RelationType, ER.EntityType, ER.EntityId,  ER.RelatedEntityType, ER.RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
             "FROM ENTITY E, ENTITY_RELATIONS ER " +
             "WHERE E.CustomerId = ER.CustomerId " +
             "AND E.ProjectId = ER.ProjectId " +
@@ -34,7 +36,7 @@ public class EntityRelationProvider extends GenericProvider {
             "AND E.Latest = 1 ";
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_2 =
-            "SELECT ER.EntityRelationPK, ER.EntityType AS RelatedEntityType, ER.EntityId AS RelatedEntityId, ER.RelatedEntityType AS EntityType, ER.RelatedEntityId AS EntityId, ER.CreatedById, ER.CreatedTime " +
+            "SELECT ER.EntityRelationPK, ER.RelationType, ER.EntityType AS RelatedEntityType, ER.EntityId AS RelatedEntityId, ER.RelatedEntityType AS EntityType, ER.RelatedEntityId AS EntityId, ER.CreatedById, ER.CreatedTime " +
             "FROM ENTITY E, ENTITY_RELATIONS ER " +
             "WHERE E.CustomerId = ER.CustomerId " +
             "AND E.ProjectId = ER.ProjectId " +
@@ -46,8 +48,8 @@ public class EntityRelationProvider extends GenericProvider {
             "AND ER.RelatedEntityId = ? " +
             "AND E.Latest = 1 ";
 
-    private static final String GET_ACTIVE_ENTITY_RELATIONS_BY_PROJECT_ID_SQL =
-            "SELECT ER.EntityRelationPK, E1.EntityType, E1.EntityId,  E2.EntityType AS RelatedEntityType, E2.EntityId AS RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
+    private static final String GET_CONFIRMED_AND_NOT_RELEVANT_ENTITY_RELATIONS_BY_PROJECT_ID_SQL =
+            "SELECT ER.EntityRelationPK, ER.RelationType, E1.EntityType, E1.EntityId,  E2.EntityType AS RelatedEntityType, E2.EntityId AS RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
                     "FROM ENTITY E1, ENTITY_RELATIONS ER, ENTITY E2  " +
                     "WHERE E1.CustomerId = ER.CustomerId " +
                     "AND E1.CustomerId = E2.CustomerId " +
@@ -71,6 +73,38 @@ public class EntityRelationProvider extends GenericProvider {
 
                     "AND E1.Active = 1 " +
                     "AND E2.Active = 1 " +
+                    "AND ER.Latest = 1 " +
+                    "AND ER.RelationType IN (1,2) " + // confirmed / not relevant
+                    "AND E1.Latest = 1 " +
+                    "AND E2.Latest = 1 ";
+
+    private static final String GET_CONFIRMED_ENTITY_RELATIONS_BY_PROJECT_ID_SQL =
+            "SELECT ER.EntityRelationPK, ER.RelationType, E1.EntityType, E1.EntityId,  E2.EntityType AS RelatedEntityType, E2.EntityId AS RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
+                    "FROM ENTITY E1, ENTITY_RELATIONS ER, ENTITY E2  " +
+                    "WHERE E1.CustomerId = ER.CustomerId " +
+                    "AND E1.CustomerId = E2.CustomerId " +
+
+                    "AND E1.ProjectId = ER.ProjectId " +
+                    "AND E1.ProjectId = E2.ProjectId " +
+
+                    "AND E1.EntityType = ER.EntityType " +
+                    "AND E1.EntityId = ER.EntityId " +
+
+                    "AND E2.EntityType = ER.RelatedEntityType " +
+                    "AND E2.EntityId = ER.RelatedEntityId " +
+
+                    "AND E1.CustomerId = ? " +
+                    "AND E1.ProjectId = ? " +
+
+                    "AND ((E1.EntityType =  ? AND E2.EntityType = ?) OR (E1.EntityType =  ? AND E2.EntityType = ?)) " +
+
+//                    "AND E1.EntityType =  ? " +
+//                    "AND E2.EntityType = ? " +
+
+                    "AND E1.Active = 1 " +
+                    "AND E2.Active = 1 " +
+                    "AND ER.Latest = 1 " +
+                    "AND ER.RelationType = 1 " + // confirmed
                     "AND E1.Latest = 1 " +
                     "AND E2.Latest = 1 ";
 
@@ -116,7 +150,7 @@ public class EntityRelationProvider extends GenericProvider {
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
 
     private static final String DELETE_ENTITY_RELATION_SQL =
-        "DELETE FROM ENTITY_RELATIONS WHERE EntityRelationPK = ?";
+        "UPDATE ENTITY_RELATIONS SET RelationType = 0 WHERE EntityRelationPK = ?";
 
     public EntityRelationProvider(WebSession webSession) {
         super(webSession);
@@ -133,13 +167,26 @@ public class EntityRelationProvider extends GenericProvider {
         return entityRelations;
     }
 
-    public List<EntityRelationRecord> getAllActiveEntityRelationRecordsByProjectId(EntityType currEntityType, EntityType relatedEntityType) throws SQLException {
+    public List<EntityRelationRecord> getAllConfirmedAndNotRelevantEntityRelationRecordsByProjectId(EntityType currEntityType, EntityType relatedEntityType) throws SQLException {
 
         List<EntityRelationRecord> entityRelationRecordList = new ArrayList<>();
 
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
 
-            findRelationsToOtherEntities(GET_ACTIVE_ENTITY_RELATIONS_BY_PROJECT_ID_SQL, entityRelationRecordList, relatedEntityType, currEntityType);
+            findRelationsToOtherEntities(GET_CONFIRMED_AND_NOT_RELEVANT_ENTITY_RELATIONS_BY_PROJECT_ID_SQL, entityRelationRecordList, relatedEntityType, currEntityType);
+            log.debug("Number of relations found : {}", entityRelationRecordList.size());
+        }
+
+        return entityRelationRecordList;
+    }
+
+    public List<EntityRelationRecord> getAllConfirmedEntityRelationRecordsByProjectId(EntityType currEntityType, EntityType relatedEntityType) throws SQLException {
+
+        List<EntityRelationRecord> entityRelationRecordList = new ArrayList<>();
+
+        if (getWebSession() != null && getWebSession().getProjectId() != null) {
+
+            findRelationsToOtherEntities(GET_CONFIRMED_ENTITY_RELATIONS_BY_PROJECT_ID_SQL, entityRelationRecordList, relatedEntityType, currEntityType);
             log.debug("Number of relations found : {}", entityRelationRecordList.size());
         }
 
@@ -149,7 +196,8 @@ public class EntityRelationProvider extends GenericProvider {
     public void insertEntityRelation(EntityType entityType,
                                      Integer entityId,
                                      EntityType relatedEntityType,
-                                     Integer relatedEntityId) {
+                                     Integer relatedEntityId,
+                                     RelationType relationType) {
 
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_RELATION_SQL)) {
@@ -164,7 +212,6 @@ public class EntityRelationProvider extends GenericProvider {
             setTimestamp(ps, new Timestamp(System.currentTimeMillis()), 8);
 
             int rows = ps.executeUpdate();
-//GFA            int rows = 1;
             if (rows > 0) {
                 log.info("Entity relation with inserted successfully {} {} {} {} {} {} {}",
                         getWebSession().getCustomerId(),
@@ -211,7 +258,6 @@ public class EntityRelationProvider extends GenericProvider {
 
                 setInt(ps, entityRelationPK, 1);
                 int rows = ps.executeUpdate();
-//GFA                int rows = 1;
                 if (rows > 0) {
                     log.info("Entity relation with PK {} removed successfully", entityRelationPK);
                 } else {
@@ -238,7 +284,6 @@ public class EntityRelationProvider extends GenericProvider {
 
                     EntityRelation entityRelation = entityRelations.getNewEntityRelation();
 
-                    entityRelation.setEntityRelationPK(rs.getInt("EntityRelationPK"));
 
                     if (currEntityId != rs.getInt(EntityId.FIELD_NAME)) {
                         throw new SQLException("EntityRelationProvider: currEntityId != rs.getInt(EntityId.FIELD_NAME)");
@@ -253,6 +298,8 @@ public class EntityRelationProvider extends GenericProvider {
                     entityRelation.setCreatedDateTime(rs.getTimestamp(CreatedDateTime.FIELD_NAME));
                     addRelatedEntityCodeColumn(entityRelation, entityRelation.getRelatedEntityType(),  entityRelation.getRelatedEntityId());
                     addRelatedEntityNameColumn(entityRelation, entityRelation.getRelatedEntityType(),  entityRelation.getRelatedEntityId());
+
+                    entityRelation.setRelationType(RelationType.valueOf(rs.getInt(EntityRelationType.FIELD_NAME)));
                     entityRelations.addEntityRelation(entityRelation);
                 }
             }
@@ -283,7 +330,7 @@ public class EntityRelationProvider extends GenericProvider {
 
                     relationRecord.setCreatedByUserId(rs.getInt(CreatedBy.FIELD_NAME));
                     relationRecord.setCreatedDate(rs.getTimestamp(CreatedDateTime.FIELD_NAME));
-
+                    relationRecord.setRelationType(RelationType.valueOf(rs.getInt(EntityRelationType.FIELD_NAME)));
                     entityRelationRecordList.add(relationRecord);
                 }
             }

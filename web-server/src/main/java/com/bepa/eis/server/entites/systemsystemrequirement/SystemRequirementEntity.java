@@ -3,7 +3,6 @@ package com.bepa.eis.server.entites.systemsystemrequirement;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.booleans.RelevantToStakeholderRequirement;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
@@ -12,7 +11,6 @@ import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
-import com.bepa.eis.server.entites.datatypes.BooleanDataElement;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.LocalDateDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;
@@ -304,9 +302,6 @@ public class SystemRequirementEntity extends AbstractEntity {
                         case REQSTATUSID:
                             requirementEntity.setStatusId(elementRecord.getIntegerValue());
                             break;
-                        case REQRELEVANTTOSTAKEHOLDER:
-                            requirementEntity.setRelevantToStakeholderRequirement(elementRecord.getBooleanValue());
-                            break;
                     }
                 }
 
@@ -328,7 +323,6 @@ public class SystemRequirementEntity extends AbstractEntity {
         addDataElement(new LocalDateDataElement(RequirementCaptureDate.FIELD_NAME, getCaptureDate()));
         addDataElement(new IntegerDataElement(RequirementOwner.FIELD_NAME, getOwnerId()));
         addDataElement(new IntegerDataElement(RequirementStatus.FIELD_NAME, getStatusId()));
-        addDataElement(new BooleanDataElement(RelevantToStakeholderRequirement.FIELD_NAME, isRelevantToStakeholderRequirement()));
 
         addDataElement(new StringDataElement(RequirementHighlevelCapability.FIELD_NAME, getRequirementHighlevelCapability()));
         addDataElement(new IntegerDataElement(RequirementType.FIELD_NAME, getRequirementTypeId()));
