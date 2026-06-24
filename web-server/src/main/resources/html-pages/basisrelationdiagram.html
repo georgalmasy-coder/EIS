@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/tabs-list.css" />
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/basisstakeholderrequirement.css" />
     <link rel="stylesheet" href="../css/basistraceability.css" />
     <link rel="stylesheet" href="../css/basisrelationdiagram.css" />
@@ -76,6 +77,11 @@
                 </div>
 
                 <div class="relationdiagram-info-item">
+                    <span class="relationdiagram-info-label">Systems breakdowns:</span>
+                    <strong id="systemsBreakdownCount">—</strong>
+                </div>
+
+                <div class="relationdiagram-info-item">
                     <span class="relationdiagram-info-label">Relations:</span>
                     <strong id="relationCount">—</strong>
                 </div>
@@ -91,20 +97,92 @@
                     </span>
                     <span class="relationdiagram-legend-item">
                         <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-selected"></span>
-                        Selected requirement
+                        Selected entity
                     </span>
+                </div>
+
+                <div class="relationdiagram-info-actions">
+                    <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view modes">
+                        <button
+                                id="relationdiagramViewStakeholderSystem"
+                                class="relationdiagram-view-button"
+                                type="button"
+                                data-view-mode="stakeholder-system"
+                                title="Stakeholder Requirements to System Requirements"
+                                aria-label="Show stakeholder requirements to system requirements"
+                                aria-pressed="false"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
+                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
+                                <path d="M10 12h5"></path>
+                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
+                            </svg>
+                        </button>
+
+                        <button
+                                id="relationdiagramViewStakeholderSystemBreakdown"
+                                class="relationdiagram-view-button"
+                                type="button"
+                                data-view-mode="stakeholder-system-breakdown"
+                                title="Stakeholder Requirements to System Requirements to Systems Breakdown"
+                                aria-label="Show stakeholder requirements, system requirements and systems breakdown"
+                                aria-pressed="true"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="2.5" y="5" width="5" height="14" rx="1"></rect>
+                                <rect x="9.5" y="5" width="5" height="14" rx="1"></rect>
+                                <rect x="16.5" y="5" width="5" height="14" rx="1"></rect>
+                                <path d="M7.5 12h2"></path>
+                                <path d="M14.5 12h2"></path>
+                            </svg>
+                        </button>
+
+                        <button
+                                id="relationdiagramViewSystemBreakdown"
+                                class="relationdiagram-view-button"
+                                type="button"
+                                data-view-mode="system-breakdown"
+                                title="System Requirements to Systems Breakdown"
+                                aria-label="Show system requirements to systems breakdown"
+                                aria-pressed="false"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="3" y="5" width="7" height="14" rx="1"></rect>
+                                <rect x="14" y="5" width="7" height="14" rx="1"></rect>
+                                <path d="M11 12h3"></path>
+                                <path d="M12.5 9.5 15 12l-2.5 2.5"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button
+                            id="btnHelp"
+                            class="relationdiagram-help-button"
+                            type="button"
+                            data-help-page="basisrelationdiagram"
+                            data-help-title="Help - Relation Diagram"
+                            title="Open help"
+                            aria-label="Open help for Relation Diagram"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
             <div class="relationdiagram-filter-bar" aria-label="Relation diagram filters">
                 <label class="relationdiagram-filter-option">
                     <input id="filterOnlyWithoutRelations" type="checkbox">
-                    <span>Show only requirements without relations</span>
+                    <span>Show only entities without relations</span>
                 </label>
 
                 <label class="relationdiagram-filter-option">
                     <input id="filterOnlyWithRelations" type="checkbox">
-                    <span>Show only requirements with relations</span>
+                    <span>Show only entities with relations</span>
                 </label>
 
                 <label class="relationdiagram-search-filter" for="filterRequirementText">
@@ -137,14 +215,25 @@
                     </div>
 
                     <div class="relationdiagram-canvas-wrap" aria-hidden="true">
-                        <svg class="relationdiagram-svg" id="relationsSvg"></svg>
+                        <svg class="relationdiagram-svg" id="relationsSvgStakeholderSystem"></svg>
                     </div>
 
-                    <div class="relationdiagram-column relationdiagram-column-right" aria-label="System requirements">
+                    <div class="relationdiagram-column relationdiagram-column-middle" aria-label="System requirements">
                         <div class="relationdiagram-column-header">
                             System Requirements
                         </div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
+                    </div>
+
+                    <div class="relationdiagram-canvas-wrap" aria-hidden="true">
+                        <svg class="relationdiagram-svg" id="relationsSvgSystemBreakdown"></svg>
+                    </div>
+
+                    <div class="relationdiagram-column relationdiagram-column-right" aria-label="Systems breakdown">
+                        <div class="relationdiagram-column-header">
+                            Systems Breakdown
+                        </div>
+                        <div class="relationdiagram-list" id="systemsBreakdownsList"></div>
                     </div>
 
                     <div class="relationdiagram-empty is-visible" id="relationdiagramEmptyState">
@@ -182,10 +271,34 @@
                 <div class="relationdiagram-dialog-label">Related requirements</div>
                 <ul class="relationdiagram-related-list" id="dialogRelatedRequirements"></ul>
             </div>
+
+            <div class="relationdiagram-dialog-field" id="dialogRelatedSystemsBreakdownsField">
+                <div class="relationdiagram-dialog-label">Related systems breakdowns</div>
+                <ul class="relationdiagram-related-list" id="dialogRelatedSystemsBreakdowns"></ul>
+            </div>
         </div>
 
         <div class="relationdiagram-dialog-footer">
             <button id="dialogCloseButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                Ã—
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading helpâ€¦
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
         </div>
     </form>
 </dialog>

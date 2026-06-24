@@ -5,11 +5,13 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
+import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
+import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 import org.slf4j.Logger;
@@ -28,7 +30,9 @@ public class RelationDiagramDocument extends GenericXmlDocument {
 
     private List<SystemRequirementEntity> listOfSystemRequirements;
     private List<StakeholderRequirementEntity> listOfStakeholderRequirements;
-    private List<EntityRelationRecord> listOfEntityRelations;
+    private List<SystemBreakdownEntity> listOfSystemBreakdowns;
+    private List<EntityRelationRecord> listOfStakeholderRequirementToSystemRequirementRelations;
+    private List<EntityRelationRecord> listOfSystemRequirementToSystemBreakdowRelations;
 
     public RelationDiagramDocument(WebSession webSession) throws Exception {
 
@@ -47,14 +51,18 @@ public class RelationDiagramDocument extends GenericXmlDocument {
 
         relationDiagramElement.appendChild(getStakeholderRequirementElement());
         relationDiagramElement.appendChild(getSystemRequirementElement());
-        relationDiagramElement.appendChild(getRelationsElement());
+        relationDiagramElement.appendChild(getSystemBreakdownElement());
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemRequirementRelations", listOfStakeholderRequirementToSystemRequirementRelations));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemsBreakdownRelations", listOfSystemRequirementToSystemBreakdowRelations));
 
     }
 
     private void relationDiagramDocument () throws SQLException {
         listOfSystemRequirements = getSystemRequirements();
         listOfStakeholderRequirements = getStakeholderRequirements();
-        listOfEntityRelations = getEntityRelations();
+        listOfSystemBreakdowns = getSystemBreakdowns();
+        listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
+        listOfSystemRequirementToSystemBreakdowRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, EntityType.SYSTEMS_BREAKDOWN);
     }
 
     private List<StakeholderRequirementEntity> getStakeholderRequirements() throws SQLException {
@@ -71,9 +79,17 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         return listOfSystemRequirementEntities;
     }
 
-    private List<EntityRelationRecord> getEntityRelations() throws SQLException {
+    private List<SystemBreakdownEntity> getSystemBreakdowns() throws SQLException {
+        SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
+        List<SystemBreakdownEntity> listOfSystemBreakdownEntities;
+        listOfSystemBreakdownEntities = systemBreakdownProvider.getAllSystemBreakdown(false);
+        return listOfSystemBreakdownEntities;
+    }
+
+
+    private List<EntityRelationRecord> getEntityRelations(EntityType entityType, EntityType relatedEentityType) throws SQLException {
         EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());
-        return entityRelationProvider.getAllConfirmedEntityRelationRecordsByProjectId(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
+        return entityRelationProvider.getAllConfirmedEntityRelationRecordsByProjectId(entityType, relatedEentityType);
     }
 
     private Element getStakeholderRequirementElement() {
@@ -108,9 +124,26 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         return systemRequirements;
     }
 
-    private Element getRelationsElement() {
-        Element relationsElement = getDoc().createElement("relations");
-        for (EntityRelationRecord relation : listOfEntityRelations) {
+    private Element getSystemBreakdownElement() {
+        Element systemRequirements = getDoc().createElement("systemsBreakdowns");
+        if (listOfSystemBreakdowns != null) {
+            for (SystemBreakdownEntity system : listOfSystemBreakdowns) {
+                Element requirementElement = getDoc().createElement("systemsBreakdown");
+                String id = formatEntityId(system.getEntityType(), system.getEntityId());
+                requirementElement.setAttribute("id", id);
+                addElement(requirementElement, "id", system.getSbsCode());
+                addElement(requirementElement, "name", system.getSystemName());
+                addElement(requirementElement, "description", system.getDescription());
+                systemRequirements.appendChild(requirementElement);
+            }
+        }
+        return systemRequirements;
+    }
+
+
+    private Element getRelationsElement(String elementName, List<EntityRelationRecord> listOfEntityRelationRecords) {
+        Element relationsElement = getDoc().createElement(elementName);
+        for (EntityRelationRecord relation : listOfEntityRelationRecords) {
             Element relationElement = getDoc().createElement("relation");
 
             String fromId = formatEntityId(relation.getEntityType(), relation.getEntityId());

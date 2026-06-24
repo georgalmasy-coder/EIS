@@ -16,6 +16,7 @@ import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
+import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -373,6 +374,25 @@ public class SystemBreakdownProvider extends EntityProvider {
             log.error("Error loading all entities including Code : {}", e.getMessage());
         }
         return trlRecords;
+    }
+
+    public List<SystemBreakdownEntity> getAllSystemBreakdown(boolean includeInactive)  {
+        List<SystemBreakdownEntity> listOfEntities = new ArrayList<>();
+
+        try {
+            List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
+            for (EntityRecord entityRecord : entityRecords) {
+                SystemBreakdownEntity systemRequirementEntity = SystemBreakdownEntity.map(entityRecord);
+                listOfEntities.add(systemRequirementEntity);
+            }
+
+            listOfEntities.sort(Comparator.comparing(SystemBreakdownEntity::getSbsCode));
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return listOfEntities;
     }
 
 

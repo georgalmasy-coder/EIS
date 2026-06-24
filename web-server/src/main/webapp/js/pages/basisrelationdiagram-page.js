@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { initHelpDialog } from "../components/help-dialog.js";
 import { setText } from "../core/dom.js";
 import {
     getChildText,
@@ -9,11 +10,19 @@ import { naturalCompare } from "../components/sortable-table.js";
 
 const RELATION_DIAGRAM_ENDPOINT = "/basis/relationdiagram?cmd=overview";
 
+const VIEW_MODES = {
+    stakeholderSystem: "stakeholder-system",
+    stakeholderSystemBreakdown: "stakeholder-system-breakdown",
+    systemBreakdown: "system-breakdown"
+};
+
 const state = {
     stakeholderRequirements: [],
     systemRequirements: [],
+    systemsBreakdowns: [],
     requirementsByInternalId: new Map(),
     relations: [],
+    viewMode: VIEW_MODES.stakeholderSystemBreakdown,
     selectedInternalId: null,
     hoverInternalId: null,
     resizeObserver: null
@@ -32,6 +41,8 @@ function initializePageShell() {
     setText("loadStatus", "Loading", "");
 
     initMenu();
+    initHelpDialog();
+    applyViewMode(state.viewMode, { redraw: false });
 }
 
 function initializeEvents() {
@@ -40,6 +51,7 @@ function initializeEvents() {
     const filterRequirementText = document.getElementById("filterRequirementText");
     const btnClearSelection = document.getElementById("btnClearSelection");
     const dialogCloseButton = document.getElementById("dialogCloseButton");
+    const viewButtons = document.querySelectorAll("[data-view-mode]");
 
     filterOnlyWithoutRelations?.addEventListener("change", () => {
         if (filterOnlyWithoutRelations.checked && filterOnlyWithRelations) {
@@ -96,6 +108,15 @@ function initializeEvents() {
         }
     });
 
+    viewButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const viewMode = button.getAttribute("data-view-mode");
+            if (viewMode) {
+                applyViewMode(viewMode);
+            }
+        });
+    });
+
     window.addEventListener("resize", debounce(() => {
         drawRelations();
         updateHighlight();
@@ -149,12 +170,20 @@ function parseRelationDiagramDocument(xmlDocument) {
 
     const stakeholderRequirements = parseRequirements(
         relationDiagramElement,
-        "stakeholderRequirements"
+        "stakeholderRequirements",
+        "requirement"
     );
 
     const systemRequirements = parseRequirements(
         relationDiagramElement,
-        "systemRequirements"
+        "systemRequirements",
+        "requirement"
+    );
+
+    const systemsBreakdowns = parseRequirements(
+        relationDiagramElement,
+        "systemsBreakdowns",
+        "systemsBreakdown"
     );
 
     const relations = parseRelations(relationDiagramElement);
@@ -162,13 +191,14 @@ function parseRelationDiagramDocument(xmlDocument) {
     return {
         stakeholderRequirements,
         systemRequirements,
+        systemsBreakdowns,
         relations
     };
 }
 
-function parseRequirements(parentElement, groupSelector) {
+function parseRequirements(parentElement, groupSelector, itemSelector) {
     const requirementElements = parentElement.querySelectorAll(
-        `:scope > ${groupSelector} > requirement`
+        `:scope > ${groupSelector} > ${itemSelector}`
     );
 
     return Array.from(requirementElements).map((requirementElement) => {
@@ -179,13 +209,19 @@ function parseRequirements(parentElement, groupSelector) {
             visibleId: getChildText(requirementElement, "id", "—"),
             name: getChildText(requirementElement, "name", "—"),
             description: getChildText(requirementElement, "description", ""),
-            type: groupSelector === "stakeholderRequirements" ? "stakeholder" : "system"
+            type: groupSelector === "stakeholderRequirements"
+                ? "stakeholder"
+                : groupSelector === "systemRequirements"
+                    ? "system"
+                    : "systemsBreakdown"
         };
     }).filter((requirement) => requirement.internalId);
 }
 
 function parseRelations(relationDiagramElement) {
-    const relationElements = relationDiagramElement.querySelectorAll(":scope > relations > relation");
+    const relationElements = relationDiagramElement.querySelectorAll(
+        ":scope > StakeholderRequirementToSystemRequirementRelations > relation, :scope > SystemRequirementToSystemsBreakdownRelations > relation"
+    );
 
     return Array.from(relationElements).map((relationElement, index) => ({
         id: `relation-${index}`,
@@ -209,6 +245,7 @@ function applyTopPanel(xmlDocument) {
 function setRelationDiagramState(diagram) {
     state.stakeholderRequirements = diagram.stakeholderRequirements;
     state.systemRequirements = diagram.systemRequirements;
+    state.systemsBreakdowns = diagram.systemsBreakdowns;
     state.relations = diagram.relations;
     state.selectedInternalId = null;
     state.hoverInternalId = null;
@@ -221,24 +258,33 @@ function setRelationDiagramState(diagram) {
     for (const requirement of state.systemRequirements) {
         state.requirementsByInternalId.set(requirement.internalId, requirement);
     }
+
+    for (const requirement of state.systemsBreakdowns) {
+        state.requirementsByInternalId.set(requirement.internalId, requirement);
+    }
+
+    applyViewMode(state.viewMode, { redraw: false });
 }
 
 function renderRelationDiagram() {
     setText("stakeholderRequirementCount", String(state.stakeholderRequirements.length), "");
     setText("systemRequirementCount", String(state.systemRequirements.length), "");
+    setText("systemsBreakdownCount", String(state.systemsBreakdowns.length), "");
     setText("relationCount", String(state.relations.length), "");
 
     const stakeholderList = document.getElementById("stakeholderRequirementsList");
     const systemList = document.getElementById("systemRequirementsList");
+    const systemsBreakdownsList = document.getElementById("systemsBreakdownsList");
 
-    if (!stakeholderList || !systemList) {
+    if (!stakeholderList || !systemList || !systemsBreakdownsList) {
         throw new Error("Missing relation diagram list elements.");
     }
 
     stakeholderList.innerHTML = "";
     systemList.innerHTML = "";
+    systemsBreakdownsList.innerHTML = "";
 
-    if (!state.stakeholderRequirements.length && !state.systemRequirements.length) {
+    if (!state.stakeholderRequirements.length && !state.systemRequirements.length && !state.systemsBreakdowns.length) {
         showEmptyState("No requirements returned from endpoint.");
         return;
     }
@@ -247,7 +293,9 @@ function renderRelationDiagram() {
 
     renderRequirementCards(stakeholderList, state.stakeholderRequirements);
     renderRequirementCards(systemList, state.systemRequirements);
+    renderRequirementCards(systemsBreakdownsList, state.systemsBreakdowns);
 
+    applyViewMode(state.viewMode, { redraw: false });
     setupScrollListeners();
     setupResizeObserver();
 
@@ -305,9 +353,11 @@ function buildRequirementTooltip(requirement) {
 function setupScrollListeners() {
     const stakeholderList = document.getElementById("stakeholderRequirementsList");
     const systemList = document.getElementById("systemRequirementsList");
+    const systemsBreakdownsList = document.getElementById("systemsBreakdownsList");
 
     stakeholderList?.addEventListener("scroll", handleDiagramScroll, { passive: true });
     systemList?.addEventListener("scroll", handleDiagramScroll, { passive: true });
+    systemsBreakdownsList?.addEventListener("scroll", handleDiagramScroll, { passive: true });
 }
 
 const handleDiagramScroll = debounce(() => {
@@ -388,14 +438,39 @@ function requirementMatchesSearch(requirement, searchText) {
 }
 
 function drawRelations() {
-    const svg = document.getElementById("relationsSvg");
-    const canvasWrap = document.querySelector(".relationdiagram-canvas-wrap");
+    const showStakeholderSystem = state.viewMode === VIEW_MODES.stakeholderSystem
+        || state.viewMode === VIEW_MODES.stakeholderSystemBreakdown;
+    const showSystemBreakdown = state.viewMode === VIEW_MODES.stakeholderSystemBreakdown
+        || state.viewMode === VIEW_MODES.systemBreakdown;
+
+    drawRelationsInCanvas(
+        "relationsSvgStakeholderSystem",
+        "stakeholder",
+        "system",
+        showStakeholderSystem
+    );
+
+    drawRelationsInCanvas(
+        "relationsSvgSystemBreakdown",
+        "system",
+        "systemsBreakdown",
+        showSystemBreakdown
+    );
+}
+
+function drawRelationsInCanvas(svgId, leftType, rightType, isEnabled) {
+    const svg = document.getElementById(svgId);
+    const canvasWrap = svg?.parentElement;
 
     if (!svg || !canvasWrap) {
         return;
     }
 
     svg.innerHTML = "";
+
+    if (!isEnabled) {
+        return;
+    }
 
     const canvasRect = canvasWrap.getBoundingClientRect();
     svg.setAttribute("viewBox", `0 0 ${canvasRect.width} ${canvasRect.height}`);
@@ -417,7 +492,7 @@ function drawRelations() {
             continue;
         }
 
-        const points = getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement);
+        const points = getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement, leftType, rightType);
 
         if (!points) {
             continue;
@@ -434,20 +509,22 @@ function drawRelations() {
     }
 }
 
-function getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement) {
+function getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement, leftType, rightType) {
     const fromRect = fromCard.getBoundingClientRect();
     const toRect = toCard.getBoundingClientRect();
 
-    const fromIsStakeholder = fromRequirement.type === "stakeholder";
-    const toIsStakeholder = toRequirement.type === "stakeholder";
+    const fromIsLeft = fromRequirement.type === leftType;
+    const fromIsRight = fromRequirement.type === rightType;
+    const toIsLeft = toRequirement.type === leftType;
+    const toIsRight = toRequirement.type === rightType;
 
     let leftRect;
     let rightRect;
 
-    if (fromIsStakeholder && !toIsStakeholder) {
+    if (fromIsLeft && toIsRight) {
         leftRect = fromRect;
         rightRect = toRect;
-    } else if (!fromIsStakeholder && toIsStakeholder) {
+    } else if (fromIsRight && toIsLeft) {
         leftRect = toRect;
         rightRect = fromRect;
     } else {
@@ -510,29 +587,38 @@ function openRequirementDialog(requirement) {
         return;
     }
 
-    setText("dialogTitle", requirement.type === "stakeholder" ? "Stakeholder Requirement" : "System Requirement", "");
+    setText(
+        "dialogTitle",
+        requirement.type === "stakeholder"
+            ? "Stakeholder Requirement"
+            : requirement.type === "systemsBreakdown"
+                ? "Systems Breakdown"
+                : "System Requirement",
+        ""
+    );
     setText("dialogRequirementId", requirement.visibleId, "");
     setText("dialogRequirementName", requirement.name, "");
     setText("dialogRequirementDescription", requirement.description || "—", "");
 
-    const relatedList = document.getElementById("dialogRelatedRequirements");
+    const systemsBreakdownsField = document.getElementById("dialogRelatedSystemsBreakdownsField");
+    if (systemsBreakdownsField) {
+        systemsBreakdownsField.hidden = requirement.type !== "system";
+    }
 
-    if (relatedList) {
-        relatedList.innerHTML = "";
+    renderRelatedRequirementList(
+        "dialogRelatedRequirements",
+        getRelatedRequirements(requirement.internalId, (relatedRequirement) => relatedRequirement.type !== "systemsBreakdown"),
+        "No related requirements."
+    );
 
-        const relatedRequirements = getRelatedRequirements(requirement.internalId);
-
-        if (!relatedRequirements.length) {
-            const li = document.createElement("li");
-            li.textContent = "No related requirements.";
-            relatedList.appendChild(li);
-        } else {
-            for (const relatedRequirement of relatedRequirements) {
-                const li = document.createElement("li");
-                li.textContent = `${relatedRequirement.visibleId} - ${relatedRequirement.name}`;
-                relatedList.appendChild(li);
-            }
-        }
+    if (requirement.type === "system") {
+        renderRelatedRequirementList(
+            "dialogRelatedSystemsBreakdowns",
+            getRelatedRequirements(requirement.internalId, (relatedRequirement) => relatedRequirement.type === "systemsBreakdown"),
+            "No related systems breakdowns."
+        );
+    } else {
+        renderRelatedRequirementList("dialogRelatedSystemsBreakdowns", [], "No related systems breakdowns.");
     }
 
     if (!dialog.open) {
@@ -556,12 +642,35 @@ function getRelatedRequirementIds(internalId) {
     return relatedIds;
 }
 
-function getRelatedRequirements(internalId) {
+function renderRelatedRequirementList(listId, relatedRequirements, emptyMessage) {
+    const relatedList = document.getElementById(listId);
+
+    if (!relatedList) {
+        return;
+    }
+
+    relatedList.innerHTML = "";
+
+    if (!relatedRequirements.length) {
+        const li = document.createElement("li");
+        li.textContent = emptyMessage;
+        relatedList.appendChild(li);
+        return;
+    }
+
+    for (const relatedRequirement of relatedRequirements) {
+        const li = document.createElement("li");
+        li.textContent = `${relatedRequirement.visibleId} - ${relatedRequirement.name}`;
+        relatedList.appendChild(li);
+    }
+}
+
+function getRelatedRequirements(internalId, predicate = () => true) {
     const relatedIds = getRelatedRequirementIds(internalId);
 
     return Array.from(relatedIds)
         .map((relatedId) => state.requirementsByInternalId.get(relatedId))
-        .filter(Boolean)
+        .filter((requirement) => Boolean(requirement) && predicate(requirement))
         .sort((a, b) => naturalCompare(a.visibleId, b.visibleId));
 }
 
@@ -572,7 +681,7 @@ function hasAnyRelation(internalId) {
 function findVisibleRequirementCard(internalId) {
     const card = document.querySelector(`.relationdiagram-requirement-card[data-internal-id="${cssEscape(internalId)}"]`);
 
-    if (!card || card.classList.contains("is-hidden-by-filter")) {
+    if (!card || card.classList.contains("is-hidden-by-filter") || card.closest(".is-hidden-by-view")) {
         return null;
     }
 
@@ -606,6 +715,56 @@ function hideEmptyState() {
     emptyState.classList.remove("is-visible");
 }
 
+function applyViewMode(viewMode, options = {}) {
+    state.viewMode = viewMode;
+
+    const frame = document.getElementById("relationdiagramFrame");
+    if (!frame) {
+        return;
+    }
+
+    const showStakeholder = viewMode === VIEW_MODES.stakeholderSystem
+        || viewMode === VIEW_MODES.stakeholderSystemBreakdown;
+    const showBreakdown = viewMode === VIEW_MODES.stakeholderSystemBreakdown
+        || viewMode === VIEW_MODES.systemBreakdown;
+
+    frame.dataset.viewMode = viewMode;
+
+    setViewVisibility("stakeholderRequirementsList", "relationsSvgStakeholderSystem", showStakeholder);
+    setViewVisibility("systemRequirementsList", null, true);
+    setViewVisibility("systemsBreakdownsList", "relationsSvgSystemBreakdown", showBreakdown);
+
+    setButtonPressed("relationdiagramViewStakeholderSystem", viewMode === VIEW_MODES.stakeholderSystem);
+    setButtonPressed("relationdiagramViewStakeholderSystemBreakdown", viewMode === VIEW_MODES.stakeholderSystemBreakdown);
+    setButtonPressed("relationdiagramViewSystemBreakdown", viewMode === VIEW_MODES.systemBreakdown);
+
+    if (options.redraw !== false) {
+        requestAnimationFrame(() => {
+            drawRelations();
+            updateHighlight();
+        });
+    }
+}
+
+function setViewVisibility(listId, canvasId, isVisible) {
+    const list = document.getElementById(listId);
+    if (list) {
+        list.closest(".relationdiagram-column")?.classList.toggle("is-hidden-by-view", !isVisible);
+    }
+
+    if (canvasId) {
+        const canvas = document.getElementById(canvasId);
+        canvas?.parentElement?.classList.toggle("is-hidden-by-view", !isVisible);
+    }
+}
+
+function setButtonPressed(buttonId, isPressed) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+        button.setAttribute("aria-pressed", String(isPressed));
+    }
+}
+
 function debounce(callback, delay) {
     let timeoutId = null;
 
@@ -617,3 +776,4 @@ function debounce(callback, delay) {
         }, delay);
     };
 }
+

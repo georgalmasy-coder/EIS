@@ -4,9 +4,9 @@
     --relationdiagram-panel-bg: #ffffff;
     --relationdiagram-list-bg: #f8fafc;
     --relationdiagram-card-bg: #ffffff;
-    --relationdiagram-card-hover-bg: #eff6ff;
-    --relationdiagram-card-active-bg: #dbeafe;
-    --relationdiagram-card-related-bg: #dcfce7;
+    --relationdiagram-card-hover-bg: #b3ecff;
+    --relationdiagram-card-active-bg: #b3ecff;
+    --relationdiagram-card-related-bg: #bbf7d0;
     --relationdiagram-card-muted-opacity: 0.35;
 
     --relationdiagram-line-normal: #6b7280;
@@ -96,6 +96,73 @@ body.relationdiagram-document {
     gap: 0.75rem;
     flex-wrap: wrap;
     margin-left: auto;
+}
+
+.relationdiagram-info-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.25rem;
+}
+
+.relationdiagram-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem;
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.45rem;
+    background: #ffffff;
+}
+
+.relationdiagram-view-button,
+.relationdiagram-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    border: 1px solid var(--relationdiagram-border-color);
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: var(--relationdiagram-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition:
+            background-color 120ms ease,
+            border-color 120ms ease,
+            box-shadow 120ms ease,
+            transform 80ms ease;
+}
+
+.relationdiagram-view-button svg,
+.relationdiagram-help-button svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.relationdiagram-view-button:hover,
+.relationdiagram-help-button:hover {
+    background: #f8fafc;
+    border-color: #93c5fd;
+}
+
+.relationdiagram-view-button:active,
+.relationdiagram-help-button:active {
+    transform: translateY(1px);
+}
+
+.relationdiagram-view-button[aria-pressed="true"] {
+    background: #dbeafe;
+    border-color: #60a5fa;
+    box-shadow: inset 0 0 0 1px rgba(25, 118, 210, 0.14);
 }
 
 .relationdiagram-legend-item {
@@ -222,7 +289,7 @@ body.relationdiagram-document {
 .relationdiagram-frame {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(160px, 260px) minmax(260px, 1fr);
+    grid-template-columns: minmax(240px, 1fr) minmax(120px, 160px) minmax(240px, 1fr) minmax(120px, 160px) minmax(240px, 1fr);
     gap: 0;
     flex: 1 1 auto;
     min-height: 0;
@@ -233,6 +300,14 @@ body.relationdiagram-document {
     border: 1px solid var(--relationdiagram-border-color);
     border-radius: 0.35rem;
     background: var(--relationdiagram-panel-bg);
+}
+
+.relationdiagram-frame[data-view-mode="stakeholder-system"] {
+    grid-template-columns: minmax(240px, 1fr) minmax(120px, 160px) minmax(240px, 1fr);
+}
+
+.relationdiagram-frame[data-view-mode="system-breakdown"] {
+    grid-template-columns: minmax(240px, 1fr) minmax(120px, 160px) minmax(240px, 1fr);
 }
 
 .relationdiagram-column {
@@ -248,8 +323,18 @@ body.relationdiagram-document {
     border-right: 1px solid var(--relationdiagram-border-color);
 }
 
+.relationdiagram-column-middle {
+    border-left: 1px solid var(--relationdiagram-border-color);
+    border-right: 1px solid var(--relationdiagram-border-color);
+}
+
 .relationdiagram-column-right {
     border-left: 1px solid var(--relationdiagram-border-color);
+}
+
+.relationdiagram-column.is-hidden-by-view,
+.relationdiagram-canvas-wrap.is-hidden-by-view {
+    display: none;
 }
 
 .relationdiagram-column-header {
@@ -522,7 +607,15 @@ body.relationdiagram-document .side-menu {
 
 @media (max-width: 1000px) {
     .relationdiagram-frame {
-        grid-template-columns: minmax(220px, 1fr) minmax(110px, 170px) minmax(220px, 1fr);
+        grid-template-columns: minmax(200px, 1fr) minmax(96px, 140px) minmax(200px, 1fr) minmax(96px, 140px) minmax(200px, 1fr);
+    }
+
+    .relationdiagram-frame[data-view-mode="stakeholder-system"] {
+        grid-template-columns: minmax(200px, 1fr) minmax(96px, 140px) minmax(200px, 1fr);
+    }
+
+    .relationdiagram-frame[data-view-mode="system-breakdown"] {
+        grid-template-columns: minmax(200px, 1fr) minmax(96px, 140px) minmax(200px, 1fr);
     }
 
     .relationdiagram-legend {
@@ -533,10 +626,24 @@ body.relationdiagram-document .side-menu {
 @media (max-width: 720px) {
     .relationdiagram-frame {
         grid-template-columns: 1fr;
+        grid-template-rows: minmax(220px, 1fr) 90px minmax(220px, 1fr) 90px minmax(220px, 1fr);
+    }
+
+    .relationdiagram-frame[data-view-mode="stakeholder-system"] {
+        grid-template-rows: minmax(220px, 1fr) 90px minmax(220px, 1fr);
+    }
+
+    .relationdiagram-frame[data-view-mode="system-breakdown"] {
         grid-template-rows: minmax(220px, 1fr) 90px minmax(220px, 1fr);
     }
 
     .relationdiagram-column-left {
+        border-right: none;
+        border-bottom: 1px solid var(--relationdiagram-border-color);
+    }
+
+    .relationdiagram-column-middle {
+        border-left: none;
         border-right: none;
         border-bottom: 1px solid var(--relationdiagram-border-color);
     }
