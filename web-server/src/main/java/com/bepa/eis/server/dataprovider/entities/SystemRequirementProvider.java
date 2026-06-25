@@ -1,7 +1,7 @@
 package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.web.application.views.basis.system.BasisSystemRequirementExportRow;
+import com.bepa.eis.server.api.web.application.views.basis.system.SystemRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
@@ -306,7 +306,6 @@ public class SystemRequirementProvider extends EntityProvider {
     public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId) {
 
         SystemRequirementParentCodeSelector parentCodeSelector = new SystemRequirementParentCodeSelector(webSession);
-//        entity.addElement(parentCodeSelector);
 
         String nextCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
         SystemRequirementCode requirementCode = new SystemRequirementCode(true);
@@ -410,10 +409,10 @@ public class SystemRequirementProvider extends EntityProvider {
 
     @Override
     public List<AbstractEntity> toEntities(WebSession webSession, Object rows) {
-        List<BasisSystemRequirementExportRow> rowsList = (List<BasisSystemRequirementExportRow>) rows;
+        List<SystemRequirementExportRow> rowsList = (List<SystemRequirementExportRow>) rows;
         List<AbstractEntity> entities = new ArrayList<>();
 
-        for (BasisSystemRequirementExportRow systemBreakdownExportRow : rowsList) {
+        for (SystemRequirementExportRow systemBreakdownExportRow : rowsList) {
             SystemRequirementEntity entity = toEntity(webSession, systemBreakdownExportRow);
             entities.add(entity);
         }
@@ -421,7 +420,7 @@ public class SystemRequirementProvider extends EntityProvider {
         return entities;
     }
 
-    private SystemRequirementEntity toEntity(WebSession webSession, BasisSystemRequirementExportRow row) {
+    private SystemRequirementEntity toEntity(WebSession webSession, SystemRequirementExportRow row) {
         SystemRequirementEntity entity = new SystemRequirementEntity(webSession);
 //        BasisStakeholderRequirementParentCodeSelector codeSelector = new BasisStakeholderRequirementParentCodeSelector(webSession);
 
@@ -430,22 +429,11 @@ public class SystemRequirementProvider extends EntityProvider {
         entity.setVersion(1);
 
         String requirementCode = row.id();
-
-  //      if (requirementCode == null || requirementCode.isBlank()) {
-//            requirementCode = codeSelector.getNextAvailableCodeValue(webSession, "");
-//        }
-
         Integer level = row.level();
-
-//        if (level == null) {
-//            level = codeSelector.getCodeLevel(requirementCode);
-//        }
-
 
         entity.setRequirementCode(requirementCode);
         entity.setRequirementCodeLevel(level);
         entity.setRequirementName(row.name());
-//        entity.setRequirementDescription(row.description());
         entity.setActive(row.active() == null || row.active());
 
         entity.addAllDataElements();

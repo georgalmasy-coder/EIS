@@ -364,7 +364,8 @@ body.systemsbreakdown-edit-document{
 }
 
 .notes-toolbar,
-.attachments-toolbar{
+.attachments-toolbar,
+.relations-toolbar{
     flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
@@ -372,7 +373,8 @@ body.systemsbreakdown-edit-document{
 }
 
 .notes-add-btn,
-.attachments-add-btn{
+.attachments-add-btn,
+.relations-add-btn{
     min-width: 110px;
 }
 
@@ -539,6 +541,37 @@ body.systemsbreakdown-edit-document{
     box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
+#relationDialog{
+    width: min(700px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+}
+
+#relationDialog .relation-dlg{
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#relationDialog .dlg-footer{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+#relationDialog .dlg-footer button{
+    min-width: 0;
+    white-space: nowrap;
+    width: auto;
+}
+
 body.systemsbreakdown-edit-readonly .page-field input,
 body.systemsbreakdown-edit-readonly .page-field textarea,
 body.systemsbreakdown-edit-readonly .page-field select{
@@ -576,8 +609,10 @@ body.systemsbreakdown-edit-readonly .page-field select{
     }
 
     .note-dlg,
-    .attachment-dlg{
-        width: 96vw;
+    .attachment-dlg,
+    #relationDialog{
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
     }
 }
 
@@ -606,12 +641,14 @@ body.systemsbreakdown-edit-readonly .page-field select{
     }
 
     .notes-toolbar,
-    .attachments-toolbar{
+    .attachments-toolbar,
+    .relations-toolbar{
         justify-content: stretch;
     }
 
     .notes-toolbar button,
-    .attachments-toolbar button{
+    .attachments-toolbar button,
+    .relations-toolbar button{
         width: 100%;
     }
 

@@ -31,4 +31,10 @@ public enum RelationType {
         return INVALID_RELATION_TYPE;
     }
 
+    public static RelationType valueOfDescription(String description) {
+        for (RelationType entityDataElement : RelationType.values()) {
+            if (entityDataElement.description.equalsIgnoreCase(description) ) return entityDataElement;
+        }
+        return INVALID_RELATION_TYPE;
+    }
 }

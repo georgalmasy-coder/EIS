@@ -60,6 +60,7 @@ export function parseEntityRelationsFromDoc(doc) {
         const createdBy = parseCreatedBy(node);
 
         return {
+            entityRelationPK: textOf(node, "EntityRelationPK").trim(),
             entityId: textOf(node, "EntityId").trim(),
             entityType: textOf(node, "EntityType").trim(),
             relatedEntityId: textOf(node, "RelatedEntityId").trim(),
@@ -71,7 +72,6 @@ export function parseEntityRelationsFromDoc(doc) {
             relatedEntityCode: textOf(node, "RelatedEntityCode"),
             relatedEntityName: textOf(node, "RelatedEntityName"),
             relationTypeName: textOf(node, "RelationTypeName"),
-            link: textOf(node, "Link"),
             isDeleted: false,
             isNew: false
         };
@@ -177,20 +177,15 @@ export function buildEntityRelationsXml(doc, relations) {
     relations.forEach((relation) => {
         const entityRelation = doc.createElement("EntityRelation");
 
+        appendTextElement(doc, entityRelation, "EntityRelationPK", relation.entityRelationPK ?? "");
         appendTextElement(doc, entityRelation, "EntityId", relation.entityId ?? "");
         appendTextElement(doc, entityRelation, "EntityType", relation.entityType ?? "");
         appendTextElement(doc, entityRelation, "RelatedEntityId", relation.relatedEntityId ?? "");
         appendTextElement(doc, entityRelation, "RelatedEntityType", relation.relatedEntityType ?? "");
+        appendTextElement(doc, entityRelation, "CreatedById", relation.createdById ?? "");
         appendTextElement(doc, entityRelation, "CreatedTime", relation.createdTime ?? "");
-        appendTextElement(doc, entityRelation, "RelatedEntityTypeName", relation.relatedEntityTypeName ?? "");
-        appendTextElement(doc, entityRelation, "RelatedEntityCode", relation.relatedEntityCode ?? "");
-        appendTextElement(doc, entityRelation, "RelatedEntityName", relation.relatedEntityName ?? "");
         appendTextElement(doc, entityRelation, "RelationTypeName", relation.relationTypeName ?? "");
-        appendTextElement(doc, entityRelation, "Link", relation.link ?? "");
-
-        const createdById = doc.createElement("CreatedById");
-        appendTextElement(doc, createdById, "Value", relation.createdById ?? "");
-        entityRelation.appendChild(createdById);
+        appendTextElement(doc, entityRelation, "IsDeleted", relation.isDeleted ? "true" : "false");
 
         relationsNode.appendChild(entityRelation);
     });

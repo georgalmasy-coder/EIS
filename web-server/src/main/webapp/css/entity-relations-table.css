@@ -31,15 +31,25 @@
 .relation-delete-btn{
     border: 1px solid var(--border);
     background: rgba(239,68,68,.15);
-    color: var(--text);
+    color: #ef4444;
     border-radius: 8px;
     width: 28px;
     height: 28px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .relation-delete-btn:hover{
     background: rgba(239,68,68,.25);
+}
+
+.relation-delete-btn svg{
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
 }
 
 .relations-table tr.is-openable{
@@ -49,4 +59,77 @@
 .relations-table tr.is-deleted{
     opacity: .55;
     text-decoration: line-through;
+}
+
+.relation-dialog-content{
+    display: grid;
+    gap: 22px;
+    margin: 8px 0 40px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.relation-dialog-list{
+    display: grid;
+    gap: 12px;
+}
+
+.relation-dialog-list-label{
+    font-weight: 600;
+}
+
+.relation-dialog-select{
+    width: 100%;
+    min-width: 0;
+}
+
+.relation-dialog-empty{
+    padding: 12px 0;
+    color: var(--muted);
+}
+
+#relationDialog{
+    width: min(700px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+}
+
+#relationDialog .relation-dlg{
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#relationDialog .page-dialog-status{
+    flex: 0 0 auto;
+}
+
+#relationDialog .dlg-footer{
+    margin-top: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: stretch;
+    flex-wrap: nowrap;
+}
+
+#relationDialog .dlg-footer button{
+    min-width: 0;
+    white-space: nowrap;
+    width: auto;
+}
+
+@media (max-width: 720px){
+#relationDialog .dlg-footer{
+        flex-wrap: wrap;
+    }
+
+#relationDialog .dlg-footer button{
+        width: 100%;
+    }
 }

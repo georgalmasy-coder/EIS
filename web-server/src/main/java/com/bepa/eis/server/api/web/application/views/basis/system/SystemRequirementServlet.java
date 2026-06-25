@@ -40,7 +40,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
 
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        BasisSystemRequirementImporters importer = new BasisSystemRequirementImporters(webSession, request);
+        SystemRequirementImporters importer = new SystemRequirementImporters(webSession, request);
         if (importer.importEntities() <= 0) {
             throw new RuntimeException("No entities imported");
         }
@@ -102,7 +102,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
 
     private GenericXmlDocument listOfRequirements(WebSession webSession) {
         try {
-            return new BasisSystemRequirementList(webSession);
+            return new SystemRequirementList(webSession);
         } catch (Exception e) {
             log.error("Error getting list of system requirement info: {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -111,7 +111,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
 
     private GenericXmlDocument createNewRequirement(WebSession webSession, Integer parentEntityId) {
         try {
-            return new BasisSystemRequirementInfo(webSession, CREATE_ENTITY, parentEntityId);
+            return new SystemRequirementInfo(webSession, CREATE_ENTITY, parentEntityId);
         } catch (Exception e) {
             log.error("Error getting system requirement info: {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -120,7 +120,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
 
     private GenericXmlDocument editRequirementById(WebSession webSession, Integer entityId, Integer version) {
         try {
-            return new BasisSystemRequirementInfo(webSession, EDIT_ENTITY, entityId, version);
+            return new SystemRequirementInfo(webSession, EDIT_ENTITY, entityId, version);
         } catch (Exception e) {
             log.error("Error getting system requirement info: {}", e.getMessage(), e);
             throw new RuntimeException(e);
@@ -197,13 +197,13 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         String format = valueOrDefault(request.getParameter("format"), "xlsx").toLowerCase();
         boolean includeInactive = Boolean.parseBoolean(valueOrDefault(request.getParameter("includeInaktive"), "false"));
 
-        List<BasisSystemRequirementExportRow> rows = fetchRequirementsForExport(webSession, includeInactive);
+        List<SystemRequirementExportRow> rows = fetchRequirementsForExport(webSession, includeInactive);
 
         byte[] content;
         String contentType;
         String fileName;
 
-        GenericExporters genericExporters = new BasisSystemRequirementExporters();
+        GenericExporters genericExporters = new SystemRequirementExporters();
 
 /* GFA
         try {
@@ -249,7 +249,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         }
     }
 
-    private List<BasisSystemRequirementExportRow> fetchRequirementsForExport(WebSession webSession, boolean includeInactive) {
+    private List<SystemRequirementExportRow> fetchRequirementsForExport(WebSession webSession, boolean includeInactive) {
         SystemRequirementProvider provider = new SystemRequirementProvider(webSession);
         return provider.getAllSystemRequirement(includeInactive)
                 .stream()
@@ -257,8 +257,8 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
                 .toList();
     }
 
-    private static BasisSystemRequirementExportRow toExportRow(SystemRequirementEntity entity) {
-        return new BasisSystemRequirementExportRow(
+    private static SystemRequirementExportRow toExportRow(SystemRequirementEntity entity) {
+        return new SystemRequirementExportRow(
                 entity.getRequirementCode(),
                 entity.getRequirementCodeLevel(),
                 entity.getRequirementName(),

@@ -8,7 +8,7 @@ import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementVe
 
 import java.time.LocalDateTime;
 
-public record BasisSystemRequirementExportRow(
+public record SystemRequirementExportRow(
         String id,
         Integer level,
         String name,

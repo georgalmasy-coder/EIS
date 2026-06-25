@@ -48,25 +48,33 @@ public class RelationProvider extends GenericProvider {
 
 
     public EntityRelationRecord getEntityRelationByEntityTypeAndId(EntityType entityType, Integer entityId, EntityType relatedEntityType, Integer relatedEntityId) throws SQLException {
+        EntityRelationRecord entityRelationRecord;
+
+        try (Connection con = getDataSource().getConnection()) {
+            entityRelationRecord = getEntityRelationByEntityTypeAndId(con, entityType, entityId, relatedEntityType, relatedEntityId);
+        }
+        return entityRelationRecord;
+    }
+
+    public EntityRelationRecord getEntityRelationByEntityTypeAndId(Connection con, EntityType entityType, Integer entityId, EntityType relatedEntityType, Integer relatedEntityId) throws SQLException {
         EntityRelationRecord entityRelationRecord = null;
 
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
-            entityRelationRecord = getEntityRelationsByEntityId(GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_1, entityType, entityId, relatedEntityType, relatedEntityId);
+            entityRelationRecord = getEntityRelationsByEntityId(con, GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_1, entityType, entityId, relatedEntityType, relatedEntityId);
 
             if (entityRelationRecord == null) {
-                entityRelationRecord = getEntityRelationsByEntityId(GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_2, entityType, entityId, relatedEntityType, relatedEntityId);
+                entityRelationRecord = getEntityRelationsByEntityId(con, GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_2, entityType, entityId, relatedEntityType, relatedEntityId);
             }
 
         }
         return entityRelationRecord;
     }
 
-    private EntityRelationRecord getEntityRelationsByEntityId(String sql, EntityType entityType, Integer entityId, EntityType relatedEntityType, Integer relatedEntityId) throws SQLException {
+    private EntityRelationRecord getEntityRelationsByEntityId(Connection con, String sql, EntityType entityType, Integer entityId, EntityType relatedEntityType, Integer relatedEntityId) throws SQLException {
 
         EntityRelationRecord entityRelationRecord = null;
 
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
@@ -99,23 +107,28 @@ public class RelationProvider extends GenericProvider {
         return entityRelationRecord;
     }
 
-
     public void clearLatestIfExists(EntityRelationRecord relationRecord) {
+
+        try (Connection con = getDataSource().getConnection()) {
+             clearLatestIfExists(con, relationRecord);
+        } catch (SQLException e) {
+            log.error("Error removing entity relation with PK: {}", relationRecord.getEntityRelationPK(), e);
+        }
+
+    }
+
+    public void clearLatestIfExists(Connection con, EntityRelationRecord relationRecord) throws SQLException {
 
         if (relationRecord != null && relationRecord.getEntityRelationPK() != null) {
 
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(CLEAR_LATEST_ENTITY_RELATION_SQL)) {
+            PreparedStatement ps = con.prepareStatement(CLEAR_LATEST_ENTITY_RELATION_SQL);
 
-                setInt(ps, relationRecord.getEntityRelationPK(), 1);
-                int rows = ps.executeUpdate();
-                if (rows > 0) {
-                    log.debug("Entity relation with PK {} removed successfully", relationRecord.getEntityRelationPK());
-                } else {
-                    log.warn("No entity relation found with PK {}", relationRecord.getEntityRelationPK());
-                }
-            } catch (SQLException e) {
-                log.error("Error removing entity relation with PK: {}", relationRecord.getEntityRelationPK(), e);
+            setInt(ps, relationRecord.getEntityRelationPK(), 1);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                log.debug("Entity relation with PK {} removed successfully", relationRecord.getEntityRelationPK());
+            } else {
+                log.warn("No entity relation found with PK {}", relationRecord.getEntityRelationPK());
             }
 
         }
@@ -124,34 +137,38 @@ public class RelationProvider extends GenericProvider {
 
     public void insertRelationRecord(RelationType relationType, EntityRelationRecord relationRecord) {
 
+        try (Connection con = getDataSource().getConnection() ) {
+            insertRelationRecord(con, relationType, relationRecord);
+        } catch (SQLException e) {
+            log.error("Error inserting entity relation : {} {}", relationRecord, e);
+        }
+
+    }
+
+    public void insertRelationRecord(Connection con, RelationType relationType, EntityRelationRecord relationRecord) throws SQLException {
+
         if (relationRecord != null && relationType != null) {
+            PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_RELATION_SQL);
 
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_RELATION_SQL)) {
+            setInt(ps, getWebSession().getCustomerId(), 1);
+            setInt(ps, getWebSession().getProjectId(), 2);
+            setInt(ps, relationRecord.getEntityType().getId(), 3);
+            setInt(ps, relationRecord.getEntityId(), 4);
+            setInt(ps, relationRecord.getRelatedEntityType().getId(), 5);
+            setInt(ps, relationRecord.getRelatedEntityId(), 6);
+            setInt(ps, relationType.getId(), 7);
+            setInt(ps, relationRecord.getNextVersion(), 8);
 
-                setInt(ps, getWebSession().getCustomerId(), 1);
-                setInt(ps, getWebSession().getProjectId(), 2);
-                setInt(ps, relationRecord.getEntityType().getId(), 3);
-                setInt(ps, relationRecord.getEntityId(), 4);
-                setInt(ps, relationRecord.getRelatedEntityType().getId(), 5);
-                setInt(ps, relationRecord.getRelatedEntityId(), 6);
-                setInt(ps, relationType.getId(), 7);
-                setInt(ps, relationRecord.getNextVersion(), 8);
+            setInt(ps, getWebSession().getUserId(), 9);
+            setTimestamp(ps, new Timestamp(System.currentTimeMillis()), 10);
+            setBoolean(ps, true, 11);
 
-                setInt(ps, getWebSession().getUserId(), 9);
-                setTimestamp(ps, new Timestamp(System.currentTimeMillis()), 10);
-                setBoolean(ps, true, 11);
-
-                int rows = ps.executeUpdate();
-                if (rows > 0) {
-                    log.debug("Entity relation successfully inserted {}", relationRecord);
-                } else {
-                    log.warn("No Entity relation inserted {}", relationRecord);
-                }
-            } catch (SQLException e) {
-                log.error("Error inserting entity relation : {} {}", relationRecord, e);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                log.debug("Entity relation successfully inserted {}", relationRecord);
+            } else {
+                log.warn("No Entity relation inserted {}", relationRecord);
             }
-
         }
 
     }

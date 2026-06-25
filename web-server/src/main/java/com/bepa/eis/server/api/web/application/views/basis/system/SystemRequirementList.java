@@ -8,12 +8,12 @@ import com.bepa.eis.server.dataprovider.entities.Entities;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 
-public class BasisSystemRequirementList extends GenericXmlDocument {
+public class SystemRequirementList extends GenericXmlDocument {
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
 
-    public BasisSystemRequirementList(WebSession webSession) throws Exception {
+    public SystemRequirementList(WebSession webSession) throws Exception {
 
         super(webSession);
 

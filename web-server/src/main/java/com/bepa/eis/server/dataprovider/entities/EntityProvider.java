@@ -1,6 +1,7 @@
 package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.baseline.Baseline;
@@ -26,7 +27,6 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
 import com.bepa.eis.server.entites.project.ProjectEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,19 +223,6 @@ abstract public class EntityProvider extends GenericProvider {
             "WHERE EntityAttachmentPK = ?";
 
 
-    private static final String INSERT_ENTITY_RELATION_SQL =
-            "INSERT INTO ENTITY_RELATIONS (" +
-                    "  CustomerId, " +
-                    "  ProjectId, " +
-                    "  EntityType, " +
-                    "  EntityId, " +
-                    "  RelatedEntityType, " +
-                    "  RelatedEntityId, " +
-                    "  ChangedByUserId, " +
-                    "  ChangedDateTime," +
-                    "  RelationType" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
     private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
             "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
                     "FROM ENTITY E " +
@@ -262,23 +249,6 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND EE.EntityDataElementType = ?";
 
 
-
-    public List<AbstractEntity> getListOfEntities(EntityType entityType, boolean includeInactive) throws SQLException {
-
-        ConcurrentMap<String, EntityRecord> mapOfEntities = buildMapOfEntities(getWebSession(), entityType, null, null, entityType.getDataElements());
-
-        List<AbstractEntity> entities = new ArrayList<>();
-
-        for (EntityRecord entityRecord : mapOfEntities.values()) {
-
-            if (entityRecord.isActive() || ! (entityRecord.isActive() && includeInactive) ) {
-
-                //GFA                entities.add(entityRecord);
-            }
-        }
-
-        return entities;
-    }
 
     public List<EntityRecord> getListOfEntityRecords(EntityType entityType, boolean includeInactive) throws SQLException {
 
@@ -754,7 +724,7 @@ abstract public class EntityProvider extends GenericProvider {
     }
 
     private Integer findNextAvailableEntityId(AbstractEntity entity) throws SQLException {
-        Integer nextAvailableEntityId;
+        int nextAvailableEntityId;
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(MAX_ENTITY_ID_SQL)) {
 
@@ -796,7 +766,7 @@ abstract public class EntityProvider extends GenericProvider {
     }
 
     private Integer findNextAvailableVersion(AbstractEntity entity) throws SQLException {
-        Integer nextAvailableVersion;
+        int nextAvailableVersion;
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(MAX_VERSION_SQL)) {
 
@@ -824,10 +794,6 @@ abstract public class EntityProvider extends GenericProvider {
 
             clearLatestIndicatorOnEntity(con, entity);
 
-            if (entity.getEntityId() > 1) {
-                log.debug("update : {} by id {}", entity.getEntityType().getDescription(), entity.getEntityId());
-            }
-
             try {
                 insertNewEntity(con, entity);
                 insertDataElements(con, entity);
@@ -836,8 +802,7 @@ abstract public class EntityProvider extends GenericProvider {
                 insertEntityRelations(con, entity);
                 updateActiveStatus(con, entity);
 
-                if (entity instanceof ProjectEntity) {
-                    ProjectEntity projectEntity = (ProjectEntity) entity;
+                if (entity instanceof ProjectEntity projectEntity) {
                     projectEntity.persistProject();
                 }
 
@@ -1060,36 +1025,33 @@ abstract public class EntityProvider extends GenericProvider {
 
         for (EntityRelationRecord relationRecord : entity.getListOfEntityRelationRecords()) {
 
-            try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_RELATION_SQL)) {
+            EntityRelationRecord existingRelationRecord = getExistingEntityRelationRecord(con, relationRecord);
+            if (existingRelationRecord == null) {
+                getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
+                log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
+            } else {
+                if (existingRelationRecord.getRelationType() != relationRecord.getRelationType()) {
+                    relationRecord.setVersion(existingRelationRecord.getVersion());
+                    getRelationProvider().clearLatestIfExists(con, existingRelationRecord);
+                    getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
 
-                ps.setInt(1, relationRecord.getCustomerId());
-                ps.setInt(2, relationRecord.getProjectId());
-                ps.setInt(3, relationRecord.getEntityType().getId());
-                ps.setInt(4, relationRecord.getEntityId());
-                ps.setInt(5, relationRecord.getRelatedEntityType().getId());
-                ps.setInt(6, relationRecord.getRelatedEntityId());
-                ps.setInt(7, relationRecord.getCreatedById());
-                ps.setTimestamp(8, Timestamp.valueOf(relationRecord.getCreatedDate()));
-                ps.setInt(9, relationRecord.getRelationType().getId());
-
-                int rows = 0;
-                try {
-                     rows = ps.executeUpdate();
-                } catch (SQLServerException e) {
-                    if (e.getMessage().contains("duplicate")) {
-                        // Ignore
-                        rows = 1;
-                    } else {
-                        throw new SQLException(e);
-                    }
                 }
-
-                if (rows == 0) {
-                    throw new SQLException("Insert entity note failed for entityId=" + entity.getEntityId());
-                }
-
             }
         }
+        log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
+    }
+
+    private EntityRelationRecord getExistingEntityRelationRecord(Connection con, EntityRelationRecord relationRecord) throws SQLException {
+        return  getRelationProvider().getEntityRelationByEntityTypeAndId(
+                con,
+                relationRecord.getEntityType(),
+                relationRecord.getEntityId(),
+                relationRecord.getRelatedEntityType(),
+                relationRecord.getRelatedEntityId());
+    }
+
+    private RelationProvider getRelationProvider() {
+        return new RelationProvider(getWebSession());
     }
 
     private void updateActiveStatus(Connection con, AbstractEntity entity) throws SQLException {
@@ -1188,7 +1150,7 @@ abstract public class EntityProvider extends GenericProvider {
         return listOfEntityRecords;
     }
 
-    public String getEntityColumnValue(EntityType entityType, EntityDataElement entityDataElement, Integer entityId) throws SQLException {
+    public String getEntityColumnValue(EntityType entityType, EntityDataElement entityDataElement, Integer entityId) {
 
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ENTITY_SQL)) {
@@ -1200,7 +1162,7 @@ abstract public class EntityProvider extends GenericProvider {
             ps.setInt(5, entityDataElement.getId());
             ResultSet rs = ps.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 return rs.getString("StringValue");
             }
 

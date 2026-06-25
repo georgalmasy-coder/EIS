@@ -477,11 +477,29 @@ body.stakeholderrequirement-edit-document{
 }
 
 .note-dlg,
-.relation-dlg,
 .attachment-dlg{
-    width: min(840px, 96vw);
-    max-width: 96vw;
+    width: min(700px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     box-sizing: border-box;
+}
+
+#relationDialog .dlg-footer{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+#relationDialog .dlg-footer button{
+    min-width: 0;
+    white-space: nowrap;
+    width: auto;
 }
 
 .note-editor{
@@ -554,12 +572,6 @@ body.stakeholderrequirement-edit-document{
     box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
-.relation-dummy-content{
-    padding: 18px 4px 24px;
-    color: var(--text);
-    font-size: 14px;
-}
-
 body.stakeholderrequirement-edit-readonly .page-field input,
 body.stakeholderrequirement-edit-readonly .page-field textarea,
 body.stakeholderrequirement-edit-readonly .page-field select{
@@ -597,9 +609,13 @@ body.stakeholderrequirement-edit-readonly .page-field select{
     }
 
     .note-dlg,
-    .relation-dlg,
     .attachment-dlg{
         width: 96vw;
+    }
+
+    #relationDialog{
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
     }
 }
 

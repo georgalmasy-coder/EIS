@@ -220,29 +220,6 @@ public class ProjectProvider extends GenericProvider {
         return projects;
     }
 
-/* GFA
-    public List<ProjectRecord> getProjectHistory(Integer projectId) throws SQLException {
-        List<ProjectRecord> projects = new ArrayList<>();
-
-        if (projectId == null) {
-            return projects;
-        }
-
-        try (Connection connection = getDataSource().getConnection();
-             PreparedStatement statement = connection.prepareStatement(SELECT_HISTORY_BY_PROJECT_ID_SQL)) {
-
-            setInt(statement, projectId, 1);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    projects.add(mapProjectRecord(resultSet));
-                }
-            }
-        }
-
-        return projects;
-    }
-*/
     public ProjectRecord persist(ProjectRecord projectRecord) throws Exception {
         validateProjectRecord(projectRecord);
 

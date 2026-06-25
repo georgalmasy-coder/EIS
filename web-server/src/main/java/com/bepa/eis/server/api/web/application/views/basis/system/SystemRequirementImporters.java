@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class BasisSystemRequirementImporters extends GenericImporters {
+public final class SystemRequirementImporters extends GenericImporters {
 
     private static final int COL_ID = 0;
     private static final int COL_LEVEL = 1;
@@ -32,7 +32,7 @@ public final class BasisSystemRequirementImporters extends GenericImporters {
     private static final int COL_DESCRIPTION = 3;
     //GFA private static final int COL_ACTIVE = 6;
 
-    public BasisSystemRequirementImporters(WebSession webSession, HttpServletRequest request) throws Exception{
+    public SystemRequirementImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);
     }
 

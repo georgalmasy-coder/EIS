@@ -27,6 +27,8 @@ import {
 const SAVE_URL = "/project/systembreakdown?cmd=save";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 const DEFAULT_RETURN_URL = "/web/view?page=systemsbreakdown-main";
+const RELATION_LIST_URL = "/basis/systemsbreakdown/relationlist";
+const RELATION_ENTITY_TYPE_ID = 2;
 
 const STORAGE_KEYS = {
     tableColumnWidths: "basis.systemsbreakdown.edit.tableColumnWidths"
@@ -137,6 +139,10 @@ function initializeRouteState() {
     notesTable.setReadOnly(state.readOnly, { render: false });
     attachmentsTable.setReadOnly(state.readOnly, { render: false });
     relationsTable.setReadOnly(state.readOnly, { render: false });
+    relationsTable.setEntityContext({
+        entityTypeId: RELATION_ENTITY_TYPE_ID,
+        entityId: state.id
+    }, { render: false });
 }
 
 function initializeEvents() {
@@ -163,7 +169,8 @@ function initializeEvents() {
     });
 
     relationsTable.bind({
-        readOnly: state.readOnly
+        readOnly: state.readOnly,
+        relationRequestUrl: RELATION_LIST_URL
     });
 }
 
@@ -212,6 +219,11 @@ async function loadDetail() {
         }, {
             render: false
         });
+
+        relationsTable.setEntityContext({
+            entityTypeId: RELATION_ENTITY_TYPE_ID,
+            entityId
+        }, { render: false });
 
         applyTopPanel();
         renderAllFromDoc(xmlDocument);

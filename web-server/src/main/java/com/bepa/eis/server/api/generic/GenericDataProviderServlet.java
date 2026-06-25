@@ -10,6 +10,9 @@ import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
 import com.bepa.eis.server.dataprovider.fields.binary.FileData;
 import com.bepa.eis.server.dataprovider.fields.integers.FileSize;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityAttachmentId;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.enums.entity.RelationType;
 import com.bepa.eis.server.dataprovider.fields.strings.ContentType;
 import com.bepa.eis.server.dataprovider.fields.strings.FileDescription;
 import com.bepa.eis.server.dataprovider.fields.strings.FileName;
@@ -491,6 +494,66 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             }
         }
     }
+
+    public void parseRelationDocument(AbstractEntity entity, Element relationSection) {
+        // --- Relations ---
+        if (relationSection != null) {
+            for (Element entry : children(relationSection, "EntityRelation")) {
+                Integer entityRelationPK = intValue(entry, "EntityRelationPK");
+                Integer entityId = intValue(entry, "EntityId");
+                Integer entityTypeId = intValue(entry, "EntityType");
+                Integer relatedEntityId = intValue(entry, "RelatedEntityId");
+                Integer relatedEntityTypeId = intValue(entry, "RelatedEntityType");
+
+                EntityRelationRecord relationRecord = new EntityRelationRecord(
+                        entity.getCustomerId(),
+                        entity.getProjectId()
+                );
+
+                relationRecord.setEntityRelationPK(entityRelationPK);
+                relationRecord.setEntityId(entityId);
+                relationRecord.setEntityType(entityTypeId == null ? null : EntityType.fromId(entityTypeId));
+                relationRecord.setRelatedEntityId(relatedEntityId);
+                relationRecord.setRelatedEntityType(relatedEntityTypeId == null ? null : EntityType.fromId(relatedEntityTypeId));
+
+                String createdTime = textValue(entry, "CreatedTime");
+                if (createdTime != null && !createdTime.isBlank()) {
+                    try {
+                        relationRecord.setCreatedDate(LocalDateTime.parse(createdTime));
+                    } catch (Exception ignored) {
+                        relationRecord.setCreatedDate(LocalDateTime.now());
+                    }
+                }
+
+                Integer createdById = intValue(entry, "CreatedById");
+                if (createdById != null) {
+                    relationRecord.setCreatedByUserId(createdById);
+                }
+
+                String relationTypeName = textValue(entry, "RelationTypeName");
+                Boolean deleted = boolValue(entry, "IsDeleted");
+
+                if (deleted != null && deleted) {
+                    relationRecord.setRelationType(RelationType.DELETED);
+                } else if (relationTypeName != null) {
+
+                    relationRecord.setRelationType(RelationType.valueOfDescription(relationTypeName));
+/* GFA
+                    if ("Confirmed".equalsIgnoreCase(relationTypeName.trim())) {
+                        relationRecord.setRelationType(RelationType.CONFIRMED);
+                    } else if ("Not Relevant".equalsIgnoreCase(relationTypeName.trim())) {
+                        relationRecord.setRelationType(RelationType.NOT_RELEVANT);
+                    }
+
+ */
+                }
+
+                entity.addEntityRelationRecord(relationRecord);
+            }
+        }
+
+    }
+
 
     public String valueOrDefault(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;

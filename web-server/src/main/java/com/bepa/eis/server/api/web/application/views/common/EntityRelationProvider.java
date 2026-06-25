@@ -33,6 +33,8 @@ public class EntityRelationProvider extends GenericProvider {
             "AND E.ProjectId = ? " +
             "AND ER.EntityType =  ? " +
             "AND ER.EntityId = ? " +
+            "AND ER.RelationType IN (1,2) " + // confirmed / not relevant
+            "AND ER.Latest = 1 " +
             "AND E.Latest = 1 ";
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_2 =
@@ -46,6 +48,8 @@ public class EntityRelationProvider extends GenericProvider {
             "AND E.ProjectId = ? " +
             "AND ER.RelatedEntityType =  ? " +
             "AND ER.RelatedEntityId = ? " +
+            "AND ER.RelationType IN (1,2) " + // confirmed / not relevant
+            "AND ER.Latest = 1 " +
             "AND E.Latest = 1 ";
 
     private static final String GET_CONFIRMED_AND_NOT_RELEVANT_ENTITY_RELATIONS_BY_PROJECT_ID_SQL =
@@ -108,27 +112,6 @@ public class EntityRelationProvider extends GenericProvider {
                     "AND E1.Latest = 1 " +
                     "AND E2.Latest = 1 ";
 
-    private static final String GET_ACTIVE_ENTITY_RELATIONS_BY_PROJECT_ID_SQL_2 =
-            "SELECT ER.EntityRelationPK, ER.EntityType AS RelatedEntityType, ER.EntityId AS RelatedEntityId, ER.RelatedEntityType AS EntityType, ER.RelatedEntityId AS EntityId, ER.CreatedById, ER.CreatedTime " +
-                    "FROM ENTITY E1, ENTITY_RELATIONS ER, ENTITY E2 " +
-                    "WHERE E1.CustomerId = ER.CustomerId " +
-                    "AND E1.CustomerId = E2.CustomerId " +
-                    "AND E1.ProjectId = ER.ProjectId " +
-                    "AND E1.ProjectId = E2.ProjectId " +
-                    "AND E1.EntityType = ER.RelatedEntityType " +
-
-                    "AND E2.EntityType = ER.EntityType " +
-                    "AND E2.EntityId = ER.EntityId " +
-
-                    "AND E1.CustomerId = ? " +
-                    "AND E1.ProjectId = ? " +
-                    "AND ER.EntityType =  ? " +
-                    "AND ER.RelatedEntityType = ? " +
-                    "AND E1.Active = 1 " +
-                    "AND E2.Active = 1 " +
-                    "AND E1.Latest = 1 " +
-                    "AND E2.Latest = 1 ";
-
     private static final String GET_ENTITY_INFO_BY_ENTITY_ID_SQL =
         "SELECT EE.StringValue " +
         "FROM ENTITY E, ENTITY_ELEMENT EE " +
@@ -143,14 +126,6 @@ public class EntityRelationProvider extends GenericProvider {
         "AND E.EntityType = ? " +
         "AND E.EntityId = ? " +
         "and EE.EntityDataElementType = ?";
-
-    private static final String INSERT_ENTITY_RELATION_SQL =
-            "INSERT INTO ENTITY_RELATIONS " +
-            "(CustomerId, ProjectId, EntityType, EntityId, RelatedEntityType, RelatedEntityId, CreatedById, CreatedTime) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
-
-    private static final String DELETE_ENTITY_RELATION_SQL =
-        "UPDATE ENTITY_RELATIONS SET RelationType = 0 WHERE EntityRelationPK = ?";
 
     public EntityRelationProvider(WebSession webSession) {
         super(webSession);
@@ -192,83 +167,6 @@ public class EntityRelationProvider extends GenericProvider {
 
         return entityRelationRecordList;
     }
-
-    public void insertEntityRelation(EntityType entityType,
-                                     Integer entityId,
-                                     EntityType relatedEntityType,
-                                     Integer relatedEntityId,
-                                     RelationType relationType) {
-
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_RELATION_SQL)) {
-
-            setInt(ps, getWebSession().getCustomerId(), 1);
-            setInt(ps, getWebSession().getProjectId(), 2);
-            setInt(ps, entityType.getId(), 3);
-            setInt(ps, entityId, 4);
-            setInt(ps, relatedEntityType.getId(), 5);
-            setInt(ps, relatedEntityId, 6);
-            setInt(ps, getWebSession().getUserId(), 7);
-            setTimestamp(ps, new Timestamp(System.currentTimeMillis()), 8);
-
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                log.info("Entity relation with inserted successfully {} {} {} {} {} {} {}",
-                        getWebSession().getCustomerId(),
-                        getWebSession().getProjectId(),
-                        entityType,
-                        entityId,
-                        relatedEntityType,
-                        relatedEntityId,
-                        getWebSession().getUserId());
-            } else {
-                log.warn("Entity relation with inserted failed {} {} {} {} {} {} {}",
-                        getWebSession().getCustomerId(),
-                        getWebSession().getProjectId(),
-                        entityType,
-                        entityId,
-                        relatedEntityType,
-                        relatedEntityId,
-                        getWebSession().getUserId());
-            }
-        } catch (SQLException e) {
-            log.error("Error inserting Entity relation : {} {} {} {} {} {} {}",
-                    getWebSession().getCustomerId(),
-                    getWebSession().getProjectId(),
-                    entityType,
-                    entityId,
-                    relatedEntityType,
-                    relatedEntityId,
-                    getWebSession().getUserId());
-        }
-
-    }
-
-    public void removeEntityRelation(EntityRelation entityRelation) {
-        if (entityRelation != null && entityRelation.getEntityRelationPK() != null) {
-            removeEntityRelation(entityRelation.getEntityRelationPK().getValue() );
-        }
-
-    }
-
-    public void removeEntityRelation(Integer entityRelationPK) {
-        if (entityRelationPK != null) {
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(DELETE_ENTITY_RELATION_SQL)) {
-
-                setInt(ps, entityRelationPK, 1);
-                int rows = ps.executeUpdate();
-                if (rows > 0) {
-                    log.info("Entity relation with PK {} removed successfully", entityRelationPK);
-                } else {
-                    log.warn("No entity relation found with PK {}", entityRelationPK);
-                }
-            } catch (SQLException e) {
-                log.error("Error removing entity relation with PK: {}", entityRelationPK, e);
-            }
-        }
-    }
-
 
     private void findRelationsToOtherEntities(String sql, EntityRelations entityRelations, EntityType entityType, Integer currEntityId) throws SQLException {
         try (Connection con = getDataSource().getConnection();
@@ -335,11 +233,6 @@ public class EntityRelationProvider extends GenericProvider {
                 }
             }
         }
-    }
-
-    private void addRelatedEntityTypeName(EntityRelation entityRelation, EntityType relatedEntityType) {
-        RelatedEntityTypeName relatedEntityTypeName = new RelatedEntityTypeName(relatedEntityType.getDescription());
-        entityRelation.addElement(relatedEntityTypeName);
     }
 
     private void addRelatedEntityCodeColumn(EntityRelation entityRelation, EntityType relatedEntityType,  RelatedEntityId relatedEntityId) throws SQLException {

@@ -269,7 +269,6 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         }
 
         return relationRecord;
-
     }
 
     private TraceabilityRelationActionRequest parseRelationActionRequest(HttpServletRequest request) {

@@ -10,16 +10,16 @@ import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.common.enums.entity.EntityType;
 
-public class BasisSystemRequirementInfo extends GenericXmlDocument {
+public class SystemRequirementInfo extends GenericXmlDocument {
 
     private final static EntityType entityType = EntityType.SYSTEM_REQUIREMENT;
 
-    public BasisSystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
+    public SystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
         super(webSession);
         buildXmlDocument(webSession, type, null, null, parentEntityId);
     }
 
-    public BasisSystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
+    public SystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
         super(webSession);
         buildXmlDocument(webSession, type, entityId, version, null);
     }

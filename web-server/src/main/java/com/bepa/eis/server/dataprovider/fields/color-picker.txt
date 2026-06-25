@@ -1,0 +1,36 @@
+<label for="colorName">Color:</label>
+
+<select id="colorName">
+    <option value="#000000">Black</option>
+    <option value="#FFFFFF">White</option>
+    <option value="#808080">Gray</option>
+    <option value="#C0C0C0">Silver</option>
+    <option value="#FF0000">Red</option>
+    <option value="#008000">Green</option>
+    <option value="#0000FF">Blue</option>
+    <option value="#FFFF00">Yellow</option>
+    <option value="#FFA500">Orange</option>
+    <option value="#800080">Purple</option>
+    <option value="#FFC0CB">Pink</option>
+    <option value="#A52A2A">Brown</option>
+    <option value="#000080">Navy</option>
+    <option value="#008080">Teal</option>
+    <option value="#FFD700">Gold</option>
+</select>
+
+<input type="color" id="colorPicker" value="#000000">
+
+<script>
+const select = document.getElementById('colorName');
+const picker = document.getElementById('colorPicker');
+
+// Når brugeren vælger et farvenavn
+select.addEventListener('change', () => {
+    picker.value = select.value;
+});
+
+// Når brugeren justerer farven manuelt
+picker.addEventListener('input', () => {
+    console.log('Selected color:', picker.value);
+});
+</script>

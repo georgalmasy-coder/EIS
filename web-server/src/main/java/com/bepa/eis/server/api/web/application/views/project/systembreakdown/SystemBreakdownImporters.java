@@ -27,7 +27,6 @@ public final class SystemBreakdownImporters extends GenericImporters {
     private static final int COL_LEVEL = 1;
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
-    //GFA private static final int COL_ACTIVE = 6;
 
     public SystemBreakdownImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);

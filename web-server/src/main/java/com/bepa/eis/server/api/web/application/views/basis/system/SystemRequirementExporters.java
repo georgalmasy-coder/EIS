@@ -3,7 +3,7 @@ package com.bepa.eis.server.api.web.application.views.basis.system;
 import com.bepa.eis.server.api.generic.GenericExporters;
 import org.apache.poi.ss.usermodel.Row;
 
-public final class BasisSystemRequirementExporters extends GenericExporters {
+public final class SystemRequirementExporters extends GenericExporters {
 
     private static final String[] HEADERS = {
             "ID",
@@ -37,7 +37,7 @@ public final class BasisSystemRequirementExporters extends GenericExporters {
             32f    // Active
     };
 
-    public BasisSystemRequirementExporters() {
+    public SystemRequirementExporters() {
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class BasisSystemRequirementExporters extends GenericExporters {
 
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
-        BasisSystemRequirementExportRow row = (BasisSystemRequirementExportRow) rowData;
+        SystemRequirementExportRow row = (SystemRequirementExportRow) rowData;
 
         csv.append(csv(row.id())).append(",");
         csv.append(csv(row.level())).append(",");
@@ -109,7 +109,7 @@ public final class BasisSystemRequirementExporters extends GenericExporters {
 
     @Override
     public void buildXmlRow(StringBuilder xml, Object rowData) {
-        BasisSystemRequirementExportRow row = (BasisSystemRequirementExportRow) rowData;
+        SystemRequirementExportRow row = (SystemRequirementExportRow) rowData;
 
         xml.append("  <systemRequirement>").append(NEW_LINE);
         xml.append(tag(getHeaders()[0], row.id()));
@@ -130,7 +130,7 @@ public final class BasisSystemRequirementExporters extends GenericExporters {
 
     @Override
     public void buildWorksheetRow(Row sheetRow, Object rowData) {
-        BasisSystemRequirementExportRow row = (BasisSystemRequirementExportRow) rowData;
+        SystemRequirementExportRow row = (SystemRequirementExportRow) rowData;
 
         sheetRow.createCell(0).setCellValue(nvl(row.id()));
         sheetRow.createCell(1).setCellValue(nvl(row.level()));
@@ -149,10 +149,10 @@ public final class BasisSystemRequirementExporters extends GenericExporters {
 
     @Override
     public String[] getPdfRowValues(Object rowData) {
-        return rowStrings((BasisSystemRequirementExportRow) rowData);
+        return rowStrings((SystemRequirementExportRow) rowData);
     }
 
-    private static String[] rowStrings(BasisSystemRequirementExportRow row) {
+    private static String[] rowStrings(SystemRequirementExportRow row) {
         return new String[] {
                 nvl(row.id()),
                 nvl(row.level()),

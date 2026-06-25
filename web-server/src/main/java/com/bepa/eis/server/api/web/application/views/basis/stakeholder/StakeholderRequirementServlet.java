@@ -55,12 +55,14 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
                 Element basisRequirement = firstChild(basisRequirementDocument, "stakeholderRequirement");
                 Element noteSection = firstChild(rootElement, "EntityNotes");
                 Element attachmentSection = firstChild(rootElement, "EntityAttachments");
+                Element relationSection = firstChild(rootElement, "EntityRelations");
 
                 StakeholderRequirementEntity requirementEntity = parseBasisRequirementDocument(webSession, basisRequirement);
                 StakeholderRequirementProvider requirementProvider = new StakeholderRequirementProvider(webSession);
 
                 parseNoteDocument(requirementEntity, noteSection);
                 parseAttachmentDocument(requirementEntity, attachmentSection);
+                parseRelationDocument(requirementEntity, relationSection);
 
                 requirementProvider.persist(requirementEntity);
 
