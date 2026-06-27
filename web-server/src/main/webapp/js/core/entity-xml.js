@@ -7,7 +7,9 @@ import {
 export function parseCreatedBy(node) {
     const createdByNode = node?.getElementsByTagName("CreatedById")?.[0] || null;
     const createdById = createdByNode?.getElementsByTagName("Value")?.[0]?.textContent?.trim() || "";
-    const createdByText = createdByNode?.getElementsByTagName("Option")?.[0]?.textContent?.trim() || "";
+    const selectedOption = Array.from(createdByNode?.getElementsByTagName("Option") || [])
+        .find((option) => (option.getAttribute("selected") || "").toLowerCase() === "true");
+    const createdByText = selectedOption?.textContent?.trim() || "";
 
     return { createdById, createdByText };
 }
@@ -46,6 +48,7 @@ export function parseEntityAttachmentsFromDoc(doc) {
             isDeleted: textOf(node, "IsDeleted").trim() === "true",
             fileData: textOf(node, "FileData"),
             createdById: createdBy.createdById,
+            createdByText: createdBy.createdByText,
             createdTime: textOf(node, "CreatedTime").trim(),
             isNew: false
         };

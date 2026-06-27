@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 
 public class AttachmentRecord {
-    private final Integer entityAttachmentPK;
+    private Integer entityAttachmentBlobPK;
     private final Integer customerId;
     private final Integer projectId;
     private final Integer entityId;
@@ -24,7 +24,7 @@ public class AttachmentRecord {
     private final Boolean deleted;
 
     public AttachmentRecord(AbstractEntity entity,
-                            Integer entityAttachmentPK,
+                            Integer entityAttachmentBlobPK,
                             String fileName,
                             String contentType,
                             Integer fileSize,
@@ -33,7 +33,7 @@ public class AttachmentRecord {
                             Integer uploadedByUserId,
                             LocalDateTime uploadedDateTime,
                             Boolean deleted) {
-        this.entityAttachmentPK = entityAttachmentPK;
+        this.entityAttachmentBlobPK = entityAttachmentBlobPK;
         this.customerId = entity.getCustomerId();
         this.projectId = entity.getProjectId();
         this.entityId = entity.getEntityId();
@@ -49,9 +49,14 @@ public class AttachmentRecord {
         this.deleted = deleted;
     }
 
-    public Integer getEntityAttachmentPK() {
-        return entityAttachmentPK;
+    public Integer getEntityAttachmentBlobPK() {
+        return entityAttachmentBlobPK;
     }
+
+    public void setEntityAttachmentBlobPK(Integer entityAttachmentBlobPK) {
+        this.entityAttachmentBlobPK = entityAttachmentBlobPK;;
+    }
+
     public Integer getCustomerId() {
         return customerId;
     }

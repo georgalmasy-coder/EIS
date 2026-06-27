@@ -220,16 +220,17 @@ public class ProjectProvider extends GenericProvider {
         return projects;
     }
 
-    public ProjectRecord persist(ProjectRecord projectRecord) throws Exception {
+    public ProjectRecord persist( ProjectEntity projectEntity, ProjectRecord projectRecord) throws Exception {
         validateProjectRecord(projectRecord);
 
         if (!projectRecord.hasValidProjectId()) {
             projectRecord.setNextProjectId(getNextProjectId());
         }
 
-        ProjectEntity projectEntity =  createProjectEntity(projectRecord);
+        ProjectEntity enrichedProjectEntity =  enrichProjectEntity(projectEntity, projectRecord);
+
         ProjectEntityProvider projectEntityProvider = new ProjectEntityProvider(getWebSession());
-        projectEntityProvider.persist(projectEntity);
+        projectEntityProvider.persist(enrichedProjectEntity);
 
         ProjectRecord persistedProject = null;
         return persistedProject;
@@ -474,9 +475,7 @@ public class ProjectProvider extends GenericProvider {
         return resultSet.wasNull() ? null : value;
     }
 
-    private ProjectEntity createProjectEntity(ProjectRecord projectRecord) {
-
-        ProjectEntity projectEntity = new ProjectEntity(getWebSession());
+    private ProjectEntity enrichProjectEntity(ProjectEntity projectEntity,ProjectRecord projectRecord) {
 
         Integer projectId = projectRecord.hasValidProjectId() ? projectRecord.getProjectId() : projectRecord.getNextProjectId();
 

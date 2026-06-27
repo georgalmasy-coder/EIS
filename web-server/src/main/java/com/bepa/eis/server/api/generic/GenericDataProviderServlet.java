@@ -441,7 +441,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         // --- Attachment ---
         if (attachmentSection != null) {
             for (Element entry : children(attachmentSection, "EntityAttachment")) {
-                Integer entityAttachmentPK = intValue(entry, EntityAttachmentId.FIELD_NAME);
+                Integer entityAttachmentBlobPK = intValue(entry, EntityAttachmentId.FIELD_NAME);
                 String fileName = textValue(entry, FileName.FIELD_NAME);
                 String contentType = textValue(entry, ContentType.FIELD_NAME);
                 Integer fileSize = intValue(entry, FileSize.FIELD_NAME);
@@ -476,10 +476,10 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
                 }
 
                 log.debug("entityAttachmentPK {} createdById {} createdAt {} fileName {} ",
-                        entityAttachmentPK, createdById, createdTime, fileName);
+                        entityAttachmentBlobPK, createdById, createdTime, fileName);
 
                 AttachmentRecord attachmentRecord = new AttachmentRecord(entity,
-                        entityAttachmentPK,
+                        entityAttachmentBlobPK,
                         fileName,
                         contentType,
                         fileSize,

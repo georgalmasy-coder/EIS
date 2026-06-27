@@ -224,13 +224,13 @@ button {
 
 .dashboard-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .dashboard-kpi-card {
-    min-height: 145px;
-    padding: 16px;
+    min-height: 132px;
+    padding: 14px;
     position: relative;
     overflow: hidden;
 }
@@ -238,45 +238,45 @@ button {
 .dashboard-kpi-card::after {
     content: "";
     position: absolute;
-    right: -40px;
-    bottom: -62px;
-    width: 140px;
-    height: 140px;
+    right: -46px;
+    bottom: -66px;
+    width: 130px;
+    height: 130px;
     border-radius: 999px;
     background: rgba(47, 156, 255, 0.08);
 }
 
 .dashboard-kpi-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border-radius: 8px;
     color: #ffffff;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 850;
     background: linear-gradient(135deg, #1175c8, #38bdf8);
 }
 
 .dashboard-kpi-label {
     color: #ffffff;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 850;
 }
 
 .dashboard-kpi-help {
-    min-height: 28px;
+    min-height: 24px;
     margin-top: 3px;
     color: var(--admin-text-muted);
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .dashboard-kpi-value {
-    margin-top: 10px;
+    margin-top: 8px;
     color: var(--admin-blue);
-    font-size: 27px;
+    font-size: 24px;
     font-weight: 900;
     letter-spacing: -0.05em;
 }
@@ -288,8 +288,8 @@ button {
 }
 
 .dashboard-mini-bar {
-    height: 6px;
-    margin-top: 8px;
+    height: 5px;
+    margin-top: 7px;
     border-radius: 999px;
     background: #303946;
     overflow: hidden;
@@ -570,6 +570,10 @@ button {
     overflow: hidden;
 }
 
+.dashboard-modal-sm {
+    width: min(640px, 100%);
+}
+
 .dashboard-modal-header {
     display: flex;
     align-items: flex-start;
@@ -659,13 +663,90 @@ button {
     font-size: 12px;
 }
 
+.dashboard-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.dashboard-modal-action-button {
+    min-width: 96px;
+    padding: 9px 14px;
+    border: 1px solid var(--admin-blue);
+    border-radius: 8px;
+    background: rgba(47, 156, 255, 0.18);
+    color: #d9edff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dashboard-modal-action-button:hover {
+    background: rgba(47, 156, 255, 0.28);
+}
+
+.dashboard-modal-action-button.is-secondary {
+    border-color: var(--admin-panel-border);
+    background: var(--admin-panel-light);
+    color: var(--admin-text);
+}
+
+.dashboard-modal-action-button.is-secondary:hover {
+    background: #283241;
+}
+
+.dashboard-modal-action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dashboard-field {
+    display: grid;
+    gap: 6px;
+}
+
+.dashboard-field-label {
+    color: var(--admin-text-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dashboard-field-input {
+    width: 100%;
+    min-height: 38px;
+    padding: 9px 12px;
+    border: 1px solid var(--admin-panel-border);
+    border-radius: 8px;
+    background: var(--admin-bg-soft);
+    color: #ffffff;
+    font: inherit;
+}
+
+.dashboard-field-input:focus {
+    outline: 2px solid rgba(47, 156, 255, 0.35);
+    outline-offset: 1px;
+}
+
+.dashboard-modal-hint {
+    color: var(--admin-text-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 @media (max-width: 1280px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1180px) {
     .dashboard-kpi-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 920px) {
     .dashboard-kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }

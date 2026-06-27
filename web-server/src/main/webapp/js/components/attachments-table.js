@@ -135,6 +135,12 @@ function formatCreatedTime(value) {
     return parseDateTime(value);
 }
 
+function formatCreatedBy(attachment) {
+    const text = normalizeText(attachment?.createdByText).trim();
+
+    return text || "—";
+}
+
 function getFileExtension(fileName) {
     const name = normalizeText(fileName).toLowerCase();
     const dot = name.lastIndexOf(".");
@@ -313,6 +319,7 @@ function createAttachmentRowMarkup(attachment, index, readOnly) {
             <td title="${escapeHtml(attachment.fileName)}">${escapeHtml(attachment.fileName)}</td>
             <td title="${escapeHtml(attachment.description)}">${escapeHtml(attachment.description)}</td>
             <td>${escapeHtml(formatFileSize(attachment.fileSize, "da-DK", ""))}</td>
+            <td title="${escapeHtml(formatCreatedBy(attachment))}">${escapeHtml(formatCreatedBy(attachment))}</td>
             <td>${escapeHtml(formatCreatedTime(attachment.createdTime))}</td>
             <td class="attachment-actions">
                 <span class="attachment-action-group">

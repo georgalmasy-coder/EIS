@@ -5,6 +5,7 @@ import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.baseline.Baseline;
+import com.bepa.eis.server.api.web.application.views.common.EntityAttachmentProvider;
 import com.bepa.eis.server.dataprovider.entities.common.*;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
@@ -201,27 +202,6 @@ abstract public class EntityProvider extends GenericProvider {
                     "  CreatedById, " +
                     "  CreatedTime" +
                     ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String INSERT_ENTITY_ATTACHMENT_SQL =
-            "INSERT INTO ENTITY_ATTACHMENTS (" +
-                    "  CustomerId, " +
-                    "  ProjectId, " +
-                    "  EntityId, " +
-                    "  EntityType, " +
-                    "  FileName, " +
-                    "  ContentType, " +
-                    "  FileSize, " +
-                    "  FileData, " +
-                    "  Description, " +
-                    "  CreatedById, " +
-                    "  CreatedTime, " +
-                    "  IsDeleted" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String DELETE_ENTITY_ATTACHMENT_SQL =
-            "DELETE FROM ENTITY_ATTACHMENTS " +
-            "WHERE EntityAttachmentPK = ?";
-
 
     private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
             "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
@@ -798,7 +778,7 @@ abstract public class EntityProvider extends GenericProvider {
                 insertNewEntity(con, entity);
                 insertDataElements(con, entity);
                 insertEntityNotes(con, entity);
-                insertEntityAttachment(con, entity);
+                getAttachmentProvider().insertEntityAttachment(con, entity);
                 insertEntityRelations(con, entity);
                 updateActiveStatus(con, entity);
 
@@ -974,53 +954,6 @@ abstract public class EntityProvider extends GenericProvider {
         }
     }
 
-    private void insertEntityAttachment(Connection con, AbstractEntity entity) throws SQLException {
-
-        for (AttachmentRecord attachmentRecord : entity.getListOfEntityAttachments()) {
-
-            if (attachmentRecord.getEntityAttachmentPK() == null) {
-
-                try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_ATTACHMENT_SQL)) {
-
-                    ps.setInt(1, entity.getCustomerId());
-                    ps.setInt(2, entity.getProjectId());
-                    ps.setInt(3, entity.getEntityId());
-                    ps.setInt(4, entity.getEntityType().getId());
-
-                    ps.setString(5, attachmentRecord.getFileName());
-                    ps.setString(6, attachmentRecord.getContentType());
-                    ps.setInt(7, attachmentRecord.getFileSize());
-                    ps.setBytes(8, attachmentRecord.getFileDataAsBinary());
-                    ps.setString(9, attachmentRecord.getDescription());
-
-                    ps.setInt(10, attachmentRecord.getChangedByUserId());
-                    ps.setTimestamp(11, Timestamp.valueOf(attachmentRecord.getChangedDate()));
-                    ps.setBoolean(12, attachmentRecord.isFileDeleted());
-
-                    int rows = ps.executeUpdate();
-
-                    if (rows == 0) {
-                        throw new SQLException("Insert entity attachment failed for entityId = " + entity.getEntityId());
-                    }
-                }
-            } else {
-                if (attachmentRecord.isFileDeleted() ) {
-                    log.info("Deleting attachment for entityId : {} - {}", entity.getEntityId(), attachmentRecord.getFileName());
-
-                    try (PreparedStatement ps = con.prepareStatement(DELETE_ENTITY_ATTACHMENT_SQL)) {
-                        ps.setInt(1, attachmentRecord.getEntityAttachmentPK());
-                        int rows = ps.executeUpdate();
-                        if (rows != 1) {
-                            throw new SQLException("Deleting entity attachment failed for EntityAttachmentPK = " + attachmentRecord.getEntityAttachmentPK());
-                        }
-                    }
-
-                }
-                log.info("Updating attachment for entityId : {} - {}", entity.getEntityId(), attachmentRecord.getFileName());
-            }
-        }
-    }
-
     private void insertEntityRelations(Connection con, AbstractEntity entity) throws SQLException {
 
         for (EntityRelationRecord relationRecord : entity.getListOfEntityRelationRecords()) {
@@ -1170,5 +1103,9 @@ abstract public class EntityProvider extends GenericProvider {
             log.error("Error loading all entities including Code : {}", e.getMessage());
         }
         return "";
+    }
+
+    private EntityAttachmentProvider getAttachmentProvider() {
+        return new EntityAttachmentProvider(getWebSession());
     }
 }

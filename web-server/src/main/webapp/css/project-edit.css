@@ -1,23 +1,40 @@
 .project-edit-document {
+    overflow: hidden;
+}
+
+.project-edit-document {
     min-height: 100vh;
 }
 
 .project-edit-app {
     min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .project-edit-content {
     min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
 }
 
 .project-edit-topbar {
+    flex: 0 0 auto;
     margin-bottom: 10px;
 }
 
 .project-edit-layout {
-    min-height: calc(100vh - 92px);
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .project-edit-section-header {
@@ -92,12 +109,38 @@
 }
 
 .project-edit-tab-bar {
+    flex: 0 0 auto;
     margin-top: 12px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .project-edit-panels {
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-edit-panels .tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-edit-panels .tab-panel.is-active {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .project-basis-info-fields {
@@ -119,11 +162,47 @@
 
 .project-notes-frame,
 .project-attachments-frame {
-    min-height: 330px;
+    min-height: 240px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#tabPanel2,
+#tabPanel3 {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+#tabPanel2 .table-frame,
+#tabPanel3 .table-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+}
+
+#tabPanel2 .table-scroll,
+#tabPanel3 .table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.project-notes-frame .table-scroll,
+.project-attachments-frame .table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
 }
 
 .project-edit-footer {
     margin-top: auto;
+    flex: 0 0 auto;
 }
 
 .project-edit-readonly #btnSave {
@@ -200,6 +279,39 @@
     gap: 6px;
 }
 
+.notes-toolbar,
+.attachments-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.notes-add-btn,
+.attachments-add-btn {
+    min-width: 110px;
+}
+
+body.project-edit-document .notes-table,
+body.project-edit-document .attachments-table {
+    width: 100%;
+    min-width: 760px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+body.project-edit-document .notes-table th,
+body.project-edit-document .attachments-table th {
+    white-space: nowrap;
+}
+
+body.project-edit-document .notes-table td,
+body.project-edit-document .attachments-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    vertical-align: top;
+}
+
 @media (max-width: 760px) {
     .project-edit-status-row {
         flex-direction: column;
@@ -208,5 +320,20 @@
 
     .project-edit-entity-meta {
         white-space: normal;
+    }
+
+    .notes-toolbar,
+    .attachments-toolbar {
+        justify-content: stretch;
+    }
+
+    .notes-toolbar button,
+    .attachments-toolbar button {
+        width: 100%;
+    }
+
+    body.project-edit-document .notes-table,
+    body.project-edit-document .attachments-table {
+        min-width: 680px;
     }
 }

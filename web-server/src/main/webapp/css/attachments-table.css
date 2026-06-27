@@ -59,33 +59,56 @@
 }
 
 .attachment-actions{
-    text-align: center;
+    text-align: right;
     white-space: nowrap;
+    padding-right: 4px;
 }
 
 .attachment-action-group{
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 100%;
 }
 
+.attachment-open-btn,
 .attachment-delete-btn,
 .attachment-download-btn{
     border: 0;
     background: transparent;
     cursor: pointer;
-    padding: 2px 6px;
-    font-size: 16px;
-    line-height: 1;
+    padding: 0;
+    font-size: 15px;
+    line-height: 0;
     width: 28px;
     height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 28px;
+    box-sizing: border-box;
+}
+
+.attachment-open-btn{
+    color: var(--accent);
 }
 
 .attachment-download-btn{
     color: var(--text);
+}
+
+.attachment-open-btn svg,
+.attachment-download-btn svg,
+.attachment-delete-btn svg{
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .attachment-delete-btn{

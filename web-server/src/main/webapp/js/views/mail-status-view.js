@@ -4,15 +4,21 @@ import {
     setBar,
     setText
 } from "/js/admin-dashboard/dashboard-charts.js";
+import { postForm } from "/js/core/http.js";
 import { formatDateTimeForDisplay } from "/js/core/format.js";
 import { escapeHtml } from "/js/core/html.js";
 
 const DATA_URL = "/admin/api/dashboard/mail-status";
+const RESEND_URL = "/admin/api/dashboard/mail-status-action";
 const REFRESH_MS = 20000;
+const RESENDABLE_STATUSES = new Set(["FAILED", "UNDELIVERED"]);
+const EMPTY_PLACEHOLDER = "-";
 
 export function createViewController(context) {
     const root = context.root;
     let latestMailRowsById = new Map();
+    let currentOpenMailId = null;
+    let isResendingMail = false;
 
     function fallbackData() {
         return {
@@ -49,6 +55,7 @@ export function createViewController(context) {
                 { hour: "23:00", sent: 0, error: 0 }
             ],
             latestSentEmails: [],
+            latestQueuedEmails: [],
             latestErrorEmails: [
                 {
                     mailId: 1,
@@ -125,14 +132,15 @@ export function createViewController(context) {
 
         latestMailRowsById = buildMailRowMap(
             safeData.latestSentEmails,
+            safeData.latestQueuedEmails,
             safeData.latestErrorEmails
         );
 
-        setText(root, '[data-field="sentLast7Days"]', safeData.sentLast7Days ?? "—");
-        setText(root, '[data-field="errorsLast7Days"]', safeData.errorsLast7Days ?? "—");
-        setText(root, '[data-field="queuedCount"]', safeData.queuedCount ?? "—");
-        setText(root, '[data-field="retryingCount"]', safeData.retryingCount ?? "—");
-        setText(root, '[data-field="undeliveredCount"]', safeData.undeliveredCount ?? "—");
+        setText(root, '[data-field="sentLast7Days"]', safeData.sentLast7Days ?? EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="errorsLast7Days"]', safeData.errorsLast7Days ?? EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="queuedCount"]', safeData.queuedCount ?? EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="retryingCount"]', safeData.retryingCount ?? EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="undeliveredCount"]', safeData.undeliveredCount ?? EMPTY_PLACEHOLDER);
 
         setBar(root, '[data-bar="sentLast7Days"]', safeData.sentLast7Days, Math.max(1, safeData.sentLast7Days, safeData.errorsLast7Days));
         setBar(root, '[data-bar="errorsLast7Days"]', safeData.errorsLast7Days, Math.max(1, safeData.sentLast7Days, safeData.errorsLast7Days));
@@ -142,15 +150,17 @@ export function createViewController(context) {
 
         renderHourlyChart(safeData.hourlySeries);
         renderMailTable('[data-table="latestSentEmails"]', safeData.latestSentEmails);
+        renderMailTable('[data-table="latestQueuedEmails"]', safeData.latestQueuedEmails);
         renderMailTable('[data-table="latestErrorEmails"]', safeData.latestErrorEmails);
         bindModalEvents();
     }
 
-    function buildMailRowMap(sentRows, errorRows) {
+    function buildMailRowMap(sentRows, queuedRows, errorRows) {
         const result = new Map();
 
         []
             .concat(Array.isArray(sentRows) ? sentRows : [])
+            .concat(Array.isArray(queuedRows) ? queuedRows : [])
             .concat(Array.isArray(errorRows) ? errorRows : [])
             .forEach(function (row) {
                 if (!row || row.mailId === null || row.mailId === undefined) {
@@ -212,13 +222,13 @@ export function createViewController(context) {
 
             return `
                 <tr data-mail-id="${escapeHtml(String(row.mailId ?? ""))}" tabindex="0">
-                    <td>${escapeHtml(row.toEmail || "—")}</td>
-                    <td>${escapeHtml(row.toName || "—")}</td>
-                    <td>${escapeHtml(row.fromName || "—")}</td>
-                    <td>${escapeHtml(row.templateTypeLabel || row.templateType || "—")}</td>
-                    <td>${escapeHtml(row.subject || "—")}</td>
+                    <td>${escapeHtml(row.toEmail || EMPTY_PLACEHOLDER)}</td>
+                    <td>${escapeHtml(row.toName || EMPTY_PLACEHOLDER)}</td>
+                    <td>${escapeHtml(row.fromName || EMPTY_PLACEHOLDER)}</td>
+                    <td>${escapeHtml(row.templateTypeLabel || row.templateType || EMPTY_PLACEHOLDER)}</td>
+                    <td>${escapeHtml(row.subject || EMPTY_PLACEHOLDER)}</td>
                     <td><span class="dashboard-pill ${statusClass}">${escapeHtml(status)}</span></td>
-                    <td>${escapeHtml(String(row.attemptCount ?? "—"))}</td>
+                    <td>${escapeHtml(String(row.attemptCount ?? EMPTY_PLACEHOLDER))}</td>
                 </tr>
             `;
         }).join("");
@@ -252,11 +262,36 @@ export function createViewController(context) {
 
     function bindModalEvents() {
         const closeButton = root.querySelector('[data-action="closeMailDetails"]');
+        const resendButton = root.querySelector('[data-action="resendMail"]');
+        const resendCloseButton = root.querySelector('[data-action="closeMailResend"]');
+        const resendCancelButton = root.querySelector('[data-action="cancelMailResend"]');
+        const resendForm = root.querySelector('[data-form="mailResend"]');
         const modalBackdrop = root.querySelector('[data-modal="mailDetails"]');
+        const resendBackdrop = root.querySelector('[data-modal="mailResend"]');
 
         if (closeButton && !closeButton.dataset.bound) {
             closeButton.dataset.bound = "true";
             closeButton.addEventListener("click", closeMailDetails);
+        }
+
+        if (resendButton && !resendButton.dataset.bound) {
+            resendButton.dataset.bound = "true";
+            resendButton.addEventListener("click", openMailResendDialog);
+        }
+
+        if (resendCloseButton && !resendCloseButton.dataset.bound) {
+            resendCloseButton.dataset.bound = "true";
+            resendCloseButton.addEventListener("click", closeMailResendDialog);
+        }
+
+        if (resendCancelButton && !resendCancelButton.dataset.bound) {
+            resendCancelButton.dataset.bound = "true";
+            resendCancelButton.addEventListener("click", closeMailResendDialog);
+        }
+
+        if (resendForm && !resendForm.dataset.bound) {
+            resendForm.dataset.bound = "true";
+            resendForm.addEventListener("submit", submitMailResend);
         }
 
         if (modalBackdrop && !modalBackdrop.dataset.bound) {
@@ -265,6 +300,16 @@ export function createViewController(context) {
             modalBackdrop.addEventListener("click", function (event) {
                 if (event.target === modalBackdrop) {
                     closeMailDetails();
+                }
+            });
+        }
+
+        if (resendBackdrop && !resendBackdrop.dataset.bound) {
+            resendBackdrop.dataset.bound = "true";
+
+            resendBackdrop.addEventListener("click", function (event) {
+                if (event.target === resendBackdrop) {
+                    closeMailResendDialog();
                 }
             });
         }
@@ -277,24 +322,27 @@ export function createViewController(context) {
             return;
         }
 
-        setText(root, '[data-field="modalMailSubtitle"]', `${mail.toEmail || "Unknown recipient"} · ${mail.statusLabel || mail.status || "Unknown"}`);
-        setText(root, '[data-field="modalSubject"]', mail.subject || "—");
-        setText(root, '[data-field="modalMailId"]', mail.mailId ?? "—");
-        setText(root, '[data-field="modalTemplate"]', mail.templateTypeLabel || mail.templateType || "—");
-        setText(root, '[data-field="modalStatus"]', mail.statusLabel || mail.status || "—");
-        setText(root, '[data-field="modalAttempts"]', `${mail.attemptCount ?? "—"} / ${mail.maxAttempts ?? "—"}`);
+        currentOpenMailId = String(mail.mailId ?? "");
+
+        setText(root, '[data-field="modalMailSubtitle"]', `${mail.toEmail || "Unknown recipient"} - ${mail.statusLabel || mail.status || "Unknown"}`);
+        setText(root, '[data-field="modalSubject"]', mail.subject || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalMailId"]', mail.mailId ?? EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalTemplate"]', mail.templateTypeLabel || mail.templateType || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalStatus"]', mail.statusLabel || mail.status || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalAttempts"]', `${mail.attemptCount ?? EMPTY_PLACEHOLDER} / ${mail.maxAttempts ?? EMPTY_PLACEHOLDER}`);
         setText(root, '[data-field="modalCreatedAt"]', formatDisplayDateTime(mail.createdAt));
         setText(root, '[data-field="modalLastAttemptAt"]', formatDisplayDateTime(mail.lastAttemptAt));
         setText(root, '[data-field="modalNextAttemptAt"]', formatDisplayDateTime(mail.nextAttemptAt));
         setText(root, '[data-field="modalSentAt"]', formatDisplayDateTime(mail.sentAt));
-        setText(root, '[data-field="modalSmtpMessageId"]', mail.smtpMessageId || "—");
-        setText(root, '[data-field="modalToName"]', mail.toName || "—");
-        setText(root, '[data-field="modalToEmail"]', mail.toEmail || "—");
-        setText(root, '[data-field="modalFromName"]', mail.fromName || "—");
-        setText(root, '[data-field="modalFromEmail"]', mail.fromEmail || "—");
-        setText(root, '[data-field="modalLastError"]', mail.lastError || "—");
+        setText(root, '[data-field="modalSmtpMessageId"]', mail.smtpMessageId || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalToName"]', mail.toName || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalToEmail"]', mail.toEmail || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalFromName"]', mail.fromName || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalFromEmail"]', mail.fromEmail || EMPTY_PLACEHOLDER);
+        setText(root, '[data-field="modalLastError"]', mail.lastError || EMPTY_PLACEHOLDER);
 
         renderBodyPreview(mail);
+        updateMailDetailsVisibility(mail);
 
         const modalBackdrop = root.querySelector('[data-modal="mailDetails"]');
 
@@ -308,6 +356,134 @@ export function createViewController(context) {
 
         if (modalBackdrop) {
             modalBackdrop.hidden = true;
+        }
+
+        closeMailResendDialog();
+        currentOpenMailId = null;
+    }
+
+    function updateMailDetailsVisibility(mail) {
+        const status = String(mail?.status || "").toUpperCase();
+        const errorSection = root.querySelector('[data-section="mailErrorDetails"]');
+        const resendButton = root.querySelector('[data-action="resendMail"]');
+        const resendable = RESENDABLE_STATUSES.has(status);
+
+        if (errorSection) {
+            errorSection.innerHTML = resendable
+                ? `
+                    <section class="dashboard-modal-section">
+                        <h3 class="dashboard-modal-section-title">Error details</h3>
+                        <pre class="dashboard-error-details" data-field="modalLastError">${escapeHtml(mail?.lastError || EMPTY_PLACEHOLDER)}</pre>
+                    </section>
+                `
+                : "";
+        }
+
+        if (resendButton) {
+            resendButton.hidden = !resendable;
+            resendButton.disabled = isResendingMail || !resendable;
+        }
+    }
+
+    function openMailResendDialog() {
+        if (!currentOpenMailId) {
+            return;
+        }
+
+        const mail = latestMailRowsById.get(String(currentOpenMailId));
+
+        if (!mail || !RESENDABLE_STATUSES.has(String(mail.status || "").toUpperCase())) {
+            return;
+        }
+
+        const input = root.querySelector('[name="recipientEmail"]');
+        const subtitle = root.querySelector('[data-field="resendMailSubtitle"]');
+        const resendBackdrop = root.querySelector('[data-modal="mailResend"]');
+
+        if (input) {
+            input.value = mail.toEmail || "";
+        }
+
+        if (subtitle) {
+            subtitle.textContent = `${mail.toEmail || "Unknown recipient"} - ${mail.statusLabel || mail.status || "Unknown"}`;
+        }
+
+        if (resendBackdrop) {
+            resendBackdrop.hidden = false;
+        }
+
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }
+
+    function closeMailResendDialog() {
+        const resendBackdrop = root.querySelector('[data-modal="mailResend"]');
+
+        if (resendBackdrop) {
+            resendBackdrop.hidden = true;
+        }
+
+        isResendingMail = false;
+
+        const mail = currentOpenMailId ? latestMailRowsById.get(String(currentOpenMailId)) : null;
+        if (mail) {
+            updateMailDetailsVisibility(mail);
+        }
+    }
+
+    async function submitMailResend(event) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        if (!currentOpenMailId || isResendingMail) {
+            return;
+        }
+
+        const mail = latestMailRowsById.get(String(currentOpenMailId));
+
+        if (!mail || !RESENDABLE_STATUSES.has(String(mail.status || "").toUpperCase())) {
+            return;
+        }
+
+        const form = root.querySelector('[data-form="mailResend"]');
+        const formData = form ? new FormData(form) : new FormData();
+        const recipientEmail = String(formData.get("recipientEmail") || "").trim() || String(mail.toEmail || "").trim();
+
+        if (!recipientEmail) {
+            return;
+        }
+
+        const submitButton = root.querySelector('[data-action="submitMailResend"]');
+        isResendingMail = true;
+
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            await postForm(
+                RESEND_URL,
+                new URLSearchParams({
+                    action: "resend",
+                    mailId: String(currentOpenMailId),
+                    recipientEmail: recipientEmail
+                })
+            );
+
+            closeMailResendDialog();
+            closeMailDetails();
+            await load();
+        } catch (error) {
+            console.warn("Failed to queue resend mail.", error);
+        } finally {
+            isResendingMail = false;
+
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
         }
     }
 
@@ -328,12 +504,12 @@ export function createViewController(context) {
             return;
         }
 
-        preview.textContent = "—";
+        preview.textContent = EMPTY_PLACEHOLDER;
     }
 
     function formatDisplayDateTime(value) {
         if (!value) {
-            return "—";
+            return EMPTY_PLACEHOLDER;
         }
 
         return formatDateTimeForDisplay(value, "en-GB", String(value));

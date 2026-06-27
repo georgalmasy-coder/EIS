@@ -98,7 +98,7 @@ public class ProjectServlet extends GenericDataProviderServlet {
             parseAttachmentDocument(projectEntity, attachmentSection);
 
             ProjectProvider projectProvider = new ProjectProvider(webSession);
-            projectProvider.persist(projectRecord);
+            projectProvider.persist(projectEntity, projectRecord);
 
         } catch (Exception exception) {
             throw new RuntimeException("Failed to save project XML.", exception);

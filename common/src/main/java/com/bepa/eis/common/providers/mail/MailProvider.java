@@ -202,6 +202,18 @@ public class MailProvider extends GenericProvider {
                     "WHERE Status IN ('FAILED', 'UNDELIVERED') " +
                     "  AND COALESCE(LastAttemptAt, CreatedAt) >= DATEADD(DAY, -7, SYSUTCDATETIME()) ";
 
+    private static final String COUNT_FAILED_LAST_7_DAYS_SQL =
+            "SELECT COUNT(*) AS MailCount " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'FAILED' " +
+                    "  AND COALESCE(LastAttemptAt, CreatedAt) >= DATEADD(DAY, -7, SYSUTCDATETIME()) ";
+
+    private static final String COUNT_UNDELIVERED_LAST_7_DAYS_SQL =
+            "SELECT COUNT(*) AS MailCount " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'UNDELIVERED' " +
+                    "  AND COALESCE(LastAttemptAt, CreatedAt) >= DATEADD(DAY, -7, SYSUTCDATETIME()) ";
+
     private static final String SELECT_MAIL_HOURLY_STATUS_LAST_24_HOURS_SQL =
             "WITH Hours AS ( " +
                     "    SELECT 23 AS HourOffset " +
@@ -259,6 +271,36 @@ public class MailProvider extends GenericProvider {
                     "FROM [dbo].[MAIL_QUEUE] " +
                     "WHERE Status = 'SENT' " +
                     "ORDER BY SentAt DESC, MailId DESC";
+
+    private static final String SELECT_LATEST_QUEUED_MAILS_SQL =
+            "SELECT TOP (?) " +
+                    "MailId, " +
+                    "TemplateType, " +
+                    "FromName, " +
+                    "FromEmail, " +
+                    "ToName, " +
+                    "ToEmail, " +
+                    "CcEmails, " +
+                    "BccEmails, " +
+                    "Subject, " +
+                    "BodyText, " +
+                    "BodyHtml, " +
+                    "ParametersJson, " +
+                    "Status, " +
+                    "AttemptCount, " +
+                    "MaxAttempts, " +
+                    "NextAttemptAt, " +
+                    "CreatedAt, " +
+                    "CreatedByUserId, " +
+                    "LastAttemptAt, " +
+                    "SentAt, " +
+                    "LastError, " +
+                    "SmtpMessageId, " +
+                    "LockedAt, " +
+                    "LockedBy " +
+                    "FROM [dbo].[MAIL_QUEUE] " +
+                    "WHERE Status = 'QUEUED' " +
+                    "ORDER BY CreatedAt DESC, MailId DESC";
 
     private static final String SELECT_LATEST_FAILED_MAILS_SQL =
             "SELECT TOP (?) " +
@@ -644,6 +686,14 @@ public class MailProvider extends GenericProvider {
         return getSingleCount(COUNT_ERRORS_LAST_7_DAYS_SQL, "mail errors last 7 days");
     }
 
+    public int getFailedLast7DaysCount() {
+        return getSingleCount(COUNT_FAILED_LAST_7_DAYS_SQL, "failed mails last 7 days");
+    }
+
+    public int getUndeliveredLast7DaysCount() {
+        return getSingleCount(COUNT_UNDELIVERED_LAST_7_DAYS_SQL, "undelivered mails last 7 days");
+    }
+
     public MailQueueStatistics getMailQueueStatistics() {
         MailQueueStatistics statistics = new MailQueueStatistics();
 
@@ -681,6 +731,10 @@ public class MailProvider extends GenericProvider {
 
     public List<MailQueueItem> getLatestSentMails(int maxRows) {
         return getLatestMails(SELECT_LATEST_SENT_MAILS_SQL, maxRows);
+    }
+
+    public List<MailQueueItem> getLatestQueuedMails(int maxRows) {
+        return getLatestMails(SELECT_LATEST_QUEUED_MAILS_SQL, maxRows);
     }
 
     public List<MailQueueItem> getLatestFailedMails(int maxRows) {

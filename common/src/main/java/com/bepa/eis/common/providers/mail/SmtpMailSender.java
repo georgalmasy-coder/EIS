@@ -27,7 +27,7 @@ public class SmtpMailSender implements MailSender {
     public SmtpMailSender() {
     }
 
-    //GFA @Override
+    @Override
     public MailSendResult send(MailQueueItem mail) {
         if (mail == null) {
             return MailSendResult.failed("Mail item is missing.");

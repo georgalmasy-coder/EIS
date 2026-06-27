@@ -2,11 +2,12 @@ package com.bepa.eis.server.api.web.application.views.myprojects;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.server.api.web.application.views.common.*;
 import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
-import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
@@ -23,10 +24,8 @@ import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
 import com.bepa.eis.server.dataprovider.fields.timestamp.StartDate;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
-import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.CREATE_ENTITY;
 
@@ -97,26 +96,30 @@ public class ProjectInfo extends GenericXmlDocument {
         return projectProvider.getLatestProjectByProjectId(projectId);
     }
 
-    private void appendProjectDocument(ProjectRecord projectRecord) {
+    private void appendProjectDocument(ProjectRecord projectRecord) throws SQLException {
+        WebSession webSession = getWebSession();
+        webSession.setProjectId(projectRecord.getProjectId());
+
         ListOfElements projectDocument = new ListOfElements(
-                getWebSession(),
+                webSession,
                 "projectDocument"
         );
 
         ListOfElements project = new ListOfElements(
-                getWebSession(),
+                webSession,
                 "project"
         );
 
-        addProjectFields(project, projectRecord);
+        addProjectFields(webSession, project, projectRecord);
 
         projectDocument.addElement(project);
         rootElement.addElement(projectDocument);
 
-        appendEmptyEntitySections();
+        appendNoteAndAttachmentSections(webSession, EntityType.PROJECT);
     }
 
     private void addProjectFields(
+            WebSession webSession,
             ListOfElements project,
             ProjectRecord projectRecord
     ) {
@@ -138,23 +141,23 @@ public class ProjectInfo extends GenericXmlDocument {
         projectName.setFieldEditable();
         project.addElement(projectName);
 
-        ProjectOwner projectOwner = new ProjectOwner(getWebSession());
+        ProjectOwner projectOwner = new ProjectOwner(webSession);
         projectOwner.setFieldNotRequired();
         projectOwner.setValue(safeProjectRecord.getOwnerId());
         projectOwner.setFieldEditable();
         project.addElement(projectOwner);
 
-        ProjectCategory projectCategory = new ProjectCategory(getWebSession());
+        ProjectCategory projectCategory = new ProjectCategory(webSession);
         projectCategory.setValue(safeProjectRecord.getCategoryId());
         projectCategory.setFieldEditable();
         project.addElement(projectCategory);
 
-        ProjectPriority projectPriority = new ProjectPriority(getWebSession());
+        ProjectPriority projectPriority = new ProjectPriority(webSession);
         projectPriority.setValue(safeProjectRecord.getPriorityId());
         projectPriority.setFieldEditable();
         project.addElement(projectPriority);
 
-        ProjectStatus projectStatus = new ProjectStatus(getWebSession());
+        ProjectStatus projectStatus = new ProjectStatus(webSession);
         projectStatus.setValue(safeProjectRecord.getProjectStatusId());
 
         if (projectRecord.isNew() ) {
@@ -185,14 +188,14 @@ public class ProjectInfo extends GenericXmlDocument {
         budgetInValue.setFieldRequired();
         project.addElement(budgetInValue);
 
-        CustomerDepartment customerDepartment = new CustomerDepartment(getWebSession());
+        CustomerDepartment customerDepartment = new CustomerDepartment(webSession);
         customerDepartment.setValue(safeProjectRecord.getDepartmentId());
         customerDepartment.setFieldEditable();
         customerDepartment.setFieldNotRequired();
         project.addElement(customerDepartment);
 
         if (projectRecord.getProjectId() != null) {
-            ChangedBy changedBy = new ChangedBy(getWebSession());
+            ChangedBy changedBy = new ChangedBy(webSession);
             changedBy.setValue(safeProjectRecord.getChangedByUserId());
             changedBy.setFieldNotEditable();
             project.addElement(changedBy);
@@ -204,11 +207,14 @@ public class ProjectInfo extends GenericXmlDocument {
         }
     }
 
-    private void appendEmptyEntitySections() {
-        Element notesElement = getDoc().createElement("EntityNotes");
-        getRoot().appendChild(notesElement);
+    private void appendNoteAndAttachmentSections(WebSession webSession, EntityType entityType) throws SQLException {
 
-        Element attachmentsElement = getDoc().createElement("EntityAttachments");
-        getRoot().appendChild(attachmentsElement);
+        EntityNoteProvider entityNoteProvider = new EntityNoteProvider(webSession);
+        EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(entityType, projectId, version);
+        rootElement.addElement(entityNotes.getEntityNoteElements());
+
+        EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
+        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, projectId);
+        rootElement.addElement(entityAttachments.getEntityAttachmentElements());
     }
 }

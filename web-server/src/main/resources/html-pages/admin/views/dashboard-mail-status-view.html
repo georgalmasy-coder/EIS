@@ -32,7 +32,7 @@
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon">…</div>
             <div class="dashboard-kpi-label">Queued</div>
-            <div class="dashboard-kpi-help">Waiting to be sent</div>
+            <div class="dashboard-kpi-help">Currently waiting to be sent</div>
             <div class="dashboard-kpi-value" data-field="queuedCount">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="queuedCount"></div>
@@ -41,8 +41,8 @@
 
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon">↻</div>
-            <div class="dashboard-kpi-label">Retrying</div>
-            <div class="dashboard-kpi-help">Failed emails with attempts left</div>
+            <div class="dashboard-kpi-label">Retrying last 7 days</div>
+            <div class="dashboard-kpi-help">Failed emails from the last 7 days</div>
             <div class="dashboard-kpi-value" data-field="retryingCount">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="retryingCount"></div>
@@ -51,8 +51,8 @@
 
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon">✕</div>
-            <div class="dashboard-kpi-label">Undelivered</div>
-            <div class="dashboard-kpi-help">Permanently failed emails</div>
+            <div class="dashboard-kpi-label">Undelivered last 7 days</div>
+            <div class="dashboard-kpi-help">Undelivered emails from the last 7 days</div>
             <div class="dashboard-kpi-value" data-field="undeliveredCount">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="undeliveredCount"></div>
@@ -85,6 +85,30 @@
                     <span>Error</span>
                 </div>
             </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid-1">
+        <article class="dashboard-card dashboard-card-pad">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">Latest queued emails</h2>
+                <span class="dashboard-card-subtitle">Latest 20 queued emails</span>
+            </div>
+
+            <table class="dashboard-table">
+                <thead>
+                <tr>
+                    <th>ToEmail</th>
+                    <th>ToName</th>
+                    <th>FromName</th>
+                    <th>Template</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>AttemptCount</th>
+                </tr>
+                </thead>
+                <tbody data-table="latestQueuedEmails"></tbody>
+            </table>
         </article>
     </section>
 
@@ -242,12 +266,53 @@
                     </div>
                 </section>
 
-                <section class="dashboard-modal-section">
-                    <h3 class="dashboard-modal-section-title">Error details</h3>
+                <div data-section="mailErrorDetails"></div>
 
-                    <pre class="dashboard-error-details" data-field="modalLastError">—</pre>
-                </section>
+                <div class="dashboard-modal-actions">
+                    <button class="dashboard-modal-action-button" type="button" data-action="resendMail">
+                        Resend
+                    </button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div class="dashboard-modal-backdrop" data-modal="mailResend" hidden>
+        <div class="dashboard-modal dashboard-modal-sm" role="dialog" aria-modal="true" aria-labelledby="mailResendTitle">
+            <div class="dashboard-modal-header">
+                <div>
+                    <h2 class="dashboard-modal-title" id="mailResendTitle">Resend email</h2>
+                    <p class="dashboard-modal-subtitle" data-field="resendMailSubtitle">-</p>
+                </div>
+
+                <button class="dashboard-modal-close" type="button" data-action="closeMailResend" aria-label="Close resend dialog">
+                    x
+                </button>
+            </div>
+
+            <form class="dashboard-modal-body" data-form="mailResend">
+                <section class="dashboard-modal-section">
+                    <h3 class="dashboard-modal-section-title">Recipient</h3>
+
+                    <div class="dashboard-field">
+                        <label class="dashboard-field-label" for="mailResendRecipient">Email address</label>
+                        <input id="mailResendRecipient" class="dashboard-field-input" type="email" name="recipientEmail" autocomplete="email" required />
+                    </div>
+
+                    <div class="dashboard-modal-hint">
+                        The email will be queued again using the same content, with this recipient address.
+                    </div>
+                </section>
+
+                <div class="dashboard-modal-actions">
+                    <button class="dashboard-modal-action-button is-secondary" type="button" data-action="cancelMailResend">
+                        Cancel
+                    </button>
+                    <button class="dashboard-modal-action-button" type="submit" data-action="submitMailResend">
+                        Queue resend
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </section>

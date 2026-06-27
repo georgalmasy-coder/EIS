@@ -322,8 +322,8 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                     mailProvider.getSentLast7DaysCount(),
                     mailProvider.getErrorsLast7DaysCount(),
                     safeInt(statistics.getQueuedCount()),
-                    safeInt(statistics.getFailedCount()),
-                    safeInt(statistics.getUndeliveredCount()),
+                    mailProvider.getFailedLast7DaysCount(),
+                    mailProvider.getUndeliveredLast7DaysCount(),
                     safeInt(statistics.getCancelledCount()),
                     mailProvider.getMailHourlyStatusLast24Hours()
                             .stream()
@@ -334,6 +334,10 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                             ))
                             .toList(),
                     mailProvider.getLatestSentMails(10)
+                            .stream()
+                            .map(this::toMailDashboardRow)
+                            .toList(),
+                    mailProvider.getLatestQueuedMails(20)
                             .stream()
                             .map(this::toMailDashboardRow)
                             .toList(),
@@ -352,6 +356,7 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
                     0,
                     0,
                     0,
+                    List.of(),
                     List.of(),
                     List.of(),
                     List.of()
@@ -1010,6 +1015,7 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             int cancelledCount,
             List<MailHourlyPoint> hourlySeries,
             List<MailDashboardRow> latestSentEmails,
+            List<MailDashboardRow> latestQueuedEmails,
             List<MailDashboardRow> latestErrorEmails
     ) {
     }
