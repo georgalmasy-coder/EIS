@@ -311,10 +311,10 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(projectElement, "version", value(project.getVersion()));
         xmlDocument.appendTextElement(projectElement, "latest", String.valueOf(project.isLatest()));
 
-        xmlDocument.appendTextElement(projectElement, "projectname", value(project.getProjectName()));
+        xmlDocument.appendTextElement(projectElement, "ProjectName", value(project.getProjectName()));
 
         xmlDocument.appendTextElement(projectElement, "projectownerid", value(project.getOwnerId()));
-        xmlDocument.appendTextElement(projectElement, "projectowner", value(getProjectOwner(project.getOwnerId())));
+        xmlDocument.appendTextElement(projectElement, "OwnerId", value(getProjectOwner(project.getOwnerId())));
 
         xmlDocument.appendTextElement(projectElement, "projectcategoryid", value(project.getCategoryId()));
         xmlDocument.appendTextElement(projectElement, "projectcategory", value(getProjectCategory(project.getCategoryId())));
@@ -325,8 +325,8 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(projectElement, "projectstatuscode", value(project.getProjectStatusCode()));
         xmlDocument.appendTextElement(projectElement, "projectstatus", value(project.getProjectStatusLabel()));
 
-        xmlDocument.appendTextElement(projectElement, "projectstartdate", formatDate(project.getStartDate()));
-        xmlDocument.appendTextElement(projectElement, "projectenddate", formatDate(project.getEndDate()));
+        xmlDocument.appendTextElement(projectElement, "StartDate", formatDate(project.getStartDate()));
+        xmlDocument.appendTextElement(projectElement, "EndDate", formatDate(project.getEndDate()));
 
         xmlDocument.appendTextElement(projectElement, "budgetindays", value(project.getBudgetInDays()));
         xmlDocument.appendTextElement(projectElement, "budgetinvalue", value(project.getBudgetInValue()));

@@ -7,6 +7,7 @@ public class LookupValue {
     private Integer lookupId;
     private String lookupCode;
     private String lookupDescription;
+    private String lookupColor;
     private Boolean active;
 
     public Integer getLookupId() {
@@ -21,6 +22,10 @@ public class LookupValue {
         return lookupDescription;
     }
 
+    public String getLookupColor() {
+        return lookupColor;
+    }
+
     public boolean isActive() {
         return active != null && active;
     }
@@ -33,4 +38,15 @@ public class LookupValue {
         this.lookupDescription = lookupDescription;
         this.active = active;
     }
+
+    public LookupValue(Integer customerId, Integer projectId, Integer lookupId, String lookupCode, String lookupDescription, String lookupColor, Boolean active) {
+        this.customerId = customerId;
+        this.projectId = projectId;
+        this.lookupId = lookupId;
+        this.lookupCode = lookupCode;
+        this.lookupDescription = lookupDescription;
+        this.lookupColor = lookupColor;
+        this.active = active;
+    }
+
 }

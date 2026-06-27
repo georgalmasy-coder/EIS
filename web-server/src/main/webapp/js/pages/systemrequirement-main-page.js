@@ -10,6 +10,7 @@ import {
     getDirectText,
     hasXmlParseError
 } from "../core/xml.js";
+import { buildColorChipStyle, sanitizeCssColor } from "../core/css.js";
 import {
     getBooleanAttribute,
     getNumberAttribute
@@ -368,6 +369,7 @@ function parseVisibleFields(node) {
             const name = field.tagName;
             const label = field.getAttribute("header") || field.getAttribute("label") || name;
             const control = (field.getAttribute("control") || "").toLowerCase();
+            const color = sanitizeCssColor(field.getAttribute("color"), "");
             const value = getFieldDisplayValue(field);
             const rawValue = getFieldRawValue(field);
 
@@ -382,6 +384,7 @@ function parseVisibleFields(node) {
                 name,
                 label,
                 control,
+                color,
                 value,
                 rawValue,
                 displayOrder,
@@ -928,6 +931,7 @@ function renderListCell(requirement, column) {
     const field = requirement.fields.find((item) => item.name === column.key);
     const value = field?.value ?? "";
     const displayValue = formatListCellValue(value, column.control);
+    const displayColor = column.control === "select" ? sanitizeCssColor(field?.color, "") : "";
 
     if (column.isActiveColumn) {
         return `
@@ -939,7 +943,10 @@ function renderListCell(requirement, column) {
         `;
     }
 
-    return `<td title="${escapeHtml(displayValue)}">${escapeHtml(displayValue)}</td>`;
+    const colorStyle = displayColor ? ` style="${escapeHtml(buildColorChipStyle(displayColor))}"` : "";
+    const colorClass = displayColor ? " select-chip" : "";
+
+    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}"${colorStyle}>${escapeHtml(displayValue)}</span></td>`;
 }
 
 function formatListCellValue(value, control) {

@@ -36,7 +36,7 @@ import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.CR
 import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.EDIT_ENTITY;
 
 @WebServlet(name = "ProjectServlet", urlPatterns = {
-        "/project/project"
+        "/project"
 })
 @MultipartConfig
 public class ProjectServlet extends GenericDataProviderServlet {

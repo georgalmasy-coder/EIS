@@ -42,7 +42,9 @@ public enum PageType {
 
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines"),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail"),
+
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects"),
+    PROJECT_MAIN_PAGE("project-main","html-pages/project-main.html", "Projects"),
     PROJECT_EDIT_PAGE("project-edit","html-pages/project-edit.html", "Project"),
 
     NONE("invalid", "", "") ;

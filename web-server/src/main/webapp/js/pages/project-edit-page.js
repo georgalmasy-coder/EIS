@@ -22,7 +22,7 @@ import {
     validateFieldsFromDetailNode
 } from "../core/validation.js";
 
-const SAVE_URL = "/project/project?cmd=save";
+const SAVE_URL = "/project?cmd=save";
 const DEFAULT_RETURN_URL = "/web/view?page=myprojects";
 
 const STORAGE_KEYS = {
@@ -202,16 +202,16 @@ async function loadDetail() {
 function buildDetailUrl() {
     if (state.mode === MODES.edit) {
         if (!state.id) return "";
-        return `/project/project?cmd=edit&id=${encodeURIComponent(state.id)}`;
+        return `/project?cmd=edit&id=${encodeURIComponent(state.id)}`;
     }
 
     if (state.mode === MODES.editVersion) {
         if (!state.id || !state.version) return "";
-        return `/project/project?cmd=edit&id=${encodeURIComponent(state.id)}&version=${encodeURIComponent(state.version)}`;
+        return `/project?cmd=edit&id=${encodeURIComponent(state.id)}&version=${encodeURIComponent(state.version)}`;
     }
 
     if (state.mode === MODES.create) {
-        return "/project/project?cmd=create";
+        return "/project?cmd=create";
     }
 
     return "";

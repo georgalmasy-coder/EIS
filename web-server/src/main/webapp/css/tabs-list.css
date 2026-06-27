@@ -119,6 +119,25 @@
     line-height: 1.35;
 }
 
+.data-table-cell-value.select-chip{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 2px);
+    max-width: calc(100% - 2px);
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    min-width: 0;
+}
+
 .data-table tbody tr{
     cursor: pointer;
 }

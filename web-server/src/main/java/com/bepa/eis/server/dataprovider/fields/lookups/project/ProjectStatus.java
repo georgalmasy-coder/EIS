@@ -42,13 +42,8 @@ public class ProjectStatus extends AbstractLookup {
 
     @Override
     public void setValue(Integer statusId) {
-        com.bepa.eis.common.enums.project.ProjectStatus status =
-                com.bepa.eis.common.enums.project.ProjectStatus.fromIdOrDefault(
-                        statusId,
-                        com.bepa.eis.common.enums.project.ProjectStatus.CREATED
-                );
-
-        setLookupValue(toLookupValue(status));
+        LookupValue lookupValue = CustomerLookupCache.getProjectStatusLookupValue(getWebSession(), statusId);
+        setLookupValue(lookupValue);
     }
 
     @Override
@@ -56,14 +51,4 @@ public class ProjectStatus extends AbstractLookup {
         return "Select project status ...";
     }
 
-    private LookupValue toLookupValue(com.bepa.eis.common.enums.project.ProjectStatus status) {
-        return new LookupValue(
-                null,
-                null,
-                status.getId(),
-                status.getCode(),
-                status.getLabel(),
-                true
-        );
-    }
 }

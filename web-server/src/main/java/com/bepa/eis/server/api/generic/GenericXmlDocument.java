@@ -156,6 +156,7 @@ public class GenericXmlDocument {
                 if (field instanceof AbstractLookup lookup) {
 
                     lookup.setWebSession(getWebSession());
+
                     if (field.isFieldEditable()) {
                         lookup.addAllActiveOptions(getWebSession());
                     } else {
@@ -166,6 +167,10 @@ public class GenericXmlDocument {
 
                     selectValueElement.setTextContent(lookup.getLookupIdAsString());
                     element.appendChild(selectValueElement);
+
+                    if (lookup.hasFieldLookupColor()) {
+                        element.setAttribute("color", lookup.getFieldLookupColor());
+                    }
 
                     lookup.getOptions().forEach(option -> {
                         Element optionElement = doc.createElement("Option");

@@ -1,6 +1,7 @@
 package com.bepa.eis.server.dataprovider.fields.timestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public class StartDate extends AbstractDate {
 
@@ -9,6 +10,13 @@ public class StartDate extends AbstractDate {
     public StartDate(Timestamp timestamp) {
         super (timestamp);
         setFieldEditable();
+    }
+
+    public StartDate(LocalDate localDate) {
+        super ();
+        if (localDate != null) {
+            setValue(localDate);
+        }
     }
 
     @Override

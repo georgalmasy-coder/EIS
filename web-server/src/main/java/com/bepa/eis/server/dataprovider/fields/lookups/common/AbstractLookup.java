@@ -142,6 +142,21 @@ abstract public class AbstractLookup extends AbstractInteger {
                      Comparator.nullsLast(String::compareToIgnoreCase)));
     }
 
+
+    public boolean hasFieldLookupColor() {
+        if (lookupValue != null && lookupValue.getLookupCode() != null && ! lookupValue.getLookupCode().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    public String getFieldLookupColor() {
+        if (lookupValue != null && lookupValue.getLookupCode() != null && ! lookupValue.getLookupCode().isEmpty()) {
+            return lookupValue.getLookupColor();
+        }
+        return null;
+    }
+
     public List<SelectOption> getOptions() {
         return options;
     }

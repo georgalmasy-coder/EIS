@@ -184,15 +184,15 @@ function readProjects(root) {
         return {
             projectId: directTextOf(projectElement, "projectid"),
             projectName: directTextOf(projectElement, "projectname"),
-            projectOwner: directTextOf(projectElement, "projectowner"),
+            projectOwner: directTextOf(projectElement, "OwnerId"),
             projectCategory: directTextOf(projectElement, "projectcategory"),
             projectStatus: directTextOf(projectElement, "projectstatus"),
             countNotifications: toNumber(directTextOf(projectElement, "countnotifications"), 0),
             countStakeholderRequirement: directTextOf(projectElement, "countstakeholderrequirement"),
             countSystemRequirement: directTextOf(projectElement, "countsystemrequirement"),
             countSystemBreakdown: directTextOf(projectElement, "countsystembreakdown"),
-            projectStartDate: directTextOf(projectElement, "projectstartdate"),
-            projectEndDate: directTextOf(projectElement, "projectenddate"),
+            projectStartDate: directTextOf(projectElement, "StartDate"),
+            projectEndDate: directTextOf(projectElement, "EndDate"),
             nextTrlDeadline: directTextOf(projectElement, "nexttrldeadline"),
             trls: readTrls(trlsElement)
         };

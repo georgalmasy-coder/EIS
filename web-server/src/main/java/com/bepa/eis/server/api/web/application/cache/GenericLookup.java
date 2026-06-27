@@ -28,7 +28,7 @@ public class GenericLookup {
     private String lookupSql = null;
 
     public void setLookupSqlByType(Integer lookupType) {
-        lookupSql = "SELECT null AS CustomerId, null AS ProjectId, LookupId, LookupCode, LookupDescription, Active FROM LOOKUP_TABLE WHERE LookupType = " + lookupType + " ORDER BY LookupCode";
+        lookupSql = "SELECT null AS CustomerId, null AS ProjectId, LookupId, LookupCode, LookupDescription, Color, Active FROM LOOKUP_TABLE WHERE LookupType = " + lookupType + " ORDER BY LookupCode";
     }
 
     public void setLookupSql(String sql, Integer customerId, Integer projectId) {
@@ -94,6 +94,7 @@ public class GenericLookup {
                         rs.getInt("LookupId"),
                         rs.getString("LookupCode"),
                         rs.getString("LookupDescription"),
+                        rs.getString("Color"),
                         rs.getBoolean("Active"));
 
                 addLookupValue(lookupValue);

@@ -6,7 +6,7 @@ public class UserCache extends GenericLookup {
 
     private static final String LOOKUP_SQL =
 
-            "SELECT null as CustomerId, null as ProjectId, U.UserId AS LookupId, Name as LookupCode, CONCAT(Initials, ' - ', Name) as LookupDescription,  Active " +
+            "SELECT null as CustomerId, null as ProjectId, U.UserId AS LookupId, Name as LookupCode, CONCAT(Initials, ' - ', Name) as LookupDescription,  null AS Color, Active " +
             "FROM USERS U, USER_CUSTOMER UC " +
             "WHERE U.UserId = UC.UserId " +
             "AND   UC.CustomerId=? " +

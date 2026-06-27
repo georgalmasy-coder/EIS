@@ -10,7 +10,7 @@ public class DepartmentCache extends GenericLookup {
             "null AS ProjectId, " +
             "DEPARTMENTID AS LookupId, " +
             "CONCAT( CONCAT( DEPARTMENTNAME,' - '), DEPARTMENTDESCRIPTION) AS LookupCode, " +
-            "DEPARTMENTDESCRIPTION AS LookupDescription, " +
+            "DEPARTMENTDESCRIPTION AS LookupDescription, null AS Color, " +
             "ACTIVE "  +
             "FROM DEPARTMENT " +
             "WHERE CustomerId=? " +
