@@ -209,6 +209,12 @@ public class LoginServlet extends GenericServlet {
             );
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            String message = "Account is locked".equalsIgnoreCase(validationResult.failureReason())
+                    ? "User Account Locked - please contact your administrator"
+                    : "Invalid username or password";
+            response.getWriter().write("{\"message\":\"" + escapeJson(message) + "\"}");
             return;
         }
 

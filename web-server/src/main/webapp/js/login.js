@@ -31,7 +31,12 @@ form.addEventListener("submit", async (e) => {
         }
 
         if (res.status === 401) {
-            errorEl.textContent = "Invalid username or password";
+            try {
+                const payload = await res.json();
+                errorEl.textContent = payload?.message || "Invalid username or password";
+            } catch {
+                errorEl.textContent = "Invalid username or password";
+            }
             return;
         }
 

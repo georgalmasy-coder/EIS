@@ -1,6 +1,7 @@
 package com.bepa.eis.common.providers;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.user.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,10 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
                     "Phone, " +
                     "DepartmentId, " +
                     "Active, " +
+                    "UserRole, " +
                     "Password " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?) ";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
 
     private static final String INSERT_USER_CUSTOMER_SQL =
             "INSERT INTO [dbo].[USER_CUSTOMER] ( " +
@@ -88,12 +90,13 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
             statement.setString(4, nullIfBlank(phone));
             statement.setNull(5, java.sql.Types.INTEGER);
             statement.setBoolean(6, true);
+            statement.setInt(7, UserRole.CUSTOMER_ADMINISTRATOR.getId());
 
             /*
              * User is created without a usable password.
              * The onboarding / confirmation workflow must handle password setup.
              */
-            statement.setString(7, "");
+            statement.setString(8, "");
 
             int rows = statement.executeUpdate();
 

@@ -53,6 +53,12 @@ export function toDateTimeLocalValue(value) {
         return trimmed.slice(0, 16);
     }
 
+    const isoSpaceMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/);
+
+    if (isoSpaceMatch) {
+        return `${isoSpaceMatch[1]}T${isoSpaceMatch[2]}:${isoSpaceMatch[3]}`;
+    }
+
     const match = trimmed.match(/^(\d{2})\/(\d{2})-(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
 
     if (!match) {

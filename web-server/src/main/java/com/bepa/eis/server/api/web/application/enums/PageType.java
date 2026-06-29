@@ -39,6 +39,7 @@ public enum PageType {
     ADMIN_DASHBOARD_MAILS_PAGE("dashboard-mail-status-view","html-pages/admin/views/dashboard-mail-status-view.html", ""),
 
     ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS"),
+    ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS"),
 
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines"),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail"),

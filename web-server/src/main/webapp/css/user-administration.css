@@ -1,0 +1,394 @@
+.user-administration-app {
+    min-height: 100vh;
+}
+
+.user-administration-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.user-administration-toolbar,
+.user-grouping-bar,
+.action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.user-administration-filter {
+    min-width: 260px;
+}
+
+.user-grouping-bar {
+    margin: 0 0 8px;
+    padding: 8px 0;
+}
+
+.user-grouping-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    opacity: 0.75;
+}
+
+.user-grouping-zone {
+    min-height: 36px;
+    flex: 1 1 420px;
+    border: 1px dashed rgba(128, 128, 128, 0.45);
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.user-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 999px;
+    cursor: grab;
+    user-select: none;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+}
+
+.user-group-chip.is-dragging {
+    opacity: 0.6;
+}
+
+.user-group-chip button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.user-administration-scroll {
+    position: relative;
+}
+
+.user-administration-table th[data-key] {
+    cursor: pointer;
+}
+
+body.user-administration-column-resizing,
+body.user-administration-column-resizing * {
+    cursor: col-resize !important;
+}
+
+.user-administration-table .col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+}
+
+.user-administration-table .col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    right: 3px;
+    width: 1px;
+    height: 60%;
+    background: rgba(170, 180, 194, .35);
+}
+
+.user-administration-table .col-resizer:hover::after {
+    background: rgba(96, 165, 250, .75);
+}
+
+.user-group-row td {
+    background: rgba(128, 128, 128, 0.08);
+    font-weight: 600;
+}
+
+.user-group-row.is-collapsed td {
+    background: rgba(128, 128, 128, 0.14);
+}
+
+.user-group-row .group-toggle {
+    margin-right: 8px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    width: 18px;
+    text-align: center;
+}
+
+.user-group-row .group-count {
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.user-active-cell {
+    text-align: center;
+}
+
+.user-administration-active-state{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 26px;
+}
+
+.user-administration-active-dot{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 1px solid rgba(148,163,184,.55);
+}
+
+.user-administration-active-dot.is-active{
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148,163,184,.12);
+}
+
+.user-administration-active-dot.is-inactive{
+    background: #ef4444;
+    border-color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.14);
+}
+
+.user-role-pill,
+.user-mfa-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(170, 180, 194, .35);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.user-role-pill.role-bepa-system-administrator {
+    border-color: rgba(96, 165, 250, .55);
+    background: rgba(30, 64, 175, .26);
+    color: #dbeafe;
+}
+
+.user-role-pill.role-customer-administrator {
+    border-color: rgba(74, 222, 128, .55);
+    background: rgba(22, 101, 52, .26);
+    color: #bbf7d0;
+}
+
+.user-role-pill.role-project-member {
+    border-color: rgba(250, 204, 21, .55);
+    background: rgba(113, 63, 18, .28);
+    color: #fef3c7;
+}
+
+.user-role-pill.role-project-viewer,
+.user-role-pill.role-invalid-user-role {
+    border-color: rgba(148, 163, 184, .55);
+    background: rgba(51, 65, 85, .36);
+    color: #e2e8f0;
+}
+
+.user-edit-dialog {
+    width: min(1100px, calc(100vw - 24px));
+    max-width: 96vw;
+    max-height: 60vh;
+    height: auto;
+    overflow: hidden;
+    padding: 0;
+}
+
+.user-edit-form {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 14px 14px 8px;
+    display: block;
+    overflow: hidden;
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+}
+
+.user-edit-form .page-dialog-head,
+.user-edit-form .page-dialog-status,
+.user-edit-form .page-tab-bar,
+.user-edit-form .dlg-footer {
+    flex: 0 0 auto;
+}
+
+.user-edit-form .page-dialog-status {
+    min-height: 16px;
+}
+
+.user-edit-form .page-dialog-status.is-error {
+    margin: 8px 0 12px;
+    padding: 10px 12px;
+    min-height: 0;
+    border: 1px solid rgba(248, 113, 113, .70);
+    border-radius: 10px;
+    background: rgba(127, 29, 29, .42);
+    color: #fecaca;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.user-edit-form .page-dialog-status.is-ok {
+    color: #d1fae5;
+}
+
+.user-edit-form .page-dialog-status.is-loading {
+    color: #bfdbfe;
+}
+
+.user-edit-form .page-tab-bar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-gutter: stable;
+}
+
+.user-dialog-panels {
+    min-height: 0;
+    /* Adjust this value to change the fixed tab height. */
+    --user-dialog-panel-height: 380px;
+    display: block;
+    overflow: hidden;
+    margin-top: 8px;
+    height: var(--user-dialog-panel-height);
+}
+
+.user-dialog-panels .tab-panel {
+    display: none;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-dialog-panels .tab-panel.is-active {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-gutter: stable both-edges;
+}
+
+.user-field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-content: start;
+    grid-auto-rows: min-content;
+}
+
+.user-field-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user-field-grid input,
+.user-field-grid select {
+    width: 100%;
+}
+
+.user-field-full {
+    grid-column: 1 / -1;
+}
+
+.user-phone-field {
+    display: grid;
+    grid-template-columns: minmax(140px, 170px) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    grid-column: 1 / 2;
+}
+
+.user-department-field {
+    grid-column: 2 / 3;
+}
+
+.user-reset-by-field {
+    grid-column: 1 / 2;
+}
+
+.user-phone-field label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user-phone-field .field-help {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    opacity: 0.75;
+}
+
+.user-active-field {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    grid-column: 1 / 2;
+}
+
+.user-active-field input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+.action-row {
+    margin-top: 12px;
+}
+
+.action-row button {
+    min-height: 34px;
+}
+
+@media (max-width: 900px) {
+    .user-edit-dialog {
+        height: auto;
+        max-height: 96vh;
+    }
+
+    .user-field-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-phone-field {
+        grid-template-columns: 1fr;
+    }
+
+    .user-department-field {
+        grid-column: auto;
+    }
+
+    .user-reset-by-field {
+        grid-column: auto;
+    }
+
+    .user-administration-filter {
+        min-width: 0;
+        width: 100%;
+    }
+}

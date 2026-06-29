@@ -1013,7 +1013,8 @@
                 }
 
                 if (res.status === 401) {
-                    errorEl.textContent = "Invalid username or password";
+                    const payload = await readJsonSafely(res);
+                    errorEl.textContent = (payload && payload.message) || "Invalid username or password";
                     return;
                 }
 
