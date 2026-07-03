@@ -289,9 +289,10 @@ public class IncidentProvider extends GenericProvider {
             try (Connection con = getDataSource().getConnection();
                  PreparedStatement ps = con.prepareStatement(INSERT_INCIDENT_SQL)) {
 
-                ps.setInt(1, getWebSession().getCustomerId());
-                ps.setInt(2, getWebSession().getProjectId());
-                ps.setInt(3, getWebSession().getUserId());
+
+                setNullableInt(ps, 1, getWebSession().getCustomerId());
+                setNullableInt(ps, 2, getWebSession().getProjectId());
+                setNullableInt(ps, 3, getWebSession().getUserId());
                 ps.setInt(4, serviceType.getId());
                 ps.setInt(5, severityType.getId());
                 ps.setString(6, getErrorMessage(throwable));
@@ -378,5 +379,17 @@ public class IncidentProvider extends GenericProvider {
             String period,
             int count
     ) {
+    }
+
+    private void setNullableInt(
+            PreparedStatement statement,
+            int parameterIndex,
+            Integer value
+    ) throws SQLException {
+        if (value == null) {
+            statement.setNull(parameterIndex, Types.INTEGER);
+            return;
+        }
+        statement.setInt(parameterIndex, value);
     }
 }

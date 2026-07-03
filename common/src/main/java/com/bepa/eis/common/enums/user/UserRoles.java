@@ -1,6 +1,6 @@
 package com.bepa.eis.common.enums.user;
 
-public enum UserRole {
+public enum UserRoles {
 
     BEPA_SYSTEM_ADMINISTRATOR(
             1,
@@ -11,8 +11,8 @@ public enum UserRole {
 
     CUSTOMER_ADMINISTRATOR(
             2,
-            "Customer Administrator",
-            "Customer Administrator with access to the customer portal.",
+            "Administrator",
+            "Administrator with access to the customer portal.",
             true
     ),
 
@@ -42,7 +42,7 @@ public enum UserRole {
     private final String description;
     private final boolean externalUserRole;
 
-    UserRole(
+    UserRoles(
             int id,
             String label,
             String description,
@@ -70,12 +70,12 @@ public enum UserRole {
         return externalUserRole;
     }
 
-    public static UserRole fromId(Integer id) {
+    public static UserRoles fromId(Integer id) {
         if (id == null) {
             return null;
         }
 
-        for (UserRole status : values()) {
+        for (UserRoles status : values()) {
             if (status.id == id) {
                 return status;
             }
@@ -84,11 +84,11 @@ public enum UserRole {
         return null;
     }
 
-    public static UserRole fromIdOrDefault(
+    public static UserRoles fromIdOrDefault(
             Integer id,
-            UserRole defaultStatus
+            UserRoles defaultStatus
     ) {
-        UserRole status = fromId(id);
+        UserRoles status = fromId(id);
 
         if (status != null) {
             return status;
@@ -97,14 +97,14 @@ public enum UserRole {
         return defaultStatus == null ? INVASIVE_USER_ROLE : defaultStatus;
     }
 
-    public static UserRole fromCode(String code) {
+    public static UserRoles fromCode(String code) {
         if (code == null || code.trim().isEmpty()) {
             return null;
         }
 
         String normalizedCode = code.trim();
 
-        for (UserRole status : values()) {
+        for (UserRoles status : values()) {
             if (status.name().equalsIgnoreCase(normalizedCode)) {
                 return status;
             }
@@ -113,11 +113,11 @@ public enum UserRole {
         return null;
     }
 
-    public static UserRole fromCodeOrDefault(
+    public static UserRoles fromCodeOrDefault(
             String code,
-            UserRole defaultStatus
+            UserRoles defaultStatus
     ) {
-        UserRole status = fromCode(code);
+        UserRoles status = fromCode(code);
 
         if (status != null) {
             return status;

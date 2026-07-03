@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/user-edit.css" />
+</head>
+
+<body class="user-edit-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app user-edit-app">
+    <div class="content user-edit-content">
+        <header class="topbar user-edit-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout user-edit-layout" aria-label="User edit">
+            <div class="section-header user-edit-section-header">
+                <div class="user-edit-title-group">
+                    <h2 id="pageTitle">User</h2>
+                    <div id="pageModeLabel" class="user-edit-mode-label">Loading...</div>
+                </div>
+
+                <button
+                        id="btnHelp"
+                        class="user-edit-help-button"
+                        type="button"
+                        data-help-page="user-edit"
+                        data-help-title="Help - User Edit"
+                        title="Open help"
+                        aria-label="Open help for User Edit"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                        <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                        <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="user-edit-status-row">
+                <div class="page-dialog-status" id="dlgStatus">Idle</div>
+                <div class="user-edit-entity-meta" id="entityMeta">-</div>
+            </div>
+
+            <div class="page-tab-bar user-edit-tab-bar" role="tablist" aria-label="User tabs">
+                <button
+                        class="tab-btn page-tab-btn is-active"
+                        id="tabBtnBasis"
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="tabPanelBasis"
+                >
+                    Basis Info
+                </button>
+
+                <button
+                        class="tab-btn page-tab-btn"
+                        id="tabBtnSecurityAndPassword"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="tabPanelSecurityAndPassword"
+                >
+                    Security and Password
+                </button>
+            </div>
+
+            <div id="userEditFields" class="tab-panels page-dialog-panels user-edit-panels">
+                <section class="tab-panel is-active" id="tabPanelBasis" role="tabpanel" aria-labelledby="tabBtnBasis">
+                    <div id="basisInfoFields" class="page-field-grid user-edit-field-grid"></div>
+                </section>
+
+                <section class="tab-panel" id="tabPanelSecurityAndPassword" role="tabpanel" aria-labelledby="tabBtnSecurityAndPassword">
+                    <div id="securityAndPasswordFields" class="page-field-grid user-edit-field-grid"></div>
+                </section>
+            </div>
+
+            <div class="dlg-footer user-edit-footer">
+                <button id="btnSave" class="primary" type="button">Save</button>
+                <button id="btnCancel" type="button">Cancel</button>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                &times;
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help...
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/user-edit-page.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@ import com.bepa.eis.common.dto.mail.MailRecipient;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import com.bepa.eis.common.enums.mail.MailTemplateType;
 import com.bepa.eis.common.enums.project.ProjectStatus;
-import com.bepa.eis.common.enums.user.UserRole;
+import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.mail.MailProvider;
 import com.bepa.eis.common.providers.customer.CustomerTokenProvider;
@@ -209,6 +209,49 @@ public class UserProvider extends GenericProvider {
             ORDER BY U.Name, U.Email, U.UserId
             """;
 
+    private static final String SELECT_USER_MAIN_ROWS_SQL = """
+            SELECT
+                U.UserId,
+                U.Initials,
+                U.Name,
+                U.Email,
+                U.Phone,
+                U.DepartmentId,
+                U.Active,
+                U.UserRole,
+                U.LockedUntil,
+                U.MfaEnabled,
+                U.MfaVerified,
+                U.MfaSecretEncrypted,
+                U.UserMfaPolicy,
+                U.MfaResetRequired,
+                U.MfaResetAt,
+                U.MfaResetByUserId,
+                U.Password,
+                LastLogin.LastLoginAt,
+                D.DepartmentName,
+                D.DepartmentDescription,
+                '' AS CustomerNames
+            FROM [dbo].[USERS] U
+            LEFT JOIN [dbo].[DEPARTMENT] D
+                ON D.DepartmentId = U.DepartmentId
+            OUTER APPLY (
+                SELECT TOP (1)
+                    L.LoginTime AS LastLoginAt
+                FROM [dbo].[USER_LOGIN_ACTIVITY] L
+                WHERE L.UserId = U.UserId
+                  AND L.Success = 1
+                ORDER BY L.LoginTime DESC
+            ) LastLogin
+            WHERE EXISTS (
+                SELECT 1
+                FROM [dbo].[USER_CUSTOMER] UC
+                WHERE UC.UserId = U.UserId
+                  AND UC.CustomerId = ?
+            )
+            ORDER BY U.Name, U.Email, U.UserId
+            """;
+
     private static final String SELECT_ADMIN_USER_DETAIL_SQL = """
             SELECT
                 U.UserId,
@@ -296,9 +339,15 @@ public class UserProvider extends GenericProvider {
                 DepartmentId,
                 Active,
                 UserRole,
-                Password
+                FailedLoginCount,
+                MfaEnabled,
+                MfaVerified,
+                MfaResetRequired,
+                UserMfaPolicy,
+                Password,
+                LockedUntil
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_USER_SQL = """
@@ -1060,6 +1109,30 @@ public class UserProvider extends GenericProvider {
         return rows;
     }
 
+    public List<UserAdministrationRow> getUserMainRows(Integer customerId) {
+        List<UserAdministrationRow> rows = new ArrayList<>();
+
+        if (customerId == null) {
+            return rows;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_USER_MAIN_ROWS_SQL)) {
+
+            statement.setInt(1, customerId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    rows.add(mapUserAdministrationRow(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error loading user main rows. customerId={}", customerId, e);
+        }
+
+        return rows;
+    }
+
     public UserAdministrationRow getUserAdministrationRow(Integer userId) {
         if (userId == null) {
             return null;
@@ -1140,8 +1213,16 @@ public class UserProvider extends GenericProvider {
             UserAdministrationRow user,
             List<Integer> customerIds
     ) {
-        if (user == null || user.userId() == null) {
+        if (user == null) {
             return false;
+        }
+
+        if (safeText(user.name(), "").isBlank()) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+
+        if (normalizeEmail(user.email()).isBlank()) {
+            throw new IllegalArgumentException("Email is required.");
         }
 
         try (Connection connection = getDataSource().getConnection()) {
@@ -1150,17 +1231,32 @@ public class UserProvider extends GenericProvider {
             try {
                 validateEmailChange(connection, user);
 
-                if (!updateUserAdministration(connection, user)) {
-                    connection.rollback();
-                    return false;
+                List<Integer> resolvedCustomerIds = resolveCustomerIdsForSave(connection, user.userId(), customerIds);
+
+                Integer persistedUserId;
+
+                if (user.userId() == null) {
+                    persistedUserId = createUserAdministration(connection, user);
+
+                    if (persistedUserId == null) {
+                        connection.rollback();
+                        return false;
+                    }
+                } else {
+                    if (!updateUserAdministration(connection, user)) {
+                        connection.rollback();
+                        return false;
+                    }
+
+                    persistedUserId = user.userId();
                 }
 
-                replaceUserCustomers(connection, user.userId(), customerIds);
+                replaceUserCustomers(connection, persistedUserId, resolvedCustomerIds);
 
                 connection.commit();
 
                 logUserAdministrationEvent(
-                        "USER_ADMIN_UPDATED",
+                        user.userId() == null ? "USER_ADMIN_CREATED" : "USER_ADMIN_UPDATED",
                         user.email(),
                         "User administration data saved",
                         "OK"
@@ -1193,6 +1289,12 @@ public class UserProvider extends GenericProvider {
             UserAdministrationRow user
     ) throws SQLException {
         if (connection == null || user == null || user.userId() == null) {
+            String newEmail = normalizeEmail(user == null ? null : user.email());
+
+            if (!newEmail.isBlank() && hasActiveUserWithEmail(connection, newEmail, -1)) {
+                throw new IllegalStateException("Another active user already uses this email.");
+            }
+
             return;
         }
 
@@ -1215,17 +1317,145 @@ public class UserProvider extends GenericProvider {
             String normalizedEmail,
             Integer excludedUserId
     ) throws SQLException {
-        if (connection == null || normalizedEmail == null || normalizedEmail.isBlank() || excludedUserId == null) {
+        if (connection == null || normalizedEmail == null || normalizedEmail.isBlank()) {
             return false;
         }
 
         try (PreparedStatement statement = connection.prepareStatement(SELECT_ACTIVE_USER_BY_EMAIL_SQL)) {
             statement.setString(1, normalizedEmail);
-            statement.setInt(2, excludedUserId);
+            statement.setInt(2, excludedUserId == null ? -1 : excludedUserId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();
             }
+        }
+    }
+
+    private Integer createUserAdministration(
+            Connection connection,
+            UserAdministrationRow user
+    ) throws SQLException {
+        if (connection == null || user == null) {
+            return null;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                INSERT_USER_SQL,
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+
+            statement.setString(1, initialsForUser(user));
+            statement.setString(2, safeText(user.name(), "").trim());
+            statement.setString(3, normalizeEmail(user.email()));
+            statement.setString(4, blankToNull(user.phone()));
+
+            if (user.departmentId() == null) {
+                statement.setNull(5, Types.INTEGER);
+            } else {
+                statement.setInt(5, user.departmentId());
+            }
+
+            statement.setBoolean(6, user.active());
+            statement.setInt(7, user.userRole() == null ? UserRoles.CUSTOMER_ADMINISTRATOR.getId() : user.userRole().getId());
+            statement.setInt(8, 0);
+            statement.setBoolean(9, false);
+            statement.setBoolean(10, false);
+            statement.setBoolean(11, false);
+            statement.setString(12, normalizeUserMfaPolicy(user.userMfaPolicy()));
+            statement.setString(13, "");
+
+            if (user.lockedUntil() == null) {
+                statement.setNull(14, Types.TIMESTAMP);
+            } else {
+                statement.setTimestamp(14, user.lockedUntil());
+            }
+
+            int updatedRows = statement.executeUpdate();
+
+            if (updatedRows == 0) {
+                return null;
+            }
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private List<Integer> resolveCustomerIdsForSave(
+            Connection connection,
+            Integer userId,
+            List<Integer> customerIds
+    ) {
+        java.util.LinkedHashSet<Integer> uniqueIds = new java.util.LinkedHashSet<>();
+
+        if (customerIds != null) {
+            for (Integer customerId : customerIds) {
+                if (customerId != null) {
+                    uniqueIds.add(customerId);
+                }
+            }
+        }
+
+        if (uniqueIds.isEmpty() && userId != null) {
+            for (UserCustomerLink link : getLinkedCustomers(userId)) {
+                if (link != null && link.customerId() != null) {
+                    uniqueIds.add(link.customerId());
+                }
+            }
+        }
+
+        if (uniqueIds.isEmpty() && getWebSession() != null && getWebSession().getCustomerId() != null) {
+            uniqueIds.add(getWebSession().getCustomerId());
+        }
+
+        return new ArrayList<>(uniqueIds);
+    }
+
+    private String initialsForUser(UserAdministrationRow user) {
+        String initials = safeText(user == null ? null : user.initials(), "").trim();
+
+        if (!initials.isBlank()) {
+            return initials;
+        }
+
+        String name = safeText(user == null ? null : user.name(), "").trim();
+
+        if (name.isBlank()) {
+            return "";
+        }
+
+        String[] parts = name.split("\\s+");
+        StringBuilder builder = new StringBuilder();
+
+        for (String part : parts) {
+            if (part == null || part.isBlank()) {
+                continue;
+            }
+
+            builder.append(Character.toUpperCase(part.charAt(0)));
+
+            if (builder.length() >= 3) {
+                break;
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private String normalizeUserMfaPolicy(String value) {
+        if (value == null || value.isBlank()) {
+            return MfaConfig.UserMfaPolicy.DEFAULT.name();
+        }
+
+        try {
+            return MfaConfig.UserMfaPolicy.valueOf(value.trim().toUpperCase(Locale.ENGLISH)).name();
+        } catch (IllegalArgumentException e) {
+            return MfaConfig.UserMfaPolicy.DEFAULT.name();
         }
     }
 
@@ -1437,7 +1667,7 @@ public class UserProvider extends GenericProvider {
                 safeText(resultSet.getString("Phone"), ""),
                 departmentId,
                 resultSet.getBoolean("Active"),
-                UserRole.fromIdOrDefault(userRoleId, UserRole.BEPA_SYSTEM_ADMINISTRATOR),
+                UserRoles.fromIdOrDefault(userRoleId, UserRoles.BEPA_SYSTEM_ADMINISTRATOR),
                 resultSet.getTimestamp("LockedUntil"),
                 resultSet.getBoolean("MfaEnabled"),
                 resultSet.getBoolean("MfaVerified"),
@@ -1471,7 +1701,7 @@ public class UserProvider extends GenericProvider {
             }
 
             statement.setBoolean(6, user.active());
-            statement.setInt(7, user.userRole() == null ? UserRole.BEPA_SYSTEM_ADMINISTRATOR.getId() : user.userRole().getId());
+            statement.setInt(7, user.userRole() == null ? UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getId() : user.userRole().getId());
             statement.setString(8, user.userMfaPolicy() == null || user.userMfaPolicy().isBlank()
                     ? MfaConfig.UserMfaPolicy.DEFAULT.name()
                     : user.userMfaPolicy());
@@ -1873,7 +2103,7 @@ public class UserProvider extends GenericProvider {
             String phone,
             Integer departmentId,
             boolean active,
-            UserRole userRole,
+            UserRoles userRole,
             Timestamp lockedUntil,
             boolean mfaEnabled,
             boolean mfaVerified,

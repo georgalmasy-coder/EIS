@@ -116,6 +116,10 @@ public class GenericXmlDocument {
                 Element element = doc.createElement(field.getFieldName());
                 rootElement.appendChild(element);
 
+                for (Attribute attribute : field.getAttributes()) {
+                    element.setAttribute(attribute.getName(), attribute.getValue());
+                }
+
                 buildXmlDocument(element, subElements);
             } else if (field instanceof AttributeElement) {
 

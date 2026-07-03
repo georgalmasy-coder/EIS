@@ -2,10 +2,12 @@ package com.bepa.eis.server.api.web.application.admin;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
-import com.bepa.eis.common.enums.user.UserRole;
+import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -238,7 +240,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 text(userElement, "phone"),
                 intValue(text(userElement, "departmentId")),
                 booleanValue(text(userElement, "active"), true),
-                UserRole.fromIdOrDefault(intValue(text(userElement, "userRole")), UserRole.BEPA_SYSTEM_ADMINISTRATOR),
+                UserRoles.fromIdOrDefault(intValue(text(userElement, "userRole")), UserRoles.BEPA_SYSTEM_ADMINISTRATOR),
                 timestampValue(text(userElement, "lockedUntil")),
                 false,
                 false,
@@ -280,6 +282,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
     private void appendLookups(StringBuilder xml) {
         xml.append("<lookups>");
+        appendCountryCodeLookup(xml);
         appendStaticLookup(
                 xml,
                 "userMfaPolicy",
@@ -290,12 +293,29 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         appendStaticLookup(
                 xml,
                 "userRole",
-                new LookupOption(String.valueOf(UserRole.BEPA_SYSTEM_ADMINISTRATOR.getId()), UserRole.BEPA_SYSTEM_ADMINISTRATOR.getLabel()),
-                new LookupOption(String.valueOf(UserRole.CUSTOMER_ADMINISTRATOR.getId()), UserRole.CUSTOMER_ADMINISTRATOR.getLabel()),
-                new LookupOption(String.valueOf(UserRole.PROJECT_MEMBER.getId()), UserRole.PROJECT_MEMBER.getLabel()),
-                new LookupOption(String.valueOf(UserRole.PROJECT_VIEWER.getId()), UserRole.PROJECT_VIEWER.getLabel())
+                new LookupOption(String.valueOf(UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getId()), UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getLabel()),
+                new LookupOption(String.valueOf(UserRoles.CUSTOMER_ADMINISTRATOR.getId()), UserRoles.CUSTOMER_ADMINISTRATOR.getLabel()),
+                new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel()),
+                new LookupOption(String.valueOf(UserRoles.PROJECT_VIEWER.getId()), UserRoles.PROJECT_VIEWER.getLabel())
         );
         xml.append("</lookups>");
+    }
+
+    private void appendCountryCodeLookup(StringBuilder xml) {
+        xml.append("<lookup name=\"countryCode\">");
+
+        for (CustomerLookupCache.PhoneCountryRule rule : CustomerLookupCache.getPhoneCountryRules()) {
+            xml.append("<option");
+            xml.append(" code=\"").append(escapeXml(rule.code())).append("\"");
+            xml.append(" country=\"").append(escapeXml(rule.country())).append("\"");
+            xml.append(" label=\"").append(escapeXml(rule.country())).append("\"");
+            xml.append(" min=\"").append(rule.minDigits()).append("\"");
+            xml.append(" max=\"").append(rule.maxDigits()).append("\"");
+            xml.append(" example=\"").append(escapeXml(rule.example())).append("\"");
+            xml.append(" />");
+        }
+
+        xml.append("</lookup>");
     }
 
     private void appendTopPanel(StringBuilder xml, WebSession webSession) {
@@ -447,8 +467,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         UserProvider userProvider = new UserProvider(webSession);
         UserProvider.UserAdministrationRow currentUser = userProvider.getUserAdministrationRow(webSession.getUserId());
 
-        return currentUser != null
-                && currentUser.userRole() == UserRole.BEPA_SYSTEM_ADMINISTRATOR;
+        return currentUser != null && currentUser.userRole() == UserRoles.BEPA_SYSTEM_ADMINISTRATOR;
     }
 
     private Element firstElement(

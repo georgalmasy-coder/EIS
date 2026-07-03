@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../css/tabs-list.css" />
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/help-dialog.css" />
     <link rel="stylesheet" href="../../css/user-administration.css" />
 </head>
 <body>
@@ -47,20 +48,49 @@
         <section class="panel page-layout user-administration-layout" aria-label="User administration">
             <div class="section-header user-administration-section-header">
                 <h2>User Administration</h2>
-                <div class="section-header-actions user-administration-toolbar">
-                    <input id="userFilter" class="user-administration-filter" type="search" placeholder="Filter users..." autocomplete="off" aria-label="Filter users" />
-                    <button id="btnRefreshUsers" class="page-icon-button" type="button" aria-label="Refresh user list" title="Refresh user list">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h8V3z"></path></svg>
-                    </button>
-                </div>
             </div>
 
-            <div class="user-grouping-bar">
-                <div class="user-grouping-label">Group by</div>
-                <div id="groupByZone" class="user-grouping-zone" aria-label="Group by area" tabindex="0"></div>
-                <button id="btnClearGrouping" class="page-icon-button" type="button" aria-label="Clear grouping" title="Clear grouping">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path></svg>
-                </button>
+            <div class="user-administration-toolbar" aria-label="User toolbar">
+                <div class="user-administration-filter-group">
+                    <label class="user-administration-search-filter" for="userFilter">
+                        <span class="user-administration-filter-label">Search</span>
+                        <span class="user-administration-search-box">
+                            <input id="userFilter" class="user-administration-search-input" type="search" placeholder="Search users..." autocomplete="off" aria-label="Search users" />
+                            <span class="user-administration-search-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                    <path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2z"></path>
+                                </svg>
+                            </span>
+                        </span>
+                    </label>
+
+                    <button id="btnClearFilter" class="user-administration-secondary-button" type="button">
+                        Clear filter
+                    </button>
+                </div>
+
+                <div class="user-grouping-bar">
+                    <div class="user-grouping-label">Group by</div>
+                    <div id="groupByZone" class="user-grouping-zone" aria-label="Group by area" tabindex="0"></div>
+                    <button id="btnClearGrouping" class="page-icon-button" type="button" aria-label="Clear grouping" title="Clear grouping">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path></svg>
+                    </button>
+                    <button
+                            id="btnHelp"
+                            class="user-administration-help-button"
+                            type="button"
+                            data-help-page="user-administration"
+                            data-help-title="Help - User Administration"
+                            title="Open help"
+                            aria-label="Open help for User Administration"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="page-body user-administration-body">
@@ -109,6 +139,9 @@
             <h3 id="userDialogTitle">User Administration</h3>
         </div>
         <div class="page-dialog-status" id="userDialogStatus">Idle</div>
+        <div class="user-field-legend" aria-hidden="true">
+            <span class="user-field-legend-item">Required <span class="field-required">*</span></span>
+        </div>
 
         <div class="page-tab-bar" role="tablist" aria-label="User administration tabs">
             <button class="tab-btn page-tab-btn is-active" id="tabBtnBasis" type="button" role="tab" aria-selected="true" aria-controls="tabPanelBasis">Basis</button>
@@ -120,10 +153,10 @@
             <section class="tab-panel is-active" id="tabPanelBasis" role="tabpanel" aria-labelledby="tabBtnBasis">
                 <input id="fieldUserId" type="hidden" />
                 <div class="user-field-grid">
-                    <label class="user-field-full"><span>Customer memberships</span><input id="fieldCustomerNames" type="text" readonly /></label>
+                    <label class="user-field-full user-field-readonly"><span>Customer memberships</span><input id="fieldCustomerNames" type="text" readonly /></label>
                     <label><span>Initials</span><input id="fieldInitials" type="text" /></label>
-                    <label><span>Name</span><input id="fieldName" type="text" required /></label>
-                    <label><span>Email</span><input id="fieldEmail" type="email" required /></label>
+                    <label class="user-field-mandatory"><span>Name <span class="field-required">*</span></span><input id="fieldName" type="text" required /></label>
+                    <label class="user-field-mandatory"><span>Email <span class="field-required">*</span></span><input id="fieldEmail" type="email" required /></label>
                     <label><span>Role</span><select id="fieldUserRole"></select></label>
                     <div class="user-phone-field">
                         <label><span>Country code</span><select id="fieldPhoneCountryCode"></select></label>
@@ -139,10 +172,10 @@
             <section class="tab-panel" id="tabPanelSecurity" role="tabpanel" aria-labelledby="tabBtnSecurity">
                 <div class="user-field-grid">
                     <label><span>MFA policy</span><select id="fieldUserMfaPolicy"></select></label>
-                    <label class="user-active-field"><span>MFA verified</span><input id="fieldMfaVerified" type="checkbox" disabled /></label>
-                    <label class="user-active-field"><span>MFA secret</span><input id="fieldMfaSecret" type="checkbox" disabled /></label>
-                    <label class="user-active-field"><span>MFA reset required</span><input id="fieldMfaResetRequired" type="checkbox" disabled /></label>
-                    <label class="user-reset-by-field"><span>Reset by</span><input id="fieldMfaResetByUserId" type="text" readonly /></label>
+                    <label class="user-field-readonly user-active-field"><span>MFA verified</span><input id="fieldMfaVerified" type="checkbox" disabled /></label>
+                    <label class="user-field-readonly user-active-field"><span>MFA secret</span><input id="fieldMfaSecret" type="checkbox" disabled /></label>
+                    <label class="user-field-readonly user-active-field"><span>MFA reset required</span><input id="fieldMfaResetRequired" type="checkbox" disabled /></label>
+                    <label class="user-field-readonly user-reset-by-field"><span>Reset by</span><input id="fieldMfaResetByUserId" type="text" readonly /></label>
                 </div>
                 <div class="action-row">
                     <button id="btnResetMfa" type="button">Reset MFA</button>
@@ -154,7 +187,7 @@
 
             <section class="tab-panel" id="tabPanelPassword" role="tabpanel" aria-labelledby="tabBtnPassword">
                 <div class="user-field-grid">
-                    <label class="user-active-field"><span>Password set</span><input id="fieldPasswordSet" type="checkbox" disabled /></label>
+                    <label class="user-field-readonly user-active-field"><span>Password set</span><input id="fieldPasswordSet" type="checkbox" disabled /></label>
                 </div>
                 <div class="action-row">
                     <button id="btnSendPasswordResetLink" type="button">Send reset link</button>
@@ -165,6 +198,25 @@
         <div class="dlg-footer">
             <button id="btnSaveUser" class="primary" type="button">Save</button>
             <button id="btnCancelUser" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                &times;
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help...
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
         </div>
     </form>
 </dialog>

@@ -17,13 +17,154 @@
     flex-wrap: wrap;
 }
 
-.user-administration-filter {
-    min-width: 260px;
+.user-administration-toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.user-administration-filter-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+
+.user-administration-action-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.user-administration-search-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(420px, 100%);
+    flex: 0 1 520px;
+}
+
+.user-administration-filter-label {
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.user-administration-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 220px;
+}
+
+.user-administration-search-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 34px 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.user-administration-search-input:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.user-administration-search-icon {
+    position: absolute;
+    right: 11px;
+    color: var(--muted);
+    pointer-events: none;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-administration-search-icon svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+}
+
+.user-administration-secondary-button {
+    min-height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
+    padding: 7px 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.user-administration-secondary-button:hover {
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
+}
+
+.user-administration-icon-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.user-administration-icon-button:hover {
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
+}
+
+.user-administration-icon-button:active {
+    transform: translateY(1px);
+}
+
+.user-administration-icon-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.user-administration-icon-button:disabled {
+    opacity: .48;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .user-grouping-bar {
-    margin: 0 0 8px;
-    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 1 780px;
+    min-width: 0;
+    margin: 0 0 0 auto;
+    padding: 0;
+    flex-wrap: nowrap;
 }
 
 .user-grouping-label {
@@ -31,19 +172,32 @@
     text-transform: uppercase;
     letter-spacing: 0;
     opacity: 0.75;
+    white-space: nowrap;
+    flex: 0 0 auto;
 }
 
 .user-grouping-zone {
-    min-height: 36px;
-    flex: 1 1 420px;
+    min-height: 42px;
+    height: 42px;
+    flex: 1 1 630px;
+    min-width: 390px;
     border: 1px dashed rgba(128, 128, 128, 0.45);
     border-radius: 6px;
     padding: 6px;
     display: flex;
     gap: 6px;
     align-items: center;
+    align-content: center;
     flex-wrap: wrap;
+    box-sizing: border-box;
     background: rgba(255, 255, 255, 0.03);
+    overflow: hidden;
+}
+
+.user-grouping-zone .empty {
+    display: flex;
+    align-items: center;
+    min-height: 100%;
 }
 
 .user-group-chip {
@@ -69,6 +223,60 @@
     padding: 0;
     cursor: pointer;
     line-height: 1;
+}
+
+.user-grouping-bar .page-icon-button {
+    flex: 0 0 auto;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(96, 165, 250, .55);
+    background: rgba(96, 165, 250, .18);
+    color: #dbeafe;
+    box-shadow: 0 0 0 1px rgba(96, 165, 250, .12) inset;
+}
+
+.user-grouping-bar .page-icon-button:hover {
+    background: rgba(96, 165, 250, .28);
+    border-color: rgba(96, 165, 250, .8);
+}
+
+.user-grouping-bar .page-icon-button svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.user-administration-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.user-administration-help-button:hover {
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
+}
+
+.user-administration-help-button:active {
+    transform: translateY(1px);
+}
+
+.user-administration-help-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
 }
 
 .user-administration-scroll {
@@ -208,7 +416,7 @@ body.user-administration-column-resizing * {
 .user-edit-dialog {
     width: min(1100px, calc(100vw - 24px));
     max-width: 96vw;
-    max-height: 60vh;
+    max-height: 64vh;
     height: auto;
     overflow: hidden;
     padding: 0;
@@ -256,6 +464,22 @@ body.user-administration-column-resizing * {
     color: #bfdbfe;
 }
 
+.user-field-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.user-field-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .user-edit-form .page-tab-bar {
     overflow-x: auto;
     overflow-y: hidden;
@@ -265,7 +489,7 @@ body.user-administration-column-resizing * {
 .user-dialog-panels {
     min-height: 0;
     /* Adjust this value to change the fixed tab height. */
-    --user-dialog-panel-height: 380px;
+    --user-dialog-panel-height: 390px;
     display: block;
     overflow: hidden;
     margin-top: 8px;
@@ -304,9 +528,52 @@ body.user-administration-column-resizing * {
     gap: 6px;
 }
 
+.user-field-mandatory > span,
+.user-field-mandatory .field-label {
+    color: var(--text);
+}
+
+.user-field-readonly > span,
+.user-field-readonly .field-label {
+    color: var(--muted);
+}
+
 .user-field-grid input,
 .user-field-grid select {
     width: 100%;
+}
+
+.user-field-grid input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+}
+
+.user-field-grid input[readonly],
+.user-field-grid textarea[readonly],
+.user-field-grid select[disabled],
+.user-field-grid input[disabled] {
+    background: rgba(15, 23, 42, .42);
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, .35);
+    cursor: not-allowed;
+}
+
+.user-field-grid input[readonly]:not([type="checkbox"]),
+.user-field-grid textarea[readonly],
+.user-field-grid select[disabled] {
+    height: 36px;
+    padding: 5px 10px;
+}
+
+.user-field-grid input[readonly]::placeholder,
+.user-field-grid textarea[readonly]::placeholder {
+    color: rgba(203, 213, 225, .55);
+}
+
+.user-field-grid input[disabled],
+.user-field-grid select[disabled] {
+    opacity: .9;
 }
 
 .user-field-full {
@@ -357,6 +624,10 @@ body.user-administration-column-resizing * {
     margin: 0;
 }
 
+.user-field-readonly.user-active-field input[type="checkbox"] {
+    accent-color: #94a3b8;
+}
+
 .action-row {
     margin-top: 12px;
 }
@@ -387,7 +658,13 @@ body.user-administration-column-resizing * {
         grid-column: auto;
     }
 
-    .user-administration-filter {
+    .user-administration-search-filter {
+        min-width: 0;
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .user-administration-search-box {
         min-width: 0;
         width: 100%;
     }

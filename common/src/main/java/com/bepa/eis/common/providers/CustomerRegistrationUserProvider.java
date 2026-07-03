@@ -1,7 +1,7 @@
 package com.bepa.eis.common.providers;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.enums.user.UserRole;
+import com.bepa.eis.common.enums.user.UserRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +90,7 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
             statement.setString(4, nullIfBlank(phone));
             statement.setNull(5, java.sql.Types.INTEGER);
             statement.setBoolean(6, true);
-            statement.setInt(7, UserRole.CUSTOMER_ADMINISTRATOR.getId());
+            statement.setInt(7, UserRoles.CUSTOMER_ADMINISTRATOR.getId());
 
             /*
              * User is created without a usable password.

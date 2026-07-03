@@ -13,6 +13,9 @@ public enum FieldControl {
     NUMBER("number"),
     DECIMAL("decimal"),
     SELECT("select"),
+    EMAIL("email"),
+    PHONE("phone"),
+    URL("url"),
     NONE("none");
 
     private final String description;

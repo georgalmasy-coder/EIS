@@ -1065,7 +1065,7 @@
 </main>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async function () {
         const totalSteps = 5;
         let currentStep = 1;
         let customerCreated = false;
@@ -1089,7 +1089,7 @@
             "VE", "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW"
         ];
 
-        const phoneCountryCodes = [
+        const fallbackPhoneCountryCodes = [
             { country: "Denmark", code: "+45", min: 8, max: 8, example: "12 34 56 78" },
             { country: "Sweden", code: "+46", min: 7, max: 10, example: "70 123 45 67" },
             { country: "Norway", code: "+47", min: 8, max: 8, example: "123 45 678" },
@@ -1112,6 +1112,8 @@
             { country: "Faroe Islands", code: "+298", min: 6, max: 6, example: "123456" },
             { country: "Greenland", code: "+299", min: 6, max: 6, example: "123456" }
         ];
+
+        let phoneCountryCodes = fallbackPhoneCountryCodes.slice();
 
         const DEFAULT_PHONE_RULE = {
             country: "Selected country",
@@ -1225,6 +1227,43 @@
                 .replaceAll(">", "&gt;")
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#039;");
+        }
+
+        async function loadPhoneCountryCodes() {
+            try {
+                const response = await fetch(`${getCustomerApiBaseUrl()}/phone-country-codes`, {
+                    headers: {
+                        Accept: "application/json"
+                    },
+                    cache: "no-store",
+                    credentials: "same-origin"
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length) {
+                    phoneCountryCodes = data.map(function (entry) {
+                        return {
+                            country: String(entry.country || entry.label || "").trim(),
+                            code: String(entry.code || "").trim(),
+                            min: Number.isFinite(entry.min) ? entry.min : 0,
+                            max: Number.isFinite(entry.max) ? entry.max : 15,
+                            example: String(entry.example || "").trim()
+                        };
+                    }).filter(function (entry) {
+                        return entry.country && entry.code;
+                    });
+                } else {
+                    phoneCountryCodes = fallbackPhoneCountryCodes.slice();
+                }
+            } catch (error) {
+                console.warn("Could not load phone country codes from backend, using fallback list.", error);
+                phoneCountryCodes = fallbackPhoneCountryCodes.slice();
+            }
         }
 
         function fillCountries() {
@@ -1980,6 +2019,7 @@
         });
 
         fillCountries();
+        await loadPhoneCountryCodes();
         fillPhoneCountryCodes();
         fillExpiryYears();
         updatePhoneHelp();

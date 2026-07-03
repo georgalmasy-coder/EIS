@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.customer;
 import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider;
 import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider.CustomerRegistrationData;
 import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider.CustomerRegistrationResult;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.external.virk.cvr.CvrCompanyDto;
 import com.bepa.eis.server.api.external.virk.cvr.CvrLookupService;
 import com.bepa.eis.server.api.external.virk.cvr.CvrapiDkLookupService;
@@ -20,12 +21,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 @WebServlet(name = "CustomerRegistrationServlet", urlPatterns = {
         "/api/customers/cvr",
+        "/api/customers/phone-country-codes",
         "/api/customers"
 })
 
@@ -60,6 +63,23 @@ public class CustomerRegistrationServlet extends AbstractAdminServlet {
             throws IOException {
 
         if (!"/api/customers/cvr".equals(request.getServletPath())) {
+            if ("/api/customers/phone-country-codes".equals(request.getServletPath())) {
+                sendJson(
+                        response,
+                        HttpServletResponse.SC_OK,
+                        CustomerLookupCache.getPhoneCountryRules().stream()
+                                .map(rule -> new PhoneCountryCodeResponse(
+                                        rule.country(),
+                                        rule.code(),
+                                        rule.minDigits(),
+                                        rule.maxDigits(),
+                                        rule.example()
+                                ))
+                                .toList()
+                );
+                return;
+            }
+
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -456,6 +476,15 @@ public class CustomerRegistrationServlet extends AbstractAdminServlet {
 
     public record ErrorResponse(
             String message
+    ) {
+    }
+
+    public record PhoneCountryCodeResponse(
+            String country,
+            String code,
+            int min,
+            int max,
+            String example
     ) {
     }
 }

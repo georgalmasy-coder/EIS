@@ -47,6 +47,8 @@ public enum PageType {
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects"),
     PROJECT_MAIN_PAGE("project-main","html-pages/project-main.html", "Projects"),
     PROJECT_EDIT_PAGE("project-edit","html-pages/project-edit.html", "Project"),
+    USER_MAIN_PAGE("user-main","html-pages/user-main.html", "User Administration"),
+    USER_EDIT_PAGE("user-edit","html-pages/user-edit.html", "User Account"),
 
     NONE("invalid", "", "") ;
 

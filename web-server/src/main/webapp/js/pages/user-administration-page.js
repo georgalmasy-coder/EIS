@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { initHelpDialog } from "../components/help-dialog.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { toDateTimeLocalValue } from "../core/date.js";
 
@@ -66,6 +67,7 @@ const state = {
     columnWidths: loadColumnWidths(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
+    currentDoc: null,
     userDetail: null,
     lookups: {},
     departments: [],
@@ -79,6 +81,7 @@ document.addEventListener("DOMContentLoaded", initialize);
 
 function initialize() {
     initMenu();
+    initHelpDialog();
     collectElements();
     fillPhoneCountryCodes(DEFAULT_PHONE_RULE);
     applyColumnWidths();
@@ -99,7 +102,7 @@ function collectElements() {
     els.projectName = document.getElementById("projectName");
     els.userName = document.getElementById("userName");
     els.userFilter = document.getElementById("userFilter");
-    els.btnRefreshUsers = document.getElementById("btnRefreshUsers");
+    els.btnClearFilter = document.getElementById("btnClearFilter");
     els.btnClearGrouping = document.getElementById("btnClearGrouping");
     els.groupByZone = document.getElementById("groupByZone");
     els.userColGroup = document.getElementById("userColGroup");
@@ -127,13 +130,29 @@ function collectElements() {
 }
 
 function bindEvents() {
-    if (els.btnRefreshUsers) {
-        els.btnRefreshUsers.addEventListener("click", loadUsers);
-    }
-
     if (els.userFilter) {
         els.userFilter.addEventListener("input", function () {
             localStorage.setItem(STORAGE_FILTER, els.userFilter.value || "");
+            applyFilterSortAndRender();
+        });
+
+        els.userFilter.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                els.userFilter.value = "";
+                localStorage.setItem(STORAGE_FILTER, "");
+                applyFilterSortAndRender();
+                els.userFilter.blur();
+            }
+        });
+    }
+
+    if (els.btnClearFilter) {
+        els.btnClearFilter.addEventListener("click", function () {
+            if (els.userFilter) {
+                els.userFilter.value = "";
+            }
+
+            localStorage.setItem(STORAGE_FILTER, "");
             applyFilterSortAndRender();
         });
     }
@@ -285,6 +304,7 @@ async function openUserDetail(userId) {
 
     try {
         const doc = await fetchXml(`${API_URL}?userId=${encodeURIComponent(userId)}`);
+        state.currentDoc = doc;
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
         state.lookups = parseLookups(doc);
         fillLookupSelect("fieldUserMfaPolicy", "userMfaPolicy");
@@ -468,9 +488,14 @@ function parseLookups(doc) {
         }
 
         lookups[name] = Array.from(lookupNode.querySelectorAll(":scope > option")).map(function (optionNode) {
+            const country = optionNode.getAttribute("country") || optionNode.getAttribute("label") || "";
             return {
                 code: optionNode.getAttribute("code") || "",
-                label: optionNode.getAttribute("label") || optionNode.getAttribute("code") || ""
+                country,
+                label: optionNode.getAttribute("label") || country || optionNode.getAttribute("code") || "",
+                min: parseInt(optionNode.getAttribute("min") || "", 10),
+                max: parseInt(optionNode.getAttribute("max") || "", 10),
+                example: optionNode.getAttribute("example") || ""
             };
         }).filter(function (option) {
             return option.code;
@@ -579,14 +604,15 @@ function fillPhoneCountryCodes(selectedRule) {
     }
 
     const currentRule = selectedRule || getPhoneRuleByCode(els.fieldPhoneCountryCode.value) || DEFAULT_PHONE_RULE;
-    els.fieldPhoneCountryCode.innerHTML = PHONE_RULES
+    const phoneRules = getPhoneCountryRules();
+    els.fieldPhoneCountryCode.innerHTML = phoneRules
         .slice()
         .sort(function (left, right) {
-            return left.country.localeCompare(right.country);
+            return String(left.country || "").localeCompare(String(right.country || ""));
         })
         .map(function (rule) {
             const selected = rule.code === currentRule.code && rule.country === currentRule.country ? " selected" : "";
-            return `<option value="${escapeAttribute(rule.code)}" data-country="${escapeAttribute(rule.country)}"${selected}>${escapeHtml(`${rule.country} (${rule.code})`)}</option>`;
+            return `<option value="${escapeAttribute(rule.code)}" data-country="${escapeAttribute(rule.country)}" data-min="${escapeAttribute(rule.min)}" data-max="${escapeAttribute(rule.max)}" data-example="${escapeAttribute(rule.example)}"${selected}>${escapeHtml(`${rule.country} (${rule.code})`)}</option>`;
         }).join("");
 
     selectPhoneCountryRule(currentRule);
@@ -594,27 +620,30 @@ function fillPhoneCountryCodes(selectedRule) {
 
 function getPhoneRuleByCountry(country) {
     const normalizedCountry = normalizeCountryCode(country);
-    return PHONE_RULES.find(function (rule) {
+    const phoneRules = getPhoneCountryRules();
+    return phoneRules.find(function (rule) {
         return normalizeCountryCode(rule.country) === normalizedCountry;
     }) || null;
 }
 
 function getPhoneRuleByCode(code) {
     const normalizedCode = String(code || "").trim();
-    return PHONE_RULES.find(function (rule) {
+    const phoneRules = getPhoneCountryRules();
+    return phoneRules.find(function (rule) {
         return rule.code === normalizedCode;
     }) || null;
 }
 
 function getPhoneRuleForValue(phone, fallbackCountry) {
     const normalizedPhone = normalizePhoneNumber(phone);
+    const phoneRules = getPhoneCountryRules();
     const fallbackRule = getPhoneRuleByCountry(fallbackCountry) || getPhoneRuleByCountry(DEFAULT_PHONE_RULE.country) || DEFAULT_PHONE_RULE;
 
     if (!normalizedPhone) {
         return fallbackRule;
     }
 
-    const prefixMatches = PHONE_RULES.filter(function (rule) {
+    const prefixMatches = phoneRules.filter(function (rule) {
         return normalizedPhone.startsWith(rule.code);
     });
 
@@ -646,10 +675,31 @@ function selectedPhoneRule() {
 
     const code = String(selectedOption.value || "").trim();
     const country = String(selectedOption.getAttribute("data-country") || "").trim();
+    const phoneRules = getPhoneCountryRules();
 
-    return PHONE_RULES.find(function (rule) {
+    return phoneRules.find(function (rule) {
         return rule.code === code && rule.country === country;
     }) || getPhoneRuleByCode(code) || getPhoneRuleByCountry(country) || DEFAULT_PHONE_RULE;
+}
+
+function getPhoneCountryRules() {
+    const countryCodeLookup = state.lookups && state.lookups.countryCode;
+
+    if (Array.isArray(countryCodeLookup) && countryCodeLookup.length) {
+        return countryCodeLookup.map(function (rule) {
+            return {
+                country: String(rule.country || rule.label || "").trim(),
+                code: String(rule.code || "").trim(),
+                min: Number.isFinite(rule.min) ? rule.min : DEFAULT_PHONE_RULE.min,
+                max: Number.isFinite(rule.max) ? rule.max : DEFAULT_PHONE_RULE.max,
+                example: String(rule.example || "").trim()
+            };
+        }).filter(function (rule) {
+            return rule.code;
+        });
+    }
+
+    return PHONE_RULES.slice();
 }
 
 function selectPhoneCountryRule(rule) {
@@ -815,7 +865,7 @@ function validatePhoneNumber() {
     const digits = onlyDigits(input.value);
 
     if (!digits) {
-        return null;
+        return isPhoneRequired() ? "Phone number is required." : null;
     }
 
     if (rule.min === rule.max && digits.length !== rule.min) {
@@ -827,6 +877,14 @@ function validatePhoneNumber() {
     }
 
     return null;
+}
+
+function isPhoneRequired() {
+    const phoneNode = state.currentDoc
+        ? state.currentDoc.querySelector("userDetail > user > UserPhone, userDetail > user > Phone, user > UserPhone, user > Phone")
+        : null;
+
+    return String(phoneNode?.getAttribute("required") || "").toLowerCase() === "true";
 }
 
 function getFullPhoneNumber() {

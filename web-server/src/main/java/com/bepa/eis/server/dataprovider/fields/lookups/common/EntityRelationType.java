@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class EntityRelationType extends AbstractUserLookup {
+public class EntityRelationType extends AbstractLookup {
 
     private static final Logger log = LoggerFactory.getLogger(EntityRelationType.class);
 
@@ -18,7 +18,7 @@ public class EntityRelationType extends AbstractUserLookup {
     }
 
     private EntityRelationType(Integer relationTypeId) {
-        super(relationTypeId);
+        setValue(relationTypeId);
     }
 
     public EntityRelationType(WebSession webSession, Integer relationTypeId) {
@@ -49,6 +49,10 @@ public class EntityRelationType extends AbstractUserLookup {
     @Override
     public List<LookupValue> getListOfActiveLookupValues() {
         return List.of();
+    }
+
+    @Override
+    public void setValue(Integer value) {
     }
 
     @Override

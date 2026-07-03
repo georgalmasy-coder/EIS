@@ -41,6 +41,7 @@ export function validateFieldElement(fieldNode, uiField) {
     const required = fieldRequired(fieldNode);
     const minLength = fieldMinLength(fieldNode);
     const maxLength = fieldMaxLength(fieldNode);
+    const control = String(fieldNode.getAttribute?.("control") || "").toLowerCase();
     const value = getUiFieldValidationValue(uiField);
 
     if (required && !value) {
@@ -48,7 +49,7 @@ export function validateFieldElement(fieldNode, uiField) {
         return errors;
     }
 
-    if (value && uiField.type !== "checkbox") {
+    if (value && uiField.type !== "checkbox" && control !== "phone") {
         if (minLength !== null && value.length < minLength) {
             errors.push(`${label} must be at least ${minLength} characters.`);
         }
@@ -58,7 +59,48 @@ export function validateFieldElement(fieldNode, uiField) {
         }
     }
 
+    if (value && control === "email" && !isPlausibleEmailAddress(value)) {
+        errors.push(`${label} must be a valid email address.`);
+    }
+
     return errors;
+}
+
+function isPlausibleEmailAddress(value) {
+    const email = String(value || "").trim();
+
+    if (!email || email.length > 254) {
+        return false;
+    }
+
+    if (/\s/.test(email)) {
+        return false;
+    }
+
+    const parts = email.split("@");
+
+    if (parts.length !== 2) {
+        return false;
+    }
+
+    const [localPart, domainPart] = parts;
+
+    if (!localPart || !domainPart) {
+        return false;
+    }
+
+    if (localPart.startsWith(".") || localPart.endsWith(".")) {
+        return false;
+    }
+
+    if (domainPart.startsWith(".") || domainPart.endsWith(".") || !domainPart.includes(".")) {
+        return false;
+    }
+
+    return /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(localPart)
+        && /^[A-Za-z0-9.-]+$/.test(domainPart)
+        && !domainPart.includes("..")
+        && !localPart.includes("..");
 }
 
 export function clearInvalidFieldMarkers(root = document) {

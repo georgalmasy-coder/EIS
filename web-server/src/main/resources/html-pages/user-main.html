@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/generel.css" />
+    <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/help-dialog.css" />
+    <link rel="stylesheet" href="../../css/user-main.css" />
+</head>
+
+<body class="user-main-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app user-main-app">
+    <div class="content user-main-content">
+        <header class="topbar user-main-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout user-main-layout" aria-label="Users">
+            <div class="section-header user-main-section-header">
+                <h2>User Administration</h2>
+            </div>
+
+            <div class="user-main-toolbar" aria-label="User toolbar">
+                <div class="user-main-filter-group">
+                    <label class="user-main-search-filter" for="filterUserText">
+                        <span class="user-main-filter-label">Search</span>
+                        <span class="user-main-search-box">
+                            <input
+                                    id="filterUserText"
+                                    class="user-main-search-input"
+                                    type="search"
+                                    placeholder="Search users..."
+                                    autocomplete="off"
+                                    aria-label="Search users"
+                            >
+                            <span class="user-main-search-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                    <path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2z"></path>
+                                </svg>
+                            </span>
+                        </span>
+                    </label>
+
+                    <button
+                            id="btnClearFilter"
+                            class="user-main-secondary-button"
+                            type="button"
+                    >
+                        Clear filter
+                    </button>
+                </div>
+
+                <div class="user-main-action-group" aria-label="View actions">
+                    <button
+                            id="btnAddUser"
+                            class="user-main-icon-button"
+                            type="button"
+                            aria-label="Add user"
+                            title="Add user"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnHelp"
+                            class="user-main-icon-button"
+                            type="button"
+                            data-help-page="user-main"
+                            data-help-title="Help - Users"
+                            title="Open help"
+                            aria-label="Open help for Users"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body user-main-body">
+                <div class="table-frame page-frame user-main-list-frame" aria-label="User list frame">
+                    <div class="table-scroll user-main-list-scroll" id="tableScroll">
+                        <table class="data-table page-table user-main-table" aria-label="User list">
+                            <colgroup id="mainColGroup"></colgroup>
+                            <thead>
+                            <tr id="mainHeaderRow"></tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+
+                        <div class="empty page-empty user-main-empty" id="listEmptyState">
+                            Loading users...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                &times;
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help...
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../../js/pages/user-main-page.js"></script>
+</body>
+</html>
