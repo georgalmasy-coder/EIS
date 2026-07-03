@@ -6,7 +6,7 @@ import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
-import com.bepa.eis.server.api.web.application.baseline.BaselineXmlDocument;
+import com.bepa.eis.server.api.web.application.views.basis.baseline.BaselineXmlDocument;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;

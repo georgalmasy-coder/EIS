@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.views.basis.system;
+package com.bepa.eis.server.api.web.application.views.basis.systemrequirement;
 
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementBusinessPriority;

@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
@@ -34,9 +34,9 @@ const DEFAULT_COLUMNS = [
 
 const state = {
     topPanel: {
-        customerName: "-",
-        projectName: "-",
-        userName: "-"
+        customerName: "—",
+        projectName: "—",
+        userName: "—"
     },
     users: [],
     filteredUsers: [],
@@ -57,9 +57,9 @@ function start() {
 }
 
 function initializeShell() {
-    setText("customerName", "-", "");
-    setText("projectName", "-", "");
-    setText("userName", "-", "");
+    setText("customerName", "—", "");
+    setText("projectName", "—", "");
+    setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
     initMenu(document);
@@ -80,15 +80,17 @@ function initializeStateFromStorage() {
 
     if (filterInput) {
         filterInput.value = filterText;
+        syncFilterClearButton(filterInput);
     }
 }
 
 function initializeEvents() {
     const filterInput = document.getElementById("filterUserText");
-    const clearButton = document.getElementById("btnClearFilter");
     const addButton = document.getElementById("btnAddUser");
+    const clearButton = document.getElementById("btnClearFilter");
 
     filterInput?.addEventListener("input", () => {
+        syncFilterClearButton(filterInput);
         persistFilterText();
         applyFiltersAndRender();
     });
@@ -96,6 +98,7 @@ function initializeEvents() {
     filterInput?.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
             filterInput.value = "";
+            syncFilterClearButton(filterInput);
             persistFilterText();
             applyFiltersAndRender();
             filterInput.blur();
@@ -105,6 +108,8 @@ function initializeEvents() {
     clearButton?.addEventListener("click", () => {
         if (filterInput) {
             filterInput.value = "";
+            syncFilterClearButton(filterInput);
+            filterInput.focus();
         }
 
         persistFilterText();
@@ -168,23 +173,23 @@ function parseTopPanel(root) {
 
     if (!topPanel) {
         return {
-            customerName: "-",
-            projectName: "-",
-            userName: "-"
+            customerName: "—",
+            projectName: "—",
+            userName: "—"
         };
     }
 
     return {
-        customerName: getChildText(topPanel, "CustomerName", "-"),
-        projectName: getChildText(topPanel, "ProjectName", "-"),
-        userName: getChildText(topPanel, "UserName", getChildText(topPanel, "Name", "-"))
+        customerName: getChildText(topPanel, "CustomerName", "—"),
+        projectName: getChildText(topPanel, "ProjectName", "—"),
+        userName: getChildText(topPanel, "UserName", getChildText(topPanel, "Name", "—"))
     };
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "-");
-    setText("projectName", state.topPanel.projectName, "-");
-    setText("userName", state.topPanel.userName, "-");
+    setText("customerName", state.topPanel.customerName, "—");
+    setText("projectName", state.topPanel.projectName, "—");
+    setText("userName", state.topPanel.userName, "—");
 }
 
 function parseUsers(root) {
@@ -416,6 +421,16 @@ function persistFilterText() {
     localStorage.setItem(STORAGE_KEYS.filterText, filterText);
 }
 
+function syncFilterClearButton(filterInput) {
+    const clearButton = document.getElementById("btnClearFilter");
+
+    if (!clearButton || !filterInput) {
+        return;
+    }
+
+    clearButton.hidden = String(filterInput.value || "") === "";
+}
+
 function persistSorting() {
     localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
     localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
@@ -629,3 +644,4 @@ function openEditUser(userId) {
 
     window.location.href = `${EDIT_USER_URL}${encodeURIComponent(userId)}&returnUrl=${encodeURIComponent(RETURN_URL)}`;
 }
+

@@ -91,6 +91,7 @@ function initialize() {
 
     if (els.userFilter) {
         els.userFilter.value = localStorage.getItem(STORAGE_FILTER) || "";
+        syncFilterClearButton(els.userFilter);
     }
 
     loadUsers();
@@ -133,6 +134,7 @@ function bindEvents() {
     if (els.userFilter) {
         els.userFilter.addEventListener("input", function () {
             localStorage.setItem(STORAGE_FILTER, els.userFilter.value || "");
+            syncFilterClearButton(els.userFilter);
             applyFilterSortAndRender();
         });
 
@@ -140,6 +142,7 @@ function bindEvents() {
             if (event.key === "Escape") {
                 els.userFilter.value = "";
                 localStorage.setItem(STORAGE_FILTER, "");
+                syncFilterClearButton(els.userFilter);
                 applyFilterSortAndRender();
                 els.userFilter.blur();
             }
@@ -150,6 +153,8 @@ function bindEvents() {
         els.btnClearFilter.addEventListener("click", function () {
             if (els.userFilter) {
                 els.userFilter.value = "";
+                syncFilterClearButton(els.userFilter);
+                els.userFilter.focus();
             }
 
             localStorage.setItem(STORAGE_FILTER, "");
@@ -1583,6 +1588,16 @@ function setLoadStatus(textValue) {
     if (els.loadStatus) {
         els.loadStatus.textContent = textValue || "";
     }
+}
+
+function syncFilterClearButton(filterInput) {
+    const clearButton = document.getElementById("btnClearFilter");
+
+    if (!clearButton || !filterInput) {
+        return;
+    }
+
+    clearButton.hidden = String(filterInput.value || "") === "";
 }
 
 function setDialogStatus(textValue, className) {

@@ -56,6 +56,11 @@
                         <span class="user-administration-filter-label">Search</span>
                         <span class="user-administration-search-box">
                             <input id="userFilter" class="user-administration-search-input" type="search" placeholder="Search users..." autocomplete="off" aria-label="Search users" />
+                            <button id="btnClearFilter" class="user-administration-search-clear" type="button" aria-label="Clear filter" title="Clear filter" hidden>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+                                </svg>
+                            </button>
                             <span class="user-administration-search-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
                                     <path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2z"></path>
@@ -63,10 +68,6 @@
                             </span>
                         </span>
                     </label>
-
-                    <button id="btnClearFilter" class="user-administration-secondary-button" type="button">
-                        Clear filter
-                    </button>
                 </div>
 
                 <div class="user-grouping-bar">

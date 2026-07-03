@@ -23,14 +23,14 @@
         aria-controls="sideMenu"
         aria-expanded="false"
 >
-    ›
+    &#8250;
 </button>
 
 <div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
 
 <nav id="sideMenu" class="side-menu" aria-label="Side menu">
     <h2>Menu</h2>
-    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
     <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
 </nav>
 
@@ -40,9 +40,9 @@
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
                     <div class="topbar-meta-lines">
-                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
-                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
-                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                        <div class="meta-line">Customer Name: <strong id="customerName">â€”</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">â€”</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">â€”</strong></div>
                     </div>
 
                     <div class="topbar-logo">
@@ -59,29 +59,32 @@
         <section class="panel page-layout customer-administration-layout" aria-label="Customer administration">
             <div class="section-header customer-administration-section-header">
                 <h2>Customer Administration</h2>
+            </div>
 
-                <div class="section-header-actions customer-administration-toolbar">
-                    <input
-                            id="customerFilter"
-                            class="customer-administration-filter"
-                            type="search"
-                            placeholder="Filter customers..."
-                            autocomplete="off"
-                            aria-label="Filter customers"
-                    />
-
-                    <button
-                            id="btnRefreshCustomers"
-                            class="page-icon-button customer-administration-refresh-button"
-                            type="button"
-                            aria-label="Refresh customer list"
-                            title="Refresh customer list"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h8V3z"></path>
-                        </svg>
-                    </button>
-                </div>
+            <div class="customer-administration-search-row" aria-label="Customer search">
+                <label class="customer-administration-search-filter" for="customerFilter">
+                    <span class="customer-administration-filter-label">Search</span>
+                    <span class="customer-administration-search-box">
+                        <input
+                                id="customerFilter"
+                                class="customer-administration-filter"
+                                type="search"
+                                placeholder="Search customers..."
+                                autocomplete="off"
+                                aria-label="Search customers"
+                        />
+                        <button id="btnClearFilter" class="customer-administration-search-clear" type="button" aria-label="Clear filter" title="Clear filter" hidden>
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+                            </svg>
+                        </button>
+                        <span class="customer-administration-search-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2z"></path>
+                            </svg>
+                        </span>
+                    </span>
+                </label>
             </div>
 
             <div class="page-body customer-administration-body">
@@ -137,7 +140,7 @@
                             <tbody id="customersBody"></tbody>
                         </table>
 
-                        <div class="empty page-empty" id="customersEmpty">Loading customers…</div>
+                        <div class="empty page-empty" id="customersEmpty">Loading customers...</div>
                     </div>
                 </div>
             </div>

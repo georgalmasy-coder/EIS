@@ -17,12 +17,12 @@ public class CustomerName extends AbstractString {
 
     @Override
     public String getFieldLabelName() {
-        return "Customer Name";
+        return "Company Name";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Customer Name";
+        return "Company Name";
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.views.basis.stakeholder;
+package com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericImporters;

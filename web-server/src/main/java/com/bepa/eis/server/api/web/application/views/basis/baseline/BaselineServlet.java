@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.baseline;
+package com.bepa.eis.server.api.web.application.views.basis.baseline;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TopPanel;

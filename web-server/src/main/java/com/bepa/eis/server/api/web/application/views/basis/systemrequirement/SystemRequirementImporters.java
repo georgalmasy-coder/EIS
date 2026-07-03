@@ -1,8 +1,8 @@
-package com.bepa.eis.server.api.web.application.views.basis.system;
+package com.bepa.eis.server.api.web.application.views.basis.systemrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericImporters;
-import com.bepa.eis.server.api.web.application.views.basis.stakeholder.StakeholderRequirementExportRow;
+import com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement.StakeholderRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;

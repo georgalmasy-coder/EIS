@@ -112,11 +112,21 @@ body.user-main-document {
     border: 1px solid var(--border);
     background: rgba(15, 23, 42, .65);
     color: var(--text);
-    padding: 8px 34px 8px 10px;
+    padding: 8px 68px 8px 10px;
     border-radius: 10px;
     outline: none;
     font: inherit;
     box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.user-main-search-input::-webkit-search-decoration,
+.user-main-search-input::-webkit-search-cancel-button,
+.user-main-search-input::-webkit-search-results-button,
+.user-main-search-input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .user-main-search-input:focus {
@@ -141,20 +151,36 @@ body.user-main-document {
     fill: currentColor;
 }
 
-.user-main-secondary-button {
-    min-height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .55);
-    color: var(--text);
-    padding: 7px 12px;
-    font: inherit;
+.user-main-search-clear {
+    position: absolute;
+    right: 32px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
 }
 
-.user-main-secondary-button:hover {
-    background: rgba(96, 165, 250, .14);
-    border-color: rgba(96, 165, 250, .45);
+.user-main-search-clear:hover {
+    color: var(--text);
+    background: rgba(96, 165, 250, .12);
+}
+
+.user-main-search-clear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.user-main-search-clear svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
 }
 
 .user-main-icon-button {

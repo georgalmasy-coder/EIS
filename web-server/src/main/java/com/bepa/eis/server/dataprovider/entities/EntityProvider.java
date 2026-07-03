@@ -4,7 +4,7 @@ import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.web.application.baseline.Baseline;
+import com.bepa.eis.server.api.web.application.views.basis.baseline.Baseline;
 import com.bepa.eis.server.api.web.application.views.common.EntityAttachmentProvider;
 import com.bepa.eis.server.dataprovider.entities.common.*;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;

@@ -401,7 +401,7 @@ function createTopbarSearch() {
     const search = document.createElement("div");
     search.className = "topbar-search";
     search.setAttribute("role", "search");
-    search.setAttribute("aria-label", "Find på siden");
+    search.setAttribute("aria-label", "Search on page");
 
     search.innerHTML = `
         <input

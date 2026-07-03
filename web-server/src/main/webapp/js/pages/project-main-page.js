@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
@@ -26,9 +26,9 @@ const STORAGE_KEYS = {
 
 const state = {
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”"
+        customerName: "—",
+        projectName: "—",
+        userName: "—"
     },
     projects: [],
     filteredProjects: [],
@@ -49,9 +49,9 @@ function start() {
 }
 
 function initializeShell() {
-    setText("customerName", "â€”", "");
-    setText("projectName", "â€”", "");
-    setText("userName", "â€”", "");
+    setText("customerName", "—", "");
+    setText("projectName", "—", "");
+    setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
     initMenu(document);
@@ -68,6 +68,7 @@ function initializeStateFromStorage() {
 
     if (filterInput) {
         filterInput.value = filterText;
+        syncFilterClearButton(filterInput);
     }
 }
 
@@ -77,6 +78,7 @@ function initializeEvents() {
     const addButton = document.getElementById("btnAddProject");
 
     filterInput?.addEventListener("input", () => {
+        syncFilterClearButton(filterInput);
         persistFilters();
         applyFiltersAndRender();
     });
@@ -84,6 +86,7 @@ function initializeEvents() {
     filterInput?.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
             filterInput.value = "";
+            syncFilterClearButton(filterInput);
             persistFilters();
             applyFiltersAndRender();
             filterInput.blur();
@@ -93,6 +96,8 @@ function initializeEvents() {
     clearButton?.addEventListener("click", () => {
         if (filterInput) {
             filterInput.value = "";
+            syncFilterClearButton(filterInput);
+            filterInput.focus();
         }
 
         persistFilters();
@@ -156,23 +161,23 @@ function parseTopPanel(root) {
 
     if (!topPanel) {
         return {
-            customerName: "â€”",
-            projectName: "â€”",
-            userName: "â€”"
+            customerName: "—",
+            projectName: "—",
+            userName: "—"
         };
     }
 
     return {
-        customerName: getChildText(topPanel, "CustomerName", "â€”"),
-        projectName: getChildText(topPanel, "ProjectName", "â€”"),
-        userName: getChildText(topPanel, "Name", "â€”")
+        customerName: getChildText(topPanel, "CustomerName", "—"),
+        projectName: getChildText(topPanel, "ProjectName", "—"),
+        userName: getChildText(topPanel, "Name", "—")
     };
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "â€”");
-    setText("projectName", state.topPanel.projectName, "â€”");
-    setText("userName", state.topPanel.userName, "â€”");
+    setText("customerName", state.topPanel.customerName, "-");
+    setText("projectName", state.topPanel.projectName, "-");
+    setText("userName", state.topPanel.userName, "-");
 }
 
 function parseProjects(root) {
@@ -474,6 +479,16 @@ function persistFilters() {
     const filterText = document.getElementById("filterProjectText")?.value || "";
 
     sessionStorage.setItem(STORAGE_KEYS.filterText, filterText);
+}
+
+function syncFilterClearButton(filterInput) {
+    const clearButton = document.getElementById("btnClearFilter");
+
+    if (!clearButton || !filterInput) {
+        return;
+    }
+
+    clearButton.hidden = String(filterInput.value || "") === "";
 }
 
 function persistSorting() {
@@ -824,3 +839,4 @@ function hideEmptyState() {
         emptyState.classList.remove("is-visible");
     }
 }
+

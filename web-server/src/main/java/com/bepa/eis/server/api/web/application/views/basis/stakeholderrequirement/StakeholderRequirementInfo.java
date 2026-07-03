@@ -1,52 +1,54 @@
-package com.bepa.eis.server.api.web.application.views.basis.system;
+package com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement;
 
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
 import com.bepa.eis.server.api.web.application.views.common.*;
+import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.Entities;
-import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.common.enums.entity.EntityType;
 
-public class SystemRequirementInfo extends GenericXmlDocument {
+public class StakeholderRequirementInfo extends GenericXmlDocument {
 
-    private final static EntityType entityType = EntityType.SYSTEM_REQUIREMENT;
+    private ListOfElements rootElement;
+    private TopPanel topPanel;
+    private final static EntityType entityType = EntityType.STAKEHOLDER_REQUIREMENT;
 
-    public SystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
+    public StakeholderRequirementInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
         super(webSession);
-        buildXmlDocument(webSession, type, null, null, parentEntityId);
+        buildXmlDocument(webSession, type, -1, null, parentEntityId);
     }
 
-    public SystemRequirementInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
+    public StakeholderRequirementInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
         super(webSession);
         buildXmlDocument(webSession, type, entityId, version, null);
     }
 
     private void buildXmlDocument(WebSession webSession, EntityRequestType type, Integer entityId, Integer version, Integer parentEntityId) throws Exception{
 
-        SystemRequirementProvider systemRequirementProvider = new SystemRequirementProvider(webSession);
+        StakeholderRequirementProvider stakeholderRequirementProvider = new StakeholderRequirementProvider(webSession);
 
-        ListOfElements rootElement = initXmlDocument(this.getClass().getSimpleName());
+        rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession();
         rootElement.addElement(topPanel.getTopPanelElements());
 
         Entities basisRequirements;
         if (type == EntityRequestType.EDIT_ENTITY) {
-            basisRequirements = systemRequirementProvider.getSystemRequirementInfo(entityId, version);
+            basisRequirements = stakeholderRequirementProvider.getBasisRequirementInfo(entityId, version);
         } else if (type == EntityRequestType.CREATE_ENTITY) {
-            basisRequirements = systemRequirementProvider.getSystemRequirementInfo(parentEntityId);
+            basisRequirements = stakeholderRequirementProvider.getBasisRequirementInfo(parentEntityId);
         } else {
             throw new IllegalArgumentException("Invalid entity request type");
         }
 
         rootElement.addElement(basisRequirements.getListOfEntities());
 
-        Entities systemRequirementHistory = systemRequirementProvider.getSystemRequirementHistory(entityId);
-        rootElement.addElement(systemRequirementHistory.getListOfEntities());
+        Entities systemBreakdownHistory = stakeholderRequirementProvider.getBasisRequirementHistory(entityId);
+        rootElement.addElement(systemBreakdownHistory.getListOfEntities());
 
         EntityNoteProvider entityNoteProvider = new EntityNoteProvider(webSession);
         EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(entityType, entityId, version);

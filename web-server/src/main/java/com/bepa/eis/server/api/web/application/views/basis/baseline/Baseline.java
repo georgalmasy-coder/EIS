@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.baseline;
+package com.bepa.eis.server.api.web.application.views.basis.baseline;
 
 import java.sql.Timestamp;
 

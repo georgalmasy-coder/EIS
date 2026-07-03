@@ -20,7 +20,7 @@ public class UserId extends AbstractId {
 
     @Override
     public String toString() {
-        return getValue().toString();
+        return getValue() != null ? getValue().toString() : "";
     }
 
 }

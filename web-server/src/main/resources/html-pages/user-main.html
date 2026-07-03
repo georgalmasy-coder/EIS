@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="da">
 <head>
     <meta charset="utf-8" />
@@ -41,9 +41,9 @@
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
                     <div class="topbar-meta-lines">
-                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
-                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
-                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
                     </div>
 
                     <div class="topbar-logo">
@@ -75,6 +75,11 @@
                                     autocomplete="off"
                                     aria-label="Search users"
                             >
+                            <button id="btnClearFilter" class="user-main-search-clear" type="button" aria-label="Clear filter" title="Clear filter" hidden>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+                                </svg>
+                            </button>
                             <span class="user-main-search-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
                                     <path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2z"></path>
@@ -82,14 +87,6 @@
                             </span>
                         </span>
                     </label>
-
-                    <button
-                            id="btnClearFilter"
-                            class="user-main-secondary-button"
-                            type="button"
-                    >
-                        Clear filter
-                    </button>
                 </div>
 
                 <div class="user-main-action-group" aria-label="View actions">
@@ -166,3 +163,4 @@
 <script type="module" src="../../js/pages/user-main-page.js"></script>
 </body>
 </html>
+

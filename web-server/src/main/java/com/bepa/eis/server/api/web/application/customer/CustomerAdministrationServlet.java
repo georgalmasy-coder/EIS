@@ -15,6 +15,7 @@ import com.bepa.eis.common.enums.customer.CustomerSubscriptionStatus;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowEventType;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowState;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowStatus;
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.customer.CustomerModuleProvider;
 import com.bepa.eis.common.providers.customer.CustomerPaymentMethodProvider;
@@ -23,7 +24,9 @@ import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.common.providers.customer.CustomerSubscriptionProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowEventProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
+import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
+import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,13 +55,14 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws ServletException, IOException {
+        WebSession webSession = getWebSessionFromRequest(request, false);
         Integer customerId = intValue(request.getParameter("customerId"));
 
         if (customerId == null) {
             writeXml(
                     response,
                     HttpServletResponse.SC_OK,
-                    buildCustomerListXml()
+                    buildCustomerListXml(webSession)
             );
             return;
         }
@@ -66,7 +70,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         writeXml(
                 response,
                 HttpServletResponse.SC_OK,
-                buildCustomerDetailXml(customerId)
+                buildCustomerDetailXml(webSession, customerId)
         );
     }
 
@@ -166,7 +170,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         }
     }
 
-    private String buildCustomerListXml() {
+    private String buildCustomerListXml(WebSession webSession) {
         CustomerRecordProvider customerRecordProvider = new CustomerRecordProvider(null);
         List<CustomerRecord> customers = customerRecordProvider.getAllLatestCustomers();
 
@@ -175,6 +179,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendXmlHeader(xml);
         xml.append("<customerAdministration>");
 
+        appendTopPanel(xml, webSession);
         appendLookups(xml);
 
         xml.append("<customers>");
@@ -191,7 +196,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         return xml.toString();
     }
 
-    private String buildCustomerDetailXml(Integer customerId) {
+    private String buildCustomerDetailXml(WebSession webSession, Integer customerId) {
         CustomerRecordProvider customerRecordProvider = new CustomerRecordProvider(null);
         CustomerSubscriptionProvider subscriptionProvider = new CustomerSubscriptionProvider(null);
         CustomerPaymentProvider paymentProvider = new CustomerPaymentProvider(null);
@@ -213,6 +218,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendXmlHeader(xml);
         xml.append("<customerAdministration>");
 
+        appendTopPanel(xml, webSession);
         appendLookups(xml);
 
         xml.append("<customerDetail>");
@@ -229,6 +235,29 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         xml.append("</customerAdministration>");
 
         return xml.toString();
+    }
+
+    private void appendTopPanel(StringBuilder xml, WebSession webSession) {
+        xml.append("<TopPanel>");
+
+        try {
+            TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+
+            if (topPanel != null && topPanel.getTopPanelElements() != null) {
+                topPanel.getTopPanelElements().getElements().forEach(field -> {
+                    if (field == null || field.getFieldName() == null || field.getFieldName().isBlank()) {
+                        return;
+                    }
+
+                    appendElement(xml, field.getFieldName(), field.toString());
+                });
+            }
+        } catch (Exception ignored) {
+            // Top panel is best-effort for this admin page.
+        }
+
+        xml.append("</TopPanel>");
     }
 
     private String buildSaveResultXml(SaveResult result) {

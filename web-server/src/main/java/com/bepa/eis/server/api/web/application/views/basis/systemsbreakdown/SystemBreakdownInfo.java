@@ -1,34 +1,34 @@
-package com.bepa.eis.server.api.web.application.views.basis.stakeholder;
+package com.bepa.eis.server.api.web.application.views.basis.systemsbreakdown;
 
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
 import com.bepa.eis.server.api.web.application.views.common.*;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.Entities;
+import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.common.enums.entity.EntityType;
 
-public class StakeholderRequirementInfo extends GenericXmlDocument {
+public class SystemBreakdownInfo extends GenericXmlDocument {
 
     private ListOfElements rootElement;
     private TopPanel topPanel;
-    private final static EntityType entityType = EntityType.STAKEHOLDER_REQUIREMENT;
+    private Entities systemBreakdowns; ;
 
-    public StakeholderRequirementInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
+    public SystemBreakdownInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
         super(webSession);
         buildXmlDocument(webSession, type, -1, null, parentEntityId);
     }
 
-    public StakeholderRequirementInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
+    public SystemBreakdownInfo(WebSession webSession, EntityRequestType type, Integer entityId, Integer version) throws Exception {
         super(webSession);
         buildXmlDocument(webSession, type, entityId, version, null);
     }
 
     private void buildXmlDocument(WebSession webSession, EntityRequestType type, Integer entityId, Integer version, Integer parentEntityId) throws Exception{
 
-        StakeholderRequirementProvider stakeholderRequirementProvider = new StakeholderRequirementProvider(webSession);
+        SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
@@ -36,32 +36,27 @@ public class StakeholderRequirementInfo extends GenericXmlDocument {
         topPanel = topPanelProvider.getTopPanelBySession();
         rootElement.addElement(topPanel.getTopPanelElements());
 
-        Entities basisRequirements;
+        Entities systemBreakdown;
         if (type == EntityRequestType.EDIT_ENTITY) {
-            basisRequirements = stakeholderRequirementProvider.getBasisRequirementInfo(entityId, version);
+            systemBreakdown = systemBreakdownProvider.getSystemBreakdownInfo(entityId, version);
         } else if (type == EntityRequestType.CREATE_ENTITY) {
-            basisRequirements = stakeholderRequirementProvider.getBasisRequirementInfo(parentEntityId);
+            systemBreakdown = systemBreakdownProvider.getSystemBreakdownInfo(parentEntityId);
         } else {
             throw new IllegalArgumentException("Invalid entity request type");
         }
 
-        rootElement.addElement(basisRequirements.getListOfEntities());
+        rootElement.addElement(systemBreakdown.getListOfEntities());
 
-        Entities systemBreakdownHistory = stakeholderRequirementProvider.getBasisRequirementHistory(entityId);
+        Entities systemBreakdownHistory = systemBreakdownProvider.getSystemBreakdownHistory(entityId);
         rootElement.addElement(systemBreakdownHistory.getListOfEntities());
 
         EntityNoteProvider entityNoteProvider = new EntityNoteProvider(webSession);
-        EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(entityType, entityId, version);
+        EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId, version);
         rootElement.addElement(entityNotes.getEntityNoteElements());
 
         EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
-        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId);
+        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId);
         rootElement.addElement(entityAttachments.getEntityAttachmentElements());
-
-        EntityRelationProvider entityRelationProvider = new EntityRelationProvider(webSession);
-        EntityRelations entityRelations = entityRelationProvider.getEntityRelationsByEntityId(entityType, entityId);
-        rootElement.addElement(entityRelations.getEntityRelationElements());
-
     }
 
 }

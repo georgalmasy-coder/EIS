@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { applyTopPanelFromDocument } from "../core/page-header.js";
 
 const API_URL = "/api/admin/customers";
 
@@ -44,6 +45,7 @@ function initialize() {
 
     if (els.customerFilter) {
         els.customerFilter.value = localStorage.getItem(STORAGE_FILTER) || "";
+        syncFilterClearButton(els.customerFilter);
     }
 
     loadCustomers();
@@ -52,7 +54,6 @@ function initialize() {
 function collectElements() {
     els.loadStatus = document.getElementById("loadStatus");
     els.customerFilter = document.getElementById("customerFilter");
-    els.btnRefreshCustomers = document.getElementById("btnRefreshCustomers");
 
     els.customerColGroup = document.getElementById("customerColGroup");
     els.customerHeaderRow = document.getElementById("customerHeaderRow");
@@ -77,13 +78,33 @@ function collectElements() {
 }
 
 function bindEvents() {
-    if (els.btnRefreshCustomers) {
-        els.btnRefreshCustomers.addEventListener("click", loadCustomers);
-    }
-
     if (els.customerFilter) {
         els.customerFilter.addEventListener("input", function () {
             localStorage.setItem(STORAGE_FILTER, els.customerFilter.value || "");
+            syncFilterClearButton(els.customerFilter);
+            applyFilterSortAndRender();
+        });
+
+        els.customerFilter.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                els.customerFilter.value = "";
+                localStorage.setItem(STORAGE_FILTER, "");
+                syncFilterClearButton(els.customerFilter);
+                applyFilterSortAndRender();
+                els.customerFilter.blur();
+            }
+        });
+    }
+
+    if (els.btnClearFilter) {
+        els.btnClearFilter.addEventListener("click", function () {
+            if (els.customerFilter) {
+                els.customerFilter.value = "";
+                syncFilterClearButton(els.customerFilter);
+                els.customerFilter.focus();
+            }
+
+            localStorage.setItem(STORAGE_FILTER, "");
             applyFilterSortAndRender();
         });
     }
@@ -117,6 +138,7 @@ async function loadCustomers() {
 
     try {
         const doc = await fetchXml(API_URL);
+        applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
 
@@ -147,6 +169,7 @@ async function openCustomerDetail(customerId) {
 
     try {
         const doc = await fetchXml(`${API_URL}?customerId=${encodeURIComponent(customerId)}`);
+        applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
 
@@ -162,6 +185,10 @@ async function openCustomerDetail(customerId) {
 
 async function saveCustomerAdministration() {
     if (state.saving) {
+        return;
+    }
+
+    if (els.customerEditForm && typeof els.customerEditForm.reportValidity === "function" && !els.customerEditForm.reportValidity()) {
         return;
     }
 
@@ -187,17 +214,11 @@ async function saveCustomerAdministration() {
         }
 
         setDialogStatus(result.message || "Customer administration data saved.", "is-ok");
+        closeDialog();
+        state.selectedCustomerId = null;
+        state.customerDetail = null;
 
         await loadCustomers();
-
-        if (state.selectedCustomerId) {
-            const detailDoc = await fetchXml(`${API_URL}?customerId=${encodeURIComponent(state.selectedCustomerId)}`);
-            state.lookups = parseLookups(detailDoc);
-            fillAllLookupSelects();
-
-            state.customerDetail = parseCustomerDetail(detailDoc);
-            fillDialog(state.customerDetail);
-        }
     } catch (error) {
         console.error(error);
         setDialogStatus(`Save failed: ${error.message}`, "is-error");
@@ -555,12 +576,12 @@ function renderStatus(status, label) {
     const safeLabel = label || safeStatus;
     const statusClass = `status-${safeStatus.toLowerCase().replaceAll("_", "-")}`;
 
-    return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "—")}</span>`;
+    return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "â€”")}</span>`;
 }
 
 function renderMfaPolicy(policy, label) {
     const safePolicy = policy || "";
-    const safeLabel = label || safePolicy || "—";
+    const safeLabel = label || safePolicy || "â€”";
     const policyClass = `mfa-${safePolicy.toLowerCase().replaceAll("_", "-")}`;
 
     return `<span class="customer-mfa-pill ${escapeAttribute(policyClass)}" title="${escapeAttribute(safePolicy)}">${escapeHtml(safeLabel)}</span>`;
@@ -574,7 +595,7 @@ function updateSortIndicators() {
     const indicator = document.getElementById(`si-${state.sortKey}`);
 
     if (indicator) {
-        indicator.textContent = state.sortDirection === "asc" ? "▲" : "▼";
+        indicator.textContent = state.sortDirection === "asc" ? "â–²" : "â–¼";
     }
 }
 
@@ -605,6 +626,16 @@ function bindColumnResize() {
             document.addEventListener("mouseup", onMouseUp);
         });
     });
+}
+
+function syncFilterClearButton(filterInput) {
+    const clearButton = document.getElementById("btnClearFilter");
+
+    if (!clearButton || !filterInput) {
+        return;
+    }
+
+    clearButton.hidden = String(filterInput.value || "") === "";
 }
 
 function applyColumnWidths() {

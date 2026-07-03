@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.views.basis.system;
+package com.bepa.eis.server.api.web.application.views.basis.systemrequirement;
 
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
