@@ -906,18 +906,16 @@ export function createLinksTable(config = {}) {
 
         const reachability = await probeUrlReachability(pendingLink.linkUrl);
 
-        if (!reachability.reachable) {
+        if (reachability.verified && !reachability.reachable) {
             const message = reachability.verified
                 ? `The url could not be reached (${reachability.message}). Save anyway?`
                 : `The url could not be verified (${reachability.message}). Save anyway?`;
-
-            setElementText(elements.status, message);
 
             if (!window.confirm(message)) {
                 return;
             }
         } else {
-            setElementText(elements.status, reachability.message);
+            setElementText(elements.status, reachability.verified ? reachability.message : "Link saved.");
         }
 
         saveLinkIntoTable(pendingLink);

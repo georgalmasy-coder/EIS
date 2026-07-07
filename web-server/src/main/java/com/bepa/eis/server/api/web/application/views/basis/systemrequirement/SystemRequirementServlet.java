@@ -54,12 +54,14 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
             if (systemRequirementDocument != null) {
                 Element systemRequirement = firstChild(systemRequirementDocument, "systemRequirement");
                 Element noteSection = firstChild(rootElement, "EntityNotes");
+                Element linkSection = firstChild(rootElement, "EntityLinks");
                 Element attachmentSection = firstChild(rootElement, "EntityAttachments");
 
                 SystemRequirementEntity systemRequirementEntity = parseBasisSystemRequirementDocument(webSession, systemRequirement);
                 SystemRequirementProvider requirementProvider = new SystemRequirementProvider(webSession);
 
                 parseNoteDocument(systemRequirementEntity, noteSection);
+                parseLinkDocument(systemRequirementEntity, linkSection);
                 parseAttachmentDocument(systemRequirementEntity, attachmentSection);
 
                 requirementProvider.persist(systemRequirementEntity);
