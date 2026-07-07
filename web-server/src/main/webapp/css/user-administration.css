@@ -203,13 +203,14 @@
 }
 
 .user-grouping-zone {
+    position: relative;
     min-height: 42px;
     height: 42px;
     flex: 1 1 630px;
     min-width: 390px;
     border: 1px dashed rgba(128, 128, 128, 0.45);
     border-radius: 6px;
-    padding: 6px;
+    padding: 6px 34px 6px 6px;
     display: flex;
     gap: 6px;
     align-items: center;
@@ -251,27 +252,44 @@
     line-height: 1;
 }
 
-.user-grouping-bar .page-icon-button {
-    flex: 0 0 auto;
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid rgba(96, 165, 250, .55);
-    background: rgba(96, 165, 250, .18);
-    color: #dbeafe;
-    box-shadow: 0 0 0 1px rgba(96, 165, 250, .12) inset;
+.user-grouping-clear {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
-.user-grouping-bar .page-icon-button:hover {
-    background: rgba(96, 165, 250, .28);
-    border-color: rgba(96, 165, 250, .8);
+.user-grouping-clear:hover {
+    color: var(--text);
+    background: rgba(96, 165, 250, .12);
 }
 
-.user-grouping-bar .page-icon-button svg {
-    width: 20px;
-    height: 20px;
+.user-grouping-clear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.user-grouping-clear svg {
+    width: 14px;
+    height: 14px;
     fill: currentColor;
+}
+
+.user-grouping-clear[hidden] {
+    display: none !important;
 }
 
 .user-administration-help-button {

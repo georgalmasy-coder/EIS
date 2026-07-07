@@ -104,7 +104,6 @@ function collectElements() {
     els.userName = document.getElementById("userName");
     els.userFilter = document.getElementById("userFilter");
     els.btnClearFilter = document.getElementById("btnClearFilter");
-    els.btnClearGrouping = document.getElementById("btnClearGrouping");
     els.groupByZone = document.getElementById("groupByZone");
     els.userColGroup = document.getElementById("userColGroup");
     els.userHeaderRow = document.getElementById("userHeaderRow");
@@ -189,17 +188,6 @@ function bindEvents() {
         els.groupByZone.addEventListener("drop", function (event) {
             event.preventDefault();
             addGroupByKey(event.dataTransfer.getData("text/plain"));
-        });
-    }
-
-    if (els.btnClearGrouping) {
-        els.btnClearGrouping.addEventListener("click", function () {
-            state.groupBy = [];
-            state.collapsedGroupPaths = [];
-            persistGroupBy();
-            persistCollapsedGroupPaths();
-            renderGroupByZone();
-            applyFilterSortAndRender();
         });
     }
 
@@ -1310,19 +1298,44 @@ function renderGroupByZone() {
         return;
     }
 
+    const clearButtonMarkup = `
+        <button
+                id="btnClearGrouping"
+                class="user-grouping-clear"
+                type="button"
+                aria-label="Clear grouping"
+                title="Clear grouping"
+                ${state.groupBy.length ? "" : "hidden"}
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+            </svg>
+        </button>
+    `;
+
     if (!state.groupBy.length) {
-        els.groupByZone.innerHTML = `<span class="empty">Drop a column here.</span>`;
-        return;
+        els.groupByZone.innerHTML = `<span class="empty">Drop a column here.</span>${clearButtonMarkup}`;
+    } else {
+        els.groupByZone.innerHTML = `${state.groupBy.map(function (key) {
+            return `
+                <span class="user-group-chip" draggable="true" data-group-key="${escapeAttribute(key)}">
+                    <span>${escapeHtml(labelForGroupKey(key))}</span>
+                    <button type="button" aria-label="Remove group">x</button>
+                </span>
+            `;
+        }).join("")}${clearButtonMarkup}`;
     }
 
-    els.groupByZone.innerHTML = state.groupBy.map(function (key) {
-        return `
-            <span class="user-group-chip" draggable="true" data-group-key="${escapeAttribute(key)}">
-                <span>${escapeHtml(labelForGroupKey(key))}</span>
-                <button type="button" aria-label="Remove group">${escapeHtml("×")}</button>
-            </span>
-        `;
-    }).join("");
+    const clearButton = document.getElementById("btnClearGrouping");
+
+    clearButton?.addEventListener("click", function () {
+        state.groupBy = [];
+        state.collapsedGroupPaths = [];
+        persistGroupBy();
+        persistCollapsedGroupPaths();
+        renderGroupByZone();
+        applyFilterSortAndRender();
+    });
 
     els.groupByZone.querySelectorAll(".user-group-chip").forEach(function (chip) {
         chip.addEventListener("dragstart", function (event) {
@@ -1770,3 +1783,4 @@ function escapeHtml(itemValue) {
 function escapeAttribute(itemValue) {
     return escapeHtml(itemValue);
 }
+

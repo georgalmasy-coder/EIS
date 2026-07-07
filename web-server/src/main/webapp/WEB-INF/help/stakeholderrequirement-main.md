@@ -15,6 +15,7 @@ The list view displays stakeholder requirements in a table.
 You can:
 
 - sort by columns
+- group rows by dragging a column header into the Group by area
 - resize column widths
 - search by ID, name, and description
 - filter active requirements

@@ -31,6 +31,7 @@ Use **Clear filter** to reset the search and active filter.
 In the list view, you can:
 
 - sort by clicking a column header
+- group rows by dragging a column header into the Group by area
 - resize columns by dragging the right edge of a column header
 - open a system by double-clicking the row
 - open the context menu by right-clicking a row

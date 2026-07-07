@@ -40,7 +40,9 @@ const STORAGE_KEYS = {
     activeOnly: "basis.systemrequirement.main.activeOnly",
     sortKey: "basis.systemrequirement.main.sortKey",
     sortDirection: "basis.systemrequirement.main.sortDirection",
-    columnWidths: "basis.systemrequirement.main.columnWidths"
+    columnWidths: "basis.systemrequirement.main.columnWidths",
+    groupBy: "basis.systemrequirement.main.groupBy",
+    groupCollapsed: "basis.systemrequirement.main.groupCollapsed"
 };
 
 const VIEW_TYPES = {
@@ -70,6 +72,8 @@ const state = {
     selectedView: VIEW_TYPES.list,
     sortKey: "",
     sortDirection: "asc",
+    groupBy: loadGroupBy(),
+    collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
     contextRequirement: null
 };
@@ -83,6 +87,7 @@ function start() {
     initializeStateFromStorage();
     initializeEvents();
     initializeImportExportDialogs();
+    renderGroupByZone();
     applyView(state.selectedView, { persist: false });
     loadSystemRequirements();
 }
@@ -135,6 +140,7 @@ function initializeEvents() {
     const filterInput = document.getElementById("filterRequirementText");
     const activeOnlyInput = document.getElementById("filterActiveOnly");
     const clearFilterButton = document.getElementById("btnClearFilter");
+    const groupByZone = document.getElementById("groupByZone");
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -168,6 +174,31 @@ function initializeEvents() {
 
         persistFilters();
         applyFiltersAndRender();
+    });
+
+    groupByZone?.addEventListener("dragenter", () => {
+        groupByZone.classList.add("is-drag-over");
+    });
+
+    groupByZone?.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+    });
+
+    groupByZone?.addEventListener("dragleave", (event) => {
+        if (event.target === groupByZone) {
+            groupByZone.classList.remove("is-drag-over");
+        }
+    });
+
+    groupByZone?.addEventListener("drop", (event) => {
+        event.preventDefault();
+        groupByZone.classList.remove("is-drag-over");
+        addGroupByKey(event.dataTransfer.getData("text/plain"));
+    });
+
+    document.addEventListener("dragend", () => {
+        groupByZone?.classList.remove("is-drag-over");
     });
 
     addRootButton?.addEventListener("click", () => {
@@ -244,6 +275,9 @@ async function loadSystemRequirements() {
             state.sortDirection = "asc";
             persistSorting();
         }
+
+        sanitizeGroupByKeys();
+        renderGroupByZone();
 
         applyTopPanel();
         applyFiltersAndRender();
@@ -642,6 +676,7 @@ function applyFiltersAndRender() {
         ].some((value) => String(value || "").toLowerCase().includes(filterText));
     });
 
+    sanitizeCollapsedGroupPaths();
     setText("systemRequirementCount", String(state.filteredRequirements.length), "");
     renderCurrentView();
 }
@@ -694,6 +729,7 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnExport", !isListView);
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
+    setElementHidden("groupByBar", !isListView);
     setElementHidden("btnHelp", false);
 }
 
@@ -721,6 +757,259 @@ function persistFilters() {
 function persistSorting() {
     localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
     localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+}
+
+function loadGroupBy() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.groupBy);
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistGroupBy() {
+    localStorage.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
+}
+
+function loadCollapsedGroupPaths() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.groupCollapsed);
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistCollapsedGroupPaths() {
+    localStorage.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
+}
+
+function sanitizeGroupByKeys() {
+    const validKeys = new Set(state.listColumns.map((column) => column.key));
+    const nextGroupBy = state.groupBy.filter((key) => validKeys.has(key));
+
+    if (nextGroupBy.length !== state.groupBy.length) {
+        state.groupBy = nextGroupBy;
+        persistGroupBy();
+    }
+}
+
+function sanitizeCollapsedGroupPaths() {
+    const validPaths = new Set();
+    collectGroupPaths(state.filteredRequirements, 0, [], validPaths);
+
+    const nextCollapsed = state.collapsedGroupPaths.filter((path) => validPaths.has(path));
+
+    if (nextCollapsed.length !== state.collapsedGroupPaths.length) {
+        state.collapsedGroupPaths = nextCollapsed;
+        persistCollapsedGroupPaths();
+    }
+}
+
+function collectGroupPaths(rows, depth, pathParts, validPaths) {
+    if (depth >= state.groupBy.length || !rows.length) {
+        return;
+    }
+
+    const groupKey = state.groupBy[depth];
+    const groups = new Map();
+
+    rows.forEach((row) => {
+        const groupValue = groupValueText(row, groupKey) || "—";
+
+        if (!groups.has(groupValue)) {
+            groups.set(groupValue, []);
+        }
+
+        groups.get(groupValue).push(row);
+    });
+
+    groups.forEach((groupRows, groupValue) => {
+        const nextPathParts = [...pathParts, `${groupKey}:${groupValue}`];
+        const groupPath = JSON.stringify(nextPathParts);
+
+        validPaths.add(groupPath);
+        collectGroupPaths(groupRows, depth + 1, nextPathParts, validPaths);
+    });
+}
+
+function renderGroupByZone() {
+    const groupZone = document.getElementById("groupByZone");
+
+    if (!groupZone) {
+        return;
+    }
+
+    const clearButtonMarkup = `
+        <button
+                id="btnClearGrouping"
+                class="systemrequirement-grouping-clear"
+                type="button"
+                aria-label="Clear grouping"
+                title="Clear grouping"
+                ${state.groupBy.length ? "" : "hidden"}
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+            </svg>
+        </button>
+    `;
+
+    if (!state.groupBy.length) {
+        groupZone.innerHTML = `<span class="empty">Drop a column here.</span>${clearButtonMarkup}`;
+    } else {
+        groupZone.innerHTML = `${state.groupBy.map((key) => `
+            <span class="systemrequirement-group-chip" draggable="true" data-group-key="${escapeHtml(key)}">
+                <span>${escapeHtml(labelForGroupKey(key))}</span>
+                <button type="button" aria-label="Remove group">x</button>
+            </span>
+        `).join("")}${clearButtonMarkup}`;
+    }
+
+    const clearButton = document.getElementById("btnClearGrouping");
+
+    clearButton?.addEventListener("click", () => {
+        clearGrouping();
+    });
+
+    groupZone.querySelectorAll(".systemrequirement-group-chip").forEach((chip) => {
+        chip.addEventListener("dragstart", (event) => {
+            chip.classList.add("is-dragging");
+            event.dataTransfer.setData("text/plain", chip.getAttribute("data-group-key") || "");
+            event.dataTransfer.effectAllowed = "move";
+        });
+
+        chip.addEventListener("dragend", () => {
+            chip.classList.remove("is-dragging");
+        });
+
+        chip.addEventListener("dragover", (event) => {
+            event.preventDefault();
+        });
+
+        chip.addEventListener("drop", (event) => {
+            event.preventDefault();
+            reorderGroupBy(event.dataTransfer.getData("text/plain"), chip.getAttribute("data-group-key") || "");
+        });
+
+        chip.querySelector("button")?.addEventListener("click", () => {
+            removeGroupByKey(chip.getAttribute("data-group-key") || "");
+        });
+    });
+}
+
+function addGroupByKey(key) {
+    if (!key || state.groupBy.includes(key) || !state.listColumns.some((column) => column.key === key)) {
+        return;
+    }
+
+    state.groupBy = [...state.groupBy, key];
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function removeGroupByKey(key) {
+    state.groupBy = state.groupBy.filter((item) => item !== key);
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function reorderGroupBy(sourceKey, targetKey) {
+    if (!sourceKey || !targetKey || sourceKey === targetKey) {
+        return;
+    }
+
+    const next = state.groupBy.filter((item) => item !== sourceKey);
+    const targetIndex = next.indexOf(targetKey);
+
+    if (targetIndex < 0) {
+        next.push(sourceKey);
+    } else {
+        next.splice(targetIndex, 0, sourceKey);
+    }
+
+    state.groupBy = next;
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function clearGrouping() {
+    if (!state.groupBy.length) {
+        renderGroupByZone();
+        return;
+    }
+
+    state.groupBy = [];
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function isGroupCollapsed(groupPath) {
+    return state.collapsedGroupPaths.includes(groupPath);
+}
+
+function toggleGroupCollapse(groupPath) {
+    if (!groupPath) {
+        return;
+    }
+
+    if (isGroupCollapsed(groupPath)) {
+        state.collapsedGroupPaths = state.collapsedGroupPaths.filter((path) => path !== groupPath);
+    } else {
+        state.collapsedGroupPaths = [...state.collapsedGroupPaths, groupPath];
+    }
+
+    persistCollapsedGroupPaths();
+    renderListView();
+}
+
+function labelForGroupKey(key) {
+    const column = state.listColumns.find((item) => item.key === key);
+
+    return column?.label || key;
+}
+
+function groupValueText(requirement, key) {
+    if (!requirement) {
+        return "";
+    }
+
+    if (key === "active") {
+        return requirement.active ? "Active" : "Inactive";
+    }
+
+    const field = requirement.fields.find((item) => item.name === key);
+
+    if (!field) {
+        return String(requirement[key] || "").trim();
+    }
+
+    if (field.control === "datetime") {
+        return formatDateTimeValue(field.value || field.rawValue || "");
+    }
+
+    if (field.control === "date") {
+        return formatDateValue(field.value || field.rawValue || "");
+    }
+
+    return String(field.value || field.rawValue || "").trim();
 }
 
 function getStoredColumnWidths() {
@@ -772,7 +1061,7 @@ function renderListView() {
         const indicator = activeSort ? (state.sortDirection === "asc" ? "▲" : "▼") : "";
 
         return `
-            <th data-key="${escapeHtml(column.key)}" class="systemrequirement-resizable-th">
+            <th data-key="${escapeHtml(column.key)}" draggable="true" class="systemrequirement-resizable-th">
                 <span class="sort">${escapeHtml(column.label)} <span class="sort-indicator">${indicator}</span></span>
                 <span class="systemrequirement-column-resizer" data-resize-column="${escapeHtml(column.key)}" aria-hidden="true"></span>
             </th>
@@ -797,15 +1086,28 @@ function renderListView() {
             persistSorting();
             renderListView();
         });
+
+        header.addEventListener("dragstart", (event) => {
+            const key = header.getAttribute("data-key");
+
+            if (!key) {
+                return;
+            }
+
+            event.dataTransfer.setData("text/plain", key);
+            event.dataTransfer.effectAllowed = "copy";
+        });
     });
 
     initializeColumnResize(headerRow, colGroup, table);
 
-    tbody.innerHTML = rows.map((requirement) => `
-        <tr data-entity-id="${escapeHtml(requirement.entityId)}" data-requirement-index="${requirement.index}">
-            ${columns.map((column) => renderListCell(requirement, column)).join("")}
-        </tr>
-    `).join("");
+    tbody.innerHTML = state.groupBy.length
+        ? renderGroupedRows(rows, columns)
+        : rows.map((requirement) => `
+            <tr data-entity-id="${escapeHtml(requirement.entityId)}" data-requirement-index="${requirement.index}">
+                ${columns.map((column) => renderListCell(requirement, column)).join("")}
+            </tr>
+        `).join("");
 
     tbody.querySelectorAll("tr[data-requirement-index]").forEach((row) => {
         const requirement = getRequirementFromRow(row);
@@ -825,11 +1127,73 @@ function renderListView() {
         });
     });
 
+    tbody.querySelectorAll(".systemrequirement-group-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            toggleGroupCollapse(button.getAttribute("data-group-path") || "");
+        });
+    });
+
     if (rows.length === 0) {
         showListEmptyState("No system requirements match the current filters.");
     } else {
         hideListEmptyState();
     }
+}
+
+function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
+    if (depth >= state.groupBy.length) {
+        return rows.map((requirement) => renderRequirementRow(requirement, columns)).join("");
+    }
+
+    const groupKey = state.groupBy[depth];
+    const groups = new Map();
+
+    rows.forEach((row) => {
+        const groupValue = groupValueText(row, groupKey) || "—";
+
+        if (!groups.has(groupValue)) {
+            groups.set(groupValue, []);
+        }
+
+        groups.get(groupValue).push(row);
+    });
+
+    return Array.from(groups.entries())
+        .sort((a, b) => compareValues(a[0], b[0]))
+        .map(([groupValue, groupRows]) => {
+            const nextPathParts = [...pathParts, `${groupKey}:${groupValue}`];
+            const groupPath = JSON.stringify(nextPathParts);
+            const collapsed = isGroupCollapsed(groupPath);
+            const nextRows = collapsed ? "" : renderGroupedRows(groupRows, columns, depth + 1, nextPathParts);
+
+            return `
+                <tr class="systemrequirement-group-row ${collapsed ? "is-collapsed" : ""}" data-group-path="${escapeHtml(groupPath)}">
+                    <td colspan="${columns.length}">
+                        <div class="systemrequirement-group-row-inner">
+                            <button
+                                    type="button"
+                                    class="systemrequirement-group-toggle"
+                                    data-group-path="${escapeHtml(groupPath)}"
+                                    aria-label="${collapsed ? "Expand group" : "Collapse group"}"
+                                    aria-expanded="${collapsed ? "false" : "true"}"
+                            >${collapsed ? "+" : "-"}</button>
+                            <span class="systemrequirement-group-label">${escapeHtml(labelForGroupKey(groupKey))}: ${escapeHtml(groupValue)}</span>
+                            <span class="systemrequirement-group-count">(${groupRows.length})</span>
+                        </div>
+                    </td>
+                </tr>
+                ${nextRows}
+            `;
+        })
+        .join("");
+}
+
+function renderRequirementRow(requirement, columns) {
+    return `
+        <tr data-entity-id="${escapeHtml(requirement.entityId)}" data-requirement-index="${requirement.index}">
+            ${columns.map((column) => renderListCell(requirement, column)).join("")}
+        </tr>
+    `;
 }
 
 function initializeColumnResize(headerRow, colGroup, table) {
@@ -995,20 +1359,33 @@ function formatDateValue(value) {
 function getSortedRequirements(requirements) {
     const rows = [...requirements];
 
-    if (!state.sortKey) {
-        return rows;
-    }
-
     rows.sort((a, b) => {
+        for (const groupKey of state.groupBy) {
+            const groupComparison = compareValues(groupValueText(a, groupKey), groupValueText(b, groupKey));
+
+            if (groupComparison !== 0) {
+                if (groupKey === state.sortKey && state.sortDirection === "desc") {
+                    return -groupComparison;
+                }
+
+                return groupComparison;
+            }
+        }
+
+        if (!state.sortKey) {
+            return compareValues(a.id, b.id);
+        }
+
         const av = getRequirementSortValue(a, state.sortKey);
         const bv = getRequirementSortValue(b, state.sortKey);
+        const comparison = compareValues(av, bv);
 
-        return compareValues(av, bv);
+        if (comparison !== 0) {
+            return state.sortDirection === "desc" ? -comparison : comparison;
+        }
+
+        return compareValues(a.id, b.id);
     });
-
-    if (state.sortDirection === "desc") {
-        rows.reverse();
-    }
 
     return rows;
 }

@@ -18,6 +18,7 @@ From this view you can:
 
 - search for requirements
 - filter active/inactive requirements
+- group rows by dragging a column header into the Group by area
 - sort by columns
 - resize column widths
 - open a requirement for editing

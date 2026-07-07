@@ -29,7 +29,9 @@ const STORAGE_KEYS = {
     activeOnly: "basis.systemsbreakdown.main.activeOnly",
     sortKey: "basis.systemsbreakdown.main.sortKey",
     sortDirection: "basis.systemsbreakdown.main.sortDirection",
-    columnWidths: "basis.systemsbreakdown.main.columnWidths"
+    columnWidths: "basis.systemsbreakdown.main.columnWidths",
+    groupBy: "basis.systemsbreakdown.main.groupBy",
+    groupCollapsed: "basis.systemsbreakdown.main.groupCollapsed"
 };
 
 const VIEW_TYPES = {
@@ -57,6 +59,8 @@ const state = {
     selectedView: VIEW_TYPES.list,
     sortKey: "",
     sortDirection: "asc",
+    groupBy: loadGroupBy(),
+    collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
     contextSystem: null
 };
@@ -70,6 +74,7 @@ function start() {
     initializeStateFromStorage();
     initializeEvents();
     initializeImportExportDialogs();
+    renderGroupByZone();
     applyView(state.selectedView, { persist: false });
     loadSystemsBreakdown();
 }
@@ -122,6 +127,7 @@ function initializeEvents() {
     const filterInput = document.getElementById("filterSystemText");
     const activeOnlyInput = document.getElementById("filterActiveOnly");
     const clearFilterButton = document.getElementById("btnClearFilter");
+    const groupByZone = document.getElementById("groupByZone");
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -155,6 +161,31 @@ function initializeEvents() {
 
         persistFilters();
         applyFiltersAndRender();
+    });
+
+    groupByZone?.addEventListener("dragenter", () => {
+        groupByZone.classList.add("is-drag-over");
+    });
+
+    groupByZone?.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+    });
+
+    groupByZone?.addEventListener("dragleave", (event) => {
+        if (event.target === groupByZone) {
+            groupByZone.classList.remove("is-drag-over");
+        }
+    });
+
+    groupByZone?.addEventListener("drop", (event) => {
+        event.preventDefault();
+        groupByZone.classList.remove("is-drag-over");
+        addGroupByKey(event.dataTransfer.getData("text/plain"));
+    });
+
+    document.addEventListener("dragend", () => {
+        groupByZone?.classList.remove("is-drag-over");
     });
 
     addRootButton?.addEventListener("click", () => {
@@ -230,6 +261,9 @@ async function loadSystemsBreakdown() {
             state.sortDirection = "asc";
             persistSorting();
         }
+
+        sanitizeGroupByKeys();
+        renderGroupByZone();
 
         applyTopPanel();
         applyFiltersAndRender();
@@ -698,6 +732,7 @@ function applyFiltersAndRender() {
         ].some((value) => String(value || "").toLowerCase().includes(filterText));
     });
 
+    sanitizeCollapsedGroupPaths();
     setText("systemsBreakdownCount", String(state.filteredSystems.length), "");
     renderCurrentView();
 }
@@ -750,6 +785,7 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnExport", !isListView);
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
+    setElementHidden("groupByBar", !isListView);
     setElementHidden("btnHelp", false);
 }
 
@@ -777,6 +813,278 @@ function persistFilters() {
 function persistSorting() {
     localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
     localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+}
+
+function loadGroupBy() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.groupBy);
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistGroupBy() {
+    localStorage.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
+}
+
+function loadCollapsedGroupPaths() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.groupCollapsed);
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistCollapsedGroupPaths() {
+    localStorage.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
+}
+
+function sanitizeGroupByKeys() {
+    const validKeys = new Set(state.listColumns.map((column) => column.key));
+    const nextGroupBy = state.groupBy.filter((key) => validKeys.has(key));
+
+    if (nextGroupBy.length !== state.groupBy.length) {
+        state.groupBy = nextGroupBy;
+        persistGroupBy();
+    }
+}
+
+function sanitizeCollapsedGroupPaths() {
+    const validPaths = new Set();
+    collectGroupPaths(state.filteredSystems, 0, [], validPaths);
+
+    const nextCollapsed = state.collapsedGroupPaths.filter((path) => validPaths.has(path));
+
+    if (nextCollapsed.length !== state.collapsedGroupPaths.length) {
+        state.collapsedGroupPaths = nextCollapsed;
+        persistCollapsedGroupPaths();
+    }
+}
+
+function collectGroupPaths(rows, depth, pathParts, validPaths) {
+    if (depth >= state.groupBy.length || !rows.length) {
+        return;
+    }
+
+    const groupKey = state.groupBy[depth];
+    const groups = new Map();
+
+    rows.forEach((row) => {
+        const groupValue = groupValueText(row, groupKey) || "—";
+
+        if (!groups.has(groupValue)) {
+            groups.set(groupValue, []);
+        }
+
+        groups.get(groupValue).push(row);
+    });
+
+    groups.forEach((groupRows, groupValue) => {
+        const nextPathParts = [...pathParts, `${groupKey}:${groupValue}`];
+        const groupPath = JSON.stringify(nextPathParts);
+
+        validPaths.add(groupPath);
+        collectGroupPaths(groupRows, depth + 1, nextPathParts, validPaths);
+    });
+}
+
+function renderGroupByZone() {
+    if (!document.getElementById("groupByZone")) {
+        return;
+    }
+
+    const groupZone = document.getElementById("groupByZone");
+
+    if (!groupZone) {
+        return;
+    }
+
+    const clearButtonMarkup = `
+        <button
+                id="btnClearGrouping"
+                class="systemsbreakdown-grouping-clear"
+                type="button"
+                aria-label="Clear grouping"
+                title="Clear grouping"
+                ${state.groupBy.length ? "" : "hidden"}
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+            </svg>
+        </button>
+    `;
+
+    if (!state.groupBy.length) {
+        groupZone.innerHTML = `<span class="empty">Drop a column here.</span>${clearButtonMarkup}`;
+    } else {
+        groupZone.innerHTML = `${state.groupBy.map((key) => `
+            <span class="systemsbreakdown-group-chip" draggable="true" data-group-key="${escapeHtml(key)}">
+                <span>${escapeHtml(labelForGroupKey(key))}</span>
+                <button type="button" aria-label="Remove group">x</button>
+            </span>
+        `).join("")}${clearButtonMarkup}`;
+    }
+
+    const clearButton = document.getElementById("btnClearGrouping");
+
+    clearButton?.addEventListener("click", () => {
+        clearGrouping();
+    });
+
+    groupZone.querySelectorAll(".systemsbreakdown-group-chip").forEach((chip) => {
+        chip.addEventListener("dragstart", (event) => {
+            chip.classList.add("is-dragging");
+            event.dataTransfer.setData("text/plain", chip.getAttribute("data-group-key") || "");
+            event.dataTransfer.effectAllowed = "move";
+        });
+
+        chip.addEventListener("dragend", () => {
+            chip.classList.remove("is-dragging");
+        });
+
+        chip.addEventListener("dragover", (event) => {
+            event.preventDefault();
+        });
+
+        chip.addEventListener("drop", (event) => {
+            event.preventDefault();
+            reorderGroupBy(event.dataTransfer.getData("text/plain"), chip.getAttribute("data-group-key") || "");
+        });
+
+        chip.querySelector("button")?.addEventListener("click", () => {
+            removeGroupByKey(chip.getAttribute("data-group-key") || "");
+        });
+    });
+}
+
+function addGroupByKey(key) {
+    if (!key || state.groupBy.includes(key) || !state.listColumns.some((column) => column.key === key)) {
+        return;
+    }
+
+    state.groupBy = [...state.groupBy, key];
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function removeGroupByKey(key) {
+    state.groupBy = state.groupBy.filter((item) => item !== key);
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function reorderGroupBy(sourceKey, targetKey) {
+    if (!sourceKey || !targetKey || sourceKey === targetKey) {
+        return;
+    }
+
+    const next = state.groupBy.filter((item) => item !== sourceKey);
+    const targetIndex = next.indexOf(targetKey);
+
+    if (targetIndex < 0) {
+        next.push(sourceKey);
+    } else {
+        next.splice(targetIndex, 0, sourceKey);
+    }
+
+    state.groupBy = next;
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function clearGrouping() {
+    if (!state.groupBy.length) {
+        renderGroupByZone();
+        return;
+    }
+
+    state.groupBy = [];
+    state.collapsedGroupPaths = [];
+    persistGroupBy();
+    persistCollapsedGroupPaths();
+    renderGroupByZone();
+    applyFiltersAndRender();
+}
+
+function isGroupCollapsed(groupPath) {
+    return state.collapsedGroupPaths.includes(groupPath);
+}
+
+function toggleGroupCollapse(groupPath) {
+    if (!groupPath) {
+        return;
+    }
+
+    if (isGroupCollapsed(groupPath)) {
+        state.collapsedGroupPaths = state.collapsedGroupPaths.filter((path) => path !== groupPath);
+    } else {
+        state.collapsedGroupPaths = [...state.collapsedGroupPaths, groupPath];
+    }
+
+    persistCollapsedGroupPaths();
+    renderListView();
+}
+
+function labelForGroupKey(key) {
+    const column = state.listColumns.find((item) => item.key === key);
+
+    if (column) {
+        return column.label;
+    }
+
+    const labels = {
+        entityId: "Entity ID",
+        id: "ID",
+        name: "Name",
+        description: "Description",
+        status: "Status",
+        active: "Active"
+    };
+
+    return labels[key] || key;
+}
+
+function groupValueText(system, key) {
+    if (!system) {
+        return "";
+    }
+
+    if (key === "active") {
+        return system.active ? "Active" : "Inactive";
+    }
+
+    const field = system.fields.find((item) => item.name === key);
+
+    if (!field) {
+        return String(system[key] || "").trim();
+    }
+
+    const value = field.value || field.rawValue || "";
+
+    if (field.control === "datetime") {
+        return formatDateTimeValue(value);
+    }
+
+    if (field.control === "date") {
+        return formatDateValue(value);
+    }
+
+    return String(value || "").trim();
 }
 
 function getStoredColumnWidths() {
@@ -828,7 +1136,7 @@ function renderListView() {
         const indicator = activeSort ? (state.sortDirection === "asc" ? "▲" : "▼") : "";
 
         return `
-            <th data-key="${escapeHtml(column.key)}" class="systemsbreakdown-resizable-th">
+            <th data-key="${escapeHtml(column.key)}" draggable="true" class="systemsbreakdown-resizable-th">
                 <span class="sort">${escapeHtml(column.label)} <span class="sort-indicator">${indicator}</span></span>
                 <span class="systemsbreakdown-column-resizer" data-resize-column="${escapeHtml(column.key)}" aria-hidden="true"></span>
             </th>
@@ -853,15 +1161,28 @@ function renderListView() {
             persistSorting();
             renderListView();
         });
+
+        header.addEventListener("dragstart", (event) => {
+            const key = header.getAttribute("data-key");
+
+            if (!key) {
+                return;
+            }
+
+            event.dataTransfer.setData("text/plain", key);
+            event.dataTransfer.effectAllowed = "copy";
+        });
     });
 
     initializeColumnResize(headerRow, colGroup, table);
 
-    tbody.innerHTML = rows.map((system) => `
-        <tr data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
-            ${columns.map((column) => renderListCell(system, column)).join("")}
-        </tr>
-    `).join("");
+    tbody.innerHTML = state.groupBy.length
+        ? renderGroupedRows(rows, columns)
+        : rows.map((system) => `
+            <tr data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
+                ${columns.map((column) => renderListCell(system, column)).join("")}
+            </tr>
+        `).join("");
 
     tbody.querySelectorAll("tr[data-system-index]").forEach((row) => {
         const system = getSystemFromRow(row);
@@ -881,11 +1202,73 @@ function renderListView() {
         });
     });
 
+    tbody.querySelectorAll(".systemsbreakdown-group-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+            toggleGroupCollapse(button.getAttribute("data-group-path") || "");
+        });
+    });
+
     if (rows.length === 0) {
         showListEmptyState(EMPTY_FILTER_MESSAGE);
     } else {
         hideListEmptyState();
     }
+}
+
+function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
+    if (depth >= state.groupBy.length) {
+        return rows.map((system) => renderSystemRow(system, columns)).join("");
+    }
+
+    const groupKey = state.groupBy[depth];
+    const groups = new Map();
+
+    rows.forEach((row) => {
+        const groupValue = groupValueText(row, groupKey) || "—";
+
+        if (!groups.has(groupValue)) {
+            groups.set(groupValue, []);
+        }
+
+        groups.get(groupValue).push(row);
+    });
+
+    return Array.from(groups.entries())
+        .sort((a, b) => compareValues(a[0], b[0]))
+        .map(([groupValue, groupRows]) => {
+            const nextPathParts = [...pathParts, `${groupKey}:${groupValue}`];
+            const groupPath = JSON.stringify(nextPathParts);
+            const collapsed = isGroupCollapsed(groupPath);
+            const nextRows = collapsed ? "" : renderGroupedRows(groupRows, columns, depth + 1, nextPathParts);
+
+            return `
+                <tr class="systemsbreakdown-group-row ${collapsed ? "is-collapsed" : ""}" data-group-path="${escapeHtml(groupPath)}">
+                    <td colspan="${columns.length}">
+                        <div class="systemsbreakdown-group-row-inner">
+                            <button
+                                    type="button"
+                                    class="systemsbreakdown-group-toggle"
+                                    data-group-path="${escapeHtml(groupPath)}"
+                                    aria-label="${collapsed ? "Expand group" : "Collapse group"}"
+                                    aria-expanded="${collapsed ? "false" : "true"}"
+                            >${collapsed ? "›" : "⌄"}</button>
+                            <span class="systemsbreakdown-group-label">${escapeHtml(labelForGroupKey(groupKey))}: ${escapeHtml(groupValue)}</span>
+                            <span class="systemsbreakdown-group-count">(${groupRows.length})</span>
+                        </div>
+                    </td>
+                </tr>
+                ${nextRows}
+            `;
+        })
+        .join("");
+}
+
+function renderSystemRow(system, columns) {
+    return `
+        <tr data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
+            ${columns.map((column) => renderListCell(system, column)).join("")}
+        </tr>
+    `;
 }
 
 function initializeColumnResize(headerRow, colGroup, table) {
@@ -1051,20 +1434,33 @@ function formatDateValue(value) {
 function getSortedSystems(systems) {
     const rows = [...systems];
 
-    if (!state.sortKey) {
-        return rows;
-    }
-
     rows.sort((a, b) => {
+        for (const groupKey of state.groupBy) {
+            const groupComparison = compareValues(groupValueText(a, groupKey), groupValueText(b, groupKey));
+
+            if (groupComparison !== 0) {
+                if (groupKey === state.sortKey && state.sortDirection === "desc") {
+                    return -groupComparison;
+                }
+
+                return groupComparison;
+            }
+        }
+
+        if (!state.sortKey) {
+            return compareValues(a.id, b.id);
+        }
+
         const av = getSystemSortValue(a, state.sortKey);
         const bv = getSystemSortValue(b, state.sortKey);
+        const comparison = compareValues(av, bv);
 
-        return compareValues(av, bv);
+        if (comparison !== 0) {
+            return state.sortDirection === "desc" ? -comparison : comparison;
+        }
+
+        return compareValues(a.id, b.id);
     });
-
-    if (state.sortDirection === "desc") {
-        rows.reverse();
-    }
 
     return rows;
 }
@@ -1719,3 +2115,4 @@ function debounce(fn, delay) {
         timeoutId = window.setTimeout(() => fn(...args), delay);
     };
 }
+
