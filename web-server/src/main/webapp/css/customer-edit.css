@@ -1,0 +1,261 @@
+.customer-edit-document {
+    overflow: hidden;
+}
+
+.customer-edit-document {
+    min-height: 100vh;
+}
+
+.customer-edit-app {
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.customer-edit-content {
+    min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.customer-edit-topbar {
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+}
+
+.customer-edit-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.customer-edit-section-header {
+    align-items: flex-start;
+}
+
+.customer-edit-title-group {
+    display: grid;
+    gap: 4px;
+}
+
+.customer-edit-title-group h2 {
+    margin: 0;
+}
+
+.customer-edit-mode-label {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.customer-edit-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    background: rgba(15,23,42,.55);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.customer-edit-help-button:hover {
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.customer-edit-help-button:active {
+    transform: translateY(1px);
+}
+
+.customer-edit-help-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.customer-readonly-banner {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(247, 201, 72, 0.45);
+    border-radius: 8px;
+    color: #f7c948;
+    background: rgba(247, 201, 72, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.customer-edit-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.customer-edit-entity-meta {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.customer-edit-tab-bar {
+    flex: 0 0 auto;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.customer-edit-panels {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-edit-panels .tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.customer-edit-panels .tab-panel.is-active {
+    display: block;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.customer-basis-info-fields,
+.customer-security-fields,
+.customer-subscription-fields,
+.customer-payment-method-fields,
+.customer-payment-fields {
+    align-items: start;
+}
+
+.customer-basis-info-fields .page-field,
+.customer-security-fields .page-field,
+.customer-subscription-fields .page-field,
+.customer-payment-method-fields .page-field,
+.customer-payment-fields .page-field {
+    min-width: 0;
+}
+
+.customer-basis-info-fields input[type="hidden"] {
+    display: none;
+}
+
+.customer-basis-info-fields .field-required {
+    margin-left: 3px;
+    color: #ef4444;
+}
+
+.customer-phone-field {
+    min-width: 0;
+}
+
+.customer-phone-controls {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.customer-phone-controls .page-field {
+    min-width: 0;
+}
+
+.customer-phone-country label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.customer-phone-country select {
+    width: 100%;
+    min-width: 0;
+}
+
+.customer-phone-input {
+    min-width: 0;
+}
+
+.customer-phone-field .field-help {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.customer-subsection-title {
+    margin: 10px 0 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.customer-edit-footer {
+    margin-top: auto;
+    flex: 0 0 auto;
+}
+
+.customer-edit-readonly #btnSave {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+    .customer-phone-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-edit-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .customer-edit-entity-meta {
+        white-space: normal;
+    }
+}

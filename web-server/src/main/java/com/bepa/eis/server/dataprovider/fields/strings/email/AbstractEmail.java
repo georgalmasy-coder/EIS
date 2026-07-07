@@ -41,8 +41,4 @@ abstract public class AbstractEmail extends AbstractString {
         return 50;
     }
 
-    @Override
-    public String toString() {
-        return getValue() != null  ? getValue() : "";
-    }
 }

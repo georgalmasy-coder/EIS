@@ -1,5 +1,6 @@
 import { initMenu } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import {
     getAttribute,
@@ -277,9 +278,7 @@ function applyTopPanel(xmlDocument) {
         return;
     }
 
-    setText("customerName", getChildText(topPanelElement, "CustomerName", "—"), "");
-    setText("projectName", getChildText(topPanelElement, "ProjectName", "—"), "");
-    setText("userName", getChildText(topPanelElement, "Name", "—"), "");
+    applyTopbarMetadata(document, xmlDocument);
 }
 
 function injectN2Styles(styles) {

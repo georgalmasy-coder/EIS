@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import {
     getChildText,
@@ -115,6 +116,7 @@ async function loadSystemRequirementDiagram() {
             throw new Error("The system requirement endpoint returned invalid XML.");
         }
 
+        state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(xmlDocument);
         state.requirements = parseSystemRequirements(xmlDocument);
         state.filteredRequirements = [...state.requirements];
@@ -151,9 +153,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "");
-    setText("projectName", state.topPanel.projectName, "");
-    setText("userName", state.topPanel.userName, "");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseSystemRequirements(xmlDocument) {

@@ -4,7 +4,6 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.project.ProjectStatus;
 import com.bepa.eis.common.providers.GenericProvider;
-import com.bepa.eis.server.api.web.application.views.myprojects.InstallDefaultConfiguration;
 import com.bepa.eis.server.dataprovider.entities.ProjectEntityProvider;
 import com.bepa.eis.server.entites.project.ProjectEntity;
 import org.slf4j.Logger;

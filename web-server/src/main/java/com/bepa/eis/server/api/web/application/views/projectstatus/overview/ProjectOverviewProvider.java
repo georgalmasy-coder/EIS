@@ -8,7 +8,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
-import com.bepa.eis.server.dataprovider.fields.lookups.CustomerDepartment;
+import com.bepa.eis.server.dataprovider.fields.lookups.customer.CustomerDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;

@@ -187,4 +187,14 @@ public enum CustomerStatus {
 
         return defaultStatus == null ? CREATED : defaultStatus;
     }
+
+    public static String getActiveStatusIds() {
+        return PENDING_CONFIRMATION.getId() + ", " +
+                TRIAL_ACTIVE.getId() + ", " +
+                PENDING_SUBSCRIPTION_CONFIRMATION.getId() + ", " +
+                PAYMENT_PENDING.getId() + ", " +
+                SUBSCRIPTION_ACTIVE.getId() + ", " +
+                SUBSCRIPTION_EXPIRING.getId() + ", " +
+                PAYMENT_OVERDUE.getId();
+    }
 }

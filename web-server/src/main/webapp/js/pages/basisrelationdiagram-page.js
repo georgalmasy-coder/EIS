@@ -1,5 +1,6 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import {
     getChildText,
@@ -237,9 +238,7 @@ function applyTopPanel(xmlDocument) {
         return;
     }
 
-    setText("customerName", getChildText(topPanelElement, "CustomerName", "—"), "");
-    setText("projectName", getChildText(topPanelElement, "ProjectName", "—"), "");
-    setText("userName", getChildText(topPanelElement, "Name", "—"), "");
+    applyTopbarMetadata(document, xmlDocument);
 }
 
 function setRelationDiagramState(diagram) {

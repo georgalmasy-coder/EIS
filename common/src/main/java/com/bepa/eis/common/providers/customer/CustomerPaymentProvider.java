@@ -14,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomerPaymentProvider extends GenericProvider {
 
@@ -113,6 +115,34 @@ public class CustomerPaymentProvider extends GenericProvider {
                     "FROM [dbo].[CUSTOMER_PAYMENT] " +
                     "WHERE SubscriptionId = ? " +
                     "ORDER BY PaymentId DESC ";
+
+    private static final String SELECT_PAYMENTS_BY_CUSTOMER_ID_SQL =
+            "SELECT " +
+                    "PaymentId, " +
+                    "CustomerId, " +
+                    "SubscriptionId, " +
+                    "PaymentStatus, " +
+                    "PaymentProvider, " +
+                    "PaymentProviderReference, " +
+                    "Amount, " +
+                    "Currency, " +
+                    "PaymentDueAt, " +
+                    "GracePeriodEndsAt, " +
+                    "RequestedAt, " +
+                    "AuthorizedAt, " +
+                    "CapturedAt, " +
+                    "SucceededAt, " +
+                    "FailedAt, " +
+                    "CancelledAt, " +
+                    "FailureReason, " +
+                    "CreatedAt, " +
+                    "UpdatedAt " +
+                    "FROM [dbo].[CUSTOMER_PAYMENT] " +
+                    "WHERE CustomerId = ? " +
+                    "ORDER BY " +
+                    "    CASE WHEN PaymentDueAt IS NULL THEN 1 ELSE 0 END, " +
+                    "    PaymentDueAt DESC, " +
+                    "    PaymentId DESC ";
 
     private static final String UPDATE_PAYMENT_SQL =
             "UPDATE [dbo].[CUSTOMER_PAYMENT] " +
@@ -265,6 +295,30 @@ public class CustomerPaymentProvider extends GenericProvider {
         }
 
         return null;
+    }
+
+    public List<CustomerPayment> getPaymentsByCustomerId(Integer customerId) {
+        List<CustomerPayment> payments = new ArrayList<>();
+
+        if (customerId == null) {
+            return payments;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_PAYMENTS_BY_CUSTOMER_ID_SQL)) {
+
+            statement.setInt(1, customerId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    payments.add(mapPayment(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error loading customer payments. customerId={}", customerId, e);
+        }
+
+        return payments;
     }
 
     public boolean updatePayment(CustomerPayment payment) {

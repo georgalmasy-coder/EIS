@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import {
     closeDialogElement,
     setInputValue,
@@ -280,9 +281,7 @@ function applyTopPanel(xmlDocument) {
         return;
     }
 
-    setText("customerName", getChildText(topPanelElement, "CustomerName", "—"), "");
-    setText("projectName", getChildText(topPanelElement, "ProjectName", "—"), "");
-    setText("userName", getChildText(topPanelElement, "Name", "—"), "");
+    applyTopbarMetadata(document, xmlDocument);
 }
 
 function injectTraceabilityStyles(styles) {

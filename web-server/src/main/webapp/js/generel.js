@@ -152,7 +152,7 @@ function createFieldMarkup(field) {
         return `
             <div class="page-field${readOnlyClass}">
                 <label for="fld-${name}">${labelMarkup}</label>
-                <input id="fld-${name}" data-field="${name}" type="datetime-local" value="${escapeXml(toDateTimeInputValue(value))}" ${readonlyAttr} ${requiredAttr} />
+                <input id="fld-${name}" data-field="${name}" type="datetime-local" step="1" value="${escapeXml(toDateTimeInputValue(value))}" ${readonlyAttr} ${requiredAttr} />
             </div>
         `;
     }

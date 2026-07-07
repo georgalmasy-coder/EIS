@@ -482,21 +482,13 @@ public class UserProvider extends GenericProvider {
                     "AND P.CustomerId = C.CustomerId " +
                     "AND C.Latest = 1 ";
 
-    private static final String ACTIVE_CUSTOMER_STATUS_IDS =
-            CustomerStatus.PENDING_CONFIRMATION.getId() + ", " +
-                    CustomerStatus.TRIAL_ACTIVE.getId() + ", " +
-                    CustomerStatus.PENDING_SUBSCRIPTION_CONFIRMATION.getId() + ", " +
-                    CustomerStatus.PAYMENT_PENDING.getId() + ", " +
-                    CustomerStatus.SUBSCRIPTION_ACTIVE.getId() + ", " +
-                    CustomerStatus.SUBSCRIPTION_EXPIRING.getId() + ", " +
-                    CustomerStatus.PAYMENT_OVERDUE.getId();
-
     private static final String CUSTOMER_BY_USER_ID_SQL =
             "SELECT C.CustomerId, C.CustomerName, C.CustomerStatus, C.CustomerMfaPolicy " +
                     "FROM CUSTOMER C " +
                     "WHERE C.Latest = 1 " +
-                    "AND C.CustomerStatus IN (" + ACTIVE_CUSTOMER_STATUS_IDS + ") " +
+                    "AND C.CustomerStatus IN (" + CustomerStatus.getActiveStatusIds() + ") " +
                     "AND C.CustomerId IN (SELECT CustomerId FROM USER_CUSTOMER WHERE UserId = ?) ";
+
 
     public UserProvider(WebSession webSession) {
         super(webSession);

@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { toDateTimeLocalValue } from "../core/date.js";
@@ -261,9 +262,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "-");
-    setText("projectName", state.topPanel.projectName, "-");
-    setText("userName", state.topPanel.userName, "-");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function findUserNode(doc) {
@@ -439,7 +438,7 @@ function renderBasisInfoFieldMarkup(field) {
         return `
             <div class="page-field">
                 <label for="fld-${escapedName}">${escapedLabel}${requiredStar}</label>
-                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" value="${escapeHtml(normalized)}" ${readonlyAttr} ${required ? "required" : ""} />
+                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" step="1" value="${escapeHtml(normalized)}" ${readonlyAttr} ${required ? "required" : ""} />
             </div>
         `;
     }

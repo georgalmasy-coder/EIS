@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
@@ -396,6 +397,11 @@ public class CustomerLookupCache {
         addGenericPhoneCountryRule(rules, 8, 11, "123456789", "+995", "GE");
         addGenericPhoneCountryRule(rules, 8, 11, "123456789", "+996", "KG");
         addGenericPhoneCountryRule(rules, 8, 11, "123456789", "+998", "UZ");
+
+        rules.sort(Comparator
+                .comparing(PhoneCountryRule::country, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(PhoneCountryRule::code)
+        );
 
         return List.copyOf(rules);
     }

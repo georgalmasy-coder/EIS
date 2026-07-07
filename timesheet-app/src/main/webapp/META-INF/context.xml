@@ -1,0 +1,19 @@
+<Context>
+    <Resource name="jdbc/TimesheetDB"
+              auth="Container"
+              type="javax.sql.DataSource"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+              driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+              url="jdbc:sqlserver://localhost:1433;databaseName=EIS-TECH;encrypt=true;trustServerCertificate=true;loginTimeout=5;"
+              username="EISTECH"
+              password="s3cret"
+              initialSize="2"
+              maxActive="20"
+              minIdle="2"
+              maxIdle="8"
+              maxWait="10000"
+              validationQuery="SELECT 1"
+              testOnBorrow="true"
+              removeAbandoned="true"
+              removeAbandonedTimeout="60"/>
+</Context>

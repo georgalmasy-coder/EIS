@@ -45,18 +45,18 @@ export function toDateTimeLocalValue(value) {
 
     const trimmed = String(value).trim();
 
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
         return trimmed;
     }
 
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
-        return trimmed.slice(0, 16);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+        return `${trimmed}:00`;
     }
 
     const isoSpaceMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/);
 
     if (isoSpaceMatch) {
-        return `${isoSpaceMatch[1]}T${isoSpaceMatch[2]}:${isoSpaceMatch[3]}`;
+        return `${isoSpaceMatch[1]}T${isoSpaceMatch[2]}:${isoSpaceMatch[3]}:${isoSpaceMatch[4] || "00"}`;
     }
 
     const match = trimmed.match(/^(\d{2})\/(\d{2})-(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
@@ -70,8 +70,9 @@ export function toDateTimeLocalValue(value) {
     const year = match[3];
     const hour = match[4];
     const minute = match[5];
+    const second = match[6] || "00";
 
-    return `${year}-${month}-${day}T${hour}:${minute}`;
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
 export function toTimeInputValue(value) {

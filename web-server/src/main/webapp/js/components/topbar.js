@@ -1,6 +1,13 @@
 import { cssEscape } from "../core/css.js";
+import { getDirectChild } from "../core/xml.js";
 
 let mountedTopbarSearch = null;
+
+const TOPBAR_FIELDS = [
+    { id: "customerName", labelId: "customerNameLabel", fallbackLabel: "Customer Name" },
+    { id: "projectName", labelId: "projectNameLabel", fallbackLabel: "Project Name" },
+    { id: "userName", labelId: "userNameLabel", fallbackLabel: "User Name" }
+];
 
 export function mountTopbar(root = document) {
     ensureTopbarSearchMarkup(root);
@@ -272,6 +279,83 @@ export function mountTopbar(root = document) {
     return mountedTopbarSearch;
 }
 
+export function readTopbarMetadata(source = {}) {
+    if (!source) {
+        return {
+            customerName: "—",
+            customerNameLabel: "Customer Name",
+            projectName: "—",
+            projectNameLabel: "Project Name",
+            userName: "—",
+            userNameLabel: "User Name"
+        };
+    }
+
+    if (source.nodeType === Node.DOCUMENT_NODE || source.nodeType === Node.ELEMENT_NODE) {
+        return readTopbarMetadataFromXml(source);
+    }
+
+    const customerName = String(source.customerName ?? "—").trim() || "—";
+    const projectName = String(source.projectName ?? "—").trim() || "—";
+    const userName = String(source.userName ?? "—").trim() || "—";
+
+    return {
+        customerName,
+        customerNameLabel: String(source.customerNameLabel ?? "Customer Name").trim() || "Customer Name",
+        projectName,
+        projectNameLabel: String(source.projectNameLabel ?? "Project Name").trim() || "Project Name",
+        userName,
+        userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name"
+    };
+}
+
+export function applyTopbarMetadata(root = document, topPanel = {}) {
+    if (!root) {
+        return;
+    }
+
+    const metadata = readTopbarMetadata(topPanel);
+
+    TOPBAR_FIELDS.forEach((field) => {
+        const valueElement = findElement(root, field.id);
+        const labelElement = findElement(root, field.labelId);
+
+        if (!valueElement && !labelElement) {
+            return;
+        }
+
+        const label = resolveTopbarLabel(metadata, field.labelId, field.fallbackLabel);
+        const value = resolveTopbarValue(metadata, field.id, "—");
+        const line = valueElement?.closest(".meta-line") || labelElement?.closest(".meta-line");
+
+        if (labelElement) {
+            labelElement.textContent = label;
+        }
+
+        if (valueElement) {
+            valueElement.textContent = value;
+        }
+
+        if (line) {
+            const content = [];
+
+            if (labelElement) {
+                content.push(labelElement);
+            } else if (label) {
+                content.push(document.createTextNode(label));
+            }
+
+            content.push(document.createTextNode(": "));
+
+            if (valueElement) {
+                content.push(valueElement);
+            }
+
+            line.replaceChildren(...content);
+        }
+    });
+}
+
 function findElement(searchRoot, id) {
     if (searchRoot.getElementById) {
         return searchRoot.getElementById(id);
@@ -395,6 +479,81 @@ function ensureTopbarStructure(topbar) {
             metaContent.appendChild(logo);
         }
     }
+}
+
+function readTopbarMetadataFromXml(source) {
+    const topPanel = findTopPanelElement(source);
+
+    if (!topPanel) {
+        return readTopbarMetadata({});
+    }
+
+    return {
+        customerNameLabel: getFieldLabel(topPanel, "CustomerName", "Customer Name"),
+        customerName: getFieldValue(topPanel, "CustomerName", "—"),
+        projectNameLabel: getFieldLabel(topPanel, "ProjectName", "Project Name"),
+        projectName: getFieldValue(topPanel, "ProjectName", "—"),
+        userNameLabel: getFieldLabel(topPanel, ["UserName", "Name"], "User Name"),
+        userName: getFieldValue(topPanel, ["UserName", "Name"], "—")
+    };
+}
+
+function resolveTopbarLabel(topPanel, labelId, fallbackLabel) {
+    const value = String(topPanel?.[labelId] || "").trim();
+
+    return value || fallbackLabel;
+}
+
+function resolveTopbarValue(topPanel, fieldId, fallbackValue) {
+    const value = String(topPanel?.[fieldId] || "").trim();
+
+    return value || fallbackValue;
+}
+
+function findTopPanelElement(source) {
+    if (!source) {
+        return null;
+    }
+
+    if (source.nodeType === Node.ELEMENT_NODE) {
+        return source.tagName === "TopPanel"
+            ? source
+            : source.querySelector("TopPanel");
+    }
+
+    return source.querySelector?.("TopPanel")
+        || source.getElementsByTagName?.("TopPanel")?.[0]
+        || null;
+}
+
+function getFieldLabel(parent, tagNames, fallback = "") {
+    const names = Array.isArray(tagNames) ? tagNames : [tagNames];
+
+    for (const tagName of names) {
+        const element = getDirectChild(parent, tagName) || parent?.getElementsByTagName?.(tagName)?.[0];
+        const label = element?.getAttribute("header") || element?.getAttribute("label") || "";
+
+        if (String(label || "").trim()) {
+            return String(label).trim();
+        }
+    }
+
+    return fallback;
+}
+
+function getFieldValue(parent, tagNames, fallback = "") {
+    const names = Array.isArray(tagNames) ? tagNames : [tagNames];
+
+    for (const tagName of names) {
+        const element = getDirectChild(parent, tagName) || parent?.getElementsByTagName?.(tagName)?.[0];
+        const value = element?.textContent?.trim();
+
+        if (value) {
+            return value;
+        }
+    }
+
+    return fallback;
 }
 
 function createTopbarSearch() {

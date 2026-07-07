@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { hasXmlParseError } from "../core/xml.js";
 
@@ -13,6 +14,7 @@ const state = {
     sortKey: "changedDateTime",
     sortDirection: "desc",
     saving: false,
+    currentDoc: null,
     topPanel: {
         customerName: "—",
         projectName: "—",
@@ -95,6 +97,7 @@ async function loadBaselines() {
     try {
         const doc = await fetchXml(`${API_URL}?cmd=list`);
 
+        state.currentDoc = doc;
         state.topPanel = parseTopPanel(doc);
         state.baselines = parseBaselines(doc);
 
@@ -141,9 +144,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "");
-    setText("projectName", state.topPanel.projectName, "");
-    setText("userName", state.topPanel.userName, "");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseBaselines(doc) {

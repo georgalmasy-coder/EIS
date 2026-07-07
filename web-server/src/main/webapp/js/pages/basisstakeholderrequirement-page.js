@@ -180,7 +180,7 @@ function renderBasisInfoFieldMarkup(field) {
         return `
             <div class="page-field">
                 <label for="fld-${escapedName}">${escapedLabel}${requiredStar}</label>
-                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" value="${escapeHtml(normalized)}" ${readonlyAttr} ${requiredAttr} />
+                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" step="1" value="${escapeHtml(normalized)}" ${readonlyAttr} ${requiredAttr} />
             </div>
         `;
     }

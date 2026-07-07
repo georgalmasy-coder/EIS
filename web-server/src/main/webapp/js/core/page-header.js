@@ -1,5 +1,6 @@
 import { setText } from "./dom.js";
-import { getChildText, textOf } from "./xml.js";
+import { getChildText } from "./xml.js";
+import { applyTopbarMetadata, readTopbarMetadata } from "../components/topbar.js";
 
 export function parseTopPanel(xmlDocument, options = {}) {
     const topPanelSelector = options.topPanelSelector || "TopPanel";
@@ -10,11 +11,7 @@ export function parseTopPanel(xmlDocument, options = {}) {
         || null;
 
     if (!topPanelElement) {
-        return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
-        };
+        return readTopbarMetadata({});
     }
 
     const userName = userTagNames
@@ -22,6 +19,7 @@ export function parseTopPanel(xmlDocument, options = {}) {
         .find((value) => value);
 
     return {
+        ...readTopbarMetadata(topPanelElement),
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
         userName: userName || "—"
@@ -29,27 +27,17 @@ export function parseTopPanel(xmlDocument, options = {}) {
 }
 
 export function applyTopPanel(topPanel, elements, options = {}) {
-    const userTagNames = options.userTagNames || ["UserName", "Name"];
+    const metadata = readTopbarMetadata(topPanel);
 
     if (!elements) {
         return;
     }
 
-    if (topPanel && typeof topPanel === "object" && "customerName" in topPanel) {
-        setText(elements.customerName, topPanel.customerName);
-        setText(elements.projectName, topPanel.projectName);
-        setText(elements.userName, topPanel.userName);
-        return;
-    }
+    applyTopbarMetadata(document, metadata);
 
-    setText(elements.customerName, topPanel ? textOf(topPanel, "CustomerName") : "");
-    setText(elements.projectName, topPanel ? textOf(topPanel, "ProjectName") : "");
-
-    const userValue = topPanel
-        ? userTagNames.map((tagName) => textOf(topPanel, tagName)).find((value) => value)
-        : "";
-
-    setText(elements.userName, userValue || "");
+    setText(elements.customerName, metadata.customerName);
+    setText(elements.projectName, metadata.projectName);
+    setText(elements.userName, metadata.userName);
 }
 
 export function applyTopPanelFromDocument(xmlDocument, elements, options = {}) {

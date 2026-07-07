@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemRequirementDiagramPdf } from "./systemrequirement-diagram-pdf.js";
@@ -232,6 +233,7 @@ async function loadSystemRequirements() {
         }
 
         state.xmlDocument = xmlDocument;
+        state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(xmlDocument);
         state.requirements = parseSystemRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
@@ -275,9 +277,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "");
-    setText("projectName", state.topPanel.projectName, "");
-    setText("userName", state.topPanel.userName, "");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseSystemRequirements(xmlDocument) {

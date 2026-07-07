@@ -171,6 +171,7 @@ function createProjectFieldControl(node) {
         case "datetime": {
             control = document.createElement("input");
             control.type = "datetime-local";
+            control.step = "1";
             control.value = toDateTimeLocalValue(rawValue);
 
             applyCommonFieldAttributes(control, node);

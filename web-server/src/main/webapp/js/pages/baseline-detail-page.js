@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { hasXmlParseError } from "../core/xml.js";
 import { downloadBaselineDetailPdf } from "./baseline-detail-pdf.js";
@@ -13,6 +14,7 @@ const SYSTEM_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=systemrequirement-edit"
 const SYSTEMS_BREAKDOWN_EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 
 const state = {
+    currentDoc: null,
     topPanel: {
         customerName: "—",
         projectName: "—",
@@ -140,6 +142,7 @@ async function loadBaselineDetail(baselinePK) {
     try {
         const doc = await fetchXml(`${API_URL}?cmd=edit&id=${encodeURIComponent(String(baselinePK))}`);
 
+        state.currentDoc = doc;
         state.topPanel = parseTopPanel(doc);
         state.baseline = parseBaseline(doc);
 
@@ -223,9 +226,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "");
-    setText("projectName", state.topPanel.projectName, "");
-    setText("userName", state.topPanel.userName, "");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseBaseline(doc) {

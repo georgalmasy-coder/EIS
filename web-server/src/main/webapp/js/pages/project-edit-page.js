@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
 import { setText } from "../core/dom.js";
@@ -294,9 +295,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName);
-    setText("projectName", state.topPanel.projectName);
-    setText("userName", state.topPanel.userName);
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function renderAllFromDoc(doc) {
@@ -376,7 +375,7 @@ function renderBasisInfoFieldMarkup(field) {
         return `
             <div class="page-field">
                 <label for="fld-${escapedName}">${escapedLabel}${requiredStar}</label>
-                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" value="${escapeHtml(normalized)}" ${readonlyAttr} ${requiredAttr} />
+                <input id="fld-${escapedName}" data-field="${escapedName}" type="datetime-local" step="1" value="${escapeHtml(normalized)}" ${readonlyAttr} ${requiredAttr} />
             </div>
         `;
     }
@@ -474,7 +473,23 @@ function normalizeDateTimeForInput(value) {
         return "";
     }
 
-    return text.replace(" ", "T").substring(0, 16);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(text)) {
+        return text;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(text)) {
+        return `${text}:00`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(text)) {
+        return text.replace(" ", "T");
+    }
+
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(text)) {
+        return `${text.replace(" ", "T")}:00`;
+    }
+
+    return text.replace(" ", "T");
 }
 
 async function saveCurrentProject() {

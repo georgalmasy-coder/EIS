@@ -22,12 +22,6 @@ public class UserEmail extends AbstractEmail {
     }
 
     @Override
-    public String toString() {
-        return getValue();
-    }
-
-
-    @Override
     public String getSortKey() {
         return getValue();
     }

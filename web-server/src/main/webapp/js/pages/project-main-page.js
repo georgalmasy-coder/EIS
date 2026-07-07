@@ -1,6 +1,7 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { sanitizeCssColor } from "../core/css.js";
@@ -25,6 +26,7 @@ const STORAGE_KEYS = {
 };
 
 const state = {
+    currentDoc: null,
     topPanel: {
         customerName: "—",
         projectName: "—",
@@ -135,6 +137,7 @@ async function loadProjects() {
 
         const root = xmlDocument.getElementsByTagName("ProjectList")[0] || xmlDocument.documentElement;
 
+        state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(root);
         state.projects = parseProjects(root);
         state.listColumns = buildListColumns(state.projects);
@@ -175,9 +178,7 @@ function parseTopPanel(root) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "-");
-    setText("projectName", state.topPanel.projectName, "-");
-    setText("userName", state.topPanel.userName, "-");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseProjects(root) {

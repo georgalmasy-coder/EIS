@@ -1,6 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemsBreakdownDiagramPdf } from "./systemsbreakdown-diagram-pdf.js";
@@ -219,6 +220,7 @@ async function loadSystemsBreakdown() {
         }
 
         state.xmlDocument = xmlDocument;
+        state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(xmlDocument);
         state.systems = parseSystemsBreakdown(xmlDocument);
         state.listColumns = buildListColumns(state.systems);
@@ -261,9 +263,7 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "");
-    setText("projectName", state.topPanel.projectName, "");
-    setText("userName", state.topPanel.userName, "");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseSystemsBreakdown(xmlDocument) {

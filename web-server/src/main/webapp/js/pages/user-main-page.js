@@ -1,6 +1,7 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
+import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import {
@@ -33,6 +34,7 @@ const DEFAULT_COLUMNS = [
 ];
 
 const state = {
+    currentDoc: null,
     topPanel: {
         customerName: "—",
         projectName: "—",
@@ -147,7 +149,7 @@ async function loadUsers() {
         }
 
         const root = xmlDocument.getElementsByTagName("UserMain")[0] || xmlDocument.documentElement;
-
+        state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(root);
         state.users = parseUsers(root);
 
@@ -187,9 +189,7 @@ function parseTopPanel(root) {
 }
 
 function applyTopPanel() {
-    setText("customerName", state.topPanel.customerName, "—");
-    setText("projectName", state.topPanel.projectName, "—");
-    setText("userName", state.topPanel.userName, "—");
+    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
 }
 
 function parseUsers(root) {
