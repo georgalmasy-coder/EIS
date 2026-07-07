@@ -591,7 +591,7 @@ function openRequirementDialog(requirement) {
         requirement.type === "stakeholder"
             ? "Stakeholder Requirement"
             : requirement.type === "systemsBreakdown"
-                ? "Systems Breakdown"
+                ? "Physical Structure"
                 : "System Requirement",
         ""
     );
@@ -614,10 +614,10 @@ function openRequirementDialog(requirement) {
         renderRelatedRequirementList(
             "dialogRelatedSystemsBreakdowns",
             getRelatedRequirements(requirement.internalId, (relatedRequirement) => relatedRequirement.type === "systemsBreakdown"),
-            "No related systems breakdowns."
+            "No related physical structure."
         );
     } else {
-        renderRelatedRequirementList("dialogRelatedSystemsBreakdowns", [], "No related systems breakdowns.");
+        renderRelatedRequirementList("dialogRelatedSystemsBreakdowns", [], "No related physical structure.");
     }
 
     if (!dialog.open) {

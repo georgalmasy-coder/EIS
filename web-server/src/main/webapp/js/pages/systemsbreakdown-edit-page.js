@@ -193,7 +193,7 @@ async function loadDetail() {
     }
 
     setText("loadStatus", "Loading");
-    setText("dlgStatus", "Loading systems breakdown details…");
+    setText("dlgStatus", "Loading physical structure details…");
 
     try {
         const response = await fetch(detailUrl, {
@@ -212,7 +212,7 @@ async function loadDetail() {
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
-            throw new Error("The systems breakdown endpoint returned invalid XML.");
+            throw new Error("The physical structure endpoint returned invalid XML.");
         }
 
         state.currentDoc = xmlDocument;
@@ -242,9 +242,9 @@ async function loadDetail() {
         setText("loadStatus", "Loaded");
         setText("dlgStatus", "Loaded.");
     } catch (error) {
-        console.error("Failed to load systems breakdown detail", error);
+        console.error("Failed to load physical structure detail", error);
         setText("loadStatus", "Error");
-        setText("dlgStatus", `Could not load systems breakdown detail. ${error.message}`);
+        setText("dlgStatus", `Could not load physical structure detail. ${error.message}`);
     }
 }
 
@@ -570,7 +570,7 @@ async function saveCurrentSystem() {
 
         returnToPreviousPage();
     } catch (error) {
-        console.error("Failed to save systems breakdown", error);
+        console.error("Failed to save physical structure", error);
         setText("dlgStatus", `Save failed. ${error.message}`);
         setText("loadStatus", "Error");
     }

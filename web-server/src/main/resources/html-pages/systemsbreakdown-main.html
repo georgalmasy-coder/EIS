@@ -62,7 +62,7 @@
 
         <section class="panel page-layout systemsbreakdown-main-layout" aria-label="Systems Breakdown">
             <div class="section-header systemsbreakdown-main-section-header">
-                <h2>Systems Breakdown</h2>
+                <h2>Physical Structure</h2>
 
                 <div class="systemsbreakdown-view-switcher" role="group" aria-label="Select view type">
                     <button
@@ -111,7 +111,7 @@
                 </div>
             </div>
 
-            <div class="systemsbreakdown-main-info-bar" aria-label="Systems breakdown information">
+            <div class="systemsbreakdown-main-info-bar" aria-label="Physical structure information">
                 <div class="systemsbreakdown-main-info-item">
                     <span class="systemsbreakdown-main-info-label">Systems:</span>
                     <strong id="systemsBreakdownCount">—</strong>
@@ -163,8 +163,8 @@
                             id="btnImport"
                             class="systemsbreakdown-icon-button systemsbreakdown-list-action"
                             type="button"
-                            aria-label="Import systems breakdown"
-                            title="Import systems breakdown"
+                            aria-label="Import Physical Structure"
+                            title="Import Physical Structure"
                     >
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
@@ -176,8 +176,8 @@
                             id="btnExport"
                             class="systemsbreakdown-icon-button systemsbreakdown-list-action"
                             type="button"
-                            aria-label="Export systems breakdown"
-                            title="Export systems breakdown"
+                            aria-label="Export Physical Structure"
+                            title="Export Physical Structure"
                     >
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
@@ -218,9 +218,9 @@
                             class="systemsbreakdown-icon-button systemsbreakdown-help-button"
                             type="button"
                             data-help-page="systemsbreakdown-main"
-                            data-help-title="Help - Systems Breakdown"
+                            data-help-title="Help - Physical Structure"
                             title="Open help"
-                            aria-label="Open help for Systems Breakdown"
+                            aria-label="Open help for Physical Structuren"
                     >
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
@@ -249,7 +249,7 @@
                             </table>
 
                             <div class="empty page-empty systemsbreakdown-empty" id="listEmptyState">
-                                Loading systems breakdown…
+                                Loading physical structure…
                             </div>
                         </div>
                     </div>
@@ -259,7 +259,7 @@
                         id="horizontalDiagramView"
                         class="systemsbreakdown-view-panel"
                         data-view-panel="horizontal"
-                        aria-label="Horizontal systems breakdown diagram view"
+                        aria-label="Horizontal physical structure diagram view"
                         hidden
                 >
                     <div class="systemsbreakdown-diagram-frame systemsbreakdown-horizontal-diagram-frame" id="horizontalDiagramFrame">
@@ -269,7 +269,7 @@
                         </div>
 
                         <div class="systemsbreakdown-empty is-visible" id="horizontalDiagramEmptyState">
-                            Loading horizontal systems breakdown diagram…
+                            Loading horizontal physical structure diagram…
                         </div>
                     </div>
                 </section>
@@ -278,7 +278,7 @@
                         id="verticalDiagramView"
                         class="systemsbreakdown-view-panel"
                         data-view-panel="vertical"
-                        aria-label="Vertical systems breakdown diagram view"
+                        aria-label="Vertical physical structure diagram view"
                         hidden
                 >
                     <div class="systemsbreakdown-diagram-frame systemsbreakdown-vertical-diagram-frame" id="verticalDiagramFrame">
@@ -288,7 +288,7 @@
                         </div>
 
                         <div class="systemsbreakdown-empty is-visible" id="verticalDiagramEmptyState">
-                            Loading vertical systems breakdown diagram…
+                            Loading vertical physical structure diagram…
                         </div>
                     </div>
                 </section>
@@ -349,7 +349,7 @@
     <form id="exportForm" method="dialog">
         <div class="export-dialog-shell">
             <div class="export-dialog-head">
-                <h3>Export Systems Breakdown</h3>
+                <h3>Export Physical Structure</h3>
             </div>
 
             <p class="export-dialog-description">
@@ -415,11 +415,11 @@
     <form id="importForm" method="dialog" enctype="multipart/form-data">
         <div class="import-dialog-shell">
             <div class="import-dialog-head">
-                <h3>Import Systems Breakdown</h3>
+                <h3>Import Physical Structure</h3>
             </div>
 
             <p class="import-dialog-description">
-                Select a file containing systems breakdown data. The file must be XML, XLSX or CSV.
+                Select a file containing physical structure data. The file must be XML, XLSX or CSV.
             </p>
 
             <section class="import-dialog-section" aria-labelledby="import-file-title">

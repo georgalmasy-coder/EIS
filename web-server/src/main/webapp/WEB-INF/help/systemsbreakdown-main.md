@@ -1,12 +1,12 @@
-# Systems Breakdown
+# Physical Structure
 
-This page is used to view, filter, import, export, and maintain Systems Breakdown data.
+This page is used to view, filter, import, export, and maintain Physical Structure.
 
 ## Views
 
 The page has three views:
 
-- **List view** shows Systems Breakdown as a table.
+- **List view** shows physical structure as a table.
 - **Horizontal diagram** shows the hierarchy from left to right.
 - **Vertical diagram** shows the hierarchy from top to bottom.
 
@@ -39,7 +39,7 @@ Sorting and column widths are saved automatically.
 
 ## Diagram views
 
-The diagram views show Systems Breakdown as a hierarchy with the project as the root node.
+The diagram views show physical structure as a hierarchy with the project as the root node.
 
 In the diagram views, you can:
 

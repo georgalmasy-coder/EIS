@@ -64,18 +64,18 @@
 
         <section class="panel page-layout systemsbreakdown-layout" aria-label="System breakdown">
             <div class="section-header systemsbreakdown-section-header">
-                <h2>Systems Breakdown</h2>
+                <h2>Physical Structure</h2>
 
                 <div class="section-header-actions">
-                    <button id="btnImport" class="page-icon-button" type="button" aria-label="Import systems breakdown" title="Import systems breakdown">
+                    <button id="btnImport" class="page-icon-button" type="button" aria-label="Import Physical Structure" title="Import Physical Structure">
                         <span aria-hidden="true">Import</span>
                     </button>
 
-                    <button id="btnExport" class="page-icon-button" type="button" aria-label="Export systems breakdown" title="Export systems breakdown">
+                    <button id="btnExport" class="page-icon-button" type="button" aria-label="Export Physical Structure" title="Export Physical Structure">
                         <span aria-hidden="true">Export</span>
                     </button>
 
-                    <button id="btnAddNew" class="page-icon-button" type="button" aria-label="Add new system" title="Add new system">
+                    <button id="btnAddNew" class="page-icon-button" type="button" aria-label="Add new Physical Structure" title="Add new Physical Structure">
                         <span aria-hidden="true">Add System</span>
                     </button>
                 </div>
@@ -84,7 +84,7 @@
             <div class="page-body systemsbreakdown-body">
                 <div class="table-frame page-frame systemsbreakdown-frame" aria-label="Systems breakdown list frame">
                     <div class="table-scroll systemsbreakdown-scroll" id="tableScroll">
-                        <table class="data-table page-table systemsbreakdown-table" aria-label="Systems breakdown list">
+                        <table class="data-table page-table systemsbreakdown-table" aria-label="Physical Structure list">
                             <colgroup id="mainColGroup"></colgroup>
                             <thead>
                             <tr id="mainHeaderRow"></tr>
@@ -103,7 +103,7 @@
 <dialog id="editDialog" aria-label="System breakdown edit dialog">
     <form id="editForm" method="dialog" class="dlg">
         <div class="page-dialog-head">
-            <h3 id="dlgTitle">Systems Breakdown</h3>
+            <h3 id="dlgTitle">Physical Structure</h3>
         </div>
 
         <div class="page-dialog-status" id="dlgStatus">Idle</div>
@@ -245,7 +245,7 @@
     <form id="exportForm" method="dialog">
         <div class="export-dialog-shell">
             <div class="export-dialog-head">
-                <h3>Export Systems Breakdown</h3>
+                <h3>Export Physical Structure</h3>
             </div>
 
             <p class="export-dialog-description">
@@ -311,11 +311,11 @@
     <form id="importForm" method="dialog" enctype="multipart/form-data">
         <div class="import-dialog-shell">
             <div class="import-dialog-head">
-                <h3>Import Systems Breakdown</h3>
+                <h3>Import Physical Structure</h3>
             </div>
 
             <p class="import-dialog-description">
-                Select a file containing systems breakdown data. The file must be XML, XLSX or CSV.
+                Select a file containing physical structure data. The file must be XML, XLSX or CSV.
             </p>
 
             <section class="import-dialog-section" aria-labelledby="import-file-title">

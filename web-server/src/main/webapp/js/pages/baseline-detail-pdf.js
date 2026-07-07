@@ -89,7 +89,7 @@ function createBaselineDetailPdf(options) {
         context,
         options,
         y,
-        "Systems breakdown",
+        "Physical Structure",
         options?.systemsBreakdown || [],
         generatedAt
     );

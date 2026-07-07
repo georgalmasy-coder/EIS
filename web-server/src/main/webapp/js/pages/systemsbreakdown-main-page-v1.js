@@ -20,7 +20,7 @@ import {
 const LIST_URL = "/project/systembreakdown?cmd=list";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 
-const EMPTY_FILTER_MESSAGE = "No systems breakdown requirements match the current filters.";
+const EMPTY_FILTER_MESSAGE = "No physical structure match the current filters.";
 
 const STORAGE_KEYS = {
     selectedView: "basis.systemsbreakdown.main.selectedView",
@@ -191,7 +191,7 @@ function initializeImportExportDialogs() {
     const exportDialog = createExportDialog({
         dialogId: "exportDialog",
         openButtonId: "btnExport",
-        entityName: "Systems Breakdown",
+        entityName: "Physical Structure",
         exportUrl: "/project/systembreakdown"
     });
 
@@ -209,9 +209,9 @@ function initializeImportExportDialogs() {
 }
 
 async function loadSystemsBreakdown() {
-    showListEmptyState("Loading systems breakdown…");
-    showDiagramEmptyState("horizontal", "Loading horizontal systems breakdown diagram…");
-    showDiagramEmptyState("vertical", "Loading vertical systems breakdown diagram…");
+    showListEmptyState("Loading physical structure…");
+    showDiagramEmptyState("horizontal", "Loading horizontal physical structure diagram…");
+    showDiagramEmptyState("vertical", "Loading vertical physical structure diagram…");
     setText("loadStatus", "Loading", "");
 
     try {
@@ -231,7 +231,7 @@ async function loadSystemsBreakdown() {
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
-            throw new Error("The systems breakdown endpoint returned invalid XML.");
+            throw new Error("The physical structure endpoint returned invalid XML.");
         }
 
         state.xmlDocument = xmlDocument;
@@ -251,9 +251,9 @@ async function loadSystemsBreakdown() {
 
         setText("loadStatus", "Loaded", "");
     } catch (error) {
-        console.error("Failed to load systems breakdown", error);
+        console.error("Failed to load physical structure", error);
         setText("loadStatus", "Error", "");
-        showListEmptyState(`Could not load systems breakdown. ${error.message}`);
+        showListEmptyState(`Could not load physical structure. ${error.message}`);
         showDiagramEmptyState("horizontal", `Could not load horizontal diagram. ${error.message}`);
         showDiagramEmptyState("vertical", `Could not load vertical diagram. ${error.message}`);
     }
@@ -1332,7 +1332,7 @@ function layoutHorizontal(node, depth, nextY, context) {
 
 /*
  * KOPIERET FRA basissystemrequirementdiagramV2-page.js:
- * Det vertikale systems breakdown diagram bruger samme visuelle layout-principper:
+ * Det vertikale physical structure diagram bruger samme visuelle layout-principper:
  * - Project-kassen har samme størrelse/udtryk som V2 project-kassen.
  * - Child-kasser har samme størrelse/udtryk som V2 requirement-kasser.
  * - Forbindelser tegnes med samme lige/knækkede path-princip som V2.

@@ -7,22 +7,23 @@ public enum PageType {
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview"),
     BASIS_RELATION_DIAGRAM_PAGE("basisrelationdiagram","html-pages/basisrelationdiagram.html", "Relation Diagram"),
     BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix"),
-    STAKEHOLDER_REQUIREMENT_PAGE("stakeholderrequirement","html-pages/stakeholderrequirement.html", "Stakeholder Requirement"),
 
+    // Old versions
+    STAKEHOLDER_REQUIREMENT_PAGE("stakeholderrequirement","html-pages/stakeholderrequirement.html", "Stakeholder Requirement"),
     SYSTEM_REQUIREMENT_PAGE("systemrequirement","html-pages/systemrequirement.html", "System Requirement"),
     SYSTEM_REQUIREMENT_DIAGRAM_PAGE("systemrequirementdiagram","html-pages/systemrequirementdiagram.html", "System Requirement Hierarchy Diagram"),
     SYSTEM_REQUIREMENT_DIAGRAM_V2_PAGE("systemrequirementdiagramV2","html-pages/systemrequirementdiagramV2.html", "System Requirement Hierarchy Diagram"),
-
-    NEW_SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
-    NEW_SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit"),
-
-    NEW_STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement"),
-    NEW_STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit"),
-
     SYSTEMS_BREAKDOWN_PAGE("systemsbreakdown","html-pages/systemsbreakdown.html", "Systems Breakdown"),
 
-    NEW_SYSTEMS_BREAKDOWN_MAIN_PAGE("systemsbreakdown-main","html-pages/systemsbreakdown-main.html", "Systems Breakdown"),
-    NEW_SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Systems Breakdown Edit"),
+
+    // New versions
+    SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
+    SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit"),
+    STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement"),
+    STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit"),
+    SYSTEMS_BREAKDOWN_MAIN_PAGE("systemsbreakdown-main","html-pages/systemsbreakdown-main.html", "Physical Structure"),
+    SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Physical Structure Edit"),
+
 
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS"),
     ADMIN_DASHBOARD_ALERT_PAGE("dashboard-alerts-view","html-pages/admin/views/dashboard-alerts-view.html", ""),

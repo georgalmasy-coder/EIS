@@ -4,7 +4,7 @@ import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
 
 public enum EntityType {
 
-    SYSTEMS_BREAKDOWN(2, "SBS", "Systems breakdown", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
+    SYSTEMS_BREAKDOWN(2, "P-SYS", "Physical Structure", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
             new EntityDataElement[]{
                     SBSCODE,
                     CODELEVEL,

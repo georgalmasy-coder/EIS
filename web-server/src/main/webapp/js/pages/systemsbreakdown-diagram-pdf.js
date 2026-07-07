@@ -670,7 +670,7 @@ function drawPdfHeader(commands, options) {
 
     drawPdfText(
         commands,
-        `Systems Breakdown ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
+        `Physical Structure ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
         margin,
         pageHeight - margin - 10,
         12,

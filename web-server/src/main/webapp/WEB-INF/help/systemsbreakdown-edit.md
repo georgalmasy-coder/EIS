@@ -1,6 +1,6 @@
-# Systems Breakdown Edit
+# Physical Structure Edit
 
-This page is used to create, edit, and review a Systems Breakdown item.
+This page is used to create, edit, and review a Physical Structure item.
 
 ## Modes
 
