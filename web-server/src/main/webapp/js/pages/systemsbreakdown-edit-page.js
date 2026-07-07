@@ -5,6 +5,7 @@ import { applyTopbarMetadata } from "../components/topbar.js";
 import { createHistoryTable } from "../components/history-table.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
+import { createLinksTable } from "../components/links-table.js";
 import { createEntityRelationsTable } from "../components/entity-relations-table.js";
 import { setText } from "../core/dom.js";
 import {
@@ -62,6 +63,8 @@ const notesTable = createNotesTable({
 const attachmentsTable = createAttachmentsTable({
     onAfterRender: initializeResizableEditTables
 });
+
+const linksTable = createLinksTable();
 
 const relationsTable = createEntityRelationsTable({
     onAfterRender: initializeResizableEditTables
@@ -139,6 +142,7 @@ function initializeRouteState() {
 
     notesTable.setReadOnly(state.readOnly, { render: false });
     attachmentsTable.setReadOnly(state.readOnly, { render: false });
+    linksTable.setReadOnly(state.readOnly, { render: false });
     relationsTable.setReadOnly(state.readOnly, { render: false });
     relationsTable.setEntityContext({
         entityTypeId: RELATION_ENTITY_TYPE_ID,
@@ -166,6 +170,10 @@ function initializeEvents() {
     });
 
     attachmentsTable.bind({
+        readOnly: state.readOnly
+    });
+
+    linksTable.bind({
         readOnly: state.readOnly
     });
 
@@ -287,6 +295,7 @@ function applyModeUi() {
     historyTable.setReadOnly(state.readOnly);
     notesTable.setReadOnly(state.readOnly);
     attachmentsTable.setReadOnly(state.readOnly);
+    linksTable.setReadOnly(state.readOnly);
     relationsTable.setReadOnly(state.readOnly);
 
     if (saveButton) {
@@ -377,6 +386,7 @@ function renderAllFromDoc(doc) {
     historyTable.loadFromDocument(doc);
     notesTable.loadFromDocument(doc);
     attachmentsTable.loadFromDocument(doc);
+    linksTable.loadFromDocument(doc);
     relationsTable.loadFromDocument(doc);
 }
 
@@ -638,6 +648,7 @@ function buildSavePayload() {
 
     notesTable.writeToDocument(updatedDoc);
     attachmentsTable.writeToDocument(updatedDoc);
+    linksTable.writeToDocument(updatedDoc);
     relationsTable.writeToDocument(updatedDoc);
 
     return serializeXml(updatedDoc);

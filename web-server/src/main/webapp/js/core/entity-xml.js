@@ -81,6 +81,25 @@ export function parseEntityRelationsFromDoc(doc) {
     });
 }
 
+export function parseEntityLinksFromDoc(doc) {
+    const root = doc?.documentElement || doc;
+    const linksRoot = root.getElementsByTagName("EntityLinks")?.[0];
+
+    return Array.from(linksRoot?.getElementsByTagName("EntityLink") || []).map((node) => {
+        const createdBy = parseCreatedBy(node);
+
+        return {
+            entityLinkPK: textOf(node, "EntityLinkPK").trim(),
+            description: textOf(node, "Description"),
+            linkUrl: textOf(node, "LinkUrl"),
+            createdById: createdBy.createdById,
+            createdByText: createdBy.createdByText,
+            createdTime: textOf(node, "CreatedTime").trim(),
+            isNew: false
+        };
+    });
+}
+
 export function buildCreatedByXml(doc, item, selected = true) {
     const createdByNode = doc.createElement("CreatedById");
 
@@ -91,7 +110,7 @@ export function buildCreatedByXml(doc, item, selected = true) {
     const optionNode = doc.createElement("Option");
     optionNode.setAttribute("value", item.createdById ?? "");
 
-    if (selected && (item.createdById ?? "") !== "") {
+    if (selected && ((item.createdById ?? "") !== "" || (item.createdByText ?? "") !== "")) {
         optionNode.setAttribute("selected", "true");
     }
 
@@ -194,4 +213,32 @@ export function buildEntityRelationsXml(doc, relations) {
     });
 
     return relationsNode;
+}
+
+export function buildEntityLinksXml(doc, links) {
+    const root = doc.documentElement;
+    let linksNode = getDirectChild(root, "EntityLinks");
+
+    if (!linksNode) {
+        linksNode = doc.createElement("EntityLinks");
+        root.appendChild(linksNode);
+    }
+
+    while (linksNode.firstChild) {
+        linksNode.removeChild(linksNode.firstChild);
+    }
+
+    links.forEach((link) => {
+        const entityLink = doc.createElement("EntityLink");
+
+        appendTextElement(doc, entityLink, "EntityLinkPK", link.entityLinkPK ?? "");
+        appendTextElement(doc, entityLink, "Description", link.description ?? "");
+        appendTextElement(doc, entityLink, "LinkUrl", link.linkUrl ?? "");
+        entityLink.appendChild(buildCreatedByXml(doc, link, true));
+        appendTextElement(doc, entityLink, "CreatedTime", link.createdTime ?? "");
+
+        linksNode.appendChild(entityLink);
+    });
+
+    return linksNode;
 }

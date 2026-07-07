@@ -54,6 +54,10 @@ public class SystemBreakdownInfo extends GenericXmlDocument {
         EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId, version);
         rootElement.addElement(entityNotes.getEntityNoteElements());
 
+        EntityLinkProvider entityLinkProvider = new EntityLinkProvider(webSession);
+        EntityLinks entityLinks = entityLinkProvider.getEntityLinkByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId, version);
+        rootElement.addElement(entityLinks.getEntityLinkElements());
+
         EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
         EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId);
         rootElement.addElement(entityAttachments.getEntityAttachmentElements());

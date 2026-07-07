@@ -1,19 +1,18 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.EntityNoteText;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class EntityNoteProvider extends GenericProvider {
 
@@ -33,6 +32,18 @@ public class EntityNoteProvider extends GenericProvider {
             "AND E.EntityId = ? " +
             " #VERSION_CONDITION# " +
             "ORDER BY EN.CreatedTime DESC";
+
+    private static final String INSERT_ENTITY_NOTE_SQL =
+            "INSERT INTO ENTITY_NOTES (" +
+                    "  CustomerId, " +
+                    "  ProjectId, " +
+                    "  EntityId, " +
+                    "  Version, " +
+                    "  EntityType, " +
+                    "  NoteText, " +
+                    "  CreatedById, " +
+                    "  CreatedTime" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     public EntityNoteProvider(WebSession webSession) {
         super(webSession);
@@ -75,4 +86,29 @@ public class EntityNoteProvider extends GenericProvider {
         }
         return entityNotes;
     }
+
+    public void insertEntityNotes(Connection con, AbstractEntity entity) throws SQLException {
+
+        for (NoteRecord noteRecord : entity.getListOfEntityNotes()) {
+
+            try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_NOTE_SQL)) {
+
+                ps.setInt(1, entity.getCustomerId());
+                ps.setInt(2, entity.getProjectId());
+                ps.setInt(3, entity.getEntityId());
+                ps.setInt(4, entity.getVersion());
+                ps.setInt(5, entity.getEntityType().getId());
+                ps.setString(6, noteRecord.getNoteText());
+                ps.setInt(7, noteRecord.getChangedByUserId());
+                ps.setTimestamp(8, Timestamp.valueOf(noteRecord.getChangedDate()));
+
+                int rows = ps.executeUpdate();
+
+                if (rows == 0) {
+                    throw new SQLException("Insert entity note failed for entityId=" + entity.getEntityId());
+                }
+            }
+        }
+    }
+
 }

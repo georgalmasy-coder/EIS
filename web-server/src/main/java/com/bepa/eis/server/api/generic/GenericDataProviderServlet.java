@@ -6,6 +6,7 @@ import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
+import com.bepa.eis.server.dataprovider.entities.common.LinkRecord;
 import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
 import com.bepa.eis.server.dataprovider.fields.binary.FileData;
 import com.bepa.eis.server.dataprovider.fields.integers.FileSize;
@@ -27,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,7 +38,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -107,9 +106,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
                     GenericXmlDocument xmlDocument= handleCreateEntity(webSession, request, response, parentEntityId);
                     setOkResponse(response, xmlDocument);
                 }
-                case "export" -> {
-                    handleExport(webSession, request, response);
-                }
+                case "export" -> handleExport(webSession, request, response);
                 case "overview" -> {
                     GenericXmlDocument xmlDocument = handleOverview(webSession, request, response);
                     setOkResponse(response, xmlDocument);
@@ -157,7 +154,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
                     Document doc = dbf.newDocumentBuilder().parse(request.getInputStream());
                     Element rootElement = doc.getDocumentElement();
                     handleSave(webSession, request, rootElement);
-                    log.debug("payload : " + toXmlString(doc));
+                    log.debug("payload : {} ", toXmlString(doc));
                 }
                 default -> {
                     log.warn("Invalid command : {}", command);
@@ -175,16 +172,6 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             setErrorResponse(response, throwable);
             throw new ServletException("Error processing request", throwable);
         }
-    }
-
-    private void handleSave(HttpServletRequest request ) throws ParserConfigurationException, TransformerException, IOException, SAXException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(false);
-        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-
-        Document doc = dbf.newDocumentBuilder().parse(request.getInputStream());
-
-        log.debug("payload : " + toXmlString(doc));
     }
 
     public String getCommandParameter(HttpServletRequest request) {
@@ -220,18 +207,6 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         return ver;
     }
 
-    private String readRequestBody(HttpServletRequest request) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-
     private void setOkResponse(HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_OK);
     }
@@ -244,14 +219,14 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     private void setErrorResponse(HttpServletResponse response, Throwable throwable) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-        String message = "<error><message>#MSG#</message></error>";
-        message = message.replace("#MSG#", throwable.getMessage());
+//        String message = "<error><message>#MSG#</message></error>";
+//        message = message.replace("#MSG#", throwable.getMessage());
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         try {
 //            response.getWriter().write(message);
-            response.getWriter().write("Error occurred : " + throwable.getMessage() + "");
+            response.getWriter().write("Error occurred : " + throwable.getMessage());
         } catch (IOException e) {
-            log.error("Unable to respone client : {}", throwable.getMessage(), throwable);
+            log.error("Unable to response client : {}", throwable.getMessage(), throwable);
         }
 
     }
@@ -284,6 +259,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         return (String) session.getAttribute("sessionID");
     }
 
+/* GFA
     public void setXmlResponse(HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType("application/xml; charset=UTF-8");
@@ -292,12 +268,14 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         response.setHeader("Pragma", "no-cache");
     }
 
+ */
+
     /**
      * Convenience method that serializes into an XML string.
      *
      * @param prettyPrint if true, indents the output (human-readable)
      */
-    public String toXmlString(Document doc, boolean prettyPrint) throws ParserConfigurationException, TransformerException {
+    public String toXmlString(Document doc, boolean prettyPrint) throws TransformerException {
 
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
@@ -350,7 +328,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
     public String textValue(Element parent, String tagName) {
         Element el = firstChild(parent, tagName);
-        String text = null;
+        String text;
         if (el == null || el.getTextContent() == null) {
             text =  "";
         } else {
@@ -369,7 +347,9 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         if (! text.isBlank()) {
             try {
                 result = Integer.parseInt(text);
-            } catch (NumberFormatException e) { }
+            } catch (NumberFormatException e) {
+                // ignore
+            }
         }
         return result;
     }
@@ -433,6 +413,47 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
                 NoteRecord noteRecord = new NoteRecord(entity, noteText, createdById, dateTime);
                 entity.addNoteRecord(noteRecord);
+            }
+        }
+    }
+
+    public void parseLinkDocument(AbstractEntity entity, Element linkSection) {
+        // --- Notes ---
+        if (linkSection != null) {
+            for (Element entry : children(linkSection, "EntityLink")) {
+                Integer entityLinkPK = intValue(entry, "EntityLinkPK");
+                String description = textValue(entry, "Description");
+                String url = textValue(entry, "LinkUrl");
+
+                Element createdByElement = (Element) entry.getElementsByTagName("CreatedById").item(0);
+                Integer createdById = null;
+
+                if (createdByElement != null) {
+                    Element valueElement = (Element) createdByElement.getElementsByTagName("Value").item(0);
+                    if (valueElement != null) {
+                        String createdByText = valueElement.getTextContent();
+                        if (createdByText != null && !createdByText.isBlank()) {
+                            try {
+                                createdById = Integer.parseInt(createdByText.trim());
+                            } catch (NumberFormatException ignored) {
+                                // keep null
+                            }
+                        }
+                    }
+                }
+
+                String createdTime = textValue(entry, "CreatedTime");
+                LocalDateTime dateTime;
+                try {
+                    dateTime = LocalDateTime.parse(createdTime);
+                } catch (Exception e) {
+                    dateTime = LocalDateTime.now();
+                }
+
+                log.debug("entityLinkPK {} createdById {} createdAt {} url {} description {}", entityLinkPK, createdById, createdTime, url, description);
+
+                LinkRecord linkRecord = new LinkRecord(entity, description, url, createdById, dateTime);
+                entity.addLinkRecord(linkRecord);
             }
         }
     }
@@ -560,7 +581,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     }
 
     public WebSession getWebSessionFromRequest(HttpServletRequest request) {
-        WebSession webSession = null;
+        WebSession webSession;
         try {
             String sessionId = getSessionIdFromRequest(request);
             webSession = getWebSession(sessionId);

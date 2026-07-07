@@ -3,6 +3,7 @@ package com.bepa.eis.server.entites;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.entities.common.LinkRecord;
 import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.entites.configuration.EntityConfiguration;
@@ -28,6 +29,7 @@ abstract public class AbstractEntity {
     private Integer version;
     private final List<AbstractDataElement> listOfDataElements = new ArrayList<>();
     private final List<NoteRecord> listOfNoteRecords = new ArrayList<>();
+    private final List<LinkRecord> listOfLinkRecords = new ArrayList<>();
     private final List<AttachmentRecord> listOfAttachmentRecords = new ArrayList<>();
     private final List<EntityRelationRecord> listOfEntityRelationRecords = new ArrayList<>();
     private Integer changedByUserId;
@@ -60,6 +62,10 @@ abstract public class AbstractEntity {
 
     public List<NoteRecord> getListOfEntityNotes() {
         return listOfNoteRecords;
+    }
+
+    public List<LinkRecord> getListOfEntityLinks() {
+        return listOfLinkRecords;
     }
 
     public List<AttachmentRecord> getListOfEntityAttachments() {
@@ -261,6 +267,12 @@ abstract public class AbstractEntity {
     public void addNoteRecord(NoteRecord noteRecord) {
         if (noteRecord != null) {
             listOfNoteRecords.add(noteRecord);
+        }
+    }
+
+    public void addLinkRecord(LinkRecord linkRecord) {
+        if (linkRecord != null) {
+            listOfLinkRecords.add(linkRecord);
         }
     }
 

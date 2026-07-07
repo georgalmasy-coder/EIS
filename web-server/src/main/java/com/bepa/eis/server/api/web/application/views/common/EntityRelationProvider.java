@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.views.common;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.RelationType;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.EntityRelationType;
@@ -11,6 +12,7 @@ import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +220,7 @@ public class EntityRelationProvider extends GenericProvider {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
 
-                    EntityRelationRecord relationRecord  = new EntityRelationRecord(getWebSession().getCustomerId(), getWebSession().getProjectId());;
+                    EntityRelationRecord relationRecord  = new EntityRelationRecord(getWebSession().getCustomerId(), getWebSession().getProjectId());
 
                     relationRecord.setEntityId(rs.getInt(EntityId.FIELD_NAME));
                     relationRecord.setEntityType(EntityType.fromId(rs.getInt(EntityTypeId.FIELD_NAME)));
@@ -279,6 +281,39 @@ public class EntityRelationProvider extends GenericProvider {
         }
 
         return value;
+    }
+
+    public void insertEntityRelations(Connection con, AbstractEntity entity) throws SQLException {
+
+        for (EntityRelationRecord relationRecord : entity.getListOfEntityRelationRecords()) {
+
+            EntityRelationRecord existingRelationRecord = getExistingEntityRelationRecord(con, relationRecord);
+            if (existingRelationRecord == null) {
+                getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
+                log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
+            } else {
+                if (existingRelationRecord.getRelationType() != relationRecord.getRelationType()) {
+                    relationRecord.setVersion(existingRelationRecord.getVersion());
+                    getRelationProvider().clearLatestIfExists(con, existingRelationRecord);
+                    getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
+
+                }
+            }
+        }
+        log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
+    }
+
+    private EntityRelationRecord getExistingEntityRelationRecord(Connection con, EntityRelationRecord relationRecord) throws SQLException {
+        return  getRelationProvider().getEntityRelationByEntityTypeAndId(
+                con,
+                relationRecord.getEntityType(),
+                relationRecord.getEntityId(),
+                relationRecord.getRelatedEntityType(),
+                relationRecord.getRelatedEntityId());
+    }
+
+    private RelationProvider getRelationProvider() {
+        return new RelationProvider(getWebSession());
     }
 
 }

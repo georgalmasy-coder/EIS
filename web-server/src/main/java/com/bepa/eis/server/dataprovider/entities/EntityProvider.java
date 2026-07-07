@@ -1,11 +1,12 @@
 package com.bepa.eis.server.dataprovider.entities;
 
-import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
-import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.views.basis.baseline.Baseline;
 import com.bepa.eis.server.api.web.application.views.common.EntityAttachmentProvider;
+import com.bepa.eis.server.api.web.application.views.common.EntityLinkProvider;
+import com.bepa.eis.server.api.web.application.views.common.EntityNoteProvider;
+import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.dataprovider.entities.common.*;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
@@ -191,18 +192,6 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND EntityId = ? ";
 
 
-    private static final String INSERT_ENTITY_NOTE_SQL =
-            "INSERT INTO ENTITY_NOTES (" +
-                    "  CustomerId, " +
-                    "  ProjectId, " +
-                    "  EntityId, " +
-                    "  Version, " +
-                    "  EntityType, " +
-                    "  NoteText, " +
-                    "  CreatedById, " +
-                    "  CreatedTime" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
     private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
             "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
                     "FROM ENTITY E " +
@@ -227,7 +216,6 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND E.EntityType = ? " +
                     "AND E.EntityId = ? " +
                     "AND EE.EntityDataElementType = ?";
-
 
 
     public List<EntityRecord> getListOfEntityRecords(EntityType entityType, boolean includeInactive) throws SQLException {
@@ -777,9 +765,10 @@ abstract public class EntityProvider extends GenericProvider {
             try {
                 insertNewEntity(con, entity);
                 insertDataElements(con, entity);
-                insertEntityNotes(con, entity);
+                getNoteProvider().insertEntityNotes(con, entity);
+                getLinkProvider().insertEntityLinks(con, entity);
                 getAttachmentProvider().insertEntityAttachment(con, entity);
-                insertEntityRelations(con, entity);
+                getEntityRelationProvider().insertEntityRelations(con, entity);
                 updateActiveStatus(con, entity);
 
                 if (entity instanceof ProjectEntity projectEntity) {
@@ -930,63 +919,6 @@ abstract public class EntityProvider extends GenericProvider {
         }
     }
 
-    private void insertEntityNotes(Connection con, AbstractEntity entity) throws SQLException {
-
-        for (NoteRecord noteRecord : entity.getListOfEntityNotes()) {
-
-            try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_NOTE_SQL)) {
-
-                ps.setInt(1, entity.getCustomerId());
-                ps.setInt(2, entity.getProjectId());
-                ps.setInt(3, entity.getEntityId());
-                ps.setInt(4, entity.getVersion());
-                ps.setInt(5, entity.getEntityType().getId());
-                ps.setString(6, noteRecord.getNoteText());
-                ps.setInt(7, noteRecord.getChangedByUserId());
-                ps.setTimestamp(8, Timestamp.valueOf(noteRecord.getChangedDate()));
-
-                int rows = ps.executeUpdate();
-
-                if (rows == 0) {
-                    throw new SQLException("Insert entity note failed for entityId=" + entity.getEntityId());
-                }
-            }
-        }
-    }
-
-    private void insertEntityRelations(Connection con, AbstractEntity entity) throws SQLException {
-
-        for (EntityRelationRecord relationRecord : entity.getListOfEntityRelationRecords()) {
-
-            EntityRelationRecord existingRelationRecord = getExistingEntityRelationRecord(con, relationRecord);
-            if (existingRelationRecord == null) {
-                getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
-                log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
-            } else {
-                if (existingRelationRecord.getRelationType() != relationRecord.getRelationType()) {
-                    relationRecord.setVersion(existingRelationRecord.getVersion());
-                    getRelationProvider().clearLatestIfExists(con, existingRelationRecord);
-                    getRelationProvider().insertRelationRecord(con, relationRecord.getRelationType(), relationRecord);
-
-                }
-            }
-        }
-        log.debug("Entity relations inserted for entityId : {} - {}", entity.getEntityId(), entity.getEntityType().getDescription());
-    }
-
-    private EntityRelationRecord getExistingEntityRelationRecord(Connection con, EntityRelationRecord relationRecord) throws SQLException {
-        return  getRelationProvider().getEntityRelationByEntityTypeAndId(
-                con,
-                relationRecord.getEntityType(),
-                relationRecord.getEntityId(),
-                relationRecord.getRelatedEntityType(),
-                relationRecord.getRelatedEntityId());
-    }
-
-    private RelationProvider getRelationProvider() {
-        return new RelationProvider(getWebSession());
-    }
-
     private void updateActiveStatus(Connection con, AbstractEntity entity) throws SQLException {
 
         if (entity.hasActiveStatusChanged()) {
@@ -1107,5 +1039,17 @@ abstract public class EntityProvider extends GenericProvider {
 
     private EntityAttachmentProvider getAttachmentProvider() {
         return new EntityAttachmentProvider(getWebSession());
+    }
+
+    private EntityLinkProvider getLinkProvider() {
+        return new EntityLinkProvider(getWebSession());
+    }
+
+    private EntityNoteProvider getNoteProvider() {
+        return new EntityNoteProvider(getWebSession());
+    }
+
+    private EntityRelationProvider getEntityRelationProvider() {
+        return new EntityRelationProvider(getWebSession());
     }
 }

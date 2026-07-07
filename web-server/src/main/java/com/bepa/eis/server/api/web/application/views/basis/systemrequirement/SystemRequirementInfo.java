@@ -52,6 +52,10 @@ public class SystemRequirementInfo extends GenericXmlDocument {
         EntityNotes entityNotes = entityNoteProvider.getEntityNotesByEntityId(entityType, entityId, version);
         rootElement.addElement(entityNotes.getEntityNoteElements());
 
+        EntityLinkProvider entityLinkProvider = new EntityLinkProvider(webSession);
+        EntityLinks entityLinks = entityLinkProvider.getEntityLinkByEntityId(entityType, entityId, version);
+        rootElement.addElement(entityLinks.getEntityLinkElements());
+
         EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
         EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId);
         rootElement.addElement(entityAttachments.getEntityAttachmentElements());
