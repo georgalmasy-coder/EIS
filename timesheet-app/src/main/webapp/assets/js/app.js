@@ -424,9 +424,7 @@ async function renderCalendarSection(root, kind) {
         </div>
         <div class="kpi-row">
             <div class="kpi"><div class="kpi-label">Month total</div><div class="kpi-value">${formatHours(state.calendar.monthHours)}</div></div>
-            <div class="kpi"><div class="kpi-label">Weeks</div><div class="kpi-value">${state.calendar.weekTotals.length}</div></div>
             <div class="kpi"><div class="kpi-label">Customer</div><div class="kpi-value">${escapeHtml(state.selectedCustomer.companyName)}</div></div>
-            <div class="kpi"><div class="kpi-label">Registration type</div><div class="kpi-value">${kind === 'time' ? '0.5 h' : 'Text'}</div></div>
         </div>
         <div class="section">
             <div class="section-head"><h2 class="section-title">${monthName(state.year, state.month)}</h2></div>
@@ -457,12 +455,13 @@ function renderCalendarTable() {
         <table class="calendar">
             <thead>
                 <tr>
-                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th>Week total</th>
+                    <th class="week-number-col">Week</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th><th>Week total</th>
                 </tr>
             </thead>
             <tbody>
                 ${weeks.map((week) => `
                     <tr>
+                        <td class="week-number-cell">${week.weekNumber ?? ''}</td>
                         ${week.cells.map((cell) => `<td>${cell ? renderDayCell(cell) : ''}</td>`).join('')}
                         <td class="week-total">${formatHours(week.hours)}</td>
                     </tr>
@@ -969,7 +968,8 @@ function buildCalendarGrid(days) {
     for (let i = 0; i < padded.length; i += 7) {
         const cells = padded.slice(i, i + 7);
         const hours = cells.reduce((sum, cell) => sum + Number(cell?.hours ?? 0), 0);
-        weeks.push({ cells, hours });
+        const firstDate = cells.find((cell) => cell)?.date;
+        weeks.push({ cells, hours, weekNumber: firstDate ? isoWeekNumber(new Date(firstDate)) : null });
     }
     return weeks;
 }
@@ -1044,6 +1044,16 @@ function formatQuantity(value) {
 
 function formatPercent(value) {
     return new Intl.NumberFormat('da-DK', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Number(value ?? 0)) + '%';
+}
+
+function isoWeekNumber(date) {
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNumber = (utcDate.getUTCDay() + 6) % 7;
+    utcDate.setUTCDate(utcDate.getUTCDate() - dayNumber + 3);
+    const firstThursday = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 4));
+    const firstThursdayDayNumber = (firstThursday.getUTCDay() + 6) % 7;
+    firstThursday.setUTCDate(firstThursday.getUTCDate() - firstThursdayDayNumber + 3);
+    return 1 + Math.round((utcDate - firstThursday) / 604800000);
 }
 
 function monthName(year, month) {

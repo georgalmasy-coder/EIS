@@ -195,6 +195,12 @@ img { display: block; max-width: 100%; }
 }
 .calendar th, .calendar td { border: 1px solid var(--line); padding: 8px; vertical-align: top; }
 .calendar th { background: var(--panel-soft); color: var(--muted); font-size: 12px; }
+.week-number-col,
+.week-number-cell {
+    width: 64px;
+    text-align: center;
+    font-weight: 700;
+}
 .calendar-day {
     min-height: 96px;
     display: flex;
