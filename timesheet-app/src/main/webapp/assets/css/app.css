@@ -233,24 +233,72 @@ img { display: block; max-width: 100%; }
 .dialog::backdrop { background: rgba(13, 20, 28, 0.55); }
 .dialog {
     width: min(980px, calc(100vw - 24px));
+    max-height: 70vh;
     border: none;
     border-radius: var(--radius);
     padding: 0;
     box-shadow: var(--shadow);
+    overflow: hidden;
 }
-.dialog-frame { padding: 0; }
+#entryDialog.dialog {
+    height: 70vh;
+}
+.dialog-frame {
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    height: 100%;
+    padding: 0;
+    min-height: 0;
+}
+#entryDialog .dialog-frame {
+    height: 100%;
+}
 .dialog-head {
     padding: 14px 16px;
     display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
     border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
 }
 .dialog-title { font-size: 16px; font-weight: 700; }
 .dialog-subtitle { font-size: 12px; color: var(--muted); }
 .dialog-section { padding: 16px; border-bottom: 1px solid var(--line); }
 .dialog-section:last-child { border-bottom: 0; }
 
+#dialogEntries,
+#promptBody {
+    min-height: 0;
+    overflow: auto;
+}
+
+#dialogEntries {
+    flex: 1 1 auto;
+}
+
+#entryDialog #dialogEntries {
+    display: flex;
+    flex-direction: column;
+}
+
+#entryDialog #dialogEntries .dialog-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+#entryDialog #dialogEntries .dialog-scroll {
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+}
+
+#dialogFormSlot {
+    flex: 0 0 auto;
+}
+
 .dialog-scroll {
-    max-height: min(38vh, 320px);
+    max-height: calc(70vh - 160px);
     overflow-y: scroll;
     overflow-x: hidden;
     scrollbar-gutter: stable;
