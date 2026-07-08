@@ -53,7 +53,7 @@ function buildDiagramPdfFileName(orientation, topPanel) {
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "") || "project";
 
-    return `systems-breakdown-${orientation}-diagram-${projectName}.pdf`;
+    return `physical-structure-${orientation}-diagram-${projectName}.pdf`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -602,22 +602,28 @@ function drawSystemNode(commands, node, x, y, width, height, scale) {
     const system = node.system || {};
     const code = system.id || node.code || "—";
     const name = system.name || node.name || "—";
-    const status = system.status || "—";
+    const trl = system.trl || "—";
+    const trlTone = getTrlTone(trl);
 
     const statusBarHeight = Math.max(9, 19 * scale);
     const headerHeight = Math.max(15, 28 * scale);
+    const trlFontSize = Math.max(3.2, 5.8 * scale);
+    const trlText = truncatePdfText(
+        trl,
+        Math.max(4, Math.floor((width - 8 * scale) / (trlFontSize * 0.52)))
+    );
 
     drawPdfRect(commands, x, y, width, height, "#334155", "#64748b");
-    drawPdfFilledRect(commands, x, y, width, statusBarHeight, getPdfStatusColor(status));
+    drawPdfFilledRect(commands, x, y, width, statusBarHeight, getPdfTrlColor(trlTone));
 
     drawPdfTextCentered(
         commands,
-        `Status: ${status}`,
+        trlText,
         x + 4 * scale,
         y,
         width - 8 * scale,
         statusBarHeight,
-        Math.max(3.2, 5.8 * scale),
+        trlFontSize,
         "Helvetica-Bold",
         [255, 255, 255],
         1
@@ -747,27 +753,42 @@ function walkTree(node, callback) {
     });
 }
 
-function getPdfStatusColor(status) {
-    const normalized = normalizeStatus(status);
+function getTrlTone(value) {
+    const text = String(value || "").trim();
+    const match = text.match(/^(\d)/) || text.match(/(\d)/);
+    const tone = Number(match?.[1] || NaN);
 
-    if (normalized === "new") return "#2563eb";
-    if (normalized === "changed") return "#f97316";
-    if (normalized === "validated") return "#0891b2";
-    if (normalized === "approved") return "#16a34a";
-    if (normalized === "deprecated") return "#7f1d1d";
-    if (normalized === "potential duplicate") return "#9333ea";
-    if (normalized === "incomplete") return "#dc2626";
-    if (normalized === "sample") return "#64748b";
-    if (normalized === "out of scope") return "#a16207";
-    if (normalized === "active") return "#16a34a";
-    if (normalized === "inactive") return "#64748b";
+    if (Number.isFinite(tone) && tone >= 1 && tone <= 9) {
+        return tone;
+    }
+
+    return 0;
+}
+
+function getPdfTrlColor(tone) {
+    if (tone === 1) return "#2563eb";
+    if (tone === 2) return "#0ea5e9";
+    if (tone === 3) return "#14b8a6";
+    if (tone === 4) return "#16a34a";
+    if (tone === 5) return "#a855f7";
+    if (tone === 6) return "#f59e0b";
+    if (tone === 7) return "#6d28d9";
+    if (tone === 8) return "#ef4444";
+    if (tone === 9) return "#64748b";
 
     return "#475569";
 }
 
-function normalizeStatus(status) {
-    return String(status || "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
+function truncatePdfText(value, maxChars) {
+    const text = String(value || "—").trim();
+
+    if (text.length <= maxChars) {
+        return text;
+    }
+
+    if (maxChars <= 1) {
+        return "…";
+    }
+
+    return `${text.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
 }

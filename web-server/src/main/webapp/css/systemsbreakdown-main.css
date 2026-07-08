@@ -667,148 +667,186 @@ body.systemsbreakdown-column-resizing *{
 }
 
 .systemsbreakdown-diagram-nodes{
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
 }
 
 .systemsbreakdown-diagram-node{
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
     width: 260px;
-    min-height: 120px;
-    border: 1px solid rgba(148,163,184,.35);
+    border: 1px solid rgba(86,95,115,.9);
     border-radius: 14px;
     background: rgba(15,23,42,.88);
-    color: var(--text);
-    box-shadow: 0 14px 32px rgba(0,0,0,.24);
-    overflow: hidden;
-    cursor: pointer;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.28);
     user-select: none;
 }
 
+.systemsbreakdown-diagram-node{
+    cursor: pointer;
+    transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease,
+            filter 120ms ease;
+}
+
 .systemsbreakdown-diagram-node:hover{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 18px 40px rgba(0,0,0,.30), 0 0 0 3px rgba(96,165,250,.14);
+    z-index: 4;
+    transform: translateY(-2px);
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
 }
 
-.systemsbreakdown-diagram-node.is-project-node{
+.systemsbreakdown-diagram-project-node{
     cursor: default;
-    background:
-            linear-gradient(135deg, rgba(96,165,250,.18), rgba(15,23,42,.88)),
-            rgba(15,23,42,.88);
-    border-color: rgba(96,165,250,.55);
+    background: #4b5563;
+    border-color: #7c8798;
 }
 
-.systemsbreakdown-diagram-node-head{
-    padding: 10px 12px 8px;
-    border-bottom: 1px solid rgba(148,163,184,.22);
+.systemsbreakdown-diagram-project-node:hover{
+    z-index: 4;
+    transform: translateY(-2px);
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
 }
 
 .systemsbreakdown-diagram-node-code{
-    font-size: 12px;
-    color: #bfdbfe;
-    font-weight: 700;
-    margin-bottom: 4px;
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: left;
     overflow-wrap: anywhere;
 }
 
-.systemsbreakdown-diagram-node-title{
-    font-size: 14px;
+.systemsbreakdown-diagram-system-node .systemsbreakdown-diagram-node-code{
+    padding: 10px 0.45rem 0.12rem 14px;
+}
+
+.systemsbreakdown-diagram-project-node .systemsbreakdown-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
+.systemsbreakdown-diagram-node-name{
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.22;
     overflow-wrap: anywhere;
 }
 
-.systemsbreakdown-diagram-node-body{
-    padding: 9px 12px 10px;
-    font-size: 12px;
-    line-height: 1.35;
-    color: var(--muted);
-    max-height: 74px;
+.systemsbreakdown-diagram-node-footer{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.systemsbreakdown-diagram-project-node .systemsbreakdown-diagram-node-footer{
+    background: #6d28d9;
 }
 
 .systemsbreakdown-diagram-status-bars{
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
+    flex: 0 0 auto;
     border-top: 1px solid rgba(148,163,184,.22);
 }
 
 .systemsbreakdown-diagram-status-bar{
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 24px;
-    padding: 4px 10px;
-    font-size: 11px;
-    line-height: 1.15;
-}
-
-.systemsbreakdown-diagram-status-label{
-    color: rgba(226,232,240,.78);
-    white-space: nowrap;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 20px;
+    padding: 0.18rem 0.4rem;
+    font-size: 0.74rem;
+    line-height: 1.1;
+    box-sizing: border-box;
 }
 
 .systemsbreakdown-diagram-status-value{
+    display: block;
+    width: 100%;
+    min-width: 0;
     color: #fff;
     font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
 }
 
-.systemsbreakdown-diagram-status-bar.system-status{
-    background: rgba(59,130,246,.28);
+.systemsbreakdown-diagram-status-bar.trl-1{
+    background: rgba(37,99,235,.34);
 }
 
-.systemsbreakdown-diagram-status-bar.status-new{
-    background: rgba(59,130,246,.34);
+.systemsbreakdown-diagram-status-bar.trl-2{
+    background: rgba(14,165,233,.34);
 }
 
-.systemsbreakdown-diagram-status-bar.status-changed{
-    background: rgba(245,158,11,.34);
+.systemsbreakdown-diagram-status-bar.trl-3{
+    background: rgba(20,184,166,.30);
 }
 
-.systemsbreakdown-diagram-status-bar.status-validated{
-    background: rgba(34,197,94,.30);
-}
-
-.systemsbreakdown-diagram-status-bar.status-approved{
+.systemsbreakdown-diagram-status-bar.trl-4{
     background: rgba(16,185,129,.34);
 }
 
-.systemsbreakdown-diagram-status-bar.status-deprecated{
-    background: rgba(100,116,139,.38);
-}
-
-.systemsbreakdown-diagram-status-bar.status-potential-duplicate{
+.systemsbreakdown-diagram-status-bar.trl-5{
     background: rgba(168,85,247,.30);
 }
 
-.systemsbreakdown-diagram-status-bar.status-incomplete{
+.systemsbreakdown-diagram-status-bar.trl-6{
+    background: rgba(245,158,11,.34);
+}
+
+.systemsbreakdown-diagram-status-bar.trl-7{
+    background: rgba(109,40,217,.38);
+}
+
+.systemsbreakdown-diagram-status-bar.trl-8{
     background: rgba(239,68,68,.30);
 }
 
-.systemsbreakdown-diagram-status-bar.status-sample{
-    background: rgba(14,165,233,.28);
-}
-
-.systemsbreakdown-diagram-status-bar.status-out-of-scope{
-    background: rgba(71,85,105,.38);
-}
-
-.systemsbreakdown-diagram-status-bar.status-active{
-    background: rgba(34,197,94,.30);
-}
-
-.systemsbreakdown-diagram-status-bar.status-inactive{
+.systemsbreakdown-diagram-status-bar.trl-9{
     background: rgba(100,116,139,.38);
+}
+
+.systemsbreakdown-diagram-status-bar.trl-unknown{
+    background: rgba(71,85,105,.38);
 }
 
 .systemsbreakdown-diagram-edge{
     stroke: rgba(148,163,184,.55);
     stroke-width: 1.6;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
     fill: none;
 }
 

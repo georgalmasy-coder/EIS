@@ -46,6 +46,18 @@ const VIEW_LABELS = {
     vertical: "Vertikal diagram"
 };
 
+const DIAGRAM_NODE_WIDTH = 260;
+const PROJECT_NODE_HEIGHT = 104;
+const SYSTEM_NODE_HEIGHT = 124;
+
+const VIEW_PAGE_URLS = {
+    list: "/web/view?page=systemsbreakdown-main-list",
+    horizontal: "/web/view?page=systemsbreakdown-main-horizontal",
+    vertical: "/web/view?page=systemsbreakdown-main-vertical"
+};
+
+const FIXED_VIEW = document.body?.dataset?.fixedView || "";
+
 const state = {
     xmlDocument: null,
     topPanel: {
@@ -62,7 +74,8 @@ const state = {
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
-    contextSystem: null
+    contextSystem: null,
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -93,7 +106,9 @@ function initializeShell() {
 function initializeStateFromStorage() {
     const storedView = localStorage.getItem(STORAGE_KEYS.selectedView);
 
-    if (Object.values(VIEW_TYPES).includes(storedView)) {
+    if (state.fixedView) {
+        state.selectedView = state.fixedView;
+    } else if (Object.values(VIEW_TYPES).includes(storedView)) {
         state.selectedView = storedView;
     }
 
@@ -119,6 +134,14 @@ function initializeEvents() {
     document.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
             const viewType = button.getAttribute("data-view-type");
+
+            const targetUrl = VIEW_PAGE_URLS[viewType];
+
+            if (targetUrl) {
+                window.location.href = targetUrl;
+                return;
+            }
+
             applyView(viewType, { persist: true });
             applyFiltersAndRender();
         });
@@ -336,10 +359,9 @@ function parseSystemsBreakdown(xmlDocument) {
             "Description"
         ], "");
 
-        const status = getFirstFieldDisplayText(node, [
-            "SystemStatusId",
-            "SystemStatus",
-            "Status"
+        const trl = getFirstFieldDisplayText(node, [
+            "TrlId",
+            "TRL"
         ], "—");
 
         const active = parseActiveFlag(node, fields);
@@ -353,7 +375,7 @@ function parseSystemsBreakdown(xmlDocument) {
             id,
             name,
             description,
-            status,
+            trl,
             active,
             fields,
             level,
@@ -754,7 +776,8 @@ function renderCurrentView() {
 }
 
 function applyView(viewType, options = {}) {
-    const safeViewType = Object.values(VIEW_TYPES).includes(viewType) ? viewType : VIEW_TYPES.list;
+    const requestedViewType = Object.values(VIEW_TYPES).includes(viewType) ? viewType : VIEW_TYPES.list;
+    const safeViewType = state.fixedView || requestedViewType;
 
     state.selectedView = safeViewType;
 
@@ -1585,8 +1608,6 @@ function sortTree(node) {
 }
 
 function layoutTree(root, orientation) {
-    const nodeWidth = 260;
-    const nodeHeight = 140;
     const horizontalGap = orientation === "horizontal" ? 110 : 70;
     const verticalGap = orientation === "horizontal" ? 52 : 92;
     const margin = 28;
@@ -1595,8 +1616,6 @@ function layoutTree(root, orientation) {
 
     if (orientation === "horizontal") {
         layoutHorizontal(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1604,8 +1623,6 @@ function layoutTree(root, orientation) {
         });
     } else {
         layoutVertical(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1613,32 +1630,32 @@ function layoutTree(root, orientation) {
         });
     }
 
-    const bounds = calculateBounds(nodes, nodeWidth, nodeHeight, margin);
+    const bounds = calculateBounds(nodes, margin);
 
     return {
         nodes,
         edges,
         width: bounds.width,
         height: bounds.height,
-        nodeWidth,
-        nodeHeight
+        nodeWidth: DIAGRAM_NODE_WIDTH
     };
 }
 
 function layoutHorizontal(node, depth, nextY, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const x = 28 + depth * (nodeWidth + horizontalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const x = 28 + depth * (dimensions.width + horizontalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x,
             y: nextY,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextY + nodeHeight + verticalGap;
+        return nextY + dimensions.height + verticalGap;
     }
 
     let childY = nextY;
@@ -1659,8 +1676,8 @@ function layoutHorizontal(node, depth, nextY, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1680,19 +1697,20 @@ function layoutHorizontal(node, depth, nextY, context) {
 }
 
 function layoutVertical(node, depth, nextX, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const y = 28 + depth * (nodeHeight + verticalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const y = 28 + depth * (dimensions.height + verticalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x: nextX,
             y,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextX + nodeWidth + horizontalGap;
+        return nextX + dimensions.width + horizontalGap;
     }
 
     let childX = nextX;
@@ -1713,8 +1731,8 @@ function layoutVertical(node, depth, nextX, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1733,9 +1751,16 @@ function layoutVertical(node, depth, nextX, context) {
     return childX;
 }
 
-function calculateBounds(nodes, nodeWidth, nodeHeight, margin) {
-    const maxX = Math.max(...nodes.map((node) => node.x + nodeWidth), 800);
-    const maxY = Math.max(...nodes.map((node) => node.y + nodeHeight), 480);
+function getDiagramNodeDimensions(node) {
+    return {
+        width: DIAGRAM_NODE_WIDTH,
+        height: node.type === "project" ? PROJECT_NODE_HEIGHT : SYSTEM_NODE_HEIGHT
+    };
+}
+
+function calculateBounds(nodes, margin) {
+    const maxX = Math.max(...nodes.map((node) => node.x + node.width), 800);
+    const maxY = Math.max(...nodes.map((node) => node.y + node.height), 480);
 
     return {
         width: maxX + margin,
@@ -1755,15 +1780,17 @@ function createSvgPath(edge, orientation) {
         const y1 = from.y + from.height / 2;
         const x2 = to.x;
         const y2 = to.y + to.height / 2;
+        const midX = x1 + ((x2 - x1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
     } else {
         const x1 = from.x + from.width / 2;
         const y1 = from.y + from.height;
         const x2 = to.x + to.width / 2;
         const y2 = to.y;
+        const midY = y1 + ((y2 - y1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} V ${midY} H ${x2} V ${y2}`;
     }
 
     path.setAttribute("d", d);
@@ -1774,25 +1801,34 @@ function createSvgPath(edge, orientation) {
 
 function createDiagramNode(node) {
     const element = document.createElement("article");
-    element.className = `systemsbreakdown-diagram-node${node.type === "project" ? " is-project-node" : ""}`;
+    element.className = node.type === "project"
+        ? "systemsbreakdown-diagram-node systemsbreakdown-diagram-project-node"
+        : "systemsbreakdown-diagram-node systemsbreakdown-diagram-system-node";
     element.style.left = `${node.x}px`;
     element.style.top = `${node.y}px`;
     element.style.width = `${node.width}px`;
-    element.style.minHeight = `${node.height}px`;
+    element.style.height = `${node.height}px`;
     element.setAttribute("data-node-type", node.type);
 
     if (node.system) {
         element.setAttribute("data-entity-id", node.system.entityId || node.system.id);
     }
 
-    element.innerHTML = `
-        <div class="systemsbreakdown-diagram-node-head">
+    if (node.type === "project") {
+        element.title = buildProjectTooltip(node);
+        element.innerHTML = `
+            <div class="systemsbreakdown-diagram-node-code"></div>
+            <div class="systemsbreakdown-diagram-node-name">${escapeHtml(node.name)}</div>
+            <div class="systemsbreakdown-diagram-node-footer">${escapeHtml(node.description || "â€”")}</div>
+        `;
+    } else {
+        element.title = buildSystemTooltip(node.system);
+        element.innerHTML = `
             <div class="systemsbreakdown-diagram-node-code">${escapeHtml(node.code)}</div>
-            <div class="systemsbreakdown-diagram-node-title">${escapeHtml(node.name)}</div>
-        </div>
-        <div class="systemsbreakdown-diagram-node-body">${escapeHtml(node.description || "")}</div>
-        ${node.type === "system" ? renderStatusBar(node.system) : ""}
-    `;
+            <div class="systemsbreakdown-diagram-node-name">${escapeHtml(node.name)}</div>
+            ${renderTrlBar(node.system)}
+        `;
+    }
 
     if (node.type === "system") {
         element.addEventListener("dblclick", () => {
@@ -1820,25 +1856,50 @@ function createDiagramNode(node) {
     return element;
 }
 
-function renderStatusBar(system) {
+function buildProjectTooltip(node) {
+    return [
+        `Project: ${node?.name || "â€”"}`,
+        node?.description ? `Customer: ${node.description}` : ""
+    ].filter(Boolean).join("\n");
+}
+
+function buildSystemTooltip(system) {
+    return [
+        `ID: ${system?.id || "â€”"}`,
+        `Name: ${system?.name || "â€”"}`,
+        system?.description ? `Description: ${system.description}` : "",
+        `TRL: ${system?.trl || "â€”"}`
+    ].filter(Boolean).join("\n");
+}
+
+function renderTrlBar(system) {
+    const toneClass = getTrlToneClass(system.trl);
+
     return `
         <div class="systemsbreakdown-diagram-status-bars">
-            <div class="systemsbreakdown-diagram-status-bar system-status ${statusClass(system.status)}">
-                <span class="systemsbreakdown-diagram-status-label">Status</span>
-                <span class="systemsbreakdown-diagram-status-value">${escapeHtml(system.status || "—")}</span>
+            <div class="systemsbreakdown-diagram-status-bar ${toneClass}">
+                <span class="systemsbreakdown-diagram-status-value">${escapeHtml(system.trl || "—")}</span>
             </div>
         </div>
     `;
 }
 
-function statusClass(value) {
-    const normalized = normalizeCssName(value);
+function getTrlToneClass(value) {
+    const tone = getTrlTone(value);
 
-    if (!normalized) {
-        return "";
+    return tone ? `trl-${tone}` : "trl-unknown";
+}
+
+function getTrlTone(value) {
+    const text = String(value || "").trim();
+    const match = text.match(/^(\d)/) || text.match(/(\d)/);
+    const tone = Number(match?.[1] || NaN);
+
+    if (Number.isFinite(tone) && tone >= 1 && tone <= 9) {
+        return tone;
     }
 
-    return `status-${normalized}`;
+    return 0;
 }
 
 function normalizeCssName(value) {
@@ -2037,7 +2098,11 @@ function buildEditPageUrl(params) {
         url.searchParams.set("id", params.id);
     }
 
-    url.searchParams.set("returnUrl", "/web/view?page=systemsbreakdown-main");
+    const returnPage = state.fixedView
+        ? `systemsbreakdown-main-${state.fixedView}`
+        : "systemsbreakdown-main";
+
+    url.searchParams.set("returnUrl", `/web/view?page=${returnPage}`);
 
     return url.toString();
 }
