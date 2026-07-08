@@ -667,87 +667,122 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-diagram-nodes{
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
 }
 
 .systemrequirement-diagram-node{
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
     width: 260px;
-    min-height: 120px;
-    border: 1px solid rgba(148,163,184,.35);
+    border: 1px solid rgba(86,95,115,.9);
     border-radius: 14px;
     background: rgba(15,23,42,.88);
-    color: var(--text);
-    box-shadow: 0 14px 32px rgba(0,0,0,.24);
-    overflow: hidden;
-    cursor: pointer;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.28);
     user-select: none;
 }
 
-.systemrequirement-diagram-node:hover{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 18px 40px rgba(0,0,0,.30), 0 0 0 3px rgba(96,165,250,.14);
+.systemrequirement-diagram-requirement-node{
+    cursor: pointer;
+    transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease,
+            filter 120ms ease;
 }
 
-.systemrequirement-diagram-node.is-project-node{
+.systemrequirement-diagram-requirement-node:hover{
+    transform: translateY(-2px);
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
+}
+
+.systemrequirement-diagram-project-node{
     cursor: default;
-    background:
-            linear-gradient(135deg, rgba(96,165,250,.18), rgba(15,23,42,.88)),
-            rgba(15,23,42,.88);
-    border-color: rgba(96,165,250,.55);
+    background: #4b5563;
+    border-color: #7c8798;
 }
 
 .systemrequirement-diagram-node-head{
-    padding: 10px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
     border-bottom: 1px solid rgba(148,163,184,.22);
 }
 
 .systemrequirement-diagram-node-code{
-    font-size: 12px;
-    color: #bfdbfe;
-    font-weight: 700;
-    margin-bottom: 4px;
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: left;
     overflow-wrap: anywhere;
 }
 
-.systemrequirement-diagram-node-title{
-    font-size: 14px;
+.systemrequirement-diagram-requirement-node .systemrequirement-diagram-node-code{
+    padding: 10px 0.45rem 0.12rem 14px;
+}
+
+.systemrequirement-diagram-project-node .systemrequirement-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
+.systemrequirement-diagram-node-name{
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.22;
     overflow-wrap: anywhere;
 }
 
-.systemrequirement-diagram-node-body{
-    padding: 9px 12px 10px;
-    font-size: 12px;
-    line-height: 1.35;
-    color: var(--muted);
-    max-height: 74px;
+.systemrequirement-diagram-node-footer{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.systemrequirement-diagram-project-node .systemrequirement-diagram-node-footer{
+    background: #6d28d9;
 }
 
 .systemrequirement-diagram-status-bars{
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
+    flex: 0 0 auto;
     border-top: 1px solid rgba(148,163,184,.22);
 }
 
 .systemrequirement-diagram-status-bar{
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 24px;
-    padding: 4px 10px;
-    font-size: 11px;
-    line-height: 1.15;
-}
-
-.systemrequirement-diagram-status-label{
-    color: rgba(226,232,240,.78);
-    white-space: nowrap;
+    justify-content: center;
+    gap: 0;
+    min-height: 20px;
+    padding: 0.18rem 0.4rem;
+    font-size: 0.74rem;
+    line-height: 1.1;
 }
 
 .systemrequirement-diagram-status-value{
@@ -825,6 +860,8 @@ body.systemrequirement-column-resizing *{
 .systemrequirement-diagram-edge{
     stroke: rgba(148,163,184,.55);
     stroke-width: 1.6;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
     fill: none;
 }
 

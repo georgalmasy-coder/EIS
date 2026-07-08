@@ -57,7 +57,18 @@ const VIEW_LABELS = {
     vertical: "Vertikal diagram"
 };
 
+const VIEW_PAGE_URLS = {
+    list: "/web/view?page=systemrequirement-main-list",
+    horizontal: "/web/view?page=systemrequirement-main-horizontal",
+    vertical: "/web/view?page=systemrequirement-main-vertical"
+};
+
+const FIXED_VIEW = document.body?.dataset?.fixedView || "";
+
 const MAX_REQUIREMENT_LEVEL = 4;
+const DIAGRAM_NODE_WIDTH = 260;
+const PROJECT_NODE_HEIGHT = 104;
+const REQUIREMENT_NODE_HEIGHT = 124;
 
 const state = {
     xmlDocument: null,
@@ -75,7 +86,8 @@ const state = {
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
-    contextRequirement: null
+    contextRequirement: null,
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -106,7 +118,9 @@ function initializeShell() {
 function initializeStateFromStorage() {
     const storedView = localStorage.getItem(STORAGE_KEYS.selectedView);
 
-    if (Object.values(VIEW_TYPES).includes(storedView)) {
+    if (state.fixedView) {
+        state.selectedView = state.fixedView;
+    } else if (Object.values(VIEW_TYPES).includes(storedView)) {
         state.selectedView = storedView;
     }
 
@@ -132,6 +146,13 @@ function initializeEvents() {
     document.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
             const viewType = button.getAttribute("data-view-type");
+            const targetUrl = VIEW_PAGE_URLS[viewType];
+
+            if (targetUrl) {
+                window.location.href = targetUrl;
+                return;
+            }
+
             applyView(viewType, { persist: true });
             applyFiltersAndRender();
         });
@@ -698,7 +719,8 @@ function renderCurrentView() {
 }
 
 function applyView(viewType, options = {}) {
-    const safeViewType = Object.values(VIEW_TYPES).includes(viewType) ? viewType : VIEW_TYPES.list;
+    const requestedViewType = Object.values(VIEW_TYPES).includes(viewType) ? viewType : VIEW_TYPES.list;
+    const safeViewType = state.fixedView || requestedViewType;
 
     state.selectedView = safeViewType;
 
@@ -1499,8 +1521,6 @@ function sortTree(node) {
 }
 
 function layoutTree(root, orientation) {
-    const nodeWidth = 260;
-    const nodeHeight = 140;
     const horizontalGap = orientation === "horizontal" ? 110 : 70;
     const verticalGap = orientation === "horizontal" ? 52 : 92;
     const margin = 28;
@@ -1509,8 +1529,6 @@ function layoutTree(root, orientation) {
 
     if (orientation === "horizontal") {
         layoutHorizontal(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1518,8 +1536,6 @@ function layoutTree(root, orientation) {
         });
     } else {
         layoutVertical(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1527,32 +1543,32 @@ function layoutTree(root, orientation) {
         });
     }
 
-    const bounds = calculateBounds(nodes, nodeWidth, nodeHeight, margin);
+    const bounds = calculateBounds(nodes, margin);
 
     return {
         nodes,
         edges,
         width: bounds.width,
         height: bounds.height,
-        nodeWidth,
-        nodeHeight
+        nodeWidth: DIAGRAM_NODE_WIDTH
     };
 }
 
 function layoutHorizontal(node, depth, nextY, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const x = 28 + depth * (nodeWidth + horizontalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const x = 28 + depth * (dimensions.width + horizontalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x,
             y: nextY,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextY + nodeHeight + verticalGap;
+        return nextY + dimensions.height + verticalGap;
     }
 
     let childY = nextY;
@@ -1573,8 +1589,8 @@ function layoutHorizontal(node, depth, nextY, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1594,19 +1610,20 @@ function layoutHorizontal(node, depth, nextY, context) {
 }
 
 function layoutVertical(node, depth, nextX, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const y = 28 + depth * (nodeHeight + verticalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const y = 28 + depth * (dimensions.height + verticalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x: nextX,
             y,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextX + nodeWidth + horizontalGap;
+        return nextX + dimensions.width + horizontalGap;
     }
 
     let childX = nextX;
@@ -1627,8 +1644,8 @@ function layoutVertical(node, depth, nextX, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1647,9 +1664,16 @@ function layoutVertical(node, depth, nextX, context) {
     return childX;
 }
 
-function calculateBounds(nodes, nodeWidth, nodeHeight, margin) {
-    const maxX = Math.max(...nodes.map((node) => node.x + nodeWidth), 800);
-    const maxY = Math.max(...nodes.map((node) => node.y + nodeHeight), 480);
+function getDiagramNodeDimensions(node) {
+    return {
+        width: DIAGRAM_NODE_WIDTH,
+        height: node.type === "project" ? PROJECT_NODE_HEIGHT : REQUIREMENT_NODE_HEIGHT
+    };
+}
+
+function calculateBounds(nodes, margin) {
+    const maxX = Math.max(...nodes.map((node) => node.x + node.width), 800);
+    const maxY = Math.max(...nodes.map((node) => node.y + node.height), 480);
 
     return {
         width: maxX + margin,
@@ -1669,15 +1693,17 @@ function createSvgPath(edge, orientation) {
         const y1 = from.y + from.height / 2;
         const x2 = to.x;
         const y2 = to.y + to.height / 2;
+        const midX = x1 + ((x2 - x1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
     } else {
         const x1 = from.x + from.width / 2;
         const y1 = from.y + from.height;
         const x2 = to.x + to.width / 2;
         const y2 = to.y;
+        const midY = y1 + ((y2 - y1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} V ${midY} H ${x2} V ${y2}`;
     }
 
     path.setAttribute("d", d);
@@ -1688,25 +1714,33 @@ function createSvgPath(edge, orientation) {
 
 function createDiagramNode(node) {
     const element = document.createElement("article");
-    element.className = `systemrequirement-diagram-node${node.type === "project" ? " is-project-node" : ""}`;
+    element.className = node.type === "project"
+        ? "systemrequirement-diagram-node systemrequirement-diagram-project-node"
+        : "systemrequirement-diagram-node systemrequirement-diagram-requirement-node";
     element.style.left = `${node.x}px`;
     element.style.top = `${node.y}px`;
     element.style.width = `${node.width}px`;
-    element.style.minHeight = `${node.height}px`;
+    element.style.height = `${node.height}px`;
     element.setAttribute("data-node-type", node.type);
 
     if (node.requirement) {
         element.setAttribute("data-entity-id", node.requirement.entityId || node.requirement.id);
     }
 
-    element.innerHTML = `
-        <div class="systemrequirement-diagram-node-head">
+    if (node.type === "project") {
+        element.innerHTML = `
+            <div class="systemrequirement-diagram-node-code"></div>
+            <div class="systemrequirement-diagram-node-name">${escapeHtml(node.name)}</div>
+            <div class="systemrequirement-diagram-node-footer">${escapeHtml(node.description || "—")}</div>
+        `;
+    } else {
+        element.title = buildRequirementTooltip(node.requirement);
+        element.innerHTML = `
             <div class="systemrequirement-diagram-node-code">${escapeHtml(node.code)}</div>
-            <div class="systemrequirement-diagram-node-title">${escapeHtml(node.name)}</div>
-        </div>
-        <div class="systemrequirement-diagram-node-body">${escapeHtml(node.description || "")}</div>
-        ${node.type === "requirement" ? renderStatusBars(node.requirement) : ""}
-    `;
+            <div class="systemrequirement-diagram-node-name">${escapeHtml(node.name)}</div>
+            ${renderStatusBars(node.requirement)}
+        `;
+    }
 
     if (node.type === "requirement") {
         element.addEventListener("dblclick", () => {
@@ -1738,15 +1772,24 @@ function renderStatusBars(requirement) {
     return `
         <div class="systemrequirement-diagram-status-bars">
             <div class="systemrequirement-diagram-status-bar requirement-status ${statusClass(requirement.requirementStatus)}">
-                <span class="systemrequirement-diagram-status-label">Requirement Status</span>
                 <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.requirementStatus || "—")}</span>
             </div>
             <div class="systemrequirement-diagram-status-bar verification-status ${verificationClass(requirement.verificationStatus)}">
-                <span class="systemrequirement-diagram-status-label">Verification Status</span>
                 <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.verificationStatus || "—")}</span>
             </div>
         </div>
     `;
+}
+
+function buildRequirementTooltip(requirement) {
+    return [
+        `ID: ${requirement?.id || "—"}`,
+        `Name: ${requirement?.name || "—"}`,
+        requirement?.description ? `Description: ${requirement.description}` : "",
+        `Verification Status: ${requirement?.verificationStatus || "—"}`,
+        `Business Priority: ${requirement?.businessPriority || "—"}`,
+        `Requirement Status: ${requirement?.requirementStatus || "—"}`
+    ].filter(Boolean).join("\n");
 }
 
 function statusClass(value) {
@@ -1965,7 +2008,11 @@ function buildEditPageUrl(params) {
         url.searchParams.set("id", params.id);
     }
 
-    url.searchParams.set("returnUrl", "/web/view?page=systemrequirement-main");
+    const returnPage = state.fixedView
+        ? `systemrequirement-main-${state.fixedView}`
+        : "systemrequirement-main";
+
+    url.searchParams.set("returnUrl", `/web/view?page=${returnPage}`);
 
     return url.toString();
 }

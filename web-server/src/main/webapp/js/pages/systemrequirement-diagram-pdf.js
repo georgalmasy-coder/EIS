@@ -16,6 +16,8 @@ import {
 } from "../core/pdf.js";
 import { clampNumber } from "../core/utils.js";
 
+const EDGE_TERMINAL_INSET = 1.5;
+
 export function downloadSystemRequirementDiagramPdf({
                                                         tree,
                                                         layout,
@@ -499,9 +501,9 @@ function edgeIntersectsTile(from, to, tile) {
 }
 
 function getHorizontalConnectionPoints(from, to, transformPoint) {
-    const startX = from.x + from.width;
+    const startX = from.x + from.width - EDGE_TERMINAL_INSET;
     const startY = from.y + from.height / 2;
-    const endX = to.x;
+    const endX = to.x + EDGE_TERMINAL_INSET;
     const endY = to.y + to.height / 2;
     const midX = startX + ((endX - startX) / 2);
 
@@ -515,9 +517,9 @@ function getHorizontalConnectionPoints(from, to, transformPoint) {
 
 function getVerticalConnectionPoints(from, to, transformPoint) {
     const startX = from.x + from.width / 2;
-    const startY = from.y + from.height;
+    const startY = from.y + from.height - EDGE_TERMINAL_INSET;
     const endX = to.x + to.width / 2;
-    const endY = to.y;
+    const endY = to.y + EDGE_TERMINAL_INSET;
     const midY = startY + ((endY - startY) / 2);
 
     return [

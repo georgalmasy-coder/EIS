@@ -18,6 +18,9 @@ public enum PageType {
 
     // New versions
     SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
+    SYSTEM_REQUIREMENT_MAIN_LIST_PAGE("systemrequirement-main-list","html-pages/systemrequirement-main-list.html", "System Requirement"),
+    SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "System Requirement"),
+    SYSTEM_REQUIREMENT_MAIN_VERTICAL_PAGE("systemrequirement-main-vertical","html-pages/systemrequirement-main-vertical.html", "System Requirement"),
     SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit"),
     STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement"),
     STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit"),
