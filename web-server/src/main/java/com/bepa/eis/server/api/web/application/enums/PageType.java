@@ -29,6 +29,9 @@ public enum PageType {
     SYSTEMS_BREAKDOWN_MAIN_HORIZONTAL_PAGE("systemsbreakdown-main-horizontal","html-pages/systemsbreakdown-main-horizontal.html", "Physical Structure"),
     SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure"),
     SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Physical Structure Edit"),
+    STAKEHOLDER_REQUIREMENT_MAIN_LIST_PAGE("stakeholderrequirement-main-list","html-pages/stakeholderrequirement-main-list.html", "Stakeholder Requirement"),
+    STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement"),
+    STAKEHOLDER_REQUIREMENT_MAIN_VERTICAL_PAGE("stakeholderrequirement-main-vertical","html-pages/stakeholderrequirement-main-vertical.html", "Stakeholder Requirement"),
 
 
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS"),

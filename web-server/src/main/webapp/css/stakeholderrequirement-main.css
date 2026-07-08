@@ -642,18 +642,14 @@ body.stakeholderrequirement-column-resizing *{
 
 .stakeholderrequirement-diagram-canvas{
     position: relative;
-    min-width: 100%;
-    min-height: 100%;
     padding: 28px;
     box-sizing: border-box;
 }
 
 .stakeholderrequirement-horizontal-diagram-canvas{
-    min-width: 1400px;
 }
 
 .stakeholderrequirement-vertical-diagram-canvas{
-    min-width: 1100px;
 }
 
 .stakeholderrequirement-diagram-svg{
@@ -667,64 +663,159 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-diagram-nodes{
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
 }
 
 .stakeholderrequirement-diagram-node{
     position: absolute;
     width: 260px;
-    min-height: 120px;
-    border: 1px solid rgba(148,163,184,.35);
+    border: 1px solid rgba(86,95,115,.9);
     border-radius: 14px;
     background: rgba(15,23,42,.88);
-    color: var(--text);
-    box-shadow: 0 14px 32px rgba(0,0,0,.24);
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.28);
     overflow: hidden;
     cursor: pointer;
     user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
 }
 
 .stakeholderrequirement-diagram-node:hover{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 18px 40px rgba(0,0,0,.30), 0 0 0 3px rgba(96,165,250,.14);
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
 }
 
 .stakeholderrequirement-diagram-node.is-project-node{
     cursor: default;
-    background:
-            linear-gradient(135deg, rgba(96,165,250,.18), rgba(15,23,42,.88)),
-            rgba(15,23,42,.88);
-    border-color: rgba(96,165,250,.55);
+    background: #4b5563;
+    border-color: #7c8798;
+}
+
+.stakeholderrequirement-diagram-node.is-project-node .stakeholderrequirement-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
+.stakeholderrequirement-diagram-node.is-project-node .stakeholderrequirement-diagram-node-footer{
+    background: #6d28d9;
+}
+
+.stakeholderrequirement-diagram-node.is-project-node:hover{
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
 }
 
 .stakeholderrequirement-diagram-node-head{
-    padding: 10px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
     border-bottom: 1px solid rgba(148,163,184,.22);
 }
 
 .stakeholderrequirement-diagram-node-code{
-    font-size: 12px;
-    color: #bfdbfe;
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.74rem;
     font-weight: 700;
-    margin-bottom: 4px;
+    line-height: 1.1;
+    text-align: left;
     overflow-wrap: anywhere;
 }
 
+.stakeholderrequirement-diagram-node:not(.is-project-node) .stakeholderrequirement-diagram-node-code{
+    padding: 10px 0.45rem 0.12rem 14px;
+}
+
+.stakeholderrequirement-diagram-project-node .stakeholderrequirement-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
 .stakeholderrequirement-diagram-node-title{
-    font-size: 14px;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.22;
+    overflow-wrap: anywhere;
+}
+
+.stakeholderrequirement-diagram-node-name{
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.22;
     overflow-wrap: anywhere;
 }
 
 .stakeholderrequirement-diagram-node-body{
-    padding: 9px 12px 12px;
-    font-size: 12px;
-    line-height: 1.35;
-    color: var(--muted);
-    max-height: 96px;
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stakeholderrequirement-diagram-node-footer{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stakeholderrequirement-diagram-status-bars{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    flex: 0 0 auto;
+    border-top: 1px solid rgba(148,163,184,.22);
+}
+
+.stakeholderrequirement-diagram-status-bar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-height: 20px;
+    padding: 0.18rem 0.4rem;
+    font-size: 0.74rem;
+    line-height: 1.1;
+}
+
+.stakeholderrequirement-diagram-status-value{
+    color: #fff;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .stakeholderrequirement-diagram-edge{
@@ -878,8 +969,4 @@ body.stakeholderrequirement-column-resizing *{
         min-width: 1220px;
     }
 
-    .stakeholderrequirement-horizontal-diagram-canvas,
-    .stakeholderrequirement-vertical-diagram-canvas{
-        min-width: 900px;
-    }
 }

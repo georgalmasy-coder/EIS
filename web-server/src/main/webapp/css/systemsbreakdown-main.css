@@ -642,18 +642,14 @@ body.systemsbreakdown-column-resizing *{
 
 .systemsbreakdown-diagram-canvas{
     position: relative;
-    min-width: 100%;
-    min-height: 100%;
     padding: 28px;
     box-sizing: border-box;
 }
 
 .systemsbreakdown-horizontal-diagram-canvas{
-    min-width: 1400px;
 }
 
 .systemsbreakdown-vertical-diagram-canvas{
-    min-width: 1100px;
 }
 
 .systemsbreakdown-diagram-svg{

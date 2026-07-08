@@ -642,18 +642,14 @@ body.systemrequirement-column-resizing *{
 
 .systemrequirement-diagram-canvas{
     position: relative;
-    min-width: 100%;
-    min-height: 100%;
     padding: 28px;
     box-sizing: border-box;
 }
 
 .systemrequirement-horizontal-diagram-canvas{
-    min-width: 1400px;
 }
 
 .systemrequirement-vertical-diagram-canvas{
-    min-width: 1100px;
 }
 
 .systemrequirement-diagram-svg{

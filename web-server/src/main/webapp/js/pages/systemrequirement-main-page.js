@@ -488,7 +488,10 @@ function buildListColumns(requirements) {
 
     return columns.map((column) => ({
         ...column,
-        width: storedWidths[column.key] || column.tableWidth || calculateFallbackColumnWidth(column)
+        width: normalizeStoredColumnWidth(
+            storedWidths[column.key],
+            column.tableWidth || calculateFallbackColumnWidth(column)
+        )
     }));
 }
 
@@ -1070,13 +1073,15 @@ function renderListView() {
 
     const columns = state.listColumns;
     const rows = getSortedRequirements(state.filteredRequirements);
+    const responsiveWidths = getResponsiveColumnWidths(columns);
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
 
     if (table) {
+        table.style.width = "100%";
         table.style.minWidth = `${Math.max(totalWidth, 1220)}px`;
     }
 
-    colGroup.innerHTML = columns.map((column) => `<col style="width: ${escapeHtml(column.width)};">`).join("");
+    colGroup.innerHTML = columns.map((column, index) => `<col style="width: ${escapeHtml(responsiveWidths[index])};">`).join("");
 
     headerRow.innerHTML = columns.map((column) => {
         const activeSort = state.sortKey === column.key;
@@ -1251,6 +1256,7 @@ function initializeColumnResize(headerRow, colGroup, table) {
 
                 updateColumnWidth(columnKey, nextWidth, colGroup, table);
                 persistColumnWidth(columnKey, nextWidth);
+                renderListView();
 
                 document.body.classList.remove("systemrequirement-column-resizing");
                 window.removeEventListener("mousemove", onMouseMove);
@@ -1284,6 +1290,7 @@ function updateColumnWidth(columnKey, widthPx, colGroup, table) {
             return sum + widthToPixels(column.width, 180);
         }, 0);
 
+        table.style.width = "100%";
         table.style.minWidth = `${Math.max(totalWidth, 1220)}px`;
     }
 }
@@ -1307,10 +1314,31 @@ function widthToPixels(width, fallback) {
 
     if (raw.endsWith("%")) {
         const parsed = Number(raw.replace("%", ""));
-        return Number.isFinite(parsed) ? Math.max(80, parsed * 18) : fallback;
+        return Number.isFinite(parsed) ? parsed : fallback;
     }
 
     return fallback;
+}
+
+function normalizeStoredColumnWidth(value, fallback) {
+    const raw = String(value || "").trim();
+
+    if (!raw) {
+        return fallback;
+    }
+
+    if (raw.endsWith("%")) {
+        return fallback;
+    }
+
+    return raw;
+}
+
+function getResponsiveColumnWidths(columns) {
+    const weights = columns.map((column) => widthToPixels(column.width, 180));
+    const totalWeight = weights.reduce((sum, value) => sum + value, 0) || 1;
+
+    return weights.map((weight) => `${((weight / totalWeight) * 100).toFixed(4)}%`);
 }
 
 function renderListCell(requirement, column) {

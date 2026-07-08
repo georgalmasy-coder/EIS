@@ -40,6 +40,14 @@ const VIEW_TYPES = {
     vertical: "vertical"
 };
 
+const VIEW_PAGE_URLS = {
+    list: "/web/view?page=stakeholderrequirement-main-list",
+    horizontal: "/web/view?page=stakeholderrequirement-main-horizontal",
+    vertical: "/web/view?page=stakeholderrequirement-main-vertical"
+};
+
+const FIXED_VIEW = document.body?.dataset?.fixedView || "";
+
 const VIEW_LABELS = {
     list: "Liste-visning",
     horizontal: "Horisontal diagram",
@@ -47,6 +55,9 @@ const VIEW_LABELS = {
 };
 
 const MAX_REQUIREMENT_LEVEL = 4;
+const DIAGRAM_NODE_WIDTH = 260;
+const PROJECT_NODE_HEIGHT = 104;
+const REQUIREMENT_NODE_HEIGHT = 124;
 
 const state = {
     xmlDocument: null,
@@ -64,7 +75,8 @@ const state = {
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
-    contextRequirement: null
+    contextRequirement: null,
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -95,7 +107,9 @@ function initializeShell() {
 function initializeStateFromStorage() {
     const storedView = localStorage.getItem(STORAGE_KEYS.selectedView);
 
-    if (Object.values(VIEW_TYPES).includes(storedView)) {
+    if (state.fixedView) {
+        state.selectedView = state.fixedView;
+    } else if (Object.values(VIEW_TYPES).includes(storedView)) {
         state.selectedView = storedView;
     }
 
@@ -121,6 +135,13 @@ function initializeEvents() {
     document.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
             const viewType = button.getAttribute("data-view-type");
+            const targetUrl = VIEW_PAGE_URLS[viewType];
+
+            if (targetUrl) {
+                window.location.href = targetUrl;
+                return;
+            }
+
             applyView(viewType, { persist: true });
             applyFiltersAndRender();
         });
@@ -432,7 +453,10 @@ function buildListColumns(requirements) {
 
     return columns.map((column) => ({
         ...column,
-        width: storedWidths[column.key] || column.tableWidth || calculateFallbackColumnWidth(column)
+        width: normalizeStoredColumnWidth(
+            storedWidths[column.key],
+            column.tableWidth || calculateFallbackColumnWidth(column)
+        )
     }));
 }
 
@@ -1012,13 +1036,15 @@ function renderListView() {
 
     const columns = state.listColumns;
     const rows = getSortedRequirements(state.filteredRequirements);
+    const responsiveWidths = getResponsiveColumnWidths(columns);
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
 
     if (table) {
+        table.style.width = "100%";
         table.style.minWidth = `${Math.max(totalWidth, 1220)}px`;
     }
 
-    colGroup.innerHTML = columns.map((column) => `<col style="width: ${escapeHtml(column.width)};">`).join("");
+    colGroup.innerHTML = columns.map((column, index) => `<col style="width: ${escapeHtml(responsiveWidths[index])};">`).join("");
 
     headerRow.innerHTML = columns.map((column) => {
         const activeSort = state.sortKey === column.key;
@@ -1193,6 +1219,7 @@ function initializeColumnResize(headerRow, colGroup, table) {
 
                 updateColumnWidth(columnKey, nextWidth, colGroup, table);
                 persistColumnWidth(columnKey, nextWidth);
+                renderListView();
 
                 document.body.classList.remove("stakeholderrequirement-column-resizing");
                 window.removeEventListener("mousemove", onMouseMove);
@@ -1226,6 +1253,7 @@ function updateColumnWidth(columnKey, widthPx, colGroup, table) {
             return sum + widthToPixels(column.width, 180);
         }, 0);
 
+        table.style.width = "100%";
         table.style.minWidth = `${Math.max(totalWidth, 1220)}px`;
     }
 }
@@ -1249,10 +1277,31 @@ function widthToPixels(width, fallback) {
 
     if (raw.endsWith("%")) {
         const parsed = Number(raw.replace("%", ""));
-        return Number.isFinite(parsed) ? Math.max(80, parsed * 18) : fallback;
+        return Number.isFinite(parsed) ? parsed : fallback;
     }
 
     return fallback;
+}
+
+function normalizeStoredColumnWidth(value, fallback) {
+    const raw = String(value || "").trim();
+
+    if (!raw) {
+        return fallback;
+    }
+
+    if (raw.endsWith("%")) {
+        return fallback;
+    }
+
+    return raw;
+}
+
+function getResponsiveColumnWidths(columns) {
+    const weights = columns.map((column) => widthToPixels(column.width, 180));
+    const totalWeight = weights.reduce((sum, value) => sum + value, 0) || 1;
+
+    return weights.map((weight) => `${((weight / totalWeight) * 100).toFixed(4)}%`);
 }
 
 function renderListCell(requirement, column) {
@@ -1392,6 +1441,16 @@ function renderDiagramView(orientation) {
     nodesContainer.innerHTML = "";
     svg.innerHTML = "";
 
+    if (state.filteredRequirements.length === 0) {
+        canvas.style.width = "";
+        canvas.style.height = "";
+        svg.removeAttribute("width");
+        svg.removeAttribute("height");
+        svg.removeAttribute("viewBox");
+        showDiagramEmptyState(orientation, "No stakeholder requirements match the current filters.");
+        return;
+    }
+
     const tree = buildVisibleTree();
     const layout = layoutTree(tree, orientation);
 
@@ -1409,11 +1468,7 @@ function renderDiagramView(orientation) {
         nodesContainer.appendChild(createDiagramNode(node));
     });
 
-    if (state.filteredRequirements.length === 0) {
-        showDiagramEmptyState(orientation, "No stakeholder requirements match the current filters.");
-    } else {
-        hideDiagramEmptyState(orientation);
-    }
+    hideDiagramEmptyState(orientation);
 }
 
 function buildVisibleTree() {
@@ -1463,8 +1518,6 @@ function sortTree(node) {
 }
 
 function layoutTree(root, orientation) {
-    const nodeWidth = 260;
-    const nodeHeight = 140;
     const horizontalGap = orientation === "horizontal" ? 110 : 70;
     const verticalGap = orientation === "horizontal" ? 52 : 92;
     const margin = 28;
@@ -1473,8 +1526,6 @@ function layoutTree(root, orientation) {
 
     if (orientation === "horizontal") {
         layoutHorizontal(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1482,8 +1533,6 @@ function layoutTree(root, orientation) {
         });
     } else {
         layoutVertical(root, 0, margin, {
-            nodeWidth,
-            nodeHeight,
             horizontalGap,
             verticalGap,
             nodes,
@@ -1491,32 +1540,33 @@ function layoutTree(root, orientation) {
         });
     }
 
-    const bounds = calculateBounds(nodes, nodeWidth, nodeHeight, margin);
+    const bounds = calculateBounds(nodes, margin);
 
     return {
         nodes,
         edges,
         width: bounds.width,
         height: bounds.height,
-        nodeWidth,
-        nodeHeight
+        nodeWidth: DIAGRAM_NODE_WIDTH,
+        nodeHeight: REQUIREMENT_NODE_HEIGHT
     };
 }
 
 function layoutHorizontal(node, depth, nextY, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const x = 28 + depth * (nodeWidth + horizontalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const x = 28 + depth * (dimensions.width + horizontalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x,
             y: nextY,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextY + nodeHeight + verticalGap;
+        return nextY + dimensions.height + verticalGap;
     }
 
     let childY = nextY;
@@ -1537,8 +1587,8 @@ function layoutHorizontal(node, depth, nextY, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1558,19 +1608,20 @@ function layoutHorizontal(node, depth, nextY, context) {
 }
 
 function layoutVertical(node, depth, nextX, context) {
-    const { nodeWidth, nodeHeight, horizontalGap, verticalGap, nodes, edges } = context;
-    const y = 28 + depth * (nodeHeight + verticalGap);
+    const { horizontalGap, verticalGap, nodes, edges } = context;
+    const dimensions = getDiagramNodeDimensions(node);
+    const y = 28 + depth * (dimensions.height + verticalGap);
 
     if (!node.children.length) {
         nodes.push({
             ...node,
             x: nextX,
             y,
-            width: nodeWidth,
-            height: nodeHeight
+            width: dimensions.width,
+            height: dimensions.height
         });
 
-        return nextX + nodeWidth + horizontalGap;
+        return nextX + dimensions.width + horizontalGap;
     }
 
     let childX = nextX;
@@ -1591,8 +1642,8 @@ function layoutVertical(node, depth, nextX, context) {
         ...node,
         x,
         y,
-        width: nodeWidth,
-        height: nodeHeight
+        width: dimensions.width,
+        height: dimensions.height
     };
 
     nodes.push(positioned);
@@ -1611,9 +1662,16 @@ function layoutVertical(node, depth, nextX, context) {
     return childX;
 }
 
-function calculateBounds(nodes, nodeWidth, nodeHeight, margin) {
-    const maxX = Math.max(...nodes.map((node) => node.x + nodeWidth), 800);
-    const maxY = Math.max(...nodes.map((node) => node.y + nodeHeight), 480);
+function getDiagramNodeDimensions(node) {
+    return {
+        width: DIAGRAM_NODE_WIDTH,
+        height: node.type === "project" ? PROJECT_NODE_HEIGHT : REQUIREMENT_NODE_HEIGHT
+    };
+}
+
+function calculateBounds(nodes, margin) {
+    const maxX = Math.max(...nodes.map((node) => node.x + node.width), 800);
+    const maxY = Math.max(...nodes.map((node) => node.y + node.height), 480);
 
     return {
         width: maxX + margin,
@@ -1633,15 +1691,17 @@ function createSvgPath(edge, orientation) {
         const y1 = from.y + from.height / 2;
         const x2 = to.x;
         const y2 = to.y + to.height / 2;
+        const midX = x1 + ((x2 - x1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} H ${midX} V ${y2} H ${x2}`;
     } else {
         const x1 = from.x + from.width / 2;
         const y1 = from.y + from.height;
         const x2 = to.x + to.width / 2;
         const y2 = to.y;
+        const midY = y1 + ((y2 - y1) / 2);
 
-        d = `M ${x1} ${y1} L ${x2} ${y2}`;
+        d = `M ${x1} ${y1} V ${midY} H ${x2} V ${y2}`;
     }
 
     path.setAttribute("d", d);
@@ -1656,20 +1716,28 @@ function createDiagramNode(node) {
     element.style.left = `${node.x}px`;
     element.style.top = `${node.y}px`;
     element.style.width = `${node.width}px`;
-    element.style.minHeight = `${node.height}px`;
+    element.style.height = `${node.height}px`;
     element.setAttribute("data-node-type", node.type);
 
     if (node.requirement) {
         element.setAttribute("data-entity-id", node.requirement.entityId || node.requirement.id);
     }
 
-    element.innerHTML = `
-        <div class="stakeholderrequirement-diagram-node-head">
+    if (node.type === "project") {
+        element.title = buildProjectTooltip(node);
+        element.innerHTML = `
+            <div class="stakeholderrequirement-diagram-node-code"></div>
+            <div class="stakeholderrequirement-diagram-node-name">${escapeHtml(node.name)}</div>
+            <div class="stakeholderrequirement-diagram-node-footer">${escapeHtml(node.description || "â€”")}</div>
+        `;
+    } else {
+        element.title = buildRequirementTooltip(node.requirement);
+        element.innerHTML = `
             <div class="stakeholderrequirement-diagram-node-code">${escapeHtml(node.code)}</div>
-            <div class="stakeholderrequirement-diagram-node-title">${escapeHtml(node.name)}</div>
-        </div>
-        <div class="stakeholderrequirement-diagram-node-body">${escapeHtml(node.description || "")}</div>
-    `;
+            <div class="stakeholderrequirement-diagram-node-name">${escapeHtml(node.name)}</div>
+            ${renderStatusBars()}
+        `;
+    }
 
     if (node.type === "requirement") {
         element.addEventListener("dblclick", () => {
@@ -1695,6 +1763,34 @@ function createDiagramNode(node) {
     }
 
     return element;
+}
+
+function buildProjectTooltip(node) {
+    return [
+        `Project: ${node?.name || "â€”"}`,
+        node?.description ? `Customer: ${node.description}` : ""
+    ].filter(Boolean).join("\n");
+}
+
+function buildRequirementTooltip(requirement) {
+    return [
+        `ID: ${requirement?.id || "â€”"}`,
+        `Name: ${requirement?.name || "â€”"}`,
+        requirement?.description ? `Description: ${requirement.description}` : ""
+    ].filter(Boolean).join("\n");
+}
+
+function renderStatusBars() {
+    return `
+        <div class="stakeholderrequirement-diagram-status-bars">
+            <div class="stakeholderrequirement-diagram-status-bar">
+                <span class="stakeholderrequirement-diagram-status-value">&nbsp;</span>
+            </div>
+            <div class="stakeholderrequirement-diagram-status-bar">
+                <span class="stakeholderrequirement-diagram-status-value">&nbsp;</span>
+            </div>
+        </div>
+    `;
 }
 
 function initializeContextMenuEvents() {
