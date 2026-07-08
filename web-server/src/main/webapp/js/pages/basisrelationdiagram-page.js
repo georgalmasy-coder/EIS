@@ -24,6 +24,7 @@ const state = {
     requirementsByInternalId: new Map(),
     relations: [],
     viewMode: VIEW_MODES.stakeholderSystemBreakdown,
+    focusedInternalId: null,
     selectedInternalId: null,
     hoverInternalId: null,
     resizeObserver: null
@@ -50,7 +51,10 @@ function initializeEvents() {
     const filterOnlyWithoutRelations = document.getElementById("filterOnlyWithoutRelations");
     const filterOnlyWithRelations = document.getElementById("filterOnlyWithRelations");
     const filterRequirementText = document.getElementById("filterRequirementText");
+    const focusDropZone = document.getElementById("focusDropZone");
+    const btnClearFocus = document.getElementById("btnClearFocus");
     const btnClearSelection = document.getElementById("btnClearSelection");
+    const dialogFocusButton = document.getElementById("dialogFocusButton");
     const dialogCloseButton = document.getElementById("dialogCloseButton");
     const viewButtons = document.querySelectorAll("[data-view-mode]");
 
@@ -82,23 +86,30 @@ function initializeEvents() {
         }
     });
 
+    focusDropZone?.addEventListener("dragenter", handleFocusDragEnter);
+    focusDropZone?.addEventListener("dragover", handleFocusDragOver);
+    focusDropZone?.addEventListener("dragleave", handleFocusDragLeave);
+    focusDropZone?.addEventListener("drop", handleFocusDrop);
+    focusDropZone?.addEventListener("keydown", (event) => {
+        if ((event.key === "Enter" || event.key === " ") && state.focusedInternalId) {
+            event.preventDefault();
+            clearFocusedRequirement();
+        }
+    });
+
+    btnClearFocus?.addEventListener("click", () => {
+        clearFocusedRequirement();
+    });
+
     btnClearSelection?.addEventListener("click", () => {
-        state.selectedInternalId = null;
-        state.hoverInternalId = null;
+        clearAllFilters();
+    });
 
-        if (filterOnlyWithoutRelations) {
-            filterOnlyWithoutRelations.checked = false;
+    dialogFocusButton?.addEventListener("click", () => {
+        const requirement = getRequirementForDialogFocus();
+        if (requirement) {
+            setFocusedRequirement(requirement.internalId);
         }
-
-        if (filterOnlyWithRelations) {
-            filterOnlyWithRelations.checked = false;
-        }
-
-        if (filterRequirementText) {
-            filterRequirementText.value = "";
-        }
-
-        applyFiltersAndRedraw();
     });
 
     dialogCloseButton?.addEventListener("click", () => {
@@ -122,6 +133,31 @@ function initializeEvents() {
         drawRelations();
         updateHighlight();
     }, 80));
+}
+
+function clearAllFilters() {
+    state.focusedInternalId = null;
+    state.selectedInternalId = null;
+    state.hoverInternalId = null;
+
+    const filterOnlyWithoutRelations = document.getElementById("filterOnlyWithoutRelations");
+    const filterOnlyWithRelations = document.getElementById("filterOnlyWithRelations");
+    const filterRequirementText = document.getElementById("filterRequirementText");
+
+    if (filterOnlyWithoutRelations) {
+        filterOnlyWithoutRelations.checked = false;
+    }
+
+    if (filterOnlyWithRelations) {
+        filterOnlyWithRelations.checked = false;
+    }
+
+    if (filterRequirementText) {
+        filterRequirementText.value = "";
+    }
+
+    updateFocusDropZone();
+    applyFiltersAndRedraw();
 }
 
 async function loadRelationDiagram() {
@@ -246,6 +282,7 @@ function setRelationDiagramState(diagram) {
     state.systemRequirements = diagram.systemRequirements;
     state.systemsBreakdowns = diagram.systemsBreakdowns;
     state.relations = diagram.relations;
+    state.focusedInternalId = null;
     state.selectedInternalId = null;
     state.hoverInternalId = null;
     state.requirementsByInternalId = new Map();
@@ -293,6 +330,7 @@ function renderRelationDiagram() {
     renderRequirementCards(stakeholderList, state.stakeholderRequirements);
     renderRequirementCards(systemList, state.systemRequirements);
     renderRequirementCards(systemsBreakdownsList, state.systemsBreakdowns);
+    updateFocusDropZone();
 
     applyViewMode(state.viewMode, { redraw: false });
     setupScrollListeners();
@@ -309,6 +347,7 @@ function renderRequirementCards(container, requirements) {
         card.type = "button";
         card.className = "relationdiagram-requirement-card";
         card.dataset.internalId = requirement.internalId;
+        card.draggable = true;
         card.title = buildRequirementTooltip(requirement);
 
         const code = document.createElement("span");
@@ -335,6 +374,19 @@ function renderRequirementCards(container, requirements) {
             state.selectedInternalId = requirement.internalId;
             updateHighlight();
             openRequirementDialog(requirement);
+        });
+
+        card.addEventListener("dragstart", (event) => {
+            event.dataTransfer?.setData("text/plain", requirement.internalId);
+            event.dataTransfer?.setData("application/x-relationdiagram-internal-id", requirement.internalId);
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = "copy";
+            }
+            card.classList.add("is-dragging");
+        });
+
+        card.addEventListener("dragend", () => {
+            card.classList.remove("is-dragging");
         });
 
         container.appendChild(card);
@@ -396,6 +448,7 @@ function applyFilters() {
     const onlyWithoutRelations = document.getElementById("filterOnlyWithoutRelations")?.checked === true;
     const onlyWithRelations = document.getElementById("filterOnlyWithRelations")?.checked === true;
     const searchText = document.getElementById("filterRequirementText")?.value?.trim().toLowerCase() || "";
+    const focusVisibleIds = state.focusedInternalId ? getFocusedVisibleIds(state.focusedInternalId) : null;
 
     const cards = document.querySelectorAll(".relationdiagram-requirement-card");
 
@@ -406,20 +459,179 @@ function applyFilters() {
 
         let shouldShow = true;
 
-        if (onlyWithoutRelations) {
+        if (focusVisibleIds) {
+            shouldShow = focusVisibleIds.has(internalId);
+        }
+
+        if (shouldShow && !focusVisibleIds && onlyWithoutRelations) {
             shouldShow = !hasRelations;
         }
 
-        if (onlyWithRelations) {
+        if (shouldShow && !focusVisibleIds && onlyWithRelations) {
             shouldShow = hasRelations;
         }
 
-        if (shouldShow && searchText) {
+        if (shouldShow && !focusVisibleIds && searchText) {
             shouldShow = requirementMatchesSearch(requirement, searchText);
         }
 
         card.classList.toggle("is-hidden-by-filter", !shouldShow);
     }
+}
+
+function getFocusedVisibleIds(internalId) {
+    const visibleIds = new Set([internalId]);
+
+    for (const relatedId of getRelatedRequirementIds(internalId)) {
+        visibleIds.add(relatedId);
+    }
+
+    return visibleIds;
+}
+
+function setFocusedRequirement(internalId) {
+    if (!internalId) {
+        return;
+    }
+
+    if (state.focusedInternalId && state.focusedInternalId !== internalId) {
+        updateFocusDropZone(`Clear the current focus before choosing another entity.`);
+        return;
+    }
+
+    state.focusedInternalId = internalId;
+    state.selectedInternalId = internalId;
+    state.hoverInternalId = null;
+
+    const filterOnlyWithoutRelations = document.getElementById("filterOnlyWithoutRelations");
+    const filterOnlyWithRelations = document.getElementById("filterOnlyWithRelations");
+    const filterRequirementText = document.getElementById("filterRequirementText");
+
+    if (filterOnlyWithoutRelations) {
+        filterOnlyWithoutRelations.checked = false;
+    }
+
+    if (filterOnlyWithRelations) {
+        filterOnlyWithRelations.checked = false;
+    }
+
+    if (filterRequirementText) {
+        filterRequirementText.value = "";
+    }
+
+    updateFocusDropZone();
+    applyFiltersAndRedraw();
+}
+
+function clearFocusedRequirement() {
+    if (!state.focusedInternalId) {
+        updateFocusDropZone();
+        return;
+    }
+
+    state.focusedInternalId = null;
+    state.selectedInternalId = null;
+    state.hoverInternalId = null;
+    updateFocusDropZone();
+    applyFiltersAndRedraw();
+}
+
+function updateFocusDropZone(message = "") {
+    const dropZone = document.getElementById("focusDropZone");
+    const dropZoneText = document.getElementById("focusDropZoneText");
+    const clearButton = document.getElementById("btnClearFocus");
+    const focusedRequirement = state.focusedInternalId ? state.requirementsByInternalId.get(state.focusedInternalId) : null;
+
+    if (!dropZone || !dropZoneText || !clearButton) {
+        return;
+    }
+
+    dropZone.classList.toggle("is-active", Boolean(focusedRequirement));
+    dropZone.classList.remove("is-drop-target");
+
+    if (focusedRequirement) {
+        dropZoneText.textContent = `${focusedRequirement.visibleId} - ${focusedRequirement.name}`;
+        clearButton.hidden = false;
+        clearButton.disabled = false;
+        dropZone.setAttribute("title", "Focus is active. Clear it before choosing another entity.");
+    } else if (message) {
+        dropZoneText.textContent = message;
+        clearButton.hidden = true;
+        dropZone.setAttribute("title", message);
+    } else {
+        dropZoneText.textContent = "Drop an entity here";
+        clearButton.hidden = true;
+        dropZone.setAttribute("title", "Drop an entity here to focus on it");
+    }
+
+    const dialogFocusButton = document.getElementById("dialogFocusButton");
+    if (dialogFocusButton) {
+        const dialogInternalId = dialogFocusButton.dataset.internalId || "";
+        dialogFocusButton.disabled = Boolean(state.focusedInternalId) && state.focusedInternalId !== dialogInternalId;
+        dialogFocusButton.textContent = state.focusedInternalId === dialogInternalId ? "Focused" : "Focus this";
+    }
+}
+
+function getRequirementForDialogFocus() {
+    const dialogFocusButton = document.getElementById("dialogFocusButton");
+    if (!dialogFocusButton?.dataset.internalId) {
+        return null;
+    }
+
+    return state.requirementsByInternalId.get(dialogFocusButton.dataset.internalId) || null;
+}
+
+function handleFocusDragEnter(event) {
+    event.preventDefault();
+
+    const dropZone = event.currentTarget;
+    if (dropZone && !state.focusedInternalId) {
+        dropZone.classList.add("is-drop-target");
+    }
+}
+
+function handleFocusDragOver(event) {
+    event.preventDefault();
+
+    const dropZone = event.currentTarget;
+    if (dropZone && !state.focusedInternalId) {
+        dropZone.classList.add("is-drop-target");
+    }
+}
+
+function handleFocusDragLeave(event) {
+    const dropZone = event.currentTarget;
+    if (!dropZone) {
+        return;
+    }
+
+    if (event.relatedTarget && dropZone.contains(event.relatedTarget)) {
+        return;
+    }
+
+    dropZone.classList.remove("is-drop-target");
+}
+
+function handleFocusDrop(event) {
+    event.preventDefault();
+
+    const dropZone = event.currentTarget;
+    dropZone?.classList.remove("is-drop-target");
+
+    if (state.focusedInternalId) {
+        updateFocusDropZone("Clear the current focus before choosing another entity.");
+        return;
+    }
+
+    const internalId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
+        || event.dataTransfer?.getData("text/plain")
+        || "";
+
+    if (!internalId || !state.requirementsByInternalId.has(internalId)) {
+        return;
+    }
+
+    setFocusedRequirement(internalId);
 }
 
 function requirementMatchesSearch(requirement, searchText) {
@@ -551,7 +763,7 @@ function buildCurvePath(points) {
 }
 
 function updateHighlight() {
-    const activeInternalId = state.hoverInternalId || state.selectedInternalId;
+    const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
     const relatedIds = activeInternalId ? getRelatedRequirementIds(activeInternalId) : new Set();
 
     const cards = document.querySelectorAll(".relationdiagram-requirement-card");
@@ -599,6 +811,11 @@ function openRequirementDialog(requirement) {
     setText("dialogRequirementName", requirement.name, "");
     setText("dialogRequirementDescription", requirement.description || "—", "");
 
+    const dialogFocusButton = document.getElementById("dialogFocusButton");
+    if (dialogFocusButton) {
+        dialogFocusButton.dataset.internalId = requirement.internalId;
+    }
+
     const systemsBreakdownsField = document.getElementById("dialogRelatedSystemsBreakdownsField");
     if (systemsBreakdownsField) {
         systemsBreakdownsField.hidden = requirement.type !== "system";
@@ -623,6 +840,8 @@ function openRequirementDialog(requirement) {
     if (!dialog.open) {
         dialog.showModal();
     }
+
+    updateFocusDropZone();
 }
 
 function getRelatedRequirementIds(internalId) {

@@ -22,6 +22,10 @@ Use the view buttons in the top-right corner to switch between these layouts.
 - "Show only requirements without relations" hides items that are connected to anything in the current data set.
 - "Show only requirements with relations" hides isolated items.
 - The search field matches ID, name, and description.
+- You can drag an entity into the focus zone to show only that entity and its directly related entities.
+- While focus is active, the zone shows the selected entity and a clear icon.
+- The clear icon only appears while a focus is active.
+- Use the clear icon to remove the focus before selecting another entity.
 
 ## Notes
 
