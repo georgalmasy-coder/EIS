@@ -7,8 +7,85 @@ import { fetchXml } from "../core/http.js";
 import { directTextOf, textOf } from "../core/xml.js";
 
 const MENU_URL = "/Menu";
+const MENU_WIDTH = 280;
+const MENU_HANDLE_WIDTH = 22;
+const MENU_OPEN_GAP = 6;
+const MENU_CLOSED_OFFSET = 23;
+const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
+const MENU_PIN_STORAGE_KEY = "eis.menu.pinned";
+const RIGHT_ARROW = "\u25B8";
+const DOWN_ARROW = "\u25BE";
 
 let hybridMenuInitialized = false;
+
+const state = {
+    explicitOpen: false,
+    hoverOpen: false,
+    pinned: false
+};
+
+let toggleButton = null;
+let sideMenu = null;
+let leftHoverZone = null;
+let pinButton = null;
+let initialStateApplied = false;
+let menuPreparingReleaseScheduled = false;
+
+function getStorageFlag(key, fallback = false) {
+    try {
+        const value = window.localStorage.getItem(key);
+
+        if (value === null) {
+            return fallback;
+        }
+
+        return value === "1";
+    } catch {
+        return fallback;
+    }
+}
+
+function setStorageFlag(key, value) {
+    try {
+        window.localStorage.setItem(key, value ? "1" : "0");
+    } catch {
+        // Ignore storage failures. The menu still works without persistence.
+    }
+}
+
+function primeMenuFromStorage() {
+    if (initialStateApplied) {
+        return;
+    }
+
+    state.pinned = getStorageFlag(MENU_PIN_STORAGE_KEY, false);
+    state.explicitOpen = state.pinned;
+    initialStateApplied = true;
+
+    if (document.body) {
+        document.body.classList.add("menu-preparing");
+        document.body.classList.toggle("menu-is-pinned", state.pinned);
+        document.body.style.setProperty("--menu-content-offset", `${getMenuContentOffset(state.pinned)}px`);
+    }
+}
+
+function applyMenuTransitionStyles() {
+    const app = document.querySelector(".app");
+
+    if (app) {
+        app.style.setProperty("transition", "padding-left 1200ms cubic-bezier(.22,.61,.36,1)", "important");
+    }
+
+    if (sideMenu) {
+        sideMenu.style.setProperty("transition", MENU_TRANSITION, "important");
+    }
+}
+
+function getMenuContentOffset(isVisible) {
+    return isVisible
+        ? MENU_WIDTH + MENU_OPEN_GAP
+        : MENU_CLOSED_OFFSET;
+}
 
 function getActiveRouteKey(path) {
     if (!path) {
@@ -46,7 +123,7 @@ function closeAllExcept(root, exceptLi) {
             const arrow = li.querySelector(".menu-arrow");
 
             if (arrow) {
-                arrow.textContent = "▸";
+                arrow.textContent = RIGHT_ARROW;
             }
         }
     });
@@ -58,7 +135,7 @@ function buildMenu(doc, statusElement, rootElement) {
     const mainItems = Array.from(doc.getElementsByTagName("main-menu-item"));
 
     if (!mainItems.length) {
-        setText(statusElement, "No menu items returned.", "");
+        setText(statusElement, "Ingen menupunkter blev returneret.", "");
         return;
     }
 
@@ -90,7 +167,7 @@ function buildMenu(doc, statusElement, rootElement) {
 
         const arrow = document.createElement("span");
         arrow.className = "menu-arrow";
-        arrow.textContent = "▸";
+        arrow.textContent = RIGHT_ARROW;
 
         const label = document.createElement("span");
         label.textContent = mainText;
@@ -120,25 +197,143 @@ function buildMenu(doc, statusElement, rootElement) {
 
             closeAllExcept(rootElement, li);
             li.classList.toggle("is-open", willOpen);
-            arrow.textContent = willOpen ? "▾" : "▸";
+            arrow.textContent = willOpen ? DOWN_ARROW : RIGHT_ARROW;
         });
 
         li.append(button, ulSub);
         rootElement.appendChild(li);
     });
 
-    setText(statusElement, "Menu loaded.", "");
+    setText(statusElement, "Menu indl\u00e6st.", "");
     setActiveLinks(rootElement);
 }
+
+function createPinButton(doc) {
+    const button = doc.createElement("button");
+    button.type = "button";
+    button.className = "menu-pin-button";
+    button.setAttribute("aria-label", "Fastg\u00f8r menu");
+    button.setAttribute("aria-pressed", "false");
+    button.title = "Fastg\u00f8r menu";
+    const image = doc.createElement("img");
+    image.className = "menu-pin-image";
+    image.src = "/images/menu-pin.png";
+    image.alt = "";
+    image.setAttribute("aria-hidden", "true");
+    button.appendChild(image);
+
+    return button;
+}
+
+function applyLayoutState() {
+    const isVisible = state.pinned || state.hoverOpen || state.explicitOpen;
+    const body = document.body;
+
+    if (!body || !toggleButton || !sideMenu) {
+        return;
+    }
+
+    body.classList.toggle("menu-is-open", isVisible);
+    body.classList.toggle("menu-is-pinned", state.pinned);
+    body.style.setProperty("--menu-content-offset", `${getMenuContentOffset(isVisible)}px`);
+
+    sideMenu.classList.toggle("is-open", isVisible);
+    sideMenu.classList.toggle("is-hover-open", state.hoverOpen && !state.pinned);
+    sideMenu.classList.toggle("is-pinned", state.pinned);
+
+    toggleButton.classList.toggle("is-open", isVisible);
+    toggleButton.classList.toggle("is-hover-open", state.hoverOpen && !state.pinned);
+    toggleButton.classList.toggle("is-pinned", state.pinned);
+    toggleButton.setAttribute("aria-expanded", isVisible ? "true" : "false");
+    toggleButton.setAttribute("aria-label", isVisible ? "Luk menu" : "A\u00e5bn menu");
+
+    if (pinButton) {
+        pinButton.classList.toggle("is-active", state.pinned);
+        pinButton.setAttribute("aria-pressed", state.pinned ? "true" : "false");
+        pinButton.setAttribute("aria-label", state.pinned ? "Frig\u00f8r menu" : "Fastg\u00f8r menu");
+        pinButton.title = state.pinned ? "Frig\u00f8r menu" : "Fastg\u00f8r menu";
+    }
+
+    if (initialStateApplied && body.classList.contains("menu-preparing") && !menuPreparingReleaseScheduled) {
+        menuPreparingReleaseScheduled = true;
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                document.body?.classList.remove("menu-preparing");
+            });
+        });
+    }
+}
+
+function setPinned(nextPinned) {
+    state.pinned = nextPinned;
+    setStorageFlag(MENU_PIN_STORAGE_KEY, nextPinned);
+
+    if (nextPinned) {
+        state.explicitOpen = true;
+    } else {
+        state.explicitOpen = false;
+    }
+
+    applyLayoutState();
+}
+
+function setExplicitOpen(nextOpen) {
+    state.explicitOpen = nextOpen;
+    applyLayoutState();
+}
+
+function openHoverMenu() {
+    if (state.pinned) {
+        return;
+    }
+
+    state.hoverOpen = true;
+    applyLayoutState();
+}
+
+function closeHoverMenu() {
+    state.hoverOpen = false;
+    applyLayoutState();
+}
+
+function toggleExplicitMenu() {
+    if (state.pinned) {
+        state.explicitOpen = true;
+        applyLayoutState();
+        return;
+    }
+
+    setExplicitOpen(!state.explicitOpen);
+}
+
+function isDesktopHoverMode() {
+    return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+function isPointerStillInsideMenuArea(event) {
+    const nextElement = event.relatedTarget;
+
+    if (!(nextElement instanceof Node)) {
+        return false;
+    }
+
+    return sideMenu.contains(nextElement)
+        || toggleButton.contains(nextElement)
+        || leftHoverZone.contains(nextElement);
+}
+
+primeMenuFromStorage();
 
 function initializeHybridMenu() {
     if (hybridMenuInitialized) {
         return;
     }
 
-    const toggleButton = byId("menuToggle");
-    const sideMenu = byId("sideMenu");
-    const leftHoverZone = byId("leftHoverZone");
+    primeMenuFromStorage();
+
+    toggleButton = byId("menuToggle");
+    sideMenu = byId("sideMenu");
+    leftHoverZone = byId("leftHoverZone");
 
     if (!toggleButton || !sideMenu || !leftHoverZone) {
         return;
@@ -146,75 +341,40 @@ function initializeHybridMenu() {
 
     hybridMenuInitialized = true;
 
-    const supportsDesktopHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+    pinButton = createPinButton(document);
+    sideMenu.insertBefore(pinButton, sideMenu.firstChild);
 
-    function isDesktopHoverMode() {
-        return supportsDesktopHover.matches;
-    }
+    toggleButton.textContent = "";
+    const label = document.createElement("span");
+    label.className = "menu-toggle-label";
+    label.textContent = "Menu";
+    toggleButton.appendChild(label);
 
-    function openTouchMenu() {
-        sideMenu.classList.add("is-open");
-        toggleButton.classList.add("is-open");
-        toggleButton.setAttribute("aria-expanded", "true");
-        toggleButton.setAttribute("aria-label", "Close menu");
-        toggleButton.textContent = "‹";
-    }
+    applyMenuTransitionStyles();
+    applyLayoutState();
 
-    function closeTouchMenu() {
-        sideMenu.classList.remove("is-open");
-        toggleButton.classList.remove("is-open");
-        toggleButton.setAttribute("aria-expanded", "false");
-        toggleButton.setAttribute("aria-label", "Open menu");
-        toggleButton.textContent = "›";
-    }
+    const hoverMediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
 
-    function toggleTouchMenu() {
-        if (sideMenu.classList.contains("is-open")) {
-            closeTouchMenu();
-        } else {
-            openTouchMenu();
+    leftHoverZone.addEventListener("pointerenter", () => {
+        if (hoverMediaQuery.matches) {
+            openHoverMenu();
         }
-    }
+    });
 
-    function openHoverMenu() {
-        sideMenu.classList.add("is-hover-open");
-        toggleButton.classList.add("is-hover-open");
-        toggleButton.setAttribute("aria-expanded", "true");
-        toggleButton.textContent = "‹";
-    }
-
-    function closeHoverMenu() {
-        sideMenu.classList.remove("is-hover-open");
-        toggleButton.classList.remove("is-hover-open");
-
-        if (!sideMenu.classList.contains("is-open")) {
-            toggleButton.setAttribute("aria-expanded", "false");
-            toggleButton.textContent = "›";
+    sideMenu.addEventListener("pointerenter", () => {
+        if (hoverMediaQuery.matches) {
+            openHoverMenu();
         }
-    }
+    });
 
-    function isPointerStillInsideMenuArea(event) {
-        const nextElement = event.relatedTarget;
-
-        if (!(nextElement instanceof Node)) {
-            return false;
+    toggleButton.addEventListener("pointerenter", () => {
+        if (hoverMediaQuery.matches) {
+            openHoverMenu();
         }
+    });
 
-        return sideMenu.contains(nextElement)
-            || toggleButton.contains(nextElement)
-            || leftHoverZone.contains(nextElement);
-    }
-
-    function handleHoverEnter() {
-        if (!isDesktopHoverMode()) {
-            return;
-        }
-
-        openHoverMenu();
-    }
-
-    function handleHoverLeave(event) {
-        if (!isDesktopHoverMode()) {
+    leftHoverZone.addEventListener("pointerleave", (event) => {
+        if (!hoverMediaQuery.matches || state.pinned) {
             return;
         }
 
@@ -223,32 +383,45 @@ function initializeHybridMenu() {
         }
 
         closeHoverMenu();
-    }
+    });
 
-    leftHoverZone.addEventListener("pointerenter", handleHoverEnter);
-    sideMenu.addEventListener("pointerenter", handleHoverEnter);
-    toggleButton.addEventListener("pointerenter", handleHoverEnter);
+    sideMenu.addEventListener("pointerleave", (event) => {
+        if (!hoverMediaQuery.matches || state.pinned) {
+            return;
+        }
 
-    leftHoverZone.addEventListener("pointerleave", handleHoverLeave);
-    sideMenu.addEventListener("pointerleave", handleHoverLeave);
-    toggleButton.addEventListener("pointerleave", handleHoverLeave);
+        if (isPointerStillInsideMenuArea(event)) {
+            return;
+        }
+
+        closeHoverMenu();
+    });
+
+    toggleButton.addEventListener("pointerleave", (event) => {
+        if (!hoverMediaQuery.matches || state.pinned) {
+            return;
+        }
+
+        if (isPointerStillInsideMenuArea(event)) {
+            return;
+        }
+
+        closeHoverMenu();
+    });
 
     toggleButton.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        toggleExplicitMenu();
+    });
 
-        if (isDesktopHoverMode()) {
-            return;
-        }
-
-        toggleTouchMenu();
+    pinButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setPinned(!state.pinned);
     });
 
     document.addEventListener("click", (event) => {
-        if (isDesktopHoverMode()) {
-            return;
-        }
-
         const clickedInsideMenu = sideMenu.contains(event.target);
         const clickedToggleButton = toggleButton.contains(event.target);
 
@@ -256,7 +429,10 @@ function initializeHybridMenu() {
             return;
         }
 
-        closeTouchMenu();
+        if (!state.pinned) {
+            setExplicitOpen(false);
+            closeHoverMenu();
+        }
     });
 
     document.addEventListener("keydown", (event) => {
@@ -264,13 +440,27 @@ function initializeHybridMenu() {
             return;
         }
 
-        closeTouchMenu();
-        closeHoverMenu();
+        if (!state.pinned) {
+            setExplicitOpen(false);
+            closeHoverMenu();
+        }
     });
 
-    supportsDesktopHover.addEventListener("change", () => {
-        closeTouchMenu();
-        closeHoverMenu();
+    window.addEventListener("storage", (event) => {
+        if (event.key !== MENU_PIN_STORAGE_KEY) {
+            return;
+        }
+
+        const nextPinned = event.newValue === "1";
+        state.pinned = nextPinned;
+
+        if (nextPinned) {
+            state.explicitOpen = true;
+        } else {
+            state.explicitOpen = false;
+        }
+
+        applyLayoutState();
     });
 }
 
@@ -284,13 +474,13 @@ export async function initMenu() {
         return;
     }
 
-    setText(statusElement, "Loading menu…", "");
+    setText(statusElement, "Indl\u00e6ser menu...", "");
 
     try {
         const doc = await fetchXml(MENU_URL);
         buildMenu(doc, statusElement, rootElement);
     } catch (error) {
-        setText(statusElement, "Failed to load menu.", "");
+        setText(statusElement, "Kunne ikke indl\u00e6se menu.", "");
         clear(rootElement);
         console.error(error);
     }

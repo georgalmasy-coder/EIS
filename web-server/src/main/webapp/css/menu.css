@@ -1,40 +1,70 @@
 .menu-toggle{
     position: fixed;
-    left: 6px;
-    top: 50%;
-    width: 24px;
-    height: 68px;
-    transform: translateY(-50%);
-    z-index: 90;
+    left: 0;
+    top: 0;
+    width: var(--menu-handle-width);
+    height: 100vh;
+    transform: none;
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, rgba(37,99,235,.96), rgba(29,78,216,.96));
-    color: #ffffff;
-    border: 1px solid rgba(147,197,253,.45);
+    padding: 0;
+    background: linear-gradient(180deg, rgba(229, 231, 235, 0.98), rgba(209, 213, 219, 0.98));
+    color: #111827;
+    border: 0;
+    border-right: 1px solid rgba(156, 163, 175, 0.75);
     border-left: 0;
-    border-radius: 0 9px 9px 0;
-    box-shadow: 0 8px 18px rgba(0,0,0,.30);
-    font-size: 19px;
-    font-weight: 800;
-    line-height: 1;
+    border-radius: 0;
+    box-shadow: 6px 0 18px rgba(0, 0, 0, 0.20);
     cursor: pointer;
+    overflow: hidden;
     touch-action: manipulation;
-    transition: left 1000ms ease, background 200ms ease;
+    transition: background 180ms ease, box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+body.menu-is-open .menu-toggle,
+body.menu-is-pinned .menu-toggle{
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-100%);
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus{
+    background: linear-gradient(180deg, rgba(243, 244, 246, 0.98), rgba(229, 231, 235, 0.98));
+    border-right-color: rgba(107, 114, 128, 0.9);
 }
 
 .menu-toggle.is-open,
-.menu-toggle.is-hover-open{
-    left: 286px;
+.menu-toggle.is-hover-open,
+.menu-toggle.is-pinned{
+    background: rgba(15, 23, 42, 0.98);
+    border-color: rgba(96, 165, 250, 0.5);
+    color: #ffffff;
+}
+
+.menu-toggle-label{
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .left-hover-zone{
     position: fixed;
     left: 0;
     top: 0;
-    width: 25px;
+    width: var(--menu-handle-width);
     height: 100vh;
-    z-index: 80;
+    z-index: 90;
 }
 
 .left-hover-zone::after{
@@ -46,43 +76,73 @@
     position: fixed;
     left: 0;
     top: 0;
+    width: var(--menu-width);
     height: 100vh;
-    width: 280px;
-    background: linear-gradient(180deg, rgba(17,28,51,.98), rgba(11,18,36,.98));
-    border-right: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    transform: translateX(calc(-100% + 6px));
-    transition: transform 2500ms ease;
-    z-index: 60;
-    padding: 16px 14px;
+    padding: 14px 14px 16px;
     overflow-x: hidden;
     overflow-y: auto;
+    background: linear-gradient(180deg, rgba(17, 28, 51, 0.98), rgba(11, 18, 36, 0.98));
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transform: translateX(-100%);
+    transition: transform 1200ms cubic-bezier(.22,.61,.36,1);
+    z-index: 80;
+    will-change: transform;
 }
 
-.side-menu::before{
-    content: "";
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 6px;
-    height: 100vh;
-    background: linear-gradient(180deg, rgba(96,165,250,.65), rgba(37,99,235,.35));
-    box-shadow: 2px 0 10px rgba(37,99,235,.25);
+.side-menu.is-open,
+.side-menu.is-hover-open,
+.side-menu.is-pinned{
+    transform: translateX(0);
+}
+
+.side-menu:not(.is-open):not(.is-hover-open):not(.is-pinned) .menu-pin-button{
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
 }
 
-.side-menu.is-hover-open,
-.side-menu.is-open{
-    transform: translateX(0);
-    transition-duration: 1000ms;
+.menu-pin-button{
+    position: sticky;
+    top: 10px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 10px auto;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    box-shadow: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 2;
+}
+
+.menu-pin-image{
+    display: block;
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.menu-pin-button:hover,
+.menu-pin-button:focus{
+    opacity: 0.95;
+}
+
+.menu-pin-button.is-active{
+    background: transparent;
 }
 
 .side-menu h2{
-    margin: 6px 8px 12px;
+    margin: 0 8px 12px;
     font-size: 14px;
     color: var(--muted);
     font-weight: 700;
-    letter-spacing: .2px;
+    letter-spacing: 0;
 }
 
 .menu-status{
@@ -107,24 +167,24 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: transparent;
+    padding: 6px 6px;
     border: 0;
+    border-radius: 10px;
+    background: transparent;
     color: var(--text);
     font-weight: 650;
-    padding: 6px 6px;
-    border-radius: 10px;
-    cursor: pointer;
     text-align: left;
+    cursor: pointer;
 }
 
 .menu-main-btn:hover{
-    background: rgba(96,165,250,.10);
+    background: rgba(96, 165, 250, 0.10);
 }
 
 .menu-arrow{
     width: 16px;
-    color: var(--muted);
     display: inline-block;
+    color: var(--muted);
     text-align: center;
 }
 
@@ -138,7 +198,7 @@
 }
 
 .menu-main-link:hover{
-    background: rgba(96,165,250,.10);
+    background: rgba(96, 165, 250, 0.10);
     color: var(--text);
 }
 
@@ -148,10 +208,10 @@
 }
 
 .menu-sub{
+    display: none;
     list-style: none;
     margin: 6px 0 0 24px;
     padding: 0;
-    display: none;
 }
 
 .menu-main.is-open > .menu-sub{
@@ -167,7 +227,7 @@
 }
 
 .menu-sub a:hover{
-    background: rgba(96,165,250,.10);
+    background: rgba(96, 165, 250, 0.10);
     color: var(--text);
 }
 
