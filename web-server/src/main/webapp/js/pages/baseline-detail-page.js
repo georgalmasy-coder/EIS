@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { hasXmlParseError } from "../core/xml.js";
 import { downloadBaselineDetailPdf } from "./baseline-detail-pdf.js";
@@ -375,16 +376,19 @@ function openEditPage(
         return;
     }
 
-    const url = new URL(
-        editPageUrl,
-        window.location.href
-    );
+    const editPage = new URL(editPageUrl, window.location.href).searchParams.get("page") || "";
 
-    url.searchParams.set("mode", "edit");
-    url.searchParams.set("id", String(entityId));
-    url.searchParams.set("returnUrl", getCurrentRelativeUrl());
+    if (!editPage) {
+        return;
+    }
 
-    window.location.href = url.toString();
+    openEditDialog({
+        page: editPage,
+        mode: "edit",
+        id: String(entityId),
+        title: "Edit",
+        onSaved: () => window.location.reload()
+    });
 }
 
 function getCurrentRelativeUrl() {

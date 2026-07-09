@@ -2,6 +2,7 @@
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { sanitizeCssColor } from "../core/css.js";
@@ -107,7 +108,12 @@ function initializeEvents() {
     });
 
     addButton?.addEventListener("click", () => {
-        window.location.href = `${CREATE_PROJECT_URL}&returnUrl=${encodeURIComponent(RETURN_URL)}`;
+        openEditDialog({
+            page: "project-edit",
+            mode: "create",
+            title: "Create Project",
+            onSaved: () => window.location.reload()
+        });
     });
 }
 
@@ -589,11 +595,19 @@ function buildEditProjectUrl(projectId) {
 }
 
 function openEditProject(project) {
-    const url = buildEditProjectUrl(project?.projectId || "");
+    const projectId = project?.projectId || "";
 
-    if (url) {
-        window.location.href = url;
+    if (!projectId) {
+        return;
     }
+
+    openEditDialog({
+        page: "project-edit",
+        mode: "edit",
+        id: projectId,
+        title: "Edit Project",
+        onSaved: () => window.location.reload()
+    });
 }
 
 function formatListCellValue(value, control) {

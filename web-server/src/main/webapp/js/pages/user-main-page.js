@@ -2,6 +2,7 @@
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import {
@@ -119,7 +120,12 @@ function initializeEvents() {
     });
 
     addButton?.addEventListener("click", () => {
-        window.location.href = `${CREATE_USER_URL}&returnUrl=${encodeURIComponent(RETURN_URL)}`;
+        openEditDialog({
+            page: "user-edit",
+            mode: "create",
+            title: "Create User",
+            onSaved: () => window.location.reload()
+        });
     });
 }
 
@@ -642,6 +648,12 @@ function openEditUser(userId) {
         return;
     }
 
-    window.location.href = `${EDIT_USER_URL}${encodeURIComponent(userId)}&returnUrl=${encodeURIComponent(RETURN_URL)}`;
+    openEditDialog({
+        page: "user-edit",
+        mode: "edit",
+        id: userId,
+        title: "Edit User",
+        onSaved: () => window.location.reload()
+    });
 }
 

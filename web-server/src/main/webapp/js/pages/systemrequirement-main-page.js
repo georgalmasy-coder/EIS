@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemRequirementDiagramPdf } from "./systemrequirement-diagram-pdf.js";
@@ -1995,12 +1996,13 @@ function openEditRequirement(requirement) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "systemrequirement-edit",
         mode: "edit",
-        id
+        id,
+        title: "Edit System Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateSubRequirement(requirement) {
@@ -2011,20 +2013,22 @@ function openCreateSubRequirement(requirement) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "systemrequirement-edit",
         mode: "create-child",
-        id
+        id,
+        title: "Create Sub System Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateRootRequirement() {
-    const url = buildEditPageUrl({
-        mode: "create-root"
+    openEditDialog({
+        page: "systemrequirement-edit",
+        mode: "create-root",
+        title: "Create Root System Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function buildEditPageUrl(params) {

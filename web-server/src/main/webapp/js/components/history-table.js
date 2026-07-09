@@ -26,6 +26,7 @@ const DEFAULT_CONFIG = {
     id: "",
     returnUrl: "",
     readOnly: false,
+    onOpenHistoricalVersion: null,
     onAfterRender: null
 };
 
@@ -289,6 +290,15 @@ export function createHistoryTable(config = {}) {
         const row = getRowByVersion(version);
 
         if (!row || row.latest) {
+            return;
+        }
+
+        if (typeof state.config.onOpenHistoricalVersion === "function") {
+            state.config.onOpenHistoricalVersion({
+                version: row.version,
+                row,
+                id: state.config.id
+            });
             return;
         }
 

@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadStakeholderRequirementDiagramPdf } from "./stakeholderrequirement-diagram-pdf.js";
@@ -1944,12 +1945,13 @@ function openEditRequirement(requirement) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "stakeholderrequirement-edit",
         mode: "edit",
-        id
+        id,
+        title: "Edit Stakeholder Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateSubRequirement(requirement) {
@@ -1960,20 +1962,22 @@ function openCreateSubRequirement(requirement) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "stakeholderrequirement-edit",
         mode: "create-child",
-        id
+        id,
+        title: "Create Sub Stakeholder Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateRootRequirement() {
-    const url = buildEditPageUrl({
-        mode: "create-root"
+    openEditDialog({
+        page: "stakeholderrequirement-edit",
+        mode: "create-root",
+        title: "Create Root Stakeholder Requirement",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function buildEditPageUrl(params) {

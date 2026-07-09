@@ -1,6 +1,12 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
+import {
+    applyEditDialogShellMode,
+    closeEditDialog,
+    getEditDialogPageContext,
+    notifyEditDialogSaved
+} from "../components/edit-dialog-page.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
@@ -54,6 +60,7 @@ const state = {
     id: "",
     version: "",
     returnUrl: DEFAULT_RETURN_URL,
+    modal: false,
     readOnly: false,
     currentDoc: null,
     detailNode: null,
@@ -78,12 +85,18 @@ function start() {
 }
 
 function initializeShell() {
+    const dialogContext = applyEditDialogShellMode(document);
+    state.modal = dialogContext.modal;
+
     setText("customerName", "—");
     setText("projectName", "—");
     setText("userName", "—");
     setText("loadStatus", "Loading");
 
-    initMenu(document);
+    if (!state.modal) {
+        initMenu(document);
+    }
+
     initHelpDialog();
 }
 
@@ -121,12 +134,14 @@ function normalizeStakeholderStyleTabs() {
 function initializeRouteState() {
     const params = new URLSearchParams(window.location.search);
     const requestedMode = params.get("mode") || MODES.edit;
+    const dialogContext = getEditDialogPageContext();
 
     state.mode = Object.values(MODES).includes(requestedMode) ? requestedMode : MODES.edit;
     state.id = params.get("id") || "";
     state.version = params.get("version") || "";
     state.returnUrl = params.get("returnUrl") || DEFAULT_RETURN_URL;
     state.readOnly = state.mode === MODES.editVersion && !!state.version;
+    state.modal = state.modal || dialogContext.modal;
 
     notesTable.setReadOnly(state.readOnly, { render: false });
     attachmentsTable.setReadOnly(state.readOnly, { render: false });
@@ -228,6 +243,7 @@ function applyModeUi() {
     attachmentsTable.setReadOnly(state.readOnly);
 
     if (saveButton) {
+        saveButton.hidden = state.modal && state.readOnly;
         saveButton.disabled = state.readOnly;
         saveButton.title = state.readOnly ? "Save is disabled for historical versions." : "";
     }
@@ -530,6 +546,14 @@ async function saveCurrentProject() {
         setText("dlgStatus", "Saved.");
         setText("loadStatus", "Saved");
 
+        if (state.modal && notifyEditDialogSaved({
+            mode: state.mode,
+            id: state.id,
+            version: state.version
+        })) {
+            return;
+        }
+
         returnToPreviousPage();
     } catch (error) {
         console.error("Failed to save project", error);
@@ -810,6 +834,10 @@ function persistEditTableColumnWidth(tableKey, columnIndex, widthPx) {
 }
 
 function returnToPreviousPage() {
+    if (state.modal && closeEditDialog("cancel")) {
+        return;
+    }
+
     window.location.href = state.returnUrl || DEFAULT_RETURN_URL;
 }
 

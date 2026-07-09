@@ -2,6 +2,11 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import {
+    applyEditDialogShellMode,
+    closeEditDialog,
+    getEditDialogPageContext
+} from "../components/edit-dialog-page.js";
 import { setText } from "../core/dom.js";
 import {
     getDirectChild,
@@ -28,6 +33,7 @@ const state = {
     id: "",
     version: "",
     returnUrl: DEFAULT_RETURN_URL,
+    modal: false,
     readOnly: false,
     currentDoc: null,
     detailNode: null,
@@ -53,12 +59,18 @@ function start() {
 }
 
 function initializeShell() {
+    const dialogContext = applyEditDialogShellMode(document);
+    state.modal = dialogContext.modal;
+
     setText("customerName", "—");
     setText("projectName", "—");
     setText("userName", "—");
     setText("loadStatus", "Loading");
 
-    initMenu(document);
+    if (!state.modal) {
+        initMenu(document);
+    }
+
     initHelpDialog();
 }
 
@@ -75,21 +87,32 @@ function initializeTabs() {
 function initializeRouteState() {
     const params = new URLSearchParams(window.location.search);
     const requestedMode = params.get("mode") || MODES.edit;
+    const dialogContext = getEditDialogPageContext();
 
     state.mode = Object.values(MODES).includes(requestedMode) ? requestedMode : MODES.edit;
     state.id = params.get("id") || "";
     state.version = params.get("version") || "";
     state.returnUrl = params.get("returnUrl") || DEFAULT_RETURN_URL;
     state.readOnly = state.mode === MODES.editVersion && !!state.version;
+    state.modal = state.modal || dialogContext.modal;
 }
 
 function initializeEvents() {
     const cancelButton = document.getElementById("btnCancel");
 
     if (cancelButton) {
-        cancelButton.hidden = true;
-        cancelButton.disabled = true;
-        cancelButton.setAttribute("aria-hidden", "true");
+        if (state.modal) {
+            cancelButton.hidden = false;
+            cancelButton.disabled = false;
+            cancelButton.removeAttribute("aria-hidden");
+            cancelButton.addEventListener("click", () => {
+                returnToPreviousPage();
+            });
+        } else {
+            cancelButton.hidden = true;
+            cancelButton.disabled = true;
+            cancelButton.setAttribute("aria-hidden", "true");
+        }
     }
 
     document.getElementById("btnSave")?.addEventListener("click", async () => {
@@ -193,6 +216,7 @@ function applyModeUi() {
     document.body.classList.toggle("customer-edit-readonly", state.readOnly);
 
     if (saveButton) {
+        saveButton.hidden = state.modal;
         saveButton.disabled = state.readOnly;
         saveButton.title = state.readOnly ? "Save is disabled for historical versions." : "";
     }
@@ -761,6 +785,10 @@ function findSectionNode(doc, sectionName) {
 }
 
 function returnToPreviousPage() {
+    if (state.modal && closeEditDialog("cancel")) {
+        return;
+    }
+
     window.location.href = state.returnUrl || DEFAULT_RETURN_URL;
 }
 

@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 
 const DATA_URL = "/project/myprojects?cmd=list";
 const SELECT_PROJECT_URL = "/project/myprojects?cmd=select&projectId=";
@@ -507,6 +508,7 @@ function renderEditProjectLink(project) {
     return `
         <a class="project-edit-link"
            href="${url}"
+           data-project-id="${escapeHtml(projectId)}"
            title="Edit project"
            aria-label="Edit project ${escapeHtml(project.projectName)}">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -562,6 +564,30 @@ async function startPage() {
 
     try {
         await initMenu();
+
+        elements.projectsGrid?.addEventListener("click", (event) => {
+            const link = event.target.closest(".project-edit-link");
+
+            if (!link) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const projectId = String(link.getAttribute("data-project-id") || "").trim();
+
+            if (!projectId) {
+                return;
+            }
+
+            openEditDialog({
+                page: "project-edit",
+                mode: "edit",
+                id: projectId,
+                title: "Edit Project",
+                onSaved: () => window.location.reload()
+            });
+        });
 
         setLoadStatus(elements, "Loading…");
 

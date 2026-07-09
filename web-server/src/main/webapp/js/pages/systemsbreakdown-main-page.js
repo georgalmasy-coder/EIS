@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemsBreakdownDiagramPdf } from "./systemsbreakdown-diagram-pdf.js";
@@ -2085,12 +2086,13 @@ function openEditSystem(system) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "systemsbreakdown-edit",
         mode: "edit",
-        id
+        id,
+        title: "Edit System",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateSubSystem(system) {
@@ -2101,20 +2103,22 @@ function openCreateSubSystem(system) {
         return;
     }
 
-    const url = buildEditPageUrl({
+    openEditDialog({
+        page: "systemsbreakdown-edit",
         mode: "create-child",
-        id
+        id,
+        title: "Create Sub System",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function openCreateRootSystem() {
-    const url = buildEditPageUrl({
-        mode: "create-root"
+    openEditDialog({
+        page: "systemsbreakdown-edit",
+        mode: "create-root",
+        title: "Create Root System",
+        onSaved: () => window.location.reload()
     });
-
-    window.location.href = url;
 }
 
 function buildEditPageUrl(params) {

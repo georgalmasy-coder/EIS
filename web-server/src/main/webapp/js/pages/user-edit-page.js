@@ -2,6 +2,12 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import { mountTopbar } from "../components/topbar.js";
+import {
+    applyEditDialogShellMode,
+    closeEditDialog,
+    getEditDialogPageContext,
+    notifyEditDialogSaved
+} from "../components/edit-dialog-page.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
@@ -60,6 +66,7 @@ const state = {
     mode: "edit",
     id: "",
     returnUrl: RETURN_URL,
+    modal: false,
     currentDoc: null,
     lookups: {},
     userNode: null,
@@ -91,14 +98,20 @@ function start() {
 }
 
 function initializeShell() {
+    const dialogContext = applyEditDialogShellMode(document);
+    state.modal = dialogContext.modal;
+
     setText("customerName", "-", "");
     setText("projectName", "-", "");
     setText("userName", "-", "");
     setText("loadStatus", "Loading", "");
 
-    initMenu(document);
+    if (!state.modal) {
+        initMenu(document);
+        mountTopbar(document);
+    }
+
     initHelpDialog();
-    mountTopbar(document);
 }
 
 function initializeTabs() {
@@ -124,10 +137,12 @@ function initializeTabs() {
 function initializeRouteState() {
     const params = new URLSearchParams(window.location.search);
     const requestedMode = String(params.get("mode") || "edit").toLowerCase();
+    const dialogContext = getEditDialogPageContext();
 
     state.mode = requestedMode === "create" ? "create" : "edit";
     state.id = params.get("id") || "";
     state.returnUrl = params.get("returnUrl") || RETURN_URL;
+    state.modal = state.modal || dialogContext.modal;
 }
 
 function initializeEvents() {
@@ -530,6 +545,14 @@ async function saveCurrentUser() {
 
         setText("dlgStatus", "Saved.");
         setText("loadStatus", "Saved");
+
+        if (state.modal && notifyEditDialogSaved({
+            mode: state.mode,
+            id: state.id
+        })) {
+            return;
+        }
+
         returnToPreviousPage();
     } catch (error) {
         console.error("Failed to save user", error);
@@ -644,6 +667,10 @@ function ensureChild(doc, parent, name) {
 }
 
 function returnToPreviousPage() {
+    if (state.modal && closeEditDialog("cancel")) {
+        return;
+    }
+
     window.location.href = state.returnUrl || RETURN_URL;
 }
 

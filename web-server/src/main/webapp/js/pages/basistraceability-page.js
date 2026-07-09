@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
+import { openEditDialog } from "../components/edit-dialog.js";
 import {
     closeDialogElement,
     setInputValue,
@@ -512,13 +513,13 @@ function openSystemRequirementEditPage(column) {
         return;
     }
 
-    const url = new URL(SYSTEM_REQUIREMENT_EDIT_PAGE_URL, window.location.href);
-
-    url.searchParams.set("mode", "edit");
-    url.searchParams.set("id", id);
-    url.searchParams.set("returnUrl", RETURN_URL);
-
-    window.location.href = url.toString();
+    openEditDialog({
+        page: "systemrequirement-edit",
+        mode: "edit",
+        id,
+        title: "Edit System Requirement",
+        onSaved: () => window.location.reload()
+    });
 }
 
 function openStakeholderRequirementEditPage(row) {
@@ -529,13 +530,13 @@ function openStakeholderRequirementEditPage(row) {
         return;
     }
 
-    const url = new URL(STAKEHOLDER_REQUIREMENT_EDIT_PAGE_URL, window.location.href);
-
-    url.searchParams.set("mode", "edit");
-    url.searchParams.set("id", id);
-    url.searchParams.set("returnUrl", RETURN_URL);
-
-    window.location.href = url.toString();
+    openEditDialog({
+        page: "stakeholderrequirement-edit",
+        mode: "edit",
+        id,
+        title: "Edit Stakeholder Requirement",
+        onSaved: () => window.location.reload()
+    });
 }
 
 function initializeRequirementDialogEvents() {

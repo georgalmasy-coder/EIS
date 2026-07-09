@@ -13,6 +13,9 @@
     --menu-handle-width: 22px;
     --menu-content-offset: 0px;
     --menu-open-offset: calc(var(--menu-width) + var(--menu-open-gap));
+    --edit-dialog-width: min(1320px, 92vw);
+    --edit-dialog-max-height: 80vh;
+    --edit-dialog-min-height: 900px;
 }
 
 *{
@@ -233,6 +236,53 @@ dialog{
     color: var(--text);
     box-shadow: var(--shadow);
     width: min(560px, 92vw);
+}
+
+dialog.eis-edit-dialog{
+    display: flex;
+    flex-direction: column;
+    width: var(--edit-dialog-width);
+    min-width: min(980px, 92vw);
+    min-height: var(--edit-dialog-min-height);
+    max-height: var(--edit-dialog-max-height);
+    padding: 0;
+    overflow: hidden;
+}
+
+dialog.eis-edit-dialog::backdrop{
+    background: rgba(0,0,0,.6);
+}
+
+.eis-edit-dialog-form{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.eis-edit-dialog-frame{
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+}
+
+body.eis-edit-dialog-mode .topbar,
+body.eis-edit-dialog-mode .menu-toggle,
+body.eis-edit-dialog-mode .side-menu,
+body.eis-edit-dialog-mode .left-hover-zone{
+    display: none !important;
+}
+
+body.eis-edit-dialog-mode .app{
+    padding-left: 0;
 }
 
 dialog::backdrop{
