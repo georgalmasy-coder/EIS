@@ -17,6 +17,17 @@ public final class EhcacheProvider {
         return CACHE_MANAGER;
     }
 
+    public static <K, V> void clearCache(String cacheAlias, Class<K> keyType, Class<V> valueType) {
+        if (cacheAlias == null || cacheAlias.isBlank()) {
+            return;
+        }
+
+        var cache = CACHE_MANAGER.getCache(cacheAlias, keyType, valueType);
+        if (cache != null) {
+            cache.clear();
+        }
+    }
+
     private static CacheManager buildAndInit() {
         URL xml = EhcacheProvider.class.getResource("/ehcache.xml");
         if (xml == null) {

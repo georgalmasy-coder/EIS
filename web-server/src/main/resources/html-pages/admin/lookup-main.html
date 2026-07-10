@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/generel.css" />
+    <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/lookup-main.css" />
+</head>
+
+<body class="lookup-main-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app lookup-main-app">
+    <div class="content lookup-main-content">
+        <header class="topbar lookup-main-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout lookup-main-layout" aria-label="Lookup administration">
+            <div class="section-header lookup-main-section-header">
+                <h2>Lookup Administration</h2>
+            </div>
+
+            <div class="lookup-main-toolbar" aria-label="Lookup toolbar">
+                <label class="lookup-main-type-filter" for="lookupTypeSelect">
+                    <span class="lookup-main-filter-label">Lookup type</span>
+                    <select id="lookupTypeSelect" class="lookup-main-type-select" aria-label="Select lookup type"></select>
+                </label>
+
+                <div class="lookup-main-action-group" aria-label="Lookup actions">
+                    <button
+                            id="btnAddLookup"
+                            class="page-icon-button lookup-main-icon-button lookup-main-add-button"
+                            type="button"
+                            aria-label="Create lookup row"
+                            title="Create lookup row"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body lookup-main-body">
+                <div class="table-frame page-frame lookup-main-list-frame" aria-label="Lookup list frame">
+                    <div class="table-scroll lookup-main-list-scroll" id="tableScroll">
+                        <table class="data-table page-table lookup-main-table" aria-label="Lookup list">
+                            <colgroup>
+                                <col style="width: 18%;">
+                                <col style="width: 42%;">
+                                <col style="width: 16%;">
+                                <col style="width: 12%;">
+                                <col style="width: 12%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Color</th>
+                                <th>Display Order</th>
+                                <th>Active</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+
+                        <div class="empty page-empty lookup-main-empty" id="listEmptyState">
+                            Loading lookups...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="lookupDialog" class="lookup-main-dialog" aria-labelledby="lookupDialogTitle">
+    <form id="lookupForm" method="dialog" class="lookup-main-dialog-form">
+        <div class="page-dialog-head lookup-main-dialog-head">
+            <div class="lookup-main-dialog-title-group">
+                <h3 id="lookupDialogTitle">Lookup</h3>
+                <div id="lookupDialogModeLabel" class="lookup-main-dialog-mode-label">Idle</div>
+            </div>
+        </div>
+
+        <div class="page-dialog-status" id="lookupDialogStatus">Idle</div>
+
+        <div class="lookup-main-dialog-grid">
+            <input type="hidden" id="lookupId" />
+            <input type="hidden" id="lookupTypeId" />
+
+            <div class="page-field">
+                <label for="lookupTypeLabel">Lookup type</label>
+                <select id="lookupTypeLabel" class="lookup-main-dialog-readonly" disabled></select>
+            </div>
+
+            <div class="page-field">
+                <label for="lookupCodeInput">Lookup code <span aria-hidden="true">*</span></label>
+                <input id="lookupCodeInput" type="text" maxlength="50" autocomplete="off" required />
+            </div>
+
+            <div class="page-field lookup-main-wide-field">
+                <label for="lookupDescriptionInput">Lookup description</label>
+                <textarea id="lookupDescriptionInput" rows="4" maxlength="255"></textarea>
+            </div>
+
+            <div class="page-field">
+                <label for="lookupDisplayOrderInput">Display order</label>
+                <input id="lookupDisplayOrderInput" type="number" step="1" inputmode="numeric" />
+            </div>
+
+            <div class="page-field checkbox-field lookup-main-checkbox-field">
+                <input id="lookupActiveInput" type="checkbox" checked />
+                <label for="lookupActiveInput">Active</label>
+            </div>
+
+            <div class="page-field lookup-main-wide-field">
+                <label for="lookupColorPresetSelect">Color</label>
+                <div class="lookup-main-color-grid">
+                    <select id="lookupColorPresetSelect" class="lookup-main-color-select">
+                        <option value="">No color</option>
+                        <option value="__custom__">Custom</option>
+                        <option value="#000000">Black</option>
+                        <option value="#FFFFFF">White</option>
+                        <option value="#808080">Gray</option>
+                        <option value="#C0C0C0">Silver</option>
+                        <option value="#FF0000">Red</option>
+                        <option value="#008000">Green</option>
+                        <option value="#0000FF">Blue</option>
+                        <option value="#FFFF00">Yellow</option>
+                        <option value="#FFA500">Orange</option>
+                        <option value="#800080">Purple</option>
+                        <option value="#FFC0CB">Pink</option>
+                        <option value="#A52A2A">Brown</option>
+                        <option value="#000080">Navy</option>
+                        <option value="#008080">Teal</option>
+                        <option value="#FFD700">Gold</option>
+                    </select>
+
+                    <input id="lookupColorInput" class="lookup-main-color-picker" type="color" value="#0000FF" />
+                </div>
+
+                <div class="lookup-main-preview" aria-live="polite">
+                    <span class="lookup-main-preview-label">Test</span>
+                    <span id="lookupPreviewChip" class="lookup-main-preview-chip">Lookup code</span>
+                    <span id="lookupPreviewMeta" class="lookup-main-preview-meta">No color</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dlg-footer lookup-main-dialog-footer">
+            <button id="lookupSaveBtn" class="primary" type="button">Save</button>
+            <button id="lookupCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../../js/pages/lookup-main-page.js"></script>
+</body>
+</html>
