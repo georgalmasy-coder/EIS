@@ -28,6 +28,17 @@ public final class EhcacheProvider {
         }
     }
 
+    public static <K, V> void clearCacheEntry(String cacheAlias, Class<K> keyType, Class<V> valueType, K key) {
+        if (cacheAlias == null || cacheAlias.isBlank() || key == null) {
+            return;
+        }
+
+        var cache = CACHE_MANAGER.getCache(cacheAlias, keyType, valueType);
+        if (cache != null) {
+            cache.remove(key);
+        }
+    }
+
     private static CacheManager buildAndInit() {
         URL xml = EhcacheProvider.class.getResource("/ehcache.xml");
         if (xml == null) {

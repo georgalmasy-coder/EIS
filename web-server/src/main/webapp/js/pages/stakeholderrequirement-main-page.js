@@ -138,6 +138,10 @@ function initializeEvents() {
             const viewType = button.getAttribute("data-view-type");
             const targetUrl = VIEW_PAGE_URLS[viewType];
 
+            if (Object.values(VIEW_TYPES).includes(viewType)) {
+                localStorage.setItem(STORAGE_KEYS.selectedView, viewType);
+            }
+
             if (targetUrl) {
                 window.location.href = targetUrl;
                 return;
