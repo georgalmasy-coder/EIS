@@ -6,11 +6,13 @@ public class SystemRequirementCode extends AbstractString {
 
     private boolean isNew = false;
 
-
-    public SystemRequirementCode() { }
+    public SystemRequirementCode() {
+        setFieldRequired();
+    }
 
     public SystemRequirementCode(boolean isNew) {
         this.isNew = isNew;
+        setFieldRequired();
     }
 
     @Override

@@ -259,6 +259,7 @@ function applyLayoutState() {
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
                 document.body?.classList.remove("menu-preparing");
+                applyMenuTransitionStyles();
             });
         });
     }
@@ -350,7 +351,6 @@ function initializeHybridMenu() {
     label.textContent = "Menu";
     toggleButton.appendChild(label);
 
-    applyMenuTransitionStyles();
     applyLayoutState();
 
     const hoverMediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");

@@ -4,7 +4,9 @@ public class RequirementName extends AbstractString {
 
     public static String FIELD_NAME = "RequirementName";
 
-    public RequirementName() { }
+    public RequirementName() {
+        setFieldRequired();
+    }
 
     @Override
     public String getFieldName() {

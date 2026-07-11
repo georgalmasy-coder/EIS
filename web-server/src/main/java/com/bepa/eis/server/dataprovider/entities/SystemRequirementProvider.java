@@ -177,7 +177,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementCode = new SystemRequirementCode();
         }
         requirementCode.setFieldNotEditable();
-        requirementCode.setFieldNotRequired();
         entity.addElement(requirementCode);
 
         CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
@@ -192,7 +191,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementName = new RequirementName();
         }
         requirementName.setFieldEditable();
-        requirementName.setFieldRequired();
         entity.addElement(requirementName);
 
         RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(EntityDataElement.REQDESCRIPTION.getId());
@@ -208,7 +206,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementVerificationStatus = new RequirementVerificationStatus(getWebSession());
         }
         requirementVerificationStatus.setFieldEditable();
-        requirementVerificationStatus.setFieldRequired();
         entity.addElement(requirementVerificationStatus);
 
         RequirementRationaleStatement requirementRationaleStatement = (RequirementRationaleStatement) mapOfLoadedFields.get(REQRATIONALESTATEMENT.getId());
@@ -216,7 +213,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementRationaleStatement = new RequirementRationaleStatement();
         }
         requirementRationaleStatement.setFieldEditable();
-        requirementRationaleStatement.setFieldRequired();
         entity.addElement(requirementRationaleStatement);
 
         RequirementCaptureDate requirementCaptureDate = (RequirementCaptureDate) mapOfLoadedFields.get(REQCAPTUREDATE.getId());
@@ -224,7 +220,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementCaptureDate = new RequirementCaptureDate();
         }
         requirementCaptureDate.setFieldEditable();
-        requirementCaptureDate.setFieldRequired();
         entity.addElement(requirementCaptureDate);
 
         RequirementBusinessPriority requirementBusinessPriority = (RequirementBusinessPriority) mapOfLoadedFields.get(REQBUSINESSPRIORITYID.getId());
@@ -232,7 +227,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementBusinessPriority = new RequirementBusinessPriority(getWebSession());
         }
         requirementBusinessPriority.setFieldEditable();
-        requirementBusinessPriority.setFieldRequired();
         entity.addElement(requirementBusinessPriority);
 
         RequirementTechnicalPriority requirementTechnicalPriority = (RequirementTechnicalPriority) mapOfLoadedFields.get(REQTECHNICALPRIORITYID.getId());
@@ -240,16 +234,13 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementTechnicalPriority = new RequirementTechnicalPriority(getWebSession());
         }
         requirementTechnicalPriority.setFieldEditable();
-        requirementTechnicalPriority.setFieldRequired();
         entity.addElement(requirementTechnicalPriority);
-
 
         RequirementVerificationStatement requirementVerificationStatement = (RequirementVerificationStatement) mapOfLoadedFields.get(REQVERIFICATIONSTATEMENTID.getId());
         if (requirementVerificationStatement == null) {
             requirementVerificationStatement = new RequirementVerificationStatement(getWebSession());
         }
         requirementVerificationStatement.setFieldEditable();
-        requirementVerificationStatement.setFieldRequired();
         entity.addElement(requirementVerificationStatement);
 
         RequirementStatus requirementStatus = (RequirementStatus) mapOfLoadedFields.get(REQSTATUSID.getId());
@@ -257,7 +248,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementStatus = new RequirementStatus(getWebSession());
         }
         requirementStatus.setFieldEditable();
-        requirementStatus.setFieldRequired();
         entity.addElement(requirementStatus);
 
         RequirementHighlevelCapability requirementHighlevelCapability = (RequirementHighlevelCapability) mapOfLoadedFields.get(REQHIGHLEVELCAPABILITY.getId());
@@ -265,7 +255,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementHighlevelCapability = new RequirementHighlevelCapability(getWebSession());
         }
         requirementHighlevelCapability.setFieldEditable();
-        requirementHighlevelCapability.setFieldRequired();
         entity.addElement(requirementHighlevelCapability);
 
         RequirementType requirementType = (RequirementType) mapOfLoadedFields.get(REQTYPEID.getId());
@@ -273,7 +262,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementType = new RequirementType(getWebSession());
         }
         requirementType.setFieldEditable();
-        requirementType.setFieldRequired();
         entity.addElement(requirementType);
 
         RequirementFrequency requirementFrequency = (RequirementFrequency) mapOfLoadedFields.get(REQFREQUENCYID.getId());
@@ -281,7 +269,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementFrequency = new RequirementFrequency(getWebSession());
         }
         requirementFrequency.setFieldEditable();
-        requirementFrequency.setFieldRequired();
         entity.addElement(requirementFrequency);
 
         RequirementPerformance requirementPerformance = (RequirementPerformance) mapOfLoadedFields.get(REQPERFORMANCE.getId());
@@ -289,7 +276,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementPerformance = new RequirementPerformance(getWebSession());
         }
         requirementPerformance.setFieldEditable();
-        requirementPerformance.setFieldRequired();
         entity.addElement(requirementPerformance);
 
         RequirementOwner requirementOwner = (RequirementOwner) mapOfLoadedFields.get(REQOWNERID.getId());
@@ -297,7 +283,6 @@ public class SystemRequirementProvider extends EntityProvider {
             requirementOwner = new RequirementOwner(getWebSession());
         }
         requirementOwner.setFieldEditable();
-        requirementOwner.setFieldRequired();
         entity.addElement(requirementOwner);
 
     }
@@ -322,70 +307,55 @@ public class SystemRequirementProvider extends EntityProvider {
 
         RequirementDescription requirementDescription = new RequirementDescription();
         requirementDescription.setFieldEditable();
-        requirementDescription.setFieldRequired();
         entity.addElement(requirementDescription);
 
         RequirementVerificationStatement requirementVerificationStatement = new RequirementVerificationStatement();
         requirementVerificationStatement.setFieldEditable();
-        requirementVerificationStatement.setFieldRequired();
         entity.addElement(requirementVerificationStatement);
 
         RequirementVerificationStatus requirementVerificationStatus = new RequirementVerificationStatus();
         requirementVerificationStatus.setFieldEditable();
-        requirementVerificationStatus.setFieldRequired();
         entity.addElement(requirementVerificationStatus);
 
         RequirementRationaleStatement requirementRationaleStatement = new RequirementRationaleStatement();
         requirementRationaleStatement.setFieldEditable();
-        requirementRationaleStatement.setFieldRequired();
         entity.addElement(requirementRationaleStatement);
 
         RequirementCaptureDate requirementCaptureDate = new RequirementCaptureDate();
         requirementCaptureDate.setFieldEditable();
-        requirementCaptureDate.setFieldRequired();
         entity.addElement(requirementCaptureDate);
 
         RequirementBusinessPriority requirementBusinessPriority = new RequirementBusinessPriority(webSession);
         requirementBusinessPriority.setFieldEditable();
-        requirementBusinessPriority.setFieldRequired();
         entity.addElement(requirementBusinessPriority);
 
         RequirementTechnicalPriority requirementTechnicalPriority = new RequirementTechnicalPriority(webSession);
         requirementTechnicalPriority.setFieldEditable();
-        requirementTechnicalPriority.setFieldRequired();
         entity.addElement(requirementTechnicalPriority);
 
         RequirementStatus requirementStatus = new RequirementStatus(webSession);
         requirementStatus.setFieldEditable();
-        requirementStatus.setFieldRequired();
         entity.addElement(requirementStatus);
 
         RequirementHighlevelCapability requirementHighlevelCapability = new RequirementHighlevelCapability(webSession);
         requirementHighlevelCapability.setFieldEditable();
-        requirementHighlevelCapability.setFieldRequired();
         entity.addElement(requirementHighlevelCapability);
 
         RequirementType requirementType = new RequirementType(webSession);
         requirementType.setFieldEditable();
-        requirementType.setFieldRequired();
         entity.addElement(requirementType);
 
         RequirementFrequency requirementFrequency = new RequirementFrequency(webSession);
         requirementFrequency.setFieldEditable();
-        requirementFrequency.setFieldRequired();
         entity.addElement(requirementFrequency);
-
 
         RequirementPerformance requirementPerformance = new RequirementPerformance(webSession);
         requirementPerformance.setFieldEditable();
-        requirementPerformance.setFieldRequired();
         entity.addElement(requirementPerformance);
 
         RequirementOwner requirementOwner = new RequirementOwner(webSession);
         requirementOwner.setFieldEditable();
-        requirementOwner.setFieldRequired();
         entity.addElement(requirementOwner);
-
     }
 
     public List<SystemRequirementEntity> getAllSystemRequirement(boolean includeInactive)  {

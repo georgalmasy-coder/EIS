@@ -4,10 +4,13 @@ public class CodeLevel extends AbstractInteger {
 
     public static String FIELD_NAME = "CodeLevel";
 
-    public CodeLevel() { }
+    public CodeLevel() {
+        setFieldRequired();
+    }
 
     public CodeLevel(Integer value) {
         setValue(value);
+        setFieldRequired();
     }
 
     @Override

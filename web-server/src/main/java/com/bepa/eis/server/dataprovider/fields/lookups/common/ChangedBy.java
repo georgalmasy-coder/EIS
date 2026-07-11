@@ -16,14 +16,17 @@ public class ChangedBy extends AbstractUserLookup {
 
     public ChangedBy(Integer userId) {
         super(userId);
+        setFieldRequired();
     }
 
     public ChangedBy() {
         super();
+        setFieldRequired();
     }
 
     public ChangedBy(WebSession webSession) {
         super(webSession);
+        setFieldRequired();
     }
 
     @Override

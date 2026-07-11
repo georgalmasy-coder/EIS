@@ -189,7 +189,7 @@ public class SystemBreakdownProvider extends EntityProvider {
             sbsCode = new SBSCode();
         }
         sbsCode.setFieldNotEditable();
-        sbsCode.setFieldNotRequired();
+        sbsCode.setFieldRequired();
         entity.addElement(sbsCode);
 
         CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(CODELEVEL.getId());
@@ -204,7 +204,6 @@ public class SystemBreakdownProvider extends EntityProvider {
             systemName = new SystemName();
         }
         systemName.setFieldEditable();
-        systemName.setFieldRequired();
         entity.addElement(systemName);
 
         SystemOwner systemOwner = (SystemOwner) mapOfLoadedFields.get(EntityDataElement.SYSTEMOWNERID.getId());
@@ -212,7 +211,6 @@ public class SystemBreakdownProvider extends EntityProvider {
             systemOwner = new SystemOwner(getWebSession());
         }
         systemOwner.setFieldEditable();
-        systemOwner.setFieldRequired();
         entity.addElement(systemOwner);
 
         SystemDepartment systemDepartment = (SystemDepartment) mapOfLoadedFields.get(DEPARTMENTID.getId());
@@ -220,7 +218,6 @@ public class SystemBreakdownProvider extends EntityProvider {
             systemDepartment = new SystemDepartment(getWebSession());
         }
         systemDepartment.setFieldEditable();
-        systemDepartment.setFieldRequired();
         entity.addElement(systemDepartment);
 
         TRL trl = (TRL) mapOfLoadedFields.get(EntityDataElement.TRLID.getId());
@@ -266,17 +263,14 @@ public class SystemBreakdownProvider extends EntityProvider {
 
         SystemName systemName = new SystemName();
         systemName.setFieldEditable();
-        systemName.setFieldRequired();
         entity.addElement(systemName);
 
         SystemOwner systemOwner = new SystemOwner(webSession);
         systemOwner.setFieldEditable();
-        systemOwner.setFieldRequired();
         entity.addElement(systemOwner);
 
         SystemDepartment systemDepartment = new SystemDepartment(webSession);
         systemDepartment.setFieldEditable();
-        systemDepartment.setFieldRequired();
         entity.addElement(systemDepartment);
 
         TRL trl =  new TRL (webSession);

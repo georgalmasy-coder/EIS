@@ -6,10 +6,13 @@ public class SBSCode extends AbstractString {
 
     private boolean isNew = false;
 
-    public SBSCode() { }
+    public SBSCode() {
+        setFieldRequired();
+    }
 
     public SBSCode(boolean isNew) {
         this.isNew = isNew;
+        setFieldRequired();
     }
 
     @Override

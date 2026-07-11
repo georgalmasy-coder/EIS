@@ -4,7 +4,9 @@ public class SystemName extends AbstractString {
 
     public static String FIELD_NAME = "SystemName";
 
-    public SystemName() { }
+    public SystemName() {
+        setFieldRequired();
+    }
 
     @Override
     public String getFieldName() {

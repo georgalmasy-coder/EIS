@@ -18,7 +18,7 @@ abstract public class AbstractField implements Cloneable {
     private final List<Attribute> attributes = new ArrayList<>();
 
     private FieldEditable fieldEditable = FieldEditable.FIELD_NOT_EDITABLE;
-    private FieldRequired fieldRequired = FieldRequired.FIELD_REQUIRED;
+    private FieldRequired fieldRequired = FieldRequired.FIELD_NOT_REQUIRED;
     private FieldVisible fieldVisible = FIELD_VISIBLE;
     private String tableWidth = null;
 
@@ -50,10 +50,6 @@ abstract public class AbstractField implements Cloneable {
     }
     public boolean isFieldVisible() {
         return Boolean.parseBoolean(fieldVisible.getDescription());
-    }
-
-    public boolean isFieldHidden() {
-        return getFieldControl() == HIDDEN || getFieldControl() == NONE;
     }
 
     public void setFieldRequired() {

@@ -45,6 +45,17 @@ button {
 .admin-dashboard-shell {
     min-height: 100vh;
     padding: 18px;
+    padding-left: calc(18px + var(--menu-content-offset));
+    transition: padding-left 1200ms cubic-bezier(.22,.61,.36,1);
+}
+
+body.menu-is-open .admin-dashboard-shell,
+body.menu-is-pinned .admin-dashboard-shell {
+    --menu-content-offset: var(--menu-open-offset);
+}
+
+body.menu-preparing .admin-dashboard-shell {
+    transition: none !important;
 }
 
 .admin-dashboard-header {
@@ -773,6 +784,7 @@ button {
 @media (max-width: 720px) {
     .admin-dashboard-shell {
         padding: 12px;
+        padding-left: calc(12px + var(--menu-content-offset));
     }
 
     .admin-dashboard-header {

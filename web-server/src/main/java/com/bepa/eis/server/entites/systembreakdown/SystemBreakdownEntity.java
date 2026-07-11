@@ -82,16 +82,6 @@ public class SystemBreakdownEntity extends AbstractEntity {
         this.sbsCodeLevel = sbsCodeLevel;
     }
 
-    public void setSbsCodeLevel(String sbsCodeLevel) {
-        if (sbsCodeLevel != null) {
-            try {
-                this.sbsCodeLevel = Integer.parseInt(sbsCodeLevel);
-            } catch (NumberFormatException e) {
-                log.error("Invalid SBSCodeLevel value : {}", sbsCodeLevel);
-            }
-        }
-    }
-
     public Integer getSbsCodeLevel() {
         return sbsCodeLevel;
     }

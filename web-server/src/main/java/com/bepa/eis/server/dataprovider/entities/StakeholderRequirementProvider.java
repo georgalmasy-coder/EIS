@@ -112,7 +112,6 @@ public class StakeholderRequirementProvider extends EntityProvider {
             requirementCode = new StakeholderRequirementCode();
         }
         requirementCode.setFieldNotEditable();
-        requirementCode.setFieldNotRequired();
         entity.addElement(requirementCode);
 
         CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
@@ -127,7 +126,6 @@ public class StakeholderRequirementProvider extends EntityProvider {
             requirementName = new RequirementName();
         }
         requirementName.setFieldEditable();
-        requirementName.setFieldRequired();
         entity.addElement(requirementName);
 
         RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(EntityDataElement.REQDESCRIPTION.getId());
@@ -155,7 +153,6 @@ public class StakeholderRequirementProvider extends EntityProvider {
 
         RequirementName requirementName = new RequirementName();
         requirementName.setFieldEditable();
-        requirementName.setFieldRequired();
         entity.addElement(requirementName);
 
         RequirementDescription requirementDescription = new RequirementDescription();

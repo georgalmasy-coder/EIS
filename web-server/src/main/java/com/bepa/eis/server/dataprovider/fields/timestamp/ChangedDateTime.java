@@ -9,6 +9,7 @@ public class ChangedDateTime extends AbstractDateTime {
     public ChangedDateTime(Timestamp timestamp) {
         super (timestamp);
         setFieldEditable();
+        setFieldRequired();
     }
 
     @Override
