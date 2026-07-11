@@ -33,6 +33,7 @@ public enum PageType {
     STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement"),
     STAKEHOLDER_REQUIREMENT_MAIN_VERTICAL_PAGE("stakeholderrequirement-main-vertical","html-pages/stakeholderrequirement-main-vertical.html", "Stakeholder Requirement"),
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration"),
+    INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents"),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration"),
 
 

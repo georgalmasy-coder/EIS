@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/generel.css" />
+    <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/admin-incidents.css" />
+</head>
+
+<body class="incident-main-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app incident-main-app">
+    <div class="content incident-main-content">
+        <header class="topbar incident-main-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout incident-main-layout" aria-label="Incidents">
+            <div class="section-header incident-main-section-header">
+                <h2>Incidents</h2>
+            </div>
+
+            <div class="incident-main-toolbar" aria-label="Incident toolbar">
+                <label class="incident-main-count-field page-field" for="incidentCountInput">
+                    <span class="incident-main-field-label">Count</span>
+                    <input
+                            id="incidentCountInput"
+                            class="incident-main-count-input"
+                            type="number"
+                            min="1"
+                            max="1000"
+                            step="1"
+                            value="100"
+                            inputmode="numeric"
+                            autocomplete="off"
+                            aria-label="Number of incidents to load"
+                    />
+                </label>
+
+                <div class="incident-main-row-count" aria-live="polite">
+                    Rows: <strong id="incidentRowCount">0</strong>
+                </div>
+
+                <div class="incident-main-toolbar-spacer"></div>
+
+                <button
+                        id="btnRefreshIncidents"
+                        class="incident-main-icon-button"
+                        type="button"
+                        aria-label="Refresh incidents"
+                        title="Refresh incidents"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 6H18a6 6 0 1 1-1.76-4.24L14 11h7V4l-3.35 2.35z"></path>
+                    </svg>
+                </button>
+            </div>
+
+                <div class="page-body incident-main-body">
+                    <div class="table-frame page-frame incident-main-list-frame" aria-label="Incident list frame">
+                        <div class="table-scroll incident-main-list-scroll" id="tableScroll">
+                        <table id="incidentTable" class="data-table page-table incident-main-table" aria-label="Incident list">
+                            <colgroup id="incidentColGroup"></colgroup>
+                            <thead>
+                            <tr id="incidentHeaderRow">
+                                <th>Incident Created</th>
+                                <th>Customer</th>
+                                <th>Project</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Severity</th>
+                                <th>Module</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+
+                            <div class="empty page-empty incident-main-empty" id="listEmptyState">
+                                Loading incidents...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+</main>
+
+<div id="incidentTraceTooltip" class="incident-main-trace-tooltip" role="tooltip" aria-hidden="true" hidden>
+    <div class="incident-main-trace-tooltip-head">
+        <div id="incidentTraceTooltipTitle" class="incident-main-trace-tooltip-title">Trace</div>
+        <div id="incidentTraceTooltipMeta" class="incident-main-trace-tooltip-meta"></div>
+    </div>
+    <pre id="incidentTraceTooltipBody" class="incident-main-trace-tooltip-body"></pre>
+</div>
+
+<dialog id="incidentTraceDialog" class="incident-main-trace-dialog" aria-labelledby="incidentTraceDialogTitle">
+    <form method="dialog" class="incident-main-trace-dialog-form">
+        <div class="incident-main-trace-dialog-head">
+            <h3 id="incidentTraceDialogTitle">Incident Trace</h3>
+            <button id="incidentTraceDialogClose" class="incident-main-trace-dialog-close" type="button" aria-label="Close trace dialog">
+                &times;
+            </button>
+        </div>
+
+        <div id="incidentTraceDialogMeta" class="incident-main-trace-dialog-meta"></div>
+
+        <pre id="incidentTraceDialogBody" class="incident-main-trace-dialog-body"></pre>
+
+        <div class="incident-main-trace-dialog-footer">
+            <button id="incidentTraceDialogOk" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../../js/pages/admin-incidents-page.js"></script>
+</body>
+</html>

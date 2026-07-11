@@ -38,12 +38,39 @@ public class IncidentProvider extends GenericProvider {
             FROM INCIDENTS I
             LEFT JOIN CUSTOMER C
                 ON I.CustomerId = C.CustomerId
+               AND C.Latest = 1
             LEFT JOIN PROJECT P
                 ON I.ProjectId = P.ProjectId
                AND I.CustomerId = P.CustomerId
+               AND P.Latest = 1
             LEFT JOIN USERS U
                 ON I.UserId = U.UserId
-            ORDER BY I.IncidentId DESC
+            ORDER BY I.LogCreated DESC, I.IncidentId DESC
+            """;
+
+    private static final String GET_RECENT_INCIDENTS_WITH_TRACE_SQL = """
+            SELECT TOP (?)
+                I.IncidentId,
+                I.LogCreated,
+                ISNULL(C.CustomerName, '') AS CustomerName,
+                ISNULL(P.ProjectName, '') AS ProjectName,
+                ISNULL(U.Name, '') AS UserName,
+                I.ServiceId,
+                I.SeverityId,
+                I.Module,
+                I.Message,
+                I.Trace
+            FROM INCIDENTS I
+            LEFT JOIN CUSTOMER C
+                ON I.CustomerId = C.CustomerId
+               AND C.Latest = 1
+            LEFT JOIN PROJECT P
+                ON I.ProjectId = P.ProjectId
+               AND I.CustomerId = P.CustomerId
+               AND P.Latest = 1
+            LEFT JOIN USERS U
+                ON I.UserId = U.UserId
+            ORDER BY I.LogCreated DESC, I.IncidentId DESC
             """;
 
     private static final String GET_RECENT_INCIDENTS_TODAY_SQL = """
@@ -59,14 +86,16 @@ public class IncidentProvider extends GenericProvider {
             FROM INCIDENTS I
             LEFT JOIN CUSTOMER C
                 ON I.CustomerId = C.CustomerId
+               AND C.Latest = 1
             LEFT JOIN PROJECT P
                 ON I.ProjectId = P.ProjectId
                AND I.CustomerId = P.CustomerId
+               AND P.Latest = 1
             LEFT JOIN USERS U
                 ON I.UserId = U.UserId
             WHERE I.LogCreated >= CAST(GETDATE() AS date)
               AND I.LogCreated < DATEADD(DAY, 1, CAST(GETDATE() AS date))
-            ORDER BY I.IncidentId DESC
+            ORDER BY I.LogCreated DESC, I.IncidentId DESC
             """;
 
     private static final String GET_RECENT_INCIDENTS_LAST_DAYS_SQL = """
@@ -82,14 +111,16 @@ public class IncidentProvider extends GenericProvider {
             FROM INCIDENTS I
             LEFT JOIN CUSTOMER C
                 ON I.CustomerId = C.CustomerId
+               AND C.Latest = 1
             LEFT JOIN PROJECT P
                 ON I.ProjectId = P.ProjectId
                AND I.CustomerId = P.CustomerId
+               AND P.Latest = 1
             LEFT JOIN USERS U
                 ON I.UserId = U.UserId
             WHERE I.LogCreated >= DATEADD(DAY, ?, CAST(GETDATE() AS date))
               AND I.LogCreated < DATEADD(DAY, 1, CAST(GETDATE() AS date))
-            ORDER BY I.IncidentId DESC
+            ORDER BY I.LogCreated DESC, I.IncidentId DESC
             """;
 
     private static final String GET_INCIDENT_COUNTS_BY_SERVICE_LAST_MONTH_SQL = """
@@ -138,6 +169,18 @@ public class IncidentProvider extends GenericProvider {
 
     public List<RecentIncident> getRecentIncidents() throws SQLException {
         return getRecentIncidents(GET_RECENT_INCIDENTS_SQL);
+    }
+
+    public List<RecentIncidentDetail> getRecentIncidentsWithTrace(int limit) throws SQLException {
+        int safeLimit = sanitizeRecentIncidentLimit(limit);
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(GET_RECENT_INCIDENTS_WITH_TRACE_SQL)) {
+
+            ps.setInt(1, safeLimit);
+
+            return getRecentIncidentDetails(ps);
+        }
     }
 
     public List<RecentIncident> getRecentIncidentsToday() throws SQLException {
@@ -253,6 +296,41 @@ public class IncidentProvider extends GenericProvider {
                         severityType.getDescription(),
                         rs.getString("Module"),
                         rs.getString("Message")
+                ));
+            }
+        }
+
+        return recentIncidents;
+    }
+
+    private List<RecentIncidentDetail> getRecentIncidentDetails(PreparedStatement ps) throws SQLException {
+        List<RecentIncidentDetail> recentIncidents = new ArrayList<>();
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Timestamp logCreated = rs.getTimestamp("LogCreated");
+
+                int serviceId = rs.getInt("ServiceId");
+                ServiceType serviceType = rs.wasNull()
+                        ? ServiceType.INVALID_SERVICE_TYPE
+                        : ServiceType.valueOf(serviceId);
+
+                int severityId = rs.getInt("SeverityId");
+                SeverityType severityType = rs.wasNull()
+                        ? SeverityType.INVALID_SEVERITY_TYPE
+                        : SeverityType.valueOf(severityId);
+
+                recentIncidents.add(new RecentIncidentDetail(
+                        rs.getInt("IncidentId"),
+                        toIsoString(logCreated),
+                        rs.getString("CustomerName"),
+                        rs.getString("ProjectName"),
+                        rs.getString("UserName"),
+                        serviceType.getDescription(),
+                        severityType.getDescription(),
+                        rs.getString("Module"),
+                        rs.getString("Message"),
+                        rs.getString("Trace")
                 ));
             }
         }
@@ -391,5 +469,27 @@ public class IncidentProvider extends GenericProvider {
             return;
         }
         statement.setInt(parameterIndex, value);
+    }
+
+    private int sanitizeRecentIncidentLimit(int limit) {
+        if (limit <= 0) {
+            return 100;
+        }
+
+        return Math.min(limit, 1000);
+    }
+
+    public record RecentIncidentDetail(
+            int incidentId,
+            String logCreated,
+            String customer,
+            String project,
+            String user,
+            String serviceType,
+            String severityType,
+            String module,
+            String message,
+            String trace
+    ) {
     }
 }
