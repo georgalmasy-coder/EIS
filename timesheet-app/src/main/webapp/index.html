@@ -49,9 +49,15 @@
                 <div class="dialog-title" id="dialogDateTitle">Entries</div>
                 <div class="dialog-subtitle" id="dialogDateMeta"></div>
             </div>
-            <button class="icon-button" value="cancel" title="Close">
-                <span class="icon" data-icon="close"></span>
-            </button>
+            <div class="toolbar toolbar-nowrap dialog-head-actions">
+                <button type="button" class="btn" data-dialog-action="new-time-entry">
+                    <span class="icon" data-icon="plus"></span>
+                    <span>Add new line</span>
+                </button>
+                <button class="icon-button" value="cancel" title="Close">
+                    <span class="icon" data-icon="close"></span>
+                </button>
+            </div>
         </header>
 
         <div id="dialogEntries"></div>
@@ -71,6 +77,21 @@
             </button>
         </header>
         <div id="promptBody"></div>
+    </div>
+</dialog>
+
+<dialog id="timeDialog" class="dialog">
+    <div class="dialog-frame">
+        <header class="dialog-head">
+            <div>
+                <div class="dialog-title">Add time today</div>
+                <div class="dialog-subtitle">Create a time entry for the current day</div>
+            </div>
+            <button class="icon-button" type="button" id="timeDialogClose" title="Close">
+                <span class="icon" data-icon="close"></span>
+            </button>
+        </header>
+        <div id="timeDialogBody"></div>
     </div>
 </dialog>
 

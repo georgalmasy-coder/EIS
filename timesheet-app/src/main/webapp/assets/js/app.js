@@ -8,6 +8,7 @@ const state = {
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
     calendar: null,
+    openDayDialogDate: null,
     invoice: null,
     companyFooter: null
 };
@@ -28,6 +29,36 @@ document.addEventListener('DOMContentLoaded', init);
 async function init() {
     bindIcons();
     bindChrome();
+    const entryDialog = document.getElementById('entryDialog');
+    const timeDialog = document.getElementById('timeDialog');
+    entryDialog.addEventListener('close', () => {
+        state.openDayDialogDate = null;
+    });
+    entryDialog.addEventListener('click', safeAsync(async (event) => {
+        if (!(event.target instanceof Element)) return;
+        const button = event.target.closest('[data-dialog-action]');
+        if (!button || !entryDialog.contains(button)) return;
+
+        const action = button.dataset.dialogAction;
+        const entryId = Number(button.dataset.id || '0');
+        const date = state.openDayDialogDate;
+        if (!date) return;
+
+        if (action === 'new-time-entry') {
+            await timeEntryDialog(date);
+        } else if (action === 'edit-time') {
+            const entry = (state.calendar?.days ?? []).flatMap((item) => item.entries ?? []).find((item) => item.id === entryId);
+            await timeEntryDialog(date, entry);
+        } else if (action === 'delete-time') {
+            await deleteEntity(`api/time-entries/${entryId}`, 'Delete time entry?');
+            entryDialog.close();
+            state.openDayDialogDate = null;
+            await reloadCurrentView();
+        }
+    }));
+    document.getElementById('timeDialogClose').addEventListener('click', () => {
+        timeDialog.close();
+    });
     await reloadBootstrap();
 }
 
@@ -418,6 +449,7 @@ async function renderCalendarSection(root, kind) {
                 <div class="page-meta">${state.selectedCustomer.companyName} - ${monthName(state.year, state.month)}</div>
             </div>
             <div class="toolbar">
+                ${kind === 'time' ? '<button class="btn" data-action="add-time-today"><span class="icon" data-icon="plus"></span><span>Add time today</span></button>' : ''}
                 <button class="btn-secondary" data-action="prev-month">Previous month</button>
                 <button class="btn-secondary" data-action="next-month">Next month</button>
             </div>
@@ -432,19 +464,20 @@ async function renderCalendarSection(root, kind) {
                 ${kind === 'time' ? renderCalendarTable() : renderMaterialMonthTable()}
             </div>
         </div>
+        ${kind === 'material' ? `
         <div class="section">
-            <div class="section-head"><h2 class="section-title">${kind === 'time' ? 'Register time' : 'Register materials'}</h2></div>
+            <div class="section-head"><h2 class="section-title">Register materials</h2></div>
             <div class="section-body">
-                ${kind === 'time' ? renderTimeForm() : renderMaterialForm()}
+                ${renderMaterialForm()}
             </div>
         </div>
+        ` : ''}
     `;
 
     bindActions(root);
+    bindIcons();
 
-    if (kind === 'time') {
-        bindTimeForm();
-    } else {
+    if (kind === 'material') {
         bindMaterialForm();
     }
 }
@@ -515,11 +548,11 @@ function renderMaterialMonthTable() {
     `;
 }
 
-function renderTimeForm() {
+function renderTimeForm(date = todayIso(), formId = 'timeForm') {
     const activeActivities = state.activities.filter((activity) => !activity.inactive);
     return `
-        <form id="timeForm" class="grid-4">
-            <div class="field"><label>Date</label><input name="entryDate" type="date" value="${todayIso()}"></div>
+        <form id="${formId}" class="grid-4">
+            <div class="field"><label>Date</label><input name="entryDate" type="date" value="${date}"></div>
             <div class="field">
                 <label>Activity</label>
                 <select name="activityId" required>
@@ -605,6 +638,9 @@ async function handleAction(event) {
             shiftMonth(1);
             await reloadCurrentView();
             break;
+        case 'add-time-today':
+            await openTimeTodayDialog();
+            break;
         case 'invoice-pdf':
             await createInvoicePdf();
             break;
@@ -677,10 +713,29 @@ async function activityDialog(activity = null) {
 }
 
 async function openDayDialog(date) {
-    const day = (state.calendar?.days ?? []).find((item) => item.date === date);
-    if (!day) return;
-
     const dialog = document.getElementById('entryDialog');
+    state.openDayDialogDate = date;
+
+    const hasDay = await refreshDayDialog(date);
+    if (!hasDay) {
+        state.openDayDialogDate = null;
+        return;
+    }
+    dialog.showModal();
+}
+
+async function openTimeTodayDialog() {
+    const dialog = document.getElementById('timeDialog');
+    document.getElementById('timeDialogBody').innerHTML = `
+        <div class="dialog-section">
+            ${renderTimeForm(todayIso(), 'timeQuickForm')}
+        </div>
+    `;
+    bindTimeForm('timeQuickForm', 'timeDialog');
+    dialog.showModal();
+}
+
+function renderDayDialog(day, date) {
     document.getElementById('dialogDateTitle').textContent = `Entries for ${date}`;
     document.getElementById('dialogDateMeta').textContent = `${formatHours(day.hours)} hour(s) registered`;
     document.getElementById('dialogEntries').innerHTML = `
@@ -697,7 +752,7 @@ async function openDayDialog(date) {
                     </thead>
                     <tbody>
                         ${(day.entries ?? []).map((entry) => `
-                            <tr>
+                            <tr data-entry-id="${entry.id}">
                                 <td>${escapeHtml(entry.activityShortDescription)}</td>
                                 <td>${formatHours(entry.hours)}</td>
                                 <td>${escapeHtml(entry.note ?? '')}</td>
@@ -716,30 +771,63 @@ async function openDayDialog(date) {
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn" data-dialog-action="new-time-entry">Add new line</button>
         </div>
     `;
     bindIcons();
     document.getElementById('dialogFormSlot').innerHTML = '';
-    dialog.showModal();
+}
 
-    dialog.querySelectorAll('[data-dialog-action]').forEach((button) => {
-        button.addEventListener('click', safeAsync(async (event) => {
-            const action = event.currentTarget.dataset.dialogAction;
-            const entryId = Number(event.currentTarget.dataset.id || '0');
+async function refreshDayDialog(date) {
+    state.calendar = await fetchJson(`${api.calendar}?customerId=${state.selectedCustomerId}&year=${state.year}&month=${state.month}`);
+    const day = (state.calendar?.days ?? []).find((item) => item.date === date);
+    if (!day) return false;
+    renderDayDialog(day, date);
+    return true;
+}
 
-            if (action === 'new-time-entry') {
-                await timeEntryDialog(date);
-            } else if (action === 'edit-time') {
-                const entry = (day.entries ?? []).find((item) => item.id === entryId);
-                await timeEntryDialog(date, entry);
-            } else if (action === 'delete-time') {
-                await deleteEntity(`api/time-entries/${entryId}`, 'Delete time entry?');
-                dialog.close();
-                await reloadCurrentView();
-            }
-        }));
-    });
+function refreshOpenDayDialogFromState(date) {
+    const day = (state.calendar?.days ?? []).find((item) => item.date === date);
+    if (!day) return false;
+    renderDayDialog(day, date);
+    return true;
+}
+
+function activityShortDescription(activityId, fallback = 'Activity') {
+    const activity = state.activities.find((item) => Number(item.id) === Number(activityId));
+    return activity?.shortDescription ?? fallback;
+}
+
+function updateDayDialogState(savedEntry, previousEntry = null) {
+    const days = state.calendar?.days ?? [];
+    if (!days.length || !savedEntry) return;
+
+    const previousDate = previousEntry?.entryDate ?? null;
+    const previousHours = previousEntry ? Number(previousEntry.hours ?? 0) : 0;
+    const savedDate = savedEntry.entryDate ?? null;
+    const savedHours = Number(savedEntry.hours ?? 0);
+
+    if (previousDate) {
+        const previousDay = days.find((item) => item.date === previousDate);
+        if (previousDay) {
+            previousDay.entries = (previousDay.entries ?? []).filter((item) => item.id !== previousEntry.id);
+            previousDay.hours = Number(previousDay.hours ?? 0) - previousHours;
+        }
+    }
+
+    if (savedDate) {
+        const savedDay = days.find((item) => item.date === savedDate);
+        if (savedDay) {
+            const nextEntry = {
+                ...savedEntry,
+                activityShortDescription: activityShortDescription(savedEntry.activityId, savedEntry.activityShortDescription)
+            };
+            const entries = (savedDay.entries ?? []).filter((item) => item.id !== nextEntry.id);
+            entries.push(nextEntry);
+            entries.sort((left, right) => String(left.activityShortDescription ?? '').localeCompare(String(right.activityShortDescription ?? '')));
+            savedDay.entries = entries;
+            savedDay.hours = Number(savedDay.hours ?? 0) + savedHours;
+        }
+    }
 }
 
 async function timeEntryDialog(date, entry = null) {
@@ -767,16 +855,31 @@ async function timeEntryDialog(date, entry = null) {
         customerId: state.selectedCustomerId
     };
 
+    const previousEntry = entry ? { ...entry } : null;
     if (entry) {
         await fetchJson(`api/time-entries/${entry.id}`, { method: 'PUT', body });
     } else {
-        await fetchJson(`${api.customers}/${state.selectedCustomerId}/time-entries`, { method: 'POST', body });
+        const created = await fetchJson(`${api.customers}/${state.selectedCustomerId}/time-entries`, { method: 'POST', body });
+        entry = { id: created.id };
+    }
+    const savedEntry = {
+        ...body,
+        id: entry.id,
+        activityShortDescription: activityShortDescription(body.activityId, previousEntry?.activityShortDescription ?? 'Activity')
+    };
+    updateDayDialogState(savedEntry, previousEntry);
+
+    if (state.openDayDialogDate) {
+        refreshOpenDayDialogFromState(state.openDayDialogDate);
     }
     await reloadCurrentView();
+    if (state.openDayDialogDate) {
+        refreshOpenDayDialogFromState(state.openDayDialogDate);
+    }
 }
 
-async function bindTimeForm() {
-    const form = document.getElementById('timeForm');
+async function bindTimeForm(formId = 'timeForm', dialogId = null) {
+    const form = document.getElementById(formId);
     if (!form) return;
     const activeActivityIds = new Set(state.activities.filter((activity) => !activity.inactive).map((activity) => String(activity.id)));
     form.addEventListener('submit', safeAsync(async (event) => {
@@ -791,6 +894,9 @@ async function bindTimeForm() {
         await fetchJson(`${api.customers}/${state.selectedCustomerId}/time-entries`, { method: 'POST', body });
         form.reset();
         form.querySelector('[name="entryDate"]').value = todayIso();
+        if (dialogId) {
+            document.getElementById(dialogId).close();
+        }
         await reloadCurrentView();
     }));
 }
@@ -983,6 +1089,7 @@ function shiftMonth(delta) {
 async function fetchJson(url, options = {}) {
     const response = await fetch(url, {
         credentials: 'same-origin',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         ...options,
         body: options.body ? JSON.stringify(options.body) : undefined
@@ -1089,7 +1196,8 @@ function iconSvg(name) {
         close: '<svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
         edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
         trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
-        pdf: '<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v5h3"/><text x="12" y="16" text-anchor="middle" font-size="6" font-family="Arial, sans-serif" font-weight="700" fill="currentColor">PDF</text></svg>'
+        pdf: '<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v5h3"/><text x="12" y="16" text-anchor="middle" font-size="6" font-family="Arial, sans-serif" font-weight="700" fill="currentColor">PDF</text></svg>',
+        plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>'
     };
     return icons[name] || '';
 }
@@ -1176,6 +1284,7 @@ async function buildInvoicePdfBlob({ customer, invoice, invoiceNumber, invoiceDa
         dueDate
     });
     const hourlyRate = Number(customer?.hourlyRate ?? 0);
+    const materialRows = invoice.materialRows ?? [];
     writer.startPage();
     drawTimeSection(writer, (invoice.timeRows ?? []).map((row) => ({
         activity: row.activityShortDescription,
@@ -1186,25 +1295,29 @@ async function buildInvoicePdfBlob({ customer, invoice, invoiceNumber, invoiceDa
         totalAmount: money(summary.timeAmount)
     });
 
-    writer.cursorY += 14;
-    drawInvoiceSection(writer, 'Materials', [
-        { label: 'Product description', width: 276, align: 'left' },
-        { label: 'Price', width: 78, align: 'right' },
-        { label: 'Qty', width: 55, align: 'right' },
-        { label: 'Total price', width: 114, align: 'right' }
-    ], (invoice.materialRows ?? []).map((row) => ([
-        { text: row.shortDescription, align: 'left' },
-        { text: money(row.unitPrice), align: 'right' },
-        { text: formatQuantity(row.quantity), align: 'right' },
-        { text: money(Number(row.quantity ?? 0) * Number(row.unitPrice ?? 0)), align: 'right' }
-    ])), [
-        { text: 'Total', align: 'left' },
-        { text: '', align: 'right' },
-        { text: '', align: 'right' },
-        { text: money(summary.materialAmount), align: 'right' }
-    ]);
+    if (materialRows.length > 0) {
+        writer.cursorY += 14;
+        drawInvoiceSection(writer, 'Materials', [
+            { label: 'Product description', width: 276, align: 'left' },
+            { label: 'Price', width: 78, align: 'right' },
+            { label: 'Qty', width: 55, align: 'right' },
+            { label: 'Total price', width: 114, align: 'right' }
+        ], materialRows.map((row) => ([
+            { text: row.shortDescription, align: 'left' },
+            { text: money(row.unitPrice), align: 'right' },
+            { text: formatQuantity(row.quantity), align: 'right' },
+            { text: money(Number(row.quantity ?? 0) * Number(row.unitPrice ?? 0)), align: 'right' }
+        ])), [
+            { text: 'Total', align: 'left' },
+            { text: '', align: 'right' },
+            { text: '', align: 'right' },
+            { text: money(summary.materialAmount), align: 'right' }
+        ]);
 
-    writer.cursorY += 16;
+        writer.cursorY += 16;
+    } else {
+        writer.cursorY += 8;
+    }
     drawSummaryBox(writer, [
         { label: 'Subtotal excl. VAT', value: money(summary.subtotal) },
         { label: 'VAT', value: money(summary.vatAmount) },
@@ -1292,10 +1405,10 @@ function drawTimeSection(writer, rows, total) {
         writer.line(rateX, writer.cursorY, rateX, writer.cursorY + headerHeight, { color: '#d7e0e7' });
         writer.line(totalX, writer.cursorY, totalX, writer.cursorY + headerHeight, { color: '#d7e0e7' });
         writer.line(tableX + tableWidth, writer.cursorY, tableX + tableWidth, writer.cursorY + headerHeight, { color: '#d7e0e7' });
-        writer.text('Activity', tableX + 5, writer.cursorY + 12, { size: 9, bold: true, align: 'left' });
-        writer.text('Hours', hoursX + hoursWidth - 5, writer.cursorY + 12, { size: 9, bold: true, align: 'right' });
-        writer.text('Rate', rateX + rateWidth - 5, writer.cursorY + 12, { size: 9, bold: true, align: 'right' });
-        writer.text('Total', totalX + totalWidth - 5, writer.cursorY + 12, { size: 9, bold: true, align: 'right' });
+        writer.text('Activity', tableX + 5, writer.cursorY + 6, { size: 9, bold: true, align: 'left' });
+        writer.text('Hours', hoursX + hoursWidth - 5, writer.cursorY + 6, { size: 9, bold: true, align: 'right' });
+        writer.text('Rate', rateX + rateWidth - 5, writer.cursorY + 6, { size: 9, bold: true, align: 'right' });
+        writer.text('Total', totalX + totalWidth - 5, writer.cursorY + 6, { size: 9, bold: true, align: 'right' });
         writer.line(tableX, writer.cursorY + headerHeight, tableX + tableWidth, writer.cursorY + headerHeight, { color: '#d7e0e7' });
         writer.cursorY += headerHeight;
     };
@@ -1412,7 +1525,7 @@ function drawTableHeader(writer, columns) {
         writer.line(x, startY, x, startY + height, { color: '#d7e0e7' });
         const padding = 5;
         const textX = column.align === 'right' ? x + column.width - padding : x + padding;
-        writer.text(column.label, textX, startY + 12, { size: 9, bold: true, align: column.align });
+        writer.text(column.label, textX, startY + 6, { size: 9, bold: true, align: column.align });
         x += column.width;
     });
     writer.line(559, startY, 559, startY + height, { color: '#d7e0e7' });
