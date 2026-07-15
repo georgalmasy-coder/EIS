@@ -19,7 +19,7 @@ public class CustomerLookupCache {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerLookupCache.class);
 
-    private static final String CACHE_ALIAS = "LookupCache";
+    private static final String CACHE_ALIAS = EhcacheProvider.LOOKUP_CACHE_ALIAS;
     private static final ReentrantLock BULK_LOAD_LOCK = new ReentrantLock();
     private static final List<PhoneCountryRule> PHONE_COUNTRY_RULES = buildPhoneCountryRules();
 
@@ -40,15 +40,27 @@ public class CustomerLookupCache {
     }
 
     public static LookupValue getTrlLookupValue(WebSession webSession, Integer lookupId) {
-        return getLookupCache(webSession).getTrlLookupValue(lookupId);
+        return getTrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
     }
 
     public static LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
-        return getLookupCache(customerId, projectId).getTrlLookupValue(lookupId);
+        return getLookupCache(customerId, projectId).getTrlLookupValue(customerId, projectId, lookupId);
     }
 
     public static List<LookupValue> getTrlLookupValues(WebSession webSession) {
-        return getLookupCache(webSession).getTrlLookupValues();
+        return getLookupCache(webSession).getTrlLookupValues(webSession.getCustomerId(), webSession.getProjectId());
+    }
+
+    public static LookupValue getStakeholderLookupValue(WebSession webSession, Integer lookupId) {
+        return getStakeholderLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
+    }
+
+    public static LookupValue getStakeholderLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+        return getLookupCache(customerId, projectId).getStakeholderLookupValue(customerId, projectId, lookupId);
+    }
+
+    public static List<LookupValue> getStakeholderLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getStakeholderLookupValues(webSession.getCustomerId(), webSession.getProjectId());
     }
 
     public static LookupValue getProjectCategoryLookupValue(WebSession webSession, Integer categoryId) {

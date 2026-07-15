@@ -1,9 +1,13 @@
 package com.bepa.eis.server.entites.stakeholderrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
+import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementVerificationStatus;
+import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
@@ -15,10 +19,11 @@ import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMEN
 
 public class StakeholderRequirementEntity extends AbstractEntity {
 
-    private String requirementCode;
-    private Integer requirementCodeLevel;
-    private String requirementName;
-    private String requirementDescription;
+    private StakeholderRequirementCode requirementCode;
+    private CodeLevel requirementCodeLevel;
+    private RequirementName requirementName;
+    private RequirementDescription requirementDescription;
+    private Stakeholder stakeholder;
 
     @Override
     public EntityType getEntityType() {
@@ -27,104 +32,166 @@ public class StakeholderRequirementEntity extends AbstractEntity {
 
     @Override
     public String getCode() {
-        return requirementCode;
+        return requirementCode.getValue();
     }
 
     @Override
     public String getName() {
-        return requirementName;
+        return requirementName.getValue();
     }
 
     @Override
     public String getDescription() {
-        return requirementDescription;
+        return requirementDescription.getValue();
+    }
+
+    @Override
+    public void initializeFields() {
+        requirementCode = new StakeholderRequirementCode();
+        requirementCodeLevel = new CodeLevel();
+        requirementName = new RequirementName();
+        requirementDescription = new RequirementDescription();
+        stakeholder = new Stakeholder(getWebSession());
+    }
+
+    @Override
+    public void addAllFieldElementsForList(Entity entityElement) {
+        entityElement.addElement(requirementCode);
+        entityElement.addElement(requirementCodeLevel);
+        entityElement.addElement(requirementName);
+        entityElement.addElement(requirementDescription);
+        entityElement.addElement(stakeholder);
+    }
+
+    @Override
+    public void addAllFieldElementsForEdit(Entity entityElement) {
+        requirementCode.setFieldNotEditable();
+        entityElement.addElement(requirementCode);
+
+        requirementCode.setFieldNotVisible();
+        entityElement.addElement(requirementCode);
+
+        requirementName.setFieldEditable();
+        entityElement.addElement(requirementName);
+
+        requirementDescription.setFieldEditable();
+        requirementDescription.setFieldRequired();
+        entityElement.addElement(requirementDescription);
+
+        stakeholder.setFieldEditable();
+        stakeholder.setFieldNotRequired();
+        entityElement.addElement(stakeholder);
+    }
+
+    @Override
+    public void addAllFieldElementsForCreate(Entity entityElement, Integer parentEntityId) {
+        StakeholderRequirementParentCodeSelector parentCodeSelector = new StakeholderRequirementParentCodeSelector(getWebSession());
+
+        String nextCode = parentCodeSelector.getNextAvailableCodeValue(getWebSession(), parentEntityId);
+        requirementCode = new StakeholderRequirementCode(true);
+        requirementCode.setValue(nextCode);
+        requirementCode.setFieldNotEditable();
+        requirementCode.setFieldRequired();
+        entityElement.addElement(requirementCode);
+
+        requirementName.setFieldEditable();
+        entityElement.addElement(requirementName);
+
+        requirementDescription.setFieldEditable();
+        requirementDescription.setFieldRequired();
+        entityElement.addElement(requirementDescription);
+
+        stakeholder.setFieldEditable();
+        stakeholder.setFieldNotRequired();
+        entityElement.addElement(stakeholder);
     }
 
     public StakeholderRequirementEntity() {}
 
-    public StakeholderRequirementEntity(WebSession session) {
-        super(session);
-        setChangedByUserId(session.getUserId());
+    public StakeholderRequirementEntity(WebSession webSession) {
+        super(webSession);
+    }
+
+    public StakeholderRequirementEntity(WebSession webSession, EntityRecord entityRecord) {
+        super(webSession, entityRecord);
+
+        for (EntityElementRecord elementRecord : entityRecord.getEntityElementRecords()) {
+
+            EntityDataElement entityDataElement = EntityDataElement.valueOf(elementRecord.getEntityDataElementType());
+
+            if (entityDataElement != null) {
+                switch (entityDataElement) {
+                    case BASISREQCODE:
+                        requirementCode.setValue(elementRecord.getStringValue());
+                        break;
+                    case CODELEVEL:
+                        requirementCodeLevel.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQNAME:
+                        requirementName.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQDESCRIPTION:
+                        requirementDescription.setValue(elementRecord.getStringValue());
+                        break;
+                    case STAKEHOLDER:
+                        stakeholder.setValue(elementRecord.getIntegerValue());
+                        break;
+
+                }
+            }
+        }
     }
 
     public void setRequirementCode(String requirementCode) {
-        this.requirementCode = requirementCode;
+        this.requirementCode.setValue(requirementCode);
     }
 
-    public String getRequirementCode() {
+    public StakeholderRequirementCode getRequirementCode() {
         return requirementCode;
     }
 
-    public void setRequirementCodeLevel(Integer requirementCodeLevel) {
-        this.requirementCodeLevel = requirementCodeLevel;
+    public String getRequirementCodeString() {
+        return requirementCode.getValue();
     }
 
-    public Integer getRequirementCodeLevel() {
+    public void setRequirementCodeLevel(Integer requirementCodeLevel) {
+        this.requirementCodeLevel.setValue(requirementCodeLevel);
+    }
+
+    public CodeLevel getRequirementCodeLevel() {
         return requirementCodeLevel;
     }
 
     public void setRequirementName(String requirementName) {
-        this.requirementName = requirementName;
+        this.requirementName.setValue(requirementName);
     }
 
-    public String getRequirementName() {
+    public RequirementName getRequirementName() {
         return requirementName;
     }
 
     public void setRequirementDescription(String requirementDescription) {
-        this.requirementDescription = requirementDescription;
+        this.requirementDescription.setValue(requirementDescription);
     }
 
-    public String getRequirementDescription() {
+    public RequirementDescription getRequirementDescription() {
         return requirementDescription;
     }
 
+    public void setStakeholderId(Integer stakeholderId) {
+        this.stakeholder.setValue(stakeholderId);
+    }
+
+    public Stakeholder getStakeholder() {
+        return stakeholder;
+    }
+
     public void addAllDataElements() {
-        addDataElement(new StringDataElement(StakeholderRequirementCode.FIELD_NAME, getRequirementCode()));
-        addDataElement(new IntegerDataElement(CodeLevel.FIELD_NAME, getRequirementCodeLevel()));
-        addDataElement(new StringDataElement(RequirementName.FIELD_NAME, getRequirementName()));
-        addDataElement(new StringDataElement(RequirementDescription.FIELD_NAME, getRequirementDescription()));
+        addDataElement(new StringDataElement(StakeholderRequirementCode.FIELD_NAME, getRequirementCode().getValue()));
+        addDataElement(new IntegerDataElement(CodeLevel.FIELD_NAME, getRequirementCodeLevel().getValue()));
+        addDataElement(new StringDataElement(RequirementName.FIELD_NAME, getRequirementName().getValue()));
+        addDataElement(new StringDataElement(RequirementDescription.FIELD_NAME, getRequirementDescription().getValue()));
+        addDataElement(new IntegerDataElement(Stakeholder.FIELD_NAME, getStakeholder().getValue()));
     }
 
-    public static StakeholderRequirementEntity map(EntityRecord entity) {
-
-        StakeholderRequirementEntity requirementEntity = null;
-
-        if (entity != null) {
-
-            requirementEntity = new StakeholderRequirementEntity(entity.getWebSession());
-
-            requirementEntity.setEntityId(entity.getEntityId());
-            requirementEntity.setCustomerId(entity.getCustomerId());
-            requirementEntity.setProjectId(entity.getProjectId());
-            requirementEntity.setVersion(entity.getVersion());
-            requirementEntity.setChangedByUserId(entity.getChangedByUserId());
-            requirementEntity.setDateOfChange(entity.getChangedDateTime());
-            requirementEntity.setActive(entity.isActive());
-
-            for (EntityElementRecord elementRecord : entity.getEntityElementRecords()) {
-
-                EntityDataElement entityDataElement = EntityDataElement.valueOf(elementRecord.getEntityDataElementType());
-
-                if (entityDataElement != null) {
-                    switch (entityDataElement) {
-                        case BASISREQCODE :
-                            requirementEntity.setRequirementCode(elementRecord.getStringValue());
-                            break;
-                        case CODELEVEL :
-                            requirementEntity.setRequirementCodeLevel(elementRecord.getIntegerValue());
-                            break;
-                        case REQNAME :
-                            requirementEntity.setRequirementName(elementRecord.getStringValue());
-                            break;
-                        case REQDESCRIPTION :
-                            requirementEntity.setRequirementDescription(elementRecord.getStringValue());
-                            break;
-                    }
-                }
-            }
-
-        }
-        return requirementEntity;
-    }
 }

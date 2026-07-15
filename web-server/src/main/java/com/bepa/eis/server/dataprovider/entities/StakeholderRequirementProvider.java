@@ -3,22 +3,16 @@ package com.bepa.eis.server.dataprovider.entities;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement.StakeholderRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
 
 public class StakeholderRequirementProvider extends EntityProvider {
 
@@ -34,11 +28,11 @@ public class StakeholderRequirementProvider extends EntityProvider {
     }
 
     public Entities getListOfBasisRequirements() throws SQLException {
-        return getListOfEntitiesByProjectId(entityType, getEntityDataElementForList());
+        return getListOfEntitiesByProjectId(entityType);
     }
 
     public Entities getBasisRequirementInfo(Integer entityId, Integer version) throws SQLException {
-        return getEntityByEntityId(entityType, entityId, version, getEntityDataElementForEdit());
+        return getEntityByEntityId(entityType, entityId, version);
     }
 
     public Entities getBasisRequirementInfo(Integer parentEntityId) throws SQLException {
@@ -49,127 +43,15 @@ public class StakeholderRequirementProvider extends EntityProvider {
         return getEntityHistoryByEntityId(entityType, entityId);
     }
 
-    @Override
-    public EntityDataElement[] getEntityDataElementForList() {
-        return new EntityDataElement[]{
-                BASISREQCODE,
-                CODELEVEL,
-                REQNAME,
-                REQDESCRIPTION};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForEdit() {
-        return new EntityDataElement[]{
-                BASISREQCODE,
-                CODELEVEL,
-                REQNAME,
-                REQDESCRIPTION};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForCreate() {
-        return new EntityDataElement[]{
-                REQNAME,
-                REQDESCRIPTION};
-    }
-
-    @Override
-    public void addAllFieldElementsForList(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-        StakeholderRequirementCode requirementCode = (StakeholderRequirementCode) mapOfLoadedFields.get(EntityDataElement.BASISREQCODE.getId());
-        if (requirementCode == null) {
-            requirementCode = new StakeholderRequirementCode();
-        }
-        requirementCode.setTableWidth("50px");
-        entity.addElement(requirementCode);
-        entity.setSortKey(requirementCode.getValue());
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
-        if (codeLevel == null) {
-            codeLevel = new CodeLevel();
-        }
-        codeLevel.setTableWidth("35px");
-        entity.addElement(codeLevel);
-
-        RequirementName requirementName = (RequirementName) mapOfLoadedFields.get(EntityDataElement.REQNAME.getId());
-        if (requirementName == null) {
-            requirementName = new RequirementName();
-        }
-        entity.addElement(requirementName);
-
-        RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(REQDESCRIPTION.getId());
-        if (requirementDescription == null) {
-            requirementDescription = new RequirementDescription();
-        }
-        entity.addElement(requirementDescription);
-
-    }
-
-    @Override
-    public void addAllFieldElementsForEdit(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-        StakeholderRequirementCode requirementCode = (StakeholderRequirementCode) mapOfLoadedFields.get(EntityDataElement.BASISREQCODE.getId());
-        if (requirementCode == null) {
-            requirementCode = new StakeholderRequirementCode();
-        }
-        requirementCode.setFieldNotEditable();
-        entity.addElement(requirementCode);
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
-        if (codeLevel == null) {
-            codeLevel = new CodeLevel();
-        }
-        codeLevel.setFieldNotVisible();
-        entity.addElement(codeLevel);
-
-        RequirementName requirementName = (RequirementName) mapOfLoadedFields.get(EntityDataElement.REQNAME.getId());
-        if (requirementName == null) {
-            requirementName = new RequirementName();
-        }
-        requirementName.setFieldEditable();
-        entity.addElement(requirementName);
-
-        RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(EntityDataElement.REQDESCRIPTION.getId());
-        if (requirementDescription == null) {
-            requirementDescription = new RequirementDescription();
-        }
-        requirementDescription.setFieldEditable();
-        requirementDescription.setFieldRequired();
-        entity.addElement(requirementDescription);
-
-    }
-
-    @Override
-    public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId) {
-
-        StakeholderRequirementParentCodeSelector parentCodeSelector = new StakeholderRequirementParentCodeSelector(webSession);
-
-        String nextCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
-        StakeholderRequirementCode requirementCode = new StakeholderRequirementCode(true);
-        requirementCode.setValue(nextCode);
-        requirementCode.setFieldNotEditable();
-        requirementCode.setFieldRequired();
-        entity.addElement(requirementCode);
-
-
-        RequirementName requirementName = new RequirementName();
-        requirementName.setFieldEditable();
-        entity.addElement(requirementName);
-
-        RequirementDescription requirementDescription = new RequirementDescription();
-        requirementDescription.setFieldEditable();
-        requirementDescription.setFieldRequired();
-        entity.addElement(requirementDescription);
-    }
-
     public List<StakeholderRequirementEntity> getAllStakeholderRequirement(boolean includeInactive)  {
         List<StakeholderRequirementEntity> listOfEntitiesForExport = new ArrayList<>();
         try {
             List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
             for (EntityRecord entityRecord : entityRecords) {
-                StakeholderRequirementEntity basisSystemRequirementEntity = StakeholderRequirementEntity.map(entityRecord);
+                StakeholderRequirementEntity basisSystemRequirementEntity = new StakeholderRequirementEntity(getWebSession(), entityRecord);
                 listOfEntitiesForExport.add(basisSystemRequirementEntity);
             }
-            listOfEntitiesForExport.sort(Comparator.comparing(StakeholderRequirementEntity::getRequirementCode));
+            listOfEntitiesForExport.sort(Comparator.comparing(StakeholderRequirementEntity::getRequirementCodeString));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -177,7 +59,7 @@ public class StakeholderRequirementProvider extends EntityProvider {
     }
 
     @Override
-    public List<AbstractEntity> toEntities(WebSession webSession, Object rows) throws SQLException {
+    public List<AbstractEntity> toEntities(WebSession webSession, Object rows) {
         List<StakeholderRequirementExportRow> rowsList = (List<StakeholderRequirementExportRow>) rows;
         List<AbstractEntity> entities = new ArrayList<>();
 

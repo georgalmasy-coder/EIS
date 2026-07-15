@@ -71,11 +71,11 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
                 String eventDescription =
                         systemBreakdownEntity.getEntityType().getDescription() + " '" +
                         systemBreakdownEntity.getSbsCode() + " " +
-                        systemBreakdownEntity.getSystemName() + "' has been " + (systemBreakdownEntity.getVersion() == 1 ? "created" : "updated");
+                        systemBreakdownEntity.getSystemName() + "' has been " + (systemBreakdownEntity.getVersion().getValue() == 1 ? "created" : "updated");
 
                 EventProvider eventProvider = new EventProvider(webSession);
                 eventProvider.createEntityChangeEvent(systemBreakdownEntity.getEntityType(),
-                                                      systemBreakdownEntity.getEntityId(),
+                                                      systemBreakdownEntity.getEntityId().getValue(),
                                                       eventDescription);
 
             }
@@ -181,8 +181,8 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
         systemBreakdownEntity.setSbsCode(sbsCode);
         systemBreakdownEntity.setSbsCodeLevel(sbsCodeLevel);
         systemBreakdownEntity.setSystemName(systemName);
-        systemBreakdownEntity.setSystemOwnerId(systemOwnerId);
-        systemBreakdownEntity.setDepartmentId(departmentId);
+        systemBreakdownEntity.setSystemOwner(systemOwnerId);
+        systemBreakdownEntity.setDepartment(departmentId);
         systemBreakdownEntity.setTrlId(trlId);
         systemBreakdownEntity.setDeadlineNextTrl(deadlineNextTrl);
         systemBreakdownEntity.setDeadlineFinalized(deadlineFinalized);
@@ -251,16 +251,16 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
 
     private static SystemBreakdownExportRow toExportRow(SystemBreakdownEntity entity) {
         return new SystemBreakdownExportRow(
-                entity.getSbsCode(),
-                entity.getSbsCodeLevel(),
-                entity.getSystemName(),
+                entity.getCode(),
+                entity.getSbsCodeLevel().getValue(),
+                entity.getName(),
                 entity.getSystemOwner(),
                 entity.getSystemDepartment(),
                 entity.getTrl(),
                 entity.getDeadlineNextTrl(),
                 entity.getDeadlineFinalized(),
                 entity.getChangedByUser(),
-                entity.getChangedDate(),
+                entity.getChangedDate().getValue(),
                 entity.isActive()
         );
     }

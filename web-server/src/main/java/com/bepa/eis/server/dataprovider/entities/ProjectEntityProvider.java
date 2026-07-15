@@ -26,36 +26,6 @@ public class ProjectEntityProvider extends EntityProvider {
     }
 
     @Override
-    public EntityDataElement[] getEntityDataElementForList() {
-        return new EntityDataElement[]{
-                PROJECTNAME};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForEdit() {
-        return new EntityDataElement[]{
-                PROJECTNAME};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForCreate() {
-        return new EntityDataElement[]{
-                PROJECTNAME};
-    }
-
-    @Override
-    public void addAllFieldElementsForList(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-    }
-
-    @Override
-    public void addAllFieldElementsForEdit(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-    }
-
-    @Override
-    public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId) {
-    }
-
-    @Override
     public List<AbstractEntity> toEntities(WebSession webSession, Object rows)  {
         return new ArrayList<>();
     }

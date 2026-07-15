@@ -28,7 +28,10 @@ import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
 import com.bepa.eis.server.entites.project.ProjectEntity;
+import com.bepa.eis.server.entites.stakeholder.StakeholderEntity;
+import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
+import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +53,6 @@ abstract public class EntityProvider extends GenericProvider {
     }
 
     abstract public EntityType getEntityType();
-
-    abstract public EntityDataElement[] getEntityDataElementForList();
-
-    abstract public void addAllFieldElementsForList(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity);
-
-    abstract public EntityDataElement[] getEntityDataElementForEdit();
-
-    abstract public EntityDataElement[] getEntityDataElementForCreate();
-
-    abstract public void addAllFieldElementsForEdit(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity);
-
-    abstract public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId);
 
     abstract public List<AbstractEntity> toEntities(WebSession webSession, Object rows) throws SQLException;
 
@@ -239,86 +230,86 @@ abstract public class EntityProvider extends GenericProvider {
 
         Entities entities = new Entities(getWebSession(), entityType.getSingleRootElementName());
 
+        AbstractEntity entity = createEntityObject(null, entityType);
+
         /* Create new entity where all the entity data elements are added tp */
-        Entity entity = entities.getNewEntity(entityType.getEntityElementName());
+        Entity entityElement = entities.getNewEntity(entityType.getEntityElementName());
 
         /* Default entity data elements */
-        entity.addElement(new ProjectId(getWebSession().getProjectId()));
-        entity.addElement(new CustomerId(getWebSession().getCustomerId()));
-        entity.addElement(new EntityId(null));
-        entity.addElement(new ParentEntityId(parentEntityId));
+        entityElement.addElement(new ProjectId(getWebSession().getProjectId()));
+        entityElement.addElement(new CustomerId(getWebSession().getCustomerId()));
+        entityElement.addElement(new EntityId(null));
 
         Version version = new Version(1);
         version.setFieldNotVisible();
-        entity.addElement(version);
+        entityElement.addElement(version);
 
-        addAllFieldElementsForCreate(getWebSession(), entity, parentEntityId);
+        entity.addAllFieldElementsForCreate(entityElement, parentEntityId);
 
         Active active = new Active(true);
         active.setFieldEditable();
         active.setValue(true);
-        entity.addElement(active);
+        entityElement.addElement(active);
 
-        entities.addEntity(entity);
+        entities.addEntity(entityElement);
         return entities;
     }
 
-    public Entities getEntityByEntityId(EntityType entityType, Integer entityId, Integer version, EntityDataElement[] entityDataElements) throws SQLException {
-        return getListOfEntitiesByProjectId(entityType, entityId, version, entityDataElements);
+    public Entities getEntityByEntityId(EntityType entityType, Integer entityId, Integer version) throws SQLException {
+        return getListOfEntitiesByProjectId(entityType, entityId, version);
     }
 
-    public Entities getListOfEntitiesByProjectId(EntityType entityType, EntityDataElement[] entityDataElements) throws SQLException {
-        Entities entities = getListOfEntitiesByProjectId(entityType, null, null, entityDataElements);
-
+    public Entities getListOfEntitiesByProjectId(EntityType entityType) throws SQLException {
+        Entities entities = getListOfEntitiesByProjectId(entityType, null, null);
         entities.sortBy(EntityComparators.bySortKey());
         return entities;
     }
 
-    public Entities getListOfEntitiesByProjectId(EntityType entityType, Integer entityId, Integer historyVersion, EntityDataElement[] entityDataElements) throws SQLException {
+    public Entities getListOfEntitiesByProjectId(EntityType entityType, Integer entityId, Integer historyVersion) throws SQLException {
 
         log.info("getListOfEntities : {} {}", entityType.getDescription(), entityId != null ? " by id : entityId " + entityId : " version : " + historyVersion);
 
         Entities entities = new Entities(getWebSession(), entityId != null ? entityType.getSingleRootElementName() : entityType.getMultipleRootElementName());
 
-        ConcurrentMap<String, EntityRecord> mapOfEntities = buildMapOfEntities(getWebSession(), entityType, entityId, historyVersion, entityDataElements);
+        ConcurrentMap<String, EntityRecord> mapOfEntities = buildMapOfEntities(getWebSession(), entityType, entityId, historyVersion, entityType.getDataElements());
 
         for (EntityRecord entityRecord : mapOfEntities.values()) {
 
-            /* Create new entity where all the entity data elements are added tp */
-            Entity entity = entities.getNewEntity(entityType.getEntityElementName());
+            AbstractEntity entity = createEntityObject(entityRecord, entityType);
 
-            /* Default entity data elements */
-            entity.addElement(new ProjectId(entityRecord.getProjectId()));
-            entity.addElement(new CustomerId(entityRecord.getCustomerId()));
-            entity.addElement(new EntityId(entityRecord.getEntityId()));
+            /* Create new entityElement where all the entityElement data elements are added tp */
+            Entity entityElement = entities.getNewEntity(entityType.getEntityElementName());
 
-            Version version = new Version(entityRecord.getVersion());
+            /* Default entityElement data elements */
+
+            entityElement.addElement(entity.getCustomerId());
+            entityElement.addElement(entity.getProjectId());
+            entityElement.addElement(entity.getEntityId());
+
+            Version version = entity.getVersion();
             version.setFieldNotVisible();
-            entity.addElement(version);
+            entityElement.addElement(version);
 
-            Latest latest = new Latest(entityRecord.isLatest());
+            Latest latest = entity.getLatest();
             latest.setFieldNotVisible();
-            entity.addElement(latest);
+            entityElement.addElement(latest);
 
-            /* Build map of all loaded fields */
-            ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields = buildMapOfLoadedFields(entityRecord);
-
-            Active active = new Active(entityRecord.isActive());
+            Active active = entity.getActive();
 
             if (entityId == null) {
-                addAllFieldElementsForList(mapOfLoadedFields, entity);
+                entity.addAllFieldElementsForList(entityElement);
                 active.setTableWidth("85px");
-                entity.addElement(active);
+                entityElement.addElement(active);
             } else {
-                addAllFieldElementsForEdit(mapOfLoadedFields, entity);
+                entity.addAllFieldElementsForEdit(entityElement);
                 active.setFieldEditable();
             }
 
-            /* And finally add another 3 default entity data elements */
-            ChangedDateTime changedDateTime = new ChangedDateTime(entityRecord.getChangedDateTime());
+            /* And finally add another 3 default entityElement data elements */
+            ChangedDateTime changedDateTime = entity.getChangedDate();
             changedDateTime.setFieldNotEditable();
 
-            ChangedBy changedBy = new ChangedBy(getWebSession());
+            ChangedBy changedBy = entity.getChangedByUser();
             changedBy.setValue(entityRecord.getChangedByUserId());
             changedBy.setFieldNotEditable();
 
@@ -330,11 +321,11 @@ abstract public class EntityProvider extends GenericProvider {
                 changedDateTime.setFieldNotVisible();
             }
 
-            entity.addElement(changedBy);
-            entity.addElement(changedDateTime);
-            entity.addElement(active);
+            entityElement.addElement(changedBy);
+            entityElement.addElement(changedDateTime);
+            entityElement.addElement(active);
 
-            entities.addEntity(entity);
+            entities.addEntity(entityElement);
         }
 
         log.debug("Number of entities loaded : {} {}", entityType.getDescription(), mapOfEntities.size());
@@ -342,83 +333,31 @@ abstract public class EntityProvider extends GenericProvider {
         return entities;
     }
 
-    private ConcurrentHashMap<Integer, AbstractField> buildMapOfLoadedFields(EntityRecord entityRecord) {
+    private AbstractEntity createEntityObject(EntityRecord entityRecord, EntityType entityType) {
+        AbstractEntity entity;
 
-        ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields = new ConcurrentHashMap<>();
-
-        for (EntityElementRecord entityElementRecord : entityRecord.getEntityElementRecords()) {
-
-            EntityDataElement entityDataElement = EntityConfiguration.getInstance().getEntityDataElement(entityElementRecord.getEntityDataElementType());
-            Integer elementId = entityDataElement.getId();
-
-            AbstractField abstractField = MapDataElementType.toFieldObject(entityDataElement);
-
-            switch (entityDataElement.getEntityElementType()) {
-                case BOOLEAN -> {
-                    AbstractBoolean ab = (AbstractBoolean) abstractField;
-                    if (ab != null) {
-                        ab.setValue(entityElementRecord.getBooleanValue());
-                        mapOfLoadedFields.put(elementId, ab);
-                    } else {
-                        throw new IllegalArgumentException("Invalid field object");
-                    }
-                }
-                case CURRENCY -> {
-                    entityElementRecord.getCurrencyValue();
-                    new IllegalArgumentException("TO BE IMPLEMENTED : " + entityDataElement.getEntityElementType());
-                }
-                case DOUBLE -> {
-                    entityElementRecord.getDoubleValue();
-                    new IllegalArgumentException("TO BE IMPLEMENTED : " + entityDataElement.getEntityElementType());
-                }
-                case INTEGER -> {
-                    AbstractInteger ai = (AbstractInteger) abstractField;
-
-                    if (ai != null) {
-                        if (ai instanceof AbstractLookup abstractLookup) {
-                            abstractLookup.setWebSession(getWebSession());
-                            abstractLookup.setValue(entityElementRecord.getIntegerValue());
-                            mapOfLoadedFields.put(elementId, abstractLookup);
-                        } else if (ai instanceof AbstractInteger abstractInteger) {
-                            abstractInteger.setValue(entityElementRecord.getIntegerValue());
-                            mapOfLoadedFields.put(elementId, abstractInteger);
-                        }
-                    }
-                }
-                case LOCAL_DATE -> {
-                    entityElementRecord.getLocalDateValue();
-                    AbstractDate ad = (AbstractDate) abstractField;
-
-                    if (ad != null) {
-                        ad.setValue(entityElementRecord.getLocalDateValue());
-                        mapOfLoadedFields.put(elementId, ad);
-                    }
-                }
-
-                case LOCAL_DATETIME -> {
-                    entityElementRecord.getLocalDateTimeValue();
-                    AbstractDateTime adt = (AbstractDateTime) abstractField;
-                    if (adt != null) {
-                        adt.setValue(entityElementRecord.getLocalDateTimeValue());
-                        mapOfLoadedFields.put(elementId, adt);
-                    }
-                }
-
-                case NOTE, STRING -> {
-                    AbstractString as = (AbstractString) abstractField;
-                    if (as != null) {
-                        as.setValue(entityElementRecord.getStringValue());
-                        mapOfLoadedFields.put(elementId, as);
-                    }
-                }
-                default ->
-                        throw new IllegalArgumentException("Invalid entity data element type: " + entityDataElement.getEntityElementType());
+        if (entityRecord != null) {
+            switch (entityType) {
+                case STAKEHOLDER -> entity = new StakeholderEntity(getWebSession(), entityRecord);
+                case STAKEHOLDER_REQUIREMENT -> entity = new StakeholderRequirementEntity(getWebSession(), entityRecord);
+                case SYSTEM_REQUIREMENT -> entity = new SystemRequirementEntity(getWebSession(), entityRecord);
+                case SYSTEMS_BREAKDOWN -> entity = new SystemBreakdownEntity(getWebSession(), entityRecord);
+                case PROJECT -> entity = new ProjectEntity(getWebSession(), entityRecord);
+                default -> throw new IllegalArgumentException("Invalid entity type : " + entityType);
             }
+        } else {
+            switch (entityType) {
+                case STAKEHOLDER -> entity = new StakeholderEntity(getWebSession());
+                case STAKEHOLDER_REQUIREMENT -> entity = new StakeholderRequirementEntity(getWebSession());
+                case SYSTEM_REQUIREMENT -> entity = new SystemRequirementEntity(getWebSession());
+                case SYSTEMS_BREAKDOWN -> entity = new SystemBreakdownEntity(getWebSession());
+                case PROJECT -> entity = new ProjectEntity(getWebSession());
+                default -> throw new IllegalArgumentException("Invalid entity type : " + entityType);
+            }
+
         }
-
-        return mapOfLoadedFields;
+        return entity;
     }
-
 
     public ConcurrentMap<String, EntityRecord> buildMapOfEntities(WebSession session, EntityType entityType, Integer entityId, Integer historyVersion, EntityDataElement[] entityDataElements) throws SQLException {
         ConcurrentMap<String, EntityRecord> mapOfEntities = new ConcurrentHashMap<>();
@@ -645,13 +584,13 @@ abstract public class EntityProvider extends GenericProvider {
 
         if (entity != null && entity.getCustomerId() != null && entity.getProjectId() != null && entity.getEntityType() != null) {
 
-            if (entity.getEntityId() == null) {
+            if (entity.getEntityId().isBlankOrEmpty()) {
                 // Create new entity
                 currentEntityId = findNextAvailableEntityId(entity);
                 currentVersion = 1;
                 prevIsActive = true;
             } else {
-                currentEntityId = entity.getEntityId();
+                currentEntityId = entity.getEntityId().getValue();
                 currentVersion = findNextAvailableVersion(entity);
                 prevIsActive = getPrevActiveStatus(entity);
             }
@@ -661,7 +600,14 @@ abstract public class EntityProvider extends GenericProvider {
             entity.setVersion(currentVersion);
             entity.setPrevActiveStatus(prevIsActive);
 
-            entityKey = new EntityKey(entity.getCustomerId(), entity.getProjectId(), currentEntityId, entity.getEntityType(), currentVersion);
+            entityKey = new EntityKey(
+                    entity.getCustomerId().getValue(),
+                    entity.getProjectId().getValue(),
+                    currentEntityId,
+                    entity.getEntityType(),
+                    currentVersion);
+
+            entity.setChangedByUserId(getWebSession().getUserId());
 
             // Persist entity
             insertOrUpdateEntity(entity);
@@ -678,8 +624,8 @@ abstract public class EntityProvider extends GenericProvider {
         if (entity.getEntityType() == EntityType.SYSTEMS_BREAKDOWN) {
             SystemBreakdownEntity systemBreakdownEntity = (SystemBreakdownEntity) entity;
 
-            String sbs = systemBreakdownEntity.getSbsCode();
-            String name = systemBreakdownEntity.getSystemName();
+            String sbs = systemBreakdownEntity.getSbsCode().getValue();
+            String name = systemBreakdownEntity.getSystemName().getValue();
 
             User changedBy = null;
             if (systemBreakdownEntity.getChangedByUser() != null) {
@@ -696,8 +642,8 @@ abstract public class EntityProvider extends GenericProvider {
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(MAX_ENTITY_ID_SQL)) {
 
-            setInt(ps, entity.getCustomerId(), 1);
-            setInt(ps, entity.getProjectId(), 2);
+            setInt(ps, entity.getCustomerId().getValue(), 1);
+            setInt(ps, entity.getProjectId().getValue(), 2);
             setInt(ps, entity.getEntityType().getId(), 3);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -717,10 +663,10 @@ abstract public class EntityProvider extends GenericProvider {
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(GET_ACTIVE_STATUS_SQL)) {
 
-            setInt(ps, entity.getCustomerId(), 1);
-            setInt(ps, entity.getProjectId(), 2);
+            setInt(ps, entity.getCustomerId().getValue(), 1);
+            setInt(ps, entity.getProjectId().getValue(), 2);
             setInt(ps, entity.getEntityType().getId(), 3);
-            setInt(ps, entity.getEntityId(), 4);
+            setInt(ps, entity.getEntityId().getValue(), 4);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -738,10 +684,10 @@ abstract public class EntityProvider extends GenericProvider {
         try (Connection con = getDataSource().getConnection();
              PreparedStatement ps = con.prepareStatement(MAX_VERSION_SQL)) {
 
-            setInt(ps, entity.getCustomerId(), 1);
-            setInt(ps, entity.getProjectId(), 2);
+            setInt(ps, entity.getCustomerId().getValue(), 1);
+            setInt(ps, entity.getProjectId().getValue(), 2);
             setInt(ps, entity.getEntityType().getId(), 3);
-            setInt(ps, entity.getEntityId(), 4);
+            setInt(ps, entity.getEntityId().getValue(), 4);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -802,13 +748,13 @@ abstract public class EntityProvider extends GenericProvider {
     }
 
     private void clearLatestIndicatorOnEntity(Connection con, AbstractEntity entity) throws SQLException {
-        if (entity.getEntityId() != null) {
+        if (! entity.getEntityId().isBlankOrEmpty()) {
             try (PreparedStatement ps = con.prepareStatement(CLEAR_LATEST_ON_SQL)) {
 
-                ps.setInt(1, entity.getCustomerId());
-                ps.setInt(2, entity.getProjectId());
+                ps.setInt(1, entity.getCustomerId().getValue());
+                ps.setInt(2, entity.getProjectId().getValue());
                 ps.setInt(3, entity.getEntityType().getId());
-                ps.setInt(4, entity.getEntityId());
+                ps.setInt(4, entity.getEntityId().getValue());
                 int rows = ps.executeUpdate();
                 if (rows == 0) {
                     log.warn("No entity found for clear latest on : {} by id {}", entity.getEntityType().getDescription(), entity.getEntityId());
@@ -821,11 +767,11 @@ abstract public class EntityProvider extends GenericProvider {
     private void insertNewEntity(Connection con, AbstractEntity entity) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_SQL)) {
 
-            ps.setInt(1, entity.getCustomerId());
-            ps.setInt(2, entity.getProjectId());
-            ps.setInt(3, entity.getEntityId());
-            ps.setInt(4, entity.getVersion());
-            ps.setInt(5, entity.getChangedByUserId());
+            ps.setInt(1, entity.getCustomerId().getValue());
+            ps.setInt(2, entity.getProjectId().getValue());
+            ps.setInt(3, entity.getEntityId().getValue());
+            ps.setInt(4, entity.getVersion().getValue());
+            ps.setInt(5, entity.getChangedBy().getValue());
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setBoolean(7, true);
             ps.setInt(8, entity.getEntityType().getId());
@@ -848,10 +794,10 @@ abstract public class EntityProvider extends GenericProvider {
 
             try (PreparedStatement ps = con.prepareStatement(insertSqlStatement)) {
 
-                ps.setInt(1, entity.getCustomerId());
-                ps.setInt(2, entity.getProjectId());
-                ps.setInt(3, entity.getEntityId());
-                ps.setInt(4, entity.getVersion());
+                ps.setInt(1, entity.getCustomerId().getValue());
+                ps.setInt(2, entity.getProjectId().getValue());
+                ps.setInt(3, entity.getEntityId().getValue());
+                ps.setInt(4, entity.getVersion().getValue());
                 ps.setInt(5, entity.getEntityType().getId());
                 ps.setInt(6, dataElement.getEntityDataElement().getId());
 
@@ -928,8 +874,8 @@ abstract public class EntityProvider extends GenericProvider {
             try (PreparedStatement ps = con.prepareStatement(UPDATE_ENTITY_ACTIVE_STATUS_SQL)) {
 
                 ps.setBoolean(1, entity.isActive());
-                ps.setInt(2, entity.getCustomerId());
-                ps.setInt(3, entity.getProjectId());
+                ps.setInt(2, entity.getCustomerId().getValue());
+                ps.setInt(3, entity.getProjectId().getValue());
                 ps.setInt(4, entity.getEntityType().getId());
                 ps.setInt(5, entityCodeColumn.getId());
                 ps.setString(6, entity.getCode()+".%");

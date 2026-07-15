@@ -7,7 +7,6 @@ import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
-import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

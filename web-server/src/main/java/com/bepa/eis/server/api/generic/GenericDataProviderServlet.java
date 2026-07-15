@@ -259,17 +259,6 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         return (String) session.getAttribute("sessionID");
     }
 
-/* GFA
-    public void setXmlResponse(HttpServletResponse response) {
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType("application/xml; charset=UTF-8");
-
-        response.setHeader("Cache-Control", "no-store");
-        response.setHeader("Pragma", "no-cache");
-    }
-
- */
-
     /**
      * Convenience method that serializes into an XML string.
      *
@@ -527,8 +516,8 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
                 Integer relatedEntityTypeId = intValue(entry, "RelatedEntityType");
 
                 EntityRelationRecord relationRecord = new EntityRelationRecord(
-                        entity.getCustomerId(),
-                        entity.getProjectId()
+                        entity.getCustomerId().getValue(),
+                        entity.getProjectId().getValue()
                 );
 
                 relationRecord.setEntityRelationPK(entityRelationPK);

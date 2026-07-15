@@ -5,11 +5,9 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.entities.common.LinkRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityLinkId;
-import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityNoteId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.EntityLinkDescription;
 import com.bepa.eis.server.dataprovider.fields.strings.EntityLinkUrl;
-import com.bepa.eis.server.dataprovider.fields.strings.EntityNoteText;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
@@ -100,15 +98,15 @@ public class EntityLinkProvider extends GenericProvider {
 
             try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_LINK_SQL)) {
 
-                ps.setInt(1, entity.getCustomerId());
-                ps.setInt(2, entity.getProjectId());
-                ps.setInt(3, entity.getEntityId());
-                ps.setInt(4, entity.getVersion());
+                ps.setInt(1, entity.getCustomerId().getValue());
+                ps.setInt(2, entity.getProjectId().getValue());
+                ps.setInt(3, entity.getEntityId().getValue());
+                ps.setInt(4, entity.getVersion().getValue());
                 ps.setInt(5, entity.getEntityType().getId());
                 ps.setString(6, linkRecord.getDescription());
                 ps.setString(7, linkRecord.getUrl());
-                ps.setInt(8, linkRecord.getChangedByUserId());
-                ps.setTimestamp(9, Timestamp.valueOf(linkRecord.getChangedDate()));
+                ps.setInt(8, linkRecord.getChangedByUserId().getValue());
+                ps.setTimestamp(9, Timestamp.valueOf(linkRecord.getChangedDate().getValue()));
 
                 int rows = ps.executeUpdate();
 

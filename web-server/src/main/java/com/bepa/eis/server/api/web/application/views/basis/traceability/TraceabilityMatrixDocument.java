@@ -9,6 +9,7 @@ import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
@@ -165,7 +166,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
     private List<StakeholderRequirementWrapper> getStakeholderRequirements(
             List<SystemRequirementWrapper> listOfSystemRequirementWrappers
-    ) throws SQLException {
+    ) {
         StakeholderRequirementProvider stakeholderRequirementProvider =
                 new StakeholderRequirementProvider(getWebSession());
 
@@ -184,7 +185,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         return listOfStakeholderRequirementWrappers;
     }
 
-    private List<SystemRequirementWrapper> getSystemRequirements() throws SQLException {
+    private List<SystemRequirementWrapper> getSystemRequirements(){
         SystemRequirementProvider systemRequirementProvider =
                 new SystemRequirementProvider(getWebSession());
 
@@ -215,11 +216,11 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
             ConcurrentMap<String, EntityRelationRecord> mapOfEntityRelations) {
 
         for (SystemRequirementWrapper systemRequirementWrapper : systemRequirementWrappers) {
-            Integer currentEntityId = systemRequirementWrapper.getEntityId();
+            EntityId currentEntityId = systemRequirementWrapper.getEntityId();
             EntityType currentEntityType = systemRequirementWrapper.getEntityType();
 
             for (EntityRelationRecord relation : mapOfEntityRelations.values()) {
-                if (Objects.equals(relation.getEntityId(), currentEntityId) && relation.getEntityType() == currentEntityType) {
+                if (Objects.equals(relation.getEntityId(), currentEntityId.getValue()) && relation.getEntityType() == currentEntityType) {
 
                     systemRequirementWrapper.addRelationToStakeholderRequirement(relation);
 
@@ -230,22 +231,6 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
                     );
                 }
             }
-/* GFA
-            for (EntityRelationRecord relation : relations) {
-
-                if (Objects.equals(relation.getEntityId(), currentEntityId) && relation.getEntityType() == currentEntityType) {
-
-                    systemRequirementWrapper.addRelationToStakeholderRequirement(relation);
-
-                    log.debug(
-                            "Relation found for system requirement {} and stakeholder requirement {}",
-                            currentEntityId,
-                            relation.getRelatedEntityId()
-                    );
-                }
-            }
-
- */
         }
     }
 
@@ -377,11 +362,6 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         );
 
         return countMatchingWords(stakeholderText, systemText);
-/*
-        int matchCount = countMatchingWords(stakeholderText, systemText);
-
-        return matchCount >= MINIMUM_TEXT_MATCH_COUNT;
-*/
     }
 
     private boolean countMatchingWords(String sourceText, String targetText) {
@@ -398,34 +378,6 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         }
 
         return false;
-    }
-
-    private int countMatchingWordsOLD(String sourceText, String targetText) {
-        String[] words = sourceText.split("\\s+");
-        int matchCount = 0;
-
-        for (String word : words) {
-            if (!isBlank(word) && targetText.contains(word)) {
-                matchCount++;
-            }
-        }
-
-        if (matchCount >= MINIMUM_TEXT_MATCH_COUNT) {
-            log.debug("Match {} for {} and {}", matchCount, sourceText, targetText );
-        }
-        return matchCount;
-    }
-
-    private boolean hasMissingTraceability(
-            StakeholderRequirementWrapper stakeholderRequirementWrapper,
-            SystemRequirementWrapper systemRequirementWrapper
-    ) {
-        return !stakeholderRequirementWrapper.hasRelationToAnySystemRequirement()
-                || !systemRequirementWrapper.hasRelationToAnyStakeholderRequirement();
-    }
-
-    private boolean isSystemRequirementNotRelevantToStakeholderRequirement(SystemRequirementWrapper systemRequirementWrapper) {
-        return !Boolean.TRUE.equals(systemRequirementWrapper.isRelevantToStakeholderRequirement());
     }
 
     private String buildSearchText(

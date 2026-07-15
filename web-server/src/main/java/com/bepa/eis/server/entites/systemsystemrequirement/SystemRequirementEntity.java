@@ -1,12 +1,13 @@
 package com.bepa.eis.server.entites.systemsystemrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
+import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemRequirementParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
-import com.bepa.eis.server.dataprovider.fields.timestamp.AbstractDate;
 import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
@@ -25,25 +26,23 @@ public class SystemRequirementEntity extends AbstractEntity {
 
     private static final Logger log = LoggerFactory.getLogger(SystemRequirementEntity.class);
 
-    private String requirementCode;
-    private Integer requirementCodeLevel;
-    private String requirementName;
-    private String requirementDescription;
-    private Integer verificationStatusId;
-    private String rationalStatement;
-    private Integer businessPriorityId;
-    private String captureDate;
-    private Integer ownerId;
-    private Integer statusId;
-    private Boolean isRelevantToStakeholderRequirement;
+    private SystemRequirementCode requirementCode;
+    private CodeLevel requirementCodeLevel;
+    private RequirementName requirementName;
+    private RequirementDescription requirementDescription;
+    private RequirementVerificationStatus requirementVerificationStatus;
+    private RequirementRationaleStatement requirementRationalStatement;
+    private RequirementBusinessPriority requirementBusinessPriority;
+    private RequirementCaptureDate requirementCaptureDate;
+    private RequirementOwner requirementOwner;
+    private RequirementStatus requirementStatus;
 
-    private String requirementHighlevelCapability;
-    private Integer typeId;
-    private Integer requirementFrequencyId;
-    private String requirementPerformance;
-    private Integer requirementVerificationStatusId;
-    private Integer requirementVerificationStatementId;
-    private Integer requirementTechnicalPriorityId;
+    private RequirementHighlevelCapability requirementHighlevelCapability;
+    private RequirementType requirementType;
+    private RequirementFrequency requirementFrequency;
+    private RequirementPerformance requirementPerformance;
+    private RequirementVerificationStatement requirementVerificationStatement;
+    private RequirementTechnicalPriority requirementTechnicalPriority;
 
     @Override
     public EntityType getEntityType() {
@@ -52,285 +51,403 @@ public class SystemRequirementEntity extends AbstractEntity {
 
     @Override
     public String getCode() {
-        return requirementCode;
+        return requirementCode.getValue();
     }
 
     @Override
     public String getName() {
-        return requirementName;
+        return requirementName.getValue();
     }
 
     @Override
     public String getDescription() {
-        return requirementDescription;
+        return requirementDescription.getValue();
+    }
+
+    @Override
+    public void initializeFields() {
+        requirementCode = new SystemRequirementCode();
+        requirementCodeLevel = new CodeLevel();
+        requirementName = new RequirementName();
+        requirementDescription = new RequirementDescription();
+        requirementVerificationStatus = new RequirementVerificationStatus(getWebSession());
+        requirementRationalStatement = new RequirementRationaleStatement();
+        requirementBusinessPriority = new RequirementBusinessPriority(getWebSession());
+        requirementCaptureDate = new RequirementCaptureDate();
+        requirementOwner = new RequirementOwner(getWebSession());
+        requirementStatus = new RequirementStatus (getWebSession());
+        requirementHighlevelCapability = new RequirementHighlevelCapability();
+        requirementType = new RequirementType(getWebSession());
+        requirementFrequency = new RequirementFrequency(getWebSession());
+        requirementPerformance = new RequirementPerformance(getWebSession());
+        requirementVerificationStatement = new RequirementVerificationStatement(getWebSession());
+        requirementTechnicalPriority = new RequirementTechnicalPriority(getWebSession());
+    }
+
+    @Override
+    public void addAllFieldElementsForList(Entity entityElement) {
+        entityElement.addElement(requirementCode);
+        entityElement.addElement(requirementCodeLevel);
+        entityElement.addElement(requirementName);
+        entityElement.addElement(requirementDescription);
+        entityElement.addElement(requirementVerificationStatus);
+        entityElement.addElement(requirementRationalStatement);
+        entityElement.addElement(requirementBusinessPriority);
+        entityElement.addElement(requirementCaptureDate);
+        entityElement.addElement(requirementOwner);
+        entityElement.addElement(requirementStatus);
+
+        entityElement.addElement(requirementHighlevelCapability);
+        entityElement.addElement(requirementType);
+        entityElement.addElement(requirementFrequency);
+        entityElement.addElement(requirementPerformance);
+        entityElement.addElement(requirementVerificationStatus);
+        entityElement.addElement(requirementVerificationStatement);
+        entityElement.addElement(requirementTechnicalPriority);
+    }
+
+    @Override
+    public void addAllFieldElementsForEdit(Entity entityElement) {
+        requirementCode.setFieldNotEditable();
+        entityElement.addElement(requirementCode);
+
+        requirementCodeLevel.setFieldNotVisible();
+        entityElement.addElement(requirementCodeLevel);
+
+        requirementName.setFieldEditable();
+        entityElement.addElement(requirementName);
+
+        requirementDescription.setFieldEditable();
+        requirementDescription.setFieldRequired();
+        entityElement.addElement(requirementDescription);
+
+        requirementVerificationStatus.setFieldEditable();
+        entityElement.addElement(requirementVerificationStatus);
+
+        requirementRationalStatement.setFieldEditable();
+        entityElement.addElement(requirementRationalStatement);
+
+        requirementCaptureDate.setFieldEditable();
+        entityElement.addElement(requirementCaptureDate);
+
+        requirementBusinessPriority.setFieldEditable();
+        entityElement.addElement(requirementBusinessPriority);
+
+        requirementTechnicalPriority.setFieldEditable();
+        entityElement.addElement(requirementTechnicalPriority);
+
+        requirementVerificationStatement.setFieldEditable();
+        entityElement.addElement(requirementVerificationStatement);
+
+        requirementStatus.setFieldEditable();
+        entityElement.addElement(requirementStatus);
+
+        requirementHighlevelCapability.setFieldEditable();
+        entityElement.addElement(requirementHighlevelCapability);
+
+        requirementType.setFieldEditable();
+        entityElement.addElement(requirementType);
+
+        requirementFrequency.setFieldEditable();
+        entityElement.addElement(requirementFrequency);
+
+        requirementPerformance.setFieldEditable();
+        entityElement.addElement(requirementPerformance);
+
+        requirementOwner.setFieldEditable();
+        entityElement.addElement(requirementOwner);
+    }
+
+    @Override
+    public void addAllFieldElementsForCreate(Entity entityElement, Integer parentEntityId) {
+
+        SystemRequirementParentCodeSelector parentCodeSelector = new SystemRequirementParentCodeSelector(getWebSession());
+
+        String nextCode = parentCodeSelector.getNextAvailableCodeValue(getWebSession(), parentEntityId);
+        requirementCode = new SystemRequirementCode(true);
+        requirementCode.setValue(nextCode);
+        requirementCode.setFieldNotEditable();
+        requirementCode.setFieldRequired();
+        entityElement.addElement(requirementCode);
+
+
+        requirementName.setFieldEditable();
+        requirementName.setFieldRequired();
+        entityElement.addElement(requirementName);
+
+        requirementDescription.setFieldEditable();
+        entityElement.addElement(requirementDescription);
+
+        requirementVerificationStatement.setFieldEditable();
+        entityElement.addElement(requirementVerificationStatement);
+
+        requirementVerificationStatus.setFieldEditable();
+        entityElement.addElement(requirementVerificationStatus);
+
+        requirementRationalStatement.setFieldEditable();
+        entityElement.addElement(requirementRationalStatement);
+
+        requirementCaptureDate.setFieldEditable();
+        entityElement.addElement(requirementCaptureDate);
+
+        requirementBusinessPriority.setFieldEditable();
+        entityElement.addElement(requirementBusinessPriority);
+
+        requirementTechnicalPriority.setFieldEditable();
+        entityElement.addElement(requirementTechnicalPriority);
+
+        requirementStatus.setFieldEditable();
+        entityElement.addElement(requirementStatus);
+
+        requirementHighlevelCapability.setFieldEditable();
+        entityElement.addElement(requirementHighlevelCapability);
+
+        requirementType.setFieldEditable();
+        entityElement.addElement(requirementType);
+
+        requirementFrequency.setFieldEditable();
+        entityElement.addElement(requirementFrequency);
+
+        requirementPerformance.setFieldEditable();
+        entityElement.addElement(requirementPerformance);
+
+        requirementOwner.setFieldEditable();
+        entityElement.addElement(requirementOwner);
     }
 
     public SystemRequirementEntity() {}
 
     public SystemRequirementEntity(WebSession session) {
         super(session);
-        setChangedByUserId(session.getUserId());
+        initializeFields();
+    }
+
+    public SystemRequirementEntity(WebSession webSession, EntityRecord entityRecord) {
+        super(webSession, entityRecord);
+        initializeFields();
+
+        for (EntityElementRecord elementRecord : entityRecord.getEntityElementRecords()) {
+
+            EntityDataElement entityDataElement = EntityDataElement.valueOf(elementRecord.getEntityDataElementType());
+
+            if (entityDataElement != null) {
+                switch (entityDataElement) {
+                    case SYSTEMREQCODE:
+                        requirementCode.setValue(elementRecord.getStringValue());
+                        break;
+                    case CODELEVEL:
+                        requirementCodeLevel.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQNAME:
+                        requirementName.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQDESCRIPTION:
+                        requirementDescription.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQVERIFICATIONSTATUSID:
+                        requirementVerificationStatus.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQRATIONALESTATEMENT:
+                        requirementRationalStatement.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQBUSINESSPRIORITYID:
+                        requirementBusinessPriority.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQCAPTUREDATE:
+                        requirementCaptureDate.setValue(elementRecord.getLocalDateValue());
+                        break;
+                    case REQOWNERID:
+                        requirementOwner.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQSTATUSID:
+                        requirementStatus.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQHIGHLEVELCAPABILITY:
+                        requirementHighlevelCapability.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQTYPEID:
+                        requirementType.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQFREQUENCYID:
+                        requirementFrequency.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQPERFORMANCE:
+                        requirementPerformance.setValue(elementRecord.getStringValue());
+                        break;
+                    case REQVERIFICATIONSTATEMENTID:
+                        requirementVerificationStatement.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQTECHNICALPRIORITYID:
+                        requirementTechnicalPriority.setValue(elementRecord.getIntegerValue());
+                        break;
+                    default:
+                        log.error("Unknown entity data element: " + entityDataElement.getFieldName());
+                        break;
+                }
+            }
+        }
     }
 
     public void setRequirementCode(String requirementCode) {
-        this.requirementCode = requirementCode;
+        this.requirementCode.setValue(requirementCode);
     }
 
-    public String getRequirementCode() {
+    public SystemRequirementCode getRequirementCode() {
         return requirementCode;
     }
 
     public void setRequirementCodeLevel(Integer requirementCodeLevel) {
-        this.requirementCodeLevel = requirementCodeLevel;
+        this.requirementCodeLevel.setValue(requirementCodeLevel);
     }
-    public Integer getRequirementCodeLevel() {
+    public CodeLevel getRequirementCodeLevel() {
         return requirementCodeLevel;
     }
 
     public void setRequirementName(String requirementName) {
-        this.requirementName = requirementName;
+        this.requirementName.setValue(requirementName);
     }
-    public String getRequirementName() {
+    public RequirementName getRequirementName() {
         return requirementName;
     }
 
     public void setRequirementDescription(String requirementDescription) {
-        this.requirementDescription = requirementDescription;
+        this.requirementDescription.setValue(requirementDescription);
     }
 
-    public String getRequirementDescription() {
+    public RequirementDescription getRequirementDescription() {
         return requirementDescription;
     }
 
-    public void setVerificationStatusId(Integer verificationStatusId) {
-        this.verificationStatusId = verificationStatusId;
-    }
-    public Integer getVerificationStatusId() {
-        return verificationStatusId;
-    }
     public RequirementVerificationStatus getVerificationStatus() {
-        RequirementVerificationStatus requirementVerificationStatus = new RequirementVerificationStatus(getWebSession());
-        requirementVerificationStatus.setValue(verificationStatusId);
         return requirementVerificationStatus;
     }
 
     public void setRationalStatement(String rationalStatement) {
-        this.rationalStatement = rationalStatement;
-    }
-    public String getRationalStatement() {
-        return rationalStatement;
+        this.requirementRationalStatement.setValue(rationalStatement);
     }
 
-    public void setBusinessPriorityId(Integer businessPriorityId) {
-        this.businessPriorityId = businessPriorityId;
+    public RequirementRationaleStatement getRationalStatement() {
+        return requirementRationalStatement;
     }
-    public Integer getBusinessPriorityId() {
-        return businessPriorityId;
-    }    public RequirementBusinessPriority getBusinessPriority() {
-        RequirementBusinessPriority requirementBusinessPriority = new RequirementBusinessPriority(getWebSession());
-        requirementBusinessPriority.setValue(businessPriorityId);
+
+    public void setBusinessPriority(Integer businessPriorityId) {
+        this.requirementBusinessPriority.setValue(businessPriorityId);
+    }
+
+    public RequirementBusinessPriority getBusinessPriority() {
         return requirementBusinessPriority;
     }
 
     public void setCaptureDate(String captureDate) {
-        this.captureDate = captureDate;
-    }
-    public void setCaptureDate(LocalDate captureDate) {
-        this.captureDate = captureDate != null ? captureDate.format(AbstractDate.FORMATTER_DATE) : "";
-    }
-    public String getCaptureDate() {
-        return captureDate;
+        this.requirementCaptureDate.setValue(captureDate);
     }
 
-    public void setOwnerId(Integer ownerId) {
-        this.ownerId = ownerId;
+    public void setCaptureDate(LocalDate captureDate) {
+        this.requirementCaptureDate.setValue(captureDate);
     }
+
+    public RequirementCaptureDate getCaptureDate() {
+        return requirementCaptureDate;
+    }
+
+    public void setOwner(Integer ownerId) {
+        this.requirementOwner.setValue(ownerId);
+    }
+
     public Integer getOwnerId() {
-        return ownerId;
+        return requirementOwner.getValue();
     }
     public RequirementOwner getOwner() {
-        RequirementOwner requirementOwner = new RequirementOwner(getWebSession());
-        requirementOwner.setValue(ownerId);
         return requirementOwner;
     }
 
-
     public void setStatusId(Integer statusId) {
-        this.statusId = statusId;
+        this.requirementStatus.setValue(statusId);
     }
+
     public Integer getStatusId() {
-        return statusId;
+        return requirementStatus.getValue();
     }
+
     public RequirementStatus getStatus() {
-        RequirementStatus requirementStatus = new RequirementStatus(getWebSession());
-        requirementStatus.setValue(statusId);
         return requirementStatus;
     }
 
-    public void setRelevantToStakeholderRequirement(Boolean relevantToStakeholderRequirement) {
-        isRelevantToStakeholderRequirement = relevantToStakeholderRequirement;
+    public void setHighlevelCapability(String requirementHighlevelCapability) {
+        this.requirementHighlevelCapability.setValue(requirementHighlevelCapability);
     }
 
-    public Boolean isRelevantToStakeholderRequirement() {
-        return isRelevantToStakeholderRequirement;
-    }
-
-
-    public void setRequirementHighlevelCapability(String requirementHighlevelCapability) {
-        this.requirementHighlevelCapability = requirementHighlevelCapability;
-    }
-    public String getRequirementHighlevelCapability() {
+    public RequirementHighlevelCapability getRequirementHighlevelCapability() {
         return requirementHighlevelCapability;
     }
 
     public void setRequirementTypeId(Integer typeId) {
-        this.typeId = typeId;
+        this.requirementType.setValue(typeId);
     }
-    public Integer getRequirementTypeId() {
-        return typeId;
-    }
+
     public RequirementType getRequirementType() {
-        RequirementType requirementType = new RequirementType(getWebSession());
-        requirementType.setValue(typeId);
         return requirementType;
     }
 
     public void setRequirementFrequencyId(Integer requirementFrequencyId) {
-        this.requirementFrequencyId = requirementFrequencyId;
+        this.requirementFrequency.setValue(requirementFrequencyId);
     }
-    public Integer getRequirementFrequencyId() {
-        return requirementFrequencyId;
-    }
+
     public RequirementFrequency getRequirementFrequency() {
-        RequirementFrequency requirementFrequency = new RequirementFrequency(getWebSession());
-        requirementFrequency.setValue(requirementFrequencyId);
         return requirementFrequency;
     }
 
     public void setRequirementPerformance(String requirementPerformance) {
-        this.requirementPerformance = requirementPerformance;
+        this.requirementPerformance.setValue(requirementPerformance);
     }
-    public String getRequirementPerformance() {
+
+    public RequirementPerformance getRequirementPerformance() {
         return requirementPerformance;
     }
 
-    public void setRequirementVerificationStatusId(Integer requirementVerificationStatusId) {
-        this.requirementVerificationStatusId = requirementVerificationStatusId;
+    public void setVerificationStatus(Integer requirementVerificationStatusId) {
+        this.requirementVerificationStatus.setValue(requirementVerificationStatusId);
     }
-    public Integer getRequirementVerificationStatusId() {
-        return requirementVerificationStatusId;
-    }
+
     public RequirementVerificationStatus getRequirementVerificationStatus() {
-        RequirementVerificationStatus requirementVerificationStatus = new RequirementVerificationStatus(getWebSession());
-        requirementVerificationStatus.setValue(requirementVerificationStatusId);
         return requirementVerificationStatus;
     }
 
     public void setRequirementVerificationStatementId(Integer requirementVerificationStatementId) {
-        this.requirementVerificationStatementId = requirementVerificationStatementId;
+        this.requirementVerificationStatement.setValue(requirementVerificationStatementId);
     }
-    public Integer getRequirementVerificationStatementId() {
-        return requirementVerificationStatementId;
-    }
+
     public RequirementVerificationStatement getRequirementVerificationStatement() {
-        RequirementVerificationStatement requirementVerificationStatement = new RequirementVerificationStatement(getWebSession());
-        requirementVerificationStatement.setValue(requirementVerificationStatementId);
         return requirementVerificationStatement;
     }
 
-    public void setRequirementTechnicalPriorityIdtId(Integer requirementTechnicalPriorityId) {
-        this.requirementTechnicalPriorityId = requirementTechnicalPriorityId;
+    public void setRequirementTechnicalPriority(Integer requirementTechnicalPriorityId) {
+        this.requirementTechnicalPriority.setValue(requirementTechnicalPriorityId);
     }
-    public Integer getRequirementTechnicalPriorityId() {
-        return requirementTechnicalPriorityId;
-    }
+
     public RequirementTechnicalPriority getRequirementTechnicalPriority() {
-        RequirementTechnicalPriority requirementTechnicalPriority = new RequirementTechnicalPriority(getWebSession());
-        requirementTechnicalPriority.setValue(requirementTechnicalPriorityId);
         return requirementTechnicalPriority;
     }
 
-    public static SystemRequirementEntity map(EntityRecord entity) {
-
-        SystemRequirementEntity requirementEntity = null;
-
-        if (entity != null) {
-
-            requirementEntity = new SystemRequirementEntity(entity.getWebSession());
-
-            requirementEntity.setEntityId(entity.getEntityId());
-            requirementEntity.setCustomerId(entity.getCustomerId());
-            requirementEntity.setProjectId(entity.getProjectId());
-            requirementEntity.setVersion(entity.getVersion());
-            requirementEntity.setChangedByUserId(entity.getChangedByUserId());
-            requirementEntity.setDateOfChange(entity.getChangedDateTime());
-            requirementEntity.setActive(entity.isActive());
-
-            for (EntityElementRecord elementRecord : entity.getEntityElementRecords()) {
-
-                EntityDataElement entityDataElement = EntityDataElement.valueOf(elementRecord.getEntityDataElementType());
-
-                if (entityDataElement != null) {
-                    switch (entityDataElement) {
-                        case SYSTEMREQCODE :
-                            requirementEntity.setRequirementCode(elementRecord.getStringValue());
-                            break;
-                        case CODELEVEL :
-                            requirementEntity.setRequirementCodeLevel(elementRecord.getIntegerValue());
-                            break;
-                        case REQNAME :
-                            requirementEntity.setRequirementName(elementRecord.getStringValue());
-                            break;
-                        case REQDESCRIPTION :
-                            requirementEntity.setRequirementDescription(elementRecord.getStringValue());
-                            break;
-                        case REQVERIFICATIONSTATUSID :
-                            requirementEntity.setVerificationStatusId(elementRecord.getIntegerValue());
-                            break;
-                        case REQRATIONALESTATEMENT :
-                            requirementEntity.setRationalStatement(elementRecord.getStringValue());
-                            break;
-                        case REQBUSINESSPRIORITYID :
-                            requirementEntity.setBusinessPriorityId(elementRecord.getIntegerValue());
-                            break;
-                        case REQCAPTUREDATE :
-                            requirementEntity.setCaptureDate(elementRecord.getLocalDateValue());
-                            break;
-                        case REQOWNERID :
-                            requirementEntity.setOwnerId(elementRecord.getIntegerValue());
-                            break;
-                        case REQSTATUSID:
-                            requirementEntity.setStatusId(elementRecord.getIntegerValue());
-                            break;
-                    }
-                }
-
-            }
-
-        }
-
-        return requirementEntity;
-    }
-
     public void addAllDataElements() {
-        addDataElement(new StringDataElement(SystemRequirementCode.FIELD_NAME, getRequirementCode()));
-        addDataElement(new IntegerDataElement(CodeLevel.FIELD_NAME, getRequirementCodeLevel()));
-        addDataElement(new StringDataElement(RequirementName.FIELD_NAME, getRequirementName()));
-        addDataElement(new StringDataElement(RequirementDescription.FIELD_NAME, getRequirementDescription()));
-        addDataElement(new IntegerDataElement(RequirementVerificationStatus.FIELD_NAME, getVerificationStatusId()));
-        addDataElement(new StringDataElement(RequirementRationaleStatement.FIELD_NAME, getRationalStatement()));
-        addDataElement(new IntegerDataElement(RequirementBusinessPriority.FIELD_NAME, getBusinessPriorityId()));
-        addDataElement(new LocalDateDataElement(RequirementCaptureDate.FIELD_NAME, getCaptureDate()));
+        addDataElement(new StringDataElement(SystemRequirementCode.FIELD_NAME, getRequirementCode().getValue()));
+        addDataElement(new IntegerDataElement(CodeLevel.FIELD_NAME, getRequirementCodeLevel().getValue()));
+        addDataElement(new StringDataElement(RequirementName.FIELD_NAME, getRequirementName().getValue()));
+        addDataElement(new StringDataElement(RequirementDescription.FIELD_NAME, getRequirementDescription().getValue()));
+        addDataElement(new IntegerDataElement(RequirementVerificationStatus.FIELD_NAME, getVerificationStatus().getValue()));
+        addDataElement(new StringDataElement(RequirementRationaleStatement.FIELD_NAME, getRationalStatement().getValue()));
+        addDataElement(new IntegerDataElement(RequirementBusinessPriority.FIELD_NAME, getBusinessPriority().getValue()));
+        addDataElement(new LocalDateDataElement(RequirementCaptureDate.FIELD_NAME, getCaptureDate().getValue()));
         addDataElement(new IntegerDataElement(RequirementOwner.FIELD_NAME, getOwnerId()));
         addDataElement(new IntegerDataElement(RequirementStatus.FIELD_NAME, getStatusId()));
 
-        addDataElement(new StringDataElement(RequirementHighlevelCapability.FIELD_NAME, getRequirementHighlevelCapability()));
-        addDataElement(new IntegerDataElement(RequirementType.FIELD_NAME, getRequirementTypeId()));
-        addDataElement(new IntegerDataElement(RequirementFrequency.FIELD_NAME, getRequirementFrequencyId()));
-        addDataElement(new StringDataElement(RequirementPerformance.FIELD_NAME, getRequirementPerformance()));
-        addDataElement(new IntegerDataElement(RequirementVerificationStatus.FIELD_NAME, getRequirementVerificationStatusId()));
-        addDataElement(new IntegerDataElement(RequirementVerificationStatement.FIELD_NAME, getRequirementVerificationStatementId()));
-        addDataElement(new IntegerDataElement(RequirementTechnicalPriority.FIELD_NAME, getRequirementTechnicalPriorityId()));
+        addDataElement(new StringDataElement(RequirementHighlevelCapability.FIELD_NAME, getRequirementHighlevelCapability().getValue()));
+        addDataElement(new IntegerDataElement(RequirementType.FIELD_NAME, getRequirementType().getValue()));
+        addDataElement(new IntegerDataElement(RequirementFrequency.FIELD_NAME, getRequirementFrequency().getValue()));
+        addDataElement(new StringDataElement(RequirementPerformance.FIELD_NAME, getRequirementPerformance().getValue()));
+        addDataElement(new IntegerDataElement(RequirementVerificationStatus.FIELD_NAME, getRequirementVerificationStatus().getValue()));
+        addDataElement(new IntegerDataElement(RequirementVerificationStatement.FIELD_NAME, getRequirementVerificationStatement().getValue()));
+        addDataElement(new IntegerDataElement(RequirementTechnicalPriority.FIELD_NAME, getRequirementTechnicalPriority().getValue()));
     }
 
 }

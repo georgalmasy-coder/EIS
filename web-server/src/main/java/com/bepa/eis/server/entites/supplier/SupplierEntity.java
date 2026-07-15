@@ -1,5 +1,10 @@
 package com.bepa.eis.server.entites.supplier;
 
+import com.bepa.eis.server.dataprovider.entities.Entity;
+import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
+import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
+import com.bepa.eis.server.dataprovider.fields.strings.RequirementName;
+import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 
@@ -43,5 +48,21 @@ public class SupplierEntity extends AbstractEntity {
     @Override
     public String getDescription() {
         return "";
+    }
+
+    @Override
+    public void initializeFields() {
+    }
+
+    @Override
+    public void addAllFieldElementsForList(Entity entityElement) {
+    }
+
+    @Override
+    public void addAllFieldElementsForEdit(Entity entityElement) {
+    }
+
+    @Override
+    public void addAllFieldElementsForCreate(Entity entityElement, Integer parentEntityId) {
     }
 }

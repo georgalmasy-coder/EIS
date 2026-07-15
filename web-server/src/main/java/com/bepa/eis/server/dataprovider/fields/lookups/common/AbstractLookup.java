@@ -48,6 +48,7 @@ abstract public class AbstractLookup extends AbstractInteger {
 
     public void setLookupValue(LookupValue lookupValue) {
         this.lookupValue = lookupValue;
+        super.setValue(lookupValue != null ? lookupValue.getLookupId() : null);
     }
 
     public LookupValue getLookupValue() {

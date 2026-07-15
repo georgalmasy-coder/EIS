@@ -3,11 +3,11 @@ package com.bepa.eis.server.dataprovider.entities.common;
 import com.bepa.eis.common.enums.entity.EntityType;
 
 public class EntityKey {
-    private Integer customerId;
-    private Integer projectId;
-    private Integer entityId;
-    private EntityType entityType;
-    private Integer version;
+    private final Integer customerId;
+    private final Integer projectId;
+    private final Integer entityId;
+    private final EntityType entityType;
+    private final Integer version;
 
     public EntityKey(Integer customerId, Integer projectId, Integer entityId, EntityType entityType, Integer version) {
         this.customerId = customerId;

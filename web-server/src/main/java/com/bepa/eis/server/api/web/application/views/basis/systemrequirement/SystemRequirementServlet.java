@@ -69,11 +69,11 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
                 String eventDescription =
                         systemRequirementEntity.getEntityType().getDescription() + " '" +
                         systemRequirementEntity.getRequirementCode() + " " +
-                        systemRequirementEntity.getRequirementName() + "' has been " + (systemRequirementEntity.getVersion() == 1 ? "created" : "updated");
+                        systemRequirementEntity.getRequirementName() + "' has been " + (systemRequirementEntity.getVersion().getValue() == 1 ? "created" : "updated");
 
                 EventProvider eventProvider = new EventProvider(webSession);
                 eventProvider.createEntityChangeEvent(systemRequirementEntity.getEntityType(),
-                                                      systemRequirementEntity.getEntityId(),
+                                                      systemRequirementEntity.getEntityId().getValue(),
                                                       eventDescription);
 
             }
@@ -152,7 +152,6 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         Integer requirementTypeId = intValue(requirmentElement, RequirementType.FIELD_NAME);
         Integer requirementFrequencyId = intValue(requirmentElement, RequirementFrequency.FIELD_NAME);
         String requirementPerformance = textValue(requirmentElement, RequirementPerformance.FIELD_NAME);
-        Integer requirementVerificationStatusId = intValue(requirmentElement, RequirementVerificationStatus.FIELD_NAME);
         Integer requirementVerificationStatementId = intValue(requirmentElement, RequirementVerificationStatement.FIELD_NAME);
         Integer requirementTechnicalPriorityId = intValue(requirmentElement, RequirementTechnicalPriority.FIELD_NAME);
 
@@ -173,20 +172,19 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         systemRequirementEntity.setRequirementCodeLevel(codeLevel);
         systemRequirementEntity.setRequirementName(requirementName);
         systemRequirementEntity.setRequirementDescription(requirementDescription);
-        systemRequirementEntity.setVerificationStatusId(verificationStatusId);
-        systemRequirementEntity.setBusinessPriorityId(businessPriorityId);
+        systemRequirementEntity.setVerificationStatus(verificationStatusId);
+        systemRequirementEntity.setBusinessPriority(businessPriorityId);
         systemRequirementEntity.setStatusId(statusId);
-        systemRequirementEntity.setOwnerId(ownerId);
+        systemRequirementEntity.setOwner(ownerId);
         systemRequirementEntity.setRationalStatement(rationalStatement);
         systemRequirementEntity.setCaptureDate(captureDate);
 
-        systemRequirementEntity.setRequirementHighlevelCapability(requirementHighlevelCapability);
+        systemRequirementEntity.setHighlevelCapability(requirementHighlevelCapability);
         systemRequirementEntity.setRequirementTypeId(requirementTypeId);
         systemRequirementEntity.setRequirementFrequencyId(requirementFrequencyId);
         systemRequirementEntity.setRequirementPerformance(requirementPerformance);
-        systemRequirementEntity.setRequirementVerificationStatusId(requirementVerificationStatusId);
         systemRequirementEntity.setRequirementVerificationStatementId(requirementVerificationStatementId);
-        systemRequirementEntity.setRequirementTechnicalPriorityIdtId(requirementTechnicalPriorityId);
+        systemRequirementEntity.setRequirementTechnicalPriority(requirementTechnicalPriorityId);
 
 
         systemRequirementEntity.setActive(active);
@@ -206,15 +204,6 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
         String fileName;
 
         GenericExporters genericExporters = new SystemRequirementExporters();
-
-/* GFA
-        try {
-            //EmailSender emailSender = new EmailSender();
-            //emailSender.sendEmail();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-*/
 
         switch (format) {
             case "csv" -> {
@@ -261,18 +250,18 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
 
     private static SystemRequirementExportRow toExportRow(SystemRequirementEntity entity) {
         return new SystemRequirementExportRow(
-                entity.getRequirementCode(),
-                entity.getRequirementCodeLevel(),
-                entity.getRequirementName(),
-                entity.getRequirementDescription(),
-                entity.getVerificationStatus(),
-                entity.getRationalStatement(),
-                entity.getCaptureDate(),
+                entity.getRequirementCode().getValue(),
+                entity.getRequirementCodeLevel().getValue(),
+                entity.getRequirementName().getValue(),
+                entity.getRequirementDescription().getValue(),
+                entity.getRequirementVerificationStatus(),
+                entity.getRationalStatement().getValue(),
+                entity.getCaptureDate().getValue().toString(),
                 entity.getStatus(),
                 entity.getBusinessPriority(),
                 entity.getOwner(),
                 entity.getChangedByUser(),
-                entity.getChangedDate(),
+                entity.getChangedDate().getValue(),
                 entity.isActive()
         );
     }

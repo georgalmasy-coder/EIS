@@ -17,6 +17,10 @@ abstract public class AbstractDateTime extends AbstractField {
         setValue(localDateTime);
     }
 
+    public AbstractDateTime(LocalDateTime localDateTime) {
+        setValue(localDateTime);
+    }
+
     public LocalDateTime getValue() {
         return value;
     }

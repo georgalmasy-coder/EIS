@@ -1,5 +1,11 @@
 package com.bepa.eis.server.dataprovider.entities.common;
 
+import com.bepa.eis.server.dataprovider.fields.integers.Version;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
+import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
+import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 
@@ -8,10 +14,10 @@ import java.util.Base64;
 
 public class AttachmentRecord {
     private Integer entityAttachmentBlobPK;
-    private final Integer customerId;
-    private final Integer projectId;
-    private final Integer entityId;
-    private final Integer version;
+    private final CustomerId customerId;
+    private final ProjectId projectId;
+    private final EntityId entityId;
+    private final Version version;
     private final EntityType entityType;
     private final String fileName;
     private final String contentType;
@@ -19,8 +25,9 @@ public class AttachmentRecord {
     private final String fileData;
     private final String description;
 
-    private final Integer uploadedByUserId;
-    private final LocalDateTime uploadedDateTime;
+    private ChangedBy uploadedBy;
+    private final ChangedDateTime uploadedDateTime = new ChangedDateTime(LocalDateTime.now());
+
     private final Boolean deleted;
 
     public AttachmentRecord(AbstractEntity entity,
@@ -44,8 +51,9 @@ public class AttachmentRecord {
         this.fileSize = fileSize;
         this.fileData = fileData;
         this.description = description;
-        this.uploadedByUserId = uploadedByUserId != null ? uploadedByUserId : entity.getChangedByUserId();
-        this.uploadedDateTime = uploadedDateTime != null ? uploadedDateTime : LocalDateTime.now();
+        this.uploadedBy = new ChangedBy(entity.getWebSession());
+        this.uploadedBy.setValue(uploadedByUserId != null ? uploadedByUserId : entity.getChangedByUser().getValue());
+        this.uploadedDateTime.setValue(uploadedDateTime != null ? uploadedDateTime : LocalDateTime.now());
         this.deleted = deleted;
     }
 
@@ -54,29 +62,29 @@ public class AttachmentRecord {
     }
 
     public void setEntityAttachmentBlobPK(Integer entityAttachmentBlobPK) {
-        this.entityAttachmentBlobPK = entityAttachmentBlobPK;;
+        this.entityAttachmentBlobPK = entityAttachmentBlobPK;
     }
 
-    public Integer getCustomerId() {
+    public CustomerId getCustomerId() {
         return customerId;
     }
-    public Integer getProjectId() {
+    public ProjectId getProjectId() {
         return projectId;
     }
-    public Integer getEntityId() {
+    public EntityId getEntityId() {
         return entityId;
     }
-    public Integer getVersion() {
+    public Version getVersion() {
         return version;
     }
 
     public EntityType getEntityType() {
         return entityType;
     }
-    public Integer getChangedByUserId() {
-        return uploadedByUserId;
+    public ChangedBy getChangedByUserId() {
+        return uploadedBy;
     }
-    public LocalDateTime getChangedDate() {
+    public ChangedDateTime getChangedDate() {
         return uploadedDateTime;
     }
 

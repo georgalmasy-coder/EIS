@@ -1,5 +1,6 @@
 package com.bepa.eis.server.dataprovider.cache;
 
+import com.bepa.eis.server.api.web.application.cache.LookupCache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.xml.XmlConfiguration;
@@ -9,6 +10,8 @@ import java.net.URL;
 public final class EhcacheProvider {
 
     private static final CacheManager CACHE_MANAGER = buildAndInit();
+
+    public static final String LOOKUP_CACHE_ALIAS = "LookupCache";
 
     private EhcacheProvider() {
     }
@@ -28,7 +31,11 @@ public final class EhcacheProvider {
         }
     }
 
-    public static <K, V> void clearCacheEntry(String cacheAlias, Class<K> keyType, Class<V> valueType, K key) {
+    public static void clearCacheEntry(Integer customerId) {
+        clearCacheEntry(LOOKUP_CACHE_ALIAS, Integer.class, LookupCache.class, customerId);
+    }
+
+    private static <K, V> void clearCacheEntry(String cacheAlias, Class<K> keyType, Class<V> valueType, K key) {
         if (cacheAlias == null || cacheAlias.isBlank() || key == null) {
             return;
         }

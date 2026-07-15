@@ -7,7 +7,7 @@
         <key-type>java.lang.Integer</key-type>
         <value-type>com.bepa.eis.server.api.web.application.cache.LookupCache</value-type>
         <expiry>
-            <ttl unit="hours">2</ttl>
+            <ttl unit="hours">12</ttl>
         </expiry>
 
         <resources>

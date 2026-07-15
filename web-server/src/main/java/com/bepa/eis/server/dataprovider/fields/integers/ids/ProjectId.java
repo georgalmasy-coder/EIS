@@ -6,6 +6,9 @@ public class ProjectId extends AbstractId {
 
     public static String FIELD_NAME = "ProjectId";
 
+    public ProjectId() {
+    }
+
     public ProjectId(Integer value) {
         setValue(value);
     }
@@ -18,11 +21,6 @@ public class ProjectId extends AbstractId {
     @Override
     public String getFieldHeaderName() {
         return "Project ID";
-    }
-
-    @Override
-    public String toString() {
-        return getValue() != null ? getValue().toString() : null;
     }
 
 }

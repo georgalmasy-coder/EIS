@@ -17,6 +17,8 @@ public enum PageType {
 
 
     // New versions
+    STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder"),
+    STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit"),
     SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
     SYSTEM_REQUIREMENT_MAIN_LIST_PAGE("systemrequirement-main-list","html-pages/systemrequirement-main-list.html", "System Requirement"),
     SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "System Requirement"),

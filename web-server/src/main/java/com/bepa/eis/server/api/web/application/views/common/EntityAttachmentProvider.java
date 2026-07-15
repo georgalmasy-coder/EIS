@@ -126,15 +126,15 @@ public class EntityAttachmentProvider extends GenericProvider {
 
                 try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_ATTACHMENT_SQL)) {
 
-                    ps.setInt(1, entity.getCustomerId());
-                    ps.setInt(2, entity.getProjectId());
-                    ps.setInt(3, entity.getEntityId());
+                    ps.setInt(1, entity.getCustomerId().getValue());
+                    ps.setInt(2, entity.getProjectId().getValue());
+                    ps.setInt(3, entity.getEntityId().getValue());
                     ps.setInt(4, entity.getEntityType().getId());
-                    ps.setInt(5, entity.getVersion());
+                    ps.setInt(5, entity.getVersion().getValue());
 
-                    Integer createdById = attachmentRecord.getChangedByUserId() != null ? attachmentRecord.getChangedByUserId() : getWebSession().getUserId();
+                    Integer createdById = attachmentRecord.getChangedByUserId() != null ? attachmentRecord.getChangedByUserId().getValue() : getWebSession().getUserId();
                     ps.setInt(6, createdById);
-                    ps.setTimestamp(7, Timestamp.valueOf(attachmentRecord.getChangedDate()));
+                    ps.setTimestamp(7, Timestamp.valueOf(attachmentRecord.getChangedDate().getValue()));
 
                     ps.setInt(8, attachmentRecord.getEntityAttachmentBlobPK());
 

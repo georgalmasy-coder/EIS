@@ -4,6 +4,10 @@ public class Latest extends AbstractBoolean {
 
     public static final String FIELD_NAME = "Latest";
 
+    public Latest() {
+        setValue(true);
+    }
+
     public Latest(Boolean value) {
         setValue(value);
     }

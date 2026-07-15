@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 
@@ -47,7 +48,7 @@ public class SystemRequirementWrapper {
         return false;
     }
 
-    protected Integer getEntityId() {
+    protected EntityId getEntityId() {
         return systemRequirementEntity.getEntityId();
     }
 
@@ -56,19 +57,15 @@ public class SystemRequirementWrapper {
     }
 
     protected String getRequirementCode() {
-        return systemRequirementEntity.getRequirementCode();
+        return systemRequirementEntity.getRequirementCode().getValue();
     }
 
     protected String getRequirementName() {
-        return systemRequirementEntity.getRequirementName();
+        return systemRequirementEntity.getRequirementName().getValue();
     }
 
     protected String getRequirementDescription() {
-        return systemRequirementEntity.getRequirementDescription();
-    }
-
-    protected Boolean isRelevantToStakeholderRequirement() {
-        return systemRequirementEntity.isRelevantToStakeholderRequirement();
+        return systemRequirementEntity.getRequirementDescription().getValue();
     }
 
     protected void setListOfStakeholderRequirements(List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers) {

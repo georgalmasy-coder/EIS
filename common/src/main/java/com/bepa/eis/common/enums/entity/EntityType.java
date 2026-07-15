@@ -4,6 +4,19 @@ import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
 
 public enum EntityType {
 
+    STAKEHOLDER(1, "STAKEHOLDER","Stakeholder", "stakeholderDocument", "stakeholders", "stakeholder",
+            new EntityDataElement[]{
+                    STAKEHOLDERNAME,
+                    STAKEHOLDERDESCRIPTION,
+                    CONTACTNAME,
+                    CONTACTEMAIL,
+                    CONTACTPHONE
+            },
+            null,
+            STAKEHOLDERNAME
+    ),
+
+
     SYSTEMS_BREAKDOWN(2, "P-SYS", "Physical Structure", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
             new EntityDataElement[]{
                     SBSCODE,
@@ -34,17 +47,18 @@ public enum EntityType {
             CONTRACTORNAME
     ),
 
-    STAKEHOLDER_REQUIREMENT(5, "STHREQ", "Stakeholder requirement", "stakeholderRequirementDocument", "stakeholderRequirements", "stakeholderRequirement",
+    STAKEHOLDER_REQUIREMENT(5, "STH", "Stakeholder requirement", "stakeholderRequirementDocument", "stakeholderRequirements", "stakeholderRequirement",
             new EntityDataElement[]{
                     BASISREQCODE,
                     CODELEVEL,
                     REQNAME,
-                    REQDESCRIPTION},
+                    REQDESCRIPTION,
+                    EntityDataElement.STAKEHOLDER},
             BASISREQCODE,
             REQNAME
     ),
 
-    SYSTEM_REQUIREMENT(6, "SYSREQ", "System requirement", "systemRequirementDocument", "systemRequirements", "systemRequirement",
+    SYSTEM_REQUIREMENT(6, "SYS", "System requirement", "systemRequirementDocument", "systemRequirements", "systemRequirement",
             new EntityDataElement[]{
                     SYSTEMREQCODE,
                     CODELEVEL,

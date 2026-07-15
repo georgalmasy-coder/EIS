@@ -4,6 +4,9 @@ public class Version extends AbstractInteger {
 
     public static String FIELD_NAME = "Version";
 
+    public Version() {
+    }
+
     public Version(Integer value) {
         setValue(value);
     }

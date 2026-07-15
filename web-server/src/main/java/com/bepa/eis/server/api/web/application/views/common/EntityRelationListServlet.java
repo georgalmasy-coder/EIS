@@ -9,6 +9,7 @@ import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
@@ -23,7 +24,6 @@ import org.w3c.dom.Element;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -116,7 +116,7 @@ public class EntityRelationListServlet extends GenericServlet {
         }
 
         EntityType entityType = parseEntityType(root, request);
-        Integer entityId = parseInteger(textOf(root, "EntityId"));
+        EntityId entityId = new EntityId(parseInteger(textOf(root, "EntityId")));
         Set<String> existingRelations = parseExistingRelations(root);
 
         return new WebRequest(entityType, entityId, existingRelations);
@@ -170,7 +170,7 @@ public class EntityRelationListServlet extends GenericServlet {
         return relationList;
     }
 
-    private List<RelationListSpec> resolveLists(WebSession webSession, WebRequest requestData) throws SQLException {
+    private List<RelationListSpec> resolveLists(WebSession webSession, WebRequest requestData) {
 
         EntityType entityType = requestData.entityType();
         List<RelationListSpec> lists = new ArrayList<>();
@@ -247,7 +247,7 @@ public class EntityRelationListServlet extends GenericServlet {
         List<RelationOption> options = new ArrayList<>();
         for (StakeholderRequirementEntity stakeholderRequirement : stakeholderRequirements) {
             EntityType entityType = stakeholderRequirement.getEntityType();
-            options.add(new RelationOption(stakeholderRequirement.getEntityId(), entityType, entityType.getDescription(), stakeholderRequirement.getRequirementCode(), stakeholderRequirement.getRequirementName()));
+            options.add(new RelationOption(stakeholderRequirement.getEntityId(), entityType, entityType.getDescription(), stakeholderRequirement.getRequirementCode().getValue(), stakeholderRequirement.getRequirementName().getValue()));
         }
         return options;
     }
@@ -267,12 +267,12 @@ public class EntityRelationListServlet extends GenericServlet {
         List<RelationOption> options = new ArrayList<>();
         for (SystemRequirementEntity systemRequirement : systemRequirements) {
             EntityType entityType = systemRequirement.getEntityType();
-            options.add(new RelationOption(systemRequirement.getEntityId(), entityType, entityType.getDescription(), systemRequirement.getRequirementCode(), systemRequirement.getRequirementName()));
+            options.add(new RelationOption(systemRequirement.getEntityId(), entityType, entityType.getDescription(), systemRequirement.getRequirementCode().getValue(), systemRequirement.getRequirementName().getValue()));
         }
         return options;
     }
 
-    private List<RelationOption> buildSystemsBreadownOptionList(WebSession webSession, WebRequest requestData) throws SQLException {
+    private List<RelationOption> buildSystemsBreadownOptionList(WebSession webSession, WebRequest requestData) {
 
         List<SystemBreakdownEntity> loadedSystemBreakdowns = getSystemBreakdowns(webSession);
         List<SystemBreakdownEntity> systemsBreakdowns = new ArrayList<>();
@@ -286,12 +286,12 @@ public class EntityRelationListServlet extends GenericServlet {
         List<RelationOption> options = new ArrayList<>();
         for (SystemBreakdownEntity systemsBreakdown : systemsBreakdowns) {
             EntityType entityType = systemsBreakdown.getEntityType();
-            options.add(new RelationOption(systemsBreakdown.getEntityId(), entityType, entityType.getDescription(), systemsBreakdown.getSbsCode(), systemsBreakdown.getSystemName()));
+            options.add(new RelationOption(systemsBreakdown.getEntityId(), entityType, entityType.getDescription(), systemsBreakdown.getSbsCode().getValue(), systemsBreakdown.getSystemName().getValue()));
         }
         return options;
     }
 
-    private boolean hasExistingRelation(EntityType currEntityType, Integer currEntityId, WebRequest requestData) {
+    private boolean hasExistingRelation(EntityType currEntityType, EntityId currEntityId, WebRequest requestData) {
 
         if (currEntityType == requestData.entityType && Objects.equals(currEntityId, requestData.entityId))  {
             return true;
@@ -299,10 +299,10 @@ public class EntityRelationListServlet extends GenericServlet {
 
         for (String relationKey : requestData.existingRelations()) {
             String[] parts = relationKey.split(":");
-            EntityType entityType = EntityType.fromId(Integer.valueOf(parts[0]));
+            EntityType entityType = EntityType.fromId(Integer.parseInt(parts[0]));
             Integer entityId = Integer.valueOf(parts[1]);
 
-            if (currEntityType == entityType && Objects.equals(currEntityId, entityId))  {
+            if (currEntityType == entityType && Objects.equals(currEntityId.getValue(), entityId))  {
                 return true;
             }
         }
@@ -340,9 +340,9 @@ public class EntityRelationListServlet extends GenericServlet {
 
         for (Element relationNode : children(relationsNode, "EntityRelation")) {
             Integer relatedEntityType = parseInteger(textOf(relationNode, "RelatedEntityType"));
-            Integer relatedEntityId = parseInteger(textOf(relationNode, "RelatedEntityId"));
+            EntityId relatedEntityId = new EntityId(parseInteger(textOf(relationNode, "RelatedEntityId")));
 
-            if (relatedEntityType != null && relatedEntityId != null) {
+            if (relatedEntityType != null) {
                 keys.add(relationKey(relatedEntityType, relatedEntityId));
             }
         }
@@ -450,11 +450,11 @@ public class EntityRelationListServlet extends GenericServlet {
         return entityType == null ? "" : String.valueOf(entityType.getId());
     }
 
-    private String relationKey(EntityType entityType, Integer entityId) {
+    private String relationKey(EntityType entityType, EntityId entityId) {
         return relationKey(entityType == null ? null : entityType.getId(), entityId);
     }
 
-    private String relationKey(Integer entityTypeId, Integer entityId) {
+    private String relationKey(Integer entityTypeId, EntityId entityId) {
         return valueOf(entityTypeId) + ":" + (entityId == null ? "" : entityId);
     }
 
@@ -462,7 +462,7 @@ public class EntityRelationListServlet extends GenericServlet {
         return value == null ? "" : String.valueOf(value);
     }
 
-    private record WebRequest(EntityType entityType, Integer entityId, Set<String> existingRelations) {
+    private record WebRequest(EntityType entityType, EntityId entityId, Set<String> existingRelations) {
     }
 
     private record RelationListResponse(Document document) {
@@ -471,6 +471,6 @@ public class EntityRelationListServlet extends GenericServlet {
     private record RelationListSpec(String label, boolean showConfirmedRelation, boolean showNoRelevantRelation, List<RelationOption> options) {
     }
 
-    private record RelationOption(Integer entityId, EntityType entityType, String entityTypeName, String entityCode, String entityName) {
+    private record RelationOption(EntityId entityId, EntityType entityType, String entityTypeName, String entityCode, String entityName) {
     }
 }

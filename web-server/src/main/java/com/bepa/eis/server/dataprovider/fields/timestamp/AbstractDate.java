@@ -19,6 +19,12 @@ abstract public class AbstractDate extends AbstractField {
         setFieldNotRequired();
     }
 
+    public AbstractDate(String date) {
+        LocalDate localDate = (date != null) ? localDate = LocalDate.parse(date) : null;
+        setValue(localDate);
+        setFieldNotRequired();
+    }
+
     public AbstractDate(Timestamp timestamp) {
         LocalDate localDate = (timestamp != null) ? LocalDate.ofInstant(timestamp.toInstant(), ZoneId.systemDefault() ) : null;
         setValue(localDate);
@@ -37,6 +43,11 @@ abstract public class AbstractDate extends AbstractField {
 
     public void setValue(LocalDate value) {
         this.value = value;
+    }
+
+    public void setValue(String value) {
+        LocalDate localDate = (value != null && !value.trim().isBlank()) ? localDate = LocalDate.parse(value) : null;
+        setValue(localDate);
     }
 
     @Override

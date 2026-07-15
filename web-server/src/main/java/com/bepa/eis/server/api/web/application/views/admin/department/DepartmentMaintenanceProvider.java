@@ -3,7 +3,6 @@ package com.bepa.eis.server.api.web.application.views.admin.department;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.DTO.Department;
-import com.bepa.eis.server.api.web.application.cache.LookupCache;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +18,6 @@ import java.util.List;
 public class DepartmentMaintenanceProvider extends GenericProvider {
 
     private static final Logger log = LoggerFactory.getLogger(DepartmentMaintenanceProvider.class);
-
-    private static final String LOOKUP_CACHE_ALIAS = "LookupCache";
 
     private static final String SELECT_DEPARTMENTS_SQL =
             "SELECT DepartmentId, CustomerId, DepartmentName, DepartmentDescription, Active " +
@@ -140,7 +137,7 @@ public class DepartmentMaintenanceProvider extends GenericProvider {
                 connection.setAutoCommit(true);
             }
 
-            EhcacheProvider.clearCacheEntry(LOOKUP_CACHE_ALIAS, Integer.class, LookupCache.class, customerId);
+            EhcacheProvider.clearCacheEntry(customerId);
 
             Department savedDepartment = getDepartmentById(savedDepartmentId);
             if (savedDepartment == null) {

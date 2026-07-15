@@ -1,15 +1,16 @@
 package com.bepa.eis.server.api.web.application.cache;
 
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.User;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LookupCache {
 
     private final RequirementBusinessPriorityCache requirementBusinessPriorityCache;
     private final RequirementVerificationCache requirementVerificationCache;
-    private final TrlCache trlCache;
     private final ProjectCategoryCache projectCategoryCache;
     private final ProjectPriorityCache projectPriorityCache;
     private final RequirementStatusCache requirementStatusCache;
@@ -22,11 +23,11 @@ public class LookupCache {
     private final RequirementTechnicalPriorityCache requirementTechnicalPriorityCache;
     private final RequirementVerificationStatementCache requirementVerificationStatementCache;
 
+    private final Map<Integer, LookupProjectCache> lookupProjectCacheMap;
 
     public LookupCache(Integer customerId, Integer projectId) {
         requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(customerId, projectId);
         requirementVerificationCache = new RequirementVerificationCache(customerId, projectId);
-        trlCache = new TrlCache(customerId, projectId);
         projectCategoryCache = new ProjectCategoryCache(customerId, projectId);
         projectPriorityCache = new ProjectPriorityCache(customerId, projectId);
         requirementStatusCache = new RequirementStatusCache(customerId, projectId);
@@ -38,6 +39,8 @@ public class LookupCache {
         requirementFrequencyCache = new RequirementFrequencyCache(customerId, projectId);
         requirementTechnicalPriorityCache = new RequirementTechnicalPriorityCache(customerId, projectId);
         requirementVerificationStatementCache = new RequirementVerificationStatementCache(customerId, projectId);
+
+        lookupProjectCacheMap = new HashMap<>();
     }
 
     public LookupValue getRequirementBusinessPriorityLookupValue(Integer lookupId) {
@@ -56,12 +59,42 @@ public class LookupCache {
         return requirementVerificationCache.getListOfActiveLookupValues();
     }
 
-    public LookupValue getTrlLookupValue(Integer lookupId) {
-        return lookupId != null ? trlCache.getLookupValueById(lookupId) : null;
+    public LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+
+        if (customerId != null && projectId != null && lookupId != null) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getTrlLookupValue(lookupId);
+        }
+
+        return null;
     }
 
-    public List<LookupValue> getTrlLookupValues() {
-        return trlCache.getListOfActiveLookupValues();
+    public List<LookupValue> getTrlLookupValues(Integer customerId, Integer projectId) {
+
+        if (customerId != null && projectId != null ) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getTrlLookupValues();
+        }
+        return new ArrayList<>();
+    }
+
+    public LookupValue getStakeholderLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+
+        if (customerId != null && projectId != null && lookupId != null) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getStakeholderLookupValue(lookupId);
+        }
+
+        return null;
+    }
+
+    public List<LookupValue> getStakeholderLookupValues(Integer customerId, Integer projectId) {
+
+        if (customerId != null && projectId != null ) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getStakeholderLookupValues();
+        }
+        return new ArrayList<>();
     }
 
     public LookupValue getProjectCategoryLookupValue(Integer lookupId) {
@@ -116,8 +149,8 @@ public class LookupCache {
         return departmentCache.getListOfAllLookupValues();
     }
 
-    public LookupValue getRequirementTypeLookupValue(Integer typrId) {
-        return typrId != null ? requirementTypeCache.getLookupValueById(typrId) : null;
+    public LookupValue getRequirementTypeLookupValue(Integer typeId) {
+        return typeId != null ? requirementTypeCache.getLookupValueById(typeId) : null;
     }
 
     public List<LookupValue> getRequirementTypeLookupValues() {
@@ -146,6 +179,16 @@ public class LookupCache {
 
     public List<LookupValue> getRequirementVerificationStatementLookupValues() {
         return requirementVerificationStatementCache.getListOfAllLookupValues();
+    }
+
+    private LookupProjectCache getLookupProjectCache(Integer customerId, Integer projectId) {
+        LookupProjectCache lookupProjectCache = lookupProjectCacheMap.get(projectId);
+        if (lookupProjectCache == null) {
+            lookupProjectCache = new LookupProjectCache(customerId, projectId);
+            lookupProjectCacheMap.put(projectId, lookupProjectCache);
+        }
+
+        return lookupProjectCache;
     }
 
 }

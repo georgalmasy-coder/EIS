@@ -8,9 +8,13 @@ import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.email.ContactEmail;
+import com.bepa.eis.server.dataprovider.fields.strings.phone.ContactPhone;
 import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineFinalized;
 import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineNextTRL;
 import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
+
+import static com.bepa.eis.common.enums.entity.EntityElementType.STRING;
 
 public class MapDataElementType {
 
@@ -43,6 +47,13 @@ public class MapDataElementType {
             case CONTRACTORNAME -> new ContractorName();
             case BASISREQCODE -> new StakeholderRequirementCode();
             case SYSTEMREQCODE -> new SystemRequirementCode();
+
+            case STAKEHOLDERNAME -> new StakeholderName();
+            case STAKEHOLDERDESCRIPTION -> new StakeholderDescription();
+            case CONTACTNAME -> new ContactName();
+            case CONTACTEMAIL -> new ContactEmail();
+            case CONTACTPHONE -> new ContactPhone();
+
             default -> throw new IllegalArgumentException("Unknown EntityDataElement: " + entityDataElement);
         };
     }

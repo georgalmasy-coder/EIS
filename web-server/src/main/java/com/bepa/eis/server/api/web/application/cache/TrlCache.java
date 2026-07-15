@@ -6,7 +6,7 @@ public class TrlCache extends GenericLookup {
             "SELECT CustomerId, ProjectId, TRLLevel as LookupId, concat(concat(TRLLevel, ' - ' ), TRLName) as LookupCode, TRLName as LookupDescription, null AS Color, Active " +
             "FROM TRL " +
             "WHERE CustomerId=? " +
-//            "AND   ProjectId=? " +
+            "AND   ProjectId=? " +
             "ORDER BY TRLLevel";
 
     public TrlCache(Integer customerId, Integer projectId) {

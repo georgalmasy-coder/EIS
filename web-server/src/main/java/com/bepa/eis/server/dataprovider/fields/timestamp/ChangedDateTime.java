@@ -1,10 +1,17 @@
 package com.bepa.eis.server.dataprovider.fields.timestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class ChangedDateTime extends AbstractDateTime {
 
     public static String FIELD_NAME = "ChangedDateTime";
+
+    public ChangedDateTime(LocalDateTime localDateTime) {
+        super (localDateTime);
+        setFieldEditable();
+        setFieldRequired();
+    }
 
     public ChangedDateTime(Timestamp timestamp) {
         super (timestamp);

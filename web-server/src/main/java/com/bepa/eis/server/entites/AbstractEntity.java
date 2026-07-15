@@ -1,11 +1,20 @@
 package com.bepa.eis.server.entites;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.entities.common.LinkRecord;
 import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
+import com.bepa.eis.server.dataprovider.fields.booleans.Active;
+import com.bepa.eis.server.dataprovider.fields.booleans.Latest;
+import com.bepa.eis.server.dataprovider.fields.integers.Version;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
+import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.entites.configuration.EntityConfiguration;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
@@ -17,35 +26,75 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 abstract public class AbstractEntity {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEntity.class);
 
     private WebSession webSession;
-    private Integer customerId;
-    private Integer projectId;
-    private Integer entityId;
-    private Integer version;
     private final List<AbstractDataElement> listOfDataElements = new ArrayList<>();
     private final List<NoteRecord> listOfNoteRecords = new ArrayList<>();
     private final List<LinkRecord> listOfLinkRecords = new ArrayList<>();
     private final List<AttachmentRecord> listOfAttachmentRecords = new ArrayList<>();
     private final List<EntityRelationRecord> listOfEntityRelationRecords = new ArrayList<>();
-    private Integer changedByUserId;
-    private LocalDateTime changedDate = LocalDateTime.now();
-    private boolean latest = true;
-    private boolean active = true;
     private Boolean prevActiveStatus = null;
 
-    private static Integer prevChangedByUserId;
     private static LocalDateTime prevChangedDate;
 
+    private CustomerId customerId;
+    private ProjectId projectId;
+    private EntityId entityId;
+    private Version version;
+    private Latest latest;
+    private Active active;
+    private ChangedDateTime changedDateTime;
+    private ChangedBy changedBy;
+
     public AbstractEntity() {
+        initFields();
     }
 
-    public AbstractEntity(WebSession session) {
-        this.webSession = session;
+    public AbstractEntity(WebSession webSession) {
+        this.webSession = webSession;
+        initFields();
+    }
+
+    public AbstractEntity(WebSession webSession, EntityRecord entityRecord) {
+        this.webSession = webSession;
+        initFields();
+
+        if (entityRecord != null) {
+            customerId.setValue(entityRecord.getCustomerId());
+            projectId.setValue(entityRecord.getProjectId());
+            entityId.setValue(entityRecord.getEntityId());
+            version.setValue(entityRecord.getVersion());
+            latest.setValue(entityRecord.isLatest());
+            active.setValue(entityRecord.isActive());
+            changedBy.setValue(entityRecord.getChangedByUserId());
+            changedDateTime.setValue(entityRecord.getChangedDateTime().toLocalDateTime());
+        } else {
+            customerId.setValue(getWebSession().getCustomerId());
+            projectId.setValue(getWebSession().getProjectId());
+            entityId.setValue(null);
+            version.setValue(1);
+            latest.setValue(true);
+            active.setValue(true);
+            changedBy.setValue(getWebSession().getUserId());
+            changedDateTime.setValue(LocalDateTime.now());
+        }
+    }
+
+    private void initFields() {
+        customerId = new CustomerId();
+        projectId = new ProjectId();
+        entityId = new EntityId();
+        version = new Version();
+        latest = new Latest(true);
+        active = new Active(true);
+        changedDateTime = new ChangedDateTime( LocalDateTime.now());
+        changedBy = new ChangedBy(getWebSession());
+        initializeFields();
     }
 
     public WebSession getWebSession() {
@@ -81,29 +130,34 @@ abstract public class AbstractEntity {
     abstract public String getName();
     abstract public String getDescription();
 
+    abstract public void initializeFields();
+    abstract public void addAllFieldElementsForList(Entity entityElement);
+    abstract public void addAllFieldElementsForEdit(Entity entityElement);
+    abstract public void addAllFieldElementsForCreate(Entity entityElement, Integer parentEntityId);
+
     public void setCustomerId(Integer customerId) {
-        this.customerId = customerId;
+        this.customerId.setValue(customerId);
     }
 
     public void setCustomerId(String value) {
         if (value == null) {
-            this.customerId = mapProjectIdToCustomerId(projectId);
+            this.customerId.setValue(mapProjectIdToCustomerId(projectId.getValue()));
         } else {
 
             try {
-                this.customerId = Integer.parseInt(value);
+                this.customerId.setValue(Integer.parseInt(value));
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("CustomerId is invalid : " + value);
             }
         }
     }
 
-    public Integer getCustomerId() {
+    public CustomerId getCustomerId() {
         return customerId;
     }
 
     public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+        this.projectId.setValue(projectId);
     }
 
     public void setProjectId(String value) {
@@ -112,106 +166,100 @@ abstract public class AbstractEntity {
         }
 
         try {
-            this.projectId = Integer.parseInt(value);
+            this.projectId.setValue(Integer.parseInt(value));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("ProjectId is invalid : " + value);
         }
     }
 
-    public Integer getProjectId() {
+    public ProjectId getProjectId() {
         return projectId;
     }
 
     public void setDateOfChange(LocalDateTime dateOfChange) {
-        this.changedDate = dateOfChange;
+        this.changedDateTime.setValue(dateOfChange);
     }
 
     public void setDateOfChange(String dateOfChange) {
         if (dateOfChange != null && !dateOfChange.isBlank()) {
-            this.changedDate = LocalDateTime.parse(dateOfChange.trim());
-            this.prevChangedDate = this.changedDate;
+            this.changedDateTime.setValue(LocalDateTime.parse(dateOfChange.trim()));
+            this.prevChangedDate = this.changedDateTime.getValue();
         } else {
-            if (this.prevChangedDate != null) {
-                this.changedDate = this.prevChangedDate;
-            } else {
-                this.changedDate = LocalDateTime.now();
-            }
+            this.changedDateTime.setValue(Objects.requireNonNullElseGet(this.prevChangedDate, LocalDateTime::now));
         }
     }
     public void setDateOfChange(Timestamp timestamp) {
-        this.changedDate = (timestamp != null) ? LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault() ) : LocalDateTime.now();
+        this.changedDateTime.setValue( (timestamp != null) ? LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault() ) : LocalDateTime.now());
     }
 
-    public LocalDateTime getChangedDate() {
-        return changedDate != null ? changedDate : LocalDateTime.now();
+
+    public ChangedDateTime getChangedDate() {
+        if (changedDateTime.getValue() == null) {
+            this.changedDateTime.setValue(LocalDateTime.now());
+        }
+        return changedDateTime;
     }
 
     public void setChangedByUserId(Integer changedBy) {
-        this.changedByUserId = changedBy;
+        this.changedBy.setValue(changedBy);
     }
 
-    public void setChangedByUserId(String changedBy) {
-        if (changedBy != null && !changedBy.isBlank()) {
-            try {
-                this.changedByUserId = Integer.parseInt(changedBy);
-                this.prevChangedByUserId = this.changedByUserId;
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("ChangedBy is invalid : " + changedBy);
-            }
-        } else {
-            if (this.prevChangedByUserId != null) {
-                this.changedByUserId = this.prevChangedByUserId;
-            } else {
-                this.changedByUserId = 1;
-            }
-        }
-    }
-    public Integer getChangedByUserId() {
-        return changedByUserId;
-    }
-    public ChangedBy getChangedByUser() {
-        ChangedBy changedBy = new ChangedBy(getWebSession());
-        changedBy.setValue(changedByUserId);
+    public ChangedBy getChangedBy() {
         return changedBy;
     }
 
-    public void setEntityId(String entityIdValue) {
+    public ChangedBy getChangedByUser() {
+        if (changedBy.getValue() == null) {
+            changedBy.setValue(getWebSession().getUserId());
+        }
+        return changedBy;
+    }
+
+    public void setEntityId(String entityId) {
         try {
-            this.entityId = Integer.parseInt(entityIdValue);
+            this.entityId.setValue(Integer.parseInt(entityId));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Entity Id Value is invalid : " + entityIdValue);
+            throw new IllegalArgumentException("Entity Id Value is invalid : " + entityId);
         }
     }
 
-    public void setEntityId(Integer entityIdValue) {
-        this.entityId = entityIdValue;
+    public void setEntityId(Integer entityId) {
+        this.entityId.setValue(entityId);
     }
 
-    public Integer getEntityId() {
+    public EntityId getEntityId() {
         return entityId;
     }
 
     public void setVersion(Integer version) {
-        this.version = version;
+        this.version.setValue(version);
     }
 
-    public Integer getVersion() {
+    public Version getVersion() {
         return version;
     }
 
-    public boolean isLatest() {
+    public Latest getLatest() {
         return latest;
     }
 
+    public boolean isLatest() {
+        return latest.getValue();
+    }
+
     public void setActive(String active) {
-        this.active = Boolean.parseBoolean(active);
+        this.active.setValue(Boolean.parseBoolean(active));
     }
 
     public void setActive(boolean active) {
-        this.active = active;
+        this.active.setValue(active);
     }
 
     public boolean isActive() {
+        return active.getValue();
+    }
+
+    public Active getActive() {
         return active;
     }
 
@@ -223,7 +271,7 @@ abstract public class AbstractEntity {
         if (prevActiveStatus == null) {
             return false;
         }
-        return active != prevActiveStatus;
+        return active.getValue() != prevActiveStatus;
     }
 
     private Integer mapProjectIdToCustomerId(Integer projectId) {
@@ -232,20 +280,20 @@ abstract public class AbstractEntity {
     }
 
     public boolean validateEntity(boolean isNewEntity) {
-        if (projectId == null || projectId < 1) {
+        if (projectId.getValue() == null || projectId.getValue() < 1) {
             throw new IllegalArgumentException("Project Id is invalid : " + projectId);
         }
-        if (customerId == null || customerId < 1) {
-            throw new IllegalArgumentException("Customer Id is invalid : " + customerId);
+        if (customerId.getValue() == null || customerId.getValue() < 1) {
+            throw new IllegalArgumentException("Customer Id is invalid : " + customerId.getValue());
         }
 
         if (getEntityType() == null ) {
             throw new IllegalArgumentException("Unknown entity type : " + "null");
         }
-        if ( !isNewEntity && (entityId == null || entityId < 1) ) {
+        if ( !isNewEntity && (entityId.getValue() == null || entityId.getValue() < 1) ) {
             throw new IllegalArgumentException("Entity Id is invalid : " + entityId);
         }
-        if (version == null || version != 1) {
+        if (version.getValue() == null || version.getValue() != 1) {
             throw new IllegalArgumentException("Version is invalid : " + entityId);
         }
 
@@ -253,12 +301,12 @@ abstract public class AbstractEntity {
             throw new IllegalArgumentException("List of data elements is empty: " + entityId);
         }
 
-        if (changedByUserId == null || changedByUserId <-1) {
-            throw new IllegalArgumentException("Changed By Id is invalid : " + this.toString());
+        if (changedBy.getValue() == null || changedBy.getValue() <-1) {
+            throw new IllegalArgumentException("Changed By Id is invalid : " + this);
         }
 
-        if (changedDate == null) {
-            throw new IllegalArgumentException("Changed Date is invalid : " + this.toString());
+        if (changedDateTime.getValue() == null) {
+            throw new IllegalArgumentException("Changed Date is invalid : " + this);
         }
 
         return true;
@@ -294,7 +342,7 @@ abstract public class AbstractEntity {
 
     @Override
     public String toString() {
-        return "Entity{" + "customerId=" + customerId + ", projectId=" + projectId + ", entityId=" + entityId + ", version=" + version + ", listOfDataElements=" + listOfDataElements + ", changedByUserId=" + changedByUserId + ", changedDate=" + changedDate + ", latest=" + latest + '}';
+        return "Entity{" + "customerId=" + customerId + ", projectId=" + projectId + ", entityId=" + entityId + ", version=" + version + ", listOfDataElements=" + listOfDataElements + ", changedByUserId=" + changedBy + ", changedDate=" + changedDateTime + ", latest=" + latest + '}';
     }
 
 }

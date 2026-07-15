@@ -4,7 +4,9 @@ public class ContactEmail extends AbstractEmail {
 
     public static String FIELD_NAME = "ContactEmail";
 
-    public ContactEmail() { }
+    public ContactEmail() {
+        setFieldEditable();
+    }
 
     @Override
     public String getFieldName() {

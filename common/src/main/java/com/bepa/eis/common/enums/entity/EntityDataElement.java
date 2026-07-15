@@ -37,6 +37,12 @@ public enum EntityDataElement {
 
     SUPPLIERNAME(29, "Supplier", "SupplierName", STRING),
     CONTRACTORNAME(30, "Contractor", "ContractorName", STRING),
+    STAKEHOLDERNAME(31, "Stakeholder Name", "StakeholderName", STRING),
+    STAKEHOLDERDESCRIPTION(32,"Stakeholder Description", "StakeholderDescription", STRING),
+    CONTACTNAME(34, "Stakeholder Contact", "ContactName", STRING),
+    CONTACTEMAIL(35, "Stakeholder Contact Email", "ContactEmail", STRING),
+    CONTACTPHONE(36, "Stakeholder Contact Phone", "ContactPhone", STRING),
+    STAKEHOLDER(37, "Stakeholder", "Stakeholder", INTEGER),
 
     BASISREQCODE(40,"Stakeholder Requirement Code", "StakeholderReqCode", STRING),
     SYSTEMREQCODE(41,"System Requirement Code", "SystemReqCode", STRING),

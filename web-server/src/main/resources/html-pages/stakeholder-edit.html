@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/history-table.css" />
+    <link rel="stylesheet" href="../css/notes-table.css" />
+    <link rel="stylesheet" href="../css/attachments-table.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/stakeholder-edit.css" />
+</head>
+
+<body class="stakeholder-edit-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &rsaquo;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app stakeholder-edit-app">
+    <div class="content stakeholder-edit-content">
+        <header class="topbar stakeholder-edit-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout stakeholder-edit-layout" aria-label="Stakeholder edit">
+            <div class="section-header stakeholder-edit-section-header">
+                <div class="stakeholder-edit-title-group">
+                    <h2 id="pageTitle">Stakeholder</h2>
+                    <div id="pageModeLabel" class="stakeholder-edit-mode-label">Loading...</div>
+                </div>
+
+                <button
+                        id="btnHelp"
+                        class="stakeholder-edit-help-button"
+                        type="button"
+                        data-help-page="stakeholder-edit"
+                        data-help-title="Help - Stakeholder Edit"
+                        title="Open help"
+                        aria-label="Open help for Stakeholder Edit"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                        <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                        <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="readOnlyBanner" class="stakeholder-readonly-banner" hidden>
+                Historical version is opened in read-only mode. Save and change actions are disabled.
+            </div>
+
+            <div class="stakeholder-edit-status-row">
+                <div class="page-dialog-status" id="dlgStatus">Idle</div>
+                <div class="stakeholder-edit-entity-meta" id="entityMeta">-</div>
+            </div>
+
+            <div class="page-tab-bar stakeholder-edit-tab-bar" role="tablist" aria-label="Stakeholder tabs">
+                <button class="tab-btn page-tab-btn is-active" id="tabBtn1" type="button" role="tab" aria-selected="true" aria-controls="tabPanel1">Basis Info</button>
+                <button class="tab-btn page-tab-btn" id="tabBtn2" type="button" role="tab" aria-selected="false" aria-controls="tabPanel2">History</button>
+                <button class="tab-btn page-tab-btn" id="tabBtn3" type="button" role="tab" aria-selected="false" aria-controls="tabPanel3">Attachments</button>
+                <button class="tab-btn page-tab-btn" id="tabBtn4" type="button" role="tab" aria-selected="false" aria-controls="tabPanel4">Notes</button>
+            </div>
+
+            <div class="tab-panels page-dialog-panels stakeholder-edit-panels">
+                <section class="tab-panel is-active" id="tabPanel1" role="tabpanel" aria-labelledby="tabBtn1">
+                    <div id="basisInfoFields" class="page-field-grid stakeholder-basis-info-fields"></div>
+                </section>
+
+                <section class="tab-panel" id="tabPanel2" role="tabpanel" aria-labelledby="tabBtn2">
+                    <div class="table-frame history-table-frame stakeholder-history-frame">
+                        <div class="table-scroll">
+                            <table class="data-table history-table" aria-label="Stakeholder history">
+                                <thead>
+                                <tr>
+                                    <th data-key="changedDateTime">
+                                        <span class="sort">Changed <span class="sort-indicator" id="si-h-changedDateTime"></span></span>
+                                    </th>
+                                    <th data-key="changedByUserId">
+                                        <span class="sort">Changed By <span class="sort-indicator" id="si-h-changedByUserId"></span></span>
+                                    </th>
+                                    <th data-key="version">
+                                        <span class="sort">Version <span class="sort-indicator" id="si-h-version"></span></span>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody id="historyBody"></tbody>
+                            </table>
+                            <div class="empty history-table-empty stakeholder-history-empty" id="historyEmpty">No history rows.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-panel" id="tabPanel3" role="tabpanel" aria-labelledby="tabBtn3">
+                    <div class="attachments-toolbar">
+                        <button id="attachmentsAddNew" class="primary attachments-add-btn" type="button" aria-label="Add attachment" title="Add attachment">
+                            Add Attachment
+                        </button>
+                    </div>
+
+                    <div class="table-frame attachments-table-frame stakeholder-attachments-frame">
+                        <div class="table-scroll">
+                            <table class="data-table attachments-table" aria-label="Stakeholder attachments">
+                                <colgroup>
+                                    <col style="width: 26%;">
+                                    <col style="width: 24%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 18%;">
+                                    <col style="width: 14%;">
+                                    <col style="width: 8%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Description</th>
+                                    <th>File Size</th>
+                                    <th>Uploaded By</th>
+                                    <th>Uploaded</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody id="attachmentsBody"></tbody>
+                            </table>
+                            <div class="empty attachments-table-empty stakeholder-attachments-empty" id="attachmentsEmpty">No attachment rows.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-panel" id="tabPanel4" role="tabpanel" aria-labelledby="tabBtn4">
+                    <div class="notes-toolbar">
+                        <button id="notesAddNew" class="primary notes-add-btn" type="button" aria-label="Add new note" title="Add new note">
+                            Add Note
+                        </button>
+                    </div>
+
+                    <div class="table-frame notes-table-frame stakeholder-notes-frame">
+                        <div class="table-scroll">
+                            <table class="data-table notes-table" aria-label="Stakeholder notes">
+                                <colgroup>
+                                    <col style="width: 60%;">
+                                    <col style="width: 30%;">
+                                    <col style="width: 18%;">
+                                </colgroup>
+                                <thead>
+                                <tr>
+                                    <th>Note</th>
+                                    <th>Created By</th>
+                                    <th>Created</th>
+                                </tr>
+                                </thead>
+                                <tbody id="notesBody"></tbody>
+                            </table>
+                            <div class="empty notes-table-empty stakeholder-notes-empty" id="notesEmpty">No notes rows.</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="dlg-footer stakeholder-edit-footer">
+                <button id="btnSave" class="primary" type="button">Save</button>
+                <button id="btnCancel" type="button">Cancel</button>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                &times;
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help...
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="noteDialog" aria-label="Note dialog">
+    <form id="noteForm" method="dialog" class="dlg note-dlg">
+        <div class="page-dialog-head">
+            <h3 id="noteDlgTitle">Note</h3>
+        </div>
+
+        <div class="page-dialog-status" id="noteDlgStatus">Idle</div>
+
+        <div class="note-editor">
+            <label for="noteTextArea" class="note-editor-label">Note text</label>
+            <textarea id="noteTextArea" rows="30" cols="100" class="note-textarea"></textarea>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="noteSaveBtn" class="primary" type="button">Save</button>
+            <button id="noteCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="attachmentDialog" aria-label="Attachment dialog">
+    <form id="attachmentForm" method="dialog" class="dlg attachment-dlg">
+        <div class="page-dialog-head">
+            <h3 id="attachmentDlgTitle">Attachment</h3>
+        </div>
+
+        <div class="page-dialog-status" id="attachmentDlgStatus">Idle</div>
+
+        <div class="attachment-editor">
+            <div class="attachment-editor-row">
+                <label class="attachment-editor-label" for="attachmentFileInput">File</label>
+                <input id="attachmentFileInput" class="attachment-input" type="file" />
+            </div>
+
+            <div class="attachment-editor-row">
+                <label class="attachment-editor-label" for="attachmentDescriptionInput">
+                    Description <span aria-hidden="true">*</span>
+                </label>
+                <textarea id="attachmentDescriptionInput" class="attachment-textarea" rows="5" maxlength="255" required></textarea>
+            </div>
+
+            <div class="attachment-editor-row">
+                <div class="attachment-editor-label" id="attachmentFileInfo">No file selected.</div>
+            </div>
+        </div>
+
+        <div class="dlg-footer">
+            <button id="attachmentSaveBtn" class="primary" type="button">Save</button>
+            <button id="attachmentCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/stakeholder-edit-page.js"></script>
+</body>
+</html>

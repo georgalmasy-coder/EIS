@@ -4,13 +4,13 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
-import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
-import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
-import com.bepa.eis.server.dataprovider.fields.strings.RequirementName;
-import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
+import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.email.ContactEmail;
+import com.bepa.eis.server.dataprovider.fields.strings.phone.ContactPhone;
 import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
@@ -21,7 +21,7 @@ import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMEN
 
 public class ProjectEntity extends AbstractEntity {
 
-    private String projectName;
+    private ProjectName projectName;
     private ProjectProvider projectProvider;
     private ProjectRecord projectRecord;
 
@@ -37,7 +37,7 @@ public class ProjectEntity extends AbstractEntity {
 
     @Override
     public String getName() {
-        return projectName;
+        return projectName.getValue();
     }
 
     @Override
@@ -45,23 +45,57 @@ public class ProjectEntity extends AbstractEntity {
         return "";
     }
 
+    @Override
+    public void initializeFields() {
+        projectName = new ProjectName();
+    }
+
+    @Override
+    public void addAllFieldElementsForList(Entity entityElement) {
+        entityElement.addElement(projectName);
+    }
+
+    @Override
+    public void addAllFieldElementsForEdit(Entity entityElement) {
+        entityElement.addElement(projectName);
+    }
+
+    @Override
+    public void addAllFieldElementsForCreate(Entity entityElement, Integer parentEntityId) {
+        entityElement.addElement(projectName);
+    }
+
     public ProjectEntity() {}
 
     public ProjectEntity(WebSession session) {
         super(session);
-        setChangedByUserId(session.getUserId());
+    }
+
+    public ProjectEntity(WebSession webSession, EntityRecord entityRecord) {
+        super(webSession, entityRecord);
+
+        for (EntityElementRecord elementRecord : entityRecord.getEntityElementRecords()) {
+            EntityDataElement entityDataElement = EntityDataElement.valueOf(elementRecord.getEntityDataElementType());
+            if (entityDataElement != null) {
+                switch (entityDataElement) {
+                    case PROJECTNAME:
+                        projectName.setValue(elementRecord.getStringValue());
+                        break;
+                }
+            }
+        }
     }
 
     public void setProjectName(String projectName) {
-        this.projectName = projectName;
+        this.projectName.setValue(projectName);
     }
 
-    public String getProjectName() {
+    public ProjectName getProjectName() {
         return projectName;
     }
 
     public void addAllDataElements() {
-        addDataElement(new StringDataElement(ProjectName.FIELD_NAME, getProjectName()));
+        addDataElement(new StringDataElement(ProjectName.FIELD_NAME, getProjectName().getValue()));
     }
 
     public void setProjectProvider(ProjectProvider projectProvider, ProjectRecord projectRecord) {

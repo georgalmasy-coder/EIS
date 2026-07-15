@@ -4,6 +4,10 @@ public class ContactName extends AbstractString {
 
     public static String FIELD_NAME = "ContactName";
 
+    public ContactName() {
+        setFieldEditable();
+    }
+
     public ContactName(String value) {
         setValue(value);
     }
@@ -24,18 +28,8 @@ public class ContactName extends AbstractString {
     }
 
     @Override
-    public Integer getFieldMinLength() {
-        return 5;
-    }
-
-    @Override
     public Integer getFieldMaxLength() {
         return 100;
-    }
-
-    @Override
-    public String toString() {
-        return getValue();
     }
 
 }

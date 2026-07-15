@@ -19,7 +19,7 @@ public class LookupMaintenanceProvider extends GenericProvider {
 
     private static final Logger log = LoggerFactory.getLogger(LookupMaintenanceProvider.class);
 
-    private static final String LOOKUP_CACHE_ALIAS = "LookupCache";
+    private static final String LOOKUP_CACHE_ALIAS = EhcacheProvider.LOOKUP_CACHE_ALIAS;
 
     private static final String SELECT_LOOKUP_TYPES_SQL =
             "SELECT LookupTypeId, LookupTypeDesc " +

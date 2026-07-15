@@ -4,16 +4,8 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.web.application.views.basis.systemsbreakdown.SystemBreakdownExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
-import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemsBreakdownParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.*;
-import com.bepa.eis.server.dataprovider.fields.strings.SBSCode;
-import com.bepa.eis.server.dataprovider.fields.strings.SystemName;
-import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineFinalized;
-import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineNextTRL;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import org.slf4j.Logger;
@@ -26,13 +18,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
-import static com.bepa.eis.common.enums.entity.EntityDataElement.DEADLINEFINALIZED;
 import static com.bepa.eis.common.enums.entity.EntityDataElement.DEADLINENEXTTRL;
-import static com.bepa.eis.common.enums.entity.EntityDataElement.DEPARTMENTID;
-import static com.bepa.eis.common.enums.entity.EntityDataElement.SYSTEMOWNERID;
 import static com.bepa.eis.common.enums.entity.EntityDataElement.TRLID;
 
 public class SystemBreakdownProvider extends EntityProvider {
@@ -78,213 +65,19 @@ public class SystemBreakdownProvider extends EntityProvider {
     }
 
     public Entities getListOfSystemsBreakdown() throws SQLException {
-        return getListOfEntitiesByProjectId(EntityType.SYSTEMS_BREAKDOWN, getEntityDataElementForList());
+        return getListOfEntitiesByProjectId(getEntityType());
     }
 
     public Entities getSystemBreakdownInfo(Integer entityId, Integer version) throws SQLException {
-        return getEntityByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId, version, getEntityDataElementForEdit());
+        return getEntityByEntityId(getEntityType(), entityId, version);
     }
 
     public Entities getSystemBreakdownInfo(Integer parentEntityId) throws SQLException {
-        return getEntityForCreate(EntityType.SYSTEMS_BREAKDOWN,  parentEntityId);
+        return getEntityForCreate(getEntityType(),  parentEntityId);
     }
 
     public Entities getSystemBreakdownHistory(Integer entityId) throws SQLException {
-        return getEntityHistoryByEntityId(EntityType.SYSTEMS_BREAKDOWN, entityId);
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForList() {
-
-        return new EntityDataElement[]{
-                SBSCODE,
-                CODELEVEL,
-                SYSTEMNAME,
-                SYSTEMOWNERID,
-                DEPARTMENTID,
-                TRLID,
-                DEADLINENEXTTRL,
-                DEADLINEFINALIZED};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForEdit() {
-
-        return new EntityDataElement[]{
-                SBSCODE,
-                CODELEVEL,
-                SYSTEMNAME,
-                SYSTEMOWNERID,
-                DEPARTMENTID,
-                TRLID,
-                DEADLINENEXTTRL,
-                DEADLINEFINALIZED};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForCreate() {
-
-        return new EntityDataElement[]{
-                SYSTEMNAME,
-                SYSTEMOWNERID,
-                DEPARTMENTID,
-                TRLID,
-                DEADLINENEXTTRL,
-                DEADLINEFINALIZED};
-    }
-
-    @Override
-    public void addAllFieldElementsForList(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-        SBSCode sbsCode = (SBSCode) mapOfLoadedFields.get(EntityDataElement.SBSCODE.getId());
-        if (sbsCode != null) {
-            sbsCode.setTableWidth("95px");
-            entity.addElement(sbsCode);
-            entity.setSortKey(sbsCode.getValue());
-        }
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
-        if (codeLevel != null) {
-            codeLevel.setTableWidth("95px");
-            entity.addElement(codeLevel);
-        }
-
-        SystemName systemName = (SystemName) mapOfLoadedFields.get(EntityDataElement.SYSTEMNAME.getId());
-        if (systemName != null) {
-            entity.addElement(systemName);
-        }
-
-        SystemOwner systemOwner = (SystemOwner) mapOfLoadedFields.get(EntityDataElement.SYSTEMOWNERID.getId());
-        if (systemOwner != null) {
-            entity.addElement(systemOwner);
-        }
-
-        SystemDepartment systemDepartment = (SystemDepartment) mapOfLoadedFields.get(DEPARTMENTID.getId());
-        if (systemDepartment != null) {
-            entity.addElement(systemDepartment);
-        }
-
-        TRL trl = (TRL) mapOfLoadedFields.get(EntityDataElement.TRLID.getId());
-        if (trl != null) {
-            trl.setTableWidth("250px");
-            entity.addElement(trl);
-        }
-
-        DeadlineNextTRL deadlineNextTRL = (DeadlineNextTRL) mapOfLoadedFields.get(EntityDataElement.DEADLINENEXTTRL.getId());
-        if (deadlineNextTRL != null) {
-            deadlineNextTRL.setTableWidth("150px");
-            entity.addElement(deadlineNextTRL);
-        }
-
-        DeadlineFinalized deadlineFinalized = (DeadlineFinalized) mapOfLoadedFields.get(EntityDataElement.DEADLINEFINALIZED.getId());
-        if (deadlineFinalized != null) {
-            deadlineFinalized.setTableWidth("150px");
-            entity.addElement(deadlineFinalized);
-        }
-    }
-
-    @Override
-    public void addAllFieldElementsForEdit(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-        SBSCode sbsCode = (SBSCode) mapOfLoadedFields.get(EntityDataElement.SBSCODE.getId());
-        if (sbsCode == null) {
-            sbsCode = new SBSCode();
-        }
-        sbsCode.setFieldNotEditable();
-        sbsCode.setFieldRequired();
-        entity.addElement(sbsCode);
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(CODELEVEL.getId());
-        if (codeLevel == null) {
-            codeLevel = new CodeLevel();
-        }
-        codeLevel.setFieldNotVisible();
-        entity.addElement(codeLevel);
-
-        SystemName systemName = (SystemName) mapOfLoadedFields.get(EntityDataElement.SYSTEMNAME.getId());
-        if (systemName == null) {
-            systemName = new SystemName();
-        }
-        systemName.setFieldEditable();
-        entity.addElement(systemName);
-
-        SystemOwner systemOwner = (SystemOwner) mapOfLoadedFields.get(EntityDataElement.SYSTEMOWNERID.getId());
-        if (systemOwner == null) {
-            systemOwner = new SystemOwner(getWebSession());
-        }
-        systemOwner.setFieldEditable();
-        entity.addElement(systemOwner);
-
-        SystemDepartment systemDepartment = (SystemDepartment) mapOfLoadedFields.get(DEPARTMENTID.getId());
-        if (systemDepartment == null) {
-            systemDepartment = new SystemDepartment(getWebSession());
-        }
-        systemDepartment.setFieldEditable();
-        entity.addElement(systemDepartment);
-
-        TRL trl = (TRL) mapOfLoadedFields.get(EntityDataElement.TRLID.getId());
-        if (trl == null) {
-            trl = new TRL(getWebSession());
-        }
-        trl.setFieldEditable();
-        entity.addElement(trl);
-
-        DeadlineNextTRL deadlineNextTRL = (DeadlineNextTRL) mapOfLoadedFields.get(EntityDataElement.DEADLINENEXTTRL.getId());
-        if (deadlineNextTRL == null) {
-            deadlineNextTRL = new DeadlineNextTRL();
-        }
-        deadlineNextTRL.setFieldEditable();
-        entity.addElement(deadlineNextTRL);
-
-        DeadlineFinalized deadlineFinalized = (DeadlineFinalized) mapOfLoadedFields.get(EntityDataElement.DEADLINEFINALIZED.getId());
-        if (deadlineFinalized == null) {
-            deadlineFinalized = new DeadlineFinalized();
-        }
-        deadlineFinalized.setFieldEditable();
-        entity.addElement(deadlineFinalized);
-    }
-
-    @Override
-    public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId) {
-
-        SystemsBreakdownParentCodeSelector parentCodeSelector = new SystemsBreakdownParentCodeSelector(webSession);
-
-        if ( parentEntityId == null) {
-            SBSCodeType sbsCodeType = new SBSCodeType();
-            sbsCodeType.setFieldEditable();
-            sbsCodeType.setFieldRequired();
-            entity.addElement(sbsCodeType);
-        }
-
-        String nextCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
-        SBSCode sbsCode = new SBSCode(true);
-        sbsCode.setValue(nextCode);
-        sbsCode.setFieldNotEditable();
-        sbsCode.setFieldRequired();
-        entity.addElement(sbsCode);
-
-        SystemName systemName = new SystemName();
-        systemName.setFieldEditable();
-        entity.addElement(systemName);
-
-        SystemOwner systemOwner = new SystemOwner(webSession);
-        systemOwner.setFieldEditable();
-        entity.addElement(systemOwner);
-
-        SystemDepartment systemDepartment = new SystemDepartment(webSession);
-        systemDepartment.setFieldEditable();
-        entity.addElement(systemDepartment);
-
-        TRL trl =  new TRL (webSession);
-        trl.setFieldEditable();
-        entity.addElement(trl);
-
-        DeadlineNextTRL deadlineNextTRL = new DeadlineNextTRL();
-        deadlineNextTRL.setFieldEditable();
-        entity.addElement(deadlineNextTRL);
-
-        DeadlineFinalized deadlineFinalized = new DeadlineFinalized();
-        deadlineFinalized.setFieldEditable();
-        entity.addElement(deadlineFinalized);
-
+        return getEntityHistoryByEntityId(getEntityType(), entityId);
     }
 
     public List<SystemBreakdownEntity> findAllForExport(boolean includeInactive)  {
@@ -292,10 +85,10 @@ public class SystemBreakdownProvider extends EntityProvider {
         try {
             List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
             for (EntityRecord entityRecord : entityRecords) {
-                SystemBreakdownEntity systemBreakdownEntity = SystemBreakdownEntity.map(entityRecord);
+                SystemBreakdownEntity systemBreakdownEntity = new SystemBreakdownEntity(getWebSession(), entityRecord);
                 listOfEntitiesForExport.add(systemBreakdownEntity);
             }
-            listOfEntitiesForExport.sort(Comparator.comparing(SystemBreakdownEntity::getSbsCode));
+            listOfEntitiesForExport.sort(Comparator.comparing(SystemBreakdownEntity::getCode));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -375,11 +168,11 @@ public class SystemBreakdownProvider extends EntityProvider {
         try {
             List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
             for (EntityRecord entityRecord : entityRecords) {
-                SystemBreakdownEntity systemRequirementEntity = SystemBreakdownEntity.map(entityRecord);
+                SystemBreakdownEntity systemRequirementEntity = new SystemBreakdownEntity(getWebSession(), entityRecord);
                 listOfEntities.add(systemRequirementEntity);
             }
 
-            listOfEntities.sort(Comparator.comparing(SystemBreakdownEntity::getSbsCode));
+            listOfEntities.sort(Comparator.comparing(SystemBreakdownEntity::getCode));
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

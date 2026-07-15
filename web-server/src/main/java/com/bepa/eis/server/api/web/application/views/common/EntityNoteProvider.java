@@ -93,14 +93,14 @@ public class EntityNoteProvider extends GenericProvider {
 
             try (PreparedStatement ps = con.prepareStatement(INSERT_ENTITY_NOTE_SQL)) {
 
-                ps.setInt(1, entity.getCustomerId());
-                ps.setInt(2, entity.getProjectId());
-                ps.setInt(3, entity.getEntityId());
-                ps.setInt(4, entity.getVersion());
+                ps.setInt(1, entity.getCustomerId().getValue());
+                ps.setInt(2, entity.getProjectId().getValue());
+                ps.setInt(3, entity.getEntityId().getValue());
+                ps.setInt(4, entity.getVersion().getValue());
                 ps.setInt(5, entity.getEntityType().getId());
                 ps.setString(6, noteRecord.getNoteText());
-                ps.setInt(7, noteRecord.getChangedByUserId());
-                ps.setTimestamp(8, Timestamp.valueOf(noteRecord.getChangedDate()));
+                ps.setInt(7, noteRecord.getChangedByUserId().getValue());
+                ps.setTimestamp(8, Timestamp.valueOf(noteRecord.getChangedDate().getValue()));
 
                 int rows = ps.executeUpdate();
 

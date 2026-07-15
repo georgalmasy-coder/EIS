@@ -11,6 +11,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
 import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
 import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
 import com.bepa.eis.server.dataprovider.fields.strings.RequirementName;
@@ -71,11 +72,11 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
                 String eventDescription =
                         requirementEntity.getEntityType().getDescription() + " '" +
                         requirementEntity.getRequirementCode() + " " +
-                        requirementEntity.getRequirementName()  + "'" + " has been " + (requirementEntity.getVersion() == 1 ? "created" : "updated");
+                        requirementEntity.getRequirementName()  + "'" + " has been " + (requirementEntity.getVersion().getValue() == 1 ? "created" : "updated");
 
                 EventProvider eventProvider = new EventProvider(webSession);
                 eventProvider.createEntityChangeEvent(requirementEntity.getEntityType(),
-                        requirementEntity.getEntityId(),
+                        requirementEntity.getEntityId().getValue(),
                         eventDescription);
 
             }
@@ -141,6 +142,7 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
         Integer version = intValue(requirmentElement, Version.FIELD_NAME);
         String requirementName = textValue(requirmentElement, RequirementName.FIELD_NAME);
         String requirementDescription = textValue(requirmentElement, RequirementDescription.FIELD_NAME);
+        Integer stakeholderId = intValue(requirmentElement, Stakeholder.FIELD_NAME);
         Boolean active = boolValue(requirmentElement, Active.FIELD_NAME);
 
         String requirementCode;
@@ -160,6 +162,7 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
         requirementEntity.setRequirementCodeLevel(codeLevel);
         requirementEntity.setRequirementName(requirementName);
         requirementEntity.setRequirementDescription(requirementDescription);
+        requirementEntity.setStakeholderId(stakeholderId);
         requirementEntity.setActive(active);
 
         requirementEntity.addAllDataElements();
@@ -224,12 +227,12 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
 
     private static StakeholderRequirementExportRow toExportRow(StakeholderRequirementEntity entity) {
         return new StakeholderRequirementExportRow(
-                entity.getRequirementCode(),
-                entity.getRequirementCodeLevel(),
-                entity.getRequirementName(),
-                entity.getRequirementDescription(),
+                entity.getRequirementCode().getValue(),
+                entity.getRequirementCodeLevel().getValue(),
+                entity.getRequirementName().getValue(),
+                entity.getRequirementDescription().getValue(),
                 entity.getChangedByUser(),
-                entity.getChangedDate(),
+                entity.getChangedDate().getValue(),
                 entity.isActive()
         );
     }

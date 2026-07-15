@@ -36,339 +36,32 @@ public class SystemRequirementProvider extends EntityProvider {
     }
 
     public Entities getListOfSystemRequirements() throws SQLException {
-        return getListOfEntitiesByProjectId(entityType, getEntityDataElementForList());
+        return getListOfEntitiesByProjectId(getEntityType());
     }
 
     public Entities getSystemRequirementInfo(Integer entityId, Integer version) throws SQLException {
-        return getEntityByEntityId(entityType, entityId, version, getEntityDataElementForEdit());
+        return getEntityByEntityId(getEntityType(), entityId, version);
     }
 
     public Entities getSystemRequirementInfo(Integer parentEntityId) throws SQLException {
-        return getEntityForCreate(entityType, parentEntityId);
+        return getEntityForCreate(getEntityType(), parentEntityId);
     }
 
     public Entities getSystemRequirementHistory(Integer entityId) throws SQLException {
-        return getEntityHistoryByEntityId(entityType, entityId);
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForList() {
-
-        return new EntityDataElement[]{
-                SYSTEMREQCODE,
-                CODELEVEL,
-                REQNAME,
-                REQDESCRIPTION,
-                REQVERIFICATIONSTATUSID,
-                REQRATIONALESTATEMENT,
-                REQBUSINESSPRIORITYID,
-                REQOWNERID,
-                REQCAPTUREDATE,
-                REQSTATUSID};
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForEdit() {
-
-        return new EntityDataElement[]{
-                SYSTEMREQCODE,
-                REQNAME,
-                REQDESCRIPTION,
-                REQVERIFICATIONSTATUSID,
-                REQRATIONALESTATEMENT,
-                REQBUSINESSPRIORITYID,
-                REQOWNERID,
-                REQSTATUSID,
-                REQCAPTUREDATE,
-                REQHIGHLEVELCAPABILITY,
-                REQTYPEID,
-                REQFREQUENCYID,
-                REQPERFORMANCE,
-                REQVERIFICATIONSTATEMENTID,
-                REQTECHNICALPRIORITYID,
-        };
-    }
-
-    @Override
-    public EntityDataElement[] getEntityDataElementForCreate() {
-
-        return new EntityDataElement[]{
-                REQNAME,
-                REQDESCRIPTION,
-                REQVERIFICATIONSTATUSID,
-                REQRATIONALESTATEMENT,
-                REQBUSINESSPRIORITYID,
-                REQOWNERID,
-                REQSTATUSID,
-                REQCAPTUREDATE,
-                REQHIGHLEVELCAPABILITY,
-                REQTYPEID,
-                REQFREQUENCYID,
-                REQPERFORMANCE,
-                REQVERIFICATIONSTATEMENTID,
-                REQTECHNICALPRIORITYID,
-        };
-    }
-
-    @Override
-    public void addAllFieldElementsForList(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-        SystemRequirementCode requirementCode = (SystemRequirementCode) mapOfLoadedFields.get(EntityDataElement.SYSTEMREQCODE.getId());
-        if (requirementCode != null) {
-            requirementCode.setTableWidth("50px");
-            entity.addElement(requirementCode);
-            entity.setSortKey(requirementCode.getValue());
-        }
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
-        if (codeLevel != null) {
-            codeLevel.setTableWidth("35px");
-            entity.addElement(codeLevel);
-        }
-
-        RequirementName requirementName = (RequirementName) mapOfLoadedFields.get(EntityDataElement.REQNAME.getId());
-        if (requirementName != null) {
-            requirementName.setTableWidth("200px");
-            entity.addElement(requirementName);
-        }
-
-        RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(REQDESCRIPTION.getId());
-        if (requirementDescription != null) {
-            requirementDescription.setTableWidth("100px");
-            entity.addElement(requirementDescription);
-        }
-
-        RequirementVerificationStatus requirementVerificationStatus = (RequirementVerificationStatus) mapOfLoadedFields.get(REQVERIFICATIONSTATUSID.getId());
-        if (requirementVerificationStatus != null) {
-            entity.addElement(requirementVerificationStatus);
-        }
-
-        RequirementRationaleStatement requirementRationaleStatement = (RequirementRationaleStatement) mapOfLoadedFields.get(REQRATIONALESTATEMENT.getId());
-        if (requirementRationaleStatement != null) {
-            entity.addElement(requirementRationaleStatement);
-        }
-
-        RequirementCaptureDate requirementCaptureDate = (RequirementCaptureDate) mapOfLoadedFields.get(REQCAPTUREDATE.getId());
-        if (requirementCaptureDate != null) {
-            entity.addElement(requirementCaptureDate);
-        }
-
-        RequirementStatus requirementStatus = (RequirementStatus) mapOfLoadedFields.get(REQSTATUSID.getId());
-        if (requirementStatus != null) {
-            entity.addElement(requirementStatus);
-        }
-
-        RequirementBusinessPriority businessPriority = (RequirementBusinessPriority) mapOfLoadedFields.get(REQBUSINESSPRIORITYID.getId());
-        if (businessPriority != null) {
-            entity.addElement(businessPriority);
-        }
-
-        RequirementOwner requirementOwner = (RequirementOwner) mapOfLoadedFields.get(REQOWNERID.getId());
-        if (requirementOwner != null) {
-            entity.addElement(requirementOwner);
-        }
-
-    }
-
-    @Override
-    public void addAllFieldElementsForEdit(ConcurrentHashMap<Integer, AbstractField> mapOfLoadedFields, Entity entity) {
-
-        SystemRequirementCode requirementCode = (SystemRequirementCode) mapOfLoadedFields.get(EntityDataElement.SYSTEMREQCODE.getId());
-        if (requirementCode == null) {
-            requirementCode = new SystemRequirementCode();
-        }
-        requirementCode.setFieldNotEditable();
-        entity.addElement(requirementCode);
-
-        CodeLevel codeLevel = (CodeLevel) mapOfLoadedFields.get(EntityDataElement.CODELEVEL.getId());
-        if (codeLevel == null) {
-            codeLevel = new CodeLevel();
-        }
-        codeLevel.setFieldNotVisible();
-        entity.addElement(codeLevel);
-
-        RequirementName requirementName = (RequirementName) mapOfLoadedFields.get(EntityDataElement.REQNAME.getId());
-        if (requirementName == null) {
-            requirementName = new RequirementName();
-        }
-        requirementName.setFieldEditable();
-        entity.addElement(requirementName);
-
-        RequirementDescription requirementDescription = (RequirementDescription) mapOfLoadedFields.get(EntityDataElement.REQDESCRIPTION.getId());
-        if (requirementDescription == null) {
-            requirementDescription = new RequirementDescription();
-        }
-        requirementDescription.setFieldEditable();
-        requirementDescription.setFieldRequired();
-        entity.addElement(requirementDescription);
-
-        RequirementVerificationStatus requirementVerificationStatus = (RequirementVerificationStatus) mapOfLoadedFields.get(REQVERIFICATIONSTATUSID.getId());
-        if (requirementVerificationStatus == null) {
-            requirementVerificationStatus = new RequirementVerificationStatus(getWebSession());
-        }
-        requirementVerificationStatus.setFieldEditable();
-        entity.addElement(requirementVerificationStatus);
-
-        RequirementRationaleStatement requirementRationaleStatement = (RequirementRationaleStatement) mapOfLoadedFields.get(REQRATIONALESTATEMENT.getId());
-        if (requirementRationaleStatement == null) {
-            requirementRationaleStatement = new RequirementRationaleStatement();
-        }
-        requirementRationaleStatement.setFieldEditable();
-        entity.addElement(requirementRationaleStatement);
-
-        RequirementCaptureDate requirementCaptureDate = (RequirementCaptureDate) mapOfLoadedFields.get(REQCAPTUREDATE.getId());
-        if (requirementCaptureDate == null) {
-            requirementCaptureDate = new RequirementCaptureDate();
-        }
-        requirementCaptureDate.setFieldEditable();
-        entity.addElement(requirementCaptureDate);
-
-        RequirementBusinessPriority requirementBusinessPriority = (RequirementBusinessPriority) mapOfLoadedFields.get(REQBUSINESSPRIORITYID.getId());
-        if (requirementBusinessPriority == null) {
-            requirementBusinessPriority = new RequirementBusinessPriority(getWebSession());
-        }
-        requirementBusinessPriority.setFieldEditable();
-        entity.addElement(requirementBusinessPriority);
-
-        RequirementTechnicalPriority requirementTechnicalPriority = (RequirementTechnicalPriority) mapOfLoadedFields.get(REQTECHNICALPRIORITYID.getId());
-        if (requirementTechnicalPriority == null) {
-            requirementTechnicalPriority = new RequirementTechnicalPriority(getWebSession());
-        }
-        requirementTechnicalPriority.setFieldEditable();
-        entity.addElement(requirementTechnicalPriority);
-
-        RequirementVerificationStatement requirementVerificationStatement = (RequirementVerificationStatement) mapOfLoadedFields.get(REQVERIFICATIONSTATEMENTID.getId());
-        if (requirementVerificationStatement == null) {
-            requirementVerificationStatement = new RequirementVerificationStatement(getWebSession());
-        }
-        requirementVerificationStatement.setFieldEditable();
-        entity.addElement(requirementVerificationStatement);
-
-        RequirementStatus requirementStatus = (RequirementStatus) mapOfLoadedFields.get(REQSTATUSID.getId());
-        if (requirementStatus == null) {
-            requirementStatus = new RequirementStatus(getWebSession());
-        }
-        requirementStatus.setFieldEditable();
-        entity.addElement(requirementStatus);
-
-        RequirementHighlevelCapability requirementHighlevelCapability = (RequirementHighlevelCapability) mapOfLoadedFields.get(REQHIGHLEVELCAPABILITY.getId());
-        if (requirementHighlevelCapability == null) {
-            requirementHighlevelCapability = new RequirementHighlevelCapability(getWebSession());
-        }
-        requirementHighlevelCapability.setFieldEditable();
-        entity.addElement(requirementHighlevelCapability);
-
-        RequirementType requirementType = (RequirementType) mapOfLoadedFields.get(REQTYPEID.getId());
-        if (requirementType == null) {
-            requirementType = new RequirementType(getWebSession());
-        }
-        requirementType.setFieldEditable();
-        entity.addElement(requirementType);
-
-        RequirementFrequency requirementFrequency = (RequirementFrequency) mapOfLoadedFields.get(REQFREQUENCYID.getId());
-        if (requirementFrequency == null) {
-            requirementFrequency = new RequirementFrequency(getWebSession());
-        }
-        requirementFrequency.setFieldEditable();
-        entity.addElement(requirementFrequency);
-
-        RequirementPerformance requirementPerformance = (RequirementPerformance) mapOfLoadedFields.get(REQPERFORMANCE.getId());
-        if (requirementPerformance == null) {
-            requirementPerformance = new RequirementPerformance(getWebSession());
-        }
-        requirementPerformance.setFieldEditable();
-        entity.addElement(requirementPerformance);
-
-        RequirementOwner requirementOwner = (RequirementOwner) mapOfLoadedFields.get(REQOWNERID.getId());
-        if (requirementOwner == null) {
-            requirementOwner = new RequirementOwner(getWebSession());
-        }
-        requirementOwner.setFieldEditable();
-        entity.addElement(requirementOwner);
-
-    }
-
-    @Override
-    public void addAllFieldElementsForCreate(WebSession webSession, Entity entity, Integer parentEntityId) {
-
-        SystemRequirementParentCodeSelector parentCodeSelector = new SystemRequirementParentCodeSelector(webSession);
-
-        String nextCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
-        SystemRequirementCode requirementCode = new SystemRequirementCode(true);
-        requirementCode.setValue(nextCode);
-        requirementCode.setFieldNotEditable();
-        requirementCode.setFieldRequired();
-        entity.addElement(requirementCode);
-
-
-        RequirementName requirementName = new RequirementName();
-        requirementName.setFieldEditable();
-        requirementName.setFieldRequired();
-        entity.addElement(requirementName);
-
-        RequirementDescription requirementDescription = new RequirementDescription();
-        requirementDescription.setFieldEditable();
-        entity.addElement(requirementDescription);
-
-        RequirementVerificationStatement requirementVerificationStatement = new RequirementVerificationStatement();
-        requirementVerificationStatement.setFieldEditable();
-        entity.addElement(requirementVerificationStatement);
-
-        RequirementVerificationStatus requirementVerificationStatus = new RequirementVerificationStatus();
-        requirementVerificationStatus.setFieldEditable();
-        entity.addElement(requirementVerificationStatus);
-
-        RequirementRationaleStatement requirementRationaleStatement = new RequirementRationaleStatement();
-        requirementRationaleStatement.setFieldEditable();
-        entity.addElement(requirementRationaleStatement);
-
-        RequirementCaptureDate requirementCaptureDate = new RequirementCaptureDate();
-        requirementCaptureDate.setFieldEditable();
-        entity.addElement(requirementCaptureDate);
-
-        RequirementBusinessPriority requirementBusinessPriority = new RequirementBusinessPriority(webSession);
-        requirementBusinessPriority.setFieldEditable();
-        entity.addElement(requirementBusinessPriority);
-
-        RequirementTechnicalPriority requirementTechnicalPriority = new RequirementTechnicalPriority(webSession);
-        requirementTechnicalPriority.setFieldEditable();
-        entity.addElement(requirementTechnicalPriority);
-
-        RequirementStatus requirementStatus = new RequirementStatus(webSession);
-        requirementStatus.setFieldEditable();
-        entity.addElement(requirementStatus);
-
-        RequirementHighlevelCapability requirementHighlevelCapability = new RequirementHighlevelCapability(webSession);
-        requirementHighlevelCapability.setFieldEditable();
-        entity.addElement(requirementHighlevelCapability);
-
-        RequirementType requirementType = new RequirementType(webSession);
-        requirementType.setFieldEditable();
-        entity.addElement(requirementType);
-
-        RequirementFrequency requirementFrequency = new RequirementFrequency(webSession);
-        requirementFrequency.setFieldEditable();
-        entity.addElement(requirementFrequency);
-
-        RequirementPerformance requirementPerformance = new RequirementPerformance(webSession);
-        requirementPerformance.setFieldEditable();
-        entity.addElement(requirementPerformance);
-
-        RequirementOwner requirementOwner = new RequirementOwner(webSession);
-        requirementOwner.setFieldEditable();
-        entity.addElement(requirementOwner);
+        return getEntityHistoryByEntityId(getEntityType(), entityId);
     }
 
     public List<SystemRequirementEntity> getAllSystemRequirement(boolean includeInactive)  {
         List<SystemRequirementEntity> listOfEntitiesForExport = new ArrayList<>();
 
         try {
-            List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
+            List<EntityRecord> entityRecords = getListOfEntityRecords( getEntityType(), includeInactive);
             for (EntityRecord entityRecord : entityRecords) {
-                SystemRequirementEntity systemRequirementEntity = SystemRequirementEntity.map(entityRecord);
+                SystemRequirementEntity systemRequirementEntity = new SystemRequirementEntity(getWebSession(), entityRecord);
                 listOfEntitiesForExport.add(systemRequirementEntity);
             }
 
-            listOfEntitiesForExport.sort(Comparator.comparing(SystemRequirementEntity::getRequirementCode));
+            listOfEntitiesForExport.sort(Comparator.comparing(SystemRequirementEntity::getCode));
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -392,7 +85,6 @@ public class SystemRequirementProvider extends EntityProvider {
 
     private SystemRequirementEntity toEntity(WebSession webSession, SystemRequirementExportRow row) {
         SystemRequirementEntity entity = new SystemRequirementEntity(webSession);
-//        BasisStakeholderRequirementParentCodeSelector codeSelector = new BasisStakeholderRequirementParentCodeSelector(webSession);
 
         entity.setCustomerId(webSession.getCustomerId());
         entity.setProjectId(webSession.getProjectId());

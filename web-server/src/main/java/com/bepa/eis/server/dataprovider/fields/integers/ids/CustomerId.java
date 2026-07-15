@@ -6,6 +6,9 @@ public class CustomerId extends AbstractId {
 
     public static String FIELD_NAME = "CustomerId";
 
+    public CustomerId() {
+    }
+
     public CustomerId(Integer value) {
         setValue(value);
     }

@@ -4,6 +4,9 @@ public class EntityId extends AbstractId {
 
     public static String FIELD_NAME = "EntityId";
 
+    public EntityId() {
+    }
+
     public EntityId(Integer value) {
         setValue(value);
     }
@@ -16,6 +19,10 @@ public class EntityId extends AbstractId {
     @Override
     public String getFieldHeaderName() {
         return "Entity Id";
+    }
+
+    public boolean isBlankOrEmpty() {
+        return getValue() == null || getValue() == 0;
     }
 
 }

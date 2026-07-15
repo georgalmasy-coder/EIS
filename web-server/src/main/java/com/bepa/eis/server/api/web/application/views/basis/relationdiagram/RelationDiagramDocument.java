@@ -9,6 +9,7 @@ import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
@@ -97,11 +98,11 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         if (listOfStakeholderRequirements != null) {
             for (StakeholderRequirementEntity requirement : listOfStakeholderRequirements) {
                 Element requirementElement = getDoc().createElement("requirement");
-                String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId());
+                String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
-                addElement(requirementElement, "id", requirement.getRequirementCode());
-                addElement(requirementElement, "name", requirement.getRequirementName());
-                addElement(requirementElement, "description", requirement.getRequirementDescription());
+                addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
+                addElement(requirementElement, "name", requirement.getRequirementName().getValue());
+                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
                 stakeholderRequirements.appendChild(requirementElement);
             }
         }
@@ -113,11 +114,11 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         if (listOfSystemRequirements != null) {
             for (SystemRequirementEntity requirement : listOfSystemRequirements) {
                 Element requirementElement = getDoc().createElement("requirement");
-                String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId());
+                String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
-                addElement(requirementElement, "id", requirement.getRequirementCode());
-                addElement(requirementElement, "name", requirement.getRequirementName());
-                addElement(requirementElement, "description", requirement.getRequirementDescription());
+                addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
+                addElement(requirementElement, "name", requirement.getRequirementName().getValue());
+                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
                 systemRequirements.appendChild(requirementElement);
             }
         }
@@ -129,10 +130,10 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         if (listOfSystemBreakdowns != null) {
             for (SystemBreakdownEntity system : listOfSystemBreakdowns) {
                 Element requirementElement = getDoc().createElement("systemsBreakdown");
-                String id = formatEntityId(system.getEntityType(), system.getEntityId());
+                String id = formatEntityId(system.getEntityType(), system.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
-                addElement(requirementElement, "id", system.getSbsCode());
-                addElement(requirementElement, "name", system.getSystemName());
+                addElement(requirementElement, "id", system.getSbsCode().getValue());
+                addElement(requirementElement, "name", system.getSystemName().getValue());
                 addElement(requirementElement, "description", system.getDescription());
                 systemRequirements.appendChild(requirementElement);
             }

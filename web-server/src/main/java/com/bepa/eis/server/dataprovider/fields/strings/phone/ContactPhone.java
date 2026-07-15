@@ -2,9 +2,11 @@ package com.bepa.eis.server.dataprovider.fields.strings.phone;
 
 public class ContactPhone extends AbstractPhone {
 
-    public static String FIELD_NAME = "UserPhone";
+    public static String FIELD_NAME = "ContactPhone";
 
-    public ContactPhone() { }
+    public ContactPhone() {
+        setFieldEditable();
+    }
 
     @Override
     public String getFieldName() {
@@ -13,19 +15,13 @@ public class ContactPhone extends AbstractPhone {
 
     @Override
     public String getFieldLabelName() {
-        return "Phone";
+        return "Contact Phone";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Phone";
+        return "Contact Phone";
     }
-
-    @Override
-    public String toString() {
-        return getValue();
-    }
-
 
     @Override
     public String getSortKey() {
