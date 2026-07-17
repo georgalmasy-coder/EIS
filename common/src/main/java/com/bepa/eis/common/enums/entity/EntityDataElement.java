@@ -46,6 +46,14 @@ public enum EntityDataElement {
 
     BASISREQCODE(40,"Stakeholder Requirement Code", "StakeholderReqCode", STRING),
     SYSTEMREQCODE(41,"System Requirement Code", "SystemReqCode", STRING),
+
+    LOGICALCODE(50,"Logical Code", "LogicalCode", STRING),
+    LOGICALNAME(51,"Logical Name", "LogicalName", STRING),
+    LOGICALDESCRIPTION(52,"Logical Description", "LogicalDescription", STRING),
+
+    FUNCTIONALCODE(60,"Functional Code", "FunctionalCode", STRING),
+    FUNCTIONALNAME(61,"Functional Name", "FunctionalName", STRING),
+    FUNCTIONALDESCRIPTION(62,"Functional Description", "FunctionalDescription", STRING),
     ;
 
     private final int id;

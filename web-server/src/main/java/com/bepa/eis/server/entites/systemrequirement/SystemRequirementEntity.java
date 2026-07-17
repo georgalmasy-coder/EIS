@@ -1,4 +1,4 @@
-package com.bepa.eis.server.entites.systemsystemrequirement;
+package com.bepa.eis.server.entites.systemrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.entities.Entity;

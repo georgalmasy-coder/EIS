@@ -12,7 +12,7 @@ import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
-import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
+import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -72,7 +72,9 @@ import java.util.*;
                 "/basis/entityrelations/relationlist",
                 "/basis/stakeholderrequirement/relationlist",
                 "/basis/systemrequirement/relationlist",
-                "/basis/systemsbreakdown/relationlist"
+                "/basis/systemsbreakdown/relationlist",
+                "/pro/logicalstructure/relationlist",
+                "/pro/functionalstructure/relationlist"
         }
 )
 public class EntityRelationListServlet extends GenericServlet {
@@ -367,6 +369,10 @@ public class EntityRelationListServlet extends GenericServlet {
                     entityTypeId = EntityType.SYSTEM_REQUIREMENT.getId();
                 } else if (servletPath.contains("systemsbreakdown")) {
                     entityTypeId = EntityType.SYSTEMS_BREAKDOWN.getId();
+                } else if (servletPath.contains("functionalstructure")) {
+                    entityTypeId = EntityType.FUNCTIONAL_STRUCTURE.getId();
+                } else if (servletPath.contains("logicalstructure")) {
+                    entityTypeId = EntityType.LOGICAL_STRUCTURE.getId();
                 }
             }
         }

@@ -14,7 +14,7 @@ import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemRequir
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
-import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
+import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

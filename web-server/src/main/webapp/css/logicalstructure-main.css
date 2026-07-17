@@ -1,0 +1,972 @@
+html,
+body{
+    min-height: 100%;
+}
+
+body.logicalstructure-main-document{
+    overflow: hidden;
+}
+
+.logicalstructure-main-app{
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.logicalstructure-main-content{
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.logicalstructure-main-topbar{
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.logicalstructure-main-layout{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.logicalstructure-main-section-header{
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.logicalstructure-main-section-header h2{
+    margin: 0;
+    min-width: 0;
+}
+
+.logicalstructure-view-switcher{
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.logicalstructure-view-button{
+    width: 42px;
+    height: 38px;
+    min-width: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .08s ease;
+}
+
+.logicalstructure-view-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.logicalstructure-view-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.logicalstructure-view-button:active{
+    transform: translateY(1px);
+}
+
+.logicalstructure-view-button.is-active,
+.logicalstructure-view-button[aria-pressed="true"]{
+    background: rgba(96,165,250,.22);
+    border-color: rgba(96,165,250,.70);
+    color: #bfdbfe;
+    box-shadow: 0 0 0 3px rgba(96,165,250,.16);
+}
+
+/*
+ * Hidden for now.
+ * Remove this rule later if count/current-view information should be visible again.
+ */
+.logicalstructure-main-info-bar{
+    display: none;
+}
+
+.logicalstructure-main-info-item{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.logicalstructure-main-info-label{
+    color: var(--muted);
+}
+
+.logicalstructure-main-info-item strong{
+    color: var(--text);
+}
+
+.logicalstructure-main-toolbar{
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.logicalstructure-filter-group{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+
+.logicalstructure-grouping-bar{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 0 1 760px;
+    margin-left: auto;
+}
+
+.logicalstructure-grouping-label{
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.logicalstructure-grouping-zone{
+    position: relative;
+    height: 42px;
+    min-height: 42px;
+    flex: 1 1 auto;
+    min-width: 300px;
+    border: 1px dashed rgba(148,163,184,.45);
+    border-radius: 10px;
+    padding: 6px 34px 6px 6px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    background: rgba(15,23,42,.28);
+    overflow: hidden;
+}
+
+.logicalstructure-grouping-zone.is-drag-over{
+    border-color: rgba(96,165,250,.72);
+    background: rgba(96,165,250,.12);
+}
+
+.logicalstructure-grouping-zone .empty{
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.logicalstructure-group-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 5px 9px;
+    border: 1px solid rgba(148,163,184,.35);
+    border-radius: 999px;
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    cursor: grab;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.logicalstructure-group-chip.is-dragging{
+    opacity: .6;
+}
+
+.logicalstructure-group-chip button{
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+    color: inherit;
+}
+
+.logicalstructure-grouping-clear{
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .08s ease, opacity .15s ease;
+    transform: translateY(-50%);
+}
+
+.logicalstructure-grouping-clear:hover{
+    color: var(--text);
+    background: rgba(96,165,250,.12);
+}
+
+.logicalstructure-grouping-clear:active{
+    transform: translateY(1px);
+}
+
+.logicalstructure-grouping-clear:disabled{
+    opacity: .45;
+    cursor: default;
+}
+
+.logicalstructure-grouping-clear svg{
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.logicalstructure-grouping-clear[hidden]{
+    display: none !important;
+}
+
+.logicalstructure-action-group{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.logicalstructure-search-filter{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(420px, 100%);
+    flex: 0 1 520px;
+}
+
+.logicalstructure-filter-label{
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.logicalstructure-search-box{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 220px;
+}
+
+.logicalstructure-search-input{
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 34px 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.logicalstructure-search-input:focus{
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+
+.logicalstructure-search-icon{
+    position: absolute;
+    right: 11px;
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.logicalstructure-active-filter{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 13px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.logicalstructure-active-filter input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.logicalstructure-secondary-button{
+    min-height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    padding: 7px 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.logicalstructure-secondary-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.logicalstructure-icon-button{
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+/*
+ * Important:
+ * The icon buttons use display:inline-flex.
+ * Without this rule, the class display value can override the HTML hidden attribute,
+ * causing list-only and diagram-only action buttons to be visible at the same time.
+ */
+.logicalstructure-icon-button[hidden],
+.logicalstructure-list-action[hidden],
+.logicalstructure-diagram-action[hidden],
+.logicalstructure-action-group [hidden]{
+    display: none !important;
+}
+
+.logicalstructure-icon-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.logicalstructure-icon-button:hover{
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.logicalstructure-icon-button:active{
+    transform: translateY(1px);
+}
+
+.logicalstructure-help-button{
+    color: var(--text);
+}
+
+.logicalstructure-help-button svg{
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.logicalstructure-pdf-button svg{
+    width: 27px;
+    height: 27px;
+    fill: none;
+}
+
+.logicalstructure-pdf-button svg rect{
+    fill: currentColor;
+}
+
+.logicalstructure-pdf-button svg text{
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: .25px;
+    dominant-baseline: auto;
+}
+
+.logicalstructure-main-body{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.logicalstructure-view-panel{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.logicalstructure-view-panel.is-active{
+    display: flex;
+    flex-direction: column;
+}
+
+.logicalstructure-list-frame{
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.logicalstructure-list-scroll{
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.page-table,
+.logicalstructure-table{
+    width: 100%;
+    min-width: 1420px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.logicalstructure-table th{
+    white-space: nowrap;
+}
+
+.logicalstructure-table td{
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    vertical-align: top;
+}
+
+.logicalstructure-table thead th{
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.logicalstructure-table tbody tr{
+    cursor: default;
+}
+
+.logicalstructure-table tbody tr[data-entity-id]{
+    cursor: pointer;
+}
+
+.logicalstructure-table tbody tr[data-entity-id]:hover{
+    background: rgba(96,165,250,.08);
+}
+
+.logicalstructure-group-row td{
+    background: rgba(148,163,184,.08);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.logicalstructure-group-row.is-collapsed td{
+    background: rgba(148,163,184,.14);
+}
+
+.logicalstructure-group-row-inner{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.logicalstructure-group-toggle{
+    border: 0;
+    background: transparent;
+    padding: 0;
+    width: 18px;
+    flex: 0 0 18px;
+    cursor: pointer;
+    color: inherit;
+    line-height: 1;
+    text-align: center;
+}
+
+.logicalstructure-group-label{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logicalstructure-group-count{
+    opacity: .72;
+    font-weight: 500;
+    flex: 0 0 auto;
+}
+
+.logicalstructure-resizable-th{
+    position: sticky;
+}
+
+.logicalstructure-resizable-th[draggable="true"]{
+    cursor: grab;
+}
+
+.logicalstructure-resizable-th[draggable="true"]:active{
+    cursor: grabbing;
+}
+
+.logicalstructure-resizable-th .sort{
+    padding-right: 10px;
+}
+
+.logicalstructure-column-resizer{
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+    z-index: 8;
+}
+
+.logicalstructure-column-resizer::after{
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 3px;
+    width: 1px;
+    background: rgba(148,163,184,.35);
+}
+
+.logicalstructure-column-resizer:hover::after{
+    background: rgba(96,165,250,.85);
+}
+
+body.logicalstructure-column-resizing{
+    cursor: col-resize;
+    user-select: none;
+}
+
+body.logicalstructure-column-resizing *{
+    cursor: col-resize !important;
+}
+
+.logicalstructure-active-state{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 26px;
+}
+
+.logicalstructure-active-dot{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 1px solid rgba(148,163,184,.55);
+}
+
+.logicalstructure-active-dot.is-active{
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148,163,184,.12);
+}
+
+.logicalstructure-active-dot.is-inactive{
+    background: #ef4444;
+    border-color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.14);
+}
+
+.logicalstructure-empty{
+    color: var(--muted);
+    padding: 16px;
+    font-size: 13px;
+}
+
+.logicalstructure-diagram-frame{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background:
+            radial-gradient(circle at top left, rgba(96,165,250,.10), transparent 34%),
+            rgba(15,23,42,.35);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.logicalstructure-diagram-canvas{
+    position: relative;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.logicalstructure-horizontal-diagram-canvas{
+}
+
+.logicalstructure-vertical-diagram-canvas{
+}
+
+.logicalstructure-diagram-svg{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.logicalstructure-diagram-nodes{
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.logicalstructure-diagram-node{
+    position: absolute;
+    width: 260px;
+    border: 1px solid rgba(86,95,115,.9);
+    border-radius: 14px;
+    background: rgba(15,23,42,.88);
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.28);
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+}
+
+.logicalstructure-diagram-node:hover{
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
+}
+
+.logicalstructure-diagram-node.is-project-node{
+    cursor: default;
+    background: #4b5563;
+    border-color: #7c8798;
+}
+
+.logicalstructure-diagram-node.is-project-node .logicalstructure-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
+.logicalstructure-diagram-node.is-project-node .logicalstructure-diagram-node-footer{
+    background: #6d28d9;
+}
+
+.logicalstructure-diagram-node.is-project-node:hover{
+    border-color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    filter: brightness(1.08);
+}
+
+.logicalstructure-diagram-node-head{
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    border-bottom: 1px solid rgba(148,163,184,.22);
+}
+
+.logicalstructure-diagram-node-code{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.35rem;
+    color: #e5e7eb;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.logicalstructure-diagram-node:not(.is-project-node) .logicalstructure-diagram-node-code{
+    padding: 10px 0.45rem 0.12rem 14px;
+}
+
+.logicalstructure-diagram-project-node .logicalstructure-diagram-node-code{
+    padding: 0.2rem 0.35rem;
+}
+
+.logicalstructure-diagram-node-title{
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.22;
+    overflow-wrap: anywhere;
+}
+
+.logicalstructure-diagram-node-name{
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.5rem;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.22;
+    overflow-wrap: anywhere;
+}
+
+.logicalstructure-diagram-node-body{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logicalstructure-diagram-node-footer{
+    display: block;
+    flex: 0 0 auto;
+    padding: 0.2rem 0.4rem;
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logicalstructure-diagram-status-bars{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    flex: 0 0 auto;
+    border-top: 1px solid rgba(148,163,184,.22);
+}
+
+.logicalstructure-diagram-status-bar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-height: 20px;
+    padding: 0.18rem 0.4rem;
+    font-size: 0.74rem;
+    line-height: 1.1;
+}
+
+.logicalstructure-diagram-status-value{
+    color: #fff;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logicalstructure-diagram-edge{
+    stroke: rgba(148,163,184,.55);
+    stroke-width: 1.6;
+    fill: none;
+}
+
+.logicalstructure-diagram-edge-highlight{
+    stroke: rgba(96,165,250,.85);
+    stroke-width: 2.1;
+}
+
+.logicalstructure-context-menu{
+    position: fixed;
+    z-index: 2000;
+    min-width: 250px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(15,23,42,.97);
+    box-shadow: 0 20px 45px rgba(0,0,0,.36);
+    display: none;
+}
+
+.logicalstructure-context-menu.is-open{
+    display: grid;
+    gap: 4px;
+}
+
+.logicalstructure-context-menu button{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.logicalstructure-context-menu button:hover{
+    background: rgba(96,165,250,.16);
+}
+
+.logicalstructure-context-menu button[hidden]{
+    display: none !important;
+}
+
+@media (max-width: 1100px){
+    .logicalstructure-main-content{
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .logicalstructure-main-layout{
+        padding: 12px;
+    }
+
+    .logicalstructure-main-section-header{
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .logicalstructure-main-toolbar{
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .logicalstructure-filter-group{
+        gap: 8px;
+    }
+
+    .page-table,
+    .logicalstructure-table{
+        min-width: 1320px;
+    }
+}
+
+@media (max-width: 900px){
+    .logicalstructure-main-section-header{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .logicalstructure-view-switcher{
+        justify-content: flex-start;
+    }
+
+    .logicalstructure-main-toolbar{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .logicalstructure-filter-group{
+        width: 100%;
+    }
+
+    .logicalstructure-search-filter{
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .logicalstructure-search-box{
+        min-width: 0;
+    }
+
+    .logicalstructure-action-group{
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 700px){
+    .logicalstructure-main-content{
+        padding: 8px;
+    }
+
+    .logicalstructure-main-layout{
+        padding: 10px;
+    }
+
+    .logicalstructure-filter-group{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .logicalstructure-active-filter{
+        justify-content: flex-start;
+    }
+
+    .logicalstructure-secondary-button{
+        width: 100%;
+    }
+
+    .logicalstructure-action-group{
+        width: 100%;
+    }
+
+    .logicalstructure-icon-button,
+    .logicalstructure-view-button{
+        width: 40px;
+        min-width: 40px;
+        height: 38px;
+    }
+
+    .page-table,
+    .logicalstructure-table{
+        min-width: 1220px;
+    }
+
+}

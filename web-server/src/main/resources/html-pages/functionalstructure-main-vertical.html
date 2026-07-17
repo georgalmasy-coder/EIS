@@ -1,0 +1,459 @@
+﻿<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/export-dialog.css" />
+    <link rel="stylesheet" href="../css/import-dialog.css" />
+    <link rel="stylesheet" href="../css/functionalstructure-main.css" />
+</head>
+
+<body class="functionalstructure-main-document" data-fixed-view="vertical">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    â€º
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menuâ€¦</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app functionalstructure-main-app">
+    <div class="content functionalstructure-main-content">
+        <header class="topbar functionalstructure-main-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">â€”</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">â€”</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">â€”</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout functionalstructure-main-layout" aria-label="Functional Structure">
+            <div class="section-header functionalstructure-main-section-header">
+                <h2>Functional Structure</h2>
+
+                <div class="functionalstructure-view-switcher" role="group" aria-label="Select view type">
+                    <button
+                            id="btnViewList"
+                            class="functionalstructure-view-button is-active"
+                            type="button"
+                            data-view-type="list"
+                            title="Liste-visning"
+                            aria-label="Show list view"
+                            aria-pressed="true"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v1A1.5 1.5 0 0 1 18.5 8h-13A1.5 1.5 0 0 1 4 6.5v-1z"></path>
+                            <path d="M4 11.5A1.5 1.5 0 0 1 5.5 10h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 12.5v-1z"></path>
+                            <path d="M4 17.5A1.5 1.5 0 0 1 5.5 16h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnViewHorizontal"
+                            class="functionalstructure-view-button"
+                            type="button"
+                            data-view-type="horizontal"
+                            title="Horisontal diagram"
+                            aria-label="Show horizontal diagram view"
+                            aria-pressed="false"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h2V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9h-2v1a2 2 0 0 1-2 2H8v2h5v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-1H7a1 1 0 0 1-1-1v-3H5a2 2 0 0 1-2-2V6z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnViewVertical"
+                            class="functionalstructure-view-button"
+                            type="button"
+                            data-view-type="vertical"
+                            title="Vertikal diagram"
+                            aria-label="Show vertical diagram view"
+                            aria-pressed="false"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9 3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v2H8a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H8v-1h8v1h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1v-1a2 2 0 0 0-2-2h-3v-2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H9z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="functionalstructure-main-info-bar" aria-label="Functional structure information">
+                <div class="functionalstructure-main-info-item">
+                    <span class="functionalstructure-main-info-label">Functional structures:</span>
+                    <strong id="functionalStructureCount">â€”</strong>
+                </div>
+
+                <div class="functionalstructure-main-info-item">
+                    <span class="functionalstructure-main-info-label">Current view:</span>
+                    <strong id="currentViewLabel">Liste-visning</strong>
+                </div>
+            </div>
+
+            <div class="functionalstructure-main-toolbar" aria-label="Functional structure toolbar">
+                <div class="functionalstructure-filter-group">
+                    <label class="functionalstructure-search-filter" for="filterRequirementText">
+                        <span class="functionalstructure-filter-label">Search</span>
+                        <span class="functionalstructure-search-box">
+                            <input
+                                    id="filterRequirementText"
+                                    class="functionalstructure-search-input"
+                                    type="search"
+                                    placeholder="Search in ID, name or description..."
+                                    autocomplete="off"
+                                    aria-label="Search in ID, name or description"
+                            >
+                            <span class="functionalstructure-search-icon" aria-hidden="true">âŒ•</span>
+                        </span>
+                    </label>
+
+                    <label class="functionalstructure-active-filter" for="filterActiveOnly">
+                        <input
+                                id="filterActiveOnly"
+                                type="checkbox"
+                                checked
+                        >
+                        <span>Aktiv</span>
+                    </label>
+
+                    <button
+                            id="btnClearFilter"
+                            class="functionalstructure-secondary-button"
+                            type="button"
+                    >
+                        Clear filter
+                    </button>
+
+                    <div id="groupByBar" class="functionalstructure-grouping-bar" aria-label="Group by controls">
+                        <div class="functionalstructure-grouping-label">Group by</div>
+                        <div id="groupByZone" class="functionalstructure-grouping-zone" aria-label="Group by area" tabindex="0"></div>
+                    </div>
+                </div>
+
+                <div class="functionalstructure-action-group" aria-label="View actions">
+                    <button
+                            id="btnImport"
+                            class="functionalstructure-icon-button functionalstructure-list-action"
+                            type="button"
+                            aria-label="Import functional structures"
+                            title="Import functional structures"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
+                            <path d="M5 5a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnExport"
+                            class="functionalstructure-icon-button functionalstructure-list-action"
+                            type="button"
+                            aria-label="Export functional structures"
+                            title="Export functional structures"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
+                            <path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnAddRoot"
+                            class="functionalstructure-icon-button functionalstructure-list-action"
+                            type="button"
+                            aria-label="Add root functional structure"
+                            title="Add root functional structure"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnDownloadDiagramPdf"
+                            class="functionalstructure-icon-button functionalstructure-pdf-button functionalstructure-diagram-action"
+                            type="button"
+                            aria-label="Download diagram as PDF"
+                            title="Download diagram as PDF"
+                            hidden
+                    >
+                        <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                            <path d="M8 3.5h11.5L25 9v19.5H8V3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <path d="M19.5 3.5V9H25" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <rect x="6" y="15" width="20" height="9" rx="1.6" fill="currentColor"></rect>
+                            <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800" fill="rgb(15,23,42)">PDF</text>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnHelp"
+                            class="functionalstructure-icon-button functionalstructure-help-button"
+                            type="button"
+                            data-help-page="functionalstructure-main"
+                            data-help-title="Help - Functional Structure"
+                            title="Open help"
+                            aria-label="Open help for Functional Structure"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body functionalstructure-main-body">
+                <section
+                        id="listView"
+                        class="functionalstructure-view-panel is-active"
+                        data-view-panel="list"
+                        aria-label="Functional structure list view"
+                >
+                    <div class="table-frame page-frame functionalstructure-list-frame" aria-label="Functional structure list frame">
+                        <div class="table-scroll functionalstructure-list-scroll" id="tableScroll">
+                            <table class="data-table page-table functionalstructure-table" aria-label="Functional structure list">
+                                <colgroup id="mainColGroup"></colgroup>
+                                <thead>
+                                <tr id="mainHeaderRow"></tr>
+                                </thead>
+                                <tbody id="tbody"></tbody>
+                            </table>
+
+                            <div class="empty page-empty functionalstructure-empty" id="listEmptyState">
+                                Loading functional structuresâ€¦
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section
+                        id="horizontalDiagramView"
+                        class="functionalstructure-view-panel"
+                        data-view-panel="horizontal"
+                        aria-label="Horizontal functional structure diagram view"
+                        hidden
+                >
+                    <div class="functionalstructure-diagram-frame functionalstructure-horizontal-diagram-frame" id="horizontalDiagramFrame">
+                        <div class="functionalstructure-diagram-canvas functionalstructure-horizontal-diagram-canvas" id="horizontalDiagramCanvas">
+                            <svg class="functionalstructure-diagram-svg" id="horizontalDiagramSvg" aria-hidden="true"></svg>
+                            <div class="functionalstructure-diagram-nodes" id="horizontalDiagramNodes"></div>
+                        </div>
+
+                        <div class="functionalstructure-empty is-visible" id="horizontalDiagramEmptyState">
+                            Loading horizontal functional structure diagramâ€¦
+                        </div>
+                    </div>
+                </section>
+
+                <section
+                        id="verticalDiagramView"
+                        class="functionalstructure-view-panel"
+                        data-view-panel="vertical"
+                        aria-label="Vertical functional structure diagram view"
+                        hidden
+                >
+                    <div class="functionalstructure-diagram-frame functionalstructure-vertical-diagram-frame" id="verticalDiagramFrame">
+                        <div class="functionalstructure-diagram-canvas functionalstructure-vertical-diagram-canvas" id="verticalDiagramCanvas">
+                            <svg class="functionalstructure-diagram-svg" id="verticalDiagramSvg" aria-hidden="true"></svg>
+                            <div class="functionalstructure-diagram-nodes" id="verticalDiagramNodes"></div>
+                        </div>
+
+                        <div class="functionalstructure-empty is-visible" id="verticalDiagramEmptyState">
+                            Loading vertical functional structure diagramâ€¦
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </div>
+</main>
+
+<div id="functionalStructureContextMenu" class="functionalstructure-context-menu" role="menu" aria-hidden="true">
+    <button
+            id="contextMenuEditRequirement"
+            type="button"
+            data-context-action="edit-requirement"
+            role="menuitem"
+    >
+        Edit Functional Structure
+    </button>
+
+    <button
+            id="contextMenuCreateSubRequirement"
+            type="button"
+            data-context-action="create-sub-requirement"
+            role="menuitem"
+    >
+        Create Sub Functional Structure
+    </button>
+
+    <button
+            id="contextMenuCreateRootRequirement"
+            type="button"
+            data-context-action="create-root-requirement"
+            role="menuitem"
+    >
+        Create Root Functional Structure
+    </button>
+</div>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                Ã—
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading helpâ€¦
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="exportDialog" class="export-dialog" aria-label="Export dialog">
+    <form id="exportForm" method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head">
+                <h3>Export Functional Structure</h3>
+            </div>
+
+            <p class="export-dialog-description">
+                Choose the format for the export and whether inactive requirements should be included.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="export-format-title">
+                <div class="export-dialog-section-title" id="export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xlsx" value="xlsx" checked>
+                        <span class="export-format-label">
+                            <strong>XLSX</strong>
+                            <span>Best for Excel and analysis</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="csv" value="csv">
+                        <span class="export-format-label">
+                            <strong>CSV</strong>
+                            <span>Simple tabular export</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="pdf" value="pdf">
+                        <span class="export-format-label">
+                            <strong>PDF</strong>
+                            <span>Readable report format</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xml" value="xml">
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured integration format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="export-dialog-section" aria-labelledby="export-options-title">
+                <div class="export-dialog-section-title" id="export-options-title">Options</div>
+
+                <div class="export-check-row">
+                    <input id="exportIncludeInactive" type="checkbox" data-export-include-inactive="true">
+                    <label for="exportIncludeInactive">Include inactive requirements</label>
+                </div>
+            </section>
+        </div>
+
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="importDialog" class="import-dialog" aria-label="Import dialog">
+    <form id="importForm" method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head">
+                <h3>Import Functional Structure</h3>
+            </div>
+
+            <p class="import-dialog-description">
+                Select a file containing functional structures. The file must be XML, XLSX or CSV.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="import-file-title">
+                <div class="import-dialog-section-title" id="import-file-title">Import file</div>
+
+                <input id="importFileInput" class="import-file-native-input" type="file" accept=".xml,.xlsx,.csv" data-import-file>
+
+                <label class="import-file-picker" for="importFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">ðŸ“„</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML, XLSX or CSV</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/functionalstructure-main-page.js"></script>
+<script src="../js/tabs-list.js"></script>
+</body>
+</html>
+
+

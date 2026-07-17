@@ -3,24 +3,14 @@ package com.bepa.eis.server.dataprovider.entities;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.views.basis.systemrequirement.SystemRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
-import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemRequirementParentCodeSelector;
-import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
-import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
 
 public class SystemRequirementProvider extends EntityProvider {
 

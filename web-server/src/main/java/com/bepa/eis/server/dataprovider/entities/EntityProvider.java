@@ -8,30 +8,24 @@ import com.bepa.eis.server.api.web.application.views.common.EntityLinkProvider;
 import com.bepa.eis.server.api.web.application.views.common.EntityNoteProvider;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.dataprovider.entities.common.*;
-import com.bepa.eis.server.dataprovider.fields.AbstractField;
-import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
 import com.bepa.eis.server.dataprovider.fields.booleans.Active;
 import com.bepa.eis.server.dataprovider.fields.booleans.Latest;
-import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
-import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
-import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
-import com.bepa.eis.server.dataprovider.fields.timestamp.AbstractDate;
-import com.bepa.eis.server.dataprovider.fields.timestamp.AbstractDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.server.entites.configuration.EntityConfiguration;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
+import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
+import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 import com.bepa.eis.server.entites.project.ProjectEntity;
 import com.bepa.eis.server.entites.stakeholder.StakeholderEntity;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
-import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
+import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,6 +336,8 @@ abstract public class EntityProvider extends GenericProvider {
                 case STAKEHOLDER_REQUIREMENT -> entity = new StakeholderRequirementEntity(getWebSession(), entityRecord);
                 case SYSTEM_REQUIREMENT -> entity = new SystemRequirementEntity(getWebSession(), entityRecord);
                 case SYSTEMS_BREAKDOWN -> entity = new SystemBreakdownEntity(getWebSession(), entityRecord);
+                case LOGICAL_STRUCTURE -> entity = new LogicalStructureEntity(getWebSession(), entityRecord);
+                case FUNCTIONAL_STRUCTURE -> entity = new FunctionalStructureEntity(getWebSession(), entityRecord);
                 case PROJECT -> entity = new ProjectEntity(getWebSession(), entityRecord);
                 default -> throw new IllegalArgumentException("Invalid entity type : " + entityType);
             }
@@ -351,6 +347,8 @@ abstract public class EntityProvider extends GenericProvider {
                 case STAKEHOLDER_REQUIREMENT -> entity = new StakeholderRequirementEntity(getWebSession());
                 case SYSTEM_REQUIREMENT -> entity = new SystemRequirementEntity(getWebSession());
                 case SYSTEMS_BREAKDOWN -> entity = new SystemBreakdownEntity(getWebSession());
+                case LOGICAL_STRUCTURE -> entity = new LogicalStructureEntity(getWebSession());
+                case FUNCTIONAL_STRUCTURE -> entity = new FunctionalStructureEntity(getWebSession());
                 case PROJECT -> entity = new ProjectEntity(getWebSession());
                 default -> throw new IllegalArgumentException("Invalid entity type : " + entityType);
             }

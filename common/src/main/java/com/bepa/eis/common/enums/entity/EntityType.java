@@ -85,6 +85,27 @@ public enum EntityType {
            new EntityDataElement[]{ PROJECTNAME},
            null,
            PROJECTNAME
+    ),
+
+    LOGICAL_STRUCTURE(8, "L-SYS", "Logical Structure", "logicalStructure", "logicalStructures", "logicalDocument",
+            new EntityDataElement[]{
+                    LOGICALCODE,
+                    CODELEVEL,
+                    LOGICALNAME,
+                    LOGICALDESCRIPTION,
+            },
+            LOGICALCODE,
+            LOGICALNAME
+    ),
+
+    FUNCTIONAL_STRUCTURE(9, "F-SYS", "Functional Structure", "functionStructure", "functionStructures", "functionalDocument",
+            new EntityDataElement[]{
+                    FUNCTIONALCODE,
+                    CODELEVEL,
+                    FUNCTIONALNAME,
+                    FUNCTIONALDESCRIPTION},
+            FUNCTIONALCODE,
+            FUNCTIONALDESCRIPTION
     );
 
 

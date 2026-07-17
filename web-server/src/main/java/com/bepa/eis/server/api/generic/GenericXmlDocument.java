@@ -131,6 +131,8 @@ public class GenericXmlDocument {
 
 
             } else {
+                log.debug("Creating element: {}", field.getFieldName());
+
                 Element element = doc.createElement(field.getFieldName());
 
                 addAttribute(element, "control", field.getFieldControl().getDescription());

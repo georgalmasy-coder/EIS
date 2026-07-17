@@ -68,8 +68,8 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         requirementCode.setFieldNotEditable();
         entityElement.addElement(requirementCode);
 
-        requirementCode.setFieldNotVisible();
-        entityElement.addElement(requirementCode);
+        requirementCodeLevel.setFieldNotVisible();
+        entityElement.addElement(requirementCodeLevel);
 
         requirementName.setFieldEditable();
         entityElement.addElement(requirementName);

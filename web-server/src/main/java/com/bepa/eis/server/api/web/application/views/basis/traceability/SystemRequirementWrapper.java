@@ -2,7 +2,7 @@ package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
-import com.bepa.eis.server.entites.systemsystemrequirement.SystemRequirementEntity;
+import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.util.ArrayList;
