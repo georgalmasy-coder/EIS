@@ -84,8 +84,8 @@ public enum IrlType {
 
     IRL_LEVEL9(
             11,
-            8,
-            "8",
+            9,
+            "9",
             "System Integration proved in operations",
             "NSystem Integration is proven through successful mission proven operations capabilities",
             true),

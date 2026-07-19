@@ -3,7 +3,7 @@ package com.bepa.eis.server.api.web.application.cache;
 public class TrlCache extends GenericLookup {
 
     private static final String LOOKUP_SQL =
-            "SELECT CustomerId, ProjectId, TRLLevel as LookupId, concat(concat(TRLLevel, ' - ' ), TRLName) as LookupCode, TRLName as LookupDescription, null AS Color, Active " +
+            "SELECT CustomerId, ProjectId, TRLLevel as LookupId, concat(concat(TRLLevel, ' - ' ), TRLName) as LookupCode, TRLName as LookupDescription, Color AS Color, Active " +
             "FROM TRL " +
             "WHERE CustomerId=? " +
             "AND   ProjectId=? " +

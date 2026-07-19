@@ -109,8 +109,6 @@ function initializeEvents() {
     dialog?.addEventListener("close", () => {
         state.dirty = false;
         state.currentLookup = null;
-        setText("lookupDialogStatus", "Idle", "");
-        setText("lookupDialogModeLabel", "Idle", "");
     });
 
     const codeInput = byId("lookupCodeInput");
@@ -386,13 +384,10 @@ function openLookupDialog(mode, lookupId = null) {
 
     state.dirty = false;
     state.currentLookup = null;
-    setText("lookupDialogStatus", "Loading...", "");
-    setText("lookupDialogModeLabel", mode === "edit" ? "Editing lookup row" : "Creating lookup row", "");
     dialog.showModal();
 
     loadLookupDialog(mode, lookupId).catch((error) => {
         console.error("Failed to open lookup dialog", error);
-        setText("lookupDialogStatus", "Failed to load.", "");
         window.alert(error.message || "Failed to load lookup row.");
         closeLookupDialog("error");
     });
@@ -414,7 +409,6 @@ async function loadLookupDialog(mode, lookupId) {
 
     state.currentLookup = lookup;
     fillLookupDialog(lookup, mode);
-    setText("lookupDialogStatus", mode === "edit" ? "Editing" : "Creating", "");
 }
 
 function parseLookupNode(node) {
@@ -455,8 +449,7 @@ function fillLookupDialog(lookup, mode) {
     }
 
     syncColorControlsFromValue(lookup.color || "");
-    setText("lookupDialogTitle", mode === "edit" ? "Edit Lookup" : "Create Lookup", "");
-    setText("lookupDialogModeLabel", mode === "edit" ? "Editing lookup row" : "Creating lookup row", "");
+    setText("lookupDialogTitle", "Lookup", "");
     updateLookupPreview();
     state.dirty = false;
 }

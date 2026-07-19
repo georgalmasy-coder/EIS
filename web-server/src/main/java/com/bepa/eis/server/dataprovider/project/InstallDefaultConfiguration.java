@@ -33,9 +33,10 @@ public class InstallDefaultConfiguration extends GenericProvider {
                     "ProjectId, " +
                     "SRLLevel, " +
                     "SRLName, " +
+                    "SRLDescription, " +
                     "color, " +
                     "Active" +
-                    ") VALUES (?, ?, ?, ?, ?, ?)";
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_TRL_SQL =
             "INSERT INTO TRL (" +
@@ -87,8 +88,9 @@ public class InstallDefaultConfiguration extends GenericProvider {
                 setInt(ps, projectId, 2);
                 ps.setInt(3, srlType.getTrlLevel());
                 ps.setString(4, srlType.getSrlName());
-                ps.setString(5, srlType.getSrlColor());
-                ps.setBoolean(6, srlType.isActive());
+                ps.setString(5, fallbackDescription(srlType.getSrlDescription(), srlType.getSrlName()));
+                ps.setString(6, srlType.getSrlColor());
+                ps.setBoolean(7, srlType.isActive());
 
                 executeInsertIgnoringDuplicateKey(ps);
             }
@@ -129,5 +131,13 @@ public class InstallDefaultConfiguration extends GenericProvider {
     private boolean isDuplicateKeyException(SQLException e) {
         return e.getErrorCode() == SQL_SERVER_DUPLICATE_KEY ||
                 e.getErrorCode() == SQL_SERVER_PRIMARY_KEY_VIOLATION;
+    }
+
+    private String fallbackDescription(String description, String fallback) {
+        if (description != null && !description.isBlank()) {
+            return description;
+        }
+
+        return fallback;
     }
 }

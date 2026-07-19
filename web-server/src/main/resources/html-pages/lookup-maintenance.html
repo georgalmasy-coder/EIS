@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/lookup-maintenance.css" />
+</head>
+
+<body class="lookup-maintenance-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app lookup-maintenance-app">
+    <div class="content lookup-maintenance-content">
+        <header class="topbar lookup-maintenance-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout lookup-maintenance-layout" aria-label="Lookup maintenance">
+            <div class="section-header lookup-maintenance-section-header">
+                <h2>Lookup Maintenance</h2>
+            </div>
+
+            <div class="page-tab-bar lookup-maintenance-tab-bar" role="tablist" aria-label="Lookup tables">
+                <button id="trlTabButton" class="tab-btn" type="button" role="tab" aria-selected="true" aria-controls="trlPanel">TRL</button>
+                <button id="irlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="irlPanel">IRL</button>
+                <button id="srlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="srlPanel">SRL</button>
+            </div>
+
+            <div class="tab-panels lookup-maintenance-panels">
+                <section id="trlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="trlTabButton">
+                    <div id="trlCards" class="lookup-maintenance-card-grid" aria-label="TRL rows"></div>
+                </section>
+
+                <section id="irlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="irlTabButton" hidden>
+                    <div id="irlCards" class="lookup-maintenance-card-grid" aria-label="IRL rows"></div>
+                </section>
+
+                <section id="srlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="srlTabButton" hidden>
+                    <div id="srlCards" class="lookup-maintenance-card-grid" aria-label="SRL rows"></div>
+                </section>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="lookupDialog" class="lookup-maintenance-dialog" aria-labelledby="lookupDialogTitle">
+    <form id="lookupForm" method="dialog" class="lookup-maintenance-dialog-form">
+        <div class="page-dialog-head lookup-maintenance-dialog-head">
+            <div class="lookup-maintenance-dialog-title-group">
+                <h3 id="lookupDialogTitle">Lookup</h3>
+            </div>
+        </div>
+
+        <div class="lookup-maintenance-dialog-grid">
+            <input type="hidden" id="lookupTypeInput" />
+            <input type="hidden" id="lookupIdInput" />
+            <input type="hidden" id="lookupBadgeTextInput" />
+            <input type="hidden" id="lookupColorValueInput" />
+
+            <div class="page-field lookup-maintenance-wide-field lookup-maintenance-code-field">
+                <label>Code / level</label>
+                <span id="lookupPreviewChip" class="lookup-maintenance-preview-chip lookup-maintenance-preview-chip-dialog">Value</span>
+            </div>
+
+            <div class="page-field lookup-maintenance-wide-field">
+                <label for="lookupNameInput">Name <span aria-hidden="true">*</span></label>
+                <input id="lookupNameInput" type="text" maxlength="255" autocomplete="off" required />
+            </div>
+
+            <div class="page-field lookup-maintenance-wide-field">
+                <label for="lookupDescriptionInput">Description <span aria-hidden="true">*</span></label>
+                <textarea id="lookupDescriptionInput" rows="5" maxlength="4000" required></textarea>
+            </div>
+
+            <div class="page-field checkbox-field lookup-maintenance-checkbox-field">
+                <input id="lookupActiveInput" type="checkbox" checked />
+                <label for="lookupActiveInput">Active</label>
+            </div>
+
+            <div class="page-field lookup-maintenance-wide-field">
+                <label for="lookupColorPresetSelect">Color</label>
+                <div class="lookup-maintenance-color-grid">
+                    <select id="lookupColorPresetSelect" class="lookup-maintenance-color-select">
+                        <option value="silver">Silver</option>
+                        <option value="red">Red</option>
+                        <option value="green">Green</option>
+                        <option value="blue">Blue</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="orange">Orange</option>
+                        <option value="purple">Purple</option>
+                        <option value="pink">Pink</option>
+                        <option value="brown">Brown</option>
+                        <option value="navy">Navy</option>
+                        <option value="teal">Teal</option>
+                    </select>
+
+                    <input id="lookupColorInput" class="lookup-maintenance-color-picker" type="color" value="#0000FF" />
+                </div>
+            </div>
+        </div>
+
+        <div class="dlg-footer lookup-maintenance-dialog-footer">
+            <button id="lookupSaveBtn" class="primary" type="button">Save</button>
+            <button id="lookupCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/lookup-maintenance-page.js"></script>
+</body>
+</html>
