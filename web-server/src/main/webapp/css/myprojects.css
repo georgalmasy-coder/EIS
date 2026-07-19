@@ -1,6 +1,7 @@
 .my-projects-panel {
-    display: grid;
-    gap: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     min-height: calc(100vh - 150px);
 }
 
@@ -16,7 +17,7 @@
 }
 
 .my-projects-subtitle {
-    margin: 5px 0 0;
+    margin: 2px 0 0;
     color: var(--muted);
     font-size: 13px;
 }
@@ -36,19 +37,22 @@
 .my-projects-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(420px, 1fr));
-    gap: 18px;
+    grid-auto-rows: 265px;
+    gap: 14px;
+    align-content: start;
     align-items: stretch;
-    padding-top: 10px;
     padding-right: 10px;
 }
 
 .project-card {
     position: relative;
     min-width: 0;
+    height: 100%;
+    align-content: start;
     display: grid;
-    grid-template-rows: auto auto auto auto 1fr auto;
-    gap: 14px;
-    padding: 16px;
+    grid-template-rows: auto auto auto auto auto auto;
+    gap: 6px;
+    padding: 9px 12px 6px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
@@ -58,8 +62,8 @@
 
 .project-top-actions {
     position: absolute;
-    top: -10px;
-    right: -10px;
+    top: 6px;
+    right: 6px;
     z-index: 20;
     display: inline-flex;
     align-items: center;
@@ -129,12 +133,13 @@
     grid-template-columns: 1.2fr 1fr 0.9fr 0.9fr;
     gap: 0;
     min-width: 0;
-    padding-right: 34px;
+    padding-right: 20px;
+    margin-bottom: 5px;
 }
 
 .project-meta-block {
     min-width: 0;
-    padding: 0 12px;
+    padding: 0 8px;
     border-right: 1px solid var(--border);
 }
 
@@ -148,7 +153,7 @@
 }
 
 .project-meta-label {
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     color: var(--text);
     font-size: 12px;
     font-weight: 800;
@@ -156,21 +161,26 @@
 }
 
 .project-meta-value {
+    display: block;
+    max-width: 100%;
     color: var(--muted);
     font-size: 12px;
     line-height: 1.25;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .project-counts {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 9px;
 }
 
 .project-count {
     min-width: 0;
-    padding: 10px;
+    padding: 8px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: rgba(47, 156, 255, 0.045);
@@ -194,12 +204,13 @@
 
 .project-timeline {
     position: relative;
-    padding: 16px 10px 20px;
+    margin-top: 10px;
+    padding: 7px 4px 6px;
 }
 
 .timeline-line {
     position: relative;
-    height: 5px;
+    height: 4px;
     border-radius: 999px;
     background: rgba(141, 153, 168, 0.3);
 }
@@ -207,7 +218,7 @@
 .timeline-active {
     position: absolute;
     top: 0;
-    height: 5px;
+    height: 4px;
     border-radius: 999px;
     background: var(--accent);
 }
@@ -224,8 +235,8 @@
     position: absolute;
     top: 50%;
     z-index: 2;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 3px solid var(--panel);
     border-radius: 999px;
     background: var(--accent);
@@ -245,35 +256,52 @@
 
 .timeline-now {
     position: absolute;
-    top: -16px;
+    top: -12px;
     z-index: 3;
     width: 0;
     height: 0;
-    border-right: 8px solid transparent;
-    border-left: 8px solid transparent;
-    border-top: 13px solid var(--text);
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    border-top: 10px solid var(--text);
     transform: translateX(-50%);
 }
 
 .timeline-labels {
-    position: relative;
-    height: 18px;
-    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 7px;
+    min-width: 0;
+    padding: 0 6px;
 }
 
-.timeline-labels span {
-    position: absolute;
+.timeline-label {
+    position: static;
+    flex: 0 1 auto;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 13px;
     white-space: nowrap;
-    transform: translateX(-50%);
+    line-height: 1.2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timeline-label-start {
+    text-align: left;
+}
+
+.timeline-label-end {
+    text-align: right;
 }
 
 .trl-title {
-    margin: 0;
+    margin: 3px 0 0;
     color: var(--text);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 850;
+    line-height: 1.1;
 }
 
 .trl-track {
@@ -282,7 +310,7 @@
     grid-template-columns: repeat(9, minmax(0, 1fr));
     align-items: center;
     gap: 0;
-    min-height: 24px;
+    min-height: 18px;
 }
 
 .trl-track::before {
@@ -302,13 +330,13 @@
     position: relative;
     z-index: 1;
     justify-self: center;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 999px;
     color: #ffffff;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 850;
-    line-height: 22px;
+    line-height: 20px;
     text-align: center;
 }
 
@@ -329,19 +357,19 @@
 
 .project-card-footer {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin: 2px -16px -16px;
+    gap: 8px;
+    margin: 5px -12px -1px;
     border-top: 1px solid var(--border);
 }
 
 .next-trl-deadline {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
-    padding: 11px 16px;
+    padding: 4px 12px 3px;
     color: var(--accent);
     font-size: 12px;
     font-weight: 700;
@@ -371,8 +399,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 165px;
-    padding: 11px 18px;
+    min-width: 155px;
+    padding: 6px 14px;
     color: #ffffff;
     background: var(--accent);
     font-size: 12px;

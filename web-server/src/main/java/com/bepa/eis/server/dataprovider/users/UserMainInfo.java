@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
@@ -54,6 +55,7 @@ public class UserMainInfo extends GenericXmlDocument {
 
         appendTopPanel(webSession);
         appendUserDocument(resolveUserRecord(webSession));
+        appendProjectAccessDocument(resolveProjectAccessRows(webSession));
         appendLookups();
     }
 
@@ -125,6 +127,31 @@ public class UserMainInfo extends GenericXmlDocument {
 
         userDocument.addElement(userElements);
         rootElement.addElement(userDocument);
+    }
+
+    private void appendProjectAccessDocument(List<UserProjectAccessRow> projectAccessRows) {
+        WebSession webSession = getWebSession();
+
+        ListOfElements projectDocument = new ListOfElements(webSession, "userProjects");
+
+        for (UserProjectAccessRow projectAccessRow : projectAccessRows == null ? List.<UserProjectAccessRow>of() : projectAccessRows) {
+            if (projectAccessRow == null) {
+                continue;
+            }
+
+            ListOfElements projectElement = new ListOfElements(webSession, "project");
+            projectElement.addElement(textField("ProjectId", "", "", projectAccessRow.projectId(), null, null, null, false, false, false));
+            projectElement.addElement(textField("ProjectName", "", "", projectAccessRow.projectName(), null, null, null, false, false, false));
+            projectElement.addElement(booleanField("Selected", "", "", projectAccessRow.selected(), true, false));
+            projectDocument.addElement(projectElement);
+        }
+
+        rootElement.addElement(projectDocument);
+    }
+
+    private List<UserProjectAccessRow> resolveProjectAccessRows(WebSession webSession) {
+        UserProvider userProvider = new UserProvider(webSession);
+        return userProvider.getUserProjectAccessRows(requestType == CREATE_ENTITY ? null : userId);
     }
 
     private void appendLookups() {

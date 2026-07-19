@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
@@ -49,11 +50,12 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         }
 
         Integer userId = intValue(request.getParameter("userId"));
+        Integer customerId = resolveCustomerId(webSession, request);
 
         writeXml(
                 response,
                 HttpServletResponse.SC_OK,
-                userId == null ? buildListXml(webSession) : buildDetailXml(webSession, userId)
+                userId == null ? buildListXml(webSession, customerId) : buildDetailXml(webSession, customerId, userId)
         );
     }
 
@@ -87,12 +89,13 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         );
     }
 
-    private String buildListXml(WebSession webSession) {
+    private String buildListXml(WebSession webSession, Integer customerId) {
         UserProvider userProvider = new UserProvider(webSession);
 
         StringBuilder xml = new StringBuilder();
         appendXmlHeader(xml);
         xml.append("<userAdministration>");
+        appendElement(xml, "customerId", customerId);
         appendTopPanel(xml, webSession);
 
         appendLookups(xml);
@@ -107,7 +110,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         return xml.toString();
     }
 
-    private String buildDetailXml(WebSession webSession, Integer userId) {
+    private String buildDetailXml(WebSession webSession, Integer customerId, Integer userId) {
         UserProvider userProvider = new UserProvider(webSession);
         CustomerRecordProvider customerRecordProvider = new CustomerRecordProvider(webSession);
 
@@ -115,10 +118,12 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         List<UserProvider.UserCustomerLink> linkedCustomers = userProvider.getLinkedCustomers(userId);
         List<UserProvider.DepartmentOption> departments = userProvider.getDepartmentOptions();
         List<CustomerRecord> allCustomers = customerRecordProvider.getAllLatestCustomers();
+        List<UserProjectAccessRow> projectAccessRows = userProvider.getUserProjectAccessRows(customerId, userId);
 
         StringBuilder xml = new StringBuilder();
         appendXmlHeader(xml);
         xml.append("<userAdministration>");
+        appendElement(xml, "customerId", customerId);
         appendTopPanel(xml, webSession);
 
         appendLookups(xml);
@@ -146,6 +151,12 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         }
         xml.append("</departments>");
 
+        xml.append("<userProjects>");
+        for (UserProjectAccessRow projectAccessRow : projectAccessRows) {
+            appendProjectAccessRow(xml, projectAccessRow);
+        }
+        xml.append("</userProjects>");
+
         xml.append("</userDetail>");
         xml.append("</userAdministration>");
 
@@ -162,9 +173,11 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
             UserProvider.UserAdministrationRow user = parseUser(root);
             List<Integer> customerIds = parseCustomerIds(root);
+            Integer customerId = intValue(text(root, "customerId"));
+            List<UserProjectAccessRow> projectAccessRows = parseProjectAccessRows(root);
 
             UserProvider userProvider = new UserProvider(webSession);
-            boolean saved = userProvider.saveUserAdministration(user, customerIds);
+            boolean saved = userProvider.saveUserAdministration(user, customerIds, projectAccessRows);
 
             return buildSaveResultXml(
                     saved,
@@ -279,6 +292,33 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         return customerIds;
     }
 
+    private List<UserProjectAccessRow> parseProjectAccessRows(Element root) {
+        List<UserProjectAccessRow> projectAccessRows = new ArrayList<>();
+        Element userProjects = firstElement(root, "userProjects");
+
+        if (userProjects == null) {
+            return projectAccessRows;
+        }
+
+        NodeList projectNodes = userProjects.getElementsByTagName("project");
+
+        for (int index = 0; index < projectNodes.getLength(); index++) {
+            org.w3c.dom.Node node = projectNodes.item(index);
+
+            if (!(node instanceof Element projectElement)) {
+                continue;
+            }
+
+            projectAccessRows.add(new UserProjectAccessRow(
+                    intValue(text(projectElement, "ProjectId")),
+                    text(projectElement, "ProjectName"),
+                    booleanValue(text(projectElement, "Selected"), false)
+            ));
+        }
+
+        return projectAccessRows;
+    }
+
     private void appendLookups(StringBuilder xml) {
         xml.append("<lookups>");
         appendCountryCodeLookup(xml);
@@ -390,6 +430,17 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "customerStatus", link == null ? null : link.customerStatus());
         appendElement(xml, "contactEmail", link == null ? null : link.contactEmail());
         xml.append("</customer>");
+    }
+
+    private void appendProjectAccessRow(
+            StringBuilder xml,
+            UserProjectAccessRow projectAccessRow
+    ) {
+        xml.append("<project>");
+        appendElement(xml, "ProjectId", projectAccessRow == null ? null : projectAccessRow.projectId());
+        appendElement(xml, "ProjectName", projectAccessRow == null ? null : projectAccessRow.projectName());
+        appendElement(xml, "Selected", projectAccessRow != null && projectAccessRow.selected());
+        xml.append("</project>");
     }
 
     private void appendCustomerOption(
@@ -548,6 +599,16 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
     private void appendXmlHeader(StringBuilder xml) {
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    }
+
+    private Integer resolveCustomerId(WebSession webSession, HttpServletRequest request) {
+        Integer customerId = intValue(request.getParameter("customerId"));
+
+        if (customerId != null) {
+            return customerId;
+        }
+
+        return webSession == null ? null : webSession.getCustomerId();
     }
 
     private void appendElement(

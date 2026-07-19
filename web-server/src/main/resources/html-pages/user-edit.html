@@ -109,11 +109,26 @@
                 >
                     Security and Password
                 </button>
+
+                <button
+                        class="tab-btn page-tab-btn"
+                        id="tabBtnProjects"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="tabPanelProjects"
+                >
+                    Projects
+                </button>
             </div>
 
             <div id="userEditFields" class="tab-panels page-dialog-panels user-edit-panels">
                 <section class="tab-panel is-active" id="tabPanelBasis" role="tabpanel" aria-labelledby="tabBtnBasis">
                     <div id="basisInfoFields" class="page-field-grid user-edit-field-grid"></div>
+                </section>
+
+                <section class="tab-panel" id="tabPanelProjects" role="tabpanel" aria-labelledby="tabBtnProjects">
+                    <div id="projectAccessFields" class="user-edit-projects-wrap"></div>
                 </section>
 
                 <section class="tab-panel" id="tabPanelSecurityAndPassword" role="tabpanel" aria-labelledby="tabBtnSecurityAndPassword">

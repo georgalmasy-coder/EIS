@@ -225,7 +225,10 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         );
 
         ProjectProvider projectProvider = new ProjectProvider(webSession);
-        List<ProjectRecord> projects = projectProvider.getLatestProjectsByCustomerId(webSession.getCustomerId());
+        List<ProjectRecord> projects = projectProvider.getLatestProjectsByCustomerAndUserId(
+                webSession.getCustomerId(),
+                webSession.getUserId()
+        );
 
         for (ProjectRecord project : projects) {
             appendProject(

@@ -24,6 +24,8 @@ const STORAGE_KEYS = {
     columnWidths: "user.main.columnWidths"
 };
 
+const USER_MAIN_EDIT_DIALOG_CLASS = "user-main-edit-dialog";
+
 const DEFAULT_COLUMNS = [
     { key: "name", label: "Name", width: "220px" },
     { key: "userRole", label: "Role", width: "180px" },
@@ -120,7 +122,7 @@ function initializeEvents() {
     });
 
     addButton?.addEventListener("click", () => {
-        openEditDialog({
+        openUserMainEditDialog({
             page: "user-edit",
             mode: "create",
             title: "Create User",
@@ -648,12 +650,21 @@ function openEditUser(userId) {
         return;
     }
 
-    openEditDialog({
+    openUserMainEditDialog({
         page: "user-edit",
         mode: "edit",
         id: userId,
         title: "Edit User",
         onSaved: () => window.location.reload()
+    });
+}
+
+function openUserMainEditDialog(options) {
+    openEditDialog({
+        ...options,
+        dialogClassName: [options.dialogClassName, USER_MAIN_EDIT_DIALOG_CLASS]
+            .filter(Boolean)
+            .join(" ")
     });
 }
 

@@ -3,6 +3,7 @@ package com.bepa.eis.server.dataprovider.users;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
@@ -34,6 +35,7 @@ public class UserMainServlet extends GenericDataProviderServlet {
         UserProvider userProvider = new UserProvider(webSession);
         UserProvider.UserAdministrationRow user = parseUser(rootElement);
         List<Integer> customerIds = parseCustomerIds(rootElement);
+        List<UserProjectAccessRow> projectAccessRows = parseProjectAccessRows(rootElement);
 
         if (user == null) {
             throw new IllegalArgumentException("Missing user in save payload.");
@@ -43,7 +45,7 @@ public class UserMainServlet extends GenericDataProviderServlet {
             customerIds = List.of(webSession.getCustomerId());
         }
 
-        boolean saved = userProvider.saveUserAdministration(user, customerIds);
+        boolean saved = userProvider.saveUserAdministration(user, customerIds, projectAccessRows);
 
         if (!saved) {
             throw new IllegalStateException("User could not be saved.");
@@ -185,6 +187,31 @@ public class UserMainServlet extends GenericDataProviderServlet {
 
         customerIds.addAll(uniqueIds);
         return customerIds;
+    }
+
+    private List<UserProjectAccessRow> parseProjectAccessRows(Element root) {
+        Element userProjects = firstElement(root, "userProjects");
+        List<UserProjectAccessRow> rows = new ArrayList<>();
+
+        if (userProjects == null) {
+            return rows;
+        }
+
+        for (int index = 0; index < userProjects.getElementsByTagName("project").getLength(); index++) {
+            org.w3c.dom.Node node = userProjects.getElementsByTagName("project").item(index);
+
+            if (!(node instanceof Element projectElement)) {
+                continue;
+            }
+
+            rows.add(new UserProjectAccessRow(
+                    integerValue(fieldValue(projectElement, "ProjectId")),
+                    elementText(projectElement, "ProjectName"),
+                    booleanValue(fieldValue(projectElement, "Selected"), false)
+            ));
+        }
+
+        return rows;
     }
 
     private Element firstElement(Element parent, String tagName) {

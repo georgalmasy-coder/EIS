@@ -37,7 +37,7 @@ body.user-edit-document {
 .user-edit-layout {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     overflow: hidden;
 }
@@ -123,7 +123,7 @@ body.user-edit-document {
 }
 
 .user-edit-panels {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     overflow: hidden;
     display: flex;
@@ -139,9 +139,9 @@ body.user-edit-document {
 
 .user-edit-panels .tab-panel.is-active {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     flex-direction: column;
-    height: 100%;
+    height: auto;
     min-height: 0;
     overflow: hidden;
 }
@@ -157,6 +157,72 @@ body.user-edit-document {
 
 .user-edit-field-grid input[type="hidden"] {
     display: none;
+}
+
+.user-edit-projects-wrap {
+    min-height: 0;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-edit-projects-table-wrap {
+    min-height: 0;
+    height: var(--user-edit-project-list-height, 340px);
+    max-height: var(--user-edit-project-list-height, 340px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    scrollbar-gutter: stable;
+}
+
+.user-edit-projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.user-edit-projects-table th,
+.user-edit-projects-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.user-edit-projects-table thead th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.user-edit-projects-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-edit-projects-check-col {
+    width: 96px;
+    text-align: center;
+}
+
+.user-edit-project-name-cell label {
+    display: block;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.user-edit-project-check-cell {
+    text-align: center;
+}
+
+.user-edit-project-access-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
 }
 
 .user-edit-phone-field {
@@ -209,7 +275,7 @@ body.user-edit-document {
 }
 
 .user-edit-footer {
-    margin-top: auto;
+    margin-top: 0;
     flex: 0 0 auto;
 }
 

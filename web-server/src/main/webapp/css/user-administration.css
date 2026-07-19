@@ -466,6 +466,15 @@ body.user-administration-column-resizing * {
     padding: 0;
 }
 
+dialog.user-edit-dialog.user-edit-dialog-fixed {
+    width: 1100px;
+    min-width: 1100px;
+    max-width: none;
+    height: 610px;
+    min-height: 610px;
+    max-height: none;
+}
+
 .user-edit-form {
     width: 100%;
     height: auto;
@@ -558,6 +567,79 @@ body.user-administration-column-resizing * {
     scrollbar-gutter: stable both-edges;
 }
 
+.user-projects-wrap {
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-projects-empty {
+    margin: 0;
+}
+
+.user-projects-table-wrap {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.user-projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.user-projects-table th,
+.user-projects-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.user-projects-table thead th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.user-projects-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-projects-check-col {
+    width: 92px;
+    text-align: center;
+}
+
+.user-project-name-cell {
+    overflow: hidden;
+}
+
+.user-project-name-cell label {
+    display: block;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-project-check-cell {
+    text-align: center;
+}
+
+.user-project-access-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
 .user-field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -593,13 +675,33 @@ body.user-administration-column-resizing * {
     min-height: 16px;
 }
 
+.user-field-grid input:not([type="checkbox"]):not([type="hidden"]),
+.user-field-grid select,
+.user-field-grid textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.user-field-grid input:not([type="checkbox"]):not([type="hidden"]):focus,
+.user-field-grid select:focus,
+.user-field-grid textarea:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
 .user-field-grid input[readonly],
 .user-field-grid textarea[readonly],
 .user-field-grid select[disabled],
 .user-field-grid input[disabled] {
-    background: rgba(15, 23, 42, .42);
-    color: #cbd5e1;
-    border-color: rgba(148, 163, 184, .35);
     cursor: not-allowed;
 }
 

@@ -345,6 +345,18 @@ body.user-main-column-resizing * {
     text-align: center;
 }
 
+dialog.eis-edit-dialog.user-main-edit-dialog {
+    width: 1040px;
+    min-width: 1040px;
+    max-width: none;
+
+    height: 640px;
+    min-height: 640px;
+    max-height: none;
+
+    overflow: hidden;
+}
+
 .user-administration-active-state {
     display: inline-flex;
     align-items: center;

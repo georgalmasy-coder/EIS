@@ -69,9 +69,11 @@ const state = {
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     currentDoc: null,
     userDetail: null,
+    customerId: null,
     lookups: {},
     departments: [],
     linkedCustomerIds: [],
+    projectAccessRows: [],
     saving: false
 };
 
@@ -123,6 +125,7 @@ function collectElements() {
     els.btnSendPasswordResetLink = document.getElementById("btnSendPasswordResetLink");
     els.fieldPhoneCountryCode = document.getElementById("fieldPhoneCountryCode");
     els.fieldPhoneHelp = document.getElementById("fieldPhoneHelp");
+    els.userProjectsBody = document.getElementById("userProjectsBody");
 
     document.querySelectorAll("[id]").forEach(function (element) {
         els[element.id] = element;
@@ -270,6 +273,7 @@ async function loadUsers() {
     try {
         const doc = await fetchXml(API_URL);
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        state.customerId = parseCustomerId(doc);
         state.lookups = parseLookups(doc);
         state.users = parseUsers(doc);
         applyFilterSortAndRender();
@@ -282,12 +286,13 @@ async function loadUsers() {
     }
 }
 
-async function openUserDetail(userId) {
+async function openUserDetail(userId, customerId = state.customerId) {
     if (!userId) {
         return;
     }
 
     state.selectedUserId = userId;
+    state.customerId = customerId != null ? customerId : state.customerId;
     setDialogStatus("Loading user...", "is-loading");
     clearDialog();
 
@@ -296,9 +301,16 @@ async function openUserDetail(userId) {
     }
 
     try {
-        const doc = await fetchXml(`${API_URL}?userId=${encodeURIComponent(userId)}`);
+        const query = [`userId=${encodeURIComponent(userId)}`];
+
+        if (state.customerId != null && state.customerId !== "") {
+            query.push(`customerId=${encodeURIComponent(state.customerId)}`);
+        }
+
+        const doc = await fetchXml(`${API_URL}?${query.join("&")}`);
         state.currentDoc = doc;
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        state.customerId = parseCustomerId(doc) ?? state.customerId;
         state.lookups = parseLookups(doc);
         fillLookupSelect("fieldUserMfaPolicy", "userMfaPolicy");
 
@@ -306,6 +318,7 @@ async function openUserDetail(userId) {
         state.userDetail = detail.user;
         state.departments = detail.departments;
         state.linkedCustomerIds = detail.linkedCustomerIds;
+        state.projectAccessRows = detail.projectAccessRows;
         fillDialog(detail);
         setDialogStatus("Loaded.", "is-ok");
     } catch (error) {
@@ -323,6 +336,15 @@ async function saveUserAdministration() {
     if (!userId) {
         setDialogStatus("User ID is missing.", "is-error");
         return;
+    }
+
+    const emailField = document.getElementById("fieldEmail");
+    if (emailField instanceof HTMLInputElement) {
+        if (!emailField.checkValidity()) {
+            emailField.reportValidity();
+            setDialogStatus("Email is missing or invalid.", "is-error");
+            return;
+        }
     }
 
     state.saving = true;
@@ -372,7 +394,7 @@ async function runAction(action) {
 
         setDialogStatus(result.message || "Action completed.", "is-ok");
         await loadUsers();
-        await openUserDetail(parseInt(userId, 10));
+        await openUserDetail(parseInt(userId, 10), state.customerId);
     } catch (error) {
         console.error(error);
         setDialogStatus(`Action failed: ${error.message}`, "is-error");
@@ -397,7 +419,8 @@ function parseUserDetail(doc) {
             user: {},
             linkedCustomerIds: [],
             customers: [],
-            departments: []
+            departments: [],
+            projectAccessRows: []
         };
     }
 
@@ -410,7 +433,16 @@ function parseUserDetail(doc) {
             })
             .filter(Boolean),
         customers: Array.from(detail.querySelectorAll(":scope > customers > customer")).map(parseCustomerNode),
-        departments: Array.from(detail.querySelectorAll(":scope > departments > department")).map(parseDepartmentNode)
+        departments: Array.from(detail.querySelectorAll(":scope > departments > department")).map(parseDepartmentNode),
+        projectAccessRows: Array.from(detail.querySelectorAll(":scope > userProjects > project")).map(parseProjectAccessNode)
+    };
+}
+
+function parseProjectAccessNode(node) {
+    return {
+        projectId: intText(node, "ProjectId"),
+        projectName: text(node, "ProjectName"),
+        selected: boolText(node, "Selected")
     };
 }
 
@@ -465,6 +497,17 @@ function parseDepartmentNode(node) {
         active: boolText(node, "active"),
         displayName: text(node, "displayName")
     };
+}
+
+function parseCustomerId(doc) {
+    const root = doc ? doc.querySelector("userAdministration") : null;
+    const valueNode = root
+        ? Array.from(root.children || []).find(function (child) {
+            return child.tagName === "customerId";
+        })
+        : null;
+    const parsed = parseInt(valueNode ? valueNode.textContent || "" : "", 10);
+    return Number.isFinite(parsed) ? parsed : null;
 }
 
 function parseLookups(doc) {
@@ -541,12 +584,70 @@ function fillDialog(detail) {
 
     fillLookupSelect("fieldUserMfaPolicy", "userMfaPolicy", user.userMfaPolicy || "DEFAULT");
     fillDepartmentSelect(detail.departments || [], user.departmentId);
+    renderProjectAccessTab(detail.projectAccessRows || []);
     updatePhoneConstraints();
     updatePhoneHelp();
 
     if (els.userDialogTitle) {
         els.userDialogTitle.textContent = `User Administration - ${user.name || user.email || user.userId || ""}`;
     }
+}
+
+function renderProjectAccessTab(projectAccessRows) {
+    if (!els.userProjectsBody) {
+        return;
+    }
+
+    const rows = Array.isArray(projectAccessRows) ? projectAccessRows : [];
+
+    if (!rows.length) {
+        els.userProjectsBody.innerHTML = '<div class="page-empty user-projects-empty">No active projects found for this customer.</div>';
+        return;
+    }
+
+    const tableRows = rows.map(function (row) {
+        const projectId = row && row.projectId != null ? String(row.projectId) : "";
+        const projectName = row && row.projectName ? row.projectName : `Project ${projectId || "-"}`;
+        const checkboxId = `projectAccess-${projectId}`;
+        const checked = row && row.selected ? "checked" : "";
+
+        return `
+            <tr>
+                <td class="user-project-name-cell">
+                    <label for="${escapeAttribute(checkboxId)}">${escapeHtml(projectName)}</label>
+                </td>
+                <td class="user-project-check-cell">
+                    <input
+                        id="${escapeAttribute(checkboxId)}"
+                        class="user-project-access-checkbox"
+                        type="checkbox"
+                        data-project-id="${escapeAttribute(projectId)}"
+                        ${checked}
+                    />
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    els.userProjectsBody.innerHTML = `
+        <div class="user-projects-table-wrap">
+            <table class="user-projects-table">
+                <colgroup>
+                    <col />
+                    <col class="user-projects-check-col" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">Project name</th>
+                        <th scope="col" class="user-projects-check-col">Access</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+        </div>
+    `;
 }
 
 function fillDepartmentSelect(departments, selectedDepartmentId) {
@@ -964,6 +1065,7 @@ function buildSaveXml() {
     const xml = [];
     xml.push('<?xml version="1.0" encoding="UTF-8"?>');
     xml.push("<userAdministrationSave>");
+    appendXmlElement(xml, "customerId", state.customerId);
     xml.push("<user>");
     appendXmlElement(xml, "userId", value("fieldUserId"));
     appendXmlElement(xml, "initials", value("fieldInitials"));
@@ -985,8 +1087,35 @@ function buildSaveXml() {
     });
     xml.push("</linkedCustomers>");
 
+    xml.push("<userProjects>");
+    serializeProjectAccessRows(xml);
+    xml.push("</userProjects>");
+
     xml.push("</userAdministrationSave>");
     return xml.join("");
+}
+
+function serializeProjectAccessRows(xml) {
+    const projectFieldsRoot = document.getElementById("userProjectsBody") || document;
+    const projectCheckboxes = Array.from(projectFieldsRoot.querySelectorAll("input[type='checkbox'][data-project-id]"));
+
+    projectCheckboxes.forEach(function (checkbox) {
+        const projectId = String(checkbox.getAttribute("data-project-id") || "").trim();
+
+        if (!projectId) {
+            return;
+        }
+
+        const row = (state.projectAccessRows || []).find(function (item) {
+            return String(item.projectId) === projectId;
+        });
+
+        xml.push("<project>");
+        appendXmlElement(xml, "ProjectId", projectId);
+        appendXmlElement(xml, "ProjectName", row && row.projectName ? row.projectName : "");
+        appendXmlElement(xml, "Selected", checkbox.checked ? "true" : "false");
+        xml.push("</project>");
+    });
 }
 
 async function fetchXml(url, options = {}) {
@@ -1214,7 +1343,7 @@ function renderUsers() {
 
         row.addEventListener("dblclick", function () {
             const userId = parseInt(row.getAttribute("data-user-id"), 10);
-            openUserDetail(userId);
+            openUserDetail(userId, state.customerId);
         });
     });
 }
@@ -1590,6 +1719,12 @@ function clearDialog() {
             activeField.checked = false;
         }
     }
+
+    if (els.userProjectsBody) {
+        els.userProjectsBody.innerHTML = "";
+    }
+
+    state.projectAccessRows = [];
 
     if (els.fieldPhoneHelp) {
         els.fieldPhoneHelp.textContent = "Select a country code and enter the local phone number.";

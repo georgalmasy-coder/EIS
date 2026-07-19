@@ -131,7 +131,7 @@
     </div>
 </main>
 
-<dialog id="userEditDialog" class="user-edit-dialog" aria-label="User edit dialog">
+<dialog id="userEditDialog" class="user-edit-dialog user-edit-dialog-fixed" aria-label="User edit dialog">
     <form id="userEditForm" method="dialog" class="user-edit-form">
         <div class="page-dialog-head">
             <h3 id="userDialogTitle">User Administration</h3>
@@ -143,6 +143,7 @@
 
         <div class="page-tab-bar" role="tablist" aria-label="User administration tabs">
             <button class="tab-btn page-tab-btn is-active" id="tabBtnBasis" type="button" role="tab" aria-selected="true" aria-controls="tabPanelBasis">Basis</button>
+            <button class="tab-btn page-tab-btn" id="tabBtnProjects" type="button" role="tab" aria-selected="false" aria-controls="tabPanelProjects">Projects</button>
             <button class="tab-btn page-tab-btn" id="tabBtnSecurity" type="button" role="tab" aria-selected="false" aria-controls="tabPanelSecurity">Security</button>
             <button class="tab-btn page-tab-btn" id="tabBtnPassword" type="button" role="tab" aria-selected="false" aria-controls="tabPanelPassword">Password</button>
         </div>
@@ -165,6 +166,10 @@
                     <label><span>Locked until</span><input id="fieldLockedUntil" type="datetime-local" step="1" /></label>
                     <label class="user-active-field"><span>Active</span><input id="fieldActive" type="checkbox" /></label>
                 </div>
+            </section>
+
+            <section class="tab-panel" id="tabPanelProjects" role="tabpanel" aria-labelledby="tabBtnProjects">
+                <div id="userProjectsBody" class="user-projects-wrap"></div>
             </section>
 
             <section class="tab-panel" id="tabPanelSecurity" role="tabpanel" aria-labelledby="tabBtnSecurity">

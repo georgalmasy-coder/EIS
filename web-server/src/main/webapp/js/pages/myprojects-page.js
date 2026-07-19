@@ -433,8 +433,8 @@ function createProjectCard(project) {
                 </div>
             </div>
             <div class="timeline-labels">
-                <span style="left:${timeline.startPercent}%">${escapeHtml(formatDate(project.projectStartDate))}</span>
-                <span style="left:${timeline.endPercent}%">${escapeHtml(formatDate(project.projectEndDate))}</span>
+                <span class="timeline-label timeline-label-start">${escapeHtml(formatDate(project.projectStartDate))}</span>
+                <span class="timeline-label timeline-label-end">${escapeHtml(formatDate(project.projectEndDate))}</span>
             </div>
         </div>
 

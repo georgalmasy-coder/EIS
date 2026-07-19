@@ -7,6 +7,7 @@ This page lists the users for the current customer and opens the user edit dialo
 The dialog is split into tabs:
 
 - **Basis** contains the main user fields.
+- **Projects** lists the active projects for the current customer and lets the administrator choose access.
 - **Security** contains MFA-related fields and actions.
 - **Password** shows whether a password is already set and provides password reset actions.
 

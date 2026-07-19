@@ -70,6 +70,7 @@ const state = {
     currentDoc: null,
     lookups: {},
     userNode: null,
+    projectAccessNode: null,
     securityAndPasswordNode: null,
     topPanel: {
         customerName: "-",
@@ -117,6 +118,7 @@ function initializeShell() {
 function initializeTabs() {
     initTabs([
         { btnId: "tabBtnBasis", panelId: "tabPanelBasis" },
+        { btnId: "tabBtnProjects", panelId: "tabPanelProjects" },
         { btnId: "tabBtnSecurityAndPassword", panelId: "tabPanelSecurityAndPassword" }
     ]);
 
@@ -178,6 +180,10 @@ function initializeEvents() {
             formatCurrentPhoneValue();
         }
     });
+
+    window.addEventListener("resize", () => {
+        syncProjectPanelHeight();
+    });
 }
 
 async function loadDetail() {
@@ -217,12 +223,14 @@ async function loadDetail() {
         state.lookups = parseLookups(xmlDocument);
         state.topPanel = parseTopPanel(xmlDocument);
         state.userNode = findUserNode(xmlDocument);
+        state.projectAccessNode = findProjectAccessNode(xmlDocument);
         state.securityAndPasswordNode = findSecurityAndPasswordNode(xmlDocument);
         state.user = parseUserNode(state.userNode);
 
         applyTopPanel();
         renderDetailFields();
         applyUserToForm();
+        syncProjectPanelHeight();
         applyModeUi();
 
         setText("loadStatus", "Loaded", "");
@@ -294,6 +302,13 @@ function findSecurityAndPasswordNode(doc) {
         || null;
 }
 
+function findProjectAccessNode(doc) {
+    return doc?.querySelector("userProjects")
+        || doc?.querySelector("userDocument > userProjects")
+        || doc?.querySelector("userDocument userProjects")
+        || null;
+}
+
 function parseUserNode(node) {
     if (!node) {
         return {
@@ -360,9 +375,10 @@ function parseLookups(doc) {
 
 function renderDetailFields() {
     const basisFields = document.getElementById("basisInfoFields");
+    const projectAccessFields = document.getElementById("projectAccessFields");
     const securityAndPasswordFields = document.getElementById("securityAndPasswordFields");
 
-    if (!basisFields || !securityAndPasswordFields) {
+    if (!basisFields || !projectAccessFields || !securityAndPasswordFields) {
         return;
     }
 
@@ -374,6 +390,12 @@ function renderDetailFields() {
             .join("");
     }
 
+    if (!state.projectAccessNode) {
+        projectAccessFields.innerHTML = '<div class="page-empty">No project access XML returned.</div>';
+    } else {
+        projectAccessFields.innerHTML = renderProjectAccessMarkup(state.projectAccessNode);
+    }
+
     if (!state.securityAndPasswordNode) {
         securityAndPasswordFields.innerHTML = '<div class="page-empty">No security and password XML returned.</div>';
         return;
@@ -382,6 +404,21 @@ function renderDetailFields() {
     securityAndPasswordFields.innerHTML = Array.from(state.securityAndPasswordNode.children || [])
         .map(renderBasisInfoFieldMarkup)
         .join("");
+}
+
+function syncProjectPanelHeight() {
+    const basisFields = document.getElementById("basisInfoFields");
+    const projectAccessFields = document.getElementById("projectAccessFields");
+
+    if (!basisFields || !projectAccessFields) {
+        return;
+    }
+
+    const basisHeight = Math.ceil(basisFields.getBoundingClientRect().height);
+
+    if (Number.isFinite(basisHeight) && basisHeight > 0) {
+        projectAccessFields.style.setProperty("--user-edit-project-list-height", `${basisHeight}px`);
+    }
 }
 
 function renderBasisInfoFieldMarkup(field) {
@@ -503,6 +540,58 @@ function getFieldUiValue(field) {
     return getDirectText(field) || "";
 }
 
+function renderProjectAccessMarkup(projectAccessNode) {
+    const rows = Array.from(projectAccessNode.children || [])
+        .filter((child) => child.tagName === "project")
+        .map(renderProjectAccessRowMarkup)
+        .join("");
+
+    if (!rows) {
+        return '<div class="page-empty">No active projects found for this customer.</div>';
+    }
+
+    return `
+        <div class="user-edit-projects-table-wrap">
+            <table class="user-edit-projects-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Project name</th>
+                        <th scope="col" class="user-edit-projects-check-col">Access</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderProjectAccessRowMarkup(projectNode) {
+    const projectId = text(projectNode, "ProjectId");
+    const projectName = text(projectNode, "ProjectName") || `Project ${projectId || "-"}`;
+    const selected = boolText(projectNode, "Selected") ? "checked" : "";
+    const safeId = escapeHtml(projectId);
+    const checkboxId = `projectAccess-${safeId}`;
+
+    return `
+        <tr>
+            <td class="user-edit-project-name-cell">
+                <label for="${checkboxId}">${escapeHtml(projectName)}</label>
+            </td>
+            <td class="user-edit-project-check-cell">
+                <input
+                    id="${checkboxId}"
+                    class="user-edit-project-access-checkbox"
+                    type="checkbox"
+                    data-project-id="${safeId}"
+                    ${selected}
+                />
+            </td>
+        </tr>
+    `;
+}
+
 async function saveCurrentUser() {
     if (state.saving) {
         return;
@@ -591,6 +680,7 @@ function buildSavePayload() {
 
     const updatedDoc = currentDoc.cloneNode(true);
     const userNode = findUserNode(updatedDoc);
+    const projectAccessNode = findProjectAccessNode(updatedDoc);
     const securityAndPasswordNode = findSecurityAndPasswordNode(updatedDoc);
 
     if (!userNode) {
@@ -651,7 +741,45 @@ function buildSavePayload() {
         child.textContent = uiField.value ?? "";
     });
 
+    syncProjectAccessSelections(updatedDoc, projectAccessNode);
+
     return serializeXml(updatedDoc);
+}
+
+function syncProjectAccessSelections(doc, projectAccessNode) {
+    if (!doc || !projectAccessNode) {
+        return;
+    }
+
+    const projectFieldsRoot = document.getElementById("projectAccessFields") || document;
+    const projectCheckboxes = Array.from(projectFieldsRoot.querySelectorAll("input[type='checkbox'][data-project-id]"));
+
+    projectCheckboxes.forEach((checkbox) => {
+        const projectId = String(checkbox.getAttribute("data-project-id") || "").trim();
+
+        if (!projectId) {
+            return;
+        }
+
+        const projectNode = findProjectAccessProjectNode(projectAccessNode, projectId);
+
+        if (!projectNode) {
+            return;
+        }
+
+        const selectedNode = ensureChild(doc, projectNode, "Selected");
+        selectedNode.textContent = checkbox.checked ? "true" : "false";
+    });
+}
+
+function findProjectAccessProjectNode(projectAccessNode, projectId) {
+    if (!projectAccessNode || !projectId) {
+        return null;
+    }
+
+    return Array.from(projectAccessNode.children || [])
+        .find((child) => child.tagName === "project" && text(child, "ProjectId") === projectId)
+        || null;
 }
 
 function ensureChild(doc, parent, name) {

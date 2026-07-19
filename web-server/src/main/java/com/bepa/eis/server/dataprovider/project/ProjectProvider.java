@@ -91,6 +91,34 @@ public class ProjectProvider extends GenericProvider {
             ORDER BY [ProjectName] ASC, [ProjectId] ASC
             """;
 
+    private static final String SELECT_LATEST_BY_CUSTOMER_AND_USER_ID_SQL = """
+            SELECT
+                P.[ProjectPK],
+                P.[ProjectId],
+                P.[Version],
+                P.[Latest],
+                P.[ProjectName],
+                P.[CustomerId],
+                P.[OwnerId],
+                P.[CategoryId],
+                P.[PriorityId],
+                P.[ProjectStatus],
+                P.[StartDate],
+                P.[EndDate],
+                P.[BudgetInDays],
+                P.[BudgetInValue],
+                P.[DepartmentId],
+                P.[ChangedByUserId],
+                P.[ChangedDateTime]
+            FROM [dbo].[PROJECT] P
+            INNER JOIN [dbo].[USER_PROJECT] UP
+                ON UP.ProjectId = P.ProjectId
+               AND UP.UserId = ?
+            WHERE P.[CustomerId] = ?
+              AND P.[Latest] = 1
+            ORDER BY P.[ProjectName] ASC, P.[ProjectId] ASC
+            """;
+
     private static final String SELECT_HISTORY_BY_PROJECT_ID_SQL = """
             SELECT
                 [ProjectPK],
@@ -208,6 +236,32 @@ public class ProjectProvider extends GenericProvider {
              PreparedStatement statement = connection.prepareStatement(SELECT_LATEST_BY_CUSTOMER_ID_SQL)) {
 
             setInt(statement, customerId, 1);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    projects.add(mapProjectRecord(resultSet));
+                }
+            }
+        }
+
+        return projects;
+    }
+
+    public List<ProjectRecord> getLatestProjectsByCustomerAndUserId(
+            Integer customerId,
+            Integer userId
+    ) throws SQLException {
+        List<ProjectRecord> projects = new ArrayList<>();
+
+        if (customerId == null || userId == null) {
+            return projects;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_LATEST_BY_CUSTOMER_AND_USER_ID_SQL)) {
+
+            setInt(statement, userId, 1);
+            setInt(statement, customerId, 2);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {

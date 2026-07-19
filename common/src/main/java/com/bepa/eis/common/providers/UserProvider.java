@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -401,6 +402,26 @@ public class UserProvider extends GenericProvider {
             VALUES (?, ?)
             """;
 
+    private static final String SELECT_USER_PROJECT_IDS_SQL = """
+            SELECT DISTINCT ProjectId
+            FROM [dbo].[USER_PROJECT]
+            WHERE UserId = ?
+            """;
+
+    private static final String DELETE_USER_PROJECT_SQL = """
+            DELETE FROM [dbo].[USER_PROJECT]
+            WHERE UserId = ?
+              AND ProjectId = ?
+            """;
+
+    private static final String INSERT_USER_PROJECT_SQL = """
+            INSERT INTO [dbo].[USER_PROJECT] (
+                UserId,
+                ProjectId
+            )
+            VALUES (?, ?)
+            """;
+
     private static final String UPDATE_USER_MFA_POLICY_SQL = """
             UPDATE [dbo].[USERS]
             SET UserMfaPolicy = ?
@@ -464,6 +485,28 @@ public class UserProvider extends GenericProvider {
                     ProjectStatus.IN_PROGRESS.getId() + ", " +
                     ProjectStatus.ON_HOLD.getId() + ", " +
                     ProjectStatus.AT_RISK.getId();
+
+    private static final String SELECT_ADMIN_USER_PROJECTS_SQL =
+            """
+            SELECT
+                P.ProjectId,
+                P.ProjectName,
+                CASE WHEN UP.UserProjectId IS NULL THEN 0 ELSE 1 END AS Selected
+            FROM [dbo].[PROJECT] P
+            INNER JOIN [dbo].[CUSTOMER] C
+                ON C.CustomerId = P.CustomerId
+               AND C.Latest = 1
+            LEFT JOIN [dbo].[USER_PROJECT] UP
+                ON UP.ProjectId = P.ProjectId
+               AND UP.UserId = ?
+            WHERE P.CustomerId = ?
+              AND P.Latest = 1
+              AND P.ProjectStatus IN ("""
+                    + ACTIVE_PROJECT_STATUS_IDS +
+                    """
+            )
+            ORDER BY P.ProjectName, P.ProjectId
+            """;
 
     private static final String CUSTOMER_PROJECT_SQL =
             "SELECT P.ProjectId, P.ProjectName, C.CustomerId, C.CustomerName " +
@@ -1177,6 +1220,56 @@ public class UserProvider extends GenericProvider {
         return links;
     }
 
+    public List<UserProjectAccessRow> getUserProjectAccessRows(Integer userId) {
+        WebSession webSession = getWebSession();
+        Integer customerId = webSession == null ? null : webSession.getCustomerId();
+        return getUserProjectAccessRows(customerId, userId);
+    }
+
+    public List<UserProjectAccessRow> getUserProjectAccessRows(
+            Integer customerId,
+            Integer userId
+    ) {
+        List<UserProjectAccessRow> rows = new ArrayList<>();
+
+        Integer resolvedCustomerId = customerId;
+
+        if (resolvedCustomerId == null) {
+            WebSession webSession = getWebSession();
+            resolvedCustomerId = webSession == null ? null : webSession.getCustomerId();
+        }
+
+        if (resolvedCustomerId == null) {
+            return rows;
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ADMIN_USER_PROJECTS_SQL)) {
+
+            if (userId == null) {
+                statement.setNull(1, Types.INTEGER);
+            } else {
+                statement.setInt(1, userId);
+            }
+
+            statement.setInt(2, resolvedCustomerId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    rows.add(new UserProjectAccessRow(
+                            resultSet.getInt("ProjectId"),
+                            safeText(resultSet.getString("ProjectName"), ""),
+                            resultSet.getBoolean("Selected")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error loading user project access rows. userId={}", userId, e);
+        }
+
+        return rows;
+    }
+
     public List<DepartmentOption> getDepartmentOptions() {
         List<DepartmentOption> departments = new ArrayList<>();
 
@@ -1204,6 +1297,14 @@ public class UserProvider extends GenericProvider {
     public boolean saveUserAdministration(
             UserAdministrationRow user,
             List<Integer> customerIds
+    ) {
+        return saveUserAdministration(user, customerIds, List.of());
+    }
+
+    public boolean saveUserAdministration(
+            UserAdministrationRow user,
+            List<Integer> customerIds,
+            List<UserProjectAccessRow> projectAccessRows
     ) {
         if (user == null) {
             return false;
@@ -1244,6 +1345,7 @@ public class UserProvider extends GenericProvider {
                 }
 
                 replaceUserCustomers(connection, persistedUserId, resolvedCustomerIds);
+                syncUserProjects(connection, persistedUserId, projectAccessRows);
 
                 connection.commit();
 
@@ -1739,6 +1841,86 @@ public class UserProvider extends GenericProvider {
         }
     }
 
+    private void syncUserProjects(
+            Connection connection,
+            Integer userId,
+            List<UserProjectAccessRow> projectAccessRows
+    ) throws SQLException {
+        if (connection == null || userId == null) {
+            return;
+        }
+
+        LinkedHashSet<Integer> visibleProjectIds = new LinkedHashSet<>();
+        LinkedHashSet<Integer> selectedProjectIds = new LinkedHashSet<>();
+
+        if (projectAccessRows != null) {
+            for (UserProjectAccessRow projectAccessRow : projectAccessRows) {
+                if (projectAccessRow == null || projectAccessRow.projectId() == null) {
+                    continue;
+                }
+
+                visibleProjectIds.add(projectAccessRow.projectId());
+
+                if (projectAccessRow.selected()) {
+                    selectedProjectIds.add(projectAccessRow.projectId());
+                }
+            }
+        }
+
+        if (visibleProjectIds.isEmpty()) {
+            return;
+        }
+
+        LinkedHashSet<Integer> currentProjectIds = new LinkedHashSet<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_USER_PROJECT_IDS_SQL)) {
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int projectId = resultSet.getInt("ProjectId");
+
+                    if (!resultSet.wasNull()) {
+                        currentProjectIds.add(projectId);
+                    }
+                }
+            }
+        }
+
+        LinkedHashSet<Integer> currentVisibleProjectIds = new LinkedHashSet<>(currentProjectIds);
+        currentVisibleProjectIds.retainAll(visibleProjectIds);
+
+        LinkedHashSet<Integer> projectIdsToDelete = new LinkedHashSet<>(currentVisibleProjectIds);
+        projectIdsToDelete.removeAll(selectedProjectIds);
+
+        LinkedHashSet<Integer> projectIdsToInsert = new LinkedHashSet<>(selectedProjectIds);
+        projectIdsToInsert.removeAll(currentVisibleProjectIds);
+
+        if (!projectIdsToDelete.isEmpty()) {
+            try (PreparedStatement deleteStatement = connection.prepareStatement(DELETE_USER_PROJECT_SQL)) {
+                for (Integer projectId : projectIdsToDelete) {
+                    deleteStatement.setInt(1, userId);
+                    deleteStatement.setInt(2, projectId);
+                    deleteStatement.addBatch();
+                }
+
+                deleteStatement.executeBatch();
+            }
+        }
+
+        if (!projectIdsToInsert.isEmpty()) {
+            try (PreparedStatement insertStatement = connection.prepareStatement(INSERT_USER_PROJECT_SQL)) {
+                for (Integer projectId : projectIdsToInsert) {
+                    insertStatement.setInt(1, userId);
+                    insertStatement.setInt(2, projectId);
+                    insertStatement.addBatch();
+                }
+
+                insertStatement.executeBatch();
+            }
+        }
+    }
+
     private void expireActivePasswordResetTokens(Integer userId) {
         try (Connection connection = getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(EXPIRE_ACTIVE_PASSWORD_RESET_TOKENS_SQL)) {
@@ -2125,6 +2307,13 @@ public class UserProvider extends GenericProvider {
             String country,
             String customerStatus,
             String contactEmail
+    ) {
+    }
+
+    public record UserProjectAccessRow(
+            Integer projectId,
+            String projectName,
+            boolean selected
     ) {
     }
 
