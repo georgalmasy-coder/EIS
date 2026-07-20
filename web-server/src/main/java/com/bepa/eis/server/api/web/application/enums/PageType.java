@@ -6,6 +6,7 @@ public enum PageType {
 
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview"),
     BASIS_RELATION_DIAGRAM_PAGE("basisrelationdiagram","html-pages/basisrelationdiagram.html", "Relation Diagram"),
+    NFLP_RELATION_DIAGRAM_PAGE("nflprelationdiagram","html-pages/nflprelationdiagram.html", "NFLP Relation Diagram"),
     BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix"),
 
     // Old versions
