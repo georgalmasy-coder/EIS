@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.lookupmaintenance;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.project.ClassificationType;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import org.slf4j.Logger;
@@ -30,11 +31,18 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             "WHERE CustomerId = ? AND ProjectId = ? " +
             "ORDER BY " + irlSortExpression();
 
+
     private static final String SELECT_SRL_ROWS_SQL =
             "SELECT SrlId, CustomerId, ProjectId, SRLLevel, SRLName, SRLDescription, Active, Color " +
             "FROM dbo.SRL " +
             "WHERE CustomerId = ? AND ProjectId = ? " +
             "ORDER BY SRLLevel";
+
+    private static final String SELECT_CLASSIFICATION_ROWS_SQL =
+            "SELECT ClassificationId, CustomerId, ProjectId, ClassId, Code, Description, Example, Active " +
+            "FROM dbo.CLASSIFICATION " +
+            "WHERE CustomerId = ? AND ProjectId = ? " +
+            "ORDER BY Code";
 
     private static final String UPDATE_TRL_SQL =
             "UPDATE dbo.TRL " +
@@ -66,6 +74,22 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             "SET Active = 0 " +
             "WHERE CustomerId = ? AND ProjectId = ? AND " + irlSortExpression("IRLCode") + " > ?";
 
+    private static final String INSERT_CLASSIFICATION_SQL =
+            "INSERT INTO dbo.CLASSIFICATION (" +
+                    "CustomerId, " +
+                    "ProjectId, " +
+                    "ClassId, " +
+                    "Code, " +
+                    "Description, " +
+                    "Example, " +
+                    "Active" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String UPDATE_CLASSIFICATION_SQL =
+            "UPDATE dbo.CLASSIFICATION " +
+            "SET Code = ?, Description = ?, Example = ?, Active = ? " +
+            "WHERE ClassificationId = ? AND CustomerId = ? AND ProjectId = ?";
+
     public LookupValueMaintenanceProvider(WebSession webSession) {
         super(webSession);
     }
@@ -77,7 +101,8 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         return new LookupMaintenanceData(
                 getTrlRows(customerId, projectId),
                 getIrlRows(customerId, projectId),
-                getSrlRows(customerId, projectId)
+                getSrlRows(customerId, projectId),
+                getClassificationRows(customerId, projectId)
         );
     }
 
@@ -91,6 +116,27 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
 
     public List<LookupRow> getSrlRows(Integer customerId, Integer projectId) {
         return loadRows(customerId, projectId, SELECT_SRL_ROWS_SQL, this::mapSrlRow);
+    }
+
+    public List<ClassificationRow> getClassificationRows(Integer customerId, Integer projectId) {
+        try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
+
+            try {
+                ensureClassificationRows(connection, customerId, projectId);
+                List<ClassificationRow> rows = loadClassificationRows(connection, customerId, projectId);
+                connection.commit();
+                return rows;
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error loading classification rows", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public void saveLookupRow(LookupRow lookupRow) {
@@ -116,6 +162,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                     case TRL -> saveTrlRow(connection, customerId, projectId, lookupRow);
                     case IRL -> saveIrlRow(connection, customerId, projectId, lookupRow);
                     case SRL -> saveSrlRow(connection, customerId, projectId, lookupRow);
+                    case CLASSIFICATION -> throw new IllegalArgumentException("Classification rows must be saved through saveClassificationRow.");
                 }
 
                 connection.commit();
@@ -166,6 +213,106 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
 
         if (!lookupRow.active()) {
             deactivateFollowingSrlRows(connection, customerId, projectId, lookupRow.level());
+        }
+    }
+
+    public void saveClassificationRow(ClassificationRow classificationRow) {
+        if (classificationRow == null) {
+            throw new IllegalArgumentException("Classification row is required.");
+        }
+
+        Integer customerId = requireCustomerId();
+        Integer projectId = requireProjectId();
+        validateClassificationRow(classificationRow);
+
+        try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
+
+            try {
+                updateClassificationRow(connection, customerId, projectId, classificationRow);
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+
+            EhcacheProvider.clearCacheEntry(customerId);
+        } catch (SQLException e) {
+            log.error("Error saving classification row {}", classificationRow, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateClassificationRow(
+            Connection connection,
+            Integer customerId,
+            Integer projectId,
+            ClassificationRow classificationRow
+    ) throws SQLException {
+        if (classificationRow.classificationId() == null) {
+            throw new IllegalArgumentException("Classification row id is required.");
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_CLASSIFICATION_SQL)) {
+            setString(statement, safeText(classificationRow.code()), 1);
+            setString(statement, safeText(classificationRow.description()), 2);
+            setString(statement, normalizeNullableText(classificationRow.example()), 3);
+            setBoolean(statement, classificationRow.active(), 4);
+            setInt(statement, classificationRow.classificationId(), 5);
+            setInt(statement, customerId, 6);
+            setInt(statement, projectId, 7);
+
+            int rows = statement.executeUpdate();
+            if (rows == 0) {
+                throw new IllegalArgumentException("Classification row was not found for current customer and project.");
+            }
+        }
+    }
+
+    private void ensureClassificationRows(Connection connection, Integer customerId, Integer projectId) throws SQLException {
+        if (classificationRowsExist(connection, customerId, projectId)) {
+            return;
+        }
+
+        insertDefaultClassificationRows(connection, customerId, projectId);
+        EhcacheProvider.clearCacheEntry(customerId);
+    }
+
+    private boolean classificationRowsExist(Connection connection, Integer customerId, Integer projectId) throws SQLException {
+        String sql = "SELECT COUNT(1) FROM dbo.CLASSIFICATION WHERE CustomerId = ? AND ProjectId = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void insertDefaultClassificationRows(Connection connection, Integer customerId, Integer projectId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_CLASSIFICATION_SQL)) {
+            for (ClassificationType classificationType : ClassificationType.values()) {
+                if (classificationType == ClassificationType.INVALID_CLASS) {
+                    continue;
+                }
+
+                setInt(statement, customerId, 1);
+                setInt(statement, projectId, 2);
+                statement.setInt(3, classificationType.getClassId());
+                statement.setString(4, classificationType.getCode());
+                statement.setString(5, classificationType.getCodeDescription());
+                statement.setString(6, normalizeNullableText(classificationType.getCodeExample()));
+                statement.setBoolean(7, classificationType.isActive());
+                statement.executeUpdate();
+            }
         }
     }
 
@@ -244,6 +391,23 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         return rows;
     }
 
+    private List<ClassificationRow> loadClassificationRows(Connection connection, Integer customerId, Integer projectId) throws SQLException {
+        List<ClassificationRow> rows = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_CLASSIFICATION_ROWS_SQL)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    rows.add(mapClassificationRow(resultSet));
+                }
+            }
+        }
+
+        return rows;
+    }
+
     private LookupRow mapTrlRow(ResultSet resultSet) throws SQLException {
         return new LookupRow(
                 LookupType.TRL,
@@ -280,6 +444,17 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                 resultSet.getString("SRLDescription"),
                 resultSet.getBoolean("Active"),
                 resultSet.getString("Color")
+        );
+    }
+
+    private ClassificationRow mapClassificationRow(ResultSet resultSet) throws SQLException {
+        return new ClassificationRow(
+                resultSet.getInt("ClassificationId"),
+                resultSet.getInt("ClassId"),
+                resultSet.getString("Code"),
+                resultSet.getString("Description"),
+                resultSet.getString("Example"),
+                resultSet.getBoolean("Active")
         );
     }
 
@@ -344,6 +519,32 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         }
     }
 
+    private void validateClassificationRow(ClassificationRow classificationRow) {
+        if (classificationRow.classificationId() == null) {
+            throw new IllegalArgumentException("ClassificationId is required.");
+        }
+
+        if (safeText(classificationRow.code()).isBlank()) {
+            throw new IllegalArgumentException("Code is required.");
+        }
+
+        if (safeText(classificationRow.description()).isBlank()) {
+            throw new IllegalArgumentException("Description is required.");
+        }
+
+        if (safeText(classificationRow.code()).length() > 10) {
+            throw new IllegalArgumentException("Code must be maximum 10 characters.");
+        }
+
+        if (safeText(classificationRow.description()).length() > 255) {
+            throw new IllegalArgumentException("Description must be maximum 255 characters.");
+        }
+
+        if (normalizeNullableText(classificationRow.example()) != null && normalizeNullableText(classificationRow.example()).length() > 255) {
+            throw new IllegalArgumentException("Example must be maximum 255 characters.");
+        }
+    }
+
     private Integer requireCustomerId() {
         if (getWebSession() == null || getWebSession().getCustomerId() == null) {
             throw new IllegalStateException("CustomerId is missing from the current session.");
@@ -366,6 +567,11 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
 
     private String normalizeColor(String color) {
         String normalized = safeText(color);
+        return normalized.isBlank() ? null : normalized;
+    }
+
+    private String normalizeNullableText(String value) {
+        String normalized = safeText(value);
         return normalized.isBlank() ? null : normalized;
     }
 
@@ -418,14 +624,16 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
     public record LookupMaintenanceData(
             List<LookupRow> trlRows,
             List<LookupRow> irlRows,
-            List<LookupRow> srlRows
+            List<LookupRow> srlRows,
+            List<ClassificationRow> classificationRows
     ) {
     }
 
     public enum LookupType {
         TRL,
         IRL,
-        SRL
+        SRL,
+        CLASSIFICATION
     }
 
     public record LookupRow(
@@ -437,6 +645,16 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             String description,
             boolean active,
             String color
+    ) {
+    }
+
+    public record ClassificationRow(
+            Integer classificationId,
+            Integer classId,
+            String code,
+            String description,
+            String example,
+            boolean active
     ) {
     }
 }

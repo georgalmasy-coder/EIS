@@ -66,6 +66,7 @@
                 <button id="trlTabButton" class="tab-btn" type="button" role="tab" aria-selected="true" aria-controls="trlPanel">TRL</button>
                 <button id="irlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="irlPanel">IRL</button>
                 <button id="srlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="srlPanel">SRL</button>
+                <button id="classificationTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="classificationPanel">Classification</button>
             </div>
 
             <div class="tab-panels lookup-maintenance-panels">
@@ -79,6 +80,10 @@
 
                 <section id="srlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="srlTabButton" hidden>
                     <div id="srlCards" class="lookup-maintenance-card-grid" aria-label="SRL rows"></div>
+                </section>
+
+                <section id="classificationPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="classificationTabButton" hidden>
+                    <div id="classificationCards" class="lookup-maintenance-card-grid" aria-label="Classification rows"></div>
                 </section>
             </div>
         </section>
@@ -99,12 +104,17 @@
             <input type="hidden" id="lookupBadgeTextInput" />
             <input type="hidden" id="lookupColorValueInput" />
 
-            <div class="page-field lookup-maintenance-wide-field lookup-maintenance-code-field">
-                <label>Code / level</label>
+            <div class="page-field lookup-maintenance-wide-field lookup-maintenance-code-field" id="lookupPreviewField">
+                <label id="lookupPreviewLabel">Code / level</label>
                 <span id="lookupPreviewChip" class="lookup-maintenance-preview-chip lookup-maintenance-preview-chip-dialog">Value</span>
             </div>
 
-            <div class="page-field lookup-maintenance-wide-field">
+            <div class="page-field lookup-maintenance-wide-field" id="lookupCodeField" hidden>
+                <label for="lookupCodeInput" id="lookupCodeLabel">Code</label>
+                <input id="lookupCodeInput" type="text" maxlength="10" autocomplete="off" />
+            </div>
+
+            <div class="page-field lookup-maintenance-wide-field" id="lookupNameField">
                 <label for="lookupNameInput">Name <span aria-hidden="true">*</span></label>
                 <input id="lookupNameInput" type="text" maxlength="255" autocomplete="off" required />
             </div>
@@ -114,12 +124,17 @@
                 <textarea id="lookupDescriptionInput" rows="5" maxlength="4000" required></textarea>
             </div>
 
+            <div class="page-field lookup-maintenance-wide-field" id="lookupExampleField" hidden>
+                <label for="lookupExampleInput">Example</label>
+                <textarea id="lookupExampleInput" rows="4" maxlength="255"></textarea>
+            </div>
+
             <div class="page-field checkbox-field lookup-maintenance-checkbox-field">
                 <input id="lookupActiveInput" type="checkbox" checked />
                 <label for="lookupActiveInput">Active</label>
             </div>
 
-            <div class="page-field lookup-maintenance-wide-field">
+            <div class="page-field lookup-maintenance-wide-field" id="lookupColorField">
                 <label for="lookupColorPresetSelect">Color</label>
                 <div class="lookup-maintenance-color-grid">
                     <select id="lookupColorPresetSelect" class="lookup-maintenance-color-select">

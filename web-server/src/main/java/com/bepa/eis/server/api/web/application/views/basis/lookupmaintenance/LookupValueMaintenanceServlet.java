@@ -35,10 +35,25 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
             throw new IllegalArgumentException("Lookup row data is required.");
         }
 
+        LookupValueMaintenanceProvider.LookupType lookupType = parseLookupType(textValue(lookupElement, "LookupType"));
         Boolean activeValue = boolValue(lookupElement, "Active");
 
+        if (lookupType == LookupValueMaintenanceProvider.LookupType.CLASSIFICATION) {
+            LookupValueMaintenanceProvider.ClassificationRow classificationRow = new LookupValueMaintenanceProvider.ClassificationRow(
+                    intValue(lookupElement, "LookupId"),
+                    intValue(lookupElement, "ClassId"),
+                    textValue(lookupElement, "LookupCode"),
+                    textValue(lookupElement, "LookupDescription"),
+                    textValue(lookupElement, "LookupExample"),
+                    activeValue == null || activeValue
+            );
+
+            provider.saveClassificationRow(classificationRow);
+            return;
+        }
+
         LookupValueMaintenanceProvider.LookupRow lookupRow = new LookupValueMaintenanceProvider.LookupRow(
-                parseLookupType(textValue(lookupElement, "LookupType")),
+                lookupType,
                 intValue(lookupElement, "LookupId"),
                 intValue(lookupElement, "LookupLevel"),
                 textValue(lookupElement, "LookupCode"),
@@ -90,6 +105,7 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
         appendRows(xmlDocument, root, "trlRows", "trlRow", data.trlRows());
         appendRows(xmlDocument, root, "irlRows", "irlRow", data.irlRows());
         appendRows(xmlDocument, root, "srlRows", "srlRow", data.srlRows());
+        appendClassificationRows(xmlDocument, root, data.classificationRows());
 
         return xmlDocument;
     }
@@ -131,6 +147,18 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
         }
     }
 
+    private void appendClassificationRows(
+            LookupValueMaintenanceXmlDocument xmlDocument,
+            Element parent,
+            java.util.List<LookupValueMaintenanceProvider.ClassificationRow> rows
+    ) {
+        Element container = xmlDocument.appendElement(parent, "classificationRows");
+
+        for (LookupValueMaintenanceProvider.ClassificationRow row : rows) {
+            appendClassificationRow(xmlDocument, container, "classificationRow", row);
+        }
+    }
+
     private void appendRow(
             LookupValueMaintenanceXmlDocument xmlDocument,
             Element parent,
@@ -150,6 +178,25 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(rowElement, "LookupDescription", row.description());
         xmlDocument.appendTextElement(rowElement, "Active", row.active());
         xmlDocument.appendTextElement(rowElement, "Color", row.color());
+    }
+
+    private void appendClassificationRow(
+            LookupValueMaintenanceXmlDocument xmlDocument,
+            Element parent,
+            String rowName,
+            LookupValueMaintenanceProvider.ClassificationRow row
+    ) {
+        if (row == null) {
+            return;
+        }
+
+        Element rowElement = xmlDocument.appendElement(parent, rowName);
+        xmlDocument.appendTextElement(rowElement, "ClassificationId", row.classificationId());
+        xmlDocument.appendTextElement(rowElement, "ClassId", row.classId());
+        xmlDocument.appendTextElement(rowElement, "Code", row.code());
+        xmlDocument.appendTextElement(rowElement, "Description", row.description());
+        xmlDocument.appendTextElement(rowElement, "Example", row.example());
+        xmlDocument.appendTextElement(rowElement, "Active", row.active());
     }
 
     private LookupValueMaintenanceProvider.LookupType parseLookupType(String value) {

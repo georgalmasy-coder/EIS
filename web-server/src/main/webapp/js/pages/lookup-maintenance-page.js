@@ -36,6 +36,15 @@ const TAB_CONFIG = [
         cardsId: "srlCards",
         label: "SRL",
         sortKey: (row) => row.level
+    },
+    {
+        key: "CLASSIFICATION",
+        index: 3,
+        tabButtonId: "classificationTabButton",
+        panelId: "classificationPanel",
+        cardsId: "classificationCards",
+        label: "Classification",
+        sortKey: (row) => row.code
     }
 ];
 
@@ -63,7 +72,8 @@ const state = {
     rows: {
         TRL: [],
         IRL: [],
-        SRL: []
+        SRL: [],
+        CLASSIFICATION: []
     },
     activeTab: "TRL",
     dirty: false,
@@ -121,7 +131,7 @@ function initializeEvents() {
         state.currentRow = null;
     });
 
-    ["lookupNameInput", "lookupDescriptionInput", "lookupActiveInput"].forEach((id) => {
+    ["lookupNameInput", "lookupDescriptionInput", "lookupExampleInput", "lookupActiveInput"].forEach((id) => {
         const element = byId(id);
         element?.addEventListener("input", () => {
             state.dirty = true;
@@ -131,6 +141,18 @@ function initializeEvents() {
             state.dirty = true;
             updatePreview();
         });
+    });
+
+    const codeInput = byId("lookupCodeInput");
+    codeInput?.addEventListener("input", () => {
+        setValue("lookupBadgeTextInput", codeInput.value || "");
+        state.dirty = true;
+        updatePreview();
+    });
+    codeInput?.addEventListener("change", () => {
+        setValue("lookupBadgeTextInput", codeInput.value || "");
+        state.dirty = true;
+        updatePreview();
     });
 
     presetSelect?.addEventListener("change", () => {
@@ -164,7 +186,8 @@ async function loadData() {
         state.rows = {
             TRL: parseRows(xmlDocument, "trlRows", "trlRow"),
             IRL: parseRows(xmlDocument, "irlRows", "irlRow"),
-            SRL: parseRows(xmlDocument, "srlRows", "srlRow")
+            SRL: parseRows(xmlDocument, "srlRows", "srlRow"),
+            CLASSIFICATION: parseClassificationRows(xmlDocument)
         };
 
         state.activeTab = resolveActiveTab();
@@ -212,6 +235,20 @@ function parseRows(xmlDocument, containerName, rowName) {
         active: parseBoolean(getChildText(node, "Active", "true")),
         color: normalizeColor(getChildText(node, "Color", ""))
     })).filter((row) => row.lookupId !== null);
+}
+
+function parseClassificationRows(xmlDocument) {
+    const container = getDirectChild(xmlDocument.documentElement, "classificationRows");
+    const rowNodes = getDirectChildren(container, "classificationRow");
+
+    return rowNodes.map((node) => ({
+        classificationId: parseNullableInt(getChildText(node, "ClassificationId", "")),
+        classId: parseNullableInt(getChildText(node, "ClassId", "")),
+        code: normalizeText(getChildText(node, "Code", "")),
+        description: getChildText(node, "Description", ""),
+        example: getChildText(node, "Example", ""),
+        active: parseBoolean(getChildText(node, "Active", "true"))
+    })).filter((row) => row.classificationId !== null);
 }
 
 function renderTabs() {
@@ -276,6 +313,10 @@ function renderEmptyStates(message) {
 }
 
 function renderCard(tab, row) {
+    if (tab.key === "CLASSIFICATION") {
+        return renderClassificationCard(row);
+    }
+
     const badgeText = getBadgeText(tab.key, row);
     const badgeStyle = row.color ? buildColorChipStyle(row.color, 0.14) : "";
     const badgeClass = row.color ? "lookup-maintenance-card-level has-color" : "lookup-maintenance-card-level";
@@ -327,6 +368,47 @@ function getBadgeText(type, row) {
     return row.level === null || row.level === undefined ? "-" : String(row.level);
 }
 
+function renderClassificationCard(row) {
+    const badgeText = row.code || "-";
+    const inactiveClass = row.active ? "" : " is-inactive";
+
+    return `
+        <article
+            class="lookup-maintenance-card${inactiveClass}"
+            data-row-id="${escapeHtml(String(row.classificationId ?? ""))}"
+            data-row-type="CLASSIFICATION"
+            tabindex="0"
+            role="button"
+            aria-label="${escapeHtml(`Classification ${badgeText}`)}"
+            title="${escapeHtml(`Classification ${badgeText}`)}"
+        >
+            <div class="lookup-maintenance-card-level">
+                ${escapeHtml(badgeText)}
+            </div>
+            <div class="lookup-maintenance-card-body">
+                <div class="lookup-maintenance-card-fields">
+                    <div class="lookup-maintenance-field-box">
+                        <span class="lookup-maintenance-field-label">Description</span>
+                        <strong class="lookup-maintenance-field-value">${escapeHtml(row.description || "")}</strong>
+                    </div>
+
+                    <div class="lookup-maintenance-field-box">
+                        <span class="lookup-maintenance-field-label">Example</span>
+                        <span class="lookup-maintenance-field-value lookup-maintenance-field-description">${escapeHtml(row.example || "")}</span>
+                    </div>
+
+                    <div class="lookup-maintenance-field-box lookup-maintenance-field-box-active">
+                        <span class="lookup-maintenance-card-active">
+                            <span class="lookup-maintenance-card-dot${row.active ? "" : " is-inactive"}" aria-hidden="true"></span>
+                            <span class="lookup-maintenance-field-value">${row.active ? "Active" : "Inactive"}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </article>
+    `;
+}
+
 function openDialog(type, rowId) {
     const row = findRow(type, rowId);
     const dialog = byId("lookupDialog");
@@ -347,24 +429,37 @@ function openDialog(type, rowId) {
 
 function fillDialog(row, type) {
     setValue("lookupTypeInput", type);
-    setValue("lookupIdInput", row.lookupId === null ? "" : String(row.lookupId));
+    setText("lookupDialogTitle", type, "");
+    setValue("lookupIdInput", getLookupRowId(row, type));
+
+    const isClassification = type === "CLASSIFICATION";
+    toggleDialogMode(isClassification);
+
+    if (isClassification) {
+        setValue("lookupBadgeTextInput", row.code || "");
+        setValue("lookupCodeInput", row.code || "");
+        setValue("lookupDescriptionInput", row.description || "");
+        setValue("lookupExampleInput", row.example || "");
+        setChecked("lookupActiveInput", row.active);
+        setValue("lookupColorValueInput", "");
+        updatePreview();
+        state.dirty = false;
+        return;
+    }
+
     setValue("lookupBadgeTextInput", getBadgeText(type, row));
     setValue("lookupColorValueInput", row.color || "");
     setValue("lookupNameInput", row.name || "");
     setValue("lookupDescriptionInput", row.description || "");
     setChecked("lookupActiveInput", row.active);
     syncColorControlsFromValue(row.color || "");
-    setText("lookupDialogTitle", type, "");
     updatePreview();
+    state.dirty = false;
 }
 
 async function saveRow() {
     const type = getValue("lookupTypeInput");
     const rowId = parseNullableInt(getValue("lookupIdInput"));
-    const name = getValue("lookupNameInput");
-    const description = getValue("lookupDescriptionInput");
-    const active = getChecked("lookupActiveInput");
-    const color = normalizeColor(getCurrentColorValue());
     const current = state.currentRow;
 
     if (!type || rowId === null || !current) {
@@ -372,16 +467,26 @@ async function saveRow() {
         return;
     }
 
-    const payload = buildSavePayload({
-        lookupType: type,
-        lookupId: rowId,
-        lookupLevel: current.level,
-        lookupCode: current.code,
-        lookupName: name,
-        lookupDescription: description,
-        active,
-        color
-    });
+    const payload = type === "CLASSIFICATION"
+        ? buildClassificationSavePayload({
+            lookupType: type,
+            classificationId: rowId,
+            classId: current.classId,
+            code: getValue("lookupCodeInput"),
+            description: getValue("lookupDescriptionInput"),
+            example: getValue("lookupExampleInput"),
+            active: getChecked("lookupActiveInput")
+        })
+        : buildLookupSavePayload({
+            lookupType: type,
+            lookupId: rowId,
+            lookupLevel: current.level,
+            lookupCode: current.code,
+            lookupName: getValue("lookupNameInput"),
+            lookupDescription: getValue("lookupDescriptionInput"),
+            active: getChecked("lookupActiveInput"),
+            color: normalizeColor(getCurrentColorValue())
+        });
 
     try {
         await postXml(SAVE_URL, payload, {
@@ -397,7 +502,7 @@ async function saveRow() {
     }
 }
 
-function buildSavePayload(row) {
+function buildLookupSavePayload(row) {
     return `
 <lookupRow>
   <LookupType>${escapeXml(row.lookupType)}</LookupType>
@@ -408,6 +513,19 @@ function buildSavePayload(row) {
   <LookupDescription>${escapeXml(row.lookupDescription ?? "")}</LookupDescription>
   <Active>${row.active ? "true" : "false"}</Active>
   <Color>${escapeXml(row.color ?? "")}</Color>
+</lookupRow>`.trim();
+}
+
+function buildClassificationSavePayload(row) {
+    return `
+<lookupRow>
+  <LookupType>${escapeXml(row.lookupType)}</LookupType>
+  <LookupId>${escapeXml(String(row.classificationId ?? ""))}</LookupId>
+  <ClassId>${escapeXml(String(row.classId ?? ""))}</ClassId>
+  <LookupCode>${escapeXml(row.code ?? "")}</LookupCode>
+  <LookupDescription>${escapeXml(row.description ?? "")}</LookupDescription>
+  <LookupExample>${escapeXml(row.example ?? "")}</LookupExample>
+  <Active>${row.active ? "true" : "false"}</Active>
 </lookupRow>`.trim();
 }
 
@@ -438,6 +556,14 @@ function updatePreview() {
     chip.classList.toggle("lookup-maintenance-preview-chip-dialog", true);
     chip.style.cssText = chipStyle;
     chip.textContent = badge || "Value";
+}
+
+function getLookupRowId(row, type) {
+    if (type === "CLASSIFICATION") {
+        return row.classificationId === null || row.classificationId === undefined ? "" : String(row.classificationId);
+    }
+
+    return row.lookupId === null || row.lookupId === undefined ? "" : String(row.lookupId);
 }
 
 function syncColorControlsFromValue(value) {
@@ -525,7 +651,7 @@ function syncPresetFromPicker() {
 function findRow(type, rowId) {
     const rows = state.rows[type] || [];
     const normalizedId = parseNullableInt(String(rowId ?? ""));
-    return rows.find((row) => row.lookupId === normalizedId) || null;
+    return rows.find((row) => getRowId(row, type) === normalizedId) || null;
 }
 
 function renderCardsForActiveTab() {
@@ -596,6 +722,68 @@ function getSortedRows(rows, sortKey) {
             sensitivity: "base"
         });
     });
+}
+
+function getRowId(row, type) {
+    if (type === "CLASSIFICATION") {
+        return row.classificationId;
+    }
+
+    return row.lookupId;
+}
+
+function toggleDialogMode(isClassification) {
+    const codeField = byId("lookupCodeField");
+    const nameField = byId("lookupNameField");
+    const exampleField = byId("lookupExampleField");
+    const colorField = byId("lookupColorField");
+    const codeInput = byId("lookupCodeInput");
+    const nameInput = byId("lookupNameInput");
+    const descriptionInput = byId("lookupDescriptionInput");
+    const exampleInput = byId("lookupExampleInput");
+    const codeLabel = byId("lookupCodeLabel");
+    const previewLabel = byId("lookupPreviewLabel");
+
+    if (codeField) {
+        codeField.hidden = !isClassification;
+    }
+
+    if (nameField) {
+        nameField.hidden = isClassification;
+    }
+
+    if (exampleField) {
+        exampleField.hidden = !isClassification;
+    }
+
+    if (colorField) {
+        colorField.hidden = isClassification;
+    }
+
+    if (codeLabel) {
+        codeLabel.textContent = isClassification ? "Code" : "Code / level";
+    }
+
+    if (previewLabel) {
+        previewLabel.textContent = isClassification ? "Code" : "Code / level";
+    }
+
+    if (codeInput) {
+        codeInput.required = isClassification;
+    }
+
+    if (nameInput) {
+        nameInput.required = !isClassification;
+    }
+
+    if (descriptionInput) {
+        descriptionInput.required = true;
+        descriptionInput.maxLength = isClassification ? 255 : 4000;
+    }
+
+    if (exampleInput) {
+        exampleInput.required = false;
+    }
 }
 
 function irlCodeOrder(code) {
