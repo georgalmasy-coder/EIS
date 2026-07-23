@@ -78,6 +78,44 @@ public class LookupCache {
         return new ArrayList<>();
     }
 
+    public LookupValue getIrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+
+        if (customerId != null && projectId != null && lookupId != null) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getIrlLookupValue(lookupId);
+        }
+
+        return null;
+    }
+
+    public List<LookupValue> getIrlLookupValues(Integer customerId, Integer projectId) {
+
+        if (customerId != null && projectId != null ) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getIrlLookupValues();
+        }
+        return new ArrayList<>();
+    }
+
+    public LookupValue getClassificationLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+
+        if (customerId != null && projectId != null && lookupId != null) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getClassificationLookupValue(lookupId);
+        }
+
+        return null;
+    }
+
+    public List<LookupValue> getClassificationLookupValues(Integer customerId, Integer projectId) {
+
+        if (customerId != null && projectId != null ) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getClassificationLookupValues();
+        }
+        return new ArrayList<>();
+    }
+
     public LookupValue getStakeholderLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
 
         if (customerId != null && projectId != null && lookupId != null) {

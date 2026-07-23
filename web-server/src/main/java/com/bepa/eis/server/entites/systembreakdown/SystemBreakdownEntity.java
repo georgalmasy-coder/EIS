@@ -306,6 +306,10 @@ public class SystemBreakdownEntity extends AbstractEntity {
         }
     }
 
+    public DeadlineNextTRL getDeadlineNextTrlField() {
+        return deadlineNextTrl;
+    }
+
     public LocalDate getDeadlineNextTrl() {
         return deadlineNextTrl.getValue();
     }

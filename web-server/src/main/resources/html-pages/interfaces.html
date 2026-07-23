@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/interfaces.css" />
+</head>
+
+<body class="interfaces-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    >
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app interfaces-app">
+    <div class="content interfaces-content">
+        <header class="topbar interfaces-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout interfaces-layout" aria-label="Interface management matrix">
+            <div class="section-header interfaces-section-header">
+                <h2 id="interfacesTitle">Interface Management</h2>
+            </div>
+
+            <div class="interfaces-info-bar" aria-label="Interface matrix information">
+                <div class="interfaces-info-item">
+                    <span class="interfaces-info-label">Number of Physical Structure:</span>
+                    <strong id="interfacesStructureCount">-</strong>
+                </div>
+
+                <label class="interfaces-filter-toggle">
+                    <input id="interfacesOverdueOnlyToggle" type="checkbox" />
+                    <span>Show overdue only</span>
+                </label>
+
+                <div class="interfaces-irl-filter-inline" aria-label="IRL filter">
+                    <span class="interfaces-irl-filter-inline-label">IRL:</span>
+                    <div id="interfacesIrlFilterList" class="interfaces-irl-filter-inline-list"></div>
+                </div>
+
+                <div class="interfaces-system-label">
+                    <strong id="interfacesColumnGroupLabel">To Physical Structure</strong>
+                </div>
+
+                <button
+                        id="btnHelp"
+                        class="interfaces-help-button"
+                        type="button"
+                        data-help-page="interfaces"
+                        data-help-title="Help - Interface Management"
+                        title="Open help"
+                        aria-label="Open help for Interface Management"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                        <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                        <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="page-body interfaces-body">
+                <div class="interfaces-frame" aria-label="Interface matrix frame">
+                    <div class="interfaces-table-scroll" id="interfacesTableScroll">
+                        <table class="interfaces-table" aria-label="Interface matrix">
+                            <thead id="interfacesTableHead"></thead>
+                            <tbody id="interfacesTableBody"></tbody>
+                        </table>
+
+                        <div class="interfaces-empty is-visible" id="interfacesEmptyState">
+                            Loading interface matrix...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="interfaceDialog" class="interfaces-dialog" aria-labelledby="interfaceDialogTitle">
+    <form method="dialog" class="interfaces-dialog-form">
+        <div class="interfaces-dialog-head">
+            <h3 id="interfaceDialogTitle">Interface</h3>
+        </div>
+
+        <div class="interfaces-dialog-content">
+            <section class="interfaces-dialog-card" aria-labelledby="interfaceFromTitle">
+                <h4 id="interfaceFromTitle">From Physical Structure</h4>
+                <div class="interfaces-dialog-card-fields" id="interfaceFromFields"></div>
+            </section>
+
+            <section class="interfaces-dialog-card" aria-labelledby="interfaceToTitle">
+                <h4 id="interfaceToTitle">To Physical Structure</h4>
+                <div class="interfaces-dialog-card-fields" id="interfaceToFields"></div>
+            </section>
+
+            <section class="interfaces-dialog-card interfaces-dialog-card--full" aria-labelledby="interfaceDetailsTitle">
+                <h4 id="interfaceDetailsTitle">Interface Details</h4>
+
+                <div class="interfaces-dialog-form-grid">
+                    <label class="interfaces-dialog-field">
+                        <span>IRL</span>
+                        <select id="interfaceDialogIrlSelect"></select>
+                    </label>
+
+                    <label class="interfaces-dialog-field">
+                        <span>Next Irl Meeting</span>
+                        <input id="interfaceDialogNextIrlMeeting" type="date" />
+                    </label>
+                </div>
+
+                <div class="interfaces-dialog-classification-group">
+                    <div class="interfaces-dialog-field-label">Classification</div>
+                    <div id="interfaceDialogClassificationList" class="interfaces-dialog-classification-list"></div>
+                </div>
+            </section>
+        </div>
+
+        <div class="interfaces-dialog-footer">
+            <div class="interfaces-dialog-footer-note" id="interfaceDialogStatus"></div>
+            <div class="interfaces-dialog-footer-actions">
+                <button id="interfaceDialogSaveButton" class="primary" type="button">Save</button>
+                <button id="interfaceDialogCancelButton" type="button">Cancel</button>
+            </div>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                x
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help...
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/interfaces-page.js"></script>
+</body>
+</html>

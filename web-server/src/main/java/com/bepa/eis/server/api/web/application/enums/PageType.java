@@ -8,6 +8,7 @@ public enum PageType {
     BASIS_RELATION_DIAGRAM_PAGE("basisrelationdiagram","html-pages/basisrelationdiagram.html", "Relation Diagram"),
     NFLP_RELATION_DIAGRAM_PAGE("nflprelationdiagram","html-pages/nflprelationdiagram.html", "NFLP Relation Diagram"),
     BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix"),
+    INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management"),
 
     // Old versions
     STAKEHOLDER_REQUIREMENT_PAGE("stakeholderrequirement","html-pages/stakeholderrequirement.html", "Stakeholder Requirement"),

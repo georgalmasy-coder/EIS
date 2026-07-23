@@ -40,7 +40,7 @@ public class CustomerLookupCache {
     }
 
     public static LookupValue getTrlLookupValue(WebSession webSession, Integer lookupId) {
-        return getTrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
+        return getIrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
     }
 
     public static LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
@@ -49,6 +49,30 @@ public class CustomerLookupCache {
 
     public static List<LookupValue> getTrlLookupValues(WebSession webSession) {
         return getLookupCache(webSession).getTrlLookupValues(webSession.getCustomerId(), webSession.getProjectId());
+    }
+
+    public static LookupValue getIrlLookupValue(WebSession webSession, Integer lookupId) {
+        return getIrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
+    }
+
+    public static LookupValue getIrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+        return getLookupCache(customerId, projectId).getIrlLookupValue(customerId, projectId, lookupId);
+    }
+
+    public static List<LookupValue> getIrlLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getIrlLookupValues(webSession.getCustomerId(), webSession.getProjectId());
+    }
+
+    public static LookupValue getClassificationLookupValue(WebSession webSession, Integer lookupId) {
+        return getClassificationLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
+    }
+
+    public static LookupValue getClassificationLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
+        return getLookupCache(customerId, projectId).getClassificationLookupValue(customerId, projectId, lookupId);
+    }
+
+    public static List<LookupValue> getClassificationLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getClassificationLookupValues(webSession.getCustomerId(), webSession.getProjectId());
     }
 
     public static LookupValue getStakeholderLookupValue(WebSession webSession, Integer lookupId) {

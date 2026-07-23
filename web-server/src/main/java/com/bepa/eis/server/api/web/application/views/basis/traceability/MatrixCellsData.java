@@ -19,16 +19,16 @@ public class MatrixCellsData {
     }
 
     protected Element getCellElement(Document doc) {
-        Element stylesElement = doc.createElement("cells");
+        Element cellsElement = doc.createElement("cells");
         for (Cell cell : cellList) {
             Element cellElement = doc.createElement("cell");
             addStyleAttribute(cellElement, "row", cell.rowindex.toString());
             addStyleAttribute(cellElement, "col", cell.colindex.toString());
             addStyleAttribute(cellElement, "value", cell.value);
             addStyleAttribute(cellElement, "style", cell.style);
-            stylesElement.appendChild(cellElement);
+            cellsElement.appendChild(cellElement);
         }
-        return stylesElement;
+        return cellsElement;
     }
 
     private void addStyleAttribute(Element styleElement, String name, String value) {
