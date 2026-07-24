@@ -3,6 +3,9 @@ package com.bepa.eis.server.api.web.application.views.common;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.generic.GenericServlet;
@@ -25,6 +28,8 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.util.*;
+
+import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
 
 /**
  * Dummy relation list endpoint used by the relation dialog.
@@ -70,6 +75,7 @@ import java.util.*;
         name = "EntityRelationListServlet",
         urlPatterns = {
                 "/basis/entityrelations/relationlist",
+                "/basis/entityrelations/createrelation",
                 "/basis/stakeholderrequirement/relationlist",
                 "/basis/systemrequirement/relationlist",
                 "/basis/systemsbreakdown/relationlist",
@@ -80,6 +86,19 @@ import java.util.*;
 public class EntityRelationListServlet extends GenericServlet {
 
     private static final Logger log = LoggerFactory.getLogger(EntityRelationListServlet.class);
+    private static final String CREATE_RELATION_PATH = "/basis/entityrelations/createrelation";
+    private static final String PARAM_FROM_ENTITY_ID = "FromEntityId";
+    private static final String PARAM_FROM_ENTITY_TYPE = "FromEntityType";
+    private static final String PARAM_FROM_ENTITY_CODE = "FromEntityCode";
+    private static final String PARAM_FROM_ENTITY_NAME = "FromEntityName";
+    private static final String PARAM_TO_ENTITY_ID = "ToEntityId";
+    private static final String PARAM_TO_ENTITY_TYPE = "ToEntityType";
+    private static final String PARAM_TO_ENTITY_CODE = "ToEntityCode";
+    private static final String PARAM_TO_ENTITY_NAME = "ToEntityName";
+    private static final String PARAM_RELATION_TYPE_NAME = "RelationTypeName";
+
+    private static final List<RelationType> CONFIRMED_AND_NOT_RELEVANT_RELATIONS = List.of(RelationType.CONFIRMED, RelationType.NOT_RELEVANT);
+    private static final List<RelationType> CONFIRMED_RELATION = List.of(RelationType.CONFIRMED);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -88,13 +107,16 @@ public class EntityRelationListServlet extends GenericServlet {
         String module = request.getServletPath();
         long startTime = System.currentTimeMillis();
 
-        setXmlResponse(response);
-
         try {
-            WebRequest requestData = parseRequest(request);
-            RelationListResponse responseData = buildResponse(webSession, requestData);
+            if (isCreateRelationRequest(request)) {
+                handleCreateRelationRequest(webSession, request, response);
+            } else {
+                setXmlResponse(response);
+                WebRequest requestData = parseRequest(request);
+                RelationListResponse responseData = buildResponse(webSession, requestData);
 
-            response.getWriter().write(toXmlString(responseData.document(), true));
+                response.getWriter().write(toXmlString(responseData.document(), true));
+            }
 
             PerformanceProvider performanceProvider = new PerformanceProvider(webSession);
             performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
@@ -103,9 +125,316 @@ public class EntityRelationListServlet extends GenericServlet {
             IncidentProvider incidentProvider = new IncidentProvider(webSession);
             incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
 
-            log.error("Failed to build relation list response", throwable);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, throwable.getMessage());
+            if (isCreateRelationRequest(request)) {
+                log.error("Failed to create relation", throwable);
+                writeCreateRelationErrorResponse(response, throwable.getMessage());
+            } else {
+                log.error("Failed to build relation list response", throwable);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, throwable.getMessage());
+            }
         }
+    }
+
+    private boolean isCreateRelationRequest(HttpServletRequest request) {
+        String servletPath = request.getServletPath();
+        return CREATE_RELATION_PATH.equalsIgnoreCase(servletPath);
+    }
+
+    private void handleCreateRelationRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        RelationCreateRequest relationCreateRequest;
+        try {
+            relationCreateRequest = parseCreateRequest(request);
+        } catch (IllegalArgumentException e) {
+            writeCreateRelationErrorResponse(response, null, e.getMessage());
+            return;
+        }
+
+        EntityRelationRecord existingRelation = findExistingRelation(webSession, relationCreateRequest);
+
+        if (existingRelation != null && ! existingRelation.getRelationType().isDeleted()) {
+            writeCreateRelationErrorResponse(
+                    response,
+                    relationCreateRequest,
+                    "A relation already exists between :\n\n"
+                            +"From: " + entitySummary(relationCreateRequest.fromEntityType(), relationCreateRequest.fromEntityCode(), relationCreateRequest.fromEntityName())
+                            + "\n"
+                            +"To  : " + entitySummary(relationCreateRequest.toEntityType(), relationCreateRequest.toEntityCode(), relationCreateRequest.toEntityName())
+                            + ".\n\nCurrent relation type: "
+                            + existingRelation.getRelationType().getDescription()
+            );
+            return;
+        }
+
+        List<RelationType> allowedRelationTypes = resolveAllowedRelationTypes(webSession, relationCreateRequest);
+
+        if (allowedRelationTypes.isEmpty()) {
+            String errorMessage = "Not allowed to create a relation from '" + relationCreateRequest.fromEntityType.getDescription() + "' to '" + relationCreateRequest.toEntityType.getDescription() + "'.";
+            writeCreateRelationErrorResponse(
+                    response,
+                    relationCreateRequest,
+                    errorMessage );
+            return;
+
+        }
+
+        String requestedRelationTypeName = relationCreateRequest.relationTypeName();
+
+        if (requestedRelationTypeName.isBlank()) {
+            writeCreateRelationTypesResponse(response, relationCreateRequest, allowedRelationTypes);
+            return;
+        }
+
+        RelationType requestedRelationType = RelationType.valueOfDescription(requestedRelationTypeName);
+
+        if (requestedRelationType == RelationType.INVALID_RELATION_TYPE) {
+            writeCreateRelationErrorResponse(response, relationCreateRequest, "Unknown relation type: " + requestedRelationTypeName);
+            return;
+        }
+
+        if (!allowedRelationTypes.contains(requestedRelationType)) {
+            writeCreateRelationErrorResponse(
+                    response,
+                    "The relation type '" + requestedRelationTypeName + "' is not allowed for this entity pair."
+            );
+            return;
+        }
+
+        createRelation(webSession, relationCreateRequest, requestedRelationType);
+        writeCreateRelationSuccessResponse(response, relationCreateRequest, requestedRelationType);
+    }
+
+    private RelationCreateRequest parseCreateRequest(HttpServletRequest request) {
+        Integer fromEntityId = requiredIntegerParameter(request, PARAM_FROM_ENTITY_ID);
+        EntityType fromEntityType = requiredEntityTypeParameter(request, PARAM_FROM_ENTITY_TYPE);
+        String fromEntityCode = firstNonBlankParameter(request, PARAM_FROM_ENTITY_CODE);
+        String fromEntityName = firstNonBlankParameter(request, PARAM_FROM_ENTITY_NAME);
+        Integer toEntityId = requiredIntegerParameter(request, PARAM_TO_ENTITY_ID);
+        EntityType toEntityType = requiredEntityTypeParameter(request, PARAM_TO_ENTITY_TYPE);
+        String toEntityCode = firstNonBlankParameter(request, PARAM_TO_ENTITY_CODE);
+        String toEntityName = firstNonBlankParameter(request, PARAM_TO_ENTITY_NAME);
+        String relationTypeName = firstNonBlankParameter(request, PARAM_RELATION_TYPE_NAME);
+
+        if (Objects.equals(fromEntityId, toEntityId) && fromEntityType == toEntityType) {
+            throw new IllegalArgumentException("You cannot create a relation from an entity to itself.");
+        }
+
+        return new RelationCreateRequest(
+                fromEntityType,
+                fromEntityId,
+                fromEntityCode,
+                fromEntityName,
+                toEntityType,
+                toEntityId,
+                toEntityCode,
+                toEntityName,
+                relationTypeName
+        );
+    }
+
+    private List<RelationType> resolveAllowedRelationTypes(WebSession webSession, RelationCreateRequest request) {
+
+        switch (request.fromEntityType()) {
+            case STAKEHOLDER_REQUIREMENT -> {
+                if (request.toEntityType() == SYSTEM_REQUIREMENT) {
+                    return CONFIRMED_AND_NOT_RELEVANT_RELATIONS;
+                }
+            }
+            case SYSTEM_REQUIREMENT -> {
+                switch (request.toEntityType()) {
+                    case STAKEHOLDER_REQUIREMENT -> {
+                        return CONFIRMED_AND_NOT_RELEVANT_RELATIONS;
+                    }
+                    case SYSTEMS_BREAKDOWN -> {
+                        return CONFIRMED_RELATION;
+                    }
+                }
+            }
+            case SYSTEMS_BREAKDOWN -> {
+                switch (request.toEntityType()) {
+                    case SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN, LOGICAL_STRUCTURE -> {
+                        return CONFIRMED_RELATION;
+                    }
+                }
+            }
+            case FUNCTIONAL_STRUCTURE -> {
+                switch (request.toEntityType()) {
+                    case LOGICAL_STRUCTURE, SYSTEM_REQUIREMENT -> {
+                        return CONFIRMED_RELATION;
+                    }
+                }
+            }
+            case LOGICAL_STRUCTURE -> {
+                switch (request.toEntityType()) {
+                    case SYSTEMS_BREAKDOWN, FUNCTIONAL_STRUCTURE -> {
+                        return CONFIRMED_RELATION;
+                    }
+                }
+            }
+        }
+
+        return List.of();
+    }
+
+    private EntityRelationRecord findExistingRelation(WebSession webSession, RelationCreateRequest request) throws Exception {
+        RelationProvider relationProvider = new RelationProvider(webSession);
+        return relationProvider.getEntityRelationByEntityTypeAndId(
+                request.fromEntityType(),
+                request.fromEntityId(),
+                request.toEntityType(),
+                request.toEntityId()
+        );
+    }
+
+    private void createRelation(WebSession webSession, RelationCreateRequest request, RelationType relationType) throws Exception {
+        RelationProvider relationProvider = new RelationProvider(webSession);
+        EntityRelationRecord newRelationRecord = new EntityRelationRecord(webSession.getCustomerId(), webSession.getProjectId());
+
+        EntityRelationRecord existingRelation = findExistingRelation(webSession, request);
+
+        if (existingRelation != null) {
+            relationProvider.clearLatestIfExists(existingRelation);
+            newRelationRecord.setVersion(existingRelation.getVersion());
+        } else {
+            newRelationRecord.setVersion(0);
+        }
+
+        newRelationRecord.setEntityType(request.fromEntityType());
+        newRelationRecord.setEntityId(request.fromEntityId());
+        newRelationRecord.setRelatedEntityType(request.toEntityType());
+        newRelationRecord.setRelatedEntityId(request.toEntityId());
+        newRelationRecord.setCreatedByUserId(webSession.getUserId());
+        newRelationRecord.setRelationType(relationType);
+        newRelationRecord.setLatest(true);
+
+        relationProvider.insertRelationRecord(relationType, newRelationRecord);
+    }
+
+    private void writeCreateRelationTypesResponse(HttpServletResponse response, RelationCreateRequest request, List<RelationType> relationTypes) throws Exception {
+        setXmlResponse(response);
+
+        DocumentBuilderFactory factory = newSecureFactory();
+        Document document = factory.newDocumentBuilder().newDocument();
+        Element root = document.createElement("RelationCreateResponse");
+        root.setAttribute("status", "options");
+        document.appendChild(root);
+
+        appendTextElement(document, root, "FromEntityType", valueOf(request.fromEntityType()));
+        appendTextElement(document, root, "FromEntityId", String.valueOf(request.fromEntityId()));
+        appendTextElement(document, root, "FromEntityCode", request.fromEntityCode());
+        appendTextElement(document, root, "FromEntityName", request.fromEntityName());
+        appendTextElement(document, root, "ToEntityType", valueOf(request.toEntityType()));
+        appendTextElement(document, root, "ToEntityId", String.valueOf(request.toEntityId()));
+        appendTextElement(document, root, "ToEntityCode", request.toEntityCode());
+        appendTextElement(document, root, "ToEntityName", request.toEntityName());
+
+        Element relationTypesNode = document.createElement("RelationTypes");
+        root.appendChild(relationTypesNode);
+
+        for (RelationType relationType : relationTypes) {
+            Element relationTypeElement = document.createElement("RelationType");
+            relationTypeElement.setAttribute("id", String.valueOf(relationType.getId()));
+            relationTypeElement.setTextContent(relationType.getDescription());
+            relationTypesNode.appendChild(relationTypeElement);
+        }
+
+        response.getWriter().write(toXmlString(document, true));
+    }
+
+    private void writeCreateRelationSuccessResponse(HttpServletResponse response, RelationCreateRequest request, RelationType relationType) throws Exception {
+        setXmlResponse(response);
+
+        DocumentBuilderFactory factory = newSecureFactory();
+        Document document = factory.newDocumentBuilder().newDocument();
+        Element root = document.createElement("RelationCreateResponse");
+        root.setAttribute("status", "created");
+        document.appendChild(root);
+
+        appendTextElement(document, root, "FromEntityType", valueOf(request.fromEntityType()));
+        appendTextElement(document, root, "FromEntityId", String.valueOf(request.fromEntityId()));
+        appendTextElement(document, root, "FromEntityCode", request.fromEntityCode());
+        appendTextElement(document, root, "FromEntityName", request.fromEntityName());
+        appendTextElement(document, root, "ToEntityType", valueOf(request.toEntityType()));
+        appendTextElement(document, root, "ToEntityId", String.valueOf(request.toEntityId()));
+        appendTextElement(document, root, "ToEntityCode", request.toEntityCode());
+        appendTextElement(document, root, "ToEntityName", request.toEntityName());
+
+        Element relationTypeElement = document.createElement("RelationType");
+        relationTypeElement.setAttribute("id", String.valueOf(relationType.getId()));
+        relationTypeElement.setTextContent(relationType.getDescription());
+        root.appendChild(relationTypeElement);
+
+        response.getWriter().write(toXmlString(document, true));
+    }
+
+    private void writeCreateRelationErrorResponse(HttpServletResponse response, String message) throws IOException {
+        writeCreateRelationErrorResponse(response, null, message);
+    }
+
+    private void writeCreateRelationErrorResponse(HttpServletResponse response, RelationCreateRequest request, String message) throws IOException {
+        try {
+            setXmlResponse(response);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            DocumentBuilderFactory factory = newSecureFactory();
+            Document document = factory.newDocumentBuilder().newDocument();
+            Element root = document.createElement("RelationCreateResponse");
+            root.setAttribute("status", "error");
+            document.appendChild(root);
+
+            if (request != null) {
+                appendTextElement(document, root, "FromEntityType", valueOf(request.fromEntityType()));
+                appendTextElement(document, root, "FromEntityId", String.valueOf(request.fromEntityId()));
+                appendTextElement(document, root, "FromEntityCode", request.fromEntityCode());
+                appendTextElement(document, root, "FromEntityName", request.fromEntityName());
+                appendTextElement(document, root, "ToEntityType", valueOf(request.toEntityType()));
+                appendTextElement(document, root, "ToEntityId", String.valueOf(request.toEntityId()));
+                appendTextElement(document, root, "ToEntityCode", request.toEntityCode());
+                appendTextElement(document, root, "ToEntityName", request.toEntityName());
+            }
+
+            appendTextElement(document, root, "Message", message == null || message.isBlank() ? "Unknown error" : message);
+            response.getWriter().write(toXmlString(document, true));
+        } catch (Exception exception) {
+            log.error("Failed to write create relation error response", exception);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, message == null || message.isBlank() ? "Unknown error" : message);
+        }
+    }
+
+    private Integer requiredIntegerParameter(HttpServletRequest request, String name) {
+        String value = requiredParameter(request, name);
+        Integer parsed = parseInteger(value);
+
+        if (parsed == null) {
+            throw new IllegalArgumentException("Invalid integer parameter: " + name);
+        }
+
+        return parsed;
+    }
+
+    private EntityType requiredEntityTypeParameter(HttpServletRequest request, String name) {
+        Integer value = requiredIntegerParameter(request, name);
+        return EntityType.fromId(value);
+    }
+
+    private String requiredParameter(HttpServletRequest request, String name) {
+        String value = firstNonBlankParameter(request, name);
+
+        if (value.isBlank()) {
+            throw new IllegalArgumentException("Missing required parameter: " + name);
+        }
+
+        return value;
+    }
+
+    private String firstNonBlankParameter(HttpServletRequest request, String... names) {
+        for (String name : names) {
+            String value = request.getParameter(name);
+
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+
+        return "";
     }
 
     private WebRequest parseRequest(HttpServletRequest request) throws Exception {
@@ -187,7 +516,7 @@ public class EntityRelationListServlet extends GenericServlet {
             return lists;
         }
 
-        if (entityType == EntityType.SYSTEM_REQUIREMENT) {
+        if (entityType == SYSTEM_REQUIREMENT) {
             lists.add(new RelationListSpec(
                     "Stakeholder requirements",
                     true,
@@ -220,17 +549,6 @@ public class EntityRelationListServlet extends GenericServlet {
             ));
             return lists;
         }
-
-        /* ???
-        lists.add(new RelationListSpec(
-                "Relations",
-                true,
-                true,
-                buildSystemRequirementOptionList(webSession, requestData)));
-
-        return lists;
-
-         */
 
         return lists;
     }
@@ -366,7 +684,7 @@ public class EntityRelationListServlet extends GenericServlet {
                 if (servletPath.contains("stakeholderrequirement")) {
                     entityTypeId = EntityType.STAKEHOLDER_REQUIREMENT.getId();
                 } else if (servletPath.contains("systemrequirement")) {
-                    entityTypeId = EntityType.SYSTEM_REQUIREMENT.getId();
+                    entityTypeId = SYSTEM_REQUIREMENT.getId();
                 } else if (servletPath.contains("systemsbreakdown")) {
                     entityTypeId = EntityType.SYSTEMS_BREAKDOWN.getId();
                 } else if (servletPath.contains("functionalstructure")) {
@@ -466,6 +784,26 @@ public class EntityRelationListServlet extends GenericServlet {
 
     private String valueOf(Integer value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private String entitySummary(EntityType entityType, String entityCode, String entityName) {
+        String typeText = entityType == null ? "Entity" : entityType.getDescription();
+        String codeText = (entityCode == null || entityCode.isBlank()) ? "-" : entityCode.trim();
+        String nameText = (entityName == null || entityName.isBlank()) ? "-" : entityName.trim();
+        return typeText + " " + codeText + " - " + nameText;
+    }
+
+    private record RelationCreateRequest(
+            EntityType fromEntityType,
+            Integer fromEntityId,
+            String fromEntityCode,
+            String fromEntityName,
+            EntityType toEntityType,
+            Integer toEntityId,
+            String toEntityCode,
+            String toEntityName,
+            String relationTypeName
+    ) {
     }
 
     private record WebRequest(EntityType entityType, EntityId entityId, Set<String> existingRelations) {

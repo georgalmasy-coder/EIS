@@ -1357,10 +1357,7 @@ public class UserProvider extends GenericProvider {
                 );
 
                 return true;
-            } catch (SQLException e) {
-                connection.rollback();
-                throw e;
-            } catch (RuntimeException e) {
+            } catch (SQLException | RuntimeException e) {
                 connection.rollback();
                 throw e;
             } finally {

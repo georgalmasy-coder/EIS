@@ -501,6 +501,13 @@ body.relationdiagram-document {
     opacity: 0.7;
 }
 
+.relationdiagram-requirement-card.is-drop-target {
+    border-color: var(--relationdiagram-blue);
+    border-left-color: var(--relationdiagram-blue);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.26);
+    transform: translateY(-1px);
+}
+
 .relationdiagram-requirement-code {
     display: block;
     margin-bottom: 0.2rem;
@@ -644,6 +651,31 @@ body.relationdiagram-document {
     background: #f8fafc;
 }
 
+.relationdiagram-dialog-line {
+    display: block;
+    margin-top: 0.35rem;
+    line-height: 1.35;
+}
+
+.relationdiagram-dialog-line-intro {
+    margin-top: 0;
+}
+
+.relationdiagram-dialog-line-spacer {
+    margin-top: 0.2rem;
+    line-height: 0.7;
+    font-size: 0.1px;
+}
+
+.relationdiagram-dialog-line-label {
+    font-weight: 700;
+    color: #526273;
+}
+
+.relationdiagram-dialog-line-value {
+    color: var(--relationdiagram-text);
+}
+
 .relationdiagram-related-list {
     margin: 0;
     padding-left: 1.25rem;
@@ -656,11 +688,20 @@ body.relationdiagram-document {
 .relationdiagram-dialog-footer {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 0.5rem;
     flex: 0 0 auto;
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--relationdiagram-border-color);
     background: #f8fafc;
+}
+
+.relationdiagram-dialog-actions {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .relationdiagram-dialog-footer .primary {

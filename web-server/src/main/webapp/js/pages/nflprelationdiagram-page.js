@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
+import { createRelationCreationDialogController } from "../components/relation-creation-dialog.js";
 import { setText } from "../core/dom.js";
 import {
     getChildText,
@@ -11,6 +12,7 @@ import { cssEscape } from "../core/css.js";
 import { naturalCompare } from "../components/sortable-table.js";
 
 const RELATION_DIAGRAM_ENDPOINT = "/pro/nflprelationdiagram?cmd=overview";
+const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";
 
 const STORAGE_KEYS = {
     selectedView: "pro.nflprelationdiagram.selectedView"
@@ -141,6 +143,8 @@ const state = {
     scrollListenersInstalled: false
 };
 
+let relationCreationDialog = null;
+
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startNflpRelationDiagramPage);
 } else {
@@ -150,8 +154,19 @@ if (document.readyState === "loading") {
 function startNflpRelationDiagramPage() {
     try {
         initializePageShell();
-        initializeEvents();
         loadRelationDiagram();
+
+        try {
+            relationCreationDialog = createRelationCreationDialogController({
+                endpointUrl: RELATION_CREATE_ENDPOINT,
+                title: "Create relation",
+                onCreated: () => loadRelationDiagram()
+            });
+        } catch (dialogError) {
+            console.error("Failed to initialize NFLP relation creation dialog", dialogError);
+        }
+
+        initializeEvents();
     } catch (error) {
         console.error("Failed to initialize NFLP relation diagram", error);
         setText("loadStatus", "Error");
@@ -359,11 +374,14 @@ function parseRequirementGroup(parentElement, groupSelector, itemSelector, type)
 
             return {
                 internalId,
-                entityId: parseEntityId(internalId),
+                entityId: parseInteger(requirementElement.getAttribute("entityId"))
+                    ?? parseEntityId(internalId, getChildText(requirementElement, "id", "")),
                 visibleId: getChildText(requirementElement, "id", "-"),
                 name: getChildText(requirementElement, "name", "-"),
                 description: getChildText(requirementElement, "description", ""),
-                type
+                type,
+                entityTypeId: parseInteger(requirementElement.getAttribute("entityType")),
+                entityTypeLabel: ENTITY_TYPES[type]?.label || "Entity"
             };
         })
         .filter((requirement) => requirement.internalId);
@@ -377,6 +395,7 @@ function parseRelationGroup(root, group) {
             id: `${group.selector}-${index}`,
             from: getChildText(relationElement, "from", ""),
             to: getChildText(relationElement, "to", ""),
+            type: getChildText(relationElement, "type", ""),
             fromType: group.fromType,
             toType: group.toType
         }))
@@ -471,6 +490,7 @@ function renderRequirementCards(container, requirements) {
         card.className = "relationdiagram-requirement-card";
         card.dataset.internalId = requirement.internalId;
         card.dataset.entityType = requirement.type;
+        card.dataset.entityTypeId = requirement.entityTypeId ? String(requirement.entityTypeId) : "";
         card.draggable = true;
         card.title = buildRequirementTooltip(requirement);
 
@@ -517,8 +537,13 @@ function renderRequirementCards(container, requirements) {
             card.classList.add("is-dragging");
         });
 
+        card.addEventListener("dragenter", handleRelationCardDragEnter);
+        card.addEventListener("dragover", handleRelationCardDragOver);
+        card.addEventListener("dragleave", handleRelationCardDragLeave);
+        card.addEventListener("drop", handleRelationCardDrop);
         card.addEventListener("dragend", () => {
             card.classList.remove("is-dragging");
+            card.classList.remove("is-drop-target");
         });
 
         container.appendChild(card);
@@ -604,13 +629,30 @@ function applyFilters() {
 }
 
 function getFocusedVisibleIds(internalId) {
-    const visibleIds = new Set([internalId]);
+    return getConnectedRequirementIds(internalId);
+}
 
-    getRelatedRequirementIds(internalId).forEach((relatedId) => {
-        visibleIds.add(relatedId);
-    });
+function getConnectedRequirementIds(internalId) {
+    const visited = new Set();
+    const queue = [internalId];
 
-    return visibleIds;
+    while (queue.length > 0) {
+        const currentId = queue.shift();
+
+        if (!currentId || visited.has(currentId)) {
+            continue;
+        }
+
+        visited.add(currentId);
+
+        getRelatedRequirementIds(currentId).forEach((relatedId) => {
+            if (!visited.has(relatedId)) {
+                queue.push(relatedId);
+            }
+        });
+    }
+
+    return visited;
 }
 
 function setFocusedRequirement(internalId) {
@@ -804,6 +846,104 @@ function handleFocusDrop(event) {
     }
 
     setFocusedRequirement(internalId);
+}
+
+function handleRelationCardDragEnter(event) {
+    event.preventDefault();
+    event.currentTarget?.classList.add("is-drop-target");
+}
+
+function handleRelationCardDragOver(event) {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+    }
+
+    event.currentTarget?.classList.add("is-drop-target");
+}
+
+function handleRelationCardDragLeave(event) {
+    const card = event.currentTarget;
+
+    if (!card) {
+        return;
+    }
+
+    if (event.relatedTarget && card.contains(event.relatedTarget)) {
+        return;
+    }
+
+    card.classList.remove("is-drop-target");
+}
+
+function handleRelationCardDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const card = event.currentTarget;
+
+    if (!card) {
+        return;
+    }
+
+    card.classList.remove("is-drop-target");
+
+    const sourceInternalId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
+        || event.dataTransfer?.getData("text/plain")
+        || "";
+
+    const targetInternalId = card.dataset.internalId || "";
+
+    if (!sourceInternalId || !targetInternalId) {
+        return;
+    }
+
+    const sourceRequirement = state.requirementsByInternalId.get(sourceInternalId);
+    const targetRequirement = state.requirementsByInternalId.get(targetInternalId);
+
+    if (!sourceRequirement || !targetRequirement || !relationCreationDialog) {
+        return;
+    }
+
+    relationCreationDialog.open({
+        fromEntityId: sourceRequirement.entityId,
+        fromEntityType: sourceRequirement.entityTypeId,
+        toEntityId: targetRequirement.entityId,
+        toEntityType: targetRequirement.entityTypeId,
+        fromEntityCode: sourceRequirement.visibleId,
+        toEntityCode: targetRequirement.visibleId,
+        fromEntityLabel: sourceRequirement.entityTypeLabel,
+        toEntityLabel: targetRequirement.entityTypeLabel,
+        fromEntityName: sourceRequirement.name,
+        toEntityName: targetRequirement.name
+    }).catch((error) => {
+        console.error("Failed to open relation creation dialog", error);
+        window.alert(error?.message || "Failed to open relation creation dialog.");
+    });
+}
+
+function parseInteger(value) {
+    if (value == null || value === "") {
+        return null;
+    }
+
+    const parsed = Number.parseInt(String(value), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseEntityId(internalId, fallbackValue = "") {
+    const fallbackNumeric = parseInteger(fallbackValue);
+
+    if (fallbackNumeric != null) {
+        return fallbackNumeric;
+    }
+
+    if (!internalId || !internalId.includes("-")) {
+        return null;
+    }
+
+    return parseInteger(internalId.slice(internalId.lastIndexOf("-") + 1));
 }
 
 function drawRelations() {
@@ -1237,23 +1377,8 @@ function buildRequirementTooltip(requirement) {
     ].filter(Boolean).join("\n");
 }
 
-function parseEntityId(internalId) {
-    const value = String(internalId || "").trim();
-
-    if (!value) {
-        return "";
-    }
-
-    const index = value.lastIndexOf("-");
-    if (index < 0 || index === value.length - 1) {
-        return value;
-    }
-
-    return value.slice(index + 1);
-}
-
 function parseRequirementIdFromInternalId(internalId) {
-    return parseEntityId(internalId);
+    return String(parseEntityId(internalId) || "");
 }
 
 function debounce(callback, delay) {

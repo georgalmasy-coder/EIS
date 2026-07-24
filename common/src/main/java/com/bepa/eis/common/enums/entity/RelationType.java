@@ -24,6 +24,10 @@ public enum RelationType {
         return description;
     }
 
+    public boolean isDeleted() {
+        return this == DELETED;
+    }
+
     public static RelationType valueOf(int value) {
         for (RelationType entityDataElement : RelationType.values()) {
             if (entityDataElement.id == value) return entityDataElement;

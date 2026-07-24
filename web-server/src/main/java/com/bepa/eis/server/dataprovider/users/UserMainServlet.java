@@ -7,6 +7,7 @@ import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
+import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,6 +51,9 @@ public class UserMainServlet extends GenericDataProviderServlet {
         if (!saved) {
             throw new IllegalStateException("User could not be saved.");
         }
+
+        EhcacheProvider.clearCacheEntry(getWebSession().getCustomerId());
+
     }
 
     @Override

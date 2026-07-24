@@ -9,6 +9,7 @@ import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
@@ -20,6 +21,8 @@ import org.w3c.dom.Element;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.bepa.eis.common.enums.entity.EntityType.*;
 
 public class RelationDiagramDocument extends GenericXmlDocument {
 
@@ -61,8 +64,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         listOfSystemRequirements = getSystemRequirements();
         listOfStakeholderRequirements = getStakeholderRequirements();
         listOfSystemBreakdowns = getSystemBreakdowns();
-        listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
-        listOfSystemRequirementToSystemBreakdowRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, EntityType.SYSTEMS_BREAKDOWN);
+        listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT);
+        listOfSystemRequirementToSystemBreakdowRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN);
     }
 
     private List<StakeholderRequirementEntity> getStakeholderRequirements() throws SQLException {
@@ -99,6 +102,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 Element requirementElement = getDoc().createElement("requirement");
                 String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
+                addEntityTypeAttribute(requirementElement, STAKEHOLDER_REQUIREMENT);
+                addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
@@ -115,6 +120,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 Element requirementElement = getDoc().createElement("requirement");
                 String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
+                addEntityTypeAttribute(requirementElement, SYSTEM_REQUIREMENT);
+                addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
@@ -131,6 +138,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 Element requirementElement = getDoc().createElement("systemsBreakdown");
                 String id = formatEntityId(system.getEntityType(), system.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
+                addEntityTypeAttribute(requirementElement, SYSTEMS_BREAKDOWN);
+                addEntityIdAttribute(requirementElement, system.getEntityId());
                 addElement(requirementElement, "id", system.getSbsCode().getValue());
                 addElement(requirementElement, "name", system.getSystemName().getValue());
                 addElement(requirementElement, "description", system.getDescription());
@@ -166,12 +175,6 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         parentelement.appendChild(element);
     }
 
-    private void addAttribute(Element element, String attributeName, String attributeValue) {
-        if (element != null && attributeName != null && attributeValue != null) {
-            element.setAttribute(attributeName, attributeValue);
-        }
-    }
-
     private Element buildRelationDiagramElement() {
         return getDoc().createElement("relationDiagram");
     }
@@ -179,5 +182,19 @@ public class RelationDiagramDocument extends GenericXmlDocument {
     private String formatEntityId(EntityType entityType, Integer entityId) {
         return entityType.getShortDescription() + "-" + entityId;
     }
+
+    private void addEntityTypeAttribute(Element element, EntityType entityType) {
+        if (element != null) {
+            Integer type = entityType.getId();
+            element.setAttribute("entityType",type.toString());
+        }
+    }
+
+    private void addEntityIdAttribute(Element element, EntityId entityId) {
+        if (element != null && entityId != null) {
+            element.setAttribute("entityId",entityId.toString());
+        }
+    }
+
 
 }

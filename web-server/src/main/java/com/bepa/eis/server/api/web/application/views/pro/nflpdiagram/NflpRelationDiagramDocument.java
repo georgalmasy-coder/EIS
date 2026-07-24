@@ -8,6 +8,7 @@ import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
 import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
@@ -20,6 +21,8 @@ import org.w3c.dom.Element;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.bepa.eis.common.enums.entity.EntityType.*;
 
 public class NflpRelationDiagramDocument extends GenericXmlDocument {
 
@@ -74,9 +77,9 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
         listOfLogicalStructures = getLogicalStructures();
 
         listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
-        listOfSystemRequirementToFunctionalStructureRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, EntityType.FUNCTIONAL_STRUCTURE);
-        listOfFunctionalStructureToLogicalStructureRelations = getEntityRelations(EntityType.FUNCTIONAL_STRUCTURE, EntityType.LOGICAL_STRUCTURE);
-        listOfLogicalStructureToSystemBreakdownsRelations = getEntityRelations(EntityType.LOGICAL_STRUCTURE, EntityType.SYSTEMS_BREAKDOWN);
+        listOfSystemRequirementToFunctionalStructureRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, FUNCTIONAL_STRUCTURE);
+        listOfFunctionalStructureToLogicalStructureRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, LOGICAL_STRUCTURE);
+        listOfLogicalStructureToSystemBreakdownsRelations = getEntityRelations(LOGICAL_STRUCTURE, SYSTEMS_BREAKDOWN);
     }
 
     private List<StakeholderRequirementEntity> getStakeholderRequirements() throws SQLException {
@@ -127,6 +130,8 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
                 Element requirementElement = getDoc().createElement("requirement");
                 String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
+                addEntityTypeAttribute(requirementElement, STAKEHOLDER_REQUIREMENT);
+                addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
@@ -143,6 +148,8 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
                 Element requirementElement = getDoc().createElement("requirement");
                 String id = formatEntityId(requirement.getEntityType(), requirement.getEntityId().getValue());
                 requirementElement.setAttribute("id", id);
+                addEntityTypeAttribute(requirementElement, SYSTEM_REQUIREMENT);
+                addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "id", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
@@ -159,6 +166,8 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
                 Element functionalElement = getDoc().createElement("functional");
                 String id = formatEntityId(functionalStructure.getEntityType(), functionalStructure.getEntityId().getValue());
                 functionalElement.setAttribute("id", id);
+                addEntityTypeAttribute(functionalElement, FUNCTIONAL_STRUCTURE);
+                addEntityIdAttribute(functionalElement, functionalStructure.getEntityId());
                 addElement(functionalElement, "id", functionalStructure.getFunctionalCode().getValue());
                 addElement(functionalElement, "name", functionalStructure.getFunctionalName().getValue());
                 addElement(functionalElement, "description", functionalStructure.getFunctionalDescription().getValue());
@@ -172,13 +181,15 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
         Element logicalStructures = getDoc().createElement("logicalStructures");
         if (listOfLogicalStructures != null) {
             for (LogicalStructureEntity logicalStructure : listOfLogicalStructures) {
-                Element requirementElement = getDoc().createElement("logical");
+                Element logicalElement = getDoc().createElement("logical");
                 String id = formatEntityId(logicalStructure.getEntityType(), logicalStructure.getEntityId().getValue());
-                requirementElement.setAttribute("id", id);
-                addElement(requirementElement, "id", logicalStructure.getLogicalCode().getValue());
-                addElement(requirementElement, "name", logicalStructure.getLogicalName().getValue());
-                addElement(requirementElement, "description", logicalStructure.getLogicalDescription().getValue());
-                logicalStructures.appendChild(requirementElement);
+                logicalElement.setAttribute("id", id);
+                addEntityTypeAttribute(logicalElement, LOGICAL_STRUCTURE);
+                addEntityIdAttribute(logicalElement, logicalStructure.getEntityId());
+                addElement(logicalElement, "id", logicalStructure.getLogicalCode().getValue());
+                addElement(logicalElement, "name", logicalStructure.getLogicalName().getValue());
+                addElement(logicalElement, "description", logicalStructure.getLogicalDescription().getValue());
+                logicalStructures.appendChild(logicalElement);
             }
         }
         return logicalStructures;
@@ -189,13 +200,15 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
         Element systemRequirements = getDoc().createElement("systemsBreakdowns");
         if (listOfSystemBreakdowns != null) {
             for (SystemBreakdownEntity system : listOfSystemBreakdowns) {
-                Element requirementElement = getDoc().createElement("systemsBreakdown");
+                Element physicalElement = getDoc().createElement("systemsBreakdown");
                 String id = formatEntityId(system.getEntityType(), system.getEntityId().getValue());
-                requirementElement.setAttribute("id", id);
-                addElement(requirementElement, "id", system.getSbsCode().getValue());
-                addElement(requirementElement, "name", system.getSystemName().getValue());
-                addElement(requirementElement, "description", system.getDescription());
-                systemRequirements.appendChild(requirementElement);
+                physicalElement.setAttribute("id", id);
+                addEntityTypeAttribute(physicalElement, SYSTEMS_BREAKDOWN);
+                addEntityIdAttribute(physicalElement, system.getEntityId());
+                addElement(physicalElement, "id", system.getSbsCode().getValue());
+                addElement(physicalElement, "name", system.getSystemName().getValue());
+                addElement(physicalElement, "description", system.getDescription());
+                systemRequirements.appendChild(physicalElement);
             }
         }
         return systemRequirements;
@@ -214,7 +227,6 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
             addElement(relationElement, "type", relation.getRelationType().getDescription());
 
             relationsElement.appendChild(relationElement);
-
         }
 
         return relationsElement;
@@ -227,18 +239,25 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
         parentelement.appendChild(element);
     }
 
-    private void addAttribute(Element element, String attributeName, String attributeValue) {
-        if (element != null && attributeName != null && attributeValue != null) {
-            element.setAttribute(attributeName, attributeValue);
-        }
-    }
-
     private Element buildRelationDiagramElement() {
         return getDoc().createElement("NflpRelationDiagram");
     }
 
     private String formatEntityId(EntityType entityType, Integer entityId) {
         return entityType.getShortDescription() + "-" + entityId;
+    }
+
+    private void addEntityTypeAttribute(Element element, EntityType entityType) {
+        if (element != null && entityType != null) {
+            Integer type = entityType.getId();
+            element.setAttribute("entityType",type.toString());
+        }
+    }
+
+    private void addEntityIdAttribute(Element element, EntityId entityId) {
+        if (element != null && entityId != null) {
+            element.setAttribute("entityId",entityId.toString());
+        }
     }
 
 }

@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
+import { createRelationCreationDialogController } from "../components/relation-creation-dialog.js";
 import { setText } from "../core/dom.js";
 import {
     getChildText,
@@ -11,6 +12,13 @@ import { cssEscape } from "../core/css.js";
 import { naturalCompare } from "../components/sortable-table.js";
 
 const RELATION_DIAGRAM_ENDPOINT = "/basis/relationdiagram?cmd=overview";
+const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";
+
+const ENTITY_TYPE_LABELS = {
+    stakeholder: "Stakeholder Requirement",
+    system: "System Requirement",
+    systemsBreakdown: "Physical Structure"
+};
 
 const VIEW_MODES = {
     stakeholderSystem: "stakeholder-system",
@@ -31,11 +39,42 @@ const state = {
     resizeObserver: null
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    initializePageShell();
-    initializeEvents();
-    loadRelationDiagram();
+let relationCreationDialog = null;
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startBasisRelationDiagramPage);
+} else {
+    startBasisRelationDiagramPage();
+}
+
+window.addEventListener("error", (event) => {
+    console.error("Unhandled basis relation diagram error", event.error || event.message || event);
+    setText("loadStatus", "Error", "");
+    showEmptyState(`Could not initialize relation diagram. ${event.error?.message || event.message || "Unknown error"}`);
 });
+
+window.addEventListener("unhandledrejection", (event) => {
+    console.error("Unhandled basis relation diagram rejection", event.reason);
+    setText("loadStatus", "Error", "");
+    showEmptyState(`Could not initialize relation diagram. ${event.reason?.message || event.reason || "Unknown error"}`);
+});
+
+function startBasisRelationDiagramPage() {
+    initializePageShell();
+    loadRelationDiagram();
+
+    try {
+        relationCreationDialog = createRelationCreationDialogController({
+            endpointUrl: RELATION_CREATE_ENDPOINT,
+            title: "Create relation",
+            onCreated: () => loadRelationDiagram()
+        });
+    } catch (error) {
+        console.error("Failed to initialize relation creation dialog", error);
+    }
+
+    initializeEvents();
+}
 
 function initializePageShell() {
     setText("customerName", "—", "");
@@ -249,17 +288,24 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
 
     return Array.from(requirementElements).map((requirementElement) => {
         const internalId = requirementElement.getAttribute("id") || "";
+        const entityTypeId = parseInteger(requirementElement.getAttribute("entityType"));
+        const entityId = parseInteger(requirementElement.getAttribute("entityId"))
+            ?? parseEntityId(internalId, getChildText(requirementElement, "id", ""));
+        const requirementType = groupSelector === "stakeholderRequirements"
+            ? "stakeholder"
+            : groupSelector === "systemRequirements"
+                ? "system"
+                : "systemsBreakdown";
 
         return {
             internalId,
             visibleId: getChildText(requirementElement, "id", "—"),
             name: getChildText(requirementElement, "name", "—"),
             description: getChildText(requirementElement, "description", ""),
-            type: groupSelector === "stakeholderRequirements"
-                ? "stakeholder"
-                : groupSelector === "systemRequirements"
-                    ? "system"
-                    : "systemsBreakdown"
+            type: requirementType,
+            entityId,
+            entityTypeId,
+            entityTypeLabel: ENTITY_TYPE_LABELS[requirementType] || "Entity"
         };
     }).filter((requirement) => requirement.internalId);
 }
@@ -272,7 +318,8 @@ function parseRelations(relationDiagramElement) {
     return Array.from(relationElements).map((relationElement, index) => ({
         id: `relation-${index}`,
         from: getChildText(relationElement, "from", ""),
-        to: getChildText(relationElement, "to", "")
+        to: getChildText(relationElement, "to", ""),
+        type: getChildText(relationElement, "type", "")
     })).filter((relation) => relation.from && relation.to);
 }
 
@@ -356,6 +403,7 @@ function renderRequirementCards(container, requirements) {
         card.type = "button";
         card.className = "relationdiagram-requirement-card";
         card.dataset.internalId = requirement.internalId;
+        card.dataset.entityTypeId = requirement.entityTypeId ? String(requirement.entityTypeId) : "";
         card.draggable = true;
         card.title = buildRequirementTooltip(requirement);
 
@@ -394,8 +442,13 @@ function renderRequirementCards(container, requirements) {
             card.classList.add("is-dragging");
         });
 
+        card.addEventListener("dragenter", handleRelationCardDragEnter);
+        card.addEventListener("dragover", handleRelationCardDragOver);
+        card.addEventListener("dragleave", handleRelationCardDragLeave);
+        card.addEventListener("drop", handleRelationCardDrop);
         card.addEventListener("dragend", () => {
             card.classList.remove("is-dragging");
+            card.classList.remove("is-drop-target");
         });
 
         container.appendChild(card);
@@ -647,6 +700,104 @@ function handleFocusDrop(event) {
     setFocusedRequirement(internalId);
 }
 
+function handleRelationCardDragEnter(event) {
+    event.preventDefault();
+    event.currentTarget?.classList.add("is-drop-target");
+}
+
+function handleRelationCardDragOver(event) {
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+    }
+
+    event.currentTarget?.classList.add("is-drop-target");
+}
+
+function handleRelationCardDragLeave(event) {
+    const card = event.currentTarget;
+
+    if (!card) {
+        return;
+    }
+
+    if (event.relatedTarget && card.contains(event.relatedTarget)) {
+        return;
+    }
+
+    card.classList.remove("is-drop-target");
+}
+
+function handleRelationCardDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const card = event.currentTarget;
+
+    if (!card) {
+        return;
+    }
+
+    card.classList.remove("is-drop-target");
+
+    const sourceInternalId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
+        || event.dataTransfer?.getData("text/plain")
+        || "";
+
+    const targetInternalId = card.dataset.internalId || "";
+
+    if (!sourceInternalId || !targetInternalId) {
+        return;
+    }
+
+    const sourceRequirement = state.requirementsByInternalId.get(sourceInternalId);
+    const targetRequirement = state.requirementsByInternalId.get(targetInternalId);
+
+    if (!sourceRequirement || !targetRequirement || !relationCreationDialog) {
+        return;
+    }
+
+    relationCreationDialog.open({
+        fromEntityId: sourceRequirement.entityId,
+        fromEntityType: sourceRequirement.entityTypeId,
+        toEntityId: targetRequirement.entityId,
+        toEntityType: targetRequirement.entityTypeId,
+        fromEntityCode: sourceRequirement.visibleId,
+        toEntityCode: targetRequirement.visibleId,
+        fromEntityLabel: sourceRequirement.entityTypeLabel,
+        toEntityLabel: targetRequirement.entityTypeLabel,
+        fromEntityName: sourceRequirement.name,
+        toEntityName: targetRequirement.name
+    }).catch((error) => {
+        console.error("Failed to open relation creation dialog", error);
+        window.alert(error?.message || "Failed to open relation creation dialog.");
+    });
+}
+
+function parseInteger(value) {
+    if (value == null || value === "") {
+        return null;
+    }
+
+    const parsed = Number.parseInt(String(value), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseEntityId(internalId, fallbackValue) {
+    const fallbackNumeric = parseInteger(fallbackValue);
+
+    if (fallbackNumeric != null) {
+        return fallbackNumeric;
+    }
+
+    if (!internalId || !internalId.includes("-")) {
+        return null;
+    }
+
+    return parseInteger(internalId.slice(internalId.lastIndexOf("-") + 1));
+}
+
 function requirementMatchesSearch(requirement, searchText) {
     if (!requirement) {
         return false;
@@ -869,7 +1020,7 @@ function openRequirementEditDialog(requirement) {
         return;
     }
 
-    const id = parseEntityId(requirement.internalId);
+    const id = requirement.entityId || parseEntityId(requirement.internalId);
 
     if (!id) {
         window.alert(`${config.label} has no entity id.`);
@@ -912,21 +1063,6 @@ function getRequirementEditConfig(requirement) {
     }
 
     return null;
-}
-
-function parseEntityId(internalId) {
-    const value = String(internalId || "").trim();
-
-    if (!value) {
-        return "";
-    }
-
-    const index = value.lastIndexOf("-");
-    if (index < 0 || index === value.length - 1) {
-        return value;
-    }
-
-    return value.slice(index + 1);
 }
 
 function getRelatedRequirementIds(internalId) {

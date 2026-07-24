@@ -323,6 +323,12 @@ body.systemsbreakdown-edit-document{
     overflow: auto;
 }
 
+#tabPanel9{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
 #tabPanel2 .table-frame,
 #tabPanel3 .table-frame,
 #tabPanel4 .table-frame{
@@ -334,9 +340,25 @@ body.systemsbreakdown-edit-document{
     flex-direction: column;
 }
 
+#tabPanel9 .table-frame{
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+}
+
 #tabPanel2 .table-scroll,
 #tabPanel3 .table-scroll,
 #tabPanel4 .table-scroll{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#tabPanel9 .table-scroll{
     flex: 1 1 auto;
     min-height: 0;
     overflow: auto;

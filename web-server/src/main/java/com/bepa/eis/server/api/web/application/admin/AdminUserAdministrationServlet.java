@@ -8,6 +8,7 @@ import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -178,6 +179,8 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
             UserProvider userProvider = new UserProvider(webSession);
             boolean saved = userProvider.saveUserAdministration(user, customerIds, projectAccessRows);
+
+            EhcacheProvider.clearCacheEntry(webSession.getCustomerId());
 
             return buildSaveResultXml(
                     saved,
