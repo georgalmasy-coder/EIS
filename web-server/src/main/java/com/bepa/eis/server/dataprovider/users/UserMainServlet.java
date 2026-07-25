@@ -16,7 +16,6 @@ import org.w3c.dom.Element;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 @WebServlet(name = "UserMainServlet", urlPatterns = {
@@ -35,24 +34,24 @@ public class UserMainServlet extends GenericDataProviderServlet {
 
         UserProvider userProvider = new UserProvider(webSession);
         UserProvider.UserAdministrationRow user = parseUser(rootElement);
-        List<Integer> customerIds = parseCustomerIds(rootElement);
+        Integer customerId = integerValue(rootElement, "customerId");
         List<UserProjectAccessRow> projectAccessRows = parseProjectAccessRows(rootElement);
 
         if (user == null) {
             throw new IllegalArgumentException("Missing user in save payload.");
         }
 
-        if (user.userId() == null && customerIds.isEmpty() && webSession != null && webSession.getCustomerId() != null) {
-            customerIds = List.of(webSession.getCustomerId());
+        if (customerId == null && webSession != null && webSession.getCustomerId() != null) {
+            customerId = webSession.getCustomerId();
         }
 
-        boolean saved = userProvider.saveUserAdministration(user, customerIds, projectAccessRows);
+        boolean saved = userProvider.saveUserAdministration(user, customerId, projectAccessRows);
 
         if (!saved) {
             throw new IllegalStateException("User could not be saved.");
         }
 
-        EhcacheProvider.clearCacheEntry(getWebSession().getCustomerId());
+        clearCustomerCacheEntry(webSession, customerId);
 
     }
 
@@ -170,29 +169,6 @@ public class UserMainServlet extends GenericDataProviderServlet {
         );
     }
 
-    private List<Integer> parseCustomerIds(Element root) {
-        Element linkedCustomers = firstElement(root, "linkedCustomers");
-        List<Integer> customerIds = new ArrayList<>();
-
-        if (linkedCustomers == null) {
-            return customerIds;
-        }
-
-        LinkedHashSet<Integer> uniqueIds = new LinkedHashSet<>();
-
-        for (int index = 0; index < linkedCustomers.getElementsByTagName("customerId").getLength(); index++) {
-            org.w3c.dom.Node node = linkedCustomers.getElementsByTagName("customerId").item(index);
-            Integer customerId = integerValue(node == null ? null : node.getTextContent());
-
-            if (customerId != null) {
-                uniqueIds.add(customerId);
-            }
-        }
-
-        customerIds.addAll(uniqueIds);
-        return customerIds;
-    }
-
     private List<UserProjectAccessRow> parseProjectAccessRows(Element root) {
         Element userProjects = firstElement(root, "userProjects");
         List<UserProjectAccessRow> rows = new ArrayList<>();
@@ -216,6 +192,17 @@ public class UserMainServlet extends GenericDataProviderServlet {
         }
 
         return rows;
+    }
+
+    private void clearCustomerCacheEntry(
+            WebSession webSession,
+            Integer customerId
+    ) {
+        Integer cacheCustomerId = customerId != null ? customerId : webSession == null ? null : webSession.getCustomerId();
+
+        if (cacheCustomerId != null) {
+            EhcacheProvider.clearCacheEntry(cacheCustomerId);
+        }
     }
 
     private Element firstElement(Element parent, String tagName) {

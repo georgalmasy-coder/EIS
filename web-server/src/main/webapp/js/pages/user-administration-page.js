@@ -72,7 +72,6 @@ const state = {
     customerId: null,
     lookups: {},
     departments: [],
-    linkedCustomerIds: [],
     projectAccessRows: [],
     saving: false
 };
@@ -317,7 +316,6 @@ async function openUserDetail(userId, customerId = state.customerId) {
         const detail = parseUserDetail(doc);
         state.userDetail = detail.user;
         state.departments = detail.departments;
-        state.linkedCustomerIds = detail.linkedCustomerIds;
         state.projectAccessRows = detail.projectAccessRows;
         fillDialog(detail);
         setDialogStatus("Loaded.", "is-ok");
@@ -417,7 +415,6 @@ function parseUserDetail(doc) {
     if (!detail) {
         return {
             user: {},
-            linkedCustomerIds: [],
             customers: [],
             departments: [],
             projectAccessRows: []
@@ -426,12 +423,6 @@ function parseUserDetail(doc) {
 
     return {
         user: parseUserNode(detail.querySelector(":scope > user")),
-        linkedCustomerIds: Array.from(detail.querySelectorAll(":scope > linkedCustomers > customer > customerId"))
-            .map(function (node) {
-                const parsed = parseInt(node.textContent || "", 10);
-                return Number.isFinite(parsed) ? parsed : null;
-            })
-            .filter(Boolean),
         customers: Array.from(detail.querySelectorAll(":scope > customers > customer")).map(parseCustomerNode),
         departments: Array.from(detail.querySelectorAll(":scope > departments > department")).map(parseDepartmentNode),
         projectAccessRows: Array.from(detail.querySelectorAll(":scope > userProjects > project")).map(parseProjectAccessNode)
@@ -543,7 +534,7 @@ function parseLookups(doc) {
 
 function fillDialog(detail) {
     const user = detail.user || {};
-    const linkedCountry = getLinkedCustomerCountry(detail.customers || [], detail.linkedCustomerIds || []);
+    const linkedCountry = getCustomerCountry(detail.customers || [], state.customerId);
     const phoneRule = getPhoneRuleForValue(user.phone, linkedCountry);
 
     setValue("fieldUserId", user.userId);
@@ -680,13 +671,9 @@ function fillLookupSelect(selectId, lookupName, selectedValue) {
     }).join("");
 }
 
-function getLinkedCustomerCountry(customers, linkedIds) {
-    const ids = new Set((linkedIds || []).map(function (value) {
-        return Number(value);
-    }));
-
+function getCustomerCountry(customers, customerId) {
     const linkedCustomer = (customers || []).find(function (customer) {
-        return ids.has(Number(customer.customerId));
+        return Number(customer.customerId) === Number(customerId);
     });
 
     return linkedCustomer ? linkedCustomer.country || "" : "";
@@ -1078,14 +1065,6 @@ function buildSaveXml() {
     appendXmlElement(xml, "lockedUntil", value("fieldLockedUntil"));
     appendXmlElement(xml, "userMfaPolicy", value("fieldUserMfaPolicy"));
     xml.push("</user>");
-
-    xml.push("<linkedCustomers>");
-    (state.linkedCustomerIds || []).forEach(function (customerId) {
-        xml.push("<customer>");
-        appendXmlElement(xml, "customerId", customerId);
-        xml.push("</customer>");
-    });
-    xml.push("</linkedCustomers>");
 
     xml.push("<userProjects>");
     serializeProjectAccessRows(xml);

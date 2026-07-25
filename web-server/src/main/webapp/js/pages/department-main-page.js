@@ -20,6 +20,7 @@ const state = {
     },
     departments: [],
     currentDepartment: null,
+    mode: "create",
     dirty: false
 };
 
@@ -213,8 +214,10 @@ function openDepartmentDialog(mode, departmentId = null) {
         return;
     }
 
+    state.mode = mode;
     state.dirty = false;
     state.currentDepartment = null;
+    setValue("departmentId", "");
     setText("departmentDialogStatus", "Loading...", "");
     setText("departmentDialogModeLabel", mode === "edit" ? "Editing department" : "Creating department", "");
     dialog.showModal();
@@ -265,7 +268,7 @@ function buildEmptyDepartment() {
 }
 
 function fillDepartmentDialog(department, mode) {
-    setValue("departmentId", department.departmentId === null ? "" : String(department.departmentId));
+    setValue("departmentId", mode === "edit" && department.departmentId !== null ? String(department.departmentId) : "");
     setValue("departmentNameInput", department.departmentName || "");
     setValue("departmentDescriptionInput", department.departmentDescription || "");
     setChecked("departmentActiveInput", department.active);
@@ -275,7 +278,7 @@ function fillDepartmentDialog(department, mode) {
 }
 
 async function saveDepartment() {
-    const departmentId = getValue("departmentId");
+    const departmentId = state.mode === "edit" ? getValue("departmentId") : "";
     const departmentName = getValue("departmentNameInput").trim();
     const departmentDescription = getValue("departmentDescriptionInput").trim();
     const active = byId("departmentActiveInput")?.checked ? "true" : "false";
@@ -325,6 +328,7 @@ function closeDepartmentDialog(_reason) {
     }
 
     dialog.close();
+    state.mode = "create";
     state.dirty = false;
 }
 

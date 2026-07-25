@@ -301,19 +301,12 @@ public class UserProvider extends GenericProvider {
             WHERE U.UserId = ?
             """;
 
-    private static final String SELECT_ADMIN_USER_CUSTOMERS_SQL = """
-            SELECT
-                C.CustomerId,
-                C.CustomerName,
-                C.Country,
-                C.CustomerStatus,
-                C.ContactEmail
-            FROM [dbo].[USER_CUSTOMER] UC
-            INNER JOIN [dbo].[CUSTOMER] C
-                ON C.CustomerId = UC.CustomerId
-               AND C.Latest = 1
-            WHERE UC.UserId = ?
-            ORDER BY C.CustomerName, C.CustomerId
+    private static final String SELECT_USER_CUSTOMER_ID_SQL = """
+            SELECT TOP (2)
+                CustomerId
+            FROM [dbo].[USER_CUSTOMER]
+            WHERE UserId = ?
+            ORDER BY CustomerId
             """;
 
     private static final String SELECT_ALL_DEPARTMENTS_SQL = """
@@ -386,11 +379,6 @@ public class UserProvider extends GenericProvider {
             SET
                 Password = ?,
                 LockedUntil = NULL
-            WHERE UserId = ?
-            """;
-
-    private static final String DELETE_USER_CUSTOMERS_SQL = """
-            DELETE FROM [dbo].[USER_CUSTOMER]
             WHERE UserId = ?
             """;
 
@@ -1190,36 +1178,6 @@ public class UserProvider extends GenericProvider {
         return null;
     }
 
-    public List<UserCustomerLink> getLinkedCustomers(Integer userId) {
-        List<UserCustomerLink> links = new ArrayList<>();
-
-        if (userId == null) {
-            return links;
-        }
-
-        try (Connection connection = getDataSource().getConnection();
-             PreparedStatement statement = connection.prepareStatement(SELECT_ADMIN_USER_CUSTOMERS_SQL)) {
-
-            statement.setInt(1, userId);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    links.add(new UserCustomerLink(
-                            resultSet.getInt("CustomerId"),
-                            safeText(resultSet.getString("CustomerName"), ""),
-                            safeText(resultSet.getString("Country"), ""),
-                            safeText(resultSet.getString("CustomerStatus"), ""),
-                            safeText(resultSet.getString("ContactEmail"), "")
-                    ));
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error loading linked customers. userId={}", userId, e);
-        }
-
-        return links;
-    }
-
     public List<UserProjectAccessRow> getUserProjectAccessRows(Integer userId) {
         WebSession webSession = getWebSession();
         Integer customerId = webSession == null ? null : webSession.getCustomerId();
@@ -1296,14 +1254,14 @@ public class UserProvider extends GenericProvider {
 
     public boolean saveUserAdministration(
             UserAdministrationRow user,
-            List<Integer> customerIds
+            Integer customerId
     ) {
-        return saveUserAdministration(user, customerIds, List.of());
+        return saveUserAdministration(user, customerId, List.of());
     }
 
     public boolean saveUserAdministration(
             UserAdministrationRow user,
-            List<Integer> customerIds,
+            Integer customerId,
             List<UserProjectAccessRow> projectAccessRows
     ) {
         if (user == null) {
@@ -1324,7 +1282,11 @@ public class UserProvider extends GenericProvider {
             try {
                 validateEmailChange(connection, user);
 
-                List<Integer> resolvedCustomerIds = resolveCustomerIdsForSave(connection, user.userId(), customerIds);
+                Integer resolvedCustomerId = resolveCustomerIdForSave(connection, user.userId(), customerId);
+
+                if (resolvedCustomerId == null) {
+                    throw new IllegalStateException("Customer ID is required.");
+                }
 
                 Integer persistedUserId;
 
@@ -1335,6 +1297,8 @@ public class UserProvider extends GenericProvider {
                         connection.rollback();
                         return false;
                     }
+
+                    linkUserToCustomer(connection, persistedUserId, resolvedCustomerId);
                 } else {
                     if (!updateUserAdministration(connection, user)) {
                         connection.rollback();
@@ -1344,7 +1308,6 @@ public class UserProvider extends GenericProvider {
                     persistedUserId = user.userId();
                 }
 
-                replaceUserCustomers(connection, persistedUserId, resolvedCustomerIds);
                 syncUserProjects(connection, persistedUserId, projectAccessRows);
 
                 connection.commit();
@@ -1477,34 +1440,25 @@ public class UserProvider extends GenericProvider {
         return null;
     }
 
-    private List<Integer> resolveCustomerIdsForSave(
+    private Integer resolveCustomerIdForSave(
             Connection connection,
             Integer userId,
-            List<Integer> customerIds
-    ) {
-        java.util.LinkedHashSet<Integer> uniqueIds = new java.util.LinkedHashSet<>();
+            Integer customerId
+    ) throws SQLException {
+        if (customerId != null) {
+            return customerId;
+        }
 
-        if (customerIds != null) {
-            for (Integer customerId : customerIds) {
-                if (customerId != null) {
-                    uniqueIds.add(customerId);
-                }
+        if (userId != null) {
+            Integer linkedCustomerId = getLinkedCustomerId(connection, userId);
+
+            if (linkedCustomerId != null) {
+                return linkedCustomerId;
             }
         }
 
-        if (uniqueIds.isEmpty() && userId != null) {
-            for (UserCustomerLink link : getLinkedCustomers(userId)) {
-                if (link != null && link.customerId() != null) {
-                    uniqueIds.add(link.customerId());
-                }
-            }
-        }
-
-        if (uniqueIds.isEmpty() && getWebSession() != null && getWebSession().getCustomerId() != null) {
-            uniqueIds.add(getWebSession().getCustomerId());
-        }
-
-        return new ArrayList<>(uniqueIds);
+        WebSession webSession = getWebSession();
+        return webSession == null ? null : webSession.getCustomerId();
     }
 
     private String initialsForUser(UserAdministrationRow user) {
@@ -1809,32 +1763,47 @@ public class UserProvider extends GenericProvider {
         }
     }
 
-    private void replaceUserCustomers(
+    private void linkUserToCustomer(
             Connection connection,
             Integer userId,
-            List<Integer> customerIds
+            Integer customerId
     ) throws SQLException {
-        try (PreparedStatement deleteStatement = connection.prepareStatement(DELETE_USER_CUSTOMERS_SQL)) {
-            deleteStatement.setInt(1, userId);
-            deleteStatement.executeUpdate();
-        }
-
-        if (customerIds == null || customerIds.isEmpty()) {
-            return;
+        if (customerId == null) {
+            throw new IllegalStateException("Customer ID is required.");
         }
 
         try (PreparedStatement insertStatement = connection.prepareStatement(INSERT_USER_CUSTOMER_SQL)) {
-            for (Integer customerId : customerIds) {
-                if (customerId == null) {
-                    continue;
+            insertStatement.setInt(1, userId);
+            insertStatement.setInt(2, customerId);
+            insertStatement.executeUpdate();
+        }
+    }
+
+    private Integer getLinkedCustomerId(
+            Connection connection,
+            Integer userId
+    ) throws SQLException {
+        if (connection == null || userId == null) {
+            return null;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_USER_CUSTOMER_ID_SQL)) {
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
                 }
 
-                insertStatement.setInt(1, userId);
-                insertStatement.setInt(2, customerId);
-                insertStatement.addBatch();
-            }
+                Integer customerId = resultSet.getInt("CustomerId");
+                boolean customerIdWasNull = resultSet.wasNull();
 
-            insertStatement.executeBatch();
+                if (resultSet.next()) {
+                    throw new IllegalStateException("User has more than one customer relation.");
+                }
+
+                return customerIdWasNull ? null : customerId;
+            }
         }
     }
 
@@ -2296,15 +2265,6 @@ public class UserProvider extends GenericProvider {
         public boolean hasPassword() {
             return password != null && !password.isBlank();
         }
-    }
-
-    public record UserCustomerLink(
-            Integer customerId,
-            String customerName,
-            String country,
-            String customerStatus,
-            String contactEmail
-    ) {
     }
 
     public record UserProjectAccessRow(

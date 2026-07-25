@@ -97,7 +97,7 @@ public class DepartmentMaintenanceProvider extends GenericProvider {
         }
 
         Integer customerId = getCustomerId();
-        Integer departmentId = department.getDepartmentId();
+        Integer departmentId = department.getDepartmentId() <= 0 ? null : department.getDepartmentId();
         String departmentName = safeText(department.getDepartmentName());
         String departmentDescription = safeText(department.getDepartmentDescription());
         boolean active = department.isActive() != null && department.isActive();
@@ -187,7 +187,7 @@ public class DepartmentMaintenanceProvider extends GenericProvider {
             String departmentDescription,
             boolean active
     ) throws SQLException {
-        if (departmentId == null) {
+        if (departmentId == null || departmentId <= 0) {
             throw new IllegalArgumentException("DepartmentId is required for update.");
         }
 

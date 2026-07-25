@@ -39,7 +39,10 @@ public class DepartmentMaintenanceServlet extends GenericDataProviderServlet {
         }
 
         Department department = new Department();
-        department.setDepartmentId(intValue(departmentElement, "DepartmentId"));
+        Integer departmentId = intValue(departmentElement, "DepartmentId");
+        if (departmentId != null) {
+            department.setDepartmentId(departmentId);
+        }
         department.setDepartmentName(textValue(departmentElement, "DepartmentName"));
         department.setDepartmentDescription(textValue(departmentElement, "DepartmentDescription"));
         department.setActive(boolValue(departmentElement, "Active"));

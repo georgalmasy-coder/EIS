@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -56,7 +55,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         writeXml(
                 response,
                 HttpServletResponse.SC_OK,
-                userId == null ? buildListXml(webSession, customerId) : buildDetailXml(webSession, customerId, userId)
+                userId == null ? buildListXml(webSession, customerId) : buildDetailXml(webSession, userId)
         );
     }
 
@@ -111,12 +110,12 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         return xml.toString();
     }
 
-    private String buildDetailXml(WebSession webSession, Integer customerId, Integer userId) {
+    private String buildDetailXml(WebSession webSession, Integer userId) {
         UserProvider userProvider = new UserProvider(webSession);
         CustomerRecordProvider customerRecordProvider = new CustomerRecordProvider(webSession);
 
         UserProvider.UserAdministrationRow user = userProvider.getUserAdministrationRow(userId);
-        List<UserProvider.UserCustomerLink> linkedCustomers = userProvider.getLinkedCustomers(userId);
+        Integer customerId = resolveUserCustomerId(userProvider, userId);
         List<UserProvider.DepartmentOption> departments = userProvider.getDepartmentOptions();
         List<CustomerRecord> allCustomers = customerRecordProvider.getAllLatestCustomers();
         List<UserProjectAccessRow> projectAccessRows = userProvider.getUserProjectAccessRows(customerId, userId);
@@ -131,12 +130,6 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
         xml.append("<userDetail>");
         appendUserDetail(xml, user);
-
-        xml.append("<linkedCustomers>");
-        for (UserProvider.UserCustomerLink link : linkedCustomers) {
-            appendCustomerLink(xml, link);
-        }
-        xml.append("</linkedCustomers>");
 
         xml.append("<customers>");
         if (allCustomers != null) {
@@ -164,6 +157,30 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         return xml.toString();
     }
 
+    private Integer resolveUserCustomerId(
+            UserProvider userProvider,
+            Integer userId
+    ) {
+        List<CustomerRecord> customers = userProvider.getCustomersByUserId(userId);
+
+        if (customers == null || customers.isEmpty()) {
+            throw new IllegalStateException("User has no customer relation.");
+        }
+
+        if (customers.size() > 1) {
+            throw new IllegalStateException("User has more than one customer relation.");
+        }
+
+        CustomerRecord customer = customers.get(0);
+        Integer customerId = customer == null ? null : customer.getCustomerId();
+
+        if (customerId == null) {
+            throw new IllegalStateException("User customer relation is missing customerId.");
+        }
+
+        return customerId;
+    }
+
     private String saveUserAdministration(
             WebSession webSession,
             HttpServletRequest request
@@ -173,14 +190,15 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
             Element root = document.getDocumentElement();
 
             UserProvider.UserAdministrationRow user = parseUser(root);
-            List<Integer> customerIds = parseCustomerIds(root);
             Integer customerId = intValue(text(root, "customerId"));
             List<UserProjectAccessRow> projectAccessRows = parseProjectAccessRows(root);
 
             UserProvider userProvider = new UserProvider(webSession);
-            boolean saved = userProvider.saveUserAdministration(user, customerIds, projectAccessRows);
+            boolean saved = userProvider.saveUserAdministration(user, customerId, projectAccessRows);
 
-            EhcacheProvider.clearCacheEntry(webSession.getCustomerId());
+            if (saved) {
+                clearCustomerCacheEntry(webSession, customerId);
+            }
 
             return buildSaveResultXml(
                     saved,
@@ -240,6 +258,17 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         return buildActionResultXml(success, userId, message);
     }
 
+    private void clearCustomerCacheEntry(
+            WebSession webSession,
+            Integer customerId
+    ) {
+        Integer cacheCustomerId = customerId != null ? customerId : webSession == null ? null : webSession.getCustomerId();
+
+        if (cacheCustomerId != null) {
+            EhcacheProvider.clearCacheEntry(cacheCustomerId);
+        }
+    }
+
     private UserProvider.UserAdministrationRow parseUser(Element root) {
         Element userElement = firstElement(root, "user");
 
@@ -270,29 +299,6 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 "",
                 ""
         );
-    }
-
-    private List<Integer> parseCustomerIds(Element root) {
-        List<Integer> customerIds = new ArrayList<>();
-        Element linkedCustomers = firstElement(root, "linkedCustomers");
-
-        if (linkedCustomers == null) {
-            return customerIds;
-        }
-
-        NodeList customerNodes = linkedCustomers.getElementsByTagName("customerId");
-        LinkedHashSet<Integer> uniqueIds = new LinkedHashSet<>();
-
-        for (int index = 0; index < customerNodes.getLength(); index++) {
-            Integer customerId = intValue(customerNodes.item(index).getTextContent());
-
-            if (customerId != null) {
-                uniqueIds.add(customerId);
-            }
-        }
-
-        customerIds.addAll(uniqueIds);
-        return customerIds;
     }
 
     private List<UserProjectAccessRow> parseProjectAccessRows(Element root) {
@@ -420,19 +426,6 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
             UserProvider.UserAdministrationRow user
     ) {
         appendUserRow(xml, user);
-    }
-
-    private void appendCustomerLink(
-            StringBuilder xml,
-            UserProvider.UserCustomerLink link
-    ) {
-        xml.append("<customer>");
-        appendElement(xml, "customerId", link == null ? null : link.customerId());
-        appendElement(xml, "customerName", link == null ? null : link.customerName());
-        appendElement(xml, "country", link == null ? null : link.country());
-        appendElement(xml, "customerStatus", link == null ? null : link.customerStatus());
-        appendElement(xml, "contactEmail", link == null ? null : link.contactEmail());
-        xml.append("</customer>");
     }
 
     private void appendProjectAccessRow(
