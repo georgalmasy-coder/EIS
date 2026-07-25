@@ -16,7 +16,7 @@ Use the view buttons in the top-right corner to switch between these layouts.
 - The code shown in each box is the internal item code.
 - The title text in each box is the item name.
 - Lines connect related items.
-- Hover a box to highlight its related items.
+- Hover a box to highlight the full connected chain.
 - Click a box to open the details dialog.
 - Double-click a box to open the edit dialog.
 
@@ -25,7 +25,7 @@ Use the view buttons in the top-right corner to switch between these layouts.
 - "Show only entities without relations" hides items that are connected to anything in the current data set.
 - "Show only entities with relations" hides isolated items.
 - The search field matches ID, name, and description.
-- You can drag an entity into the focus zone to show only that entity and its directly related entities.
+- You can drag an entity into the focus zone to show only that entity and its full connected chain.
 - While focus is active, the zone shows the selected entity and a clear icon.
 - Use the clear icon to remove the focus before selecting another entity.
 

@@ -1076,12 +1076,13 @@ function buildCurvePath(points) {
 function updateHighlight() {
     const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
     const relatedIds = activeInternalId ? getRelatedRequirementIds(activeInternalId) : new Set();
+    const highlightedIds = activeInternalId ? new Set([activeInternalId, ...relatedIds]) : new Set();
 
     document.querySelectorAll(".relationdiagram-requirement-card").forEach((card) => {
         const internalId = card.dataset.internalId;
         const isSelected = internalId === activeInternalId;
         const isRelated = relatedIds.has(internalId);
-        const shouldMute = Boolean(activeInternalId) && !isSelected && !isRelated;
+        const shouldMute = Boolean(activeInternalId) && !highlightedIds.has(internalId);
 
         card.classList.toggle("is-selected", isSelected);
         card.classList.toggle("is-related", isRelated);
@@ -1091,7 +1092,9 @@ function updateHighlight() {
     document.querySelectorAll(".relationdiagram-line").forEach((line) => {
         const from = line.dataset.from;
         const to = line.dataset.to;
-        const isActive = Boolean(activeInternalId) && (from === activeInternalId || to === activeInternalId);
+        const isActive = Boolean(activeInternalId)
+            && highlightedIds.has(from)
+            && highlightedIds.has(to);
 
         line.classList.toggle("is-active", isActive);
         line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);
@@ -1203,16 +1206,28 @@ function getEditDialogConfig(requirement) {
 
 function getRelatedRequirementIds(internalId) {
     const relatedIds = new Set();
+    const queue = [internalId];
 
-    state.relations.forEach((relation) => {
-        if (relation.from === internalId) {
-            relatedIds.add(relation.to);
-        }
+    while (queue.length) {
+        const currentInternalId = queue.shift();
 
-        if (relation.to === internalId) {
-            relatedIds.add(relation.from);
-        }
-    });
+        state.relations.forEach((relation) => {
+            let relatedInternalId = null;
+
+            if (relation.from === currentInternalId) {
+                relatedInternalId = relation.to;
+            } else if (relation.to === currentInternalId) {
+                relatedInternalId = relation.from;
+            }
+
+            if (!relatedInternalId || relatedInternalId === internalId || relatedIds.has(relatedInternalId)) {
+                return;
+            }
+
+            relatedIds.add(relatedInternalId);
+            queue.push(relatedInternalId);
+        });
+    }
 
     return relatedIds;
 }
