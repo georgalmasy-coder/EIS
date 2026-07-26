@@ -10,15 +10,6 @@ public enum PageType {
     BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix"),
     INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management"),
 
-    // Old versions
-    STAKEHOLDER_REQUIREMENT_PAGE("stakeholderrequirement","html-pages/stakeholderrequirement.html", "Stakeholder Requirement"),
-    SYSTEM_REQUIREMENT_PAGE("systemrequirement","html-pages/systemrequirement.html", "System Requirement"),
-    SYSTEM_REQUIREMENT_DIAGRAM_PAGE("systemrequirementdiagram","html-pages/systemrequirementdiagram.html", "System Requirement Hierarchy Diagram"),
-    SYSTEM_REQUIREMENT_DIAGRAM_V2_PAGE("systemrequirementdiagramV2","html-pages/systemrequirementdiagramV2.html", "System Requirement Hierarchy Diagram"),
-    SYSTEMS_BREAKDOWN_PAGE("systemsbreakdown","html-pages/systemsbreakdown.html", "Systems Breakdown"),
-
-
-    // New versions
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder"),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit"),
     SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement"),
