@@ -24,7 +24,9 @@ const state = {
     baseline: null,
     stakeholderRequirements: [],
     systemRequirements: [],
-    systemsBreakdown: []
+    functionalStructures: null,
+    logicalStructures: null,
+    physicalStructures: null
 };
 
 const els = {};
@@ -73,14 +75,27 @@ function collectElements() {
     els.stakeholderRequirementsBody = document.getElementById("stakeholderRequirementsBody");
     els.stakeholderRequirementsEmpty = document.getElementById("stakeholderRequirementsEmpty");
     els.stakeholderRequirementsCount = document.getElementById("stakeholderRequirementsCount");
+    els.stakeholderRequirementsSection = document.getElementById("stakeholderRequirementsSection");
 
     els.systemRequirementsBody = document.getElementById("systemRequirementsBody");
     els.systemRequirementsEmpty = document.getElementById("systemRequirementsEmpty");
     els.systemRequirementsCount = document.getElementById("systemRequirementsCount");
+    els.systemRequirementsSection = document.getElementById("systemRequirementsSection");
 
-    els.systemsBreakdownBody = document.getElementById("systemsBreakdownBody");
-    els.systemsBreakdownEmpty = document.getElementById("systemsBreakdownEmpty");
-    els.systemsBreakdownCount = document.getElementById("systemsBreakdownCount");
+    els.functionalStructuresBody = document.getElementById("functionalStructuresBody");
+    els.functionalStructuresEmpty = document.getElementById("functionalStructuresEmpty");
+    els.functionalStructuresCount = document.getElementById("functionalStructuresCount");
+    els.functionalStructuresSection = document.getElementById("functionalStructuresSection");
+
+    els.logicalStructuresBody = document.getElementById("logicalStructuresBody");
+    els.logicalStructuresEmpty = document.getElementById("logicalStructuresEmpty");
+    els.logicalStructuresCount = document.getElementById("logicalStructuresCount");
+    els.logicalStructuresSection = document.getElementById("logicalStructuresSection");
+
+    els.physicalStructuresBody = document.getElementById("physicalStructuresBody");
+    els.physicalStructuresEmpty = document.getElementById("physicalStructuresEmpty");
+    els.physicalStructuresCount = document.getElementById("physicalStructuresCount");
+    els.physicalStructuresSection = document.getElementById("physicalStructuresSection");
 }
 
 function bindEvents() {
@@ -91,7 +106,9 @@ function bindEvents() {
                 baseline: state.baseline,
                 stakeholderRequirements: state.stakeholderRequirements,
                 systemRequirements: state.systemRequirements,
-                systemsBreakdown: state.systemsBreakdown,
+                functionalStructures: state.functionalStructures,
+                logicalStructures: state.logicalStructures,
+                physicalStructures: state.physicalStructures,
                 formatDateTime: formatDanishDateTime
             });
         });
@@ -157,16 +174,34 @@ async function loadBaselineDetail(baselinePK) {
             "systemRequirements"
         );
 
-        state.systemsBreakdown = parseChanges(
+        state.functionalStructures = parseChanges(
             doc,
-            "systemsBreakdown"
+            "functionalStructures"
         );
+
+        state.logicalStructures = parseChanges(
+            doc,
+            "logicalStructures"
+        );
+
+        state.physicalStructures = parseChanges(
+            doc,
+            "physicalStructures"
+        );
+
+        if (state.physicalStructures === null) {
+            state.physicalStructures = parseChanges(
+                doc,
+                "systemsBreakdown"
+            );
+        }
 
         applyTopPanel();
         renderBaseline(state.baseline);
 
         renderChanges(
             state.stakeholderRequirements,
+            els.stakeholderRequirementsSection,
             els.stakeholderRequirementsBody,
             els.stakeholderRequirementsEmpty,
             els.stakeholderRequirementsCount,
@@ -175,6 +210,7 @@ async function loadBaselineDetail(baselinePK) {
 
         renderChanges(
             state.systemRequirements,
+            els.systemRequirementsSection,
             els.systemRequirementsBody,
             els.systemRequirementsEmpty,
             els.systemRequirementsCount,
@@ -182,10 +218,29 @@ async function loadBaselineDetail(baselinePK) {
         );
 
         renderChanges(
-            state.systemsBreakdown,
-            els.systemsBreakdownBody,
-            els.systemsBreakdownEmpty,
-            els.systemsBreakdownCount,
+            state.functionalStructures,
+            els.functionalStructuresSection,
+            els.functionalStructuresBody,
+            els.functionalStructuresEmpty,
+            els.functionalStructuresCount,
+            SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+        );
+
+        renderChanges(
+            state.logicalStructures,
+            els.logicalStructuresSection,
+            els.logicalStructuresBody,
+            els.logicalStructuresEmpty,
+            els.logicalStructuresCount,
+            SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+        );
+
+        renderChanges(
+            state.physicalStructures,
+            els.physicalStructuresSection,
+            els.physicalStructuresBody,
+            els.physicalStructuresEmpty,
+            els.physicalStructuresCount,
             SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
         );
 
@@ -257,7 +312,7 @@ function parseChanges(
     const sectionElement = doc.querySelector(`baselineDetail > ${sectionName}`);
 
     if (!sectionElement) {
-        return [];
+        return null;
     }
 
     return Array.from(sectionElement.querySelectorAll("change"))
@@ -301,13 +356,13 @@ function renderBaseline(baseline) {
     setText(
         "detailChangedDateTime",
         formatDanishDateTime(baseline.changedDateTime),
-        "—"
+        "\u2014"
     );
 
     setText(
         "previousBaselineDateTime",
         formatDanishDateTime(baseline.previousBaselineDateTime),
-        "—"
+        "\u2014"
     );
 
     document.title = baseline.tagName
@@ -317,11 +372,32 @@ function renderBaseline(baseline) {
 
 function renderChanges(
     rows,
+    sectionElement,
     bodyElement,
     emptyElement,
     countElement,
     editPageUrl
 ) {
+    if (sectionElement) {
+        sectionElement.hidden = rows === null;
+    }
+
+    if (rows === null) {
+        clear(bodyElement);
+
+        if (countElement) {
+            countElement.textContent = "0";
+        }
+
+        if (emptyElement) {
+            emptyElement.classList.remove("is-visible");
+            emptyElement.hidden = true;
+        }
+
+        return;
+    }
+
+    rows = rows || [];
     clear(bodyElement);
 
     if (countElement) {
@@ -422,7 +498,9 @@ function renderError(message) {
     state.baseline = null;
     state.stakeholderRequirements = [];
     state.systemRequirements = [];
-    state.systemsBreakdown = [];
+    state.functionalStructures = null;
+    state.logicalStructures = null;
+    state.physicalStructures = null;
 
     setText(
         "detailTagName",
@@ -444,18 +522,19 @@ function renderError(message) {
 
     setText(
         "detailChangedDateTime",
-        "—",
-        "—"
+        "\u2014",
+        "\u2014"
     );
 
     setText(
         "previousBaselineDateTime",
-        "—",
-        "—"
+        "\u2014",
+        "\u2014"
     );
 
     renderChanges(
         [],
+        els.stakeholderRequirementsSection,
         els.stakeholderRequirementsBody,
         els.stakeholderRequirementsEmpty,
         els.stakeholderRequirementsCount,
@@ -464,6 +543,7 @@ function renderError(message) {
 
     renderChanges(
         [],
+        els.systemRequirementsSection,
         els.systemRequirementsBody,
         els.systemRequirementsEmpty,
         els.systemRequirementsCount,
@@ -471,10 +551,29 @@ function renderError(message) {
     );
 
     renderChanges(
-        [],
-        els.systemsBreakdownBody,
-        els.systemsBreakdownEmpty,
-        els.systemsBreakdownCount,
+        null,
+        els.functionalStructuresSection,
+        els.functionalStructuresBody,
+        els.functionalStructuresEmpty,
+        els.functionalStructuresCount,
+        SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+    );
+
+    renderChanges(
+        null,
+        els.logicalStructuresSection,
+        els.logicalStructuresBody,
+        els.logicalStructuresEmpty,
+        els.logicalStructuresCount,
+        SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+    );
+
+    renderChanges(
+        null,
+        els.physicalStructuresSection,
+        els.physicalStructuresBody,
+        els.physicalStructuresEmpty,
+        els.physicalStructuresCount,
         SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
     );
 }
@@ -566,7 +665,8 @@ function textOf(
         return "";
     }
 
-    const element = parent.querySelector(tagName);
+    const element = parent.getElementsByTagName(tagName)[0]
+        || parent.querySelector(tagName);
 
     if (!element || element.textContent == null) {
         return "";
@@ -634,3 +734,4 @@ function clear(element) {
 function setLoadStatus(message) {
     setText("loadStatus", message, "");
 }
+

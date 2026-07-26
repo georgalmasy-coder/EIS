@@ -25,14 +25,14 @@
         aria-controls="sideMenu"
         aria-expanded="false"
 >
-    ›
+    &#8250;
 </button>
 
 <div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
 
 <nav id="sideMenu" class="side-menu" aria-label="Side menu">
     <h2>Menu</h2>
-    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
     <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
 </nav>
 
@@ -42,9 +42,9 @@
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
                     <div class="topbar-meta-lines">
-                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
-                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
-                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                        <div class="meta-line">Customer Name: <strong id="customerName">&mdash;</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">&mdash;</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">&mdash;</strong></div>
                     </div>
 
                     <div class="topbar-logo">
@@ -62,11 +62,6 @@
             <div class="section-header baseline-section-header">
                 <div>
                     <h2>Baseline detail</h2>
-                    <!--
-                    <p class="baseline-section-subtitle">
-                        View changes captured by the selected baseline.
-                    </p>
-                    -->
                 </div>
 
                 <div class="section-header-actions baseline-toolbar">
@@ -119,33 +114,33 @@
                 <div class="baseline-detail-grid">
                     <div class="baseline-detail-field">
                         <span class="baseline-detail-label">Tag Name</span>
-                        <strong id="detailTagName">—</strong>
+                        <strong id="detailTagName">&mdash;</strong>
                     </div>
 
                     <div class="baseline-detail-field">
                         <span class="baseline-detail-label">Created By</span>
-                        <strong id="detailChangedBy">—</strong>
+                        <strong id="detailChangedBy">&mdash;</strong>
                     </div>
 
                     <div class="baseline-detail-field">
                         <span class="baseline-detail-label">Created At</span>
-                        <strong id="detailChangedDateTime">—</strong>
+                        <strong id="detailChangedDateTime">&mdash;</strong>
                     </div>
 
                     <div class="baseline-detail-field">
                         <span class="baseline-detail-label">Previous Baseline</span>
-                        <strong id="previousBaselineDateTime">—</strong>
+                        <strong id="previousBaselineDateTime">&mdash;</strong>
                     </div>
 
                     <div class="baseline-detail-field baseline-detail-field-wide">
                         <span class="baseline-detail-label">Description</span>
-                        <p id="detailDescription">—</p>
+                        <p id="detailDescription">&mdash;</p>
                     </div>
                 </div>
             </section>
 
             <div class="page-body baseline-detail-body">
-                <section class="baseline-collapse-section" data-collapse-section>
+                <section class="baseline-collapse-section" data-collapse-section id="stakeholderRequirementsSection" hidden>
                     <button
                             class="baseline-collapse-header"
                             type="button"
@@ -153,7 +148,7 @@
                             aria-controls="stakeholderRequirementsPanel"
                             data-collapse-toggle
                     >
-                        <span class="baseline-collapse-icon" aria-hidden="true">▸</span>
+                        <span class="baseline-collapse-icon" aria-hidden="true">&rsaquo;</span>
                         <span>Stakeholder requirements</span>
                         <strong id="stakeholderRequirementsCount">0</strong>
                     </button>
@@ -186,7 +181,7 @@
                     </div>
                 </section>
 
-                <section class="baseline-collapse-section" data-collapse-section>
+                <section class="baseline-collapse-section" data-collapse-section id="systemRequirementsSection" hidden>
                     <button
                             class="baseline-collapse-header"
                             type="button"
@@ -194,7 +189,7 @@
                             aria-controls="systemRequirementsPanel"
                             data-collapse-toggle
                     >
-                        <span class="baseline-collapse-icon" aria-hidden="true">▸</span>
+                        <span class="baseline-collapse-icon" aria-hidden="true">&rsaquo;</span>
                         <span>System requirements</span>
                         <strong id="systemRequirementsCount">0</strong>
                     </button>
@@ -227,28 +222,28 @@
                     </div>
                 </section>
 
-                <section class="baseline-collapse-section" data-collapse-section>
+                <section class="baseline-collapse-section" data-collapse-section id="functionalStructuresSection" hidden>
                     <button
                             class="baseline-collapse-header"
                             type="button"
                             aria-expanded="false"
-                            aria-controls="systemsBreakdownPanel"
+                            aria-controls="functionalStructuresPanel"
                             data-collapse-toggle
                     >
-                        <span class="baseline-collapse-icon" aria-hidden="true">▸</span>
-                        <span>Physical Structure</span>
-                        <strong id="systemsBreakdownCount">0</strong>
+                        <span class="baseline-collapse-icon" aria-hidden="true">&rsaquo;</span>
+                        <span>Functional structures</span>
+                        <strong id="functionalStructuresCount">0</strong>
                     </button>
 
                     <div
-                            id="systemsBreakdownPanel"
+                            id="functionalStructuresPanel"
                             class="baseline-collapse-panel"
                             data-collapse-panel
                             hidden
                     >
                         <div class="table-frame page-frame baseline-detail-frame">
                             <div class="table-scroll baseline-detail-scroll">
-                                <table class="data-table page-table baseline-change-table" aria-label="Systems breakdown changes">
+                                <table class="data-table page-table baseline-change-table" aria-label="Functional structure changes">
                                     <thead>
                                     <tr>
                                         <th>Activity</th>
@@ -258,9 +253,91 @@
                                         <th>Last modified</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="systemsBreakdownBody"></tbody>
+                                    <tbody id="functionalStructuresBody"></tbody>
                                 </table>
-                                <div class="empty page-empty baseline-empty" id="systemsBreakdownEmpty">
+                                <div class="empty page-empty baseline-empty" id="functionalStructuresEmpty">
+                                    No functional structure changes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="baseline-collapse-section" data-collapse-section id="logicalStructuresSection" hidden>
+                    <button
+                            class="baseline-collapse-header"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="logicalStructuresPanel"
+                            data-collapse-toggle
+                    >
+                        <span class="baseline-collapse-icon" aria-hidden="true">&rsaquo;</span>
+                        <span>Logical structures</span>
+                        <strong id="logicalStructuresCount">0</strong>
+                    </button>
+
+                    <div
+                            id="logicalStructuresPanel"
+                            class="baseline-collapse-panel"
+                            data-collapse-panel
+                            hidden
+                    >
+                        <div class="table-frame page-frame baseline-detail-frame">
+                            <div class="table-scroll baseline-detail-scroll">
+                                <table class="data-table page-table baseline-change-table" aria-label="Logical structure changes">
+                                    <thead>
+                                    <tr>
+                                        <th>Activity</th>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Last modified by</th>
+                                        <th>Last modified</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="logicalStructuresBody"></tbody>
+                                </table>
+                                <div class="empty page-empty baseline-empty" id="logicalStructuresEmpty">
+                                    No logical structure changes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="baseline-collapse-section" data-collapse-section id="physicalStructuresSection" hidden>
+                    <button
+                            class="baseline-collapse-header"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="physicalStructuresPanel"
+                            data-collapse-toggle
+                    >
+                        <span class="baseline-collapse-icon" aria-hidden="true">&rsaquo;</span>
+                        <span>Physical structures</span>
+                        <strong id="physicalStructuresCount">0</strong>
+                    </button>
+
+                    <div
+                            id="physicalStructuresPanel"
+                            class="baseline-collapse-panel"
+                            data-collapse-panel
+                            hidden
+                    >
+                        <div class="table-frame page-frame baseline-detail-frame">
+                            <div class="table-scroll baseline-detail-scroll">
+                                <table class="data-table page-table baseline-change-table" aria-label="Physical structure changes">
+                                    <thead>
+                                    <tr>
+                                        <th>Activity</th>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Last modified by</th>
+                                        <th>Last modified</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="physicalStructuresBody"></tbody>
+                                </table>
+                                <div class="empty page-empty baseline-empty" id="physicalStructuresEmpty">
                                     No physical structure changes.
                                 </div>
                             </div>
@@ -277,12 +354,12 @@
         <div class="help-dialog-head">
             <h3 id="helpDialogTitle">Help</h3>
             <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
-                ×
+                &times;
             </button>
         </div>
 
         <div id="helpDialogContent" class="help-dialog-content">
-            Loading help…
+            Loading help...
         </div>
 
         <div class="help-dialog-footer">

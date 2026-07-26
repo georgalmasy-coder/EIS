@@ -168,11 +168,27 @@ public class BaselineServlet extends GenericDataProviderServlet {
                 baselineProvider.getSystemRequirementChanges(baseline)
         );
 
+        if (true) { // Subscription condition
+            appendChangeSection(
+                    xmlDocument,
+                    root,
+                    "functionalStructures",
+                    baselineProvider.getFunctionalStructureChanges(baseline)
+            );
+
+            appendChangeSection(
+                    xmlDocument,
+                    root,
+                    "logicalStructures",
+                    baselineProvider.getLogicalStructureChanges(baseline)
+            );
+        }
+
         appendChangeSection(
                 xmlDocument,
                 root,
-                "systemsBreakdown",
-                baselineProvider.getSystemsBreakdownChanges(baseline)
+                "physicalStructures",
+                baselineProvider.getPhysicalStructureChanges(baseline)
         );
 
         log.debug("BaselineServlet.handleGetEntity: baseline={}", xmlDocument.toXmlString());

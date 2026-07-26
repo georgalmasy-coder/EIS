@@ -85,12 +85,30 @@ function createBaselineDetailPdf(options) {
         generatedAt
     );
 
-    y = drawChangeSection(
+    y = drawOptionalChangeSection(
         context,
         options,
         y,
-        "Physical Structure",
-        options?.systemsBreakdown || [],
+        "Functional structures",
+        options?.functionalStructures,
+        generatedAt
+    );
+
+    y = drawOptionalChangeSection(
+        context,
+        options,
+        y,
+        "Logical structures",
+        options?.logicalStructures,
+        generatedAt
+    );
+
+    y = drawOptionalChangeSection(
+        context,
+        options,
+        y,
+        "Physical structures",
+        options?.physicalStructures ?? options?.systemsBreakdown,
         generatedAt
     );
 
@@ -279,7 +297,7 @@ function drawBaselineDetails(
         ["Tag Name", baseline.tagName || "—"],
         ["Created By", baseline.changedBy || "—"],
         ["Created At", formatDateTime(baseline.changedDateTime) || "—"],
-        ["Previous Baseline", formatDateTime(baseline.previousBaselineDateTime) || "—"],
+        ["Previous Baseline", formatDateTime(baseline.previousBaselineDateTime) || "\u2014"],
         ["Description", baseline.description || "—"]
     ];
 
@@ -379,6 +397,28 @@ function drawChangeSection(
     });
 
     return y - 8;
+}
+
+function drawOptionalChangeSection(
+    context,
+    options,
+    y,
+    title,
+    rows,
+    generatedAt
+) {
+    if (rows == null) {
+        return y;
+    }
+
+    return drawChangeSection(
+        context,
+        options,
+        y,
+        title,
+        rows,
+        generatedAt
+    );
 }
 
 function drawSectionTitle(

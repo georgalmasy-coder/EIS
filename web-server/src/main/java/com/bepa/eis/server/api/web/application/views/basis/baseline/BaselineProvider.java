@@ -54,13 +54,20 @@ public class BaselineProvider extends GenericProvider {
                     "  AND CustomerId = ? " +
                     "  AND ProjectId = ?";
 
+    private static final String SELECT_PROJECT_CREATED_DATE_SQL =
+            "SELECT TOP 1 ChangedDateTime " +
+                    "FROM [dbo].[PROJECT] " +
+                    "WHERE CustomerId = ? " +
+                    "  AND ProjectId = ? " +
+            "ORDER BY ProjectPK ASC";
+
     private static final String SELECT_PREV_BASELINE_BY_PK_SQL =
             "SELECT TOP 1 ChangedDateTime " +
                     "FROM [dbo].[BASELINE] " +
                     "WHERE CustomerId = ? " +
                     "  AND ProjectId = ? " +
                     "  AND BaselinePK < ? " +
-            "ORDER BY ChangedDateTime DESC";
+                    "ORDER BY ChangedDateTime DESC";
 
     private static final String BASELINE_EXISTS_SQL =
             "SELECT TOP (1) BaselinePK " +
@@ -219,7 +226,17 @@ public class BaselineProvider extends GenericProvider {
         return getEntityChanges( entityProvider, SYSTEM_REQUIREMENT, baseline);
     }
 
-    public List<BaselineChangeRow> getSystemsBreakdownChanges(Baseline baseline) {
+    public List<BaselineChangeRow> getFunctionalStructureChanges(Baseline baseline) {
+        EntityProvider entityProvider = new SystemRequirementProvider(getWebSession());
+        return getEntityChanges( entityProvider, FUNCTIONAL_STRUCTURE, baseline);
+    }
+
+    public List<BaselineChangeRow> getLogicalStructureChanges(Baseline baseline) {
+        EntityProvider entityProvider = new SystemRequirementProvider(getWebSession());
+        return getEntityChanges( entityProvider, LOGICAL_STRUCTURE, baseline);
+    }
+
+    public List<BaselineChangeRow> getPhysicalStructureChanges(Baseline baseline) {
         EntityProvider entityProvider = new SystemBreakdownProvider(getWebSession());
         return getEntityChanges( entityProvider, SYSTEMS_BREAKDOWN, baseline);
     }
@@ -386,6 +403,26 @@ public class BaselineProvider extends GenericProvider {
                     getWebSession().getProjectId(),e );
             throw new RuntimeException(e);
         }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_PROJECT_CREATED_DATE_SQL)) {
+
+            setInt(statement, getWebSession().getCustomerId(), 1);
+            setInt(statement, getWebSession().getProjectId(), 2);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getTimestamp("ChangedDateTime");
+                }
+            }
+        } catch (SQLException e) {
+            log.error( "Error getting previous baseline. baselinePK={}, customerId={}, projectId={}",
+                    baselineId,
+                    getWebSession().getCustomerId(),
+                    getWebSession().getProjectId(),e );
+            throw new RuntimeException(e);
+        }
+
         return null;
     }
 
