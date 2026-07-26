@@ -98,7 +98,7 @@ export function drawPdfRect(commands, x, y, width, height, fillHex, strokeHex) {
     commands.push("q");
     commands.push(`${formatRgb(hexToRgb(fillHex))} rg`);
     commands.push(`${formatRgb(hexToRgb(strokeHex))} RG`);
-    commands.push("0.8 w");
+    commands.push("1 w");
     commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
     commands.push("B");
     commands.push("Q");
@@ -109,6 +109,17 @@ export function drawPdfFilledRect(commands, x, y, width, height, fillHex) {
     commands.push(`${formatRgb(hexToRgb(fillHex))} rg`);
     commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
     commands.push("f");
+    commands.push("Q");
+}
+
+export function clipPdfRect(commands, x, y, width, height) {
+    commands.push("q");
+    commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
+    commands.push("W");
+    commands.push("n");
+}
+
+export function endPdfClip(commands) {
     commands.push("Q");
 }
 
@@ -197,6 +208,78 @@ export function wrapPdfText(text, maxChars, maxLines) {
     }
 
     return lines.slice(0, maxLines);
+}
+
+export function fitPdfTextLines(text, maxWidth, fontSize, maxHeight, maxLines) {
+    const safeFontSize = Math.max(1, Number(fontSize) || 1);
+    const safeWidth = Math.max(1, Number(maxWidth) || 1);
+    const safeHeight = Math.max(1, Number(maxHeight) || 1);
+    const lineHeight = safeFontSize * 1.15;
+    const maxChars = Math.max(1, Math.floor(safeWidth / (safeFontSize * 0.52)));
+    const maxLinesByHeight = Math.max(1, Math.floor(safeHeight / lineHeight));
+    const limit = Math.max(1, Math.min(Number(maxLines) || maxLinesByHeight, maxLinesByHeight));
+    const words = String(text || "â€”").trim().split(/\s+/).filter(Boolean);
+
+    if (!words.length) {
+        return ["â€”"];
+    }
+
+    const lines = [];
+    let current = "";
+    let truncated = false;
+
+    for (let index = 0; index < words.length; index += 1) {
+        const word = words[index];
+        const candidate = current ? `${current} ${word}` : word;
+
+        if (candidate.length <= maxChars) {
+            current = candidate;
+            continue;
+        }
+
+        if (current) {
+            lines.push(current);
+        } else {
+            lines.push(ellipsizePdfText(word, maxChars));
+        }
+
+        current = word;
+
+        if (lines.length >= limit) {
+            truncated = index < words.length - 1;
+            current = "";
+            break;
+        }
+    }
+
+    if (current && lines.length < limit) {
+        lines.push(current);
+    }
+
+    if (lines.length > limit) {
+        lines.length = limit;
+        truncated = true;
+    }
+
+    if (truncated && lines.length) {
+        lines[lines.length - 1] = ellipsizePdfText(lines[lines.length - 1], maxChars);
+    }
+
+    return lines;
+}
+
+export function ellipsizePdfText(value, maxChars) {
+    const text = String(value || "â€”").trim();
+
+    if (text.length <= maxChars) {
+        return text;
+    }
+
+    if (maxChars <= 1) {
+        return "â€¦";
+    }
+
+    return `${text.slice(0, Math.max(1, maxChars - 1)).trimEnd()}â€¦`;
 }
 
 export function hexToRgb(hex) {

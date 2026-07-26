@@ -1,6 +1,8 @@
 import {
     buildPdfDocument,
     downloadBlob,
+    clipPdfRect,
+    endPdfClip,
     drawPdfBackground,
     drawPdfFilledRect,
     drawPdfMultilineText,
@@ -12,7 +14,7 @@ import {
     formatPdfNumber,
     formatRgb,
     hexToRgb,
-    wrapPdfText
+    fitPdfTextLines
 } from "../core/pdf.js";
 import { clampNumber } from "../core/utils.js";
 
@@ -316,7 +318,8 @@ function calculateTiles({
             axis: "y",
             sizeField: "height",
             totalSize: layout.height,
-            preferredPageSize: diagramPageHeight
+            preferredPageSize: diagramPageHeight,
+            orientation
         });
 
         return yRanges.map((range) => ({
@@ -332,7 +335,8 @@ function calculateTiles({
         axis: "x",
         sizeField: "width",
         totalSize: layout.width,
-        preferredPageSize: diagramPageWidth
+        preferredPageSize: diagramPageWidth,
+        orientation
     });
 
     return xRanges.map((range) => ({
@@ -348,7 +352,8 @@ function calculateAxisRanges({
                                  axis,
                                  sizeField,
                                  totalSize,
-                                 preferredPageSize
+                                 preferredPageSize,
+                                 orientation
                              }) {
     const spans = (nodes || [])
         .map((node) => ({
@@ -364,7 +369,12 @@ function calculateAxisRanges({
         let end = Math.min(start + preferredPageSize, totalSize);
 
         if (end < totalSize) {
-            end = adjustPageBreakToAvoidCuttingNodes(start, end, spans, preferredPageSize);
+            let nextEnd = end;
+
+            do {
+                end = nextEnd;
+                nextEnd = adjustPageBreakToAvoidCuttingNodes(start, end, spans, preferredPageSize, orientation);
+            } while (nextEnd !== end);
         }
 
         if (end <= start) {
@@ -382,20 +392,21 @@ function calculateAxisRanges({
     return ranges;
 }
 
-function adjustPageBreakToAvoidCuttingNodes(start, proposedEnd, spans, preferredPageSize) {
+function adjustPageBreakToAvoidCuttingNodes(start, proposedEnd, spans, preferredPageSize, orientation) {
     const cuttingNode = spans.find((span) => span.start < proposedEnd && span.end > proposedEnd);
 
     if (!cuttingNode) {
         return proposedEnd;
     }
 
-    const breakBeforeNode = cuttingNode.start - 8;
+    const pageBreakInset = orientation === "horizontal" ? 18 : 8;
+    const breakBeforeNode = cuttingNode.start - pageBreakInset;
 
     if (breakBeforeNode > start + preferredPageSize * 0.45) {
         return breakBeforeNode;
     }
 
-    return cuttingNode.end + 8;
+    return cuttingNode.end + pageBreakInset;
 }
 
 function createPageContent(options) {
@@ -437,6 +448,15 @@ function createPageContent(options) {
         orientation
     });
 
+    const clipBleedRight = orientation === "horizontal" ? 12 : 0;
+    clipPdfRect(
+        commands,
+        margin,
+        margin + footerHeight,
+        pageWidth - margin * 2 + clipBleedRight,
+        pageHeight - margin * 2 - titleHeight - footerHeight
+    );
+
     const transformPoint = (x, y) => ({
         x: offsetX + (x - tile.startX) * scale,
         y: pageHeight - (offsetY + (y - tile.startY) * scale)
@@ -451,6 +471,8 @@ function createPageContent(options) {
 
     drawPdfConnections(commands, layout.edges, transformPoint, scale, tile, orientation);
     drawPdfNodes(commands, layout.nodes, transformPoint, scale, isVisible, topPanel);
+
+    endPdfClip(commands);
 
     commands.push("q");
     commands.push("1 1 1 rg");
@@ -536,8 +558,8 @@ function drawPdfStraightConnection(commands, points, scale) {
     }
 
     commands.push("q");
-    commands.push(`${formatRgb(hexToRgb("#aeb8c8"))} RG`);
-    commands.push(`${formatPdfNumber(Math.max(0.55, 1.45 * scale))} w`);
+    commands.push("0 0 0 RG");
+    commands.push("1 w");
     commands.push(`${formatPdfNumber(points[0].x)} ${formatPdfNumber(points[0].y)} m`);
 
     points.slice(1).forEach((point) => {
@@ -571,8 +593,8 @@ function drawPdfNodes(commands, nodes, transformPoint, scale, isVisible, topPane
 function drawProjectNode(commands, node, topPanel, x, y, width, height, scale) {
     const footerHeight = Math.max(8, 18 * scale);
 
-    drawPdfRect(commands, x, y, width, height, "#4b5563", "#7c8798");
-    drawPdfFilledRect(commands, x, y, width, footerHeight, "#6d28d9");
+    drawPdfRect(commands, x, y, width, height, "#ffffff", "#000000");
+    drawPdfFilledRect(commands, x, y, width, footerHeight, "#ffffff");
 
     drawPdfTextCentered(
         commands,
@@ -583,7 +605,7 @@ function drawProjectNode(commands, node, topPanel, x, y, width, height, scale) {
         height - footerHeight,
         Math.max(3.8, 8.2 * scale),
         "Helvetica-Bold",
-        [255, 255, 255],
+        [0, 0, 0],
         3
     );
 
@@ -596,7 +618,7 @@ function drawProjectNode(commands, node, topPanel, x, y, width, height, scale) {
         footerHeight,
         Math.max(3.5, 6.8 * scale),
         "Helvetica-Bold",
-        [255, 255, 255],
+        [0, 0, 0],
         1
     );
 }
@@ -610,63 +632,77 @@ function drawRequirementNode(commands, node, x, y, width, height, scale) {
     const verificationBarHeight = Math.max(8, 17 * scale);
     const headerHeight = Math.max(15, 28 * scale);
 
-    drawPdfRect(commands, x, y, width, height, "#334155", "#64748b");
+    drawPdfRect(commands, x, y, width, height, "#ffffff", "#000000");
 
     drawPdfFilledRect(commands, x, y, width, statusBarHeight, getPdfStatusColor(requirement.requirementStatus));
     drawPdfFilledRect(commands, x, y + statusBarHeight, width, verificationBarHeight, getPdfVerificationColor(requirement.verificationStatus));
 
     drawPdfTextCentered(
         commands,
-        `Requirement Status: ${requirement.requirementStatus || "—"}`,
+        fitPdfTextLines(
+            `Requirement Status: ${requirement.requirementStatus || "—"}`,
+            width - 8 * scale,
+            Math.max(3.8, 7.4 * scale) + 2,
+            Math.max(0, statusBarHeight - 4 * scale),
+            1
+        )[0],
         x + 4 * scale,
         y,
         width - 8 * scale,
         statusBarHeight,
-        Math.max(3.2, 5.8 * scale),
+        Math.max(3.8, 7.4 * scale) + 2,
         "Helvetica-Bold",
-        [255, 255, 255],
+        [0, 0, 0],
         1
-    );
+);
 
     drawPdfTextCentered(
         commands,
-        `Verification Status: ${requirement.verificationStatus || "—"}`,
+        fitPdfTextLines(
+            `Verification Status: ${requirement.verificationStatus || "—"}`,
+            width - 8 * scale,
+            Math.max(3.8, 7.4 * scale) + 2,
+            Math.max(0, verificationBarHeight - 4 * scale),
+            1
+        )[0],
         x + 4 * scale,
         y + statusBarHeight,
         width - 8 * scale,
         verificationBarHeight,
-        Math.max(3.2, 5.8 * scale),
+        Math.max(3.8, 7.4 * scale) + 2,
         "Helvetica-Bold",
-        [255, 255, 255],
+        [0, 0, 0],
         1
-    );
+);
 
     drawPdfText(
         commands,
         code,
-        x + 7 * scale,
-        y + height - 14 * scale,
-        Math.max(3.8, 7.4 * scale),
+        x + 9 * scale,
+        y + height - 20 * scale,
+        Math.max(3.8, 7.4 * scale) + 2,
         "Helvetica-Bold",
-        [229, 231, 235]
+        [0, 0, 0]
     );
 
     const titleFontSize = Math.max(3.8, 7.2 * scale);
-    const titleLines = wrapPdfText(
+    const titleLines = fitPdfTextLines(
         name,
-        Math.max(8, Math.floor((width - 14 * scale) / (titleFontSize * 0.52))),
+        width - 18 * scale,
+        titleFontSize + 2,
+        Math.max((titleFontSize + 2) * 1.18 * 3, 14 * scale),
         3
     );
 
     drawPdfMultilineText(
         commands,
         titleLines,
-        x + 7 * scale,
-        y + height - headerHeight,
-        titleFontSize,
+        x + 9 * scale,
+        y + height - headerHeight - 2 * scale,
+        titleFontSize + 2,
         "Helvetica-Bold",
-        [255, 255, 255],
-        titleFontSize * 1.18
+        [0, 0, 0],
+        (titleFontSize + 2) * 1.18
     );
 }
 
