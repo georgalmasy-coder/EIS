@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.security;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
+import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
@@ -11,7 +12,9 @@ import com.bepa.eis.common.providers.security.LoginActivityLogger;
 import com.bepa.eis.common.providers.security.MfaConfig;
 import com.bepa.eis.common.providers.security.MfaTotpService;
 import com.bepa.eis.common.providers.security.SessionManager;
+import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.generic.GenericServlet;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -389,7 +392,7 @@ public class LoginServlet extends GenericServlet {
                 SessionProvider sessionProvider = new SessionProvider(webSession);
                 sessionProvider.updateSessionInfo(webSession);
 
-                response.sendRedirect("/web/view?page=myprojects");
+                response.sendRedirect(getRedirectUrl(webSession));
                 return;
             }
 
@@ -398,6 +401,18 @@ public class LoginServlet extends GenericServlet {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static public String getRedirectUrl(WebSession webSession) {
+        User user = CustomerLookupCache.getUser(webSession, webSession.getUserId());
+
+        if (user == null) {
+            return "/index.html";
+        }
+
+        UserRoles userRole = user.getUserRole();
+
+        return userRole == UserRoles.BEPA_SYSTEM_ADMINISTRATOR ? "/web/view?page=admindashboard" : "/web/view?page=myprojects";
     }
 
     private void startMfaFlow(
