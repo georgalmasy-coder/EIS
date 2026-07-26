@@ -42,7 +42,6 @@ public class GenericServlet extends HttpServlet {
         } else {
             try {
                 SessionProvider sessionProvider = new SessionProvider(null);
-//GFA                ws = sessionProvider.getBySessionId("georg.almasy@Gmail.com");
                 ws = sessionProvider.getBySessionId(getSessionId(request));
 
             } catch (SQLException e) {

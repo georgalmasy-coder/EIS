@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../../css/common.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
+    <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/generel.css" />
+    <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/menu-editor.css" />
+</head>
+
+<body class="menu-editor-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    &#8250;
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app menu-editor-app">
+    <div class="content menu-editor-content">
+        <header class="topbar menu-editor-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout menu-editor-layout" aria-label="Menu editor">
+            <div class="section-header menu-editor-section-header">
+                <h2>Menu Editor</h2>
+            </div>
+
+            <div class="menu-editor-toolbar" aria-label="Menu actions">
+                <div class="menu-editor-toolbar-group">
+                    <button
+                            id="btnRefreshMenu"
+                            class="page-icon-button menu-editor-icon-button"
+                            type="button"
+                            aria-label="Reload menu"
+                            title="Reload menu"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 6H18a6 6 0 1 1-1.76-4.24L14 11h7V4l-3.35 2.35z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnAddParentMenuItem"
+                            class="page-icon-button menu-editor-icon-button"
+                            type="button"
+                            aria-label="Create parent menu item"
+                            title="Create parent menu item"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-body menu-editor-body">
+                <div class="table-frame page-frame menu-editor-tree-frame" aria-label="Menu tree frame">
+                    <div class="table-scroll menu-editor-tree-scroll" id="treeScroll">
+                        <table class="data-table page-table menu-editor-table" aria-label="Menu tree">
+                            <colgroup>
+                                <col style="width: 33%;">
+                                <col style="width: 19%;">
+                                <col style="width: 17%;">
+                                <col style="width: 11%;">
+                                <col style="width: 11%;">
+                                <col style="width: 4%;">
+                                <col style="width: 5%;">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>Menu item</th>
+                                <th>Url</th>
+                                <th>User roles</th>
+                                <th>Customer</th>
+                                <th>Project</th>
+                                <th>Active</th>
+                                <th>Order</th>
+                            </tr>
+                            </thead>
+                            <tbody id="menuBody"></tbody>
+                        </table>
+
+                        <div class="empty page-empty menu-editor-empty" id="menuEmptyState">
+                            Loading menu items...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<div
+        id="menuEditorContextMenu"
+        class="menu-editor-context-menu"
+        role="menu"
+        aria-hidden="true"
+        hidden
+></div>
+
+<dialog id="menuDialog" class="menu-editor-dialog" aria-labelledby="menuDialogTitle">
+    <form id="menuForm" method="dialog" class="menu-editor-dialog-form">
+        <div class="page-dialog-head menu-editor-dialog-head">
+            <div class="menu-editor-dialog-title-group">
+                <h3 id="menuDialogTitle">Menu item</h3>
+                <div id="menuDialogMode" class="menu-editor-dialog-mode-label"></div>
+            </div>
+        </div>
+
+        <div id="menuDialogStatus" class="page-dialog-status">Idle</div>
+
+        <div class="menu-editor-dialog-grid">
+            <input type="hidden" id="fieldMenuId" />
+            <input type="hidden" id="fieldParentMenuId" />
+
+            <div class="page-field menu-editor-wide-field">
+                <label for="fieldMenuItemText">Menu item text <span aria-hidden="true">*</span></label>
+                <input id="fieldMenuItemText" type="text" maxlength="50" autocomplete="off" required />
+            </div>
+
+            <div class="page-field menu-editor-wide-field">
+                <label for="fieldMenuItemUrl">Menu item url</label>
+                <input id="fieldMenuItemUrl" type="text" maxlength="50" autocomplete="off" />
+            </div>
+
+            <fieldset class="page-field menu-editor-wide-field menu-editor-roles-fieldset">
+                <legend>User roles</legend>
+                <div id="userRolesGrid" class="menu-editor-roles-grid" aria-label="User roles"></div>
+            </fieldset>
+
+            <div class="page-field checkbox-field menu-editor-checkbox-field">
+                <input id="fieldCustomerIdRequired" type="checkbox" />
+                <label for="fieldCustomerIdRequired">CustomerIdRequired</label>
+            </div>
+
+            <div class="page-field checkbox-field menu-editor-checkbox-field">
+                <input id="fieldProjectIdRequired" type="checkbox" />
+                <label for="fieldProjectIdRequired">ProjectIdRequired</label>
+            </div>
+
+            <div class="page-field checkbox-field menu-editor-checkbox-field">
+                <input id="fieldActive" type="checkbox" checked />
+                <label for="fieldActive">Active</label>
+            </div>
+        </div>
+
+        <div class="dlg-footer menu-editor-dialog-footer">
+            <button id="btnSaveMenu" class="primary" type="button">Save</button>
+            <button id="btnCancelMenu" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../../js/pages/menu-editor-page.js"></script>
+</body>
+</html>

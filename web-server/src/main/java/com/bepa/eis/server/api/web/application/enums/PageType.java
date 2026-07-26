@@ -49,6 +49,7 @@ public enum PageType {
     FUNCTIONAL_STRUCTURE_MAIN_VERTICAL_PAGE("functionalstructure-main-vertical","html-pages/functionalstructure-main-vertical.html", "Functional Structure"),
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration"),
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents"),
+    ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS"),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration"),
 
 

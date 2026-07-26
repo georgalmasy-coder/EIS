@@ -131,6 +131,17 @@ public class CustomerLookupCache {
         return getLookupCache(webSession).getUser(userId);
     }
 
+    public static UserRoles getUserRole(WebSession webSession) {
+        if (webSession == null) {
+            return UserRoles.INVASIVE_USER_ROLE;
+        }
+        User user = getLookupCache(webSession).getUser(webSession.getUserId());
+        if (user == null) {
+            return UserRoles.INVASIVE_USER_ROLE;
+        }
+        return user.getUserRole();
+    }
+
     public static LookupValue getDepartmentLookupValue(WebSession webSession, Integer departmentId) {
         return getLookupCache(webSession).getDepartmentLookupValue(departmentId);
     }

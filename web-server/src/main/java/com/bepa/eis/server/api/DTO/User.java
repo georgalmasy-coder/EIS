@@ -1,8 +1,11 @@
 package com.bepa.eis.server.api.DTO;
 
+import com.bepa.eis.common.enums.user.UserRoles;
+
 public class User {
 
     private Integer userId;
+    private Integer userRoleId;
     private String initials;
     private String name;
     private String email;
@@ -24,6 +27,14 @@ public class User {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public void setUserRoleId(Integer userRoleId) {
+        this.userRoleId = userRoleId;
+    }
+
+    public UserRoles getUserRole() {
+        return UserRoles.fromId(userRoleId);
     }
 
     public void setInitials(String initials) {
@@ -83,6 +94,6 @@ public class User {
     }
 
     public String toString() {
-        return "User [userId=" + userId + ", initials=" + initials + ", name=" + name + ", email=" + email + ", phone=" + phone + ", departmentId=" + departmentId + ", active=" + active + "]";
+        return "User [userId=" + userId + ", userRoleId=" + userRoleId + ", initials=" + initials + ", name=" + name + ", email=" + email + ", phone=" + phone + ", departmentId=" + departmentId + ", active=" + active + "]";
     }
 }

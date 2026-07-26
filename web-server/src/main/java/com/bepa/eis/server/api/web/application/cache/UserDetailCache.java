@@ -39,6 +39,7 @@ public class UserDetailCache extends GenericLookup {
             while (rs.next()) {
                 User user = new User();
                 user.setUserId(rs.getInt("UserId"));
+                user.setUserRoleId(rs.getInt("UserRole"));
                 user.setName(rs.getString("Name"));
                 user.setEmail(rs.getString("Email"));
                 user.setPhone(rs.getString("Phone"));

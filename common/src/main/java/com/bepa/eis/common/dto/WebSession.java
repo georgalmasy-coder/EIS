@@ -25,6 +25,9 @@ public class WebSession {
     private Date expiredAt;
     private String endedReason;
 
+    public WebSession() {
+    }
+
     public void setId(int id) {
         this.id = id;
     }
