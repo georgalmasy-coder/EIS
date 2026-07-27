@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/dashboard-irls.css" />
+</head>
+
+<body class="dashboard-irls-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    >
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app dashboard-irls-app">
+    <div class="content dashboard-irls-content">
+        <header class="topbar dashboard-irls-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+        </header>
+
+        <section class="panel page-layout dashboard-irls-layout" aria-label="Dashboard IRL matrix">
+            <div class="section-header dashboard-irls-section-header">
+                <h2 id="dashboardIrlTitle">Dashboard IRL</h2>
+            </div>
+
+            <div class="dashboard-irls-info-bar" aria-label="Dashboard IRL information">
+                <div class="dashboard-irls-info-item">
+                    <span class="dashboard-irls-info-label">Number of Physical Structure:</span>
+                    <strong id="dashboardIrlStructureCount">-</strong>
+                </div>
+
+                <label class="dashboard-irls-filter-toggle">
+                    <input id="dashboardIrlOverdueOnlyToggle" type="checkbox" />
+                    <span>Show overdue only</span>
+                </label>
+
+                <label class="dashboard-irls-filter-toggle">
+                    <input id="dashboardIrlNotOverdueOnlyToggle" type="checkbox" />
+                    <span>Show not overdue only</span>
+                </label>
+
+                <div class="dashboard-irls-trl-filter-inline" aria-label="TRL filter">
+                    <span class="dashboard-irls-trl-filter-inline-label">TRL:</span>
+                    <div id="dashboardIrlTrlFilterList" class="dashboard-irls-trl-filter-inline-list"></div>
+                </div>
+            </div>
+
+            <div class="page-body dashboard-irls-body">
+                <div class="dashboard-irls-frame" aria-label="Dashboard IRL frame">
+                    <div class="dashboard-irls-table-scroll" id="dashboardIrlTableScroll">
+                        <table class="dashboard-irls-table" aria-label="Dashboard IRL">
+                            <thead id="dashboardIrlTableHead"></thead>
+                            <tbody id="dashboardIrlTableBody"></tbody>
+                        </table>
+
+                        <div class="dashboard-irls-empty is-visible" id="dashboardIrlEmptyState">
+                            Loading dashboard IRL...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script type="module" src="../js/pages/dashboard-irls-page.js"></script>
+</body>
+</html>

@@ -102,13 +102,25 @@ public class InterfaceMatrixProvider extends GenericProvider {
 
     public List<InterfaceRecord> getLatestInterfaceRecords() throws SQLException {
         validateSession();
+        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+    }
+
+    public List<InterfaceRecord> getAllInterfaceRecords() throws SQLException {
+        validateSession();
+        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+    }
+
+    public List<InterfaceRecord> getLatestInterfaceRecords(Integer customerId, Integer projectId) throws SQLException {
+        if (customerId == null || projectId == null) {
+            throw new IllegalArgumentException("CustomerId and ProjectId are required.");
+        }
 
         List<InterfaceRecord> records = new ArrayList<>();
 
         try (Connection connection = getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_SQL)) {
-            setInt(ps, getWebSession().getCustomerId(), 1);
-            setInt(ps, getWebSession().getProjectId(), 2);
+            setInt(ps, customerId, 1);
+            setInt(ps, projectId, 2);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
