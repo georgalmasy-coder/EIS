@@ -10,6 +10,7 @@ public enum PageType {
     BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix"),
     INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management"),
     DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL"),
+    DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork"),
 
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder"),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit"),
@@ -43,7 +44,6 @@ public enum PageType {
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents"),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS"),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration"),
-
 
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS"),
     ADMIN_DASHBOARD_ALERT_PAGE("dashboard-alerts-view","html-pages/admin/views/dashboard-alerts-view.html", ""),

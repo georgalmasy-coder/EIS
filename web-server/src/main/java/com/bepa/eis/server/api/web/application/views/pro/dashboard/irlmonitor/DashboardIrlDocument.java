@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
+import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
@@ -29,7 +30,7 @@ public class DashboardIrlDocument extends GenericXmlDocument {
 
     private final List<PhysicalStructureWrapper> listOfPhysicalStructures = new ArrayList<>();
     private final Map<Integer, PhysicalStructureWrapper> mapOfPhysicalStructures = new HashMap<>();
-    private DashboardIrlMetaData dashboardMetaData;
+    private DashboardMetaData dashboardMetaData;
 
     private final Timestamp now = Timestamp.from(Instant.now());
     private LocalDate today = now.toLocalDateTime().toLocalDate();
@@ -57,7 +58,7 @@ public class DashboardIrlDocument extends GenericXmlDocument {
     private void dashboardDocument() throws SQLException {
         buildPhysicalStructures();
         calculateIrlCounts();
-        dashboardMetaData = new DashboardIrlMetaData(getWebSession());
+        dashboardMetaData = new DashboardMetaData(getWebSession());
     }
 
     private void buildPhysicalStructures() throws SQLException {

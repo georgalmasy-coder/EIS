@@ -16,7 +16,7 @@ public class UserDetailCache extends GenericLookup {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserDetailCache.class);
 
-    private ConcurrentMap<Integer, User> mapOfUsers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Integer, User> mapOfUsers = new ConcurrentHashMap<>();
 
     private static final String LOOKUP_SQL =
 

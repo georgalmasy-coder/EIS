@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { openEditDialog } from "../components/edit-dialog.js";
+import { downloadDashboardIrlPdf } from "./dashboard-irls-pdf.js";
 import { setText } from "../core/dom.js";
 import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
 
@@ -10,6 +11,11 @@ const SYSTEMS_BREAKDOWN_EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 
 const state = {
     document: null,
+    topPanel: {
+        customerName: "—",
+        projectName: "—",
+        userName: "—"
+    },
     filterMode: "all",
     selectedTrlIds: [],
     selectedBlankTrl: false
@@ -31,6 +37,9 @@ function initializePageShell() {
 
     initMenu();
     initHelpDialog();
+
+    const pdfButton = document.getElementById("btnDownloadPdf");
+    pdfButton?.addEventListener("click", handleDownloadPdf);
 }
 
 function initializeEvents() {
@@ -63,6 +72,7 @@ async function loadDashboard() {
         }
 
         state.document = parseDashboardDocument(xmlDocument);
+        state.topPanel = parseTopPanel(xmlDocument);
         applyTopPanel(xmlDocument);
         renderDashboard(state.document);
 
@@ -96,6 +106,24 @@ function parseDashboardDocument(xmlDocument) {
         structures,
         lookup,
         irlTotalsById
+    };
+}
+
+function parseTopPanel(xmlDocument) {
+    const topPanelElement = xmlDocument.querySelector("TopPanel");
+
+    if (!topPanelElement) {
+        return {
+            customerName: "—",
+            projectName: "—",
+            userName: "—"
+        };
+    }
+
+    return {
+        customerName: getChildText(topPanelElement, "CustomerName", "—"),
+        projectName: getChildText(topPanelElement, "ProjectName", "—"),
+        userName: getChildText(topPanelElement, "Name", "—")
     };
 }
 
@@ -470,6 +498,26 @@ function renderTrlFilterList(dashboard) {
     }
 }
 
+function handleDownloadPdf() {
+    if (!state.document) {
+        return;
+    }
+
+    const rows = buildVisibleStructures(
+        state.document,
+        state.filterMode,
+        state.selectedTrlIds,
+        state.selectedBlankTrl
+    );
+
+    downloadDashboardIrlPdf({
+        topPanel: state.topPanel,
+        dashboard: state.document,
+        rows,
+        isFiltered: hasActiveFilters()
+    });
+}
+
 function createFilterItem({ label, checked, tooltip, trlId = "", blank = false }) {
     const item = document.createElement("label");
     item.className = "dashboard-irls-trl-filter-item";
@@ -518,6 +566,12 @@ function buildVisibleStructures(dashboard, filterMode, selectedTrlIds = [], sele
 
         return selectedTrlSet.has(trlId);
     });
+}
+
+function hasActiveFilters() {
+    return state.filterMode !== "all"
+        || state.selectedTrlIds.length > 0
+        || state.selectedBlankTrl;
 }
 
 function isOverdue(structure) {
