@@ -4,6 +4,7 @@ import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider;
 import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider.CustomerRegistrationData;
 import com.bepa.eis.common.providers.customer.CustomerRegistrationProvider.CustomerRegistrationResult;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import com.bepa.eis.server.api.external.virk.cvr.CvrCompanyDto;
 import com.bepa.eis.server.api.external.virk.cvr.CvrLookupService;
 import com.bepa.eis.server.api.external.virk.cvr.CvrapiDkLookupService;
@@ -180,6 +181,8 @@ public class CustomerRegistrationServlet extends AbstractAdminServlet {
             );
             return;
         }
+
+        EhcacheProvider.clearCacheEntry(result.getCustomerId());
 
         sendJson(
                 resp,

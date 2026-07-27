@@ -4,6 +4,7 @@ import java.util.List;
 
 public class LookupProjectCache {
 
+    private final ProjectBasisInfo projectBasisInfo;
     private final TrlCache trlCache;
     private final IrlCache irlCache;
     private final SrlCache srlCache;
@@ -12,11 +13,16 @@ public class LookupProjectCache {
     private final StakeholderCache stakeholderCache;
 
     public LookupProjectCache(Integer customerId, Integer projectId) {
+        projectBasisInfo = new ProjectBasisInfoProvider().getProjectBasisInfo(customerId, projectId);
         trlCache = new TrlCache(customerId, projectId);
         irlCache = new IrlCache(customerId, projectId);
         srlCache = new SrlCache(customerId, projectId);
         classificationCache = new ClassificationCache(customerId, projectId);
         stakeholderCache = new StakeholderCache(customerId, projectId);
+    }
+
+    public ProjectBasisInfo getProjectBasisInfo() {
+        return projectBasisInfo;
     }
 
     public LookupValue getTrlLookupValue(Integer lookupId) {

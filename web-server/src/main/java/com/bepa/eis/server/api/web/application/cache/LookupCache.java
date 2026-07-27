@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class LookupCache {
 
+    private final CustomerBasisInfo customerInfo;
     private final RequirementBusinessPriorityCache requirementBusinessPriorityCache;
     private final RequirementVerificationCache requirementVerificationCache;
     private final ProjectCategoryCache projectCategoryCache;
@@ -26,6 +27,7 @@ public class LookupCache {
     private final Map<Integer, LookupProjectCache> lookupProjectCacheMap;
 
     public LookupCache(Integer customerId, Integer projectId) {
+        customerInfo = new CustomerInfoProvider().getCustomerInfo(customerId);
         requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(customerId, projectId);
         requirementVerificationCache = new RequirementVerificationCache(customerId, projectId);
         projectCategoryCache = new ProjectCategoryCache(customerId, projectId);
@@ -41,6 +43,20 @@ public class LookupCache {
         requirementVerificationStatementCache = new RequirementVerificationStatementCache(customerId, projectId);
 
         lookupProjectCacheMap = new HashMap<>();
+    }
+
+    public CustomerBasisInfo getCustomerInfo() {
+        return customerInfo;
+    }
+
+    public ProjectBasisInfo getProjectInfo(Integer customerId, Integer projectId) {
+
+        if (customerId != null && projectId != null ) {
+            LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);
+            return projectCache.getProjectBasisInfo();
+        }
+
+        return null;
     }
 
     public LookupValue getRequirementBusinessPriorityLookupValue(Integer lookupId) {

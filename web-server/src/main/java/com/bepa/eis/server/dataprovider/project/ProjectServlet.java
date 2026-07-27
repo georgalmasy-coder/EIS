@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
@@ -97,6 +98,7 @@ public class ProjectServlet extends GenericDataProviderServlet {
 
             ProjectProvider projectProvider = new ProjectProvider(webSession);
             projectProvider.persist(projectEntity, projectRecord);
+            EhcacheProvider.clearCacheEntry(projectRecord.getCustomerId());
 
         } catch (Exception exception) {
             throw new RuntimeException("Failed to save project XML.", exception);

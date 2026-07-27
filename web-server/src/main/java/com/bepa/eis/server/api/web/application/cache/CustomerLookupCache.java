@@ -23,6 +23,20 @@ public class CustomerLookupCache {
     private static final ReentrantLock BULK_LOAD_LOCK = new ReentrantLock();
     private static final List<PhoneCountryRule> PHONE_COUNTRY_RULES = buildPhoneCountryRules();
 
+    public static CustomerBasisInfo getCustomerInfo(WebSession webSession) {
+        if (webSession != null && webSession.getCustomerId() != null) {
+            return getLookupCache(webSession).getCustomerInfo();
+        }
+        return null;
+    }
+
+    public static ProjectBasisInfo getProjectInfo(WebSession webSession) {
+        if (webSession != null && webSession.getCustomerId() != null && webSession.getProjectId() != null) {
+            return getLookupCache(webSession.getCustomerId(), webSession.getProjectId()).getProjectInfo(webSession.getCustomerId(), webSession.getProjectId());
+        }
+        return null;
+    }
+
     public static LookupValue getRequirementBusinessPriorityLookupValue(WebSession webSession, Integer lookupId) {
         return getLookupCache(webSession).getRequirementBusinessPriorityLookupValue(lookupId);
     }

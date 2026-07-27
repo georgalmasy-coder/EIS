@@ -2,6 +2,10 @@ package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.DTO.User;
+import com.bepa.eis.server.api.web.application.cache.CustomerBasisInfo;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.cache.ProjectBasisInfo;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.UserId;
@@ -13,9 +17,6 @@ import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class TopPanelProvider extends GenericProvider {
@@ -23,21 +24,6 @@ public class TopPanelProvider extends GenericProvider {
     private static final Logger log = LoggerFactory.getLogger(TopPanelProvider.class);
 
     private final TopPanel topPanel = new TopPanel(getWebSession());
-
-    private static final String GET_CUSTOMER_BY_CUSTOMER_ID_SQL =
-            "SELECT * " +
-            "FROM CUSTOMER " +
-            "WHERE CustomerId = ? " +
-            "AND Latest=1";
-
-    private static final String GET_PROJECT_BY_PROJECT_ID_SQL =
-            "SELECT * " +
-            "FROM PROJECT " +
-            "WHERE ProjectId = ? " +
-            "AND Latest=1";
-
-    private static final String GET_USER_BY_USER_ID_SQL =
-            "SELECT * FROM USERS WHERE UserId = ?";
 
     public TopPanelProvider(WebSession webSession) {
         super(webSession);
@@ -127,60 +113,50 @@ public class TopPanelProvider extends GenericProvider {
     private void loadCustomerInfo() throws SQLException {
         /* Get customer info */
         if (getWebSession() != null && getWebSession().getCustomerId() != null) {
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(GET_CUSTOMER_BY_CUSTOMER_ID_SQL)) {
 
-                setInt(ps, getWebSession().getCustomerId(), 1);
+            CustomerBasisInfo customerInfo = CustomerLookupCache.getCustomerInfo(getWebSession());
 
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
-                        log.error("No customer found for customerId: {}", getWebSession().getCustomerId());
-                        throw new SQLException("No customer found for customerId: " + getWebSession().getCustomerId());
-                    }
-
-                    customerId = new CustomerId(rs.getInt(CustomerId.FIELD_NAME));
-                    customerName = new CustomerName(rs.getString(CustomerName.FIELD_NAME));
-                }
+            if (customerInfo != null) {
+                customerId = new CustomerId(customerInfo.getCustomerId());
+                customerName = new CustomerName(customerInfo.getCustomerName());
+            } else {
+                customerId = new CustomerId(0);
+                customerName = new CustomerName("--");
+                log.error("Customer not found for customerId: {}", getWebSession().getCustomerId());
             }
         }
     }
 
     private void loadProjectInfo() throws SQLException {
         /* Get project info */
+
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(GET_PROJECT_BY_PROJECT_ID_SQL)) {
 
-                setInt(ps, getWebSession().getProjectId(), 1);
+            ProjectBasisInfo projectBasisInfo = CustomerLookupCache.getProjectInfo(getWebSession());
 
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
-                        log.debug("No project found for projectId: {}", getWebSession().getProjectId());
-                    } else {
-                        projectId = new ProjectId(rs.getInt(ProjectId.FIELD_NAME));
-                        projectName = new ProjectName(rs.getString(ProjectName.FIELD_NAME));
-                    }
-                }
+            if (projectBasisInfo != null) {
+                projectId = new ProjectId(projectBasisInfo.getProjectId());
+                projectName = new ProjectName(projectBasisInfo.getProjectName());
+            } else {
+                projectId = new ProjectId(0);
+                projectName = new ProjectName("--");
+                log.error("Project not found for projectId: {}", getWebSession().getProjectId());
             }
+
         }
     }
 
     private void loadUserInfo() throws SQLException {
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(GET_USER_BY_USER_ID_SQL)) {
 
-            setInt(ps, getWebSession().getUserId(), 1);
+        User user = CustomerLookupCache.getUser(getWebSession(), getWebSession().getUserId());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    log.error("No user found for userId: {}", getWebSession().getUserId());
-                    throw new SQLException("No user found for userId: " + getWebSession().getUserId());
-                }
-
-                userId = new UserId(rs.getInt(UserId.FIELD_NAME));
-                userName = new UserName(rs.getString(UserName.FIELD_NAME));
-            }
+        if (user != null) {
+            userId = new UserId( user.getUserId());
+            userName = new UserName(user.getName());
+        } else {
+            userId = new UserId( 0);
+            userName = new UserName("--");
+            log.error("User not found for userId: {}", getWebSession().getUserId());
         }
-
     }
 }

@@ -27,6 +27,7 @@ import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
+import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -80,6 +81,10 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
             HttpServletResponse response
     ) throws ServletException, IOException {
         SaveResult result = saveCustomerAdministration(request);
+
+        if (result.success() && result.customerId() != null) {
+            EhcacheProvider.clearCacheEntry(result.customerId());
+        }
 
         writeXml(
                 response,
