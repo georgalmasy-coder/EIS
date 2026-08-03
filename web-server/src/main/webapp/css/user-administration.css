@@ -417,6 +417,10 @@ body.user-administration-column-resizing * {
     box-shadow: 0 0 0 3px rgba(239,68,68,.14);
 }
 
+.phone-field .iti {
+    width: 100%;
+}
+
 .user-role-pill,
 .user-mfa-pill {
     display: inline-flex;
@@ -728,10 +732,9 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 
 .user-phone-field {
     display: grid;
-    grid-template-columns: minmax(140px, 170px) minmax(0, 1fr);
-    gap: 12px;
-    align-items: start;
+    gap: 6px;
     grid-column: 1 / 2;
+    min-width: 0;
 }
 
 .user-department-field {
@@ -742,10 +745,10 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     grid-column: 1 / 2;
 }
 
-.user-phone-field label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.user-phone-field > label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .user-phone-field .field-help {
@@ -793,7 +796,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     }
 
     .user-phone-field {
-        grid-template-columns: 1fr;
+        grid-column: auto;
     }
 
     .user-department-field {

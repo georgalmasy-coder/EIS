@@ -23,6 +23,7 @@ public class CustomerSubscriptionProvider extends GenericProvider {
                     "CustomerId, " +
                     "SubscriptionStatus, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "SubscriptionPlanName, " +
                     "TrialStartAt, " +
                     "TrialEndAt, " +
@@ -34,7 +35,7 @@ public class CustomerSubscriptionProvider extends GenericProvider {
                     "RenewalConfirmedAt, " +
                     "GracePeriodEndsAt " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
     private static final String SELECT_SUBSCRIPTION_BY_ID_SQL =
             "SELECT " +
@@ -42,6 +43,7 @@ public class CustomerSubscriptionProvider extends GenericProvider {
                     "CustomerId, " +
                     "SubscriptionStatus, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "SubscriptionPlanName, " +
                     "TrialStartAt, " +
                     "TrialEndAt, " +
@@ -63,6 +65,7 @@ public class CustomerSubscriptionProvider extends GenericProvider {
                     "CustomerId, " +
                     "SubscriptionStatus, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "SubscriptionPlanName, " +
                     "TrialStartAt, " +
                     "TrialEndAt, " +
@@ -84,6 +87,7 @@ public class CustomerSubscriptionProvider extends GenericProvider {
                     "SET " +
                     "    SubscriptionStatus = ?, " +
                     "    SubscriptionPlanId = ?, " +
+                    "    SubscriptionPlanBillingPeriodId = ?, " +
                     "    SubscriptionPlanName = ?, " +
                     "    TrialStartAt = ?, " +
                     "    TrialEndAt = ?, " +
@@ -122,16 +126,17 @@ public class CustomerSubscriptionProvider extends GenericProvider {
             statement.setInt(1, subscription.getCustomerId());
             statement.setString(2, subscription.getSubscriptionStatusCode());
             setNullableInt(statement, 3, subscription.getSubscriptionPlanId());
-            statement.setString(4, safeText(subscription.getSubscriptionPlanName(), ""));
-            statement.setTimestamp(5, subscription.getTrialStartAt());
-            statement.setTimestamp(6, subscription.getTrialEndAt());
-            statement.setTimestamp(7, subscription.getTrialReminderSentAt());
-            statement.setTimestamp(8, subscription.getPeriodStartAt());
-            statement.setTimestamp(9, subscription.getPeriodEndAt());
-            statement.setTimestamp(10, subscription.getRenewalReminderSentAt());
-            statement.setTimestamp(11, subscription.getContinuationConfirmedAt());
-            statement.setTimestamp(12, subscription.getRenewalConfirmedAt());
-            statement.setTimestamp(13, subscription.getGracePeriodEndsAt());
+            setNullableInt(statement, 4, subscription.getSubscriptionPlanBillingPeriodId());
+            statement.setString(5, safeText(subscription.getSubscriptionPlanName(), ""));
+            statement.setTimestamp(6, subscription.getTrialStartAt());
+            statement.setTimestamp(7, subscription.getTrialEndAt());
+            statement.setTimestamp(8, subscription.getTrialReminderSentAt());
+            statement.setTimestamp(9, subscription.getPeriodStartAt());
+            statement.setTimestamp(10, subscription.getPeriodEndAt());
+            statement.setTimestamp(11, subscription.getRenewalReminderSentAt());
+            statement.setTimestamp(12, subscription.getContinuationConfirmedAt());
+            statement.setTimestamp(13, subscription.getRenewalConfirmedAt());
+            statement.setTimestamp(14, subscription.getGracePeriodEndsAt());
 
             int updatedRows = statement.executeUpdate();
 
@@ -207,17 +212,18 @@ public class CustomerSubscriptionProvider extends GenericProvider {
 
             statement.setString(1, subscription.getSubscriptionStatusCode());
             setNullableInt(statement, 2, subscription.getSubscriptionPlanId());
-            statement.setString(3, safeText(subscription.getSubscriptionPlanName(), ""));
-            statement.setTimestamp(4, subscription.getTrialStartAt());
-            statement.setTimestamp(5, subscription.getTrialEndAt());
-            statement.setTimestamp(6, subscription.getTrialReminderSentAt());
-            statement.setTimestamp(7, subscription.getPeriodStartAt());
-            statement.setTimestamp(8, subscription.getPeriodEndAt());
-            statement.setTimestamp(9, subscription.getRenewalReminderSentAt());
-            statement.setTimestamp(10, subscription.getContinuationConfirmedAt());
-            statement.setTimestamp(11, subscription.getRenewalConfirmedAt());
-            statement.setTimestamp(12, subscription.getGracePeriodEndsAt());
-            statement.setInt(13, subscription.getSubscriptionId());
+            setNullableInt(statement, 3, subscription.getSubscriptionPlanBillingPeriodId());
+            statement.setString(4, safeText(subscription.getSubscriptionPlanName(), ""));
+            statement.setTimestamp(5, subscription.getTrialStartAt());
+            statement.setTimestamp(6, subscription.getTrialEndAt());
+            statement.setTimestamp(7, subscription.getTrialReminderSentAt());
+            statement.setTimestamp(8, subscription.getPeriodStartAt());
+            statement.setTimestamp(9, subscription.getPeriodEndAt());
+            statement.setTimestamp(10, subscription.getRenewalReminderSentAt());
+            statement.setTimestamp(11, subscription.getContinuationConfirmedAt());
+            statement.setTimestamp(12, subscription.getRenewalConfirmedAt());
+            statement.setTimestamp(13, subscription.getGracePeriodEndsAt());
+            statement.setInt(14, subscription.getSubscriptionId());
 
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -264,6 +270,9 @@ public class CustomerSubscriptionProvider extends GenericProvider {
 
         int subscriptionPlanId = resultSet.getInt("SubscriptionPlanId");
         subscription.setSubscriptionPlanId(resultSet.wasNull() ? null : subscriptionPlanId);
+
+        int subscriptionPlanBillingPeriodId = resultSet.getInt("SubscriptionPlanBillingPeriodId");
+        subscription.setSubscriptionPlanBillingPeriodId(resultSet.wasNull() ? null : subscriptionPlanBillingPeriodId);
 
         subscription.setSubscriptionPlanName(resultSet.getString("SubscriptionPlanName"));
         subscription.setTrialStartAt(resultSet.getTimestamp("TrialStartAt"));

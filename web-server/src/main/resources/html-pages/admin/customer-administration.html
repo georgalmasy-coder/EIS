@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
     <link rel="stylesheet" href="../../css/customer-administration.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css" />
 </head>
 
 <body>
@@ -183,10 +184,11 @@
                         <input id="fieldCvrNumber" type="text" />
                     </label>
 
-                    <label>
-                        <span>Phone / Contact Phone</span>
-                        <input id="fieldPhone" type="text" />
-                    </label>
+                    <div class="customer-phone-field phone-field" data-phone-field="true">
+                        <label for="fieldPhone">Phone / Contact Phone</label>
+                        <input id="fieldPhone" data-phone-input="true" type="tel" inputmode="tel" autocomplete="tel" />
+                        <p class="field-help" id="fieldPhoneHelp">Country code is included automatically.</p>
+                    </div>
 
                     <label>
                         <span>Address</span>
@@ -247,6 +249,8 @@
 
             <section class="tab-panel" id="tabPanelSubscription" role="tabpanel" aria-labelledby="tabBtnSubscription">
                 <input id="fieldSubscriptionId" type="hidden" />
+
+                <div class="customer-summary-strip" id="subscriptionSummary" aria-label="Effective subscription summary"></div>
 
                 <div class="customer-field-grid">
                     <label>
@@ -491,6 +495,8 @@
             <section class="tab-panel" id="tabPanelWorkflow" role="tabpanel" aria-labelledby="tabBtnWorkflow">
                 <input id="fieldWorkflowId" type="hidden" />
 
+                <div class="customer-summary-strip" id="workflowSummary" aria-label="Workflow summary"></div>
+
                 <div class="customer-field-grid">
                     <label>
                         <span>Workflow type</span>
@@ -584,6 +590,7 @@
     </form>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
 <script type="module" src="../../js/pages/customer-administration-page.js"></script>
 </body>
 </html>

@@ -12,6 +12,7 @@ public class CustomerSubscription {
     private CustomerSubscriptionStatus subscriptionStatus;
 
     private Integer subscriptionPlanId;
+    private Integer subscriptionPlanBillingPeriodId;
     private String subscriptionPlanName;
 
     private Timestamp trialStartAt;
@@ -35,6 +36,7 @@ public class CustomerSubscription {
         customerId = null;
         subscriptionStatus = CustomerSubscriptionStatus.NONE;
         subscriptionPlanId = null;
+        subscriptionPlanBillingPeriodId = null;
         subscriptionPlanName = "";
         trialStartAt = null;
         trialEndAt = null;
@@ -90,6 +92,14 @@ public class CustomerSubscription {
 
     public void setSubscriptionPlanId(Integer subscriptionPlanId) {
         this.subscriptionPlanId = subscriptionPlanId;
+    }
+
+    public Integer getSubscriptionPlanBillingPeriodId() {
+        return subscriptionPlanBillingPeriodId;
+    }
+
+    public void setSubscriptionPlanBillingPeriodId(Integer subscriptionPlanBillingPeriodId) {
+        this.subscriptionPlanBillingPeriodId = subscriptionPlanBillingPeriodId;
     }
 
     public String getSubscriptionPlanName() {
@@ -260,6 +270,7 @@ public class CustomerSubscription {
                 + ", customerId=" + customerId
                 + ", subscriptionStatus=" + getSubscriptionStatusCode()
                 + ", subscriptionPlanId=" + subscriptionPlanId
+                + ", subscriptionPlanBillingPeriodId=" + subscriptionPlanBillingPeriodId
                 + ", subscriptionPlanName=" + subscriptionPlanName
                 + ", trialStartAt=" + trialStartAt
                 + ", trialEndAt=" + trialEndAt

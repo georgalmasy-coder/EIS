@@ -282,6 +282,152 @@
             height: 18px;
         }
 
+        .billing-period-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .billing-period-button {
+            min-height: 52px;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--white);
+            color: var(--text-dark);
+            font-size: 15px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .billing-period-button:hover,
+        .billing-period-button:focus {
+            transform: translateY(-1px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(4, 107, 210, 0.08);
+        }
+
+        .billing-period-button.is-selected {
+            border-color: var(--text-dark);
+            box-shadow: inset 0 0 0 1px var(--text-dark);
+        }
+
+        .subscription-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .subscription-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 380px;
+            padding: 24px 22px 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 16px;
+            background: var(--white);
+        }
+
+        .subscription-card.is-selected {
+            border-color: var(--primary);
+            box-shadow: 0 16px 34px rgba(4, 107, 210, 0.12);
+        }
+
+        .subscription-card.is-disabled {
+            opacity: 0.72;
+        }
+
+        .subscription-card h3 {
+            margin: 0 0 12px;
+            color: var(--text-dark);
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .subscription-card p {
+            margin: 0 0 12px;
+        }
+
+        .subscription-card-description {
+            flex: 1 1 auto;
+            color: var(--text);
+        }
+
+        .subscription-card-bottom {
+            margin-top: auto;
+            padding-top: 18px;
+        }
+
+        .subscription-card-price {
+            color: var(--text-dark);
+            font-size: 34px;
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-align: right;
+        }
+
+        .subscription-card-vat {
+            margin-top: 4px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 650;
+            text-align: right;
+        }
+
+        .subscription-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .subscription-card-period {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 650;
+            line-height: 1.35;
+        }
+
+        .subscription-card-period-main {
+            display: block;
+        }
+
+        .subscription-card-period-monthly {
+            display: block;
+            margin-top: 2px;
+        }
+
+        .subscription-select-button {
+            min-height: 44px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 22px;
+            background: #6d5efc;
+            color: var(--white);
+            font-size: 15px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .subscription-select-button:hover,
+        .subscription-select-button:focus {
+            background: #5d4df5;
+        }
+
+        .subscription-select-button.is-selected {
+            background: #5d4df5;
+        }
+
+        .subscription-select-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -332,42 +478,83 @@
         }
 
         .customer-cvr-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: minmax(0, 2.25fr) minmax(0, 1.15fr) minmax(0, 0.62fr);
+            gap: 18px 20px;
+            align-items: start;
             grid-column: 1 / -1;
         }
 
+        .customer-cvr-row.is-cvr-disabled {
+            grid-template-columns: minmax(0, 2.25fr) minmax(0, 0.62fr);
+        }
+
+        .customer-address-row {
+            display: grid;
+            grid-template-columns: minmax(0, 4.8fr) minmax(0, 1.32fr) minmax(0, 3.88fr) minmax(0, 2fr);
+            gap: 18px 20px;
+            align-items: start;
+            grid-column: 1 / -1;
+        }
+
+        .field-company-name {
+            min-width: 0;
+        }
+
+        .customer-cvr-stack {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+            min-width: 0;
+        }
+
         .field-cvr {
-            width: 150px;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .field-vat {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .field-vat input {
+            width: 100%;
             max-width: 100%;
         }
 
         .field-cvr input {
-            width: 150px;
+            width: 100%;
             max-width: 100%;
         }
 
         .customer-cvr-action {
             padding-top: 31px;
+            align-self: start;
+        }
+
+        .customer-cvr-action .button {
+            width: auto;
+            white-space: nowrap;
         }
 
         .field-zipcode {
-            grid-column: span 2;
+            min-width: 0;
         }
 
         .field-zipcode input {
-            width: 150px;
+            width: 100%;
             max-width: 100%;
         }
 
         .field-city {
-            grid-column: span 5;
+            min-width: 0;
         }
 
         .field-country {
-            grid-column: span 5;
+            min-width: 0;
         }
 
         .field-country-code {
@@ -375,12 +562,17 @@
         }
 
         .field-phone {
-            grid-column: span 3;
+            grid-column: span 4;
+            min-width: 0;
+        }
+
+        .field-phone .iti {
+            width: 100%;
         }
 
         .field-phone input {
-            width: 190px;
-            max-width: 100%;
+            width: 100%;
+            max-width: none;
         }
 
         .field-email {
@@ -392,6 +584,118 @@
             color: var(--text-muted);
             font-size: 13px;
             line-height: 1.35;
+        }
+
+        .vat-validation-status {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 18px;
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #f9fbff;
+        }
+
+        .vat-validation-illustration {
+            position: relative;
+            width: 168px;
+            height: 88px;
+            flex: 0 0 auto;
+        }
+
+        .vat-keyboard {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 44px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background:
+                    linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+
+        .vat-key {
+            position: absolute;
+            bottom: 10px;
+            width: 16px;
+            height: 12px;
+            border-radius: 4px;
+            background: #ffffff;
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.08);
+            transform-origin: center bottom;
+            animation: vatKeyTap 1.2s infinite ease-in-out;
+        }
+
+        .vat-key.key-1 { left: 22px; animation-delay: 0s; }
+        .vat-key.key-2 { left: 44px; animation-delay: 0.12s; }
+        .vat-key.key-3 { left: 66px; animation-delay: 0.24s; }
+        .vat-key.key-4 { left: 88px; animation-delay: 0.36s; }
+        .vat-key.key-5 { left: 110px; animation-delay: 0.48s; }
+        .vat-key.key-6 { left: 132px; animation-delay: 0.6s; }
+
+        .vat-finger {
+            position: absolute;
+            bottom: 28px;
+            width: 12px;
+            height: 28px;
+            border-radius: 999px;
+            background: #f59e0b;
+            transform-origin: center bottom;
+            animation: vatFingerTap 1.2s infinite ease-in-out;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
+        }
+
+        .vat-finger.finger-1 {
+            left: 70px;
+            --rotate: -18deg;
+            animation-delay: 0s;
+        }
+
+        .vat-finger.finger-2 {
+            left: 96px;
+            --rotate: 14deg;
+            animation-delay: 0.24s;
+        }
+
+        .vat-validation-status-text {
+            min-width: 0;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 650;
+            line-height: 1.35;
+        }
+
+        .vat-validation-status-text strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .vat-validation-status.is-hidden {
+            display: none;
+        }
+
+        @keyframes vatFingerTap {
+            0%, 100% {
+                transform: translateY(0) rotate(var(--rotate, 0deg));
+            }
+            45% {
+                transform: translateY(7px) rotate(var(--rotate, 0deg));
+            }
+        }
+
+        @keyframes vatKeyTap {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 0.96;
+            }
+            45% {
+                transform: translateY(3px);
+                opacity: 1;
+            }
         }
 
         .payment-box {
@@ -587,6 +891,10 @@
                 width: 100%;
             }
 
+            .subscription-grid {
+                grid-template-columns: 1fr;
+            }
+
             .form-grid,
             .confirmation-grid {
                 grid-template-columns: 1fr;
@@ -598,7 +906,6 @@
             .field-zipcode,
             .field-city,
             .field-country,
-            .field-country-code,
             .field-phone,
             .field-email,
             .confirmation-section.full {
@@ -610,14 +917,25 @@
                 grid-template-columns: 1fr;
             }
 
+            .customer-cvr-row.is-cvr-disabled {
+                grid-template-columns: 1fr;
+            }
+
+            .customer-address-row {
+                grid-template-columns: 1fr;
+            }
+
             .customer-cvr-action {
                 padding-top: 0;
             }
 
             .field-cvr,
             .field-cvr input,
+            .customer-cvr-stack,
+            .field-address input,
             .field-zipcode input,
-            .field-phone input {
+            .field-phone input,
+            .field-phone .iti {
                 width: 100%;
                 max-width: none;
             }
@@ -662,6 +980,8 @@
             }
         }
     </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css">
 </head>
 
 <body>
@@ -683,7 +1003,7 @@
         <div class="wizard-progress" id="wizardProgress">
             <div class="wizard-progress-step is-current" data-progress-step="1">
                 <span class="wizard-progress-number">1</span>
-                <span class="wizard-progress-label">Select module</span>
+                <span class="wizard-progress-label">Select subscription</span>
             </div>
             <div class="wizard-progress-step" data-progress-step="2">
                 <span class="wizard-progress-number">2</span>
@@ -707,70 +1027,13 @@
     <section class="wizard-card">
         <form id="createCustomerWizard" novalidate>
             <section class="wizard-step is-active" data-step="1">
-                <h2>1. Select module</h2>
+                <h2>1. Select subscription</h2>
                 <p class="step-description">
-                    Select the module that should be enabled for the new customer.
+                    Select a billing period and then choose the subscription that should be enabled for the new customer.
                 </p>
 
-                <div class="module-options">
-                    <article class="module-option">
-                        <div>
-                            <h3>Basis Module Requirements</h3>
-                            <p>
-                                Basis Module is to support the complete lifecycle of requirements: from capturing
-                                stakeholder needs, deriving system-level specifications, establishing traceability,
-                                to verifying compliance.
-                            </p>
-                            <p>
-                                This software should help product managers, engineers, QA, and business stakeholders
-                                collaborate efficiently and ensure full requirement coverage, traceability, and testability.
-                            </p>
-                            <div class="module-price">Price XXXX kr/monthly</div>
-                        </div>
-
-                        <label class="module-radio">
-                            <input type="radio" name="module" value="BASIS-MODULE" checked>
-                            Select Basis Module
-                        </label>
-                    </article>
-
-                    <article class="module-option is-disabled">
-                        <div>
-                            <h3>Pro Module Requirements</h3>
-                            <p>
-                                Pro Module is to support and integrate the complete lifecycle of full RFLP methodologies:
-                                (R) from capturing stakeholder and system requirements, establishing traceability between
-                                stakeholder and system requirement, including all functions in Basis Module.
-                            </p>
-                            <div class="module-price">Price YYYYY kr/monthly</div>
-                        </div>
-
-                        <label class="module-radio">
-                            <input type="radio" name="module" value="PRO-MODULE" disabled>
-                            Pro Module coming soon
-                        </label>
-                    </article>
-
-                    <article class="module-option is-disabled">
-                        <div>
-                            <h3>Master Module</h3>
-                            <p>
-                                Master Module includes all functionality from Pro Module plus TRL, IRL, DRL and
-                                Configuration / Modularisation architectures.
-                            </p>
-                            <p>
-                                This module is intended for organisations that need extended architecture management,
-                                maturity tracking and advanced configuration support across complex product platforms.
-                            </p>
-                            <div class="module-price">Price ZZZZZ kr/monthly</div>
-                        </div>
-
-                        <label class="module-radio">
-                            Master Module coming soon
-                            <input type="radio" name="module" value="MASTER-MODULE" disabled>
-                        </label>
-                    </article>
-                </div>
+                <div class="billing-period-bar" id="billingPeriodsBar" aria-label="Billing periods"></div>
+                <div class="subscription-grid" id="subscriptionCards" aria-label="Subscriptions"></div>
 
                 <p class="message message-error" data-error-for-step="1"></p>
 
@@ -784,65 +1047,74 @@
             <section class="wizard-step" data-step="2">
                 <h2>2. Customer information</h2>
                 <p class="step-description">
-                    Enter customer information. CVR number is optional. If entered, you can fetch available company data
-                    from Virk.dk.
+                    Enter customer information. Company name and VAT number are used for the EU validation flow.
                 </p>
 
                 <div class="form-grid">
-                    <div class="customer-cvr-row">
-                        <div class="form-field field-cvr">
-                            <label for="customerCvrNumber">CVR nr optional</label>
+                    <div class="customer-cvr-row" id="customerCvrRow">
+                        <div class="form-field field-company-name">
+                            <label for="customerName">Company Name</label>
+                            <input type="text" id="customerName" name="customerName" required>
+                        </div>
+
+                        <div class="customer-cvr-stack" id="customerCvrStack">
+                            <div class="form-field field-cvr" id="customerCvrField">
+                                <label for="customerCvrNumber">CVR nr optional</label>
+                                <input
+                                        type="text"
+                                        id="customerCvrNumber"
+                                        name="customerCvrNumber"
+                                        inputmode="numeric"
+                                        maxlength="8"
+                                        pattern="[0-9]{8}"
+                                        autocomplete="off">
+                                <p class="field-help">Optional. Exactly 8 digits.</p>
+                            </div>
+
+                            <div class="customer-cvr-action" id="customerCvrAction">
+                                <button type="button" class="button button-secondary" id="fetchFromVirkButton" disabled>
+                                    Fetch from Virk.dk
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-field field-vat">
+                            <label for="customerVatNumber">VAT number</label>
                             <input
                                     type="text"
-                                    id="customerCvrNumber"
-                                    name="customerCvrNumber"
-                                    inputmode="numeric"
-                                    maxlength="8"
-                                    pattern="[0-9]{8}"
+                                    id="customerVatNumber"
+                                    name="customerVatNumber"
+                                    maxlength="20"
                                     autocomplete="off">
-                            <p class="field-help">Optional. Exactly 8 digits.</p>
-                        </div>
-
-                        <div class="customer-cvr-action">
-                            <button type="button" class="button button-secondary" id="fetchFromVirkButton" disabled>
-                                Fetch from Virk.dk
-                            </button>
+                            <p class="field-help">Required for EU countries.</p>
                         </div>
                     </div>
 
-                    <div class="form-field span-6">
-                        <label for="customerName">Name</label>
-                        <input type="text" id="customerName" name="customerName" required>
-                    </div>
+                    <div class="customer-address-row">
+                        <div class="form-field field-address">
+                            <label for="customerAddress">Address</label>
+                            <input type="text" id="customerAddress" name="customerAddress" required>
+                        </div>
 
-                    <div class="form-field span-6">
-                        <label for="customerAddress">Address</label>
-                        <input type="text" id="customerAddress" name="customerAddress" required>
-                    </div>
+                        <div class="form-field field-zipcode">
+                            <label for="customerZipCode">Zip Code</label>
+                            <input
+                                    type="text"
+                                    id="customerZipCode"
+                                    name="customerZipCode"
+                                    maxlength="10"
+                                    required>
+                        </div>
 
-                    <div class="form-field field-zipcode">
-                        <label for="customerZipCode">ZipCode</label>
-                        <input
-                                type="text"
-                                id="customerZipCode"
-                                name="customerZipCode"
-                                maxlength="10"
-                                required>
-                    </div>
+                        <div class="form-field field-city">
+                            <label for="customerCity">City</label>
+                            <input type="text" id="customerCity" name="customerCity" required>
+                        </div>
 
-                    <div class="form-field field-city">
-                        <label for="customerCity">City</label>
-                        <input type="text" id="customerCity" name="customerCity" required>
-                    </div>
-
-                    <div class="form-field field-country">
-                        <label for="customerCountry">Country</label>
-                        <select id="customerCountry" name="customerCountry" required></select>
-                    </div>
-
-                    <div class="form-field field-country-code">
-                        <label for="customerPhoneCountryCode">Country Code</label>
-                        <select id="customerPhoneCountryCode" name="customerPhoneCountryCode" required></select>
+                        <div class="form-field field-country">
+                            <label for="customerCountry">Country</label>
+                            <select id="customerCountry" name="customerCountry" required></select>
+                        </div>
                     </div>
 
                     <div class="form-field field-phone">
@@ -851,11 +1123,10 @@
                                 type="text"
                                 id="customerPhone"
                                 name="customerPhone"
-                                maxlength="20"
                                 inputmode="tel"
                                 autocomplete="tel-national"
                                 required>
-                        <p class="field-help" id="customerPhoneHelp">Select country code and enter phone number.</p>
+                        <p class="field-help" id="customerPhoneHelp">Country code is included automatically.</p>
                     </div>
 
                     <div class="form-field field-email">
@@ -865,6 +1136,24 @@
                 </div>
 
                 <p class="message message-error" data-error-for-step="2"></p>
+
+                <div class="vat-validation-status is-hidden" id="vatValidationStatus" aria-live="polite">
+                    <div class="vat-validation-illustration" aria-hidden="true">
+                        <div class="vat-keyboard"></div>
+                        <div class="vat-key key-1"></div>
+                        <div class="vat-key key-2"></div>
+                        <div class="vat-key key-3"></div>
+                        <div class="vat-key key-4"></div>
+                        <div class="vat-key key-5"></div>
+                        <div class="vat-key key-6"></div>
+                        <div class="vat-finger finger-1"></div>
+                        <div class="vat-finger finger-2"></div>
+                    </div>
+                    <div class="vat-validation-status-text" id="vatValidationStatusText">
+                        <strong>Validating VAT with VIES</strong>
+                        Waiting for the official EU response.
+                    </div>
+                </div>
 
                 <div class="button-row">
                     <button type="button" class="button button-secondary" data-previous-step>
@@ -967,20 +1256,18 @@
 
                 <div class="confirmation-grid">
                     <article class="confirmation-section">
-                        <h3>Module</h3>
+                        <h3>Subscription</h3>
                         <dl class="summary-list">
-                            <dt>Selected module</dt>
-                            <dd id="summaryModule">-</dd>
-                            <dt>Price</dt>
-                            <dd id="summaryPrice">-</dd>
-                        </dl>
-                    </article>
-
-                    <article class="confirmation-section">
-                        <h3>CVR</h3>
-                        <dl class="summary-list">
-                            <dt>CVR number</dt>
-                            <dd id="summaryCvrNumber">-</dd>
+                            <dt>Selected subscription</dt>
+                            <dd id="summarySubscription">-</dd>
+                            <dt>Billing period</dt>
+                            <dd id="summaryBillingPeriod">-</dd>
+                            <dt>Price excl. VAT</dt>
+                            <dd id="summaryPriceExclVat">-</dd>
+                            <dt>VAT</dt>
+                            <dd id="summaryVatAmount">-</dd>
+                            <dt>Price incl. VAT</dt>
+                            <dd id="summaryPriceInclVat">-</dd>
                         </dl>
                     </article>
 
@@ -991,6 +1278,8 @@
                             <dd id="summaryCustomerName">-</dd>
                             <dt>Address</dt>
                             <dd id="summaryCustomerAddress">-</dd>
+                            <dt>VAT number</dt>
+                            <dd id="summaryCustomerVatNumber">-</dd>
                             <dt>ZipCode</dt>
                             <dd id="summaryCustomerZipCode">-</dd>
                             <dt>City</dt>
@@ -1001,6 +1290,8 @@
                             <dd id="summaryCustomerPhone">-</dd>
                             <dt>Administrator email</dt>
                             <dd id="summaryCustomerAdministratorEmail">-</dd>
+                            <dt hidden>CVR number</dt>
+                            <dd id="summaryCvrNumber" hidden>-</dd>
                         </dl>
                     </article>
 
@@ -1064,6 +1355,7 @@
     </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
         const totalSteps = 5;
@@ -1113,36 +1405,76 @@
             { country: "Greenland", code: "+299", min: 6, max: 6, example: "123456" }
         ];
 
-        let phoneCountryCodes = fallbackPhoneCountryCodes.slice();
-
-        const DEFAULT_PHONE_RULE = {
-            country: "Selected country",
-            code: "",
-            min: 4,
-            max: 15,
-            example: "Enter phone number"
-        };
-
         const wizardForm = document.getElementById("createCustomerWizard");
         const progressSteps = Array.from(document.querySelectorAll("[data-progress-step]"));
         const wizardSteps = Array.from(document.querySelectorAll("[data-step]"));
 
+        const billingPeriodsBar = document.getElementById("billingPeriodsBar");
+        const subscriptionCards = document.getElementById("subscriptionCards");
+        const customerCvrRow = document.getElementById("customerCvrRow");
+        const customerCvrStack = document.getElementById("customerCvrStack");
+        const customerCvrField = document.getElementById("customerCvrField");
+        const customerCvrAction = document.getElementById("customerCvrAction");
+
         const fetchFromVirkButton = document.getElementById("fetchFromVirkButton");
 
+        const customerRegistrationConfig = {
+            cvrLookupEnabled: true
+        };
+
+        const vatRatesByCountry = {
+            AT: 0.20,
+            BE: 0.21,
+            BG: 0.20,
+            HR: 0.25,
+            CY: 0.19,
+            CZ: 0.21,
+            DK: 0.25,
+            EE: 0.24,
+            FI: 0.255,
+            FR: 0.20,
+            DE: 0.19,
+            GR: 0.24,
+            HU: 0.27,
+            IE: 0.23,
+            IT: 0.22,
+            LV: 0.21,
+            LT: 0.21,
+            LU: 0.17,
+            MT: 0.18,
+            NL: 0.21,
+            PL: 0.23,
+            PT: 0.23,
+            RO: 0.19,
+            SK: 0.23,
+            SI: 0.22,
+            ES: 0.21,
+            SE: 0.25
+        };
+
+        const customerDisplayState = {
+            viesCompanyName: "",
+            viesAddress: ""
+        };
+
         const customerFields = {
+            vatNumber: document.getElementById("customerVatNumber"),
             cvrNumber: document.getElementById("customerCvrNumber"),
             name: document.getElementById("customerName"),
             address: document.getElementById("customerAddress"),
             zipCode: document.getElementById("customerZipCode"),
             city: document.getElementById("customerCity"),
             country: document.getElementById("customerCountry"),
-            phoneCountryCode: document.getElementById("customerPhoneCountryCode"),
             phone: document.getElementById("customerPhone"),
             phoneHelp: document.getElementById("customerPhoneHelp"),
             administratorEmail: document.getElementById("customerAdministratorEmail")
         };
 
+        let phoneIti = null;
+
         const customerInfoNextButton = document.getElementById("customerInfoNextButton");
+        const vatValidationStatus = document.getElementById("vatValidationStatus");
+        const vatValidationStatusText = document.getElementById("vatValidationStatusText");
 
         const paymentFields = {
             cardholderName: document.getElementById("cardholderName"),
@@ -1160,8 +1492,12 @@
         const customerCreatedReceiptText = document.getElementById("customerCreatedReceiptText");
 
         const summary = {
-            module: document.getElementById("summaryModule"),
-            price: document.getElementById("summaryPrice"),
+            subscription: document.getElementById("summarySubscription"),
+            billingPeriod: document.getElementById("summaryBillingPeriod"),
+            priceExclVat: document.getElementById("summaryPriceExclVat"),
+            vatAmount: document.getElementById("summaryVatAmount"),
+            priceInclVat: document.getElementById("summaryPriceInclVat"),
+            customerVatNumber: document.getElementById("summaryCustomerVatNumber"),
             cvrNumber: document.getElementById("summaryCvrNumber"),
             customerName: document.getElementById("summaryCustomerName"),
             customerAddress: document.getElementById("summaryCustomerAddress"),
@@ -1174,6 +1510,96 @@
             cardNumber: document.getElementById("summaryCardNumber"),
             cardExpiry: document.getElementById("summaryCardExpiry"),
             billingZipCode: document.getElementById("summaryBillingZipCode")
+        };
+
+        const subscriptionSelectionState = {
+            billingPeriods: [],
+            subscriptions: [],
+            selectedBillingPeriodCode: "",
+            selectedSubscriptionPlanId: null
+        };
+
+        const EU_COUNTRY_CODES = new Set([
+            "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR",
+            "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK",
+            "SI", "ES", "SE"
+        ]);
+
+        const fallbackSubscriptionOptions = {
+            billingPeriods: [
+                {
+                    code: "MONTHLY",
+                    label: "Monthly",
+                    description: "Monthly billing period",
+                    months: 1,
+                    displayOrder: 1,
+                    active: true
+                },
+                {
+                    code: "QUARTERLY",
+                    label: "Quarterly",
+                    description: "Quarterly billing period",
+                    months: 3,
+                    displayOrder: 2,
+                    active: true
+                },
+                {
+                    code: "SEMI_ANNUAL",
+                    label: "Semi-annual",
+                    description: "Semi-annual billing period",
+                    months: 6,
+                    displayOrder: 3,
+                    active: true
+                },
+                {
+                    code: "ANNUAL",
+                    label: "Annually",
+                    description: "Annual billing period",
+                    months: 12,
+                    displayOrder: 4,
+                    active: true
+                }
+            ],
+            subscriptions: [
+                {
+                    subscriptionPlanId: 1,
+                    subscriptionCode: "BASIS-MODULE",
+                    subscriptionLabel: "Basis",
+                    description: "Basis Module is to support the complete lifecycle of requirements: from capturing stakeholder needs, deriving system-level specifications, establishing traceability, to verifying compliance.",
+                    validFrom: "",
+                    validTo: "",
+                    displayOrder: 1,
+                    active: true,
+                    billingPeriods: [
+                        { code: "MONTHLY", label: "Monthly", description: "Monthly billing period", months: 1, priceAmount: "1000", currency: "EUR", displayOrder: 1, active: true },
+                        { code: "QUARTERLY", label: "Quarterly", description: "Quarterly billing period", months: 3, priceAmount: "3000", currency: "EUR", displayOrder: 2, active: true },
+                        { code: "SEMI_ANNUAL", label: "Semi-annual", description: "Semi-annual billing period", months: 6, priceAmount: "6000", currency: "EUR", displayOrder: 3, active: true },
+                        { code: "ANNUAL", label: "Annually", description: "Annual billing period", months: 12, priceAmount: "12000", currency: "EUR", displayOrder: 4, active: true }
+                    ]
+                },
+                {
+                    subscriptionPlanId: 2,
+                    subscriptionCode: "PRO-MODULE",
+                    subscriptionLabel: "Pro",
+                    description: "Pro Module is to support and integrate the complete lifecycle of full RFLP methodologies.",
+                    validFrom: "",
+                    validTo: "",
+                    displayOrder: 2,
+                    active: false,
+                    billingPeriods: []
+                },
+                {
+                    subscriptionPlanId: 3,
+                    subscriptionCode: "MASTER-MODULE",
+                    subscriptionLabel: "Master",
+                    description: "Master Module includes all functionality from Pro Module plus TRL, IRL, DRL and Configuration / Modularisation architectures.",
+                    validFrom: "",
+                    validTo: "",
+                    displayOrder: 3,
+                    active: false,
+                    billingPeriods: []
+                }
+            ]
         };
 
         function getApplicationBaseUrl() {
@@ -1229,43 +1655,6 @@
                 .replaceAll("'", "&#039;");
         }
 
-        async function loadPhoneCountryCodes() {
-            try {
-                const response = await fetch(`${getCustomerApiBaseUrl()}/phone-country-codes`, {
-                    headers: {
-                        Accept: "application/json"
-                    },
-                    cache: "no-store",
-                    credentials: "same-origin"
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status} ${response.statusText}`);
-                }
-
-                const data = await response.json();
-
-                if (Array.isArray(data) && data.length) {
-                    phoneCountryCodes = data.map(function (entry) {
-                        return {
-                            country: String(entry.country || entry.label || "").trim(),
-                            code: String(entry.code || "").trim(),
-                            min: Number.isFinite(entry.min) ? entry.min : 0,
-                            max: Number.isFinite(entry.max) ? entry.max : 15,
-                            example: String(entry.example || "").trim()
-                        };
-                    }).filter(function (entry) {
-                        return entry.country && entry.code;
-                    });
-                } else {
-                    phoneCountryCodes = fallbackPhoneCountryCodes.slice();
-                }
-            } catch (error) {
-                console.warn("Could not load phone country codes from backend, using fallback list.", error);
-                phoneCountryCodes = fallbackPhoneCountryCodes.slice();
-            }
-        }
-
         function fillCountries() {
             const displayNames = typeof Intl !== "undefined" && Intl.DisplayNames
                 ? new Intl.DisplayNames(["en"], { type: "region" })
@@ -1289,6 +1678,7 @@
                 const option = document.createElement("option");
                 option.value = country.name;
                 option.textContent = country.name;
+                option.dataset.code = country.code;
 
                 if (country.code === "DK") {
                     option.selected = true;
@@ -1298,159 +1688,183 @@
             });
         }
 
-        function fillPhoneCountryCodes() {
-            phoneCountryCodes
-                .slice()
-                .sort(function (a, b) {
-                    return a.country.localeCompare(b.country);
-                })
-                .forEach(function (entry) {
-                    const option = document.createElement("option");
-                    option.value = entry.code;
-                    option.textContent = `${entry.country} (${entry.code})`;
-                    option.dataset.country = entry.country;
-
-                    if (entry.country === "Denmark" && entry.code === "+45") {
-                        option.selected = true;
-                    }
-
-                    customerFields.phoneCountryCode.appendChild(option);
+        async function loadCustomerRegistrationConfig() {
+            try {
+                const response = await fetch(`${getCustomerApiBaseUrl()}/config`, {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json"
+                    },
+                    credentials: "same-origin",
+                    cache: "no-store"
                 });
-        }
 
-        function selectedPhoneRule() {
-            const selectedOption = customerFields.phoneCountryCode.options[customerFields.phoneCountryCode.selectedIndex];
-
-            if (!selectedOption) {
-                return DEFAULT_PHONE_RULE;
-            }
-
-            const country = selectedOption.dataset.country || "";
-            const code = selectedOption.value || "";
-
-            return phoneCountryCodes.find(function (rule) {
-                return rule.country === country && rule.code === code;
-            }) || {
-                ...DEFAULT_PHONE_RULE,
-                country,
-                code
-            };
-        }
-
-        function formatPhoneDigits(digits, rule) {
-            const safeDigits = onlyDigits(digits).slice(0, rule.max || 15);
-
-            if (!safeDigits) {
-                return "";
-            }
-
-            if (rule.code === "+45" && safeDigits.length <= 8) {
-                return safeDigits.replace(/(\d{2})(?=\d)/g, "$1 ").trim();
-            }
-
-            if (rule.code === "+47" && safeDigits.length <= 8) {
-                return safeDigits.replace(/^(\d{3})(\d{0,2})(\d{0,3}).*/, function (_match, first, second, third) {
-                    return [first, second, third].filter(Boolean).join(" ");
-                });
-            }
-
-            if (rule.code === "+1" && safeDigits.length <= 10) {
-                if (safeDigits.length <= 3) {
-                    return safeDigits;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} ${response.statusText}`);
                 }
 
-                if (safeDigits.length <= 6) {
-                    return `(${safeDigits.slice(0, 3)}) ${safeDigits.slice(3)}`;
-                }
+                const data = await response.json();
+                customerRegistrationConfig.cvrLookupEnabled = data?.cvrLookupEnabled !== false;
+            } catch (error) {
+                console.warn("Could not load customer registration config, using defaults.", error);
+                customerRegistrationConfig.cvrLookupEnabled = true;
+            }
+        }
 
-                return `(${safeDigits.slice(0, 3)}) ${safeDigits.slice(3, 6)}-${safeDigits.slice(6)}`;
+        function applyCustomerRegistrationConfig() {
+            const enabled = customerRegistrationConfig.cvrLookupEnabled !== false;
+
+            if (customerCvrRow) {
+                customerCvrRow.classList.toggle("is-cvr-disabled", !enabled);
             }
 
-            if (rule.code === "+44" && safeDigits.length <= 10) {
-                return safeDigits.replace(/^(\d{4})(\d{0,6}).*/, function (_match, first, second) {
-                    return [first, second].filter(Boolean).join(" ");
-                });
+            if (customerCvrStack) {
+                customerCvrStack.hidden = !enabled;
             }
 
-            if (rule.code === "+33" && safeDigits.length <= 9) {
-                return safeDigits.replace(/^(\d)(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2}).*/, function (_match, first, second, third, fourth, fifth) {
-                    return [first, second, third, fourth, fifth].filter(Boolean).join(" ");
-                });
+            if (customerCvrField) {
+                customerCvrField.hidden = !enabled;
             }
 
-            if (rule.code === "+48" && safeDigits.length <= 9) {
-                return safeDigits.replace(/^(\d{3})(\d{0,3})(\d{0,3}).*/, function (_match, first, second, third) {
-                    return [first, second, third].filter(Boolean).join(" ");
-                });
+            if (customerCvrAction) {
+                customerCvrAction.hidden = !enabled;
+            }
+        }
+
+        function initializePhoneInput() {
+            if (!customerFields.phone || !window.intlTelInput) {
+                return;
             }
 
-            if (safeDigits.length <= 6) {
-                return safeDigits;
-            }
+            const initialCountry = selectedCustomerCountryCode().toLowerCase() || "dk";
 
-            if (safeDigits.length <= 10) {
-                return safeDigits.replace(/^(\d{3})(\d{0,3})(\d{0,4}).*/, function (_match, first, second, third) {
-                    return [first, second, third].filter(Boolean).join(" ");
-                });
-            }
+            phoneIti = window.intlTelInput(customerFields.phone, {
+                initialCountry,
+                preferredCountries: ["dk", "se", "no", "de", "us"],
+                separateDialCode: true,
+                loadUtils: () => import("https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/utils.js")
+            });
 
-            return safeDigits.replace(/^(\d{3})(\d{0,4})(\d{0,4})(\d{0,4}).*/, function (_match, first, second, third, fourth) {
-                return [first, second, third, fourth].filter(Boolean).join(" ");
+            customerFields.phone.addEventListener("countrychange", function () {
+                updatePhoneHelp();
+                updateCustomerInfoButtonState();
             });
         }
 
-        function updatePhoneHelp() {
-            const rule = selectedPhoneRule();
+        function syncPhoneCountryToCustomerCountry() {
+            if (!phoneIti) {
+                return;
+            }
 
+            const countryCode = selectedCustomerCountryCode().toLowerCase();
+
+            if (!countryCode) {
+                return;
+            }
+
+            try {
+                phoneIti.setCountry(countryCode);
+            } catch (_error) {
+                // Leave the existing country when the selected code is not supported.
+            }
+        }
+
+        function selectedCustomerCountryOption() {
+            if (!customerFields.country) {
+                return null;
+            }
+
+            return customerFields.country.options[customerFields.country.selectedIndex] || null;
+        }
+
+        function selectedCustomerCountryCode() {
+            const option = selectedCustomerCountryOption();
+            return option ? String(option.dataset.code || "").trim().toUpperCase() : "";
+        }
+
+        function isEuCountryCode(countryCode) {
+            return EU_COUNTRY_CODES.has(String(countryCode || "").trim().toUpperCase());
+        }
+
+        function normalizeVatNumber(value) {
+            return String(value || "")
+                .replace(/[\s.-]+/g, "")
+                .toUpperCase()
+                .trim();
+        }
+
+        function isValidVatFormat(vatNumber) {
+            return /^[A-Z0-9]{2,20}$/.test(normalizeVatNumber(vatNumber));
+        }
+
+        function getVatValidationError() {
+            const countryCode = selectedCustomerCountryCode();
+            const vatNumber = normalizeVatNumber(customerFields.vatNumber.value);
+
+            if (!isEuCountryCode(countryCode)) {
+                return null;
+            }
+
+            if (!vatNumber) {
+                return "VAT number is required for EU countries.";
+            }
+
+            if (!isValidVatFormat(vatNumber)) {
+                return "VAT number format is invalid.";
+            }
+
+            return null;
+        }
+
+        function updatePhoneHelp() {
             if (!customerFields.phoneHelp) {
                 return;
             }
 
-            if (rule.min === rule.max) {
-                customerFields.phoneHelp.textContent = `${rule.country}: exactly ${rule.min} digits. Example: ${rule.example}`;
-            } else {
-                customerFields.phoneHelp.textContent = `${rule.country}: ${rule.min}-${rule.max} digits. Example: ${rule.example}`;
-            }
+            const countryData = phoneIti?.getSelectedCountryData?.() || null;
+            const countryLabel = countryData?.name ? String(countryData.name).trim() : "";
+            const dialCode = countryData?.dialCode ? `+${countryData.dialCode}` : "";
+
+            customerFields.phoneHelp.textContent = dialCode
+                ? `${countryLabel || "Selected country"} ${dialCode} is included automatically.`
+                : "Country code is included automatically.";
         }
 
         function formatCurrentPhoneValue() {
-            const rule = selectedPhoneRule();
-            const digits = onlyDigits(customerFields.phone.value);
-
-            customerFields.phone.value = formatPhoneDigits(digits, rule);
-            customerFields.phone.maxLength = Math.max((rule.max || 15) + 6, 15);
-
+            syncPhoneCountryToCustomerCountry();
             updatePhoneHelp();
         }
 
         function validatePhoneNumber() {
-            const rule = selectedPhoneRule();
-            const digits = onlyDigits(customerFields.phone.value);
+            const phone = customerFields.phone.value.trim();
 
-            if (!digits) {
+            if (!phone) {
                 return "Phone is required.";
             }
 
-            if (rule.min === rule.max && digits.length !== rule.min) {
-                return `Phone number for ${rule.country} must contain exactly ${rule.min} digits.`;
+            if (!phoneIti) {
+                return null;
             }
 
-            if (digits.length < rule.min || digits.length > rule.max) {
-                return `Phone number for ${rule.country} must contain between ${rule.min} and ${rule.max} digits.`;
+            if (!phoneIti.isValidNumber()) {
+                return "Phone number is invalid.";
             }
 
             return null;
         }
 
         function getFullPhoneNumber() {
-            const rule = selectedPhoneRule();
             const phone = customerFields.phone.value.trim();
 
-            if (!rule.code && !phone) {
+            if (!phone) {
                 return "";
             }
 
-            return `${rule.code} ${phone}`.trim();
+            if (!phoneIti) {
+                return phone;
+            }
+
+            return phoneIti.isValidNumber() ? phoneIti.getNumber() : phone;
         }
 
         function fillExpiryYears() {
@@ -1465,38 +1879,281 @@
             }
         }
 
-        function getSelectedModule() {
-            const selected = wizardForm.querySelector('input[name="module"]:checked');
+        async function loadSubscriptionOptions() {
+            try {
+                const response = await fetch(`${getCustomerApiBaseUrl()}/subscription-options`, {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json"
+                    },
+                    credentials: "same-origin"
+                });
 
-            if (!selected) {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                applySubscriptionOptions(normalizeSubscriptionOptions(data));
+            } catch (error) {
+                console.warn("Could not load subscription options from backend, using fallback data.", error);
+                applySubscriptionOptions(normalizeSubscriptionOptions(fallbackSubscriptionOptions));
+            }
+        }
+
+        function normalizeSubscriptionOptions(data) {
+            const billingPeriods = Array.isArray(data && data.billingPeriods) ? data.billingPeriods : [];
+            const subscriptions = Array.isArray(data && data.subscriptions) ? data.subscriptions : [];
+
+            return {
+                billingPeriods: billingPeriods.map(function (billingPeriod) {
+                    return {
+                        code: String(billingPeriod.code || "").trim(),
+                        label: String(billingPeriod.label || billingPeriod.code || "").trim(),
+                        description: String(billingPeriod.description || "").trim(),
+                        months: Number.isFinite(Number(billingPeriod.months)) ? Number(billingPeriod.months) : 1,
+                        displayOrder: Number.isFinite(Number(billingPeriod.displayOrder)) ? Number(billingPeriod.displayOrder) : 999,
+                        active: billingPeriod.active !== false
+                    };
+                }).filter(function (billingPeriod) {
+                    return billingPeriod.code;
+                }),
+                subscriptions: subscriptions.map(function (subscription) {
+                    return {
+                        subscriptionPlanId: subscription.subscriptionPlanId == null ? null : Number(subscription.subscriptionPlanId),
+                        subscriptionCode: String(subscription.subscriptionCode || "").trim(),
+                        subscriptionLabel: String(subscription.subscriptionLabel || subscription.subscriptionCode || "").trim(),
+                        description: String(subscription.description || "").trim(),
+                        validFrom: String(subscription.validFrom || "").trim(),
+                        validTo: String(subscription.validTo || "").trim(),
+                        displayOrder: Number.isFinite(Number(subscription.displayOrder)) ? Number(subscription.displayOrder) : 999,
+                        active: subscription.active !== false,
+                        billingPeriods: Array.isArray(subscription.billingPeriods) ? subscription.billingPeriods.map(function (billingPeriod) {
+                            return {
+                                code: String(billingPeriod.code || "").trim(),
+                                label: String(billingPeriod.label || billingPeriod.code || "").trim(),
+                                description: String(billingPeriod.description || "").trim(),
+                                months: Number.isFinite(Number(billingPeriod.months)) ? Number(billingPeriod.months) : 1,
+                                priceAmount: String(billingPeriod.priceAmount == null ? "" : billingPeriod.priceAmount).trim(),
+                                currency: String(billingPeriod.currency || "EUR").trim(),
+                                displayOrder: Number.isFinite(Number(billingPeriod.displayOrder)) ? Number(billingPeriod.displayOrder) : 999,
+                                active: billingPeriod.active !== false
+                            };
+                        }).filter(function (billingPeriod) {
+                            return billingPeriod.code;
+                        }) : []
+                    };
+                }).filter(function (subscription) {
+                    return subscription.subscriptionCode;
+                })
+            };
+        }
+
+        function applySubscriptionOptions(options) {
+            subscriptionSelectionState.billingPeriods = (options.billingPeriods || [])
+                .filter(function (billingPeriod) {
+                    return billingPeriod.active;
+                })
+                .sort(function (left, right) {
+                    return left.displayOrder - right.displayOrder || left.label.localeCompare(right.label);
+                });
+
+            subscriptionSelectionState.subscriptions = (options.subscriptions || [])
+                .filter(function (subscription) {
+                    return subscription.active && Array.isArray(subscription.billingPeriods) && subscription.billingPeriods.length > 0;
+                })
+                .sort(function (left, right) {
+                    return left.displayOrder - right.displayOrder || left.subscriptionLabel.localeCompare(right.subscriptionLabel);
+                });
+
+            if (!subscriptionSelectionState.billingPeriods.some(function (billingPeriod) {
+                return billingPeriod.code === subscriptionSelectionState.selectedBillingPeriodCode;
+            })) {
+                subscriptionSelectionState.selectedBillingPeriodCode = subscriptionSelectionState.billingPeriods.length
+                    ? subscriptionSelectionState.billingPeriods[0].code
+                    : "";
+            }
+
+            if (!subscriptionSelectionState.subscriptions.some(function (subscription) {
+                return subscription.subscriptionPlanId === subscriptionSelectionState.selectedSubscriptionPlanId;
+            })) {
+                const defaultSubscription = subscriptionSelectionState.subscriptions[0] || null;
+                subscriptionSelectionState.selectedSubscriptionPlanId = defaultSubscription ? defaultSubscription.subscriptionPlanId : null;
+            }
+
+            renderSubscriptionSelection();
+        }
+
+        function getSelectedSubscription() {
+            return subscriptionSelectionState.subscriptions.find(function (subscription) {
+                return subscription.subscriptionPlanId === subscriptionSelectionState.selectedSubscriptionPlanId;
+            }) || null;
+        }
+
+        function getSelectedBillingPeriod() {
+            return subscriptionSelectionState.billingPeriods.find(function (billingPeriod) {
+                return billingPeriod.code === subscriptionSelectionState.selectedBillingPeriodCode;
+            }) || null;
+        }
+
+        function getSelectedBillingPeriodForSubscription(subscription) {
+            if (!subscription || !Array.isArray(subscription.billingPeriods)) {
                 return null;
             }
 
-            if (selected.value === "BASIS-MODULE") {
+            return subscription.billingPeriods.find(function (billingPeriod) {
+                return billingPeriod.code === subscriptionSelectionState.selectedBillingPeriodCode;
+            }) || null;
+        }
+
+        function formatSubscriptionPrice(priceAmount, currency) {
+            const amount = Number(priceAmount);
+
+            if (!Number.isFinite(amount)) {
+                return "-";
+            }
+
+            const currencyText = String(currency || "").trim().toUpperCase();
+
+            try {
+                return new Intl.NumberFormat("en-GB", {
+                    style: "currency",
+                    currency: currencyText || "EUR",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(amount);
+            } catch (_error) {
+                const priceText = amount.toFixed(2);
+                return currencyText ? `${currencyText} ${priceText}` : priceText;
+            }
+        }
+
+        function formatMonthlyEquivalent(priceAmount, currency, months) {
+            const amount = Number(priceAmount);
+            const periodMonths = Number(months);
+
+            if (!Number.isFinite(amount) || !Number.isFinite(periodMonths) || periodMonths <= 1) {
+                return "";
+            }
+
+            return formatSubscriptionPrice(amount / periodMonths, currency);
+        }
+
+        function getVatRateForCountry(countryCode) {
+            return vatRatesByCountry[String(countryCode || "").trim().toUpperCase()] || 0;
+        }
+
+        function calculateVatBreakdown(netAmount, countryCode) {
+            const amount = Number(netAmount);
+            const vatRate = getVatRateForCountry(countryCode);
+
+            if (!Number.isFinite(amount) || amount < 0) {
                 return {
-                    code: "BASIS-MODULE",
-                    name: "Basis Module",
-                    price: "XXXX kr/monthly"
+                    vatRate,
+                    netAmount: null,
+                    vatAmount: null,
+                    grossAmount: null
                 };
             }
 
-            if (selected.value === "PRO-MODULE") {
-                return {
-                    code: "PRO-MODULE",
-                    name: "Pro Module",
-                    price: "YYYYY kr/monthly"
-                };
+            const vatAmount = amount * vatRate;
+
+            return {
+                vatRate,
+                netAmount: amount,
+                vatAmount,
+                grossAmount: amount + vatAmount
+            };
+        }
+
+        function renderSubscriptionSelection() {
+            if (billingPeriodsBar) {
+                billingPeriodsBar.innerHTML = subscriptionSelectionState.billingPeriods.map(function (billingPeriod) {
+                    const selected = billingPeriod.code === subscriptionSelectionState.selectedBillingPeriodCode ? " is-selected" : "";
+
+                    return `
+                        <button type="button" class="billing-period-button${selected}" data-billing-period-code="${escapeHtml(billingPeriod.code)}">
+                            ${escapeHtml(billingPeriod.label)}
+                        </button>
+                    `;
+                }).join("");
             }
 
-            if (selected.value === "MASTER-MODULE") {
-                return {
-                    code: "MASTER-MODULE",
-                    name: "Master Module",
-                    price: "ZZZZZ kr/monthly"
-                };
+            if (subscriptionCards) {
+                subscriptionCards.innerHTML = subscriptionSelectionState.subscriptions.map(function (subscription) {
+                    const billingPeriod = getSelectedBillingPeriodForSubscription(subscription);
+                    const selected = subscription.subscriptionPlanId === subscriptionSelectionState.selectedSubscriptionPlanId;
+                    const priceText = billingPeriod ? formatSubscriptionPrice(billingPeriod.priceAmount, billingPeriod.currency) : "-";
+                    const periodMonthlyText = billingPeriod
+                        ? formatMonthlyEquivalent(billingPeriod.priceAmount, billingPeriod.currency, billingPeriod.months)
+                        : "";
+
+                    return `
+                        <article class="subscription-card${selected ? " is-selected" : ""}${billingPeriod ? "" : " is-disabled"}">
+                            <div>
+                                <h3>${escapeHtml(subscription.subscriptionLabel)}</h3>
+                                <p class="subscription-card-description">${escapeHtml(subscription.description)}</p>
+                            </div>
+                            <div class="subscription-card-bottom">
+                                <div class="subscription-card-price">${escapeHtml(priceText)}</div>
+                                <div class="subscription-card-vat">+ VAT</div>
+                                <div class="subscription-card-footer">
+                                    <div class="subscription-card-period">
+                                        <span class="subscription-card-period-main">${escapeHtml(billingPeriod ? billingPeriod.label : "")}</span>
+                                        ${periodMonthlyText ? `<span class="subscription-card-period-monthly">(${escapeHtml(periodMonthlyText)} per month)</span>` : ""}
+                                    </div>
+                                    <button
+                                            type="button"
+                                            class="subscription-select-button${selected ? " is-selected" : ""}"
+                                            data-subscription-plan-id="${escapeHtml(subscription.subscriptionPlanId)}"
+                                            ${billingPeriod ? "" : "disabled"}>
+                                        Select
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join("");
+            }
+        }
+
+        function handleSubscriptionSelectionClick(event) {
+            const billingPeriodButton = event.target.closest("[data-billing-period-code]");
+            if (billingPeriodButton && billingPeriodsBar && billingPeriodsBar.contains(billingPeriodButton)) {
+                subscriptionSelectionState.selectedBillingPeriodCode = billingPeriodButton.getAttribute("data-billing-period-code") || "";
+
+                const matchingSubscription = subscriptionSelectionState.subscriptions.find(function (subscription) {
+                    return Array.isArray(subscription.billingPeriods)
+                        && subscription.billingPeriods.some(function (billingPeriod) {
+                            return billingPeriod.code === subscriptionSelectionState.selectedBillingPeriodCode;
+                        });
+                });
+
+                if (matchingSubscription) {
+                    subscriptionSelectionState.selectedSubscriptionPlanId = matchingSubscription.subscriptionPlanId;
+                }
+
+                renderSubscriptionSelection();
+                updateConfirmationSummary();
+                return;
             }
 
-            return null;
+            const subscriptionButton = event.target.closest("[data-subscription-plan-id]");
+            if (subscriptionButton && subscriptionCards && subscriptionCards.contains(subscriptionButton)) {
+                const subscriptionPlanId = parseInt(subscriptionButton.getAttribute("data-subscription-plan-id"), 10);
+                if (Number.isFinite(subscriptionPlanId)) {
+                    subscriptionSelectionState.selectedSubscriptionPlanId = subscriptionPlanId;
+
+                    const selectedSubscription = getSelectedSubscription();
+                    const selectedBillingPeriod = selectedSubscription ? getSelectedBillingPeriodForSubscription(selectedSubscription) : null;
+                    if (!selectedBillingPeriod && selectedSubscription && Array.isArray(selectedSubscription.billingPeriods) && selectedSubscription.billingPeriods.length) {
+                        subscriptionSelectionState.selectedBillingPeriodCode = selectedSubscription.billingPeriods[0].code;
+                    }
+
+                    renderSubscriptionSelection();
+                    updateConfirmationSummary();
+                }
+            }
         }
 
         function updateProgress() {
@@ -1534,10 +2191,16 @@
         }
 
         function validateStep1() {
-            const selectedModule = getSelectedModule();
+            const selectedSubscription = getSelectedSubscription();
+            const selectedBillingPeriod = getSelectedBillingPeriod();
 
-            if (!selectedModule) {
-                setStepError(1, "Please select a module.");
+            if (!selectedSubscription) {
+                setStepError(1, "Please select a subscription.");
+                return false;
+            }
+
+            if (!selectedBillingPeriod) {
+                setStepError(1, "Please select a billing period.");
                 return false;
             }
 
@@ -1607,15 +2270,49 @@
             }
         }
 
+        function clearViesOverrides() {
+            customerDisplayState.viesCompanyName = "";
+            customerDisplayState.viesAddress = "";
+        }
+
+        function applyViesCustomerDetails(viesResponse) {
+            const viesName = String(viesResponse?.viesName || "").trim();
+            const viesAddress = String(viesResponse?.viesAddress || "").trim();
+
+            clearViesOverrides();
+
+            if (viesName) {
+                customerDisplayState.viesCompanyName = viesName;
+                customerFields.name.value = viesName;
+            }
+
+            if (viesAddress) {
+                customerDisplayState.viesAddress = viesAddress;
+                customerFields.address.value = viesAddress;
+            }
+        }
+
         function fillBlankCustomerFieldsFromCompany(company) {
             setIfBlank(customerFields.name, company.name);
             setIfBlank(customerFields.address, company.address);
             setIfBlank(customerFields.zipCode, company.postalCode || company.zipCode);
             setIfBlank(customerFields.city, company.city);
-            setIfBlank(customerFields.country, company.country);
+            if (customerFields.country && isBlank(customerFields.country.value) && company.country) {
+                const matchingOption = Array.from(customerFields.country.options).find(function (option) {
+                    return option.value === company.country || option.textContent === company.country;
+                });
+
+                if (matchingOption) {
+                    customerFields.country.value = matchingOption.value;
+                }
+            }
 
             if (customerFields.phone && isBlank(customerFields.phone.value) && company.phone) {
-                customerFields.phone.value = onlyDigits(company.phone || "");
+                if (phoneIti) {
+                    phoneIti.setNumber(String(company.phone || "").trim());
+                } else {
+                    customerFields.phone.value = String(company.phone || "").trim();
+                }
                 formatCurrentPhoneValue();
             }
 
@@ -1625,6 +2322,11 @@
         }
 
         function updateFetchFromVirkButtonState() {
+            if (!customerRegistrationConfig.cvrLookupEnabled) {
+                fetchFromVirkButton.disabled = true;
+                return;
+            }
+
             const cvr = customerFields.cvrNumber.value.trim();
 
             fetchFromVirkButton.disabled = cvr.length === 0 || !isValidCvr(cvr);
@@ -1661,13 +2363,82 @@
                 customerFields.zipCode,
                 customerFields.city,
                 customerFields.country,
-                customerFields.phoneCountryCode,
                 customerFields.phone,
                 customerFields.administratorEmail
             ];
         }
 
-        function validateStep2() {
+        function getCustomerVatValidationError() {
+            return getVatValidationError();
+        }
+
+        function setVatValidationInProgress(isInProgress, message) {
+            if (!vatValidationStatus) {
+                return;
+            }
+
+            vatValidationStatus.classList.toggle("is-hidden", !isInProgress);
+
+            if (vatValidationStatusText && message) {
+                vatValidationStatusText.innerHTML = message;
+            }
+        }
+
+        async function validateVatWithBackend() {
+            const countryCode = selectedCustomerCountryCode();
+
+            if (!isEuCountryCode(countryCode)) {
+                return null;
+            }
+
+            const vatNumber = normalizeVatNumber(customerFields.vatNumber.value);
+
+            let response;
+
+            try {
+                response = await fetch(
+                    `${getCustomerApiBaseUrl()}/vat-validate?countryCode=${encodeURIComponent(countryCode)}&vatNumber=${encodeURIComponent(vatNumber)}&companyName=${encodeURIComponent(customerFields.name.value.trim())}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Accept: "application/json"
+                        },
+                        credentials: "same-origin"
+                    }
+                );
+            } catch (error) {
+                return {
+                    ok: false,
+                    message: getErrorMessage(error, "Could not validate VAT number through VIES.")
+                };
+            }
+
+            const body = await response.json().catch(function () {
+                return null;
+            });
+
+            if (!response.ok) {
+                const message = await parseErrorMessage(
+                    response,
+                    `VAT validation failed with HTTP ${response.status}`
+                );
+
+                return {
+                    ok: false,
+                    message
+                };
+            }
+
+            return {
+                ok: true,
+                valid: body?.valid !== false,
+                viesName: String(body?.viesName || "").trim(),
+                viesAddress: String(body?.viesAddress || "").trim(),
+                message: String(body?.message || "").trim()
+            };
+        }
+
+        function validateStep2Local() {
             const cvr = customerFields.cvrNumber.value.trim();
 
             if (cvr.length > 0 && !isValidCvr(cvr)) {
@@ -1696,6 +2467,49 @@
                 return false;
             }
 
+            const vatValidationError = getCustomerVatValidationError();
+
+            if (vatValidationError) {
+                setStepError(2, vatValidationError);
+                return false;
+            }
+
+            clearStepError(2);
+            return true;
+        }
+
+        async function validateStep2() {
+            if (!validateStep2Local()) {
+                return false;
+            }
+
+            clearViesOverrides();
+
+            const shouldCallVies = isEuCountryCode(selectedCustomerCountryCode());
+
+            if (shouldCallVies) {
+                setVatValidationInProgress(true, "<strong>Validating VAT with VIES</strong>Waiting for the official EU response.");
+            }
+
+            try {
+                const vatValidationResult = shouldCallVies
+                    ? await validateVatWithBackend()
+                    : { ok: true, valid: true };
+
+                if (!vatValidationResult.ok) {
+                    setStepError(2, vatValidationResult.message);
+                    return false;
+                }
+
+                if (shouldCallVies && vatValidationResult.valid) {
+                    applyViesCustomerDetails(vatValidationResult);
+                }
+            } finally {
+                if (shouldCallVies) {
+                    setVatValidationInProgress(false, "");
+                }
+            }
+
             clearStepError(2);
             return true;
         }
@@ -1708,8 +2522,9 @@
             });
             const phoneValid = validatePhoneNumber() === null;
             const emailValid = isValidEmail(customerFields.administratorEmail.value);
+            const vatValid = getCustomerVatValidationError() === null;
 
-            customerInfoNextButton.disabled = !(cvrValid && allFilled && phoneValid && emailValid);
+            customerInfoNextButton.disabled = !(cvrValid && allFilled && phoneValid && emailValid && vatValid);
             updateFetchFromVirkButtonState();
 
             if (!customerInfoNextButton.disabled) {
@@ -1793,15 +2608,30 @@
         }
 
         function updateConfirmationSummary() {
-            const selectedModule = getSelectedModule();
+            const selectedSubscription = getSelectedSubscription();
+            const selectedBillingPeriod = getSelectedBillingPeriod();
+            const selectedPrice = selectedSubscription ? getSelectedBillingPeriodForSubscription(selectedSubscription) : null;
+            const vatBreakdown = selectedPrice
+                ? calculateVatBreakdown(selectedPrice.priceAmount, selectedCustomerCountryCode())
+                : null;
+            const displayedCustomerName = customerDisplayState.viesCompanyName || customerFields.name.value;
+            const displayedCustomerAddress = customerDisplayState.viesAddress || customerFields.address.value;
 
-            summary.module.textContent = selectedModule ? selectedModule.name : "-";
-            summary.price.textContent = selectedModule ? selectedModule.price : "-";
+            summary.subscription.textContent = selectedSubscription ? selectedSubscription.subscriptionLabel : "-";
+            summary.billingPeriod.textContent = selectedBillingPeriod ? selectedBillingPeriod.label : "-";
+            summary.priceExclVat.textContent = selectedPrice ? formatSubscriptionPrice(selectedPrice.priceAmount, selectedPrice.currency) : "-";
+            summary.vatAmount.textContent = selectedPrice && vatBreakdown
+                ? formatSubscriptionPrice(vatBreakdown.vatAmount, selectedPrice.currency)
+                : "-";
+            summary.priceInclVat.textContent = selectedPrice && vatBreakdown
+                ? formatSubscriptionPrice(vatBreakdown.grossAmount, selectedPrice.currency)
+                : "-";
             summary.cvrNumber.textContent = customerFields.cvrNumber.value || "-";
-            summary.customerName.textContent = customerFields.name.value || "-";
-            summary.customerAddress.textContent = customerFields.address.value || "-";
+            summary.customerName.textContent = displayedCustomerName || "-";
+            summary.customerAddress.textContent = displayedCustomerAddress || "-";
             summary.customerZipCode.textContent = customerFields.zipCode.value || "-";
             summary.customerCity.textContent = customerFields.city.value || "-";
+            summary.customerVatNumber.textContent = customerFields.vatNumber.value.trim() || "-";
             summary.customerCountry.textContent = customerFields.country.value || "-";
             summary.customerPhone.textContent = getFullPhoneNumber() || "-";
             summary.customerAdministratorEmail.textContent = customerFields.administratorEmail.value || "-";
@@ -1853,18 +2683,26 @@
         }
 
         function buildCreateCustomerPayload() {
-            const selectedModule = getSelectedModule();
+            const selectedSubscription = getSelectedSubscription();
+            const selectedBillingPeriod = getSelectedBillingPeriod();
 
             return {
-                moduleCode: selectedModule ? selectedModule.code : "",
-                moduleName: selectedModule ? selectedModule.name : "",
-                modulePrice: selectedModule ? selectedModule.price : "",
+                subscriptionPlanId: selectedSubscription ? selectedSubscription.subscriptionPlanId : null,
+                subscriptionCode: selectedSubscription ? selectedSubscription.subscriptionCode : "",
+                billingPeriodCode: selectedBillingPeriod ? selectedBillingPeriod.code : "",
+                moduleCode: selectedSubscription ? selectedSubscription.subscriptionCode : "",
+                moduleName: selectedSubscription ? selectedSubscription.subscriptionLabel : "",
+                modulePrice: selectedSubscription && selectedBillingPeriod
+                    ? formatSubscriptionPrice(selectedBillingPeriod.priceAmount, selectedBillingPeriod.currency)
+                    : "",
                 cvrNumber: customerFields.cvrNumber.value.trim(),
                 name: customerFields.name.value.trim(),
                 address: customerFields.address.value.trim(),
                 zipCode: customerFields.zipCode.value.trim(),
                 city: customerFields.city.value.trim(),
                 country: customerFields.country.value.trim(),
+                countryCode: selectedCustomerCountryCode(),
+                vatNumber: normalizeVatNumber(customerFields.vatNumber.value),
                 phone: getFullPhoneNumber(),
                 administratorEmail: customerFields.administratorEmail.value.trim(),
                 payment: {
@@ -1911,7 +2749,7 @@
             }
 
             if (currentStep === 2) {
-                if (validateStep2()) {
+                if (await validateStep2()) {
                     goToStep(3);
                 }
                 return;
@@ -1970,6 +2808,19 @@
             button.addEventListener("click", movePrevious);
         });
 
+        if (billingPeriodsBar) {
+            billingPeriodsBar.addEventListener("click", handleSubscriptionSelectionClick);
+        }
+
+        if (subscriptionCards) {
+            subscriptionCards.addEventListener("click", handleSubscriptionSelectionClick);
+        }
+
+        customerFields.vatNumber.addEventListener("input", function () {
+            customerFields.vatNumber.value = normalizeVatNumber(customerFields.vatNumber.value).slice(0, 20);
+            updateCustomerInfoButtonState();
+        });
+
         customerFields.cvrNumber.addEventListener("input", function () {
             customerFields.cvrNumber.value = onlyDigits(customerFields.cvrNumber.value).slice(0, 8);
             updateCustomerInfoButtonState();
@@ -1980,12 +2831,11 @@
             updateCustomerInfoButtonState();
         });
 
-        customerFields.phoneCountryCode.addEventListener("change", function () {
-            formatCurrentPhoneValue();
+        customerFields.phone.addEventListener("input", function () {
             updateCustomerInfoButtonState();
         });
 
-        customerFields.phone.addEventListener("input", function () {
+        customerFields.country.addEventListener("change", function () {
             formatCurrentPhoneValue();
             updateCustomerInfoButtonState();
         });
@@ -1996,6 +2846,10 @@
             field.addEventListener("input", updateCustomerInfoButtonState);
             field.addEventListener("change", updateCustomerInfoButtonState);
         });
+
+        if (customerFields.vatNumber) {
+            customerFields.vatNumber.addEventListener("change", updateCustomerInfoButtonState);
+        }
 
         paymentFields.cardNumber.addEventListener("input", function () {
             paymentFields.cardNumber.value = formatCardNumber(paymentFields.cardNumber.value);
@@ -2018,9 +2872,11 @@
             event.preventDefault();
         });
 
+        await loadCustomerRegistrationConfig();
+        applyCustomerRegistrationConfig();
         fillCountries();
-        await loadPhoneCountryCodes();
-        fillPhoneCountryCodes();
+        initializePhoneInput();
+        await loadSubscriptionOptions();
         fillExpiryYears();
         updatePhoneHelp();
         formatCurrentPhoneValue();

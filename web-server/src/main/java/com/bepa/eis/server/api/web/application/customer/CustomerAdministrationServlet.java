@@ -24,8 +24,11 @@ import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.common.providers.customer.CustomerSubscriptionProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowEventProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
+import com.bepa.eis.common.providers.customer.SubscriptionPlanBillingPeriodProvider;
+import com.bepa.eis.common.providers.customer.SubscriptionPlanProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
@@ -121,6 +124,33 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
             CustomerPaymentProvider paymentProvider = new CustomerPaymentProvider(null);
             CustomerPaymentMethodProvider paymentMethodProvider = new CustomerPaymentMethodProvider(null);
             CustomerModuleProvider moduleProvider = new CustomerModuleProvider(null);
+
+            CustomerRecord currentCustomer = customerRecordProvider.getLatestCustomerByCustomerId(customerId);
+            CustomerSubscription currentSubscription = subscription == null || subscription.getSubscriptionId() == null
+                    ? null
+                    : subscriptionProvider.getSubscriptionById(subscription.getSubscriptionId());
+
+            if (customer != null && currentCustomer != null && isBlank(customer.getVatNumber())) {
+                customer.setVatNumber(currentCustomer.getVatNumber());
+            }
+
+            if (subscription != null && currentSubscription != null && subscription.getSubscriptionPlanBillingPeriodId() == null) {
+                subscription.setSubscriptionPlanBillingPeriodId(currentSubscription.getSubscriptionPlanBillingPeriodId());
+            }
+
+            if (modules != null && !modules.isEmpty()) {
+                for (CustomerModule module : modules) {
+                    if (module == null || module.getCustomerModuleId() == null) {
+                        continue;
+                    }
+
+                    CustomerModule currentModule = moduleProvider.getCustomerModuleById(module.getCustomerModuleId());
+
+                    if (currentModule != null && module.getSubscriptionPlanBillingPeriodId() == null) {
+                        module.setSubscriptionPlanBillingPeriodId(currentModule.getSubscriptionPlanBillingPeriodId());
+                    }
+                }
+            }
 
             if (customer != null) {
                 Integer customerPK = customerRecordProvider.updateCustomer(customer);
@@ -230,6 +260,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
 
         appendCustomerDetail(xml, customer);
         appendSubscription(xml, subscription);
+        appendSubscriptionSummary(xml, subscription, modules, workflow);
         appendLatestPayment(xml, latestPayment);
         appendPaymentMethod(xml, paymentMethod);
         appendModules(xml, modules);
@@ -292,6 +323,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         customer.setVersion(intValue(text(customerElement, "version")));
         customer.setCustomerName(text(customerElement, "customerName"));
         customer.setCvrNumber(text(customerElement, "cvrNumber"));
+        customer.setVatNumber(text(customerElement, "vatNumber"));
         customer.setPhone(text(customerElement, "phone"));
         customer.setAddress(text(customerElement, "address"));
         customer.setZipCode(text(customerElement, "zipCode"));
@@ -429,6 +461,21 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
 
     private void appendLookups(StringBuilder xml) {
         xml.append("<lookups>");
+
+        xml.append("<lookup name=\"countryCode\">");
+
+        for (CustomerLookupCache.PhoneCountryRule rule : CustomerLookupCache.getPhoneCountryRules()) {
+            xml.append("<option");
+            xml.append(" code=\"").append(escapeXml(rule.code())).append("\"");
+            xml.append(" country=\"").append(escapeXml(rule.country())).append("\"");
+            xml.append(" label=\"").append(escapeXml(rule.country())).append("\"");
+            xml.append(" min=\"").append(rule.minDigits()).append("\"");
+            xml.append(" max=\"").append(rule.maxDigits()).append("\"");
+            xml.append(" example=\"").append(escapeXml(rule.example())).append("\"");
+            xml.append("/>");
+        }
+
+        xml.append("</lookup>");
 
         appendStaticLookup(
                 xml,
@@ -582,6 +629,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "version", customer == null ? null : customer.getVersion());
         appendElement(xml, "customerName", customer == null ? null : customer.getCustomerName());
         appendElement(xml, "cvrNumber", customer == null ? null : customer.getCvrNumber());
+        appendElement(xml, "vatNumber", customer == null ? null : customer.getVatNumber());
         appendElement(xml, "contactName", customer == null ? null : customer.getContactName());
         appendElement(xml, "contactEmail", customer == null ? null : customer.getContactEmail());
         appendElement(xml, "contactPhone", customer == null ? null : customer.getPhone());
@@ -604,6 +652,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "version", customer == null ? null : customer.getVersion());
         appendElement(xml, "customerName", customer == null ? null : customer.getCustomerName());
         appendElement(xml, "cvrNumber", customer == null ? null : customer.getCvrNumber());
+        appendElement(xml, "vatNumber", customer == null ? null : customer.getVatNumber());
         appendElement(xml, "phone", customer == null ? null : customer.getPhone());
         appendElement(xml, "address", customer == null ? null : customer.getAddress());
         appendElement(xml, "zipCode", customer == null ? null : customer.getZipCode());
@@ -751,6 +800,49 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         xml.append("</workflow>");
     }
 
+    private void appendSubscriptionSummary(
+            StringBuilder xml,
+            CustomerSubscription subscription,
+            List<CustomerModule> modules,
+            CustomerWorkflow workflow
+    ) {
+        CustomerModule primaryModule = resolvePrimaryCustomerModule(modules);
+        SubscriptionPlanProvider planProvider = new SubscriptionPlanProvider(null);
+        SubscriptionPlanBillingPeriodProvider billingPeriodProvider = new SubscriptionPlanBillingPeriodProvider(null);
+
+        com.bepa.eis.common.dto.customer.SubscriptionPlan subscriptionPlan = resolveSummarySubscriptionPlan(
+                subscription,
+                primaryModule,
+                planProvider
+        );
+        com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod billingPeriod = resolveSummaryBillingPeriod(
+                subscription,
+                primaryModule,
+                subscriptionPlan,
+                billingPeriodProvider
+        );
+
+        xml.append("<subscriptionSummary>");
+        appendElement(xml, "source", resolveSubscriptionSource(subscription, primaryModule));
+        appendElement(xml, "subscriptionId", subscription == null ? null : subscription.getSubscriptionId());
+        appendElement(xml, "customerModuleId", primaryModule == null ? null : primaryModule.getCustomerModuleId());
+        appendElement(xml, "subscriptionPlanId", resolveSubscriptionPlanId(subscription, primaryModule));
+        appendElement(xml, "subscriptionPlanName", resolveSubscriptionPlanName(subscription, primaryModule, subscriptionPlan));
+        appendElement(xml, "moduleCode", resolveModuleCode(primaryModule, subscriptionPlan));
+        appendElement(xml, "moduleName", resolveModuleName(primaryModule, subscriptionPlan));
+        appendElement(xml, "billingPeriodId", resolveBillingPeriodId(subscription, primaryModule, billingPeriod));
+        appendElement(xml, "billingPeriodCode", billingPeriod == null ? null : billingPeriod.getBillingPeriodCode());
+        appendElement(xml, "billingPeriodName", billingPeriod == null ? null : billingPeriod.getBillingPeriodName());
+        appendElement(xml, "billingPeriodMonths", billingPeriod == null ? null : billingPeriod.getBillingPeriodMonths());
+        appendElement(xml, "priceAmount", billingPeriod == null ? null : billingPeriod.getPriceAmount());
+        appendElement(xml, "currency", billingPeriod == null ? null : billingPeriod.getCurrency());
+        appendElement(xml, "validFrom", subscriptionPlan == null ? null : subscriptionPlan.getValidFrom());
+        appendElement(xml, "validTo", subscriptionPlan == null ? null : subscriptionPlan.getValidTo());
+        appendElement(xml, "workflowState", workflow == null ? null : workflow.getCurrentStateCode());
+        appendElement(xml, "workflowStatus", workflow == null ? null : workflow.getWorkflowStatusCode());
+        xml.append("</subscriptionSummary>");
+    }
+
     private void appendWorkflowEvents(
             StringBuilder xml,
             List<CustomerWorkflowEvent> workflowEvents
@@ -778,6 +870,173 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         }
 
         xml.append("</workflowEvents>");
+    }
+
+    private CustomerModule resolvePrimaryCustomerModule(List<CustomerModule> modules) {
+        if (modules == null || modules.isEmpty()) {
+            return null;
+        }
+
+        for (CustomerModule module : modules) {
+            if (module != null && module.isTrial()) {
+                return module;
+            }
+        }
+
+        for (CustomerModule module : modules) {
+            if (module != null && module.isActive()) {
+                return module;
+            }
+        }
+
+        return modules.get(0);
+    }
+
+    private com.bepa.eis.common.dto.customer.SubscriptionPlan resolveSummarySubscriptionPlan(
+            CustomerSubscription subscription,
+            CustomerModule module,
+            SubscriptionPlanProvider planProvider
+    ) {
+        Integer subscriptionPlanId = resolveSubscriptionPlanId(subscription, module);
+
+        if (subscriptionPlanId == null) {
+            return null;
+        }
+
+        return planProvider.getPlanById(subscriptionPlanId);
+    }
+
+    private com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod resolveSummaryBillingPeriod(
+            CustomerSubscription subscription,
+            CustomerModule module,
+            com.bepa.eis.common.dto.customer.SubscriptionPlan subscriptionPlan,
+            SubscriptionPlanBillingPeriodProvider billingPeriodProvider
+    ) {
+        Integer billingPeriodId = resolveBillingPeriodId(subscription, module, null);
+
+        if (billingPeriodId != null) {
+            com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod billingPeriod =
+                    billingPeriodProvider.getBillingPeriodById(billingPeriodId);
+
+            if (billingPeriod != null) {
+                return billingPeriod;
+            }
+        }
+
+        Integer subscriptionPlanId = resolveSubscriptionPlanId(subscription, module);
+
+        if (subscriptionPlanId == null) {
+            return null;
+        }
+
+        List<com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod> billingPeriods =
+                billingPeriodProvider.getBillingPeriodsByPlanId(subscriptionPlanId);
+
+        if (subscriptionPlan != null && subscriptionPlan.getBillingPeriodMonths() != null) {
+            for (com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod candidate : billingPeriods) {
+                if (candidate != null && subscriptionPlan.getBillingPeriodMonths().equals(candidate.getBillingPeriodMonths())) {
+                    return candidate;
+                }
+            }
+        }
+
+        return billingPeriods.isEmpty() ? null : billingPeriods.get(0);
+    }
+
+    private String resolveSubscriptionSource(
+            CustomerSubscription subscription,
+            CustomerModule module
+    ) {
+        if (subscription != null && subscription.getSubscriptionId() != null) {
+            return "CUSTOMER_SUBSCRIPTION";
+        }
+
+        if (module != null && module.getCustomerModuleId() != null) {
+            return "CUSTOMER_MODULE";
+        }
+
+        return "NONE";
+    }
+
+    private Integer resolveSubscriptionPlanId(
+            CustomerSubscription subscription,
+            CustomerModule module
+    ) {
+        if (subscription != null && subscription.getSubscriptionPlanId() != null) {
+            return subscription.getSubscriptionPlanId();
+        }
+
+        if (module != null) {
+            return module.getSubscriptionPlanId();
+        }
+
+        return null;
+    }
+
+    private String resolveSubscriptionPlanName(
+            CustomerSubscription subscription,
+            CustomerModule module,
+            com.bepa.eis.common.dto.customer.SubscriptionPlan subscriptionPlan
+    ) {
+        if (subscription != null && subscription.getSubscriptionPlanName() != null && !subscription.getSubscriptionPlanName().isBlank()) {
+            return subscription.getSubscriptionPlanName();
+        }
+
+        if (subscriptionPlan != null && subscriptionPlan.getDisplayName() != null && !subscriptionPlan.getDisplayName().isBlank()) {
+            return subscriptionPlan.getDisplayName();
+        }
+
+        if (module != null) {
+            return module.getDisplayName();
+        }
+
+        return null;
+    }
+
+    private String resolveModuleCode(
+            CustomerModule module,
+            com.bepa.eis.common.dto.customer.SubscriptionPlan subscriptionPlan
+    ) {
+        if (module != null && module.getModuleCode() != null && !module.getModuleCode().isBlank()) {
+            return module.getModuleCode();
+        }
+
+        if (subscriptionPlan != null) {
+            return subscriptionPlan.getModuleCode();
+        }
+
+        return null;
+    }
+
+    private String resolveModuleName(
+            CustomerModule module,
+            com.bepa.eis.common.dto.customer.SubscriptionPlan subscriptionPlan
+    ) {
+        if (module != null && module.getModuleName() != null && !module.getModuleName().isBlank()) {
+            return module.getModuleName();
+        }
+
+        if (subscriptionPlan != null) {
+            return subscriptionPlan.getModuleName();
+        }
+
+        return null;
+    }
+
+    private Integer resolveBillingPeriodId(
+            CustomerSubscription subscription,
+            CustomerModule module,
+            com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod billingPeriod
+    ) {
+        if (subscription != null && subscription.getSubscriptionPlanBillingPeriodId() != null) {
+            return subscription.getSubscriptionPlanBillingPeriodId();
+        }
+
+        if (module != null && module.getSubscriptionPlanBillingPeriodId() != null) {
+            return module.getSubscriptionPlanBillingPeriodId();
+        }
+
+        return billingPeriod == null ? null : billingPeriod.getSubscriptionPlanBillingPeriodId();
     }
 
     private String displayNameByUserId(Integer userId) {
@@ -819,6 +1078,10 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
         return nodes.item(0).getTextContent() == null
                 ? ""
                 : nodes.item(0).getTextContent().trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     private void appendXmlHeader(StringBuilder xml) {

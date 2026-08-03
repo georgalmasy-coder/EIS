@@ -4,19 +4,25 @@ import java.util.Locale;
 
 public enum Subscription {
 
-    BASIS("BASIS-MODULE", "Basis"),
-    PRO("PRO-MODULE", "Pro"),
-    MASTER("MASTER-MODULE", "Master");
+    BASIS("BASIS-MODULE", "Basis Module", 1, true),
+    PRO("PRO-MODULE", "Pro Module", 2, true),
+    MASTER("MASTER-MODULE", "Master Module", 3, true);
 
     private final String moduleCode;
     private final String label;
+    private final int displayOrder;
+    private final boolean active;
 
     Subscription(
             String moduleCode,
-            String label
+            String label,
+            int displayOrder,
+            boolean active
     ) {
         this.moduleCode = moduleCode;
         this.label = label;
+        this.displayOrder = displayOrder;
+        this.active = active;
     }
 
     public String getModuleCode() {
@@ -25,6 +31,14 @@ public enum Subscription {
 
     public String getLabel() {
         return label;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public String getCode() {

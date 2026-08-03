@@ -183,6 +183,10 @@
     min-width: 0;
 }
 
+.phone-field .iti {
+    width: 100%;
+}
+
 .customer-phone-controls {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);

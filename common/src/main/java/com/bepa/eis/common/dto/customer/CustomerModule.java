@@ -10,6 +10,7 @@ public class CustomerModule {
 
     private Integer customerId;
     private Integer subscriptionPlanId;
+    private Integer subscriptionPlanBillingPeriodId;
 
     private String moduleCode;
     private String moduleName;
@@ -26,6 +27,7 @@ public class CustomerModule {
 
         customerId = null;
         subscriptionPlanId = null;
+        subscriptionPlanBillingPeriodId = null;
 
         moduleCode = "";
         moduleName = "";
@@ -60,6 +62,14 @@ public class CustomerModule {
 
     public void setSubscriptionPlanId(Integer subscriptionPlanId) {
         this.subscriptionPlanId = subscriptionPlanId;
+    }
+
+    public Integer getSubscriptionPlanBillingPeriodId() {
+        return subscriptionPlanBillingPeriodId;
+    }
+
+    public void setSubscriptionPlanBillingPeriodId(Integer subscriptionPlanBillingPeriodId) {
+        this.subscriptionPlanBillingPeriodId = subscriptionPlanBillingPeriodId;
     }
 
     public String getModuleCode() {
@@ -201,6 +211,7 @@ public class CustomerModule {
         return "CustomerModule [customerModuleId=" + customerModuleId
                 + ", customerId=" + customerId
                 + ", subscriptionPlanId=" + subscriptionPlanId
+                + ", subscriptionPlanBillingPeriodId=" + subscriptionPlanBillingPeriodId
                 + ", moduleCode=" + moduleCode
                 + ", moduleName=" + moduleName
                 + ", customerModuleStatus=" + getCustomerModuleStatusCode()

@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[CUSTOMER] (
 
     [CustomerName] NVARCHAR(255) NOT NULL,
     [CvrNumber] NVARCHAR(20) NULL,
+    [VatNumber] NVARCHAR(20) NULL,
     [Phone] NVARCHAR(50) NULL,
 
     [Address] NVARCHAR(255) NULL,
@@ -107,6 +108,19 @@ BEGIN
 CREATE INDEX [IX_CUSTOMER_CvrNumber_Latest]
     ON [dbo].[CUSTOMER] ([CvrNumber], [Latest])
     WHERE [CvrNumber] IS NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_CUSTOMER_VatNumber_Latest'
+      AND object_id = OBJECT_ID(N'[dbo].[CUSTOMER]')
+)
+BEGIN
+CREATE INDEX [IX_CUSTOMER_VatNumber_Latest]
+    ON [dbo].[CUSTOMER] ([VatNumber], [Latest])
+    WHERE [VatNumber] IS NOT NULL;
 END;
 GO
 
@@ -217,6 +231,11 @@ CREATE TABLE [dbo].[SUBSCRIPTION_PLAN] (
 
     [Description] NVARCHAR(1000) NULL,
 
+    [ValidFrom] DATE NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_ValidFrom] DEFAULT (CONVERT(date, SYSUTCDATETIME())),
+
+    [ValidTo] DATE NULL,
+
     [PriceAmount] DECIMAL(18,2) NOT NULL
     CONSTRAINT [DF_SUBSCRIPTION_PLAN_PriceAmount] DEFAULT 0,
 
@@ -242,7 +261,7 @@ CREATE TABLE [dbo].[SUBSCRIPTION_PLAN] (
     PRIMARY KEY CLUSTERED ([SubscriptionPlanId] ASC),
 
     CONSTRAINT [UQ_SUBSCRIPTION_PLAN_ModuleCode_PlanName]
-    UNIQUE ([ModuleCode], [PlanName]),
+    UNIQUE ([ModuleCode], [PlanName], [ValidFrom]),
 
     CONSTRAINT [CK_SUBSCRIPTION_PLAN_ModuleCode_NotEmpty]
     CHECK (LEN(LTRIM(RTRIM([ModuleCode]))) > 0),
@@ -252,6 +271,9 @@ CREATE TABLE [dbo].[SUBSCRIPTION_PLAN] (
 
     CONSTRAINT [CK_SUBSCRIPTION_PLAN_PlanName_NotEmpty]
     CHECK (LEN(LTRIM(RTRIM([PlanName]))) > 0),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_ValidTo]
+    CHECK ([ValidTo] IS NULL OR [ValidTo] >= [ValidFrom]),
 
     CONSTRAINT [CK_SUBSCRIPTION_PLAN_PriceAmount]
     CHECK ([PriceAmount] >= 0),
@@ -277,6 +299,61 @@ CREATE INDEX [IX_SUBSCRIPTION_PLAN_ModuleCode_Active]
 END;
 GO
 
+IF OBJECT_ID(N'[dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD]', N'U') IS NULL
+BEGIN
+CREATE TABLE [dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD] (
+    [SubscriptionPlanBillingPeriodId] INT IDENTITY(1,1) NOT NULL,
+
+    [SubscriptionPlanId] INT NOT NULL,
+    [BillingPeriodCode] NVARCHAR(100) NOT NULL,
+    [BillingPeriodName] NVARCHAR(255) NOT NULL,
+    [Description] NVARCHAR(1000) NULL,
+
+    [BillingPeriodMonths] INT NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_BillingPeriodMonths] DEFAULT 1,
+
+    [PriceAmount] DECIMAL(18,2) NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_PriceAmount] DEFAULT 0,
+
+    [Currency] NVARCHAR(10) NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_Currency] DEFAULT N'EUR',
+
+    [Active] BIT NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_Active] DEFAULT 1,
+
+    [CreatedAt] DATETIME2(0) NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_CreatedAt] DEFAULT SYSUTCDATETIME(),
+
+    [UpdatedAt] DATETIME2(0) NOT NULL
+    CONSTRAINT [DF_SUBSCRIPTION_PLAN_BILLING_PERIOD_UpdatedAt] DEFAULT SYSUTCDATETIME(),
+
+    CONSTRAINT [PK_SUBSCRIPTION_PLAN_BILLING_PERIOD]
+    PRIMARY KEY CLUSTERED ([SubscriptionPlanBillingPeriodId] ASC),
+
+    CONSTRAINT [FK_SUBSCRIPTION_PLAN_BILLING_PERIOD_PLAN]
+    FOREIGN KEY ([SubscriptionPlanId]) REFERENCES [dbo].[SUBSCRIPTION_PLAN]([SubscriptionPlanId]),
+
+    CONSTRAINT [UQ_SUBSCRIPTION_PLAN_BILLING_PERIOD_Plan_Code]
+    UNIQUE ([SubscriptionPlanId], [BillingPeriodCode]),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_BILLING_PERIOD_PlanId]
+    CHECK ([SubscriptionPlanId] > 0),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_BILLING_PERIOD_Code_NotEmpty]
+    CHECK (LEN(LTRIM(RTRIM([BillingPeriodCode]))) > 0),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_BILLING_PERIOD_Name_NotEmpty]
+    CHECK (LEN(LTRIM(RTRIM([BillingPeriodName]))) > 0),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_BILLING_PERIOD_BillingPeriodMonths]
+    CHECK ([BillingPeriodMonths] > 0),
+
+    CONSTRAINT [CK_SUBSCRIPTION_PLAN_BILLING_PERIOD_PriceAmount]
+    CHECK ([PriceAmount] >= 0)
+    );
+END;
+GO
+
 
 IF OBJECT_ID(N'[dbo].[CUSTOMER_MODULE]', N'U') IS NULL
 BEGIN
@@ -285,6 +362,7 @@ CREATE TABLE [dbo].[CUSTOMER_MODULE] (
 
     [CustomerId] INT NOT NULL,
     [SubscriptionPlanId] INT NOT NULL,
+    [SubscriptionPlanBillingPeriodId] INT NULL,
 
     [ModuleCode] NVARCHAR(100) NOT NULL,
     [ModuleName] NVARCHAR(255) NULL,
@@ -309,6 +387,9 @@ CREATE TABLE [dbo].[CUSTOMER_MODULE] (
 
     CONSTRAINT [CK_CUSTOMER_MODULE_SubscriptionPlanId]
     CHECK ([SubscriptionPlanId] > 0),
+
+    CONSTRAINT [FK_CUSTOMER_MODULE_SubscriptionPlanBillingPeriod]
+    FOREIGN KEY ([SubscriptionPlanBillingPeriodId]) REFERENCES [dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD]([SubscriptionPlanBillingPeriodId]),
 
     CONSTRAINT [CK_CUSTOMER_MODULE_ModuleCode_NotEmpty]
     CHECK (LEN(LTRIM(RTRIM([ModuleCode]))) > 0),
@@ -341,6 +422,19 @@ GO
 IF NOT EXISTS (
     SELECT 1
     FROM sys.indexes
+    WHERE name = N'IX_CUSTOMER_MODULE_BillingPeriod_Latest'
+      AND object_id = OBJECT_ID(N'[dbo].[CUSTOMER_MODULE]')
+)
+BEGIN
+CREATE INDEX [IX_CUSTOMER_MODULE_BillingPeriod_Latest]
+    ON [dbo].[CUSTOMER_MODULE] ([SubscriptionPlanBillingPeriodId], [Latest])
+    INCLUDE ([CustomerId], [SubscriptionPlanId], [ModuleCode], [CustomerModuleStatus]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
     WHERE name = N'IX_CUSTOMER_MODULE_ModuleCode_Latest'
       AND object_id = OBJECT_ID(N'[dbo].[CUSTOMER_MODULE]')
 )
@@ -355,8 +449,9 @@ GO
 IF NOT EXISTS (
     SELECT 1
     FROM [dbo].[SUBSCRIPTION_PLAN]
-    WHERE [ModuleCode] = N'BASIS-MODUL'
+    WHERE [ModuleCode] = N'BASIS-MODULE'
       AND [PlanName] = N'Standard'
+      AND [ValidFrom] = CONVERT(date, SYSUTCDATETIME())
 )
 BEGIN
 INSERT INTO [dbo].[SUBSCRIPTION_PLAN] (
@@ -364,6 +459,8 @@ INSERT INTO [dbo].[SUBSCRIPTION_PLAN] (
     [ModuleName],
     [PlanName],
     [Description],
+    [ValidFrom],
+    [ValidTo],
     [PriceAmount],
     [Currency],
     [BillingPeriodMonths],
@@ -372,9 +469,11 @@ INSERT INTO [dbo].[SUBSCRIPTION_PLAN] (
 )
 VALUES (
     N'BASIS-MODULE',
-    N'Basis Module',
+    N'Basis',
     N'Standard',
-    N'Standard subscription plan for Basis module.',
+    N'Basis Module is to support the complete lifecycle of requirements: from capturing stakeholder needs, deriving system-level specifications, establishing traceability, to verifying compliance.',
+    CONVERT(date, SYSUTCDATETIME()),
+    NULL,
     1000,
     N'EUR',
     1,
@@ -382,4 +481,119 @@ VALUES (
     1
     );
 END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM [dbo].[SUBSCRIPTION_PLAN]
+    WHERE [ModuleCode] = N'PRO-MODULE'
+      AND [PlanName] = N'Standard'
+      AND [ValidFrom] = CONVERT(date, SYSUTCDATETIME())
+)
+BEGIN
+INSERT INTO [dbo].[SUBSCRIPTION_PLAN] (
+    [ModuleCode],
+    [ModuleName],
+    [PlanName],
+    [Description],
+    [ValidFrom],
+    [ValidTo],
+    [PriceAmount],
+    [Currency],
+    [BillingPeriodMonths],
+    [TrialDays],
+    [Active]
+)
+VALUES (
+    N'PRO-MODULE',
+    N'Pro',
+    N'Standard',
+    N'Pro Module is to support and integrate the complete lifecycle of full RFLP methodologies: (R) from capturing stakeholder and system requirements, establishing traceability between stakeholder and system requirement, including all functions in Basis Module.',
+    CONVERT(date, SYSUTCDATETIME()),
+    NULL,
+    0,
+    N'EUR',
+    1,
+    14,
+    0
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM [dbo].[SUBSCRIPTION_PLAN]
+    WHERE [ModuleCode] = N'MASTER-MODULE'
+      AND [PlanName] = N'Standard'
+      AND [ValidFrom] = CONVERT(date, SYSUTCDATETIME())
+)
+BEGIN
+INSERT INTO [dbo].[SUBSCRIPTION_PLAN] (
+    [ModuleCode],
+    [ModuleName],
+    [PlanName],
+    [Description],
+    [ValidFrom],
+    [ValidTo],
+    [PriceAmount],
+    [Currency],
+    [BillingPeriodMonths],
+    [TrialDays],
+    [Active]
+)
+VALUES (
+    N'MASTER-MODULE',
+    N'Master',
+    N'Standard',
+    N'Master Module includes all functionality from Pro Module plus TRL, IRL, DRL and Configuration / Modularisation architectures.',
+    CONVERT(date, SYSUTCDATETIME()),
+    NULL,
+    0,
+    N'EUR',
+    1,
+    14,
+    0
+    );
+END;
+GO
+
+INSERT INTO [dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD] (
+    [SubscriptionPlanId],
+    [BillingPeriodCode],
+    [BillingPeriodName],
+    [Description],
+    [BillingPeriodMonths],
+    [PriceAmount],
+    [Currency],
+    [Active]
+)
+SELECT
+    SP.[SubscriptionPlanId],
+    BP.[BillingPeriodCode],
+    BP.[BillingPeriodName],
+    BP.[Description],
+    BP.[BillingPeriodMonths],
+    CASE
+        WHEN SP.[ModuleCode] = N'BASIS-MODULE' AND BP.[BillingPeriodCode] = N'MONTHLY' THEN 1000
+        WHEN SP.[ModuleCode] = N'BASIS-MODULE' AND BP.[BillingPeriodCode] = N'QUARTERLY' THEN 3000
+        WHEN SP.[ModuleCode] = N'BASIS-MODULE' AND BP.[BillingPeriodCode] = N'SEMI_ANNUAL' THEN 6000
+        WHEN SP.[ModuleCode] = N'BASIS-MODULE' AND BP.[BillingPeriodCode] = N'ANNUAL' THEN 12000
+        ELSE 0
+    END,
+    N'EUR',
+    1
+FROM [dbo].[SUBSCRIPTION_PLAN] SP
+CROSS JOIN (
+    VALUES
+        (N'MONTHLY', N'Monthly', N'Monthly billing period', 1),
+        (N'QUARTERLY', N'Quarterly', N'Quarterly billing period', 3),
+        (N'SEMI_ANNUAL', N'Semi-annual', N'Semi-annual billing period', 6),
+        (N'ANNUAL', N'Annually', N'Annual billing period', 12)
+) BP ([BillingPeriodCode], [BillingPeriodName], [Description], [BillingPeriodMonths])
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM [dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD] Existing
+    WHERE Existing.[SubscriptionPlanId] = SP.[SubscriptionPlanId]
+      AND Existing.[BillingPeriodCode] = BP.[BillingPeriodCode]
+);
 GO

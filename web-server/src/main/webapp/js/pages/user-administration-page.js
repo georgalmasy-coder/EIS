@@ -2,6 +2,16 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { toDateTimeLocalValue } from "../core/date.js";
+import {
+    applyPhoneConstraints as applyIntlPhoneConstraints,
+    formatCurrentPhoneValue as syncIntlPhoneFieldValue,
+    getFullPhoneNumber as getIntlPhoneNumber,
+    initPhoneField,
+    phonePatternForRule as phonePatternForIntlRule,
+    phoneTitleForRule as phoneTitleForIntlRule,
+    updatePhoneHelp as updateIntlPhoneHelp,
+    validatePhoneNumber as validateIntlPhoneNumber
+} from "../components/phone-intl-field.js";
 
 const API_URL = "/api/admin/users";
 
@@ -84,7 +94,6 @@ function initialize() {
     initMenu();
     initHelpDialog();
     collectElements();
-    fillPhoneCountryCodes(DEFAULT_PHONE_RULE);
     applyColumnWidths();
     bindEvents();
     initializeTabs();
@@ -535,15 +544,22 @@ function parseLookups(doc) {
 function fillDialog(detail) {
     const user = detail.user || {};
     const linkedCountry = getCustomerCountry(detail.customers || [], state.customerId);
-    const phoneRule = getPhoneRuleForValue(user.phone, linkedCountry);
 
     setValue("fieldUserId", user.userId);
     setValue("fieldInitials", user.initials);
     setValue("fieldName", user.name);
     setValue("fieldEmail", user.email);
     fillLookupSelect("fieldUserRole", "userRole", user.userRole == null ? "1" : String(user.userRole));
-    fillPhoneCountryCodes(phoneRule);
-    setValue("fieldPhone", formatPhoneNumberForDisplay(user.phone, phoneRule));
+    setValue("fieldPhone", user.phone);
+    initPhoneField(els.fieldPhone, {
+        initialCountry: String(linkedCountry || "dk").toLowerCase() || "dk",
+        onCountryChange: function () {
+            updatePhoneHelp();
+        },
+        onInput: function () {
+            updatePhoneHelp();
+        }
+    });
     setValue("fieldLockedUntil", toDateTimeLocalValue(user.lockedUntil));
     setValue("fieldCustomerNames", user.customerNames);
     setValue("fieldMfaResetByUserId", user.mfaResetByUserId);
@@ -576,7 +592,6 @@ function fillDialog(detail) {
     fillLookupSelect("fieldUserMfaPolicy", "userMfaPolicy", user.userMfaPolicy || "DEFAULT");
     fillDepartmentSelect(detail.departments || [], user.departmentId);
     renderProjectAccessTab(detail.projectAccessRows || []);
-    updatePhoneConstraints();
     updatePhoneHelp();
 
     if (els.userDialogTitle) {
@@ -680,23 +695,7 @@ function getCustomerCountry(customers, customerId) {
 }
 
 function fillPhoneCountryCodes(selectedRule) {
-    if (!els.fieldPhoneCountryCode) {
-        return;
-    }
-
-    const currentRule = selectedRule || getPhoneRuleByCode(els.fieldPhoneCountryCode.value) || DEFAULT_PHONE_RULE;
-    const phoneRules = getPhoneCountryRules();
-    els.fieldPhoneCountryCode.innerHTML = phoneRules
-        .slice()
-        .sort(function (left, right) {
-            return String(left.country || "").localeCompare(String(right.country || ""));
-        })
-        .map(function (rule) {
-            const selected = rule.code === currentRule.code && rule.country === currentRule.country ? " selected" : "";
-            return `<option value="${escapeAttribute(rule.code)}" data-country="${escapeAttribute(rule.country)}" data-min="${escapeAttribute(rule.min)}" data-max="${escapeAttribute(rule.max)}" data-example="${escapeAttribute(rule.example)}"${selected}>${escapeHtml(`${rule.country} (${rule.code})`)}</option>`;
-        }).join("");
-
-    selectPhoneCountryRule(currentRule);
+    return;
 }
 
 function getPhoneRuleByCountry(country) {
@@ -716,51 +715,11 @@ function getPhoneRuleByCode(code) {
 }
 
 function getPhoneRuleForValue(phone, fallbackCountry) {
-    const normalizedPhone = normalizePhoneNumber(phone);
-    const phoneRules = getPhoneCountryRules();
-    const fallbackRule = getPhoneRuleByCountry(fallbackCountry) || getPhoneRuleByCountry(DEFAULT_PHONE_RULE.country) || DEFAULT_PHONE_RULE;
-
-    if (!normalizedPhone) {
-        return fallbackRule;
-    }
-
-    const prefixMatches = phoneRules.filter(function (rule) {
-        return normalizedPhone.startsWith(rule.code);
-    });
-
-    if (prefixMatches.length === 1) {
-        return prefixMatches[0];
-    }
-
-    if (prefixMatches.length > 1) {
-        const fallbackMatch = prefixMatches.find(function (rule) {
-            return normalizeCountryCode(rule.country) === normalizeCountryCode(fallbackCountry);
-        });
-
-        return fallbackMatch || prefixMatches[0];
-    }
-
-    return fallbackRule;
+    return null;
 }
 
 function selectedPhoneRule() {
-    if (!els.fieldPhoneCountryCode) {
-        return DEFAULT_PHONE_RULE;
-    }
-
-    const selectedOption = els.fieldPhoneCountryCode.options[els.fieldPhoneCountryCode.selectedIndex];
-
-    if (!selectedOption) {
-        return getPhoneRuleByCountry(DEFAULT_PHONE_RULE.country) || DEFAULT_PHONE_RULE;
-    }
-
-    const code = String(selectedOption.value || "").trim();
-    const country = String(selectedOption.getAttribute("data-country") || "").trim();
-    const phoneRules = getPhoneCountryRules();
-
-    return phoneRules.find(function (rule) {
-        return rule.code === code && rule.country === country;
-    }) || getPhoneRuleByCode(code) || getPhoneRuleByCountry(country) || DEFAULT_PHONE_RULE;
+    return null;
 }
 
 function getPhoneCountryRules() {
@@ -889,75 +848,24 @@ function formatPhoneDigits(digits, rule) {
 }
 
 function updatePhoneConstraints() {
-    const input = document.getElementById("fieldPhone");
-    if (!input) {
-        return;
-    }
-
-    const rule = selectedPhoneRule();
-    input.setAttribute("inputmode", "tel");
-    input.setAttribute("autocomplete", "tel");
-    input.setAttribute("type", "tel");
-    input.setAttribute("placeholder", rule.example || "");
-    input.setAttribute("pattern", phonePatternForRule(rule));
-    input.setAttribute("title", phoneTitleForRule(rule));
-    input.maxLength = Math.max((rule.max || 15) + 6, 15);
+    applyIntlPhoneConstraints(els.fieldPhone);
 }
 
 function updatePhoneHelp() {
-    if (!els.fieldPhoneHelp) {
-        return;
-    }
-
-    const rule = selectedPhoneRule();
-
-    if (rule.min === rule.max) {
-        els.fieldPhoneHelp.textContent = `${rule.country}: exactly ${rule.min} digits. Example: ${rule.example}`;
-    } else {
-        els.fieldPhoneHelp.textContent = `${rule.country}: ${rule.min}-${rule.max} digits. Example: ${rule.example}`;
-    }
+    updateIntlPhoneHelp(els.fieldPhoneHelp, els.fieldPhone);
 }
 
 function formatPhoneNumberForDisplay(value, rule) {
-    const selectedRule = rule || DEFAULT_PHONE_RULE;
-    const localDigits = extractLocalPhoneDigits(value, selectedRule);
-    return formatPhoneDigits(localDigits, selectedRule);
+    return String(value == null ? "" : value);
 }
 
 function formatCurrentPhoneValue() {
-    const input = document.getElementById("fieldPhone");
-    if (!input) {
-        return;
-    }
-
-    const rule = selectedPhoneRule();
-    input.value = formatPhoneDigits(extractLocalPhoneDigits(input.value, rule), rule);
-    updatePhoneConstraints();
+    syncIntlPhoneFieldValue(els.fieldPhone);
     updatePhoneHelp();
 }
 
 function validatePhoneNumber() {
-    const input = document.getElementById("fieldPhone");
-    if (!input) {
-        return null;
-    }
-
-    const rule = selectedPhoneRule();
-    const digits = onlyDigits(input.value);
-
-    if (!digits) {
-        return isPhoneRequired() ? "Phone number is required." : null;
-    }
-
-    if (rule.min === rule.max && digits.length !== rule.min) {
-        return `Phone number for ${rule.country} must contain exactly ${rule.min} digits.`;
-    }
-
-    if (digits.length < rule.min || digits.length > rule.max) {
-        return `Phone number for ${rule.country} must contain between ${rule.min} and ${rule.max} digits.`;
-    }
-
-    return null;
+    return validateIntlPhoneNumber(els.fieldPhone);
 }
 
 function isPhoneRequired() {
@@ -969,31 +877,15 @@ function isPhoneRequired() {
 }
 
 function getFullPhoneNumber() {
-    const rule = selectedPhoneRule();
-    const input = document.getElementById("fieldPhone");
-    if (!input) {
-        return "";
-    }
-
-    const digits = onlyDigits(input.value);
-
-    if (!digits) {
-        return "";
-    }
-
-    return `${rule.code} ${formatPhoneDigits(digits, rule)}`.trim();
+    return getIntlPhoneNumber(els.fieldPhone);
 }
 
 function phonePatternForRule(rule) {
-    return "^\\d[\\d\\s().-]{3,}$";
+    return phonePatternForIntlRule(rule);
 }
 
 function phoneTitleForRule(rule) {
-    if (!rule || !rule.country) {
-        return "Phone number";
-    }
-
-    return `Phone number for ${rule.country}`;
+    return phoneTitleForIntlRule(rule);
 }
 
 function normalizeCountryCode(country) {

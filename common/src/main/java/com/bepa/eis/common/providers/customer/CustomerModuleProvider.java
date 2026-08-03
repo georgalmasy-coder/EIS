@@ -25,18 +25,20 @@ public class CustomerModuleProvider extends GenericProvider {
             "INSERT INTO [dbo].[CUSTOMER_MODULE] ( " +
                     "CustomerId, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "ModuleCode, " +
                     "ModuleName, " +
                     "CustomerModuleStatus, " +
                     "Latest " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, ?) ";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?) ";
 
     private static final String SELECT_LATEST_MODULES_BY_CUSTOMER_ID_SQL =
             "SELECT " +
                     "CustomerModuleId, " +
                     "CustomerId, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "ModuleCode, " +
                     "ModuleName, " +
                     "CustomerModuleStatus, " +
@@ -53,6 +55,7 @@ public class CustomerModuleProvider extends GenericProvider {
                     "CustomerModuleId, " +
                     "CustomerId, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "ModuleCode, " +
                     "ModuleName, " +
                     "CustomerModuleStatus, " +
@@ -70,6 +73,7 @@ public class CustomerModuleProvider extends GenericProvider {
                     "CustomerModuleId, " +
                     "CustomerId, " +
                     "SubscriptionPlanId, " +
+                    "SubscriptionPlanBillingPeriodId, " +
                     "ModuleCode, " +
                     "ModuleName, " +
                     "CustomerModuleStatus, " +
@@ -90,6 +94,7 @@ public class CustomerModuleProvider extends GenericProvider {
     private static final String UPDATE_CUSTOMER_MODULE_SQL =
             "UPDATE [dbo].[CUSTOMER_MODULE] " +
                     "SET SubscriptionPlanId = ?, " +
+                    "    SubscriptionPlanBillingPeriodId = ?, " +
                     "    ModuleCode = ?, " +
                     "    ModuleName = ?, " +
                     "    CustomerModuleStatus = ?, " +
@@ -309,10 +314,11 @@ public class CustomerModuleProvider extends GenericProvider {
              PreparedStatement statement = connection.prepareStatement(UPDATE_CUSTOMER_MODULE_SQL)) {
 
             statement.setInt(1, customerModule.getSubscriptionPlanId());
-            statement.setString(2, customerModule.getModuleCode());
-            statement.setString(3, nullIfBlank(customerModule.getModuleName()));
-            statement.setInt(4, customerModule.getCustomerModuleStatusId());
-            statement.setInt(5, customerModule.getCustomerModuleId());
+            setNullableInt(statement, 2, customerModule.getSubscriptionPlanBillingPeriodId());
+            statement.setString(3, customerModule.getModuleCode());
+            statement.setString(4, nullIfBlank(customerModule.getModuleName()));
+            statement.setInt(5, customerModule.getCustomerModuleStatusId());
+            statement.setInt(6, customerModule.getCustomerModuleId());
 
             boolean updated = statement.executeUpdate() > 0;
 
@@ -392,10 +398,11 @@ public class CustomerModuleProvider extends GenericProvider {
 
             statement.setInt(1, customerModule.getCustomerId());
             statement.setInt(2, customerModule.getSubscriptionPlanId());
-            statement.setString(3, customerModule.getModuleCode());
-            statement.setString(4, nullIfBlank(customerModule.getModuleName()));
-            statement.setInt(5, customerModule.getCustomerModuleStatusId());
-            statement.setBoolean(6, customerModule.isLatest());
+            setNullableInt(statement, 3, customerModule.getSubscriptionPlanBillingPeriodId());
+            statement.setString(4, customerModule.getModuleCode());
+            statement.setString(5, nullIfBlank(customerModule.getModuleName()));
+            statement.setInt(6, customerModule.getCustomerModuleStatusId());
+            statement.setBoolean(7, customerModule.isLatest());
 
             int updatedRows = statement.executeUpdate();
 
@@ -437,6 +444,9 @@ public class CustomerModuleProvider extends GenericProvider {
         int subscriptionPlanId = resultSet.getInt("SubscriptionPlanId");
         customerModule.setSubscriptionPlanId(resultSet.wasNull() ? null : subscriptionPlanId);
 
+        int subscriptionPlanBillingPeriodId = resultSet.getInt("SubscriptionPlanBillingPeriodId");
+        customerModule.setSubscriptionPlanBillingPeriodId(resultSet.wasNull() ? null : subscriptionPlanBillingPeriodId);
+
         customerModule.setModuleCode(resultSet.getString("ModuleCode"));
         customerModule.setModuleName(resultSet.getString("ModuleName"));
 
@@ -458,6 +468,19 @@ public class CustomerModuleProvider extends GenericProvider {
         }
 
         return value.trim();
+    }
+
+    private void setNullableInt(
+            PreparedStatement statement,
+            int parameterIndex,
+            Integer value
+    ) throws SQLException {
+        if (value == null) {
+            statement.setNull(parameterIndex, java.sql.Types.INTEGER);
+            return;
+        }
+
+        statement.setInt(parameterIndex, value);
     }
 
     private void rollbackQuietly(Connection connection) {

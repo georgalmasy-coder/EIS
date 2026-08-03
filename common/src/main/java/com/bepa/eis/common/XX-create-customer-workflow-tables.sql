@@ -91,6 +91,7 @@ CREATE TABLE [dbo].[CUSTOMER_SUBSCRIPTION] (
     [SubscriptionStatus] NVARCHAR(100) NOT NULL,
 
     [SubscriptionPlanId] INT NULL,
+    [SubscriptionPlanBillingPeriodId] INT NULL,
     [SubscriptionPlanName] NVARCHAR(255) NULL,
 
     [TrialStartAt] DATETIME2(0) NULL,
@@ -113,7 +114,10 @@ CREATE TABLE [dbo].[CUSTOMER_SUBSCRIPTION] (
     CONSTRAINT [DF_CUSTOMER_SUBSCRIPTION_UpdatedAt] DEFAULT SYSUTCDATETIME(),
 
     CONSTRAINT [PK_CUSTOMER_SUBSCRIPTION]
-    PRIMARY KEY CLUSTERED ([SubscriptionId] ASC)
+    PRIMARY KEY CLUSTERED ([SubscriptionId] ASC),
+
+    CONSTRAINT [FK_CUSTOMER_SUBSCRIPTION_SubscriptionPlanBillingPeriod]
+    FOREIGN KEY ([SubscriptionPlanBillingPeriodId]) REFERENCES [dbo].[SUBSCRIPTION_PLAN_BILLING_PERIOD]([SubscriptionPlanBillingPeriodId])
     );
 END;
 GO
@@ -264,6 +268,30 @@ IF NOT EXISTS (
 BEGIN
 CREATE INDEX [IX_CUSTOMER_SUBSCRIPTION_Status]
     ON [dbo].[CUSTOMER_SUBSCRIPTION] ([SubscriptionStatus]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_CUSTOMER_SUBSCRIPTION_BillingPeriod'
+      AND object_id = OBJECT_ID(N'[dbo].[CUSTOMER_SUBSCRIPTION]')
+)
+BEGIN
+CREATE INDEX [IX_CUSTOMER_SUBSCRIPTION_BillingPeriod]
+    ON [dbo].[CUSTOMER_SUBSCRIPTION] ([SubscriptionPlanBillingPeriodId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_CUSTOMER_SUBSCRIPTION_BillingPeriod'
+      AND object_id = OBJECT_ID(N'[dbo].[CUSTOMER_SUBSCRIPTION]')
+)
+BEGIN
+CREATE INDEX [IX_CUSTOMER_SUBSCRIPTION_BillingPeriod]
+    ON [dbo].[CUSTOMER_SUBSCRIPTION] ([SubscriptionPlanBillingPeriodId]);
 END;
 GO
 

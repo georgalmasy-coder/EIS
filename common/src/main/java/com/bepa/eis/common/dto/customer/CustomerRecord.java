@@ -14,6 +14,7 @@ public class CustomerRecord {
 
     private String customerName;
     private String cvrNumber;
+    private String vatNumber;
     private String phone;
 
     private String address;
@@ -40,6 +41,7 @@ public class CustomerRecord {
 
         customerName = "";
         cvrNumber = "";
+        vatNumber = "";
         phone = "";
 
         address = "";
@@ -98,6 +100,14 @@ public class CustomerRecord {
 
     public void setCvrNumber(String cvrNumber) {
         this.cvrNumber = safeText(cvrNumber);
+    }
+
+    public String getVatNumber() {
+        return vatNumber;
+    }
+
+    public void setVatNumber(String vatNumber) {
+        this.vatNumber = safeText(vatNumber).toUpperCase();
     }
 
     public String getPhone() {
@@ -301,6 +311,7 @@ public class CustomerRecord {
                 + ", version=" + version
                 + ", customerName=" + customerName
                 + ", cvrNumber=" + cvrNumber
+                + ", vatNumber=" + vatNumber
                 + ", contactEmail=" + contactEmail
                 + ", customerStatus=" + getCustomerStatusCode()
                 + ", customerMfaPolicy=" + getCustomerMfaPolicy()

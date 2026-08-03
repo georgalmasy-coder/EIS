@@ -633,6 +633,110 @@
     grid-column: 1 / -1;
 }
 
+.customer-phone-field {
+    display: grid;
+    gap: 6px;
+}
+
+.phone-field .iti {
+    width: 100%;
+}
+
+.customer-phone-controls {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.customer-phone-controls .customer-phone-country,
+.customer-phone-controls .customer-phone-input {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.customer-phone-field > span,
+.customer-phone-controls label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.customer-phone-country select,
+.customer-phone-input input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.customer-phone-field .field-help {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.customer-phone-country select:focus,
+.customer-phone-input input:focus {
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+}
+
+.customer-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.customer-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(35, 52, 84, .75);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, .42);
+}
+
+.customer-summary-label {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.customer-summary-value {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.35;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.customer-summary-value.is-pill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(96, 165, 250, .55);
+    background: rgba(96, 165, 250, .14);
+}
+
+.customer-summary-value.is-muted {
+    color: var(--muted);
+}
+
 .customer-dialog-table-frame {
     height: 300px;
     min-height: 240px;
@@ -777,6 +881,22 @@
     opacity: .55;
     cursor: not-allowed;
     filter: none;
+}
+
+@media (max-width: 1200px) {
+    .customer-summary-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 780px) {
+    .customer-summary-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-phone-controls {
+        grid-template-columns: 1fr;
+    }
 }
 
 #customerDialogStatus {

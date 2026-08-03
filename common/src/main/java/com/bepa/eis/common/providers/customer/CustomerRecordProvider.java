@@ -32,6 +32,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.Version, " +
                     "C.CustomerName, " +
                     "C.CvrNumber, " +
+                    "C.VatNumber, " +
                     "C.Phone, " +
                     "C.Address, " +
                     "C.ZipCode, " +
@@ -62,6 +63,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.Version, " +
                     "C.CustomerName, " +
                     "C.CvrNumber, " +
+                    "C.VatNumber, " +
                     "C.Phone, " +
                     "C.Address, " +
                     "C.ZipCode, " +
@@ -93,6 +95,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "C.Version, " +
                     "C.CustomerName, " +
                     "C.CvrNumber, " +
+                    "C.VatNumber, " +
                     "C.Phone, " +
                     "C.Address, " +
                     "C.ZipCode, " +
@@ -132,6 +135,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "Version, " +
                     "CustomerName, " +
                     "CvrNumber, " +
+                    "VatNumber, " +
                     "Phone, " +
                     "Address, " +
                     "ZipCode, " +
@@ -145,7 +149,7 @@ public class CustomerRecordProvider extends GenericProvider {
                     "ChangedDateTime, " +
                     "Latest " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME(), ?) ";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME(), ?) ";
 
     public CustomerRecordProvider(WebSession webSession) {
         super(webSession);
@@ -187,10 +191,12 @@ public class CustomerRecordProvider extends GenericProvider {
                 customer.setCustomerPK(customerPK);
 
                 log.info(
-                        "Customer created. customerPK={}, customerId={}, version={}, customerMfaPolicy={}",
+                        "Customer created. customerPK={}, customerId={}, version={}, cvrNumber={}, vatNumber={}, customerMfaPolicy={}",
                         customerPK,
                         customerId,
                         customer.getVersion(),
+                        customer.getCvrNumber(),
+                        customer.getVatNumber(),
                         customer.getCustomerMfaPolicy()
                 );
 
@@ -262,10 +268,12 @@ public class CustomerRecordProvider extends GenericProvider {
                 updatedCustomer.setCustomerPK(customerPK);
 
                 log.info(
-                        "Customer updated. customerPK={}, customerId={}, version={}, customerMfaPolicy={}",
+                        "Customer updated. customerPK={}, customerId={}, version={}, cvrNumber={}, vatNumber={}, customerMfaPolicy={}",
                         customerPK,
                         updatedCustomer.getCustomerId(),
                         updatedCustomer.getVersion(),
+                        updatedCustomer.getCvrNumber(),
+                        updatedCustomer.getVatNumber(),
                         updatedCustomer.getCustomerMfaPolicy()
                 );
 
@@ -437,23 +445,24 @@ public class CustomerRecordProvider extends GenericProvider {
             statement.setInt(2, customer.getVersion());
             statement.setString(3, customer.getCustomerName());
             statement.setString(4, nullIfBlank(customer.getCvrNumber()));
-            statement.setString(5, nullIfBlank(customer.getPhone()));
-            statement.setString(6, nullIfBlank(customer.getAddress()));
-            statement.setString(7, nullIfBlank(customer.getZipCode()));
-            statement.setString(8, nullIfBlank(customer.getCity()));
-            statement.setString(9, nullIfBlank(customer.getCountry()));
-            statement.setString(10, nullIfBlank(customer.getContactName()));
-            statement.setString(11, nullIfBlank(customer.getContactEmail()));
-            statement.setInt(12, customer.getCustomerStatusId());
-            statement.setString(13, customer.getCustomerMfaPolicy());
+            statement.setString(5, nullIfBlank(customer.getVatNumber()));
+            statement.setString(6, nullIfBlank(customer.getPhone()));
+            statement.setString(7, nullIfBlank(customer.getAddress()));
+            statement.setString(8, nullIfBlank(customer.getZipCode()));
+            statement.setString(9, nullIfBlank(customer.getCity()));
+            statement.setString(10, nullIfBlank(customer.getCountry()));
+            statement.setString(11, nullIfBlank(customer.getContactName()));
+            statement.setString(12, nullIfBlank(customer.getContactEmail()));
+            statement.setInt(13, customer.getCustomerStatusId());
+            statement.setString(14, customer.getCustomerMfaPolicy());
 
             if (customer.getChangedByUserId() == null) {
-                statement.setNull(14, Types.INTEGER);
+                statement.setNull(15, Types.INTEGER);
             } else {
-                statement.setInt(14, customer.getChangedByUserId());
+                statement.setInt(15, customer.getChangedByUserId());
             }
 
-            statement.setBoolean(15, customer.isLatest());
+            statement.setBoolean(16, customer.isLatest());
 
             int updatedRows = statement.executeUpdate();
 
@@ -485,6 +494,7 @@ public class CustomerRecordProvider extends GenericProvider {
 
         customer.setCustomerName(resultSet.getString("CustomerName"));
         customer.setCvrNumber(resultSet.getString("CvrNumber"));
+        customer.setVatNumber(resultSet.getString("VatNumber"));
         customer.setPhone(resultSet.getString("Phone"));
 
         customer.setAddress(resultSet.getString("Address"));

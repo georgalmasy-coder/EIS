@@ -1,5 +1,15 @@
 import { initMenu } from "../components/menu.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
+import {
+    applyPhoneConstraints as applyIntlPhoneConstraints,
+    formatCurrentPhoneValue as syncIntlPhoneFieldValue,
+    getFullPhoneNumber as getIntlPhoneNumber,
+    initPhoneField,
+    phonePatternForRule as phonePatternForIntlRule,
+    phoneTitleForRule as phoneTitleForIntlRule,
+    updatePhoneHelp as updateIntlPhoneHelp,
+    validatePhoneNumber as validateIntlPhoneNumber
+} from "../components/phone-intl-field.js";
 
 const API_URL = "/api/admin/customers";
 
@@ -66,11 +76,15 @@ function collectElements() {
     els.customerDialogStatus = document.getElementById("customerDialogStatus");
     els.btnSaveCustomer = document.getElementById("btnSaveCustomer");
     els.btnCancelCustomer = document.getElementById("btnCancelCustomer");
+    els.fieldPhoneCountryCode = document.getElementById("fieldPhoneCountryCode");
+    els.fieldPhoneHelp = document.getElementById("fieldPhoneHelp");
 
     els.modulesBody = document.getElementById("modulesBody");
     els.modulesEmpty = document.getElementById("modulesEmpty");
     els.workflowEventsBody = document.getElementById("workflowEventsBody");
     els.workflowEventsEmpty = document.getElementById("workflowEventsEmpty");
+    els.subscriptionSummary = document.getElementById("subscriptionSummary");
+    els.workflowSummary = document.getElementById("workflowSummary");
 
     document.querySelectorAll("[id]").forEach(function (element) {
         els[element.id] = element;
@@ -131,6 +145,31 @@ function bindEvents() {
     if (els.btnSaveCustomer) {
         els.btnSaveCustomer.addEventListener("click", saveCustomerAdministration);
     }
+
+    document.addEventListener("change", function (event) {
+        const target = event.target;
+
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (target.id === "fieldPhoneCountryCode") {
+            formatCurrentPhoneValue();
+            updatePhoneHelp();
+        }
+    });
+
+    document.addEventListener("input", function (event) {
+        const target = event.target;
+
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (target.id === "fieldPhone") {
+            formatCurrentPhoneValue();
+        }
+    });
 }
 
 async function loadCustomers() {
@@ -384,6 +423,7 @@ function parseCustomerDetail(doc) {
     return {
         customer: parseElement(detail.querySelector(":scope > customer")),
         subscription: parseElement(detail.querySelector(":scope > subscription")),
+        subscriptionSummary: parseElement(detail.querySelector(":scope > subscriptionSummary")),
         latestPayment: parseElement(detail.querySelector(":scope > latestPayment")),
         paymentMethod: parseElement(detail.querySelector(":scope > paymentMethod")),
         modules: Array.from(detail.querySelectorAll(":scope > modules > module")).map(parseElement),
@@ -695,6 +735,7 @@ function initializeTabs() {
 function fillDialog(detail) {
     const customer = detail.customer || {};
     const subscription = detail.subscription || {};
+    const subscriptionSummary = detail.subscriptionSummary || {};
     const payment = detail.latestPayment || {};
     const paymentMethod = detail.paymentMethod || {};
     const workflow = detail.workflow || {};
@@ -716,6 +757,13 @@ function fillDialog(detail) {
     setValue("fieldCreatedDateTime", formatDanishDateTime(customer.createdDateTime));
     setValue("fieldChangedDateTime", formatDanishDateTime(customer.changedDateTime));
     setValue("fieldChangedByUserId", customer.changedBy || "");
+
+    setValue("fieldPhone", customer.phone);
+    initPhoneField(els.fieldPhone, {
+        onCountryChange: () => updatePhoneHelp(),
+        onInput: () => updatePhoneHelp()
+    });
+    updatePhoneHelp();
 
     setValue("fieldSubscriptionId", subscription.subscriptionId);
     setValue("fieldSubscriptionStatus", subscription.subscriptionStatus);
@@ -782,6 +830,14 @@ function fillDialog(detail) {
         els.customerDialogTitle.textContent = `Customer Administration - ${customer.customerName || customer.customerId || ""}`;
     }
 
+    renderSubscriptionSummary(subscriptionSummary);
+    renderWorkflowSummary(workflow, subscriptionSummary);
+
+    if (els.customerDialogStatus) {
+        const dialogStatus = buildDialogStatus(workflow, subscriptionSummary);
+        setDialogStatus(dialogStatus, "is-ok");
+    }
+
     renderModules(detail.modules || []);
     renderWorkflowEvents(detail.workflowEvents || []);
 }
@@ -793,8 +849,161 @@ function clearDialog() {
         });
     }
 
+    if (els.fieldPhone) {
+        els.fieldPhone.value = "";
+    }
+    updatePhoneHelp();
+    renderSubscriptionSummary({});
+    renderWorkflowSummary({}, {});
     renderModules([]);
     renderWorkflowEvents([]);
+}
+
+function renderSubscriptionSummary(summary) {
+    if (!els.subscriptionSummary) {
+        return;
+    }
+
+    const items = buildSubscriptionSummaryItems(summary || {});
+    els.subscriptionSummary.innerHTML = renderSummaryStrip(items);
+}
+
+function renderWorkflowSummary(workflow, subscriptionSummary) {
+    if (!els.workflowSummary) {
+        return;
+    }
+
+    const items = [
+        {
+            label: "Workflow state",
+            value: workflow?.currentState ? lookupLabel("workflowState", workflow.currentState) : "No workflow",
+            pill: true
+        },
+        {
+            label: "Workflow status",
+            value: workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "—",
+            pill: true
+        },
+        {
+            label: "Subscription source",
+            value: subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "—",
+            pill: false
+        }
+    ];
+
+    els.workflowSummary.innerHTML = renderSummaryStrip(items);
+}
+
+function buildSubscriptionSummaryItems(summary) {
+    return [
+        {
+            label: "Subscription source",
+            value: summary.source ? humanizeSummaryValue(summary.source) : "No subscription yet",
+            pill: true
+        },
+        {
+            label: "Plan",
+            value: summary.subscriptionPlanName || summary.moduleName || summary.moduleCode || "—"
+        },
+        {
+            label: "Billing period",
+            value: summary.billingPeriodName || summary.billingPeriodCode || "—"
+        },
+        {
+            label: "Price",
+            value: formatAmountAndCurrency(summary.priceAmount, summary.currency)
+        },
+        {
+            label: "Valid from",
+            value: formatDateOnly(summary.validFrom)
+        },
+        {
+            label: "Valid to",
+            value: formatDateOnly(summary.validTo)
+        },
+        {
+            label: "Module",
+            value: summary.moduleName || summary.moduleCode || "—"
+        },
+        {
+            label: "Billing months",
+            value: summary.billingPeriodMonths || "—"
+        }
+    ];
+}
+
+function renderSummaryStrip(items) {
+    if (!Array.isArray(items) || !items.length) {
+        return "";
+    }
+
+    return items.map(function (item) {
+        const value = item?.value == null || item.value === "" ? "—" : String(item.value);
+        const pillClass = item?.pill ? " is-pill" : "";
+
+        return `
+            <div class="customer-summary-item">
+                <div class="customer-summary-label">${escapeHtml(item?.label || "")}</div>
+                <div class="customer-summary-value${pillClass}">${escapeHtml(value)}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+function buildDialogStatus(workflow, subscriptionSummary) {
+    const workflowState = workflow?.currentState ? lookupLabel("workflowState", workflow.currentState) : "No workflow";
+    const workflowStatus = workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "—";
+    const source = subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "No subscription";
+
+    return `Workflow: ${workflowState} | Status: ${workflowStatus} | Subscription source: ${source}`;
+}
+
+function humanizeSummaryValue(value) {
+    const normalized = String(value || "").trim();
+
+    if (!normalized) {
+        return "";
+    }
+
+    return normalized
+        .toLowerCase()
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, function (match) {
+            return match.toUpperCase();
+        });
+}
+
+function formatDateOnly(value) {
+    const textValue = String(value || "").trim();
+
+    if (!textValue) {
+        return "—";
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(textValue)) {
+        return textValue.substring(0, 10);
+    }
+
+    return formatDanishDateTime(textValue);
+}
+
+function formatAmountAndCurrency(amount, currency) {
+    const safeAmount = String(amount == null ? "" : amount).trim();
+    const safeCurrency = String(currency || "").trim().toUpperCase();
+
+    if (!safeAmount && !safeCurrency) {
+        return "—";
+    }
+
+    if (!safeAmount) {
+        return safeCurrency || "—";
+    }
+
+    if (!safeCurrency) {
+        return safeAmount;
+    }
+
+    return `${safeAmount} ${safeCurrency}`;
 }
 
 function renderModules(modules) {
@@ -904,7 +1113,7 @@ function appendCustomerXml(xml) {
     appendXmlElement(xml, "version", value("fieldVersion"));
     appendXmlElement(xml, "customerName", value("fieldCustomerName"));
     appendXmlElement(xml, "cvrNumber", value("fieldCvrNumber"));
-    appendXmlElement(xml, "phone", value("fieldPhone"));
+    appendXmlElement(xml, "phone", getFullPhoneNumber());
     appendXmlElement(xml, "address", value("fieldAddress"));
     appendXmlElement(xml, "zipCode", value("fieldZipCode"));
     appendXmlElement(xml, "city", value("fieldCity"));
@@ -1032,6 +1241,103 @@ function appendXmlElement(xml, elementName, itemValue) {
     xml.push("</");
     xml.push(elementName);
     xml.push(">");
+}
+
+function getPhoneCountryRules() {
+    const countryCodeLookup = state.lookups?.countryCode;
+
+    if (!Array.isArray(countryCodeLookup) || !countryCodeLookup.length) {
+        return [];
+    }
+
+    return countryCodeLookup;
+}
+
+function getPhoneRuleByCode(code) {
+    const normalizedCode = String(code || "").trim();
+    const rules = getPhoneCountryRules();
+
+    return rules.find(function (rule) {
+        return rule.code === normalizedCode;
+    }) || null;
+}
+
+function getPhoneRuleByCountry(country) {
+    const normalizedCountry = normalizeCountryCode(country);
+    const rules = getPhoneCountryRules();
+
+    return rules.find(function (rule) {
+        return normalizeCountryCode(rule.country) === normalizedCountry;
+    }) || null;
+}
+
+function getPhoneRuleForValue(phone, fallbackCountry) {
+    return null;
+}
+
+function fillPhoneCountryCodes(selectedRule) {
+    return;
+}
+
+function selectPhoneCountryRule(rule) {
+    return;
+}
+
+function selectedPhoneRule() {
+    return null;
+}
+
+function formatCurrentPhoneValue() {
+    syncIntlPhoneFieldValue(document.getElementById("fieldPhone"));
+    updatePhoneHelp();
+}
+
+function updatePhoneConstraints() {
+    applyIntlPhoneConstraints(document.getElementById("fieldPhone"));
+}
+
+function updatePhoneHelp() {
+    updateIntlPhoneHelp(els.fieldPhoneHelp, els.fieldPhone);
+}
+
+function getFullPhoneNumber() {
+    return getIntlPhoneNumber(document.getElementById("fieldPhone"));
+}
+
+function formatPhoneNumberForDisplay(value, rule) {
+    return String(value == null ? "" : value);
+}
+
+function extractLocalPhoneDigits(value, rule) {
+    return onlyDigits(value);
+}
+
+function formatPhoneDigits(digits, rule) {
+    return String(digits == null ? "" : digits);
+}
+
+function normalizePhoneNumber(value) {
+    return String(value == null ? "" : value).trim();
+}
+
+function onlyDigits(value) {
+    return String(value == null ? "" : value).replace(/\D/g, "");
+}
+
+function normalizeCountryCode(value) {
+    return String(value == null ? "" : value).trim().toUpperCase();
+}
+
+function phonePatternForRule(_rule) {
+    return phonePatternForIntlRule(_rule);
+}
+
+function phoneTitleForRule(rule) {
+    return phoneTitleForIntlRule(rule);
+}
+
+function fallbackPhoneRule() {
+    return null;
 }
 
 function closeDialog() {

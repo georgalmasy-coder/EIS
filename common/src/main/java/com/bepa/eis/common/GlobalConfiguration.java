@@ -58,6 +58,11 @@ public final class GlobalConfiguration {
     private static final int DEFAULT_CUSTOMER_WORKFLOW_REACTIVATION_TOKEN_VALID_DAYS = 14;
     private static final int DEFAULT_CUSTOMER_WORKFLOW_SUBSCRIPTION_RENEWAL_REMINDER_DAYS_BEFORE_EXPIRY = 14;
 
+    private static final boolean DEFAULT_CUSTOMER_REGISTRATION_CVR_LOOKUP_ENABLED = true;
+
+    private static final boolean DEFAULT_VIES_VALIDATION_ENABLED = true;
+    private static final int DEFAULT_VIES_VALIDATION_TIMEOUT_SECONDS = 60;
+
     private static final String DEFAULT_MAIL_SMTP_HOST = "localhost";
     private static final int DEFAULT_MAIL_SMTP_PORT = 25;
     private static final String DEFAULT_MAIL_SMTP_USERNAME = "";
@@ -256,6 +261,18 @@ public final class GlobalConfiguration {
 
     public static int getCustomerWorkflowSubscriptionRenewalReminderDaysBeforeExpiry() {
         return getInt("customer.workflow.subscription.renewal.reminder.days.before.expiry", DEFAULT_CUSTOMER_WORKFLOW_SUBSCRIPTION_RENEWAL_REMINDER_DAYS_BEFORE_EXPIRY, 0, 365);
+    }
+
+    public static boolean isCustomerRegistrationCvrLookupEnabled() {
+        return getBoolean("customer.registration.cvr.lookup.enabled", DEFAULT_CUSTOMER_REGISTRATION_CVR_LOOKUP_ENABLED);
+    }
+
+    public static boolean isViesValidationEnabled() {
+        return getBoolean("vies.validation.enabled", DEFAULT_VIES_VALIDATION_ENABLED);
+    }
+
+    public static int getViesValidationTimeoutSeconds() {
+        return getInt("vies.validation.timeout.seconds", DEFAULT_VIES_VALIDATION_TIMEOUT_SECONDS, 1, 300);
     }
 
     public static String getMailSmtpHost() {
@@ -593,7 +610,9 @@ public final class GlobalConfiguration {
         appendPathConfiguration(content, lineSeparator);
         appendDatabaseConfiguration(content, lineSeparator);
         appendMailConfiguration(content, lineSeparator);
+        appendCustomerRegistrationConfiguration(content, lineSeparator);
         appendCustomerWorkflowConfiguration(content, lineSeparator);
+        appendViesConfiguration(content, lineSeparator);
         appendMfaConfiguration(content, lineSeparator);
 
         return content.toString();
@@ -687,6 +706,15 @@ public final class GlobalConfiguration {
         content.append(lineSeparator);
     }
 
+    private static void appendCustomerRegistrationConfiguration(StringBuilder content, String lineSeparator) {
+        content.append("###############################################################################").append(lineSeparator);
+        content.append("# Customer registration configuration").append(lineSeparator);
+        content.append("###############################################################################").append(lineSeparator);
+        content.append(lineSeparator);
+        content.append("customer.registration.cvr.lookup.enabled=true").append(lineSeparator);
+        content.append(lineSeparator);
+    }
+
     private static void appendCustomerWorkflowConfiguration(StringBuilder content, String lineSeparator) {
         content.append("###############################################################################").append(lineSeparator);
         content.append("# Customer workflow configuration").append(lineSeparator);
@@ -702,6 +730,16 @@ public final class GlobalConfiguration {
         content.append("customer.workflow.payment.token.valid.days=14").append(lineSeparator);
         content.append("customer.workflow.reactivation.token.valid.days=14").append(lineSeparator);
         content.append("customer.workflow.subscription.renewal.reminder.days.before.expiry=14").append(lineSeparator);
+        content.append(lineSeparator);
+    }
+
+    private static void appendViesConfiguration(StringBuilder content, String lineSeparator) {
+        content.append("###############################################################################").append(lineSeparator);
+        content.append("# VIES validation configuration").append(lineSeparator);
+        content.append("###############################################################################").append(lineSeparator);
+        content.append(lineSeparator);
+        content.append("vies.validation.enabled=true").append(lineSeparator);
+        content.append("vies.validation.timeout.seconds=60").append(lineSeparator);
         content.append(lineSeparator);
     }
 

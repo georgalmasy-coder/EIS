@@ -1,6 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
 import com.bepa.eis.common.dto.customer.SubscriptionPlan;
+import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerModule;
 import com.bepa.eis.common.dto.customer.CustomerSubscription;
@@ -19,6 +20,7 @@ public class CustomerSubscriptionActivationProvider {
 
     private final CustomerSubscriptionProvider subscriptionProvider;
     private final SubscriptionPlanProvider subscriptionPlanProvider;
+    private final SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider;
     private final CustomerWorkflowTimingProvider timingProvider;
     private final CustomerModuleProvider customerModuleProvider;
 
@@ -30,6 +32,7 @@ public class CustomerSubscriptionActivationProvider {
         this(
                 new CustomerSubscriptionProvider(webSession),
                 new SubscriptionPlanProvider(webSession),
+                new SubscriptionPlanBillingPeriodProvider(webSession),
                 new CustomerWorkflowTimingProvider(),
                 new CustomerModuleProvider(webSession)
         );
@@ -38,11 +41,13 @@ public class CustomerSubscriptionActivationProvider {
     public CustomerSubscriptionActivationProvider(
             CustomerSubscriptionProvider subscriptionProvider,
             SubscriptionPlanProvider subscriptionPlanProvider,
+            SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider,
             CustomerWorkflowTimingProvider timingProvider
     ) {
         this(
                 subscriptionProvider,
                 subscriptionPlanProvider,
+                subscriptionPlanBillingPeriodProvider,
                 timingProvider,
                 new CustomerModuleProvider(null)
         );
@@ -51,6 +56,7 @@ public class CustomerSubscriptionActivationProvider {
     public CustomerSubscriptionActivationProvider(
             CustomerSubscriptionProvider subscriptionProvider,
             SubscriptionPlanProvider subscriptionPlanProvider,
+            SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider,
             CustomerWorkflowTimingProvider timingProvider,
             CustomerModuleProvider customerModuleProvider
     ) {
@@ -61,6 +67,10 @@ public class CustomerSubscriptionActivationProvider {
         this.subscriptionPlanProvider = subscriptionPlanProvider == null
                 ? new SubscriptionPlanProvider(null)
                 : subscriptionPlanProvider;
+
+        this.subscriptionPlanBillingPeriodProvider = subscriptionPlanBillingPeriodProvider == null
+                ? new SubscriptionPlanBillingPeriodProvider(null)
+                : subscriptionPlanBillingPeriodProvider;
 
         this.timingProvider = timingProvider == null
                 ? new CustomerWorkflowTimingProvider()
@@ -95,7 +105,7 @@ public class CustomerSubscriptionActivationProvider {
         Timestamp periodStartAt = now;
         Timestamp periodEndAt = calculatePeriodEndAt(
                 now,
-                subscription.getSubscriptionPlanId()
+                subscription
         );
 
         subscription.setSubscriptionStatus(CustomerSubscriptionStatus.ACTIVE);
@@ -246,9 +256,9 @@ public class CustomerSubscriptionActivationProvider {
 
     private Timestamp calculatePeriodEndAt(
             Timestamp periodStartAt,
-            Integer subscriptionPlanId
+            CustomerSubscription subscription
     ) {
-        int billingPeriodMonths = resolveBillingPeriodMonths(subscriptionPlanId);
+        int billingPeriodMonths = resolveBillingPeriodMonths(subscription);
 
         Instant startInstant = periodStartAt == null
                 ? Instant.now()
@@ -257,12 +267,24 @@ public class CustomerSubscriptionActivationProvider {
         return Timestamp.from(startInstant.plus(estimateDaysFromMonths(billingPeriodMonths), ChronoUnit.DAYS));
     }
 
-    private int resolveBillingPeriodMonths(Integer subscriptionPlanId) {
-        if (subscriptionPlanId == null) {
+    private int resolveBillingPeriodMonths(CustomerSubscription subscription) {
+        if (subscription == null || subscription.getSubscriptionPlanId() == null) {
             return 1;
         }
 
-        SubscriptionPlan plan = subscriptionPlanProvider.getPlanById(subscriptionPlanId);
+        SubscriptionPlanBillingPeriod billingPeriod = null;
+
+        if (subscription.getSubscriptionPlanBillingPeriodId() != null) {
+            billingPeriod = subscriptionPlanBillingPeriodProvider.getBillingPeriodById(
+                    subscription.getSubscriptionPlanBillingPeriodId()
+            );
+        }
+
+        if (billingPeriod != null && billingPeriod.getBillingPeriodMonths() != null && billingPeriod.getBillingPeriodMonths() > 0) {
+            return billingPeriod.getBillingPeriodMonths();
+        }
+
+        SubscriptionPlan plan = subscriptionPlanProvider.getPlanById(subscription.getSubscriptionPlanId());
 
         if (plan == null) {
             return 1;

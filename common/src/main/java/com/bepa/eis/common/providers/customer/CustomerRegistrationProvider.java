@@ -4,13 +4,17 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerModule;
 import com.bepa.eis.common.dto.customer.CustomerPaymentMethod;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
+import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
 import com.bepa.eis.common.dto.customer.SubscriptionPlan;
+import com.bepa.eis.common.enums.customer.BillingPeriod;
 import com.bepa.eis.common.enums.customer.CustomerModuleStatus;
 import com.bepa.eis.common.enums.customer.CustomerPaymentMethodStatus;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import com.bepa.eis.common.providers.CustomerRegistrationUserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class CustomerRegistrationProvider {
 
@@ -22,6 +26,7 @@ public class CustomerRegistrationProvider {
     private final WebSession webSession;
     private final CustomerRecordProvider customerRecordProvider;
     private final SubscriptionPlanProvider subscriptionPlanProvider;
+    private final SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider;
     private final CustomerModuleProvider customerModuleProvider;
     private final CustomerPaymentMethodProvider customerPaymentMethodProvider;
     private final CustomerWorkflowStarterProvider workflowStarterProvider;
@@ -32,6 +37,7 @@ public class CustomerRegistrationProvider {
                 webSession,
                 new CustomerRecordProvider(webSession),
                 new SubscriptionPlanProvider(webSession),
+                new SubscriptionPlanBillingPeriodProvider(webSession),
                 new CustomerModuleProvider(webSession),
                 new CustomerPaymentMethodProvider(webSession),
                 new CustomerWorkflowStarterProvider(webSession),
@@ -43,6 +49,7 @@ public class CustomerRegistrationProvider {
             WebSession webSession,
             CustomerRecordProvider customerRecordProvider,
             SubscriptionPlanProvider subscriptionPlanProvider,
+            SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider,
             CustomerModuleProvider customerModuleProvider,
             CustomerPaymentMethodProvider customerPaymentMethodProvider,
             CustomerWorkflowStarterProvider workflowStarterProvider,
@@ -51,6 +58,9 @@ public class CustomerRegistrationProvider {
         this.webSession = webSession;
         this.customerRecordProvider = customerRecordProvider == null ? new CustomerRecordProvider(webSession) : customerRecordProvider;
         this.subscriptionPlanProvider = subscriptionPlanProvider == null ? new SubscriptionPlanProvider(webSession) : subscriptionPlanProvider;
+        this.subscriptionPlanBillingPeriodProvider = subscriptionPlanBillingPeriodProvider == null
+                ? new SubscriptionPlanBillingPeriodProvider(webSession)
+                : subscriptionPlanBillingPeriodProvider;
         this.customerModuleProvider = customerModuleProvider == null ? new CustomerModuleProvider(webSession) : customerModuleProvider;
         this.customerPaymentMethodProvider = customerPaymentMethodProvider == null ? new CustomerPaymentMethodProvider(webSession) : customerPaymentMethodProvider;
         this.workflowStarterProvider = workflowStarterProvider == null ? new CustomerWorkflowStarterProvider(webSession) : workflowStarterProvider;
@@ -72,11 +82,26 @@ public class CustomerRegistrationProvider {
             return CustomerRegistrationResult.failed("Email is already used by an active user.");
         }
 
-        SubscriptionPlan subscriptionPlan = subscriptionPlanProvider.getActivePlanByModuleCode(data.getModuleCode());
+        SubscriptionPlan subscriptionPlan = resolveSubscriptionPlan(data);
 
         if (subscriptionPlan == null) {
-            return CustomerRegistrationResult.failed("No active subscription plan was found for moduleCode: " + data.getModuleCode());
+            return CustomerRegistrationResult.failed("No active subscription plan was found for the selected subscription.");
         }
+
+        if (!isSelectableBillingPeriod(subscriptionPlan, data.getBillingPeriodCode())) {
+            return CustomerRegistrationResult.failed("Selected billing period is not available for the chosen subscription.");
+        }
+
+        SubscriptionPlanBillingPeriod selectedBillingPeriod = resolveBillingPeriod(
+                subscriptionPlan,
+                data.getBillingPeriodCode()
+        );
+
+        if (selectedBillingPeriod == null || selectedBillingPeriod.getSubscriptionPlanBillingPeriodId() == null) {
+            return CustomerRegistrationResult.failed("Selected billing period could not be resolved.");
+        }
+
+        data.setSubscriptionPlanBillingPeriodId(selectedBillingPeriod.getSubscriptionPlanBillingPeriodId());
 
         CustomerRecord customerRecord = buildCustomerRecord(data);
         Integer customerId = customerRecordProvider.createCustomer(customerRecord);
@@ -122,7 +147,8 @@ public class CustomerRegistrationProvider {
 
         CustomerModule customerModule = buildCustomerModule(
                 customerId,
-                subscriptionPlan
+                subscriptionPlan,
+                data.getSubscriptionPlanBillingPeriodId()
         );
 
         Integer customerModuleId = customerModuleProvider.createCustomerModule(customerModule);
@@ -178,6 +204,7 @@ public class CustomerRegistrationProvider {
 
         customer.setCustomerName(data.getCustomerName());
         customer.setCvrNumber(data.getCvrNumber());
+        customer.setVatNumber(data.getVatNumber());
         customer.setPhone(data.getPhone());
 
         customer.setAddress(data.getAddress());
@@ -198,12 +225,14 @@ public class CustomerRegistrationProvider {
 
     private CustomerModule buildCustomerModule(
             Integer customerId,
-            SubscriptionPlan subscriptionPlan
+            SubscriptionPlan subscriptionPlan,
+            Integer subscriptionPlanBillingPeriodId
     ) {
         CustomerModule customerModule = new CustomerModule();
 
         customerModule.setCustomerId(customerId);
         customerModule.setSubscriptionPlanId(subscriptionPlan.getSubscriptionPlanId());
+        customerModule.setSubscriptionPlanBillingPeriodId(subscriptionPlanBillingPeriodId);
         customerModule.setModuleCode(subscriptionPlan.getModuleCode());
         customerModule.setModuleName(subscriptionPlan.getModuleName());
         customerModule.setCustomerModuleStatus(CustomerModuleStatus.TRIAL);
@@ -234,8 +263,12 @@ public class CustomerRegistrationProvider {
     }
 
     private String validate(CustomerRegistrationData data) {
-        if (isBlank(data.getModuleCode())) {
-            return "Module code is required.";
+        if (resolveSubscriptionPlan(data) == null) {
+            return "Subscription is required.";
+        }
+
+        if (isBlank(data.getBillingPeriodCode())) {
+            return "Billing period is required.";
         }
 
         if (isBlank(data.getCustomerName())) {
@@ -289,6 +322,91 @@ public class CustomerRegistrationProvider {
         return null;
     }
 
+    private SubscriptionPlan resolveSubscriptionPlan(CustomerRegistrationData data) {
+        if (data == null) {
+            return null;
+        }
+
+        if (data.getSubscriptionPlanId() != null) {
+            SubscriptionPlan planById = subscriptionPlanProvider.getPlanById(data.getSubscriptionPlanId());
+            if (isSelectableSubscriptionPlan(planById)) {
+                return planById;
+            }
+        }
+
+        if (!isBlank(data.getModuleCode())) {
+            SubscriptionPlan planByModuleCode = subscriptionPlanProvider.getActivePlanByModuleCode(data.getModuleCode());
+            if (isSelectableSubscriptionPlan(planByModuleCode)) {
+                return planByModuleCode;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isSelectableSubscriptionPlan(SubscriptionPlan plan) {
+        return plan != null
+                && plan.getSubscriptionPlanId() != null
+                && plan.getActive()
+                && plan.getValidFrom() != null
+                && !plan.getValidFrom().isAfter(java.time.LocalDate.now())
+                && (plan.getValidTo() == null || !plan.getValidTo().isBefore(java.time.LocalDate.now()));
+    }
+
+    private boolean isSelectableBillingPeriod(
+            SubscriptionPlan subscriptionPlan,
+            String billingPeriodCode
+    ) {
+        if (subscriptionPlan == null || subscriptionPlan.getSubscriptionPlanId() == null || isBlank(billingPeriodCode)) {
+            return false;
+        }
+
+        List<SubscriptionPlanBillingPeriod> billingPeriods = subscriptionPlanBillingPeriodProvider.getBillingPeriodsByPlanId(
+                subscriptionPlan.getSubscriptionPlanId()
+        );
+
+        for (SubscriptionPlanBillingPeriod billingPeriod : billingPeriods) {
+            BillingPeriod enumValue = BillingPeriod.fromCode(billingPeriod.getBillingPeriodCode());
+
+            if (enumValue == null || !enumValue.isActive()) {
+                continue;
+            }
+
+            if (billingPeriodCode.trim().equalsIgnoreCase(billingPeriod.getBillingPeriodCode())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private SubscriptionPlanBillingPeriod resolveBillingPeriod(
+            SubscriptionPlan subscriptionPlan,
+            String billingPeriodCode
+    ) {
+        if (subscriptionPlan == null || subscriptionPlan.getSubscriptionPlanId() == null || isBlank(billingPeriodCode)) {
+            return null;
+        }
+
+        List<SubscriptionPlanBillingPeriod> billingPeriods = subscriptionPlanBillingPeriodProvider.getBillingPeriodsByPlanId(
+                subscriptionPlan.getSubscriptionPlanId()
+        );
+
+        for (SubscriptionPlanBillingPeriod billingPeriod : billingPeriods) {
+            BillingPeriod enumValue = BillingPeriod.fromCode(billingPeriod.getBillingPeriodCode());
+
+            if (enumValue == null || !enumValue.isActive()) {
+                continue;
+            }
+
+            if (billingPeriodCode.trim().equalsIgnoreCase(billingPeriod.getBillingPeriodCode())) {
+                return billingPeriod;
+            }
+        }
+
+        return null;
+    }
+
     private Integer getChangedByUserId() {
         if (webSession == null) {
             return null;
@@ -335,8 +453,12 @@ public class CustomerRegistrationProvider {
 
     public static class CustomerRegistrationData {
 
+        private Integer subscriptionPlanId;
+        private Integer subscriptionPlanBillingPeriodId;
+        private String billingPeriodCode;
         private String moduleCode;
         private String customerName;
+        private String vatNumber;
         private String cvrNumber;
         private String phone;
         private String address;
@@ -353,8 +475,12 @@ public class CustomerRegistrationProvider {
         private String billingZipCode;
 
         public CustomerRegistrationData() {
+            subscriptionPlanId = null;
+            subscriptionPlanBillingPeriodId = null;
+            billingPeriodCode = "";
             moduleCode = "";
             customerName = "";
+            vatNumber = "";
             cvrNumber = "";
             phone = "";
             address = "";
@@ -371,6 +497,30 @@ public class CustomerRegistrationProvider {
             billingZipCode = "";
         }
 
+        public Integer getSubscriptionPlanId() {
+            return subscriptionPlanId;
+        }
+
+        public void setSubscriptionPlanId(Integer subscriptionPlanId) {
+            this.subscriptionPlanId = subscriptionPlanId;
+        }
+
+        public Integer getSubscriptionPlanBillingPeriodId() {
+            return subscriptionPlanBillingPeriodId;
+        }
+
+        public void setSubscriptionPlanBillingPeriodId(Integer subscriptionPlanBillingPeriodId) {
+            this.subscriptionPlanBillingPeriodId = subscriptionPlanBillingPeriodId;
+        }
+
+        public String getBillingPeriodCode() {
+            return billingPeriodCode;
+        }
+
+        public void setBillingPeriodCode(String billingPeriodCode) {
+            this.billingPeriodCode = safeText(billingPeriodCode).toUpperCase();
+        }
+
         public String getModuleCode() {
             return moduleCode;
         }
@@ -385,6 +535,14 @@ public class CustomerRegistrationProvider {
 
         public void setCustomerName(String customerName) {
             this.customerName = safeText(customerName);
+        }
+
+        public String getVatNumber() {
+            return vatNumber;
+        }
+
+        public void setVatNumber(String vatNumber) {
+            this.vatNumber = safeText(vatNumber).toUpperCase();
         }
 
         public String getCvrNumber() {

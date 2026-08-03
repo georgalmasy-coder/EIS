@@ -1,6 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
 import com.bepa.eis.common.dto.customer.SubscriptionPlan;
+import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
 import com.bepa.eis.common.dto.customer.CustomerPayment;
 import com.bepa.eis.common.dto.customer.CustomerSubscription;
 import com.bepa.eis.common.dto.customer.CustomerWorkflow;
@@ -12,6 +13,7 @@ import com.bepa.eis.common.enums.customer.CustomerWorkflowState;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowStatus;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowTimingProvider;
 import com.bepa.eis.common.providers.customer.SubscriptionPlanProvider;
+import com.bepa.eis.common.providers.customer.SubscriptionPlanBillingPeriodProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ public class CustomerPaymentRequestProvider {
     private final CustomerWorkflowProvider workflowProvider;
     private final CustomerWorkflowTimingProvider timingProvider;
     private final SubscriptionPlanProvider subscriptionPlanProvider;
+    private final SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider;
 
     public CustomerPaymentRequestProvider() {
         this(
@@ -37,7 +40,8 @@ public class CustomerPaymentRequestProvider {
                 new CustomerSubscriptionProvider(null),
                 new CustomerWorkflowProvider(null),
                 new CustomerWorkflowTimingProvider(),
-                new SubscriptionPlanProvider(null)
+                new SubscriptionPlanProvider(null),
+                new SubscriptionPlanBillingPeriodProvider(null)
         );
     }
 
@@ -52,7 +56,8 @@ public class CustomerPaymentRequestProvider {
                 subscriptionProvider,
                 workflowProvider,
                 timingProvider,
-                new SubscriptionPlanProvider(null)
+                new SubscriptionPlanProvider(null),
+                new SubscriptionPlanBillingPeriodProvider(null)
         );
     }
 
@@ -61,13 +66,17 @@ public class CustomerPaymentRequestProvider {
             CustomerSubscriptionProvider subscriptionProvider,
             CustomerWorkflowProvider workflowProvider,
             CustomerWorkflowTimingProvider timingProvider,
-            SubscriptionPlanProvider subscriptionPlanProvider
+            SubscriptionPlanProvider subscriptionPlanProvider,
+            SubscriptionPlanBillingPeriodProvider subscriptionPlanBillingPeriodProvider
     ) {
         this.paymentProvider = paymentProvider == null ? new CustomerPaymentProvider(null) : paymentProvider;
         this.subscriptionProvider = subscriptionProvider == null ? new CustomerSubscriptionProvider(null) : subscriptionProvider;
         this.workflowProvider = workflowProvider == null ? new CustomerWorkflowProvider(null) : workflowProvider;
         this.timingProvider = timingProvider == null ? new CustomerWorkflowTimingProvider() : timingProvider;
         this.subscriptionPlanProvider = subscriptionPlanProvider == null ? new SubscriptionPlanProvider(null) : subscriptionPlanProvider;
+        this.subscriptionPlanBillingPeriodProvider = subscriptionPlanBillingPeriodProvider == null
+                ? new SubscriptionPlanBillingPeriodProvider(null)
+                : subscriptionPlanBillingPeriodProvider;
     }
 
     public Integer requestPaymentForWorkflow(
@@ -115,15 +124,18 @@ public class CustomerPaymentRequestProvider {
                 : subscriptionProvider.getSubscriptionById(workflow.getSubscriptionId());
 
         SubscriptionPlan subscriptionPlan = loadSubscriptionPlan(subscription);
+        SubscriptionPlanBillingPeriod billingPeriod = loadBillingPeriod(subscription);
 
         BigDecimal resolvedAmount = resolveAmount(
                 amount,
-                subscriptionPlan
+                subscriptionPlan,
+                billingPeriod
         );
 
         String resolvedCurrency = resolveCurrency(
                 currency,
-                subscriptionPlan
+                subscriptionPlan,
+                billingPeriod
         );
 
         Timestamp now = timingProvider.now();
@@ -211,12 +223,25 @@ public class CustomerPaymentRequestProvider {
         return subscriptionPlanProvider.getPlanById(subscription.getSubscriptionPlanId());
     }
 
+    private SubscriptionPlanBillingPeriod loadBillingPeriod(CustomerSubscription subscription) {
+        if (subscription == null || subscription.getSubscriptionPlanBillingPeriodId() == null) {
+            return null;
+        }
+
+        return subscriptionPlanBillingPeriodProvider.getBillingPeriodById(subscription.getSubscriptionPlanBillingPeriodId());
+    }
+
     private BigDecimal resolveAmount(
             BigDecimal requestedAmount,
-            SubscriptionPlan subscriptionPlan
+            SubscriptionPlan subscriptionPlan,
+            SubscriptionPlanBillingPeriod billingPeriod
     ) {
         if (requestedAmount != null && requestedAmount.compareTo(BigDecimal.ZERO) > 0) {
             return requestedAmount;
+        }
+
+        if (billingPeriod != null && billingPeriod.getPriceAmount() != null) {
+            return billingPeriod.getPriceAmount();
         }
 
         if (subscriptionPlan != null && subscriptionPlan.getPriceAmount() != null) {
@@ -228,10 +253,15 @@ public class CustomerPaymentRequestProvider {
 
     private String resolveCurrency(
             String requestedCurrency,
-            SubscriptionPlan subscriptionPlan
+            SubscriptionPlan subscriptionPlan,
+            SubscriptionPlanBillingPeriod billingPeriod
     ) {
         if (requestedCurrency != null && !requestedCurrency.trim().isEmpty()) {
             return requestedCurrency.trim().toUpperCase();
+        }
+
+        if (billingPeriod != null && billingPeriod.getCurrency() != null && !billingPeriod.getCurrency().trim().isEmpty()) {
+            return billingPeriod.getCurrency().trim().toUpperCase();
         }
 
         if (subscriptionPlan != null

@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="../../css/topbar.css" />
     <link rel="stylesheet" href="../../css/help-dialog.css" />
     <link rel="stylesheet" href="../../css/user-administration.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css" />
 </head>
 <body>
 <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">›</button>
@@ -157,10 +159,10 @@
                     <label class="user-field-mandatory"><span>Name <span class="field-required">*</span></span><input id="fieldName" type="text" required /></label>
                     <label class="user-field-mandatory"><span>Email <span class="field-required">*</span></span><input id="fieldEmail" type="email" required /></label>
                     <label><span>Role</span><select id="fieldUserRole"></select></label>
-                    <div class="user-phone-field">
-                        <label><span>Country code</span><select id="fieldPhoneCountryCode"></select></label>
-                        <label><span>Phone</span><input id="fieldPhone" type="tel" inputmode="tel" autocomplete="tel" /></label>
-                        <p class="field-help" id="fieldPhoneHelp">Select a country code and enter the local phone number.</p>
+                    <div class="user-phone-field phone-field" data-phone-field="true">
+                        <label for="fieldPhone">Phone</label>
+                        <input id="fieldPhone" type="tel" inputmode="tel" autocomplete="tel" />
+                        <p class="field-help" id="fieldPhoneHelp">Country code is included automatically.</p>
                     </div>
                     <label class="user-department-field"><span>Department</span><select id="fieldDepartmentId"></select></label>
                     <label><span>Locked until</span><input id="fieldLockedUntil" type="datetime-local" step="1" /></label>
@@ -224,6 +226,8 @@
     </form>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
 <script type="module" src="../../js/pages/user-administration-page.js"></script>
 </body>
 </html>

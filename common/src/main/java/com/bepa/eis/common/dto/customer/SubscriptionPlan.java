@@ -2,6 +2,7 @@ package com.bepa.eis.common.dto.customer;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public class SubscriptionPlan {
 
@@ -12,6 +13,8 @@ public class SubscriptionPlan {
     private String planName;
 
     private String description;
+    private LocalDate validFrom;
+    private LocalDate validTo;
 
     private BigDecimal priceAmount;
     private String currency;
@@ -32,6 +35,8 @@ public class SubscriptionPlan {
         planName = "";
 
         description = "";
+        validFrom = LocalDate.now();
+        validTo = null;
 
         priceAmount = BigDecimal.ZERO;
         currency = "EUR";
@@ -83,6 +88,22 @@ public class SubscriptionPlan {
 
     public void setDescription(String description) {
         this.description = safeText(description);
+    }
+
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public LocalDate getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(LocalDate validTo) {
+        this.validTo = validTo;
     }
 
     public BigDecimal getPriceAmount() {
@@ -203,6 +224,8 @@ public class SubscriptionPlan {
                 + ", moduleCode=" + moduleCode
                 + ", moduleName=" + moduleName
                 + ", planName=" + planName
+                + ", validFrom=" + validFrom
+                + ", validTo=" + validTo
                 + ", priceAmount=" + priceAmount
                 + ", currency=" + currency
                 + ", billingPeriodMonths=" + billingPeriodMonths
