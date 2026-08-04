@@ -63,13 +63,10 @@ Use **Add Note** to add a new note when the page is not read-only.
 
 ## Additional tabs
 
-The following tabs are currently placeholders or reserved for later functionality:
+The following tabs are currently available on this page:
 
 - Links
-- Subsystem Owners
-- Supplier
-- Contractor
-- Linked To ...
+- Relations
 
 ## Save and cancel
 

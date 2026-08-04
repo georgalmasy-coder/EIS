@@ -24,9 +24,9 @@ import java.util.List;
 
 import static com.bepa.eis.common.enums.entity.EntityType.*;
 
-public class NflpRelationDiagramDocument extends GenericXmlDocument {
+public class RflpRelationDiagramDocument extends GenericXmlDocument {
 
-    private static final Logger log = LoggerFactory.getLogger(NflpRelationDiagramDocument.class);
+    private static final Logger log = LoggerFactory.getLogger(RflpRelationDiagramDocument.class);
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
@@ -42,7 +42,7 @@ public class NflpRelationDiagramDocument extends GenericXmlDocument {
     private List<EntityRelationRecord> listOfFunctionalStructureToLogicalStructureRelations;
     private List<EntityRelationRecord> listOfLogicalStructureToSystemBreakdownsRelations;
 
-    public NflpRelationDiagramDocument(WebSession webSession) throws Exception {
+    public RflpRelationDiagramDocument(WebSession webSession) throws Exception {
 
         super(webSession);
 

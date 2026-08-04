@@ -13,9 +13,9 @@ import org.w3c.dom.Element;
 
 @WebServlet(name = "NflpRelationDiagramServlet", urlPatterns = {"/pro/nflprelationdiagram"})
 @MultipartConfig
-public class NflpRelationDiagramServlet extends GenericDataProviderServlet {
+public class RflpRelationDiagramServlet extends GenericDataProviderServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(NflpRelationDiagramServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(RflpRelationDiagramServlet.class);
 
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
@@ -49,9 +49,9 @@ public class NflpRelationDiagramServlet extends GenericDataProviderServlet {
 
     private GenericXmlDocument buildRelationDiagram(WebSession webSession) {
         try {
-            return new NflpRelationDiagramDocument(webSession);
+            return new RflpRelationDiagramDocument(webSession);
         } catch (Exception e) {
-            log.error("Error getting relation diagram for NFLP : {}", e.getMessage(), e);
+            log.error("Error getting relation diagram for RFLP : {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }

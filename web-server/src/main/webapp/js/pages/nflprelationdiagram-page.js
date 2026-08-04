@@ -163,25 +163,25 @@ function startNflpRelationDiagramPage() {
                 onCreated: () => loadRelationDiagram()
             });
         } catch (dialogError) {
-            console.error("Failed to initialize NFLP relation creation dialog", dialogError);
+            console.error("Failed to initialize RFLP relation creation dialog", dialogError);
         }
 
         initializeEvents();
     } catch (error) {
-        console.error("Failed to initialize NFLP relation diagram", error);
+        console.error("Failed to initialize RFLP relation diagram", error);
         setText("loadStatus", "Error");
         showEmptyState(`Could not initialize relation diagram. ${error.message}`);
     }
 }
 
 window.addEventListener("error", (event) => {
-    console.error("Unhandled NFLP relation diagram error", event.error || event.message || event);
+    console.error("Unhandled RFLP relation diagram error", event.error || event.message || event);
     setText("loadStatus", "Error");
     showEmptyState(`Could not initialize relation diagram. ${event.error?.message || event.message || "Unknown error"}`);
 });
 
 window.addEventListener("unhandledrejection", (event) => {
-    console.error("Unhandled NFLP relation diagram rejection", event.reason);
+    console.error("Unhandled RFLP relation diagram rejection", event.reason);
     setText("loadStatus", "Error");
     showEmptyState(`Could not initialize relation diagram. ${event.reason?.message || event.reason || "Unknown error"}`);
 });
@@ -335,7 +335,7 @@ async function loadRelationDiagram() {
 
         setText("loadStatus", "Loaded");
     } catch (error) {
-        console.error("Failed to load NFLP relation diagram", error);
+        console.error("Failed to load RFLP relation diagram", error);
         setText("loadStatus", "Error");
         showEmptyState(`Could not load relation diagram. ${error.message}`);
     }

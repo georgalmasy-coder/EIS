@@ -67,9 +67,9 @@ You can:
 
 The **Links** tab is reserved for future functionality.
 
-## Linked To ...
+## Relations
 
-The **Linked To ...** tab shows relations to other elements.
+The **Relations** tab shows relations to other elements.
 
 You can open a relation by double-clicking the row.
 

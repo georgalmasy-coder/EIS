@@ -129,10 +129,7 @@ function initializeTabs() {
         { btnId: "tabBtn3", panelId: "tabPanel3" },
         { btnId: "tabBtn4", panelId: "tabPanel4" },
         { btnId: "tabBtn5", panelId: "tabPanel5" },
-        { btnId: "tabBtn6", panelId: "tabPanel6" },
-        { btnId: "tabBtn7", panelId: "tabPanel7" },
-        { btnId: "tabBtn8", panelId: "tabPanel8" },
-        { btnId: "tabBtn9", panelId: "tabPanel9" }
+        { btnId: "tabBtn6", panelId: "tabPanel6" }
     ]);
 }
 

@@ -27,7 +27,7 @@ public enum UserRoles {
             4,
             "Project viewer",
             "Project member with only read access to project data",
-            true
+            false
     ),
 
     INVASIVE_USER_ROLE(

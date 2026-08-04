@@ -9,7 +9,7 @@ The page contains several tabs:
 - **Attachments**
 - **Notes**
 - **Links**
-- **Linked To ...**
+- **Relations**
 
 ## Basis Info
 

@@ -1,4 +1,4 @@
-# NFLP Relation Diagram Help
+# RFLP Relation Diagram Help
 
 The relation diagram shows item relationships across five views:
 
