@@ -58,24 +58,6 @@ public final class StakeholderRequirementExporters extends GenericExporters {
         return "Stakeholder Requirements Export";
     }
 
-    /*
-    @Override
-    public boolean isPdfLandscape() {
-        return true;
-    }
-
-    @Override
-    public int getPdfFontSize() {
-        return 8;
-    }
-
-    @Override
-    public float getPdfMinRowHeight() {
-        return 18f;
-    }
-
-     */
-
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
         StakeholderRequirementExportRow row = (StakeholderRequirementExportRow) rowData;

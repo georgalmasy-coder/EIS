@@ -569,6 +569,21 @@ async function startPage() {
             const link = event.target.closest(".project-edit-link");
 
             if (!link) {
+                const createButton = event.target.closest(".create-project-button");
+
+                if (!createButton) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                openEditDialog({
+                    page: "project-edit",
+                    mode: "create",
+                    title: "Create Project",
+                    onSaved: () => window.location.reload()
+                });
+
                 return;
             }
 

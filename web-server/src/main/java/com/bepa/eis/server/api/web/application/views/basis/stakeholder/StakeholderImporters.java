@@ -58,6 +58,26 @@ public final class StakeholderImporters extends GenericImporters {
         return fromXlsx(inputStream);
     }
 
+    @Override
+    protected List<String> getPreviewFieldNames() {
+        return List.of("id", "level", "name", "description");
+    }
+
+    @Override
+    protected List<String> getRequiredFieldNames() {
+        return List.of("name", "description");
+    }
+
+    @Override
+    protected List<String> getValidPrefixes() {
+        return List.of("", "STH=", "STH-", "STH", "=");
+    }
+
+    @Override
+    protected String getImportEntitiesButtonText() {
+        return "Import entities";
+    }
+
     private List<StakeholderRequirementExportRow> fromXml(InputStream inputStream) throws Exception {
         var document = DocumentBuilderFactory
                 .newInstance()

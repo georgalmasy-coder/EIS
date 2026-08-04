@@ -8,8 +8,23 @@ function normalizeText(value) {
     return value == null ? "" : String(value);
 }
 
+function sanitizeFileName(value) {
+    return normalizeText(value)
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/^[.\s]+|[.\s]+$/g, "");
+}
+
+function resolveBaseFileName(baseFileName) {
+    const value = typeof baseFileName === "function" ? baseFileName() : baseFileName;
+    const sanitized = sanitizeFileName(value);
+
+    return sanitized || "export";
+}
+
 function fileNameForFormat(baseFileName, format) {
-    const normalized = normalizeText(baseFileName).trim() || "export";
+    const normalized = resolveBaseFileName(baseFileName);
     const ext = {
         xlsx: "xlsx",
         csv: "csv",

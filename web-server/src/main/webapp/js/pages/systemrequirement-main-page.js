@@ -247,7 +247,8 @@ function initializeImportExportDialogs() {
         dialogId: "exportDialog",
         openButtonId: "btnExport",
         entityName: "System Requirement",
-        exportUrl: "/basis/systemrequirement?cmd=export"
+        exportUrl: "/basis/systemrequirement?cmd=export",
+        baseFileName: () => buildExportBaseFileName("System Requirement", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -261,6 +262,12 @@ function initializeImportExportDialogs() {
 
     exportDialog.bind();
     importDialog.bind();
+}
+
+function buildExportBaseFileName(entityName, projectName) {
+    const entity = String(entityName || "").trim();
+    const project = String(projectName || "").trim();
+    return project ? `${entity} - ${project}` : entity;
 }
 
 async function loadSystemRequirements() {
@@ -707,6 +714,7 @@ function applyFiltersAndRender() {
 
     sanitizeCollapsedGroupPaths();
     setText("systemRequirementCount", String(state.filteredRequirements.length), "");
+    updateActionButtonsForView(state.selectedView);
     renderCurrentView();
 }
 
@@ -754,9 +762,10 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    const hasRequirements = state.requirements.length > 0;
 
-    setElementHidden("btnImport", !isListView);
-    setElementHidden("btnExport", !isListView);
+    setElementHidden("btnImport", !isListView || hasRequirements);
+    setElementHidden("btnExport", !isListView || !hasRequirements);
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);

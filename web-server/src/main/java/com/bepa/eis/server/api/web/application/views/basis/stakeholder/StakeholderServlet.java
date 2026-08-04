@@ -170,22 +170,22 @@ public class StakeholderServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = genericExporters.getCsvFileName();
+                fileName = buildDownloadFileName(webSession, "Stakeholder", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = genericExporters.getPdfFileName();
+                fileName = buildDownloadFileName(webSession, "Stakeholder", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = genericExporters.getXmlFileName();
+                fileName = buildDownloadFileName(webSession, "Stakeholder", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = genericExporters.getXlsxFileName();
+                fileName = buildDownloadFileName(webSession, "Stakeholder", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }

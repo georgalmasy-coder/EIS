@@ -236,7 +236,8 @@ function initializeImportExportDialogs() {
         dialogId: "exportDialog",
         openButtonId: "btnExport",
         entityName: "Physical Structure",
-        exportUrl: "/project/systembreakdown"
+        exportUrl: "/project/systembreakdown",
+        baseFileName: () => buildExportBaseFileName("Physical Structure", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -250,6 +251,12 @@ function initializeImportExportDialogs() {
 
     exportDialog.bind();
     importDialog.bind();
+}
+
+function buildExportBaseFileName(entityName, projectName) {
+    const entity = String(entityName || "").trim();
+    const project = String(projectName || "").trim();
+    return project ? `${entity} - ${project}` : entity;
 }
 
 async function loadSystemsBreakdown() {
@@ -764,6 +771,7 @@ function applyFiltersAndRender() {
 
     sanitizeCollapsedGroupPaths();
     setText("systemsBreakdownCount", String(state.filteredSystems.length), "");
+    updateActionButtonsForView(state.selectedView);
     renderCurrentView();
 }
 
@@ -811,9 +819,10 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    const hasSystems = state.systems.length > 0;
 
-    setElementHidden("btnImport", !isListView);
-    setElementHidden("btnExport", !isListView);
+    setElementHidden("btnImport", !isListView || hasSystems);
+    setElementHidden("btnExport", !isListView || !hasSystems);
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
@@ -1559,16 +1568,6 @@ function renderDiagramView(orientation) {
     nodesContainer.innerHTML = "";
     svg.innerHTML = "";
 
-    if (state.filteredSystems.length === 0) {
-        canvas.style.width = "";
-        canvas.style.height = "";
-        svg.removeAttribute("width");
-        svg.removeAttribute("height");
-        svg.removeAttribute("viewBox");
-        showDiagramEmptyState(orientation, EMPTY_FILTER_MESSAGE);
-        return;
-    }
-
     const tree = buildVisibleTree();
     const layout = layoutTree(tree, orientation);
 
@@ -1586,7 +1585,11 @@ function renderDiagramView(orientation) {
         nodesContainer.appendChild(createDiagramNode(node));
     });
 
-    hideDiagramEmptyState(orientation);
+    if (state.filteredSystems.length === 0) {
+        showDiagramEmptyState(orientation, EMPTY_FILTER_MESSAGE);
+    } else {
+        hideDiagramEmptyState(orientation);
+    }
 }
 
 function buildVisibleTree() {

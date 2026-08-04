@@ -1,5 +1,7 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
+import com.bepa.eis.common.enums.entity.EntityType;
+
 public class SystemRequirementCode extends AbstractString {
 
     public static String FIELD_NAME = "SystemReqCode";
@@ -54,4 +56,15 @@ public class SystemRequirementCode extends AbstractString {
     public String getSortKey() {
         return getValue();
     }
+
+    @Override
+    public void setValue(String value) {
+        if (value != null) {
+            if (!value.startsWith(EntityType.SYSTEM_REQUIREMENT.getIdPrefix())) {
+                value = EntityType.SYSTEM_REQUIREMENT.getIdPrefix() + value;
+            }
+            super.setValue(value);
+        }
+    }
+
 }

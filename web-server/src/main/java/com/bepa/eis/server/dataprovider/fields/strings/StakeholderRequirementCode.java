@@ -1,5 +1,7 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
+import com.bepa.eis.common.enums.entity.EntityType;
+
 public class StakeholderRequirementCode extends AbstractString {
 
     public static String FIELD_NAME = "StakeholderReqCode";
@@ -51,4 +53,15 @@ public class StakeholderRequirementCode extends AbstractString {
     public String getSortKey() {
         return getValue();
     }
+
+    @Override
+    public void setValue(String value) {
+        if (value != null) {
+            if (!value.startsWith(EntityType.STAKEHOLDER_REQUIREMENT.getIdPrefix())) {
+                value = EntityType.STAKEHOLDER_REQUIREMENT.getIdPrefix() + value;
+            }
+            super.setValue(value);
+        }
+    }
+
 }

@@ -86,6 +86,7 @@ public class SystemRequirementProvider extends EntityProvider {
         entity.setRequirementCode(requirementCode);
         entity.setRequirementCodeLevel(level);
         entity.setRequirementName(row.name());
+        entity.setRequirementDescription(row.description());
         entity.setActive(row.active() == null || row.active());
 
         entity.addAllDataElements();

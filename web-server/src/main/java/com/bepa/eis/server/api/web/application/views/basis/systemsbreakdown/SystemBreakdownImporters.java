@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.systemsbreakdown;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.SBSCodeTypes;
 import com.bepa.eis.server.api.generic.GenericImporters;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
@@ -28,6 +29,8 @@ public final class SystemBreakdownImporters extends GenericImporters {
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
 
+    private static final EntityType entityType = EntityType.SYSTEMS_BREAKDOWN;
+
     public SystemBreakdownImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);
     }
@@ -39,7 +42,7 @@ public final class SystemBreakdownImporters extends GenericImporters {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.SYSTEMS_BREAKDOWN;
+        return entityType;
     }
 
     @Override
@@ -57,6 +60,37 @@ public final class SystemBreakdownImporters extends GenericImporters {
         return fromXlsx(inputStream);
     }
 
+    @Override
+    protected List<String> getPreviewFieldNames() {
+        return List.of("id", "level", "name");
+    }
+
+    @Override
+    protected List<String> getRequiredFieldNames() {
+        return List.of("id", "name");
+    }
+
+    @Override
+    protected List<String> getValidPrefixes() {
+
+        List<String> prefixes = new ArrayList<>();
+        prefixes.add("");
+
+        SBSCodeTypes[] types = SBSCodeTypes.values();
+
+        for (SBSCodeTypes type : types) {
+            if (type.isActive()) {
+                prefixes.add(type.getPrefix());
+            }
+        }
+        return prefixes;
+    }
+
+    @Override
+    protected String getImportEntitiesButtonText() {
+        return "Import Physical Structures";
+    }
+
     private List<SystemBreakdownExportRow> fromXml(InputStream inputStream) throws Exception {
         var document = DocumentBuilderFactory
                 .newInstance()
@@ -66,7 +100,7 @@ public final class SystemBreakdownImporters extends GenericImporters {
         document.getDocumentElement().normalize();
 
         List<SystemBreakdownExportRow> rows = new ArrayList<>();
-        var nodes = document.getElementsByTagName("systemsBreakdown");
+        var nodes = document.getElementsByTagName("physicalStructures");
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
@@ -76,7 +110,7 @@ public final class SystemBreakdownImporters extends GenericImporters {
             }
 
             rows.add(new SystemBreakdownExportRow(
-                    text(element, "ID"),
+                    text(element, "SBS"),
                     intValue(text(element, "Level")),
                     text(element, "Name"),
                     null,

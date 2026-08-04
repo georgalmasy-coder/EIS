@@ -144,6 +144,10 @@ public enum EntityType {
         return shortDescription;
     }
 
+    public String getIdPrefix() {
+        return shortDescription + "-";
+    }
+
     public String getDescription() {
         return description;
     }

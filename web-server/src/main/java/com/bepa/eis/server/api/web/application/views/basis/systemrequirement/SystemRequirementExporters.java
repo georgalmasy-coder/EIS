@@ -70,24 +70,6 @@ public final class SystemRequirementExporters extends GenericExporters {
         return "System Requirements Export";
     }
 
-    /*
-    @Override
-    public boolean isPdfLandscape() {
-        return true;
-    }
-
-    @Override
-    public int getPdfFontSize() {
-        return 8;
-    }
-
-    @Override
-    public float getPdfMinRowHeight() {
-        return 18f;
-    }
-
-     */
-
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
         SystemRequirementExportRow row = (SystemRequirementExportRow) rowData;

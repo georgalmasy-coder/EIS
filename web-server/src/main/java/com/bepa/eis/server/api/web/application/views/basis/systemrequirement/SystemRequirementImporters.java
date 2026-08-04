@@ -2,11 +2,9 @@ package com.bepa.eis.server.api.web.application.views.basis.systemrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericImporters;
-import com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement.StakeholderRequirementExportRow;
+import com.bepa.eis.server.api.web.application.views.basis.systemrequirement.SystemRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
-import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
-import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
+import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.common.enums.entity.EntityType;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -30,7 +28,8 @@ public final class SystemRequirementImporters extends GenericImporters {
     private static final int COL_LEVEL = 1;
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
-    //GFA private static final int COL_ACTIVE = 6;
+
+    private static final EntityType entityType = EntityType.SYSTEM_REQUIREMENT;
 
     public SystemRequirementImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);
@@ -38,12 +37,12 @@ public final class SystemRequirementImporters extends GenericImporters {
 
     @Override
     public EntityProvider getProvider() {
-        return new StakeholderRequirementProvider(getWebSession());
+        return new SystemRequirementProvider(getWebSession());
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.SYSTEM_REQUIREMENT;
+        return entityType;
     }
 
     @Override
@@ -61,7 +60,27 @@ public final class SystemRequirementImporters extends GenericImporters {
         return fromXlsx(inputStream);
     }
 
-    private List<StakeholderRequirementExportRow> fromXml(InputStream inputStream) throws Exception {
+    @Override
+    protected List<String> getPreviewFieldNames() {
+        return List.of("id", "level", "name", "description");
+    }
+
+    @Override
+    protected List<String> getRequiredFieldNames() {
+        return List.of("id", "name");
+    }
+
+    @Override
+    protected List<String> getValidPrefixes() {
+        return List.of("", entityType.getIdPrefix());
+    }
+
+    @Override
+    protected String getImportEntitiesButtonText() {
+        return "Import System Requirements";
+    }
+
+    private List<SystemRequirementExportRow> fromXml(InputStream inputStream) throws Exception {
         var document = DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()
@@ -69,7 +88,7 @@ public final class SystemRequirementImporters extends GenericImporters {
 
         document.getDocumentElement().normalize();
 
-        List<StakeholderRequirementExportRow> rows = new ArrayList<>();
+        List<SystemRequirementExportRow> rows = new ArrayList<>();
         var nodes = document.getElementsByTagName("systemRequirement");
 
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -79,22 +98,28 @@ public final class SystemRequirementImporters extends GenericImporters {
                 continue;
             }
 
-            rows.add(new StakeholderRequirementExportRow(
+            rows.add(new SystemRequirementExportRow(
                     text(element, "ID"),
                     intValue(text(element, "Level")),
                     text(element, "Name"),
                     text(element, "Description"),
                     null,
                     null,
-                    Boolean.TRUE) // Active
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Boolean.TRUE)
             );
         }
 
         return rows;
     }
 
-    private List<StakeholderRequirementExportRow> fromCsv(InputStream inputStream) throws Exception {
-        List<StakeholderRequirementExportRow> rows = new ArrayList<>();
+    private List<SystemRequirementExportRow> fromCsv(InputStream inputStream) throws Exception {
+        List<SystemRequirementExportRow> rows = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
@@ -118,8 +143,8 @@ public final class SystemRequirementImporters extends GenericImporters {
         return rows;
     }
 
-    private List<StakeholderRequirementExportRow> fromXlsx(InputStream inputStream) throws Exception {
-        List<StakeholderRequirementExportRow> rows = new ArrayList<>();
+    private List<SystemRequirementExportRow> fromXlsx(InputStream inputStream) throws Exception {
+        List<SystemRequirementExportRow> rows = new ArrayList<>();
         DataFormatter formatter = new DataFormatter();
 
         try (Workbook workbook = WorkbookFactory.create(inputStream)) {
@@ -149,54 +174,21 @@ public final class SystemRequirementImporters extends GenericImporters {
         return rows;
     }
 
-    private StakeholderRequirementExportRow rowFromValues(List<String> values) {
-        return new StakeholderRequirementExportRow(
+    private SystemRequirementExportRow rowFromValues(List<String> values) {
+        return new SystemRequirementExportRow(
                 valueAt(values, COL_ID),
                 intValue(valueAt(values, COL_LEVEL)),
                 valueAt(values, COL_NAME),
                 valueAt(values, COL_DESCRIPTION),
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 Boolean.TRUE);
-    }
-
-    private StakeholderRequirementEntity toEntity(WebSession webSession, StakeholderRequirementExportRow row) {
-        StakeholderRequirementEntity entity = new StakeholderRequirementEntity(webSession);
-        StakeholderRequirementParentCodeSelector codeSelector = new StakeholderRequirementParentCodeSelector(webSession);
-
-        entity.setCustomerId(webSession.getCustomerId());
-        entity.setProjectId(webSession.getProjectId());
-        entity.setVersion(1);
-
-        String requirementCode = row.id();
-
-        if (requirementCode == null || requirementCode.isBlank()) {
-            requirementCode = codeSelector.getNextAvailableCodeValue(webSession, "");
-        }
-
-        Integer level = row.level();
-
-        if (level == null) {
-            level = codeSelector.getCodeLevel(requirementCode);
-        }
-
-        entity.setRequirementCode(requirementCode);
-        entity.setRequirementCodeLevel(level);
-        entity.setRequirementName(row.name());
-        entity.setRequirementDescription(row.description());
-        entity.setActive(true);
-
-        entity.addAllDataElements();
-
-        return entity;
-    }
-
-    private boolean isEmpty(StakeholderRequirementExportRow row) {
-        return isBlank(row.id())
-                && row.level() == null
-                && isBlank(row.name())
-                && isBlank(row.description())
-                && row.active() == null;
     }
 
     private boolean isHeader(List<String> values) {

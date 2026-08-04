@@ -1,5 +1,7 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
+import com.bepa.eis.common.enums.entity.EntityType;
+
 public class FunctionalCode extends AbstractString {
 
     public static String FIELD_NAME = "FunctionalCode";
@@ -22,12 +24,12 @@ public class FunctionalCode extends AbstractString {
 
     @Override
     public String getFieldLabelName() {
-        return isNew ? "Temporary Functional Code" : "Functional Code";
+        return isNew ? "Temporary ID" : "ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return isNew ? "Temporary Functional Code" : "Functional Code";
+        return isNew ? "Temporary ID" : "ID";
     }
 
     @Override
@@ -54,4 +56,15 @@ public class FunctionalCode extends AbstractString {
     public String getSortKey() {
         return getValue();
     }
+
+    @Override
+    public void setValue(String value) {
+        if (value != null) {
+            if (!value.startsWith(EntityType.FUNCTIONAL_STRUCTURE.getIdPrefix())) {
+                value = EntityType.FUNCTIONAL_STRUCTURE.getIdPrefix() + value;
+            }
+            super.setValue(value);
+        }
+    }
+
 }

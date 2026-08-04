@@ -236,7 +236,8 @@ function initializeImportExportDialogs() {
         dialogId: "exportDialog",
         openButtonId: "btnExport",
         entityName: "Functional Structure",
-        exportUrl: "/pro/functionalstructure?cmd=export"
+        exportUrl: "/pro/functionalstructure?cmd=export",
+        baseFileName: () => buildExportBaseFileName("Functional Structure", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -250,6 +251,12 @@ function initializeImportExportDialogs() {
 
     exportDialog.bind();
     importDialog.bind();
+}
+
+function buildExportBaseFileName(entityName, projectName) {
+    const entity = String(entityName || "").trim();
+    const project = String(projectName || "").trim();
+    return project ? `${entity} - ${project}` : entity;
 }
 
 async function loadFunctionalStructures() {
@@ -663,6 +670,7 @@ function applyFiltersAndRender() {
 
     sanitizeCollapsedGroupPaths();
     setText("functionalStructureCount", String(state.filteredRequirements.length), "");
+    updateActionButtonsForView(state.selectedView);
     renderCurrentView();
 }
 
@@ -709,9 +717,10 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    const hasRequirements = state.requirements.length > 0;
 
-    setElementHidden("btnImport", !isListView);
-    setElementHidden("btnExport", !isListView);
+    setElementHidden("btnImport", !isListView || hasRequirements);
+    setElementHidden("btnExport", !isListView || !hasRequirements);
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
@@ -1438,16 +1447,6 @@ function renderDiagramView(orientation) {
     nodesContainer.innerHTML = "";
     svg.innerHTML = "";
 
-    if (state.filteredRequirements.length === 0) {
-        canvas.style.width = "";
-        canvas.style.height = "";
-        svg.removeAttribute("width");
-        svg.removeAttribute("height");
-        svg.removeAttribute("viewBox");
-        showDiagramEmptyState(orientation, "No functional structures match the current filters.");
-        return;
-    }
-
     const tree = buildVisibleTree();
     const layout = layoutTree(tree, orientation);
 
@@ -1465,7 +1464,11 @@ function renderDiagramView(orientation) {
         nodesContainer.appendChild(createDiagramNode(node));
     });
 
-    hideDiagramEmptyState(orientation);
+    if (state.filteredRequirements.length === 0) {
+        showDiagramEmptyState(orientation, "No functional structures match the current filters.");
+    } else {
+        hideDiagramEmptyState(orientation);
+    }
 }
 
 function buildVisibleTree() {

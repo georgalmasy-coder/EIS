@@ -41,6 +41,11 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
         SystemRequirementImporters importer = new SystemRequirementImporters(webSession, request);
+        if ("preview".equalsIgnoreCase(request.getParameter("phase"))) {
+            importer.previewImport(response);
+            return;
+        }
+
         if (importer.importEntities() <= 0) {
             throw new RuntimeException("No entities imported");
         }
@@ -209,22 +214,22 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = genericExporters.getCsvFileName();
+                fileName = buildDownloadFileName(webSession, "System Requirement", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = genericExporters.getPdfFileName();
+                fileName = buildDownloadFileName(webSession, "System Requirement", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = genericExporters.getXmlFileName();
+                fileName = buildDownloadFileName(webSession, "System Requirement", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = genericExporters.getXlsxFileName();
+                fileName = buildDownloadFileName(webSession, "System Requirement", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }
@@ -256,7 +261,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
                 entity.getRequirementDescription().getValue(),
                 entity.getRequirementVerificationStatus(),
                 entity.getRationalStatement().getValue(),
-                entity.getCaptureDate().getValue().toString(),
+                entity.getCaptureDate().getValueAsString(),
                 entity.getStatus(),
                 entity.getBusinessPriority(),
                 entity.getOwner(),

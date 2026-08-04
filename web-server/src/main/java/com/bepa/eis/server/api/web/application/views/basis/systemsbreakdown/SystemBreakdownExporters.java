@@ -43,17 +43,17 @@ public final class SystemBreakdownExporters extends GenericExporters {
 
     @Override
     public String getFileName() {
-        return "systemsbreakdown";
+        return "PhysicalStructure";
     }
 
     @Override
     public String getWorksheetName() {
-        return "Systems Breakdown";
+        return "Physical Structure";
     }
 
     @Override
     public String getXmlRootNodeName() {
-        return "systemsBreakdownExport";
+        return "PhysicalStructureExport";
     }
 
     @Override
@@ -63,26 +63,8 @@ public final class SystemBreakdownExporters extends GenericExporters {
 
     @Override
     public String getPdfTitle() {
-        return "System Breakdown Export";
+        return "Physical Structure Export";
     }
-
-    /*
-    @Override
-    public boolean isPdfLandscape() {
-        return true;
-    }
-
-    @Override
-    public int getPdfFontSize() {
-        return 8;
-    }
-
-    @Override
-    public float getPdfMinRowHeight() {
-        return 18f;
-    }
-
-     */
 
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
@@ -108,7 +90,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
     public void buildXmlRow(StringBuilder xml, Object rowData) {
         SystemBreakdownExportRow row = (SystemBreakdownExportRow) rowData;
 
-        xml.append("  <systemsBreakdown>").append(NEW_LINE);
+        xml.append("  <physicalStructures>").append(NEW_LINE);
         xml.append(tag(getHeaders()[0], row.id()));
         xml.append(tag(getHeaders()[1], row.level()));
         xml.append(tag(getHeaders()[2], row.name()));
@@ -120,7 +102,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
         xml.append(tag(getHeaders()[8], row.changedBy()));
         xml.append(tag(getHeaders()[9], row.changed()));
         xml.append(tag(getHeaders()[10], row.active()));
-        xml.append("  </systemsBreakdown>").append(NEW_LINE);
+        xml.append("  </physicalStructures>").append(NEW_LINE);
     }
 
     @Override

@@ -28,6 +28,8 @@ public final class LogicalStructureImporters extends GenericImporters {
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
 
+    private static final EntityType entityType = EntityType.LOGICAL_STRUCTURE;
+
     public LogicalStructureImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);
     }
@@ -39,7 +41,7 @@ public final class LogicalStructureImporters extends GenericImporters {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.LOGICAL_STRUCTURE;
+        return entityType;
     }
 
     @Override
@@ -57,6 +59,26 @@ public final class LogicalStructureImporters extends GenericImporters {
         return fromXlsx(inputStream);
     }
 
+    @Override
+    protected List<String> getPreviewFieldNames() {
+        return List.of("id", "level", "name", "description");
+    }
+
+    @Override
+    protected List<String> getRequiredFieldNames() {
+        return List.of("id", "name");
+    }
+
+    @Override
+    protected List<String> getValidPrefixes() {
+        return List.of("", entityType.getIdPrefix());
+    }
+
+    @Override
+    protected String getImportEntitiesButtonText() {
+        return "Import Logical Structures";
+    }
+
     private List<LogicalStructureExportRow> fromXml(InputStream inputStream) throws Exception {
         var document = DocumentBuilderFactory
                 .newInstance()
@@ -66,7 +88,7 @@ public final class LogicalStructureImporters extends GenericImporters {
         document.getDocumentElement().normalize();
 
         List<LogicalStructureExportRow> rows = new ArrayList<>();
-        var nodes = document.getElementsByTagName("LogicalStructure");
+        var nodes = document.getElementsByTagName("logicalStructures");
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);

@@ -1,5 +1,7 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
+import com.bepa.eis.common.enums.entity.EntityType;
+
 public class LogicalCode extends AbstractString {
 
     public static String FIELD_NAME = "LogicalCode";
@@ -22,12 +24,12 @@ public class LogicalCode extends AbstractString {
 
     @Override
     public String getFieldLabelName() {
-        return isNew ? "Temporary Logical Code" : "Logical Code";
+        return isNew ? "Temporary ID" : "ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return isNew ? "Temporary Logical Code" : "Logical Code";
+        return isNew ? "Temporary ID" : "ID";
     }
 
     @Override
@@ -53,5 +55,15 @@ public class LogicalCode extends AbstractString {
     @Override
     public String getSortKey() {
         return getValue();
+    }
+
+    @Override
+    public void setValue(String value) {
+        if (value != null) {
+            if (!value.startsWith(EntityType.LOGICAL_STRUCTURE.getIdPrefix())) {
+                value = EntityType.LOGICAL_STRUCTURE.getIdPrefix() + value;
+            }
+            super.setValue(value);
+        }
     }
 }

@@ -41,6 +41,10 @@ abstract public class AbstractDate extends AbstractField {
         return value;
     }
 
+    public String getValueAsString() {
+        return getValue() != null ? getValue().format(FORMATTER_DATE) : "";
+    }
+
     public void setValue(LocalDate value) {
         this.value = value;
     }
@@ -82,6 +86,9 @@ abstract public class AbstractDate extends AbstractField {
 
     @Override
     public String toString() {
+        if (getValue() == null ) {
+            return "";
+        }
         return getValue() != null ? getValue().format(FORMATTER_DATE) : "";
     }
 

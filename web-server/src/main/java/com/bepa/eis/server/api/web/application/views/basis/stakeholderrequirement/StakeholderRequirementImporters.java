@@ -28,6 +28,8 @@ public final class StakeholderRequirementImporters extends GenericImporters {
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
 
+    private static final EntityType entityType = EntityType.STAKEHOLDER_REQUIREMENT;
+
     public StakeholderRequirementImporters(WebSession webSession, HttpServletRequest request) throws Exception{
         super(webSession, request);
     }
@@ -39,7 +41,7 @@ public final class StakeholderRequirementImporters extends GenericImporters {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.STAKEHOLDER_REQUIREMENT;
+        return entityType;
     }
 
     @Override
@@ -55,6 +57,26 @@ public final class StakeholderRequirementImporters extends GenericImporters {
     @Override
     public Object loadFromXlsx(InputStream inputStream) throws Exception {
         return fromXlsx(inputStream);
+    }
+
+    @Override
+    protected List<String> getPreviewFieldNames() {
+        return List.of("id", "level", "name", "description");
+    }
+
+    @Override
+    protected List<String> getRequiredFieldNames() {
+        return List.of("id", "name");
+    }
+
+    @Override
+    protected List<String> getValidPrefixes() {
+        return List.of("", entityType.getIdPrefix());
+    }
+
+    @Override
+    protected String getImportEntitiesButtonText() {
+        return "Import Stakeholder Requirements";
     }
 
     private List<StakeholderRequirementExportRow> fromXml(InputStream inputStream) throws Exception {

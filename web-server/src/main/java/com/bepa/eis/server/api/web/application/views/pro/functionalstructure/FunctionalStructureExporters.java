@@ -75,7 +75,7 @@ public final class FunctionalStructureExporters extends GenericExporters {
     public void buildXmlRow(StringBuilder xml, Object rowData) {
         FunctionalStructureExportRow row = (FunctionalStructureExportRow) rowData;
 
-        xml.append("  <functionStructures").append(NEW_LINE);
+        xml.append("  <functionStructures>").append(NEW_LINE);
         xml.append(tag(getHeaders()[0], row.id()));
         xml.append(tag(getHeaders()[1], row.level()));
         xml.append(tag(getHeaders()[2], row.name()));

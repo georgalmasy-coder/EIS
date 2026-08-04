@@ -39,6 +39,11 @@ public class LogicalStructureServlet extends GenericDataProviderServlet {
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LogicalStructureImporters importer = new LogicalStructureImporters(webSession, request);
+        if ("preview".equalsIgnoreCase(request.getParameter("phase"))) {
+            importer.previewImport(response);
+            return;
+        }
+
         if (importer.importEntities() <= 0) {
             throw new RuntimeException("No entities imported");
         }
@@ -183,22 +188,22 @@ public class LogicalStructureServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = genericExporters.getCsvFileName();
+                fileName = buildDownloadFileName(webSession, "Logical Structure", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = genericExporters.getPdfFileName();
+                fileName = buildDownloadFileName(webSession, "Logical Structure", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = genericExporters.getXmlFileName();
+                fileName = buildDownloadFileName(webSession, "Logical Structure", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = genericExporters.getXlsxFileName();
+                fileName = buildDownloadFileName(webSession, "Logical Structure", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }

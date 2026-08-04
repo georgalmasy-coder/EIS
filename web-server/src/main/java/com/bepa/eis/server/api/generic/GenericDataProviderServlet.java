@@ -18,6 +18,7 @@ import com.bepa.eis.server.dataprovider.fields.strings.ContentType;
 import com.bepa.eis.server.dataprovider.fields.strings.FileDescription;
 import com.bepa.eis.server.dataprovider.fields.strings.FileName;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -177,6 +178,33 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     public String getCommandParameter(HttpServletRequest request) {
         String command = request.getParameter("cmd");
         return command != null ? command.trim().toLowerCase() : "";
+    }
+
+    protected String buildDownloadFileName(WebSession webSession, String entityLabel, String extension) throws Exception {
+        String projectName = "";
+
+        if (webSession != null) {
+            projectName = new TopPanelProvider(webSession).getProjectName();
+        }
+
+        String baseName = sanitizeFileName(entityLabel + " - " + projectName);
+
+        if (baseName.isBlank()) {
+            baseName = sanitizeFileName(entityLabel);
+        }
+
+        return baseName + "." + extension.toLowerCase();
+    }
+
+    private String sanitizeFileName(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String sanitized = value.trim().replaceAll("[\\\\/:*?\"<>|]+", " ");
+        sanitized = sanitized.replaceAll("\\s+", " ").trim();
+        sanitized = sanitized.replaceAll("^[.\\s]+|[.\\s]+$", "");
+        return sanitized;
     }
 
     private Integer getEntityIdParameter(HttpServletRequest request) {

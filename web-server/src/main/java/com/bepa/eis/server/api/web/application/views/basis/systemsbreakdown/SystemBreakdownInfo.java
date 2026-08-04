@@ -14,7 +14,6 @@ public class SystemBreakdownInfo extends GenericXmlDocument {
 
     private ListOfElements rootElement;
     private TopPanel topPanel;
-    private Entities systemBreakdowns; ;
 
     public SystemBreakdownInfo(WebSession webSession, EntityRequestType type, Integer parentEntityId) throws Exception {
         super(webSession);

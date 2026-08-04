@@ -12,7 +12,6 @@ public class SystemBreakdownList extends GenericXmlDocument {
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
-    private Entities systemBreakdowns;
 
     public SystemBreakdownList(WebSession webSession) throws Exception {
 
