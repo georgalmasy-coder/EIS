@@ -75,6 +75,10 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
     private List<EntityRelationRecord> listOfEntityRelations;
     private ConcurrentMap<String, EntityRelationRecord> mapOfEntityRelations;
 
+    private ConcurrentMap<Integer, RelationToEntity> mapOfStakeholderRequirementRelations;
+    private ConcurrentMap<Integer, RelationToEntity> mapOfSystemRequirementRelations;
+
+
     private MatrixColumnsData matrixColumnsData;
     private MatrixRowsData matrixRowsData;
     private MatrixCellsData matrixCellsData;
@@ -111,13 +115,16 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         listOfEntityRelations = getEntityRelations();
         mapOfEntityRelations  = buildMapOfEntityRelations(listOfEntityRelations);
 
+        mapOfStakeholderRequirementRelations  = buildMapRelations(STAKEHOLDER_REQUIREMENT, listOfEntityRelations);
+        mapOfSystemRequirementRelations = buildMapRelations(SYSTEM_REQUIREMENT, listOfEntityRelations);
+
         setAllRelationsFromSystemRequirementToStakeholderRequirement(
                 listOfSystemRequirementWrappers,
                 mapOfEntityRelations
         );
 
-        matrixColumnsData = createMatrixColumnsData(listOfSystemRequirementWrappers);
-        matrixRowsData = createMatrixRowsData(listOfStakeholderRequirementWrappers);
+        matrixColumnsData = createMatrixColumnsData(listOfSystemRequirementWrappers, mapOfSystemRequirementRelations);
+        matrixRowsData = createMatrixRowsData(listOfStakeholderRequirementWrappers, mapOfStakeholderRequirementRelations);
         matrixCellsData = applyRules(listOfStakeholderRequirementWrappers);
     }
 
@@ -143,6 +150,25 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         return mapOfEntityRelations;
     }
 
+    private ConcurrentMap<Integer, RelationToEntity> buildMapRelations(EntityType entityType, List<EntityRelationRecord> listOfEntityRelations) {
+        ConcurrentMap<Integer, RelationToEntity> map = new ConcurrentHashMap<>();
+
+        for (EntityRelationRecord relation : listOfEntityRelations) {
+            if (relation.getEntityType() == entityType) {
+                RelationToEntity relationToEntity = new RelationToEntity(relation.getEntityId(), relation.getEntityType(), relation.getRelatedEntityId(), relation.getRelatedEntityType(), relation.getRelationType());
+                map.put(relation.getEntityId(), relationToEntity);
+            }
+        }
+
+        for (EntityRelationRecord relation : listOfEntityRelations) {
+            if (relation.getRelatedEntityType() == entityType) {
+                RelationToEntity relationToEntity = new RelationToEntity(relation.getRelatedEntityId(), relation.getRelatedEntityType(), relation.getEntityId(), relation.getEntityType(), relation.getRelationType());
+                map.put(relation.getRelatedEntityId(), relationToEntity);
+            }
+        }
+        return map;
+    }
+
     private MatrixMetaData createMatrixMetaData() {
         MatrixMetaData matrixMetaData = new MatrixMetaData();
         matrixMetaData.setTitle("Traceability Matrix");
@@ -156,12 +182,12 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         return new MatrixStylesData();
     }
 
-    private MatrixColumnsData createMatrixColumnsData(List<SystemRequirementWrapper> listOfSystemRequirementWrappers) {
-        return new MatrixColumnsData(listOfSystemRequirementWrappers);
+    private MatrixColumnsData createMatrixColumnsData(List<SystemRequirementWrapper> listOfSystemRequirementWrappers, ConcurrentMap<Integer, RelationToEntity> mapOfSystemRequirementRelations) {
+        return new MatrixColumnsData(listOfSystemRequirementWrappers, mapOfSystemRequirementRelations);
     }
 
-    private MatrixRowsData createMatrixRowsData(List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers) {
-        return new MatrixRowsData(listOfStakeholderRequirementWrappers);
+    private MatrixRowsData createMatrixRowsData(List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers, ConcurrentMap<Integer, RelationToEntity> mapOfStakeholderRequirementRelations) {
+        return new MatrixRowsData(listOfStakeholderRequirementWrappers, mapOfStakeholderRequirementRelations);
     }
 
     private List<StakeholderRequirementWrapper> getStakeholderRequirements(
@@ -419,6 +445,23 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         matrixElement.setAttribute("defaultCellValue", VALUE_EMPTY);
 
         return matrixElement;
+    }
+
+    protected static class RelationToEntity {
+        Integer entityId;
+        EntityType entityType;
+        Integer relatedEntityId;
+        EntityType relatedEntityType;
+        RelationType relationType;
+
+        RelationToEntity(Integer entityId, EntityType entityType, Integer relatedEntityId, EntityType relatedEntityType, RelationType relationType) {
+            this.entityId = entityId;
+            this.entityType = entityType;
+            this.relatedEntityId = relatedEntityId;
+            this.relatedEntityType = relatedEntityType;
+            this.relationType = relationType;
+        }
+
     }
 
 }

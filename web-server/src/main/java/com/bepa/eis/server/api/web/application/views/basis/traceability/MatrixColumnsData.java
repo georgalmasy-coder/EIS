@@ -5,17 +5,18 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 public class MatrixColumnsData {
 
     private final List<Column> columnList = new ArrayList<>();
 
-    public MatrixColumnsData(List<SystemRequirementWrapper> listOfSystemRequirementWrapperEntities) {
+    public MatrixColumnsData(List<SystemRequirementWrapper> listOfSystemRequirementWrapperEntities, ConcurrentMap<Integer, TraceabilityMatrixDocument.RelationToEntity> mapOfSystemRequirementRelations) {
 
         int index = 0;
         for (SystemRequirementWrapper entity : listOfSystemRequirementWrapperEntities) {
 
-            String style = findColumnStyle(entity);
+            String style = findColumnStyle(entity, mapOfSystemRequirementRelations);
 
             String label = valueOrDefault(entity.getRequirementCode(), "??") + " " + valueOrDefault(entity.getRequirementName(), "Unknown");
             columnList.add(new Column(
@@ -30,15 +31,9 @@ public class MatrixColumnsData {
         }
     }
 
-    private String findColumnStyle(SystemRequirementWrapper systemRequirementWrapper) {
-        if (hasMissingTraceability(systemRequirementWrapper)) {
-            return TraceabilityMatrixDocument.STYLE_RED;
-        }
-        return TraceabilityMatrixDocument.STYLE_NORMAL;
-    }
-
-    private boolean hasMissingTraceability(SystemRequirementWrapper systemRequirementWrapper) {
-        return !systemRequirementWrapper.hasRelationToAnyStakeholderRequirement();
+    private String findColumnStyle(SystemRequirementWrapper systemRequirementWrapper, ConcurrentMap<Integer, TraceabilityMatrixDocument.RelationToEntity> mapOfSystemRequirementRelations) {
+        TraceabilityMatrixDocument.RelationToEntity relationToEntity = mapOfSystemRequirementRelations.get(systemRequirementWrapper.getEntityId().getValue());
+        return relationToEntity != null ? TraceabilityMatrixDocument.STYLE_NORMAL : TraceabilityMatrixDocument.STYLE_RED;
     }
 
     private String valueOrDefault(String value, String fallback) {

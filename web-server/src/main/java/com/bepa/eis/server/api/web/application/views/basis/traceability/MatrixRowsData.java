@@ -5,16 +5,17 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 public class MatrixRowsData {
 
     private final List<Row> rowList = new ArrayList<>();
 
-    protected MatrixRowsData(List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers) {
+    protected MatrixRowsData(List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers, ConcurrentMap<Integer, TraceabilityMatrixDocument.RelationToEntity> mapOfStakeholderRequirementRelations) {
         int index = 0;
         for (StakeholderRequirementWrapper entity : listOfStakeholderRequirementWrappers) {
             String label = valueOrDefault(entity.getRequirementCode(), "??") + " " + valueOrDefault(entity.getRequirementName(), "Unknown");
-            String style = findRowStyle(entity);
+            String style = findRowStyle(entity, mapOfStakeholderRequirementRelations);
             rowList.add(new Row(
                     index++,
                     entity.getEntityId().toString(),
@@ -27,15 +28,9 @@ public class MatrixRowsData {
         }
     }
 
-    private String findRowStyle(StakeholderRequirementWrapper stakeholderRequirementWrapper) {
-        if (hasMissingTraceability(stakeholderRequirementWrapper)) {
-            return TraceabilityMatrixDocument.STYLE_RED;
-        }
-        return TraceabilityMatrixDocument.STYLE_NORMAL;
-    }
-
-    private boolean hasMissingTraceability(StakeholderRequirementWrapper stakeholderRequirementWrapper) {
-        return !stakeholderRequirementWrapper.hasRelationToAnySystemRequirement();
+    private String findRowStyle(StakeholderRequirementWrapper stakeholderRequirementWrapper, ConcurrentMap<Integer, TraceabilityMatrixDocument.RelationToEntity> mapOfStakeholderRequirementRelations) {
+        TraceabilityMatrixDocument.RelationToEntity relationToEntity = mapOfStakeholderRequirementRelations.get(stakeholderRequirementWrapper.getEntityId().getValue());
+        return relationToEntity != null ? TraceabilityMatrixDocument.STYLE_NORMAL : TraceabilityMatrixDocument.STYLE_RED;
     }
 
     protected Element getRowElement(Document doc) {

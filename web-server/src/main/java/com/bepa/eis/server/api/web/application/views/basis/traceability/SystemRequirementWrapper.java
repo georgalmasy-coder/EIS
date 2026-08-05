@@ -4,6 +4,8 @@ import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.Objects;
 import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMENT;
 
 public class SystemRequirementWrapper {
+
+    private static final Logger log = LoggerFactory.getLogger(SystemRequirementWrapper.class);
 
     private final SystemRequirementEntity systemRequirementEntity;
     private final List<EntityRelationRecord> listOfRelationsToStakeholderRequirements = new ArrayList<>();
@@ -26,6 +30,9 @@ public class SystemRequirementWrapper {
     }
 
     protected boolean hasRelationToStakeholderRequirement(StakeholderRequirementWrapper stakeholderRequirementWrapper) {
+
+
+
         for (EntityRelationRecord relation : listOfRelationsToStakeholderRequirements) {
             if (Objects.equals(relation.getRelatedEntityId(), stakeholderRequirementWrapper.getEntityId())
                     && relation.getRelatedEntityType() == STAKEHOLDER_REQUIREMENT) {

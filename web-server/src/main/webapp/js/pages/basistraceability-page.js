@@ -745,12 +745,8 @@ async function executeTraceabilityRelationAction(endpoint, row, column, cell, ce
             throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
-        const result = await response.json();
-        const updatedCell = normalizeCellUpdateResponse(result);
-
-        updateTraceabilityCell(cell, cellElement, row, column, updatedCell);
-
-        setText("loadStatus", "Loaded", "");
+        await response.json();
+        await loadTraceabilityMatrix();
     } catch (error) {
         console.error("Failed to update traceability relation", error);
         setText("loadStatus", "Error", "");
@@ -774,31 +770,6 @@ function buildRelationActionPayload(row, column, cell) {
     payload.set("value", cell?.value || "");
 
     return payload;
-}
-
-function normalizeCellUpdateResponse(result) {
-    return {
-        style: String(result?.style || FALLBACK_STYLE_ID),
-        value: String(result?.value || "")
-    };
-}
-
-function updateTraceabilityCell(cell, cellElement, row, column, updatedCell) {
-    const previousStyle = cell.style || FALLBACK_STYLE_ID;
-    const nextStyle = updatedCell.style || FALLBACK_STYLE_ID;
-    const nextValue = updatedCell.value || "";
-
-    cell.style = nextStyle;
-    cell.value = nextValue;
-
-    cellElement.classList.remove(getDynamicStyleClass(previousStyle, "traceability-xml-style"));
-    cellElement.classList.add(getDynamicStyleClass(nextStyle, "traceability-xml-style"));
-
-    cellElement.setAttribute("data-cell-style", nextStyle);
-    cellElement.setAttribute("data-cell-value", nextValue);
-    cellElement.title = buildCellTooltip(row, column);
-
-    renderCellValue(cellElement, nextValue);
 }
 
 function setCellBusy(cellElement, busy) {
