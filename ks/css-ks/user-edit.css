@@ -1,0 +1,318 @@
+html,
+body {
+    min-height: 100%;
+}
+
+body.user-edit-document {
+    overflow: hidden;
+}
+
+.user-edit-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-edit-content {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.user-edit-topbar {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.user-edit-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.user-edit-title-group {
+    display: grid;
+    gap: 4px;
+}
+
+.user-edit-title-group h2 {
+    margin: 0;
+}
+
+.user-edit-mode-label {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.user-edit-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    background: rgba(15,23,42,.55);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.user-edit-help-button:hover {
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.user-edit-help-button:active {
+    transform: translateY(1px);
+}
+
+.user-edit-help-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.user-edit-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.user-edit-entity-meta {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.user-edit-tab-bar {
+    flex: 0 0 auto;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.user-edit-panels {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-edit-panels .tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-panels .tab-panel.is-active {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-field-grid {
+    grid-template-columns: 1fr;
+    align-content: start;
+}
+
+.user-edit-field-grid .page-field {
+    min-width: 0;
+}
+
+.user-edit-field-grid input[type="hidden"] {
+    display: none;
+}
+
+.user-edit-projects-wrap {
+    min-height: 0;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-edit-projects-table-wrap {
+    min-height: 0;
+    height: var(--user-edit-project-list-height, 340px);
+    max-height: var(--user-edit-project-list-height, 340px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    scrollbar-gutter: stable;
+}
+
+.user-edit-projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.user-edit-projects-table th,
+.user-edit-projects-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.user-edit-projects-table thead th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.user-edit-projects-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-edit-projects-check-col {
+    width: 96px;
+    text-align: center;
+}
+
+.user-edit-project-name-cell label {
+    display: block;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.user-edit-project-check-cell {
+    text-align: center;
+}
+
+.user-edit-project-access-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.user-edit-phone-field {
+    min-width: 0;
+}
+
+.phone-field .iti {
+    width: 100%;
+}
+
+.user-edit-phone-controls {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+}
+
+.user-edit-phone-controls .page-field {
+    min-width: 0;
+}
+
+.user-edit-phone-country-code label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.user-edit-phone-country-code select {
+    width: 100%;
+    min-width: 0;
+}
+
+.user-edit-phone-input {
+    min-width: 0;
+}
+
+.user-edit-phone-field .field-help {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.user-edit-footer {
+    margin-top: 0;
+    flex: 0 0 auto;
+}
+
+.user-edit-footer #btnSave:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.user-edit-dialog-status {
+    min-height: 18px;
+}
+
+.user-edit-panels .page-field input[readonly],
+.user-edit-panels .page-field select[disabled] {
+    opacity: .92;
+}
+
+.user-edit-panels .page-field input[type="text"][readonly],
+.user-edit-panels .page-field input[type="datetime-local"][readonly] {
+    background: rgba(255, 255, 255, 0.045);
+}
+
+@media (max-width: 900px) {
+    .user-edit-phone-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .user-edit-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-edit-entity-meta {
+        white-space: normal;
+    }
+}

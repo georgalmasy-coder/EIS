@@ -40,6 +40,19 @@ public class CustomerProjectProvider extends GenericProvider {
                     "AND P.CustomerId = C.CustomerId " +
                     "AND C.Latest = 1 ";
 
+    private static final String CUSTOMER_PROJECTS_BY_USERID_SQL =
+            "SELECT P.ProjectId, P.ProjectName, C.CustomerId, C.CustomerName " +
+                    "FROM PROJECT P, CUSTOMER C " +
+                    "WHERE P.ProjectId IN ( " +
+                    "    SELECT ProjectId " +
+                    "    FROM USER_PROJECT " +
+                    "    WHERE UserId = ? "+
+                    ") " +
+                    "AND P.Latest = 1 " +
+                    "AND P.ProjectStatus IN (" + ACTIVE_PROJECT_STATUS_IDS + ") " +
+                    "AND P.CustomerId = C.CustomerId " +
+                    "AND C.Latest = 1 ";
+
     private static final String CUSTOMER_ID_BY_PROJECT_ID_SQL =
             "SELECT C.CustomerId " +
                     "FROM PROJECT P, CUSTOMER C " +
@@ -67,6 +80,38 @@ public class CustomerProjectProvider extends GenericProvider {
                  PreparedStatement ps = con.prepareStatement(CUSTOMER_PROJECT_SQL)) {
 
                 setString(ps, sessionId, 1);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int customerId = rs.getInt("CustomerId");
+                        String customerName = rs.getString("CustomerName");
+                        int projectId = rs.getInt("ProjectId");
+                        String projectName = rs.getString("ProjectName");
+
+                        customerProject.addCustomerAndProject(
+                                customerId,
+                                customerName,
+                                projectId,
+                                projectName
+                        );
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error getting customer and projects: {}", e.getMessage(), e);
+        }
+
+        return customerProject;
+    }
+
+    public CustomerProject getProjectsByUserId(Integer userId) {
+        CustomerProject customerProject = new CustomerProject();
+
+        try {
+            try (Connection con = getDataSource().getConnection();
+                 PreparedStatement ps = con.prepareStatement(CUSTOMER_PROJECTS_BY_USERID_SQL)) {
+
+                setInt(ps, userId, 1);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {

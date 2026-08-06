@@ -1,0 +1,534 @@
+:root {
+    --dashboard-teamwork-group-header-height: 30px;
+    --dashboard-teamwork-header-height: 58px;
+    --dashboard-teamwork-row-height: 48px;
+    --dashboard-teamwork-border-color: rgba(255, 255, 255, 0.10);
+    --dashboard-teamwork-header-bg: #122033;
+    --dashboard-teamwork-cell-bg: #0e1626;
+    --dashboard-teamwork-cell-alt-bg: #101b2d;
+    --dashboard-teamwork-group-bg: #17304b;
+    --dashboard-teamwork-pill-bg: rgba(255, 255, 255, 0.04);
+    --dashboard-teamwork-arrow-color: #4ea1ff;
+}
+
+html,
+body.dashboard-systems-teamwork-document {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.dashboard-systems-teamwork-app {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+.dashboard-systems-teamwork-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dashboard-systems-teamwork-topbar {
+    flex: 0 0 auto;
+}
+
+.dashboard-systems-teamwork-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dashboard-systems-teamwork-section-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+}
+
+.dashboard-systems-teamwork-section-header h2 {
+    margin-bottom: 0;
+}
+
+.dashboard-systems-teamwork-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+.dashboard-systems-teamwork-icon-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(15, 23, 42, 0.55);
+    color: var(--text, #ffffff);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.dashboard-systems-teamwork-icon-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.dashboard-systems-teamwork-icon-button:hover {
+    background: rgba(96, 165, 250, 0.14);
+    border-color: rgba(96, 165, 250, 0.45);
+}
+
+.dashboard-systems-teamwork-icon-button:active {
+    transform: translateY(1px);
+}
+
+.dashboard-systems-teamwork-pdf-button svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+}
+
+.dashboard-systems-teamwork-pdf-button svg rect {
+    fill: currentColor;
+}
+
+.dashboard-systems-teamwork-pdf-button svg text {
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 0.25px;
+    dominant-baseline: auto;
+}
+
+.dashboard-systems-teamwork-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+.dashboard-systems-teamwork-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    gap: 0;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.dashboard-systems-teamwork-filter-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.dashboard-systems-teamwork-filter-slot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.dashboard-systems-teamwork-filter-slot-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    min-width: 84px;
+    text-align: right;
+}
+
+.dashboard-systems-teamwork-filter-zone {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    min-height: 32px;
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: 0.25rem 0.35rem;
+    border: 1px dashed rgba(148, 163, 184, 0.45);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.28);
+    box-sizing: border-box;
+}
+
+.dashboard-systems-teamwork-filter-zone.is-active {
+    border-style: solid;
+}
+
+.dashboard-systems-teamwork-filter-zone.is-drop-target {
+    border-color: rgba(96, 165, 250, 0.75);
+    background: rgba(96, 165, 250, 0.12);
+}
+
+.dashboard-systems-teamwork-filter-placeholder {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.dashboard-systems-teamwork-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.55rem;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--dashboard-systems-teamwork-filter-chip-color, #ffffff) 18%, rgba(255, 255, 255, 0.06));
+    color: #ffffff;
+    user-select: none;
+    cursor: grab;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.dashboard-systems-teamwork-filter-chip.is-dragging {
+    opacity: 0.6;
+}
+
+.dashboard-systems-teamwork-filter-chip-label {
+    min-width: 0;
+}
+
+.dashboard-systems-teamwork-filter-chip-remove {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+    font: inherit;
+}
+
+.dashboard-systems-teamwork-secondary-button {
+    display: none;
+}
+
+.dashboard-systems-teamwork-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.45rem;
+    background: var(--dashboard-teamwork-cell-bg);
+}
+
+.dashboard-systems-teamwork-table-scroll {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    background: var(--dashboard-teamwork-cell-bg);
+}
+
+.dashboard-systems-teamwork-header {
+    position: sticky;
+    top: 0;
+    z-index: 70;
+    background: var(--dashboard-teamwork-header-bg);
+}
+
+.dashboard-systems-teamwork-group-row,
+.dashboard-systems-teamwork-column-row {
+    display: grid;
+    width: max-content;
+}
+
+.dashboard-systems-teamwork-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+    color: #ffffff;
+    font-size: 0.82rem;
+}
+
+.dashboard-systems-teamwork-table th,
+.dashboard-systems-teamwork-table td {
+    box-sizing: border-box;
+    border-right: 1px solid var(--dashboard-teamwork-border-color);
+    border-bottom: 1px solid var(--dashboard-teamwork-border-color);
+    padding: 0.35rem 0.45rem;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+.dashboard-systems-teamwork-group-header,
+.dashboard-systems-teamwork-header-cell {
+    background: var(--dashboard-teamwork-header-bg);
+    color: #ffffff;
+}
+
+.dashboard-systems-teamwork-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--dashboard-teamwork-group-header-height);
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 850;
+    letter-spacing: 0;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.dashboard-systems-teamwork-header-cell {
+    display: flex;
+    align-items: stretch;
+    height: 72px;
+    text-align: left;
+    font-size: 0.82rem;
+    box-sizing: border-box;
+}
+
+.dashboard-systems-teamwork-resizable-th {
+    position: relative;
+}
+
+.dashboard-systems-teamwork-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+    z-index: 3;
+}
+
+.dashboard-systems-teamwork-resizer::after {
+    content: "";
+    position: absolute;
+    top: 18%;
+    right: 3px;
+    width: 2px;
+    height: 64%;
+    border-radius: 2px;
+    background: rgba(148, 163, 184, 0.55);
+}
+
+.dashboard-systems-teamwork-resizer:hover::after {
+    background: rgba(96, 165, 250, 0.95);
+}
+
+.dashboard-systems-teamwork-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    justify-content: center;
+    min-width: 0;
+    height: 100%;
+}
+
+.dashboard-systems-teamwork-header-label {
+    display: block;
+    color: #ffffff;
+    font-weight: 850;
+    line-height: 1.04;
+    word-break: break-word;
+}
+
+.dashboard-systems-teamwork-header-sublabel {
+    display: block;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 700;
+    line-height: 1.04;
+}
+
+.dashboard-systems-teamwork-cell {
+    min-height: var(--dashboard-teamwork-row-height);
+    height: auto;
+    background: var(--dashboard-teamwork-cell-bg);
+    color: #ffffff;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+.dashboard-systems-teamwork-row:nth-child(even) .dashboard-systems-teamwork-cell {
+    background: var(--dashboard-teamwork-cell-alt-bg);
+}
+
+.dashboard-systems-teamwork-cell--interactive {
+    cursor: pointer;
+}
+
+.dashboard-systems-teamwork-header-cell--center,
+.dashboard-systems-teamwork-cell--center {
+    text-align: center;
+    justify-content: center;
+}
+
+.dashboard-systems-teamwork-cell--center .dashboard-systems-teamwork-cell-text,
+.dashboard-systems-teamwork-cell--center .dashboard-systems-teamwork-pill {
+    margin-inline: auto;
+}
+
+.dashboard-systems-teamwork-cell--draggable {
+    cursor: grab;
+}
+
+.dashboard-systems-teamwork-cell--draggable.is-dragging {
+    opacity: 0.7;
+}
+
+.dashboard-systems-teamwork-cell-text {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    font-weight: 650;
+}
+
+.dashboard-systems-teamwork-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 20px;
+    padding: 1px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--dashboard-systems-teamwork-pill-color, rgba(255, 255, 255, 0.22));
+    background: color-mix(in srgb, var(--dashboard-systems-teamwork-pill-color, #ffffff) 22%, transparent);
+    color: #ffffff;
+    font-weight: 850;
+    white-space: nowrap;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+.dashboard-systems-teamwork-cell--fromSbsCode,
+.dashboard-systems-teamwork-cell--fromTrlId,
+.dashboard-systems-teamwork-cell--fromSystemName,
+.dashboard-systems-teamwork-cell--fromSystemOwnerId,
+.dashboard-systems-teamwork-cell--fromSystemDepartmentId,
+.dashboard-systems-teamwork-cell--toSbsCode,
+.dashboard-systems-teamwork-cell--toTrlId,
+.dashboard-systems-teamwork-cell--toSystemName,
+.dashboard-systems-teamwork-cell--toSystemOwnerId,
+.dashboard-systems-teamwork-cell--toSystemDepartmentId {
+    font-variant-numeric: tabular-nums;
+}
+
+.dashboard-systems-teamwork-cell--fromTrlId,
+.dashboard-systems-teamwork-cell--toTrlId {
+    text-align: center;
+    font-weight: 800;
+}
+
+.dashboard-systems-teamwork-cell--fromSbsCode,
+.dashboard-systems-teamwork-cell--fromTrlId,
+.dashboard-systems-teamwork-cell--fromSystemName,
+.dashboard-systems-teamwork-cell--fromSystemOwnerId,
+.dashboard-systems-teamwork-cell--fromSystemDepartmentId {
+    position: sticky;
+    z-index: 30;
+}
+
+.dashboard-systems-teamwork-cell--dual {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    vertical-align: top;
+    overflow: visible;
+}
+
+.dashboard-systems-teamwork-dual {
+    display: flex;
+    flex-direction: column;
+    gap: 0.16rem;
+    align-items: stretch;
+    justify-content: center;
+    min-width: 0;
+    height: auto;
+}
+
+.dashboard-systems-teamwork-dual-line {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.22rem;
+    min-width: 0;
+}
+
+.dashboard-systems-teamwork-dual-text {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    font-weight: 650;
+    line-height: 1.08;
+}
+
+.dashboard-systems-teamwork-dual-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 950;
+    -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.95);
+    line-height: 1;
+    flex: 0 0 auto;
+    margin-top: 0;
+}
+
+.dashboard-systems-teamwork-dual-arrow--left {
+    margin-right: 0.04rem;
+}
+
+.dashboard-systems-teamwork-empty {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(11, 34, 52, 0.88);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+}
+
+.dashboard-systems-teamwork-empty.is-visible {
+    display: flex;
+}
+
+body.dashboard-systems-teamwork-document .left-hover-zone {
+    z-index: 1000;
+}
+
+body.dashboard-systems-teamwork-document .side-menu {
+    z-index: 1001;
+}

@@ -94,19 +94,21 @@
                     <div class="table-scroll menu-editor-tree-scroll" id="treeScroll">
                         <table class="data-table page-table menu-editor-table" aria-label="Menu tree">
                             <colgroup>
-                                <col style="width: 33%;">
-                                <col style="width: 19%;">
+                                <col style="width: 24%;">
+                                <col style="width: 18%;">
                                 <col style="width: 17%;">
-                                <col style="width: 11%;">
-                                <col style="width: 11%;">
-                                <col style="width: 4%;">
+                                <col style="width: 14%;">
+                                <col style="width: 9%;">
+                                <col style="width: 9%;">
                                 <col style="width: 5%;">
+                                <col style="width: 4%;">
                             </colgroup>
                             <thead>
                             <tr>
                                 <th>Menu item</th>
                                 <th>Url</th>
                                 <th>User roles</th>
+                                <th>Subscription</th>
                                 <th>Customer</th>
                                 <th>Project</th>
                                 <th>Active</th>
@@ -147,7 +149,21 @@
 
         <div class="menu-editor-dialog-grid">
             <input type="hidden" id="fieldMenuId" />
-            <input type="hidden" id="fieldParentMenuId" />
+
+            <div class="page-field">
+                <label for="fieldMenuItemType">Type</label>
+                <select id="fieldMenuItemType"></select>
+            </div>
+
+            <div class="page-field">
+                <label for="fieldSubscriptionCode">Subscription</label>
+                <select id="fieldSubscriptionCode"></select>
+            </div>
+
+            <div class="page-field">
+                <label for="fieldParentMenuId">Parent menu item</label>
+                <select id="fieldParentMenuId"></select>
+            </div>
 
             <div class="page-field menu-editor-wide-field">
                 <label for="fieldMenuItemText">Menu item text <span aria-hidden="true">*</span></label>
@@ -157,6 +173,12 @@
             <div class="page-field menu-editor-wide-field">
                 <label for="fieldMenuItemUrl">Menu item url</label>
                 <input id="fieldMenuItemUrl" type="text" maxlength="50" autocomplete="off" />
+            </div>
+
+            <div class="page-field">
+                <label for="fieldIconId">Icon</label>
+                <select id="fieldIconId"></select>
+                <div id="menuIconPreview" class="menu-editor-icon-preview" aria-hidden="true"></div>
             </div>
 
             <fieldset class="page-field menu-editor-wide-field menu-editor-roles-fieldset">

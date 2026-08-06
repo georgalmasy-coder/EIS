@@ -1,0 +1,36 @@
+.history-table-frame{
+    min-height: 240px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-table-frame .table-scroll{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.history-table{
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.history-table th{
+    white-space: nowrap;
+}
+
+.history-table td{
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+.history-table-empty{
+    color: var(--muted);
+    padding: 16px;
+    font-size: 13px;
+}

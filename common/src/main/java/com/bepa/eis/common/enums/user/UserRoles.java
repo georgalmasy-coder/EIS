@@ -6,13 +6,15 @@ public enum UserRoles {
             1,
             "Bepa system administrator",
             "Full access to the system.",
-            false
+            true,
+            true
     ),
 
     CUSTOMER_ADMINISTRATOR(
             2,
             "Administrator",
             "Administrator with access to the customer portal.",
+            true,
             true
     ),
 
@@ -20,6 +22,7 @@ public enum UserRoles {
             3,
             "Project Member",
             "Project member with read/write access to project data",
+            true,
             true
                 ),
 
@@ -27,6 +30,7 @@ public enum UserRoles {
             4,
             "Project viewer",
             "Project member with only read access to project data",
+            true,
             false
     ),
 
@@ -34,6 +38,7 @@ public enum UserRoles {
             -1,
             "Invalid User Role",
             "No access to the system.",
+            false,
             false
     );
 
@@ -41,17 +46,20 @@ public enum UserRoles {
     private final String label;
     private final String description;
     private final boolean externalUserRole;
+    private final boolean active;
 
     UserRoles(
             int id,
             String label,
             String description,
-            boolean externalUserRole
+            boolean externalUserRole,
+            boolean active
     ) {
         this.id = id;
         this.label = label;
         this.description = description;
         this.externalUserRole = externalUserRole;
+        this.active = active;
     }
 
     public int getId() {
@@ -68,6 +76,10 @@ public enum UserRoles {
 
     public boolean isExternalUserRole() {
         return externalUserRole;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public static UserRoles fromId(Integer id) {

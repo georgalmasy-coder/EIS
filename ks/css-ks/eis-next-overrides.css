@@ -1,0 +1,40 @@
+.svg-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.nav-icon,.global-search svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.primary-nav button,.primary-nav .relation-primary,.admin-link,.developer-room-link{min-width:0}
+.primary-nav .relation-primary,.developer-room-link{width:100%;min-height:43px;border:0;border-radius:9px;background:transparent;color:#dbe9e5;display:flex;align-items:center;gap:12px;padding:0 12px;text-decoration:none;text-align:left}
+.primary-nav .relation-primary:hover,.primary-nav .relation-primary:focus-visible,.developer-room-link:hover,.developer-room-link:focus-visible{background:rgba(255,255,255,.08);color:#fff}
+.relation-primary span{min-width:0}.relation-primary em{margin-left:auto;font-style:normal;font-size:10px}
+.relation-shortcuts{display:none;grid-template-columns:1fr 1fr;gap:3px;margin:2px 7px 7px 42px}
+.relation-module:hover .relation-shortcuts,.relation-module:focus-within .relation-shortcuts{display:grid}
+.relation-shortcuts a{padding:5px 7px;border-radius:5px;color:#9fc0b6;font-size:9px;text-decoration:none;white-space:nowrap}
+.relation-shortcuts a:hover,.relation-shortcuts a:focus-visible{background:rgba(255,255,255,.08);color:#fff}
+.developer-room-link{margin-top:6px;border:1px solid rgba(255,255,255,.1);min-height:46px}
+.developer-room-link span{display:block;font-size:11px;min-width:0}.developer-room-link small{display:block;color:#91b5aa;font-size:8px;letter-spacing:.04em}
+.admin-link.active{box-shadow:inset 4px 0 0 var(--mint);background:rgba(255,255,255,.08);color:#fff}
+.sidebar.collapsed .relation-shortcuts,.sidebar.collapsed .developer-room-link span{display:none}
+.sidebar.collapsed .relation-primary,.sidebar.collapsed .developer-room-link{justify-content:center;padding-inline:0}
+.sidebar.collapsed .nav-icon{margin:0}
+.sidebar .primary-nav{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.sidebar .sidebar-foot{margin-top:8px;flex:0 0 auto}
+
+.btn,.text-link,.data-table td:last-child a{white-space:nowrap;flex:0 0 auto}
+.data-table td:last-child{white-space:nowrap;width:1%}
+.data-table td:last-child .btn{min-width:max-content}
+.primary-nav i,.domain-card i,.mini-action i,.admin-link .nav-icon,.developer-room-link .nav-icon{flex-shrink:0}
+
+.admin-command{display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:12px}
+.admin-command .search{min-width:340px;margin:0}
+.admin-tabs{display:flex;align-items:center;gap:3px;min-width:0;overflow:auto}
+.admin-tabs a{height:36px;display:inline-flex;align-items:center;padding:0 13px;border-radius:7px;color:var(--ink);font-size:10px;font-weight:700;text-decoration:none;white-space:nowrap}
+.admin-tabs a:hover,.admin-tabs a:focus-visible,.admin-tabs a.active{background:#dff1e9;color:var(--green)}
+.admin-customers{min-width:0;padding:18px}.admin-customers .panel-head p,.attention .panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.admin-customer-table{min-width:780px}.admin-customer-table .btn{min-width:92px}
+.admin-panel-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 2px 0;color:var(--muted);font-size:10px}
+.attention a{width:100%;display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:9px;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;text-align:left}
+.attention a:last-child{border-bottom:0}.attention a>span:first-child{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:#fff0e6;color:#a35d21;font-weight:800;flex:0 0 28px}.attention a:hover em{color:var(--green)}
+.attention em{color:var(--green-2);font-size:10px;font-style:normal;font-weight:800;white-space:nowrap}.attention small{display:block;color:var(--muted)}
+.admin-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.admin-link-panel{padding:18px}.admin-link-panel>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-link-panel a{display:block;min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;color:var(--ink);text-decoration:none;background:#fbfcfb}
+.admin-link-panel a:hover,.admin-link-panel a:focus-visible{border-color:#86a99d;background:#f0f8f4}.admin-link-panel small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+@media(max-width:1250px){.admin-command{align-items:stretch;flex-direction:column}.admin-command .search{width:100%}.admin-lower-grid{grid-template-columns:1fr}}

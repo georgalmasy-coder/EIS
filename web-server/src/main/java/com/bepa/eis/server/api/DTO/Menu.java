@@ -16,8 +16,16 @@ public class Menu {
 
     private final List<MainMenuItem> mainMenuItems = new ArrayList<>();
 
-    public MainMenuItem addMainMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int displayOrder) {
-        MainMenuItem mainMenuItem = new MainMenuItem(menuItemId, menuItemText, menuItemUrl, displayOrder);
+    public MainMenuItem addMainMenuItem(
+            int menuItemId,
+            String menuItemText,
+            String menuItemUrl,
+            int displayOrder,
+            Integer iconId,
+            String menuItemType,
+            String iconSvg
+    ) {
+        MainMenuItem mainMenuItem = new MainMenuItem(menuItemId, menuItemText, menuItemUrl, displayOrder, iconId, menuItemType, iconSvg);
         mainMenuItems.add(mainMenuItem);
         return mainMenuItem;
     }
@@ -43,6 +51,24 @@ public class Menu {
             displayEL.setTextContent(String.valueOf(m.menuItemText));
             mainMenuEl.appendChild(displayEL);
 
+            if (m.menuItemType != null) {
+                Element typeEL = doc.createElement("menuItemType");
+                typeEL.setTextContent(String.valueOf(m.menuItemType));
+                mainMenuEl.appendChild(typeEL);
+            }
+
+            if (m.iconId != null) {
+                Element iconIdEL = doc.createElement("iconId");
+                iconIdEL.setTextContent(String.valueOf(m.iconId));
+                mainMenuEl.appendChild(iconIdEL);
+            }
+
+            if (m.iconSvg != null && !m.iconSvg.isEmpty()) {
+                Element iconSvgEL = doc.createElement("iconSvg");
+                iconSvgEL.setTextContent(m.iconSvg);
+                mainMenuEl.appendChild(iconSvgEL);
+            }
+
             if (m.menuItemUrl != null && ! m.menuItemUrl.isEmpty()) {
                 Element urlEL = doc.createElement("url");
                 urlEL.setTextContent(String.valueOf(m.menuItemUrl));
@@ -60,6 +86,24 @@ public class Menu {
                 Element subMenuDdisplayEL = doc.createElement("display");
                 subMenuDdisplayEL.setTextContent(String.valueOf(s.menuItemText));
                 subMenuEl.appendChild(subMenuDdisplayEL);
+
+                if (s.menuItemType != null) {
+                    Element subMenuTypeEL = doc.createElement("menuItemType");
+                    subMenuTypeEL.setTextContent(String.valueOf(s.menuItemType));
+                    subMenuEl.appendChild(subMenuTypeEL);
+                }
+
+                if (s.iconId != null) {
+                    Element subMenuIconIdEL = doc.createElement("iconId");
+                    subMenuIconIdEL.setTextContent(String.valueOf(s.iconId));
+                    subMenuEl.appendChild(subMenuIconIdEL);
+                }
+
+                if (s.iconSvg != null && !s.iconSvg.isEmpty()) {
+                    Element subMenuIconSvgEL = doc.createElement("iconSvg");
+                    subMenuIconSvgEL.setTextContent(s.iconSvg);
+                    subMenuEl.appendChild(subMenuIconSvgEL);
+                }
 
                 Element subMenuUrlEL = doc.createElement("url");
                 subMenuUrlEL.setTextContent(String.valueOf(s.menuItemUrl));
@@ -80,21 +124,44 @@ public class Menu {
         private final String menuItemText;
         private final String menuItemUrl;
         private final int displayOrder;
+        private final Integer iconId;
+        private final String iconSvg;
+        private final String menuItemType;
         private final List<SubMenuItem> subMenuItems = new ArrayList<>();
 
-        private MainMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int displayOrder) {
+        private MainMenuItem(
+                int menuItemId,
+                String menuItemText,
+                String menuItemUrl,
+                int displayOrder,
+                Integer iconId,
+                String menuItemType,
+                String iconSvg
+        ) {
             this.menuItemId = menuItemId;
             this.menuItemText = menuItemText;
             this.menuItemUrl = menuItemUrl;
             this.displayOrder = displayOrder;
+            this.iconId = iconId;
+            this.iconSvg = iconSvg;
+            this.menuItemType = menuItemType;
         }
 
         public int getMenuItemId() {
             return menuItemId;
         }
 
-        public void addSubMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int parentMenuItemId, int displayOrder) {
-            SubMenuItem subMenuItem = new SubMenuItem(menuItemId, menuItemText, menuItemUrl, parentMenuItemId, displayOrder);
+        public void addSubMenuItem(
+                int menuItemId,
+                String menuItemText,
+                String menuItemUrl,
+                int parentMenuItemId,
+                int displayOrder,
+                Integer iconId,
+                String menuItemType,
+                String iconSvg
+        ) {
+            SubMenuItem subMenuItem = new SubMenuItem(menuItemId, menuItemText, menuItemUrl, parentMenuItemId, displayOrder, iconId, menuItemType, iconSvg);
             subMenuItems.add(subMenuItem);
         }
     }
@@ -105,12 +172,28 @@ public class Menu {
         private final String menuItemUrl;
         private final int parentMenuItemId;
         private final int displayOrder;
-        private SubMenuItem(int menuItemId, String menuItemText, String menuItemUrl, int parentMenuItemId, int displayOrder) {
+        private final Integer iconId;
+        private final String iconSvg;
+        private final String menuItemType;
+
+        private SubMenuItem(
+                int menuItemId,
+                String menuItemText,
+                String menuItemUrl,
+                int parentMenuItemId,
+                int displayOrder,
+                Integer iconId,
+                String menuItemType,
+                String iconSvg
+        ) {
             this.menuItemId = menuItemId;
             this.menuItemText = menuItemText;
             this.menuItemUrl = menuItemUrl;
             this.parentMenuItemId = parentMenuItemId;
             this.displayOrder = displayOrder;
+            this.iconId = iconId;
+            this.iconSvg = iconSvg;
+            this.menuItemType = menuItemType;
         }
     }
 

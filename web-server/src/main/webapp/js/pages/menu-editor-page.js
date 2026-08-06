@@ -17,6 +17,9 @@ const state = {
     },
     menuItems: [],
     userRoles: [],
+    subscriptions: [],
+    menuItemTypes: [],
+    menuIcons: [],
     selectedMenuId: null,
     expandedParentIds: loadExpandedParentIds(),
     currentItem: null,
@@ -80,11 +83,16 @@ function bindEvents() {
         state.dialogParentMenuId = null;
     });
 
-    ["fieldMenuItemText", "fieldMenuItemUrl", "fieldCustomerIdRequired", "fieldProjectIdRequired", "fieldActive"].forEach((id) => {
+    ["fieldMenuItemText", "fieldMenuItemUrl", "fieldParentMenuId", "fieldMenuItemType", "fieldSubscriptionCode", "fieldIconId", "fieldCustomerIdRequired", "fieldProjectIdRequired", "fieldActive"].forEach((id) => {
         const element = byId(id);
         element?.addEventListener("input", markDirty);
         element?.addEventListener("change", markDirty);
     });
+
+    els.fieldParentMenuId?.addEventListener("change", syncMenuDialogState);
+    els.fieldMenuItemType?.addEventListener("change", onMenuItemTypeChanged);
+    els.fieldSubscriptionCode?.addEventListener("change", updateSubscriptionPreview);
+    els.fieldIconId?.addEventListener("change", updateIconPreview);
 
     els.menuDialog?.addEventListener("input", markDirty);
     els.menuDialog?.addEventListener("change", markDirty);
@@ -134,6 +142,9 @@ async function loadMenuData(showSpinner = false) {
         state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(xmlDocument);
         state.userRoles = parseUserRoles(xmlDocument);
+        state.subscriptions = parseSubscriptions(xmlDocument);
+        state.menuItemTypes = parseMenuItemTypes(xmlDocument);
+        state.menuIcons = parseMenuIcons(xmlDocument);
         state.menuItems = parseMenuItems(xmlDocument);
         state.selectedMenuId = resolveSelectedMenuId();
 
@@ -145,6 +156,9 @@ async function loadMenuData(showSpinner = false) {
         state.currentDoc = null;
         state.menuItems = [];
         state.userRoles = [];
+        state.subscriptions = [];
+        state.menuItemTypes = [];
+        state.menuIcons = [];
         state.selectedMenuId = null;
         renderMenuTree();
         setText("loadStatus", "Error", "");
@@ -191,6 +205,52 @@ function parseUserRoles(xmlDocument) {
     })).filter((option) => option.value);
 }
 
+function parseSubscriptions(xmlDocument) {
+    const lookupsElement = getDirectChild(xmlDocument.documentElement, "lookups");
+    const lookupNodes = getDirectChildren(lookupsElement, "lookup");
+    const lookupNode = lookupNodes.find((node) => (node.getAttribute("name") || "").toLowerCase() === "subscriptions");
+
+    if (!lookupNode) {
+        return [];
+    }
+
+    return getDirectChildren(lookupNode, "option").map((optionNode) => ({
+        value: getAttribute(optionNode, "code") || getAttribute(optionNode, "value"),
+        label: getAttribute(optionNode, "label") || getAttribute(optionNode, "code")
+    })).filter((option) => option.value);
+}
+
+function parseMenuItemTypes(xmlDocument) {
+    const lookupsElement = getDirectChild(xmlDocument.documentElement, "lookups");
+    const lookupNodes = getDirectChildren(lookupsElement, "lookup");
+    const lookupNode = lookupNodes.find((node) => (node.getAttribute("name") || "").toLowerCase() === "menuitemtypes");
+
+    if (!lookupNode) {
+        return [];
+    }
+
+    return getDirectChildren(lookupNode, "option").map((optionNode) => ({
+        value: getAttribute(optionNode, "code") || getAttribute(optionNode, "value"),
+        label: getAttribute(optionNode, "label") || getAttribute(optionNode, "code"),
+        isHeader: Number.parseInt(getAttribute(optionNode, "code") || getAttribute(optionNode, "value"), 10) === 1
+    })).filter((option) => option.value);
+}
+
+function parseMenuIcons(xmlDocument) {
+    const lookupsElement = getDirectChild(xmlDocument.documentElement, "lookups");
+    const menuIconsElement = getDirectChild(lookupsElement, "menuIcons");
+
+    if (!menuIconsElement) {
+        return [];
+    }
+
+    return getDirectChildren(menuIconsElement, "menuIcon").map((iconNode) => ({
+        value: getChildText(iconNode, "Id", ""),
+        label: getChildText(iconNode, "Name", ""),
+        svgCode: getChildText(iconNode, "SvgCode", "")
+    })).filter((icon) => icon.value);
+}
+
 function parseMenuItems(xmlDocument) {
     const menuItemsElement = getDirectChild(xmlDocument.documentElement, "menuItems");
     const menuNodes = menuItemsElement
@@ -202,6 +262,9 @@ function parseMenuItems(xmlDocument) {
         menuItemText: getChildText(node, "MenuItemText", ""),
         menuItemUrl: getChildText(node, "MenuItemUrl", ""),
         parentMenuId: parseNullableInt(getChildText(node, "ParentMenuId", "")),
+        menuItemType: parseNullableInt(getChildText(node, "MenuItemType", "")),
+        subscriptionCode: getChildText(node, "SubscriptionCode", ""),
+        iconId: parseNullableInt(getChildText(node, "IconId", "")),
         displayOrder: parseNullableInt(getChildText(node, "DisplayOrder", "")),
         customerIdRequired: parseBoolean(getChildText(node, "CustomerIdRequired", "false")),
         projectIdRequired: parseBoolean(getChildText(node, "ProjectIdRequired", "false")),
@@ -244,9 +307,13 @@ function getChildRows(parentMenuId) {
 }
 
 function renderMenuRow(menuItem, isChild) {
+    const iconLabel = getMenuIconLabel(menuItem.iconId);
+    const subscriptionLabel = getSubscriptionLabel(menuItem.subscriptionCode);
+    const menuItemType = parseNullableInt(menuItem.menuItemType) || 2;
     const rowClassNames = [
         "menu-editor-row",
         isChild ? "is-child" : "is-parent",
+        menuItemType === 1 ? "is-header" : "is-menu-item",
         menuItem.active ? "" : "is-inactive",
         state.selectedMenuId === menuItem.menuId ? "is-selected" : ""
     ].filter(Boolean).join(" ");
@@ -266,11 +333,14 @@ function renderMenuRow(menuItem, isChild) {
                 <div class="menu-editor-name-cell ${isChild ? "is-child" : ""}">
                     ${renderExpandButton(menuItem, isChild)}
                     ${isChild ? '<span class="menu-editor-indent" aria-hidden="true"></span>' : ""}
+                    ${renderRowIcon(menuItem.iconId, iconLabel)}
                     <span class="menu-editor-item-label">${escapeHtml(menuItem.menuItemText || "")}</span>
+                    ${renderTypePill(menuItemType)}
                 </div>
             </td>
             <td class="menu-editor-url-cell" title="${escapeHtml(menuItem.menuItemUrl || "")}">${escapeHtml(menuItem.menuItemUrl || "")}</td>
             <td class="menu-editor-role-cell" title="${escapeHtml(renderRoleSummary(menuItem.userRoles))}">${escapeHtml(renderRoleSummary(menuItem.userRoles))}</td>
+            <td>${renderPill(subscriptionLabel || "-", subscriptionLabel ? "is-subscription" : "is-no")}</td>
             <td>${renderPill(menuItem.customerIdRequired ? "Yes" : "No", menuItem.customerIdRequired ? "is-yes" : "is-no")}</td>
             <td>${renderPill(menuItem.projectIdRequired ? "Yes" : "No", menuItem.projectIdRequired ? "is-yes" : "is-no")}</td>
             <td class="menu-editor-active-cell">${renderPill(menuItem.active ? "Active" : "Inactive", menuItem.active ? "is-active" : "is-inactive")}</td>
@@ -306,6 +376,54 @@ function renderExpandButton(menuItem, isChild) {
                 aria-expanded="${expanded ? "true" : "false"}"
         >${glyph}</button>
     `;
+}
+
+function renderRowIcon(iconId, iconLabel) {
+    const icon = findMenuIcon(iconId);
+
+    if (!icon) {
+        return "";
+    }
+
+    return `
+        <span class="menu-editor-row-icon" title="${escapeHtml(iconLabel)}" aria-hidden="true">
+            ${icon.svgCode}
+        </span>
+    `;
+}
+
+function renderTypePill(menuItemType) {
+    const type = parseNullableInt(menuItemType) || 2;
+    const label = type === 1 ? "Header" : "Menu item";
+    const className = type === 1 ? "is-header" : "is-menu-item";
+    return `<span class="menu-editor-type-pill ${className}">${escapeHtml(label)}</span>`;
+}
+
+function renderSubscriptionOptions(subscriptionCode) {
+    const select = els.fieldSubscriptionCode;
+
+    if (!select) {
+        return;
+    }
+
+    const options = [{
+        value: "",
+        label: "No subscription",
+        selected: !subscriptionCode
+    }, ...state.subscriptions.map((subscription) => ({
+        value: subscription.value,
+        label: subscription.label || subscription.value,
+        selected: String(subscription.value) === String(subscriptionCode || "")
+    }))];
+
+    select.innerHTML = options.map((option) => {
+        const selected = option.selected ? " selected" : "";
+        return `<option value="${escapeHtml(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
+    }).join("");
+}
+
+function updateSubscriptionPreview() {
+    // Intentionally empty for now.
 }
 
 function renderRoleSummary(roleList) {
@@ -586,6 +704,9 @@ function parseMenuItem(node) {
         menuItemText: getChildText(node, "MenuItemText", ""),
         menuItemUrl: getChildText(node, "MenuItemUrl", ""),
         parentMenuId: parseNullableInt(getChildText(node, "ParentMenuId", "")),
+        menuItemType: parseNullableInt(getChildText(node, "MenuItemType", "")),
+        subscriptionCode: getChildText(node, "SubscriptionCode", ""),
+        iconId: parseNullableInt(getChildText(node, "IconId", "")),
         displayOrder: parseNullableInt(getChildText(node, "DisplayOrder", "")),
         customerIdRequired: parseBoolean(getChildText(node, "CustomerIdRequired", "false")),
         projectIdRequired: parseBoolean(getChildText(node, "ProjectIdRequired", "false")),
@@ -600,6 +721,9 @@ function buildEmptyMenuItem(parentMenuId) {
         menuItemText: "",
         menuItemUrl: "",
         parentMenuId: parentMenuId ?? null,
+        menuItemType: 2,
+        subscriptionCode: "",
+        iconId: null,
         displayOrder: null,
         customerIdRequired: false,
         projectIdRequired: false,
@@ -609,17 +733,181 @@ function buildEmptyMenuItem(parentMenuId) {
 }
 
 function fillMenuDialog(menuItem, mode) {
+    renderMenuItemTypeOptions(menuItem.menuItemType);
+    renderSubscriptionOptions(menuItem.subscriptionCode);
+    renderParentMenuOptions(menuItem);
+    renderIconOptions(menuItem.iconId);
     setValue("fieldMenuId", menuItem.menuId);
+    setValue("fieldMenuItemType", menuItem.menuItemType);
+    setValue("fieldSubscriptionCode", menuItem.subscriptionCode);
     setValue("fieldParentMenuId", menuItem.parentMenuId);
+    setValue("fieldIconId", menuItem.iconId);
     setValue("fieldMenuItemText", menuItem.menuItemText);
     setValue("fieldMenuItemUrl", menuItem.menuItemUrl);
     setChecked("fieldCustomerIdRequired", menuItem.customerIdRequired);
     setChecked("fieldProjectIdRequired", menuItem.projectIdRequired);
     setChecked("fieldActive", menuItem.active);
     renderUserRoleChecklist(menuItem.userRoles);
-    setMenuDialogModeLabel(mode, menuItem.parentMenuId, menuItem.menuId);
+    updateIconPreview();
+    syncMenuDialogState();
+    setMenuDialogModeLabel(mode, menuItem.parentMenuId, menuItem.menuId, menuItem.menuItemType);
     setDialogStatus(mode === "create" ? "Create menu item." : "Edit menu item.", "");
     state.dirty = false;
+}
+
+function renderMenuItemTypeOptions(menuItemType) {
+    const select = els.fieldMenuItemType;
+
+    if (!select) {
+        return;
+    }
+
+    const selectedType = parseNullableInt(menuItemType) || 2;
+    const options = state.menuItemTypes.length ? state.menuItemTypes : [
+        { value: "1", label: "Header" },
+        { value: "2", label: "Menu item" }
+    ];
+
+    select.innerHTML = options.map((option) => {
+        const selected = Number(option.value) === Number(selectedType) ? " selected" : "";
+        return `<option value="${escapeHtml(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
+    }).join("");
+}
+
+function renderParentMenuOptions(menuItem) {
+    const select = els.fieldParentMenuId;
+
+    if (!select) {
+        return;
+    }
+
+    const currentMenuId = menuItem?.menuId ?? null;
+    const hasChildren = currentMenuId !== null && getChildRows(currentMenuId).length > 0;
+    const rootRows = getParentRows().filter((row) => row.menuId !== currentMenuId);
+
+    const options = [{
+        value: "",
+        label: "Root level",
+        selected: menuItem?.parentMenuId === null || menuItem?.parentMenuId === undefined
+    }];
+
+    if (!hasChildren) {
+        rootRows.forEach((row) => {
+            options.push({
+                value: String(row.menuId),
+                label: row.menuItemText || `Menu ${row.menuId}`,
+                selected: row.menuId === menuItem?.parentMenuId
+            });
+        });
+    }
+
+    select.innerHTML = options.map((option) => {
+        const selected = option.selected ? " selected" : "";
+        return `<option value="${escapeHtml(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
+    }).join("");
+
+    select.disabled = false;
+}
+
+function renderIconOptions(iconId) {
+    const select = els.fieldIconId;
+
+    if (!select) {
+        return;
+    }
+
+    const options = [{
+        value: "",
+        label: "No icon",
+        selected: iconId === null || iconId === undefined
+    }, ...state.menuIcons.map((icon) => ({
+        value: icon.value,
+        label: icon.label || `Icon ${icon.value}`,
+        selected: Number(icon.value) === Number(iconId)
+    }))];
+
+    select.innerHTML = options.map((option) => {
+        const selected = option.selected ? " selected" : "";
+        return `<option value="${escapeHtml(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
+    }).join("");
+}
+
+function updateIconPreview() {
+    const container = els.menuIconPreview;
+
+    if (!container) {
+        return;
+    }
+
+    const iconId = parseNullableInt(getValue("fieldIconId"));
+    const icon = findMenuIcon(iconId);
+
+    if (!icon) {
+        container.classList.add("is-empty");
+        container.innerHTML = "<span>No icon selected</span>";
+        return;
+    }
+
+    container.classList.remove("is-empty");
+    container.innerHTML = `${icon.svgCode}<span>${escapeHtml(icon.label)}</span>`;
+}
+
+function syncMenuDialogState() {
+    const typeId = parseNullableInt(getValue("fieldMenuItemType")) || 2;
+    const isHeader = typeId === 1;
+    const hasParent = parseNullableInt(getValue("fieldParentMenuId")) !== null;
+    const typeSelect = els.fieldMenuItemType;
+    const parentSelect = els.fieldParentMenuId;
+    const urlField = els.fieldMenuItemUrl;
+    const rolesFieldset = els.userRolesGrid?.closest("fieldset");
+    const customerField = byId("fieldCustomerIdRequired");
+    const projectField = byId("fieldProjectIdRequired");
+
+    if (typeSelect) {
+        typeSelect.disabled = hasParent;
+    }
+
+    if (parentSelect) {
+        parentSelect.disabled = isHeader;
+    }
+
+    if (urlField) {
+        urlField.disabled = isHeader;
+        urlField.closest(".page-field")?.classList.toggle("is-hidden", isHeader);
+    }
+
+    if (rolesFieldset) {
+        rolesFieldset.hidden = isHeader;
+    }
+
+    if (customerField) {
+        customerField.disabled = isHeader;
+        customerField.closest(".page-field")?.classList.toggle("is-hidden", isHeader);
+    }
+
+    if (projectField) {
+        projectField.disabled = isHeader;
+        projectField.closest(".page-field")?.classList.toggle("is-hidden", isHeader);
+    }
+}
+
+function onMenuItemTypeChanged() {
+    const typeId = parseNullableInt(getValue("fieldMenuItemType")) || 2;
+
+    if (typeId === 1) {
+        setValue("fieldParentMenuId", "");
+        setValue("fieldMenuItemUrl", "");
+        setChecked("fieldCustomerIdRequired", false);
+        setChecked("fieldProjectIdRequired", false);
+        if (els.userRolesGrid) {
+            els.userRolesGrid.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+        }
+    }
+
+    syncMenuDialogState();
+    updateIconPreview();
 }
 
 function renderUserRoleChecklist(selectedRoles) {
@@ -648,7 +936,10 @@ function renderUserRoleChecklist(selectedRoles) {
 
 function clearMenuDialogFields() {
     setValue("fieldMenuId", "");
+    setValue("fieldMenuItemType", "2");
+    setValue("fieldSubscriptionCode", "");
     setValue("fieldParentMenuId", "");
+    setValue("fieldIconId", "");
     setValue("fieldMenuItemText", "");
     setValue("fieldMenuItemUrl", "");
     setChecked("fieldCustomerIdRequired", false);
@@ -658,6 +949,13 @@ function clearMenuDialogFields() {
     if (els.userRolesGrid) {
         clear(els.userRolesGrid);
     }
+
+    if (els.menuIconPreview) {
+        els.menuIconPreview.classList.add("is-empty");
+        els.menuIconPreview.textContent = "No icon selected";
+    }
+
+    syncMenuDialogState();
 }
 
 function closeMenuDialog(reason) {
@@ -676,7 +974,10 @@ async function saveMenuItem() {
 
     const menuItemText = getValue("fieldMenuItemText").trim();
     const menuItemUrl = getValue("fieldMenuItemUrl").trim();
-    const menuItem = state.currentItem || buildEmptyMenuItem(parseNullableInt(getValue("fieldParentMenuId")));
+    const menuItemType = parseNullableInt(getValue("fieldMenuItemType")) || 2;
+    const subscriptionCode = getValue("fieldSubscriptionCode").trim();
+    const parentMenuId = parseNullableInt(getValue("fieldParentMenuId"));
+    const iconId = parseNullableInt(getValue("fieldIconId"));
     const selectedRoles = Array.from(els.userRolesGrid?.querySelectorAll("input[type='checkbox']:checked") || [])
         .map((checkbox) => String(checkbox.value || "").trim())
         .filter(Boolean);
@@ -690,7 +991,10 @@ async function saveMenuItem() {
         <menuSave>
             <menuItem>
                 <MenuId>${escapeXml(getValue("fieldMenuId"))}</MenuId>
-                <ParentMenuId>${escapeXml(getValue("fieldParentMenuId"))}</ParentMenuId>
+                <MenuItemType>${escapeXml(menuItemType)}</MenuItemType>
+                <SubscriptionCode>${escapeXml(subscriptionCode)}</SubscriptionCode>
+                <ParentMenuId>${escapeXml(parentMenuId)}</ParentMenuId>
+                <IconId>${escapeXml(iconId)}</IconId>
                 <MenuItemText>${escapeXml(menuItemText)}</MenuItemText>
                 <MenuItemUrl>${escapeXml(menuItemUrl)}</MenuItemUrl>
                 <CustomerIdRequired>${escapeXml(getChecked("fieldCustomerIdRequired") ? "true" : "false")}</CustomerIdRequired>
@@ -805,9 +1109,13 @@ function normalizeRoleList(roleList) {
         .filter((value) => value !== "-1");
 }
 
-function setMenuDialogModeLabel(mode, parentMenuId, menuId) {
+function setMenuDialogModeLabel(mode, parentMenuId, menuId, menuItemType) {
+    const typeId = parseNullableInt(menuItemType) || 2;
+    const isHeader = typeId === 1;
     const label = mode === "create"
-        ? (parentMenuId === null || parentMenuId === undefined ? "Create parent item" : `Create child under ${parentMenuId}`)
+        ? (isHeader
+            ? "Create header"
+            : (parentMenuId === null || parentMenuId === undefined ? "Create root item" : `Create child under ${parentMenuId}`))
         : `Edit item ${menuId || ""}`;
 
     setText("menuDialogMode", label, "");
@@ -861,6 +1169,28 @@ function displayOrderText(value) {
 
 function findMenuItem(menuId) {
     return state.menuItems.find((row) => row.menuId === menuId) || null;
+}
+
+function findMenuIcon(iconId) {
+    if (iconId === null || iconId === undefined) {
+        return null;
+    }
+
+    return state.menuIcons.find((icon) => Number(icon.value) === Number(iconId)) || null;
+}
+
+function getMenuIconLabel(iconId) {
+    const icon = findMenuIcon(iconId);
+    return icon ? icon.label : "";
+}
+
+function getSubscriptionLabel(subscriptionCode) {
+    if (!subscriptionCode) {
+        return "";
+    }
+
+    const subscription = state.subscriptions.find((entry) => String(entry.value) === String(subscriptionCode));
+    return subscription ? subscription.label : String(subscriptionCode);
 }
 
 function markDirty() {

@@ -1,12 +1,19 @@
 package com.bepa.eis.server.api.web.application.misc;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.customer.Subscription;
+import com.bepa.eis.common.enums.menu.MenuItemType;
+import com.bepa.eis.common.enums.menu.MenuIcon;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.misc.AuditEventProvider;
+import com.bepa.eis.server.api.DTO.CustomerProject;
 import com.bepa.eis.server.api.DTO.Menu;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
+import com.bepa.eis.server.dataprovider.misc.CustomerProjectProvider;
 import com.bepa.eis.server.dataprovider.misc.MenuProvider;
 import com.bepa.eis.server.dataprovider.misc.MenuProvider.MenuRow;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,6 +30,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -33,6 +41,8 @@ import java.util.List;
 public class MenuServlet extends GenericServlet {
 
     private static final Logger log = LoggerFactory.getLogger(MenuServlet.class);
+    private static final String CMD_SELECT_PROJECT = "selectproject";
+    private static final String PROJECT_OVERVIEW_URL = "/web/view?page=projectoverview";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -46,12 +56,24 @@ public class MenuServlet extends GenericServlet {
             try {
                 MenuProvider menuProvider = new MenuProvider(webSession);
                 Menu menu = menuProvider.getMenuItems(getSessionId(req));
-                String xml = toXmlString(menu.toXmlDocument());
+
+                Document document = menu.toXmlDocument();
+                appendTopPanel(document, webSession);
+
+                appendProjects(document, webSession);
+
+                String xml = toXmlString(document);
                 resp.getWriter().write(xml);
+
             } catch (ParserConfigurationException | TransformerException e) {
                 log.error("Error loading menu: {}", e.getMessage(), e);
                 throw new RuntimeException(e);
             }
+            return;
+        }
+
+        if (CMD_SELECT_PROJECT.equals(command)) {
+            handleSelectProject(req, resp);
             return;
         }
 
@@ -78,6 +100,11 @@ public class MenuServlet extends GenericServlet {
         }
 
         WebSession webSession = getSession(req);
+
+        if (CMD_SELECT_PROJECT.equals(command)) {
+            handleSelectProject(req, resp);
+            return;
+        }
 
         if (!isSystemAdministrator(webSession)) {
             writeXml(resp, HttpServletResponse.SC_FORBIDDEN, errorXml("Forbidden"));
@@ -149,6 +176,75 @@ public class MenuServlet extends GenericServlet {
         }
     }
 
+    private void handleSelectProject(
+            HttpServletRequest req,
+            HttpServletResponse resp
+    ) throws IOException {
+        Integer projectId = intValue(req.getParameter("projectId"));
+        String sessionId = safeText(getSessionId(req));
+
+        if (projectId == null) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        if (sessionId.isBlank()) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        SessionProvider sessionProvider = new SessionProvider(null);
+
+        try {
+            WebSession webSession = sessionProvider.getBySessionId(sessionId);
+
+            if (webSession == null) {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            webSession.setSessionId(sessionId);
+            webSession.setProjectId(projectId);
+
+            boolean updated = sessionProvider.updateSessionInfo(webSession);
+
+            if (!updated) {
+                log.warn(
+                        "Project selection did not update any session rows. sessionId={}, customerId={}, projectId={}",
+                        sessionId,
+                        webSession.getCustomerId(),
+                        projectId
+                );
+            }
+
+            resp.setHeader("Cache-Control", "no-store");
+            resp.setHeader("Pragma", "no-cache");
+            writeXml(
+                    resp,
+                    HttpServletResponse.SC_OK,
+                    buildSelectProjectResultXml(PROJECT_OVERVIEW_URL)
+            );
+        } catch (SQLException e) {
+            log.error(
+                    "Error updating selected project in menu api. sessionId={}, customerId={}, projectId={}",
+                    sessionId,
+                    null,
+                    projectId,
+                    e
+                );
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String buildSelectProjectResultXml(String redirectUrl) {
+        StringBuilder xml = new StringBuilder();
+        appendXmlHeader(xml);
+        xml.append("<projectSelectionResult>");
+        appendElement(xml, "redirectUrl", redirectUrl);
+        xml.append("</projectSelectionResult>");
+        return xml.toString();
+    }
+
     private String buildListXml(
             WebSession webSession,
             MenuProvider menuProvider
@@ -206,6 +302,84 @@ public class MenuServlet extends GenericServlet {
         xml.append("</TopPanel>");
     }
 
+    private void appendProjects(
+            Document document,
+            WebSession webSession
+    ) {
+        if (document == null) {
+            return;
+        }
+
+        Element root = document.getDocumentElement();
+
+        if (root == null) {
+            return;
+        }
+
+        if (webSession == null) {
+            return;
+        }
+
+        try {
+            CustomerProjectProvider customerProjectProvider = new CustomerProjectProvider(webSession);
+            CustomerProject project = customerProjectProvider.getProjectsByUserId(webSession.getUserId());
+
+            if (project == null) {
+                return;
+            }
+
+            Document projectsDocument = project.toXmlProjectDocument();
+            if (projectsDocument == null || projectsDocument.getDocumentElement() == null) {
+                return;
+            }
+
+            Element projects = (Element) document.importNode(projectsDocument.getDocumentElement(), true);
+            root.appendChild(projects);
+        } catch (Exception e) {
+            log.error("Error loading project data for menu: {}", e.getMessage(), e);
+        }
+
+    }
+
+    private void appendTopPanel(
+            Document document,
+            WebSession webSession
+    ) {
+        if (document == null) {
+            return;
+        }
+
+        Element root = document.getDocumentElement();
+
+        if (root == null) {
+            return;
+        }
+
+        Element topPanelElement = document.createElement("TopPanel");
+        root.insertBefore(topPanelElement, root.getFirstChild());
+
+        if (webSession == null) {
+            return;
+        }
+
+        try {
+            TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+
+            if (topPanel != null && topPanel.getTopPanelElements() != null) {
+                topPanel.getTopPanelElements().getElements().forEach(field -> {
+                    if (field == null || field.getFieldName() == null || field.getFieldName().isBlank()) {
+                        return;
+                    }
+
+                    appendElement(topPanelElement, field.getFieldName(), field.toString());
+                });
+            }
+        } catch (Exception ignored) {
+            // Best-effort for the public menu payload.
+        }
+    }
+
     private void appendLookups(
             StringBuilder xml,
             MenuProvider menuProvider
@@ -214,7 +388,7 @@ public class MenuServlet extends GenericServlet {
         xml.append("<lookup name=\"userRoles\">");
 
         for (UserRoles role : UserRoles.values()) {
-            if (role == UserRoles.INVASIVE_USER_ROLE) {
+            if (role == UserRoles.INVASIVE_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
                 continue;
             }
 
@@ -225,6 +399,41 @@ public class MenuServlet extends GenericServlet {
         }
 
         xml.append("</lookup>");
+        xml.append("<lookup name=\"subscriptions\">");
+
+        for (Subscription subscription : Subscription.values()) {
+            if (!subscription.isActive()) {
+                continue;
+            }
+
+            xml.append("<option");
+            xml.append(" code=\"").append(escapeXml(subscription.getModuleCode())).append("\"");
+            xml.append(" label=\"").append(escapeXml(subscription.getLabel())).append("\"");
+            xml.append(" />");
+        }
+
+        xml.append("</lookup>");
+        xml.append("<lookup name=\"menuItemTypes\">");
+
+        for (MenuItemType type : MenuItemType.values()) {
+            xml.append("<option");
+            xml.append(" code=\"").append(escapeXml(String.valueOf(type.getId()))).append("\"");
+            xml.append(" label=\"").append(escapeXml(type.getLabel())).append("\"");
+            xml.append(" />");
+        }
+
+        xml.append("</lookup>");
+        xml.append("<menuIcons>");
+
+        for (MenuIcon icon : MenuIcon.values()) {
+            xml.append("<menuIcon>");
+            appendElement(xml, "Id", icon.getId());
+            appendElement(xml, "Name", icon.getName());
+            appendElement(xml, "SvgCode", icon.getSvgCode());
+            xml.append("</menuIcon>");
+        }
+
+        xml.append("</menuIcons>");
         xml.append("</lookups>");
     }
 
@@ -270,6 +479,9 @@ public class MenuServlet extends GenericServlet {
         appendElement(xml, "MenuItemText", menuRow == null ? null : menuRow.menuItemText());
         appendElement(xml, "MenuItemUrl", menuRow == null ? null : menuRow.menuItemUrl());
         appendElement(xml, "ParentMenuId", menuRow == null ? null : menuRow.parentMenuId());
+        appendElement(xml, "MenuItemType", menuRow == null ? null : menuRow.menuItemType());
+        appendElement(xml, "SubscriptionCode", menuRow == null ? null : menuRow.subscriptionCode());
+        appendElement(xml, "IconId", menuRow == null ? null : menuRow.iconId());
 
         if (includeDisplayOrder) {
             appendElement(xml, "DisplayOrder", menuRow == null ? null : menuRow.displayOrder());
@@ -301,6 +513,9 @@ public class MenuServlet extends GenericServlet {
                 text(menuElement, "MenuItemText"),
                 text(menuElement, "MenuItemUrl"),
                 intValue(text(menuElement, "ParentMenuId")),
+                intValue(text(menuElement, "MenuItemType")),
+                text(menuElement, "SubscriptionCode"),
+                intValue(text(menuElement, "IconId")),
                 intValue(text(menuElement, "DisplayOrder")),
                 boolValue(text(menuElement, "CustomerIdRequired"), false),
                 boolValue(text(menuElement, "ProjectIdRequired"), false),
@@ -315,6 +530,9 @@ public class MenuServlet extends GenericServlet {
                 "",
                 "",
                 parentMenuId,
+                MenuItemType.MENU_ITEM.getId(),
+                "",
+                null,
                 null,
                 Boolean.FALSE,
                 Boolean.FALSE,
@@ -336,6 +554,36 @@ public class MenuServlet extends GenericServlet {
         appendElement(xml, "message", message);
         xml.append("</menuEditorSaveResult>");
         return xml.toString();
+    }
+
+    private void logAuditEvent(
+            String actorEmail,
+            String eventType,
+            String description,
+            String status
+    ) {
+        try {
+            AuditEventProvider auditEventProvider = new AuditEventProvider(null);
+
+            auditEventProvider.logEvent(new AuditEventProvider.AuditEvent(
+                    safeActor(actorEmail),
+                    eventType,
+                    "SESSION",
+                    safeActor(actorEmail),
+                    description,
+                    status
+            ));
+        } catch (Exception e) {
+            log.warn("Could not write project selection audit event. eventType={}, actor={}", eventType, actorEmail, e);
+        }
+    }
+
+    private String safeActor(String actorEmail) {
+        if (actorEmail == null || actorEmail.isBlank()) {
+            return "unknown";
+        }
+
+        return actorEmail;
     }
 
     private String errorXml(String message) {
@@ -377,6 +625,25 @@ public class MenuServlet extends GenericServlet {
         }
 
         xml.append("</").append(elementName).append(">");
+    }
+
+    private void appendElement(
+            Element parent,
+            String elementName,
+            Object value
+    ) {
+        if (parent == null || elementName == null || elementName.isBlank()) {
+            return;
+        }
+
+        Document document = parent.getOwnerDocument();
+        Element element = document.createElement(elementName);
+
+        if (value != null) {
+            element.setTextContent(String.valueOf(value));
+        }
+
+        parent.appendChild(element);
     }
 
     private String safeText(String value) {

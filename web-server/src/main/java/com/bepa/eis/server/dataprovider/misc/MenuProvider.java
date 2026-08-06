@@ -1,6 +1,9 @@
 package com.bepa.eis.server.dataprovider.misc;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.customer.Subscription;
+import com.bepa.eis.common.enums.menu.MenuIcon;
+import com.bepa.eis.common.enums.menu.MenuItemType;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.DTO.Menu;
@@ -26,7 +29,7 @@ public class MenuProvider extends GenericProvider {
     private static final Logger log = LoggerFactory.getLogger(MenuProvider.class);
 
     private static final String SELECT_ALL_MENU_ROWS_SQL =
-            "SELECT MenuId, MenuItemText, MenuItemUrl, ParentMenuId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active " +
+            "SELECT MenuId, MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active " +
             "FROM MENU ";
 
     private static final String SELECT_MENU_ROW_SQL =
@@ -38,12 +41,12 @@ public class MenuProvider extends GenericProvider {
             SELECT_ALL_MENU_ROWS_SQL + " WHERE ((ParentMenuId IS NULL AND ? IS NULL) OR ParentMenuId = ?) ";
 
     private static final String INSERT_MENU_ROW_SQL =
-            "INSERT INTO dbo.MENU (MenuItemText, MenuItemUrl, ParentMenuId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO dbo.MENU (MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_MENU_ROW_SQL =
             "UPDATE dbo.MENU " +
-            "SET MenuItemText = ?, MenuItemUrl = ?, CustomerIdRequired = ?, ProjectIdRequired = ?, UserRoles = ?, Active = ? " +
+            "SET MenuItemText = ?, MenuItemUrl = ?, ParentMenuId = ?, MenuItemType = ?, SubscriptionCode = ?, IconId = ?, DisplayOrder = ?, CustomerIdRequired = ?, ProjectIdRequired = ?, UserRoles = ?, Active = ? " +
             "WHERE MenuId = ?";
 
     private static final String UPDATE_MENU_ORDER_SQL =
@@ -124,15 +127,19 @@ public class MenuProvider extends GenericProvider {
         }
 
         String menuItemText = safeText(menuRow.menuItemText());
-        String menuItemUrl = normalizeUrl(menuRow.menuItemUrl());
-        String userRoles = normalizeRoles(menuRow.userRoles());
-        boolean customerIdRequired = toBoolean(menuRow.customerIdRequired());
-        boolean projectIdRequired = toBoolean(menuRow.projectIdRequired());
+        MenuItemType menuItemType = normalizeMenuItemType(menuRow.menuItemType());
+        String subscriptionCode = normalizeSubscriptionCode(menuRow.subscriptionCode());
+        boolean header = menuItemType.isHeader();
+        String menuItemUrl = header ? null : normalizeUrl(menuRow.menuItemUrl());
+        String userRoles = header ? "" : normalizeRoles(menuRow.userRoles());
+        boolean customerIdRequired = header ? false : toBoolean(menuRow.customerIdRequired());
+        boolean projectIdRequired = header ? false : toBoolean(menuRow.projectIdRequired());
         boolean active = menuRow.active() == null || menuRow.active();
         Integer menuId = menuRow.menuId();
         Integer parentMenuId = menuRow.parentMenuId();
+        Integer iconId = menuRow.iconId();
 
-        validateMenuRow(menuItemText, menuItemUrl, userRoles);
+        validateMenuRow(menuItemText, menuItemUrl, userRoles, iconId, menuItemType, subscriptionCode);
 
         try (Connection connection = getDataSource().getConnection()) {
             connection.setAutoCommit(false);
@@ -141,12 +148,16 @@ public class MenuProvider extends GenericProvider {
                 Integer savedMenuId;
 
                 if (menuId == null || menuId <= 0) {
+                    validateParentMenuId(connection, parentMenuId, null, false, menuItemType);
                     Integer nextDisplayOrder = getNextDisplayOrder(connection, parentMenuId);
                     savedMenuId = insertMenuRow(
                             connection,
                             menuItemText,
                             menuItemUrl,
                             parentMenuId,
+                            menuItemType,
+                            subscriptionCode,
+                            iconId,
                             nextDisplayOrder,
                             customerIdRequired,
                             projectIdRequired,
@@ -160,12 +171,31 @@ public class MenuProvider extends GenericProvider {
                         throw new IllegalArgumentException("Menu item was not found.");
                     }
 
-                    parentMenuId = existingMenuRow.parentMenuId();
+                    boolean parentChanged = !Objects.equals(existingMenuRow.parentMenuId(), parentMenuId);
+                    boolean hasChildren = hasChildRows(connection, menuId);
+
+                    validateParentMenuId(connection, parentMenuId, menuId, hasChildren, menuItemType);
+
+                    if (parentChanged) {
+                        List<MenuRow> oldSiblings = getSiblingRows(connection, existingMenuRow.parentMenuId());
+                        oldSiblings.removeIf(row -> row != null && Objects.equals(row.menuId(), menuId));
+                        renameDisplayOrders(connection, oldSiblings);
+                    }
+
+                    Integer displayOrder = parentChanged
+                            ? getNextDisplayOrder(connection, parentMenuId)
+                            : existingMenuRow.displayOrder();
+
                     savedMenuId = updateMenuRow(
                             connection,
                             menuId,
                             menuItemText,
                             menuItemUrl,
+                            parentMenuId,
+                            menuItemType,
+                            subscriptionCode,
+                            iconId,
+                            displayOrder,
                             customerIdRequired,
                             projectIdRequired,
                             userRoles,
@@ -264,11 +294,16 @@ public class MenuProvider extends GenericProvider {
 
         for (MenuRow parentRow : parentRows) {
             int displayOrder = parentRow.displayOrder() == null ? parentRow.menuId() : parentRow.displayOrder();
+            MenuItemType parentType = normalizeMenuItemType(parentRow.menuItemType());
+            MenuIcon parentIcon = MenuIcon.fromId(parentRow.iconId());
             Menu.MainMenuItem mainMenuItem = menu.addMainMenuItem(
                     parentRow.menuId(),
                     parentRow.menuItemText(),
                     parentRow.menuItemUrl(),
-                    displayOrder
+                    displayOrder,
+                    parentRow.iconId(),
+                    parentType.name(),
+                    parentIcon == null ? null : parentIcon.getSvgCode()
             );
 
             List<MenuRow> childRows = childRowsByParent.getOrDefault(parentRow.menuId(), List.of());
@@ -279,12 +314,15 @@ public class MenuProvider extends GenericProvider {
                             childRow.menuItemText(),
                             childRow.menuItemUrl(),
                             childRow.parentMenuId(),
-                            childRow.displayOrder() == null ? childRow.menuId() : childRow.displayOrder()
+                            childRow.displayOrder() == null ? childRow.menuId() : childRow.displayOrder(),
+                            childRow.iconId(),
+                            MenuItemType.MENU_ITEM.name(),
+                            MenuIcon.fromId(childRow.iconId()) == null ? null : MenuIcon.fromId(childRow.iconId()).getSvgCode()
                     ));
         }
 
         // Add exit menu item
-        menu.addMainMenuItem(999, "Exit EIS", "/api/logout", 999);
+        menu.addMainMenuItem(999, "Exit EIS", "/api/logout", 999, null, MenuItemType.MENU_ITEM.name(), null);
 
         return menu;
     }
@@ -308,6 +346,9 @@ public class MenuProvider extends GenericProvider {
             String menuItemText,
             String menuItemUrl,
             Integer parentMenuId,
+            MenuItemType menuItemType,
+            String subscriptionCode,
+            Integer iconId,
             Integer displayOrder,
             boolean customerIdRequired,
             boolean projectIdRequired,
@@ -318,11 +359,14 @@ public class MenuProvider extends GenericProvider {
             setString(statement, menuItemText, 1);
             setString(statement, menuItemUrl, 2);
             setInt(statement, parentMenuId, 3);
-            setInt(statement, displayOrder, 4);
-            setBoolean(statement, customerIdRequired, 5);
-            setBoolean(statement, projectIdRequired, 6);
-            setString(statement, userRoles, 7);
-            setBoolean(statement, active, 8);
+            setInt(statement, menuItemType == null ? null : menuItemType.getId(), 4);
+            setString(statement, subscriptionCode, 5);
+            setInt(statement, iconId, 6);
+            setInt(statement, displayOrder, 7);
+            setBoolean(statement, customerIdRequired, 8);
+            setBoolean(statement, projectIdRequired, 9);
+            setString(statement, userRoles, 10);
+            setBoolean(statement, active, 11);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -344,6 +388,11 @@ public class MenuProvider extends GenericProvider {
             Integer menuId,
             String menuItemText,
             String menuItemUrl,
+            Integer parentMenuId,
+            MenuItemType menuItemType,
+            String subscriptionCode,
+            Integer iconId,
+            Integer displayOrder,
             boolean customerIdRequired,
             boolean projectIdRequired,
             String userRoles,
@@ -352,11 +401,16 @@ public class MenuProvider extends GenericProvider {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_MENU_ROW_SQL)) {
             setString(statement, menuItemText, 1);
             setString(statement, menuItemUrl, 2);
-            setBoolean(statement, customerIdRequired, 3);
-            setBoolean(statement, projectIdRequired, 4);
-            setString(statement, userRoles, 5);
-            setBoolean(statement, active, 6);
-            setInt(statement, menuId, 7);
+            setInt(statement, parentMenuId, 3);
+            setInt(statement, menuItemType == null ? null : menuItemType.getId(), 4);
+            setString(statement, subscriptionCode, 5);
+            setInt(statement, iconId, 6);
+            setInt(statement, displayOrder, 7);
+            setBoolean(statement, customerIdRequired, 8);
+            setBoolean(statement, projectIdRequired, 9);
+            setString(statement, userRoles, 10);
+            setBoolean(statement, active, 11);
+            setInt(statement, menuId, 12);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -430,6 +484,9 @@ public class MenuProvider extends GenericProvider {
                 resultSet.getString("MenuItemText"),
                 resultSet.getString("MenuItemUrl"),
                 getNullableInt(resultSet, "ParentMenuId"),
+                getNullableInt(resultSet, "MenuItemType"),
+                safeText(resultSet.getString("SubscriptionCode")),
+                getNullableInt(resultSet, "IconId"),
                 getNullableInt(resultSet, "DisplayOrder"),
                 getNullableBoolean(resultSet, "CustomerIdRequired"),
                 getNullableBoolean(resultSet, "ProjectIdRequired"),
@@ -510,7 +567,10 @@ public class MenuProvider extends GenericProvider {
     private void validateMenuRow(
             String menuItemText,
             String menuItemUrl,
-            String userRoles
+            String userRoles,
+            Integer iconId,
+            MenuItemType menuItemType,
+            String subscriptionCode
     ) {
         if (menuItemText.isBlank()) {
             throw new IllegalArgumentException("MenuItemText is required.");
@@ -526,6 +586,18 @@ public class MenuProvider extends GenericProvider {
 
         if (userRoles != null && userRoles.length() > 20) {
             throw new IllegalArgumentException("UserRoles must be maximum 20 characters.");
+        }
+
+        if (iconId != null && MenuIcon.fromId(iconId) == null) {
+            throw new IllegalArgumentException("IconId is invalid.");
+        }
+
+        if (menuItemType == null) {
+            throw new IllegalArgumentException("MenuItemType is required.");
+        }
+
+        if (subscriptionCode != null && !subscriptionCode.isBlank() && normalizeSubscriptionCode(subscriptionCode) == null) {
+            throw new IllegalArgumentException("SubscriptionCode is invalid.");
         }
     }
 
@@ -552,7 +624,7 @@ public class MenuProvider extends GenericProvider {
                 int roleId = Integer.parseInt(normalizedToken);
                 UserRoles role = UserRoles.fromId(roleId);
 
-                if (role == null || role == UserRoles.INVASIVE_USER_ROLE) {
+                if (role == null || role == UserRoles.INVASIVE_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
                     continue;
                 }
 
@@ -571,6 +643,86 @@ public class MenuProvider extends GenericProvider {
 
     private boolean toBoolean(Boolean value) {
         return value != null && value;
+    }
+
+    private MenuItemType normalizeMenuItemType(Integer menuItemTypeId) {
+        MenuItemType menuItemType = MenuItemType.fromId(menuItemTypeId);
+        return menuItemType == null ? MenuItemType.MENU_ITEM : menuItemType;
+    }
+
+    private String normalizeSubscriptionCode(String value) {
+        String normalized = safeText(value);
+
+        if (normalized.isBlank()) {
+            return null;
+        }
+
+        Subscription subscription = Subscription.fromModuleCode(normalized);
+
+        if (subscription == null || !subscription.isActive()) {
+            subscription = Subscription.fromCode(normalized);
+        }
+
+        if (subscription == null || !subscription.isActive()) {
+            return null;
+        }
+
+        return subscription.getModuleCode();
+    }
+
+    private boolean hasChildRows(
+            Connection connection,
+            Integer menuId
+    ) throws SQLException {
+        if (menuId == null) {
+            return false;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement("SELECT COUNT(1) FROM MENU WHERE ParentMenuId = ?")) {
+            setInt(statement, menuId, 1);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void validateParentMenuId(
+            Connection connection,
+            Integer parentMenuId,
+            Integer menuId,
+            boolean hasChildren,
+            MenuItemType menuItemType
+    ) throws SQLException {
+        if (menuItemType != null && menuItemType.isHeader() && parentMenuId != null) {
+            throw new IllegalArgumentException("Header menu items must be top-level.");
+        }
+
+        if (parentMenuId == null) {
+            return;
+        }
+
+        MenuRow parentMenuRow = getMenuRow(connection, parentMenuId);
+
+        if (parentMenuRow == null) {
+            throw new IllegalArgumentException("Parent menu item was not found.");
+        }
+
+        if (menuId != null && Objects.equals(parentMenuRow.menuId(), menuId)) {
+            throw new IllegalArgumentException("A menu item cannot be its own parent.");
+        }
+
+        if (parentMenuRow.parentMenuId() != null) {
+            throw new IllegalArgumentException("Parent menu item must be a top-level item.");
+        }
+
+        if (hasChildren) {
+            throw new IllegalArgumentException("Menu items with children cannot be moved under another parent.");
+        }
     }
 
     private Integer getNullableInt(
@@ -598,6 +750,9 @@ public class MenuProvider extends GenericProvider {
             String menuItemText,
             String menuItemUrl,
             Integer parentMenuId,
+            Integer menuItemType,
+            String subscriptionCode,
+            Integer iconId,
             Integer displayOrder,
             Boolean customerIdRequired,
             Boolean projectIdRequired,

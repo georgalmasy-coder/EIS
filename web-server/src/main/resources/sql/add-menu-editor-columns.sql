@@ -26,9 +26,31 @@ BEGIN
 END;
 GO
 
+IF COL_LENGTH('dbo.MENU', 'IconId') IS NULL
+BEGIN
+    ALTER TABLE dbo.MENU
+        ADD IconId int NULL;
+END;
+GO
+
+IF COL_LENGTH('dbo.MENU', 'MenuItemType') IS NULL
+BEGIN
+    ALTER TABLE dbo.MENU
+        ADD MenuItemType int NULL;
+END;
+GO
+
+IF COL_LENGTH('dbo.MENU', 'SubscriptionCode') IS NULL
+BEGIN
+    ALTER TABLE dbo.MENU
+        ADD SubscriptionCode nvarchar(50) NULL;
+END;
+GO
+
 UPDATE dbo.MENU
 SET CustomerIdRequired = COALESCE(CustomerIdRequired, 0),
     ProjectIdRequired = COALESCE(ProjectIdRequired, 0),
     UserRoles = COALESCE(UserRoles, ''),
-    Active = COALESCE(Active, 1);
+    Active = COALESCE(Active, 1),
+    MenuItemType = COALESCE(MenuItemType, 2);
 GO

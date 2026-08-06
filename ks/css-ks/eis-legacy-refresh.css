@@ -1,0 +1,199 @@
+/* Visual bridge for server-rendered engineering workbenches.
+   Structure, IDs and event handlers remain owned by the legacy EiS pages. */
+body.relationdiagram-document,
+body.n2-document,
+body.traceability-document,
+body.interfaces-document{
+  --bg:#f3f7f4;
+  --panel:#fff;
+  --panel2:#f8fbf9;
+  --text:#15201d;
+  --muted:#68736f;
+  --border:#d9dfdc;
+  --accent:#0d7259;
+  --shadow:0 8px 30px rgba(22,48,39,.08);
+  background:#f3f7f4;
+  color:#15201d;
+  font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+body.relationdiagram-document .content,
+body.n2-document .content,
+body.traceability-document .content,
+body.interfaces-document .content{
+  gap:10px;
+  padding:14px 18px 18px 30px;
+}
+
+body.relationdiagram-document .topbar.panel,
+body.n2-document .topbar.panel,
+body.traceability-document .topbar.panel,
+body.interfaces-document .topbar.panel{
+  background:#fff;
+  border-color:#d9dfdc;
+  border-radius:12px;
+  box-shadow:0 5px 22px rgba(22,48,39,.06);
+}
+
+body.relationdiagram-document .meta-line,
+body.n2-document .meta-line,
+body.traceability-document .meta-line,
+body.interfaces-document .meta-line{color:#68736f}
+
+body.relationdiagram-document .meta-line strong,
+body.n2-document .meta-line strong,
+body.traceability-document .meta-line strong,
+body.interfaces-document .meta-line strong{color:#15201d}
+
+body.relationdiagram-document .topbar-search,
+body.n2-document .topbar-search,
+body.traceability-document .topbar-search,
+body.interfaces-document .topbar-search{
+  border-color:#d9dfdc;
+  border-radius:9px;
+  box-shadow:none;
+}
+
+body.relationdiagram-document .side-menu,
+body.n2-document .side-menu,
+body.traceability-document .side-menu,
+body.interfaces-document .side-menu{
+  background:linear-gradient(155deg,#0b4a3d,#042d25 65%,#02241e);
+  border-color:rgba(255,255,255,.14);
+  box-shadow:18px 0 50px rgba(0,32,24,.2);
+}
+
+body.relationdiagram-document .menu-toggle,
+body.n2-document .menu-toggle,
+body.traceability-document .menu-toggle,
+body.interfaces-document .menu-toggle{
+  background:#0b4a3d;
+  color:#fff;
+  border-color:#0b4a3d;
+  box-shadow:4px 0 16px rgba(0,32,24,.18);
+}
+
+body.relationdiagram-document .menu-main-btn,
+body.relationdiagram-document .menu-main-link,
+body.n2-document .menu-main-btn,
+body.n2-document .menu-main-link,
+body.traceability-document .menu-main-btn,
+body.traceability-document .menu-main-link,
+body.interfaces-document .menu-main-btn,
+body.interfaces-document .menu-main-link{color:#dbe9e5}
+
+body.relationdiagram-document .menu-main-btn:hover,
+body.relationdiagram-document .menu-main-link:hover,
+body.n2-document .menu-main-btn:hover,
+body.n2-document .menu-main-link:hover,
+body.traceability-document .menu-main-btn:hover,
+body.traceability-document .menu-main-link:hover,
+body.interfaces-document .menu-main-btn:hover,
+body.interfaces-document .menu-main-link:hover{background:rgba(255,255,255,.09);color:#fff}
+
+body.relationdiagram-document button,
+body.n2-document button,
+body.traceability-document button,
+body.interfaces-document button{font-family:inherit}
+
+body.relationdiagram-document :is(.relationdiagram-view-button,.relationdiagram-help-button,.relationdiagram-secondary-button),
+body.traceability-document .traceability-help-button{
+  min-width:42px;
+  height:42px;
+  flex:0 0 auto;
+  border:1px solid #d9dfdc;
+  border-radius:9px;
+  background:#fff;
+  color:#274d42;
+  box-shadow:none;
+}
+
+body.relationdiagram-document :is(.relationdiagram-view-button,.relationdiagram-help-button):hover,
+body.traceability-document .traceability-help-button:hover{
+  border-color:#7eaa9a;
+  background:#edf6f2;
+}
+
+body.relationdiagram-document .relationdiagram-view-button[aria-pressed="true"]{
+  background:#dff1e9;
+  border-color:#0d7259;
+  color:#064d3e;
+  box-shadow:0 0 0 3px rgba(13,114,89,.12);
+}
+
+body.relationdiagram-document :is(.relationdiagram-view-button,.relationdiagram-help-button) svg,
+body.traceability-document .traceability-help-button svg{
+  width:20px;
+  height:20px;
+  flex:0 0 auto;
+}
+
+body.relationdiagram-document .relationdiagram-section-header,
+body.n2-document .n2-section-header,
+body.traceability-document .traceability-section-header,
+body.interfaces-document .interfaces-section-header{
+  color:#15201d;
+  padding:4px 2px 8px;
+}
+
+body.relationdiagram-document .relationdiagram-info-bar,
+body.n2-document :is(.n2-info-bar,.n2-type-bar),
+body.traceability-document .traceability-info-bar,
+body.interfaces-document .interfaces-info-bar{
+  background:#eef7f3;
+  border-color:#d9dfdc;
+  color:#274d42;
+}
+
+body.relationdiagram-document .relationdiagram-filter-bar,
+body.interfaces-document .interfaces-filter-bar{
+  background:#fff;
+  border-color:#d9dfdc;
+}
+
+body.relationdiagram-document :is(.relationdiagram-search-input,.relationdiagram-focus-dropzone){
+  min-height:40px;
+  border-radius:8px;
+  border-color:#cfdad5;
+}
+
+body.relationdiagram-document .relationdiagram-focus-dropzone{background:#f2f8f5}
+
+body.relationdiagram-document .relationdiagram-search-input:focus{
+  border-color:#0d7259;
+  outline-color:rgba(13,114,89,.14);
+}
+
+body.relationdiagram-document .relationdiagram-frame{
+  border-color:#cfdad5;
+  border-radius:11px;
+  background:#edf4f1;
+  box-shadow:0 8px 28px rgba(22,48,39,.06);
+}
+
+body.relationdiagram-document .relationdiagram-column{background:#f4f8f6}
+body.relationdiagram-document .relationdiagram-column-header{background:#e8f1ed;color:#15201d}
+body.relationdiagram-document .relationdiagram-canvas-wrap{background:linear-gradient(90deg,#e7f0ec,#f3f7f5,#e7f0ec)}
+body.relationdiagram-document .relationdiagram-requirement-card{
+  border-color:#d6e0dc;
+  border-left-color:#8ba99d;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(22,48,39,.05);
+}
+body.relationdiagram-document .relationdiagram-requirement-card:hover{background:#e8f6ef;border-color:#79aa98}
+body.relationdiagram-document .relationdiagram-requirement-card.is-selected{background:#dff1e9;border-color:#0d7259;border-left-color:#0d7259}
+body.relationdiagram-document .relationdiagram-requirement-card.is-related{background:#e9f6ef;border-color:#72a992;border-left-color:#256650}
+
+body.n2-document .n2-frame,
+body.traceability-document .traceability-frame{
+  border-color:#cfdad5;
+  border-radius:11px;
+  box-shadow:0 8px 28px rgba(22,48,39,.06);
+}
+
+body.n2-document :is(.n2-corner-axis,.n2-corner-row,.n2-column-header),
+body.traceability-document :is(.traceability-column-header,.traceability-second-corner-axis,.traceability-second-corner-row){background:#e8f1ed}
+body.n2-document :is(.n2-axis-cell,.n2-row-header),
+body.traceability-document :is(.traceability-axis-cell,.traceability-row-header){background:#f3f7f5}
+body.n2-document .n2-cell-diagonal{box-shadow:inset 0 0 0 9999px rgba(199,226,215,.62)}
+

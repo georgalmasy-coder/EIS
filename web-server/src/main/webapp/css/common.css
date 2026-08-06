@@ -7,7 +7,8 @@
     --border: #233454;
     --accent: #60a5fa;
     --shadow: 0 10px 30px rgba(0,0,0,.35);
-    --menu-width: 280px;
+    --menu-width: 272px;
+    --menu-collapsed-width: 72px;
     --menu-open-gap: 6px;
     --menu-closed-offset: 23px;
     --menu-handle-width: 22px;
@@ -36,6 +37,11 @@ body{
     overflow-y: auto;
 }
 
+.menu-toggle,
+.left-hover-zone{
+    display: none !important;
+}
+
 .app{
     min-height: 100vh;
     width: 100%;
@@ -46,13 +52,17 @@ body{
     transition: padding-left 1200ms cubic-bezier(.22,.61,.36,1);
 }
 
-body.menu-is-open .app,
-body.menu-is-pinned .app{
+body.menu-is-open:not(.menu-is-collapsed) .app,
+body.menu-is-pinned:not(.menu-is-collapsed) .app{
     --menu-content-offset: var(--menu-open-offset);
 }
 
+body.menu-is-open.menu-is-collapsed .app,
+body.menu-is-pinned.menu-is-collapsed .app{
+    --menu-content-offset: var(--menu-collapsed-width);
+}
+
 body.menu-preparing .app,
-body.menu-preparing .menu-toggle,
 body.menu-preparing .side-menu{
     transition: none !important;
 }
@@ -112,32 +122,18 @@ body.menu-preparing .side-menu{
     padding: 14px;
 }
 
-.left-hover-zone{
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 16px;
-    height: 100vh;
-    z-index: 1;
-}
-
 .side-menu{
     position: fixed;
     left: 0;
     top: 0;
-    width: 280px;
+    width: 272px;
     height: 100vh;
     overflow: auto;
-    transform: translateX(-100%);
-    transition: transform 1200ms cubic-bezier(.22,.61,.36,1) !important;
+    transform: none;
+    transition: width 1200ms cubic-bezier(.22,.61,.36,1), padding 1200ms cubic-bezier(.22,.61,.36,1) !important;
     z-index: 20;
     background: rgba(15,23,42,.96);
     border-right: 1px solid var(--border);
-}
-
-.left-hover-zone:hover + .side-menu,
-.side-menu:hover{
-    transform: translateX(0);
 }
 
 .menu-root{
@@ -275,7 +271,6 @@ dialog.eis-edit-dialog::backdrop{
 }
 
 body.eis-edit-dialog-mode .topbar,
-body.eis-edit-dialog-mode .menu-toggle,
 body.eis-edit-dialog-mode .side-menu,
 body.eis-edit-dialog-mode .left-hover-zone{
     display: none !important;

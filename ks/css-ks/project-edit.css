@@ -1,0 +1,419 @@
+.project-edit-document {
+    overflow: hidden;
+}
+
+.project-edit-document {
+    min-height: 100vh;
+}
+
+.project-edit-app {
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.project-edit-content {
+    min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.project-edit-topbar {
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+}
+
+.project-edit-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.project-edit-section-header {
+    align-items: flex-start;
+}
+
+.project-edit-title-group {
+    display: grid;
+    gap: 4px;
+}
+
+.project-edit-title-group h2 {
+    margin: 0;
+}
+
+.project-edit-mode-label {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.project-edit-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    background: rgba(15,23,42,.55);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.project-edit-help-button:hover {
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
+}
+
+.project-edit-help-button:active {
+    transform: translateY(1px);
+}
+
+.project-edit-help-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.project-readonly-banner {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(247, 201, 72, 0.45);
+    border-radius: 8px;
+    color: #f7c948;
+    background: rgba(247, 201, 72, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.project-edit-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.project-edit-entity-meta {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.project-edit-tab-bar {
+    flex: 0 0 auto;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.project-edit-panels {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-edit-panels .tab-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-edit-panels .tab-panel.is-active {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-basis-info-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-flow: row;
+    grid-auto-rows: min-content;
+    gap: 14px;
+    width: 100%;
+    min-height: 0;
+    overflow: auto;
+    padding-right: 12px;
+    box-sizing: border-box;
+    scrollbar-gutter: stable;
+    align-content: start;
+}
+
+#tabPanel1 {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.project-basis-info-fields .page-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    min-width: 0;
+    align-items: stretch;
+}
+
+.project-basis-info-fields .page-field > * {
+    min-width: 0;
+}
+
+.project-basis-info-fields .page-field.checkbox-field {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.project-basis-info-fields .page-field.checkbox-field label {
+    margin: 0;
+    order: 1;
+    flex: 0 0 auto;
+}
+
+.project-basis-info-fields .page-field.checkbox-field input[type="checkbox"] {
+    order: 2;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.project-basis-info-fields .page-field label {
+    display: block;
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.project-basis-info-fields input,
+.project-basis-info-fields textarea,
+.project-basis-info-fields select{
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.project-basis-info-fields textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.project-basis-info-fields input[type="hidden"] {
+    display: none;
+}
+
+.project-basis-info-fields .field-required {
+    margin-left: 3px;
+    color: #ef4444;
+}
+
+.project-basis-info-fields .page-empty {
+    grid-column: 1 / -1;
+}
+
+.project-notes-frame,
+.project-attachments-frame {
+    min-height: 240px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#tabPanel2,
+#tabPanel3 {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+#tabPanel2 .table-frame,
+#tabPanel3 .table-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+}
+
+#tabPanel2 .table-scroll,
+#tabPanel3 .table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.project-notes-frame .table-scroll,
+.project-attachments-frame .table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.project-edit-footer {
+    margin-top: auto;
+    flex: 0 0 auto;
+}
+
+.project-edit-readonly #btnSave {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.project-edit-column-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.project-edit-resizable-th {
+    position: relative;
+}
+
+.project-edit-column-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    z-index: 2;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.project-edit-column-resizer:hover {
+    background: rgba(47, 156, 255, 0.22);
+}
+
+.note-dlg,
+.attachment-dlg {
+    width: min(920px, calc(100vw - 36px));
+}
+
+.note-editor,
+.attachment-editor {
+    display: grid;
+    gap: 12px;
+}
+
+.note-editor-label,
+.attachment-editor-label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.note-textarea,
+.attachment-textarea,
+.attachment-input {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.045);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.note-textarea:focus,
+.attachment-textarea:focus,
+.attachment-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(47, 156, 255, 0.12);
+}
+
+.attachment-editor-row {
+    display: grid;
+    gap: 6px;
+}
+
+.notes-toolbar,
+.attachments-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.notes-add-btn,
+.attachments-add-btn {
+    min-width: 110px;
+}
+
+body.project-edit-document .notes-table,
+body.project-edit-document .attachments-table {
+    width: 100%;
+    min-width: 760px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+body.project-edit-document .notes-table th,
+body.project-edit-document .attachments-table th {
+    white-space: nowrap;
+}
+
+body.project-edit-document .notes-table td,
+body.project-edit-document .attachments-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    vertical-align: top;
+}
+
+@media (max-width: 760px) {
+    .project-edit-status-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .project-edit-entity-meta {
+        white-space: normal;
+    }
+
+    .notes-toolbar,
+    .attachments-toolbar {
+        justify-content: stretch;
+    }
+
+    .notes-toolbar button,
+    .attachments-toolbar button {
+        width: 100%;
+    }
+
+    body.project-edit-document .notes-table,
+    body.project-edit-document .attachments-table {
+        min-width: 680px;
+    }
+}

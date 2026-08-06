@@ -61,4 +61,20 @@ public enum Subscription {
 
         return null;
     }
+
+    public static Subscription fromCode(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalizedCode = code.trim().toUpperCase(Locale.ROOT);
+
+        for (Subscription subscription : values()) {
+            if (subscription.name().equalsIgnoreCase(normalizedCode)) {
+                return subscription;
+            }
+        }
+
+        return null;
+    }
 }

@@ -83,6 +83,51 @@ public class CustomerProject {
         return doc;
     }
 
+    public Document toXmlProjectDocument() throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+
+//        Element root = doc.createElement("customers");
+//        doc.appendChild(root);
+
+        Element root = doc.createElement("projects");
+        doc.appendChild(root);
+
+        for (Customer c : customers) {
+/*
+            Element customerEl = doc.createElement("customer");
+            root.appendChild(customerEl);
+
+            Element customerIdEL = doc.createElement("customerId");
+            customerIdEL.setTextContent(String.valueOf(c.getCustomerId()));
+            customerEl.appendChild(customerIdEL);
+
+            Element customerNameEL = doc.createElement("customerName");
+            customerNameEL.setTextContent(String.valueOf(c.getCustomerName()));
+            customerEl.appendChild(customerNameEL);
+
+            Element projectsEl = doc.createElement("projects");
+            customerEl.appendChild(projectsEl);
+*/
+            for (Project p : c.getProjects()) {
+                Element projectEl = doc.createElement("project");
+
+                Element projectIdEL = doc.createElement("projectId");
+                projectIdEL.setTextContent(String.valueOf(p.getProjectId()));
+                projectEl.appendChild(projectIdEL);
+
+                Element projectNameEL = doc.createElement("projectName");
+                projectNameEL.setTextContent(String.valueOf(p.getProjectName()));
+                projectEl.appendChild(projectNameEL);
+
+                root.appendChild(projectEl);
+            }
+        }
+
+        return doc;
+    }
+
     private static class Customer {
         private final int customerId;
         private final String customerName;
