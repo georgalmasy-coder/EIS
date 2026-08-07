@@ -45,10 +45,10 @@
     width: 100%;
     min-width: 300px;
     padding: 4px 8px 4px 12px;
-    border: 1px solid rgba(120, 120, 120, 0.35);
+    border: 1px solid var(--app-border-default);
     border-radius: 999px;
-    background: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    background: var(--app-surface-background);
+    box-shadow: var(--app-shadow);
 }
 
 .topbar-search-input{
@@ -58,18 +58,18 @@
     outline: 0;
     background: transparent;
     font: inherit;
-    color: #111827;
-    caret-color: #111827;
+    color: var(--app-text-primary);
+    caret-color: var(--app-text-primary);
 }
 
 .topbar-search-input::placeholder{
-    color: #6b7280;
+    color: var(--app-text-secondary);
 }
 
 .topbar-search-count{
     flex: 0 0 auto;
     min-width: 44px;
-    color: #374151;
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1;
     text-align: center;
@@ -93,24 +93,24 @@
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: #333333;
+    color: var(--app-text-secondary);
     cursor: pointer;
     line-height: 1;
     font-size: 15px;
 }
 
 .topbar-search-button:hover{
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--app-accent-soft);
 }
 
 .topbar-search-button:focus{
-    outline: 2px solid rgba(4, 107, 210, 0.35);
+    outline: 2px solid var(--app-input-focus-ring);
     outline-offset: 1px;
 }
 
 .topbar-search-icon{
     flex: 0 0 auto;
-    color: #374151;
+    color: var(--app-text-secondary);
     font-size: 22px;
     line-height: 1;
 }
@@ -118,13 +118,13 @@
 .topbar-search-highlight{
     padding: 0 1px;
     border-radius: 2px;
-    background: rgba(37, 99, 235, 0.96);
+    background: var(--app-accent-primary);
     color: #ffffff;
 }
 
 .topbar-search-highlight-active{
-    background: #ff9800;
-    color: #111827;
+    background: var(--app-surface-strong-background);
+    color: var(--app-text-primary);
 }
 
 .topbar-logo{

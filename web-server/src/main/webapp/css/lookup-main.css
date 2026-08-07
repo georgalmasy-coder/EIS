@@ -17,24 +17,24 @@
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0;
-    color: var(--text-muted, #5b6472);
+    color: var(--app-text-secondary, var(--muted));
 }
 
 .lookup-main-type-select {
     width: 100%;
     min-height: 36px;
-    border: 1px solid var(--border-color, #c9d1dc);
+    border: 1px solid var(--app-input-border, var(--border-color, #c9d1dc));
     border-radius: 6px;
-    background: #fff;
-    color: #111827;
+    background: var(--app-input-background, #fff);
+    color: var(--app-text-primary, #111827);
     padding: 0 10px;
     font: inherit;
 }
 
 .lookup-main-type-select option,
 .lookup-main-dialog-grid select option {
-    color: #e5e7eb;
-    background: rgba(15,23,42,.98);
+    color: var(--app-text-primary, #e5e7eb);
+    background: var(--app-surface-background, rgba(15,23,42,.98));
 }
 
 .lookup-main-action-group {
@@ -51,9 +51,9 @@
     height: 38px;
     min-height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .55);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15, 23, 42, .55));
+    color: var(--app-control-foreground, var(--text));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -63,8 +63,8 @@
 }
 
 .lookup-main-icon-button:hover {
-    background: rgba(96, 165, 250, .14);
-    border-color: rgba(96, 165, 250, .45);
+    background: var(--app-control-hover-background, rgba(96, 165, 250, .14));
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .45));
 }
 
 .lookup-main-icon-button:active {
@@ -104,7 +104,7 @@
 .lookup-main-color-swatch {
     width: 14px;
     height: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--app-border-strong, rgba(0, 0, 0, 0.25));
     border-radius: 3px;
     flex: 0 0 auto;
 }
@@ -149,13 +149,13 @@
     height: 12px;
     border-radius: 999px;
     display: inline-block;
-    border: 1px solid rgba(148, 163, 184, .55);
+    border: 1px solid var(--app-border-strong, rgba(148, 163, 184, .55));
 }
 
 .lookup-main-active-dot.is-active {
-    background: #94a3b8;
-    border-color: #cbd5e1;
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, .12);
+    background: var(--app-text-tertiary, #94a3b8);
+    border-color: var(--app-border-default, #cbd5e1);
+    box-shadow: 0 0 0 3px var(--app-accent-soft, rgba(148, 163, 184, .12));
 }
 
 .lookup-main-active-dot.is-inactive {
@@ -171,9 +171,9 @@
 .lookup-main-dialog {
     width: min(760px, calc(100vw - 24px));
     max-width: 760px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 12px;
-    background: rgba(15, 23, 42, .96);
+    background: var(--app-surface-background, rgba(15, 23, 42, .96));
     padding: 0;
     height: fit-content;
     max-height: calc(100vh - 48px);
@@ -182,7 +182,7 @@
 }
 
 .lookup-main-dialog::backdrop {
-    background: rgba(15, 23, 42, 0.35);
+    background: var(--app-backdrop, rgba(15, 23, 42, 0.35));
 }
 
 .lookup-main-dialog-form {
@@ -213,7 +213,7 @@
 }
 
 .lookup-main-dialog-mode-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     line-height: 1.25;
 }
@@ -253,7 +253,7 @@
 
 .lookup-main-dialog-grid .page-field.checkbox-field > label {
     margin: 0 !important;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 13px;
     line-height: 1.2;
     cursor: pointer;
@@ -266,10 +266,10 @@
 .lookup-main-dialog-grid textarea,
 .lookup-main-dialog-grid select {
     width: 100%;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-input-border, var(--border));
     border-radius: 10px;
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    background: var(--app-input-background, rgba(15,23,42,.65));
+    color: var(--app-text-primary, var(--text));
     padding: 5px 10px;
     font: inherit;
     min-height: 32px;
@@ -282,8 +282,8 @@
 .lookup-main-dialog-grid input[type="number"]:focus,
 .lookup-main-dialog-grid textarea:focus,
 .lookup-main-dialog-grid select:focus {
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary, rgba(96,165,250,.65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96,165,250,.18));
 }
 
 .lookup-main-dialog-grid textarea {
@@ -292,7 +292,7 @@
 }
 
 .lookup-main-dialog-grid .lookup-main-dialog-readonly {
-    background: rgba(15,23,42,.42);
+    background: var(--app-surface-subtle-background, rgba(15,23,42,.42));
     opacity: .92;
 }
 
@@ -320,9 +320,9 @@
     width: 56px;
     height: 36px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-input-border, var(--border));
     border-radius: 10px;
-    background: rgba(15,23,42,.65);
+    background: var(--app-input-background, rgba(15,23,42,.65));
 }
 
 .lookup-main-color-picker:disabled {
@@ -336,7 +336,7 @@
 }
 
 .lookup-main-preview-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 12px;
     line-height: 1.25;
 }
@@ -349,25 +349,25 @@
     min-width: 120px;
     max-width: 100%;
     padding: 2px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 999px;
     box-sizing: border-box;
     white-space: nowrap;
     line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: rgba(15,23,42,.45);
-    color: var(--text);
+    background: var(--app-surface-subtle-background, rgba(15,23,42,.45));
+    color: var(--app-text-primary, var(--text));
 }
 
 .lookup-main-preview-chip.is-empty {
-    background: rgba(148, 163, 184, .12);
-    border-color: rgba(148, 163, 184, .35);
-    color: var(--muted);
+    background: var(--app-table-row-selected, rgba(148, 163, 184, .12));
+    border-color: var(--app-border-strong, rgba(148, 163, 184, .35));
+    color: var(--app-text-secondary, var(--muted));
 }
 
 .lookup-main-preview-meta {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 12px;
     line-height: 1.25;
 }
@@ -375,7 +375,7 @@
 .lookup-main-dialog-footer {
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid rgba(35,52,84,.65);
+    border-top: 1px solid var(--app-border-default, rgba(35,52,84,.65));
 }
 
 @media (max-width: 800px) {

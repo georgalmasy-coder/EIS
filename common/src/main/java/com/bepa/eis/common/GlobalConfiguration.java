@@ -120,6 +120,10 @@ public final class GlobalConfiguration {
         return WEB_SERVER_APPLICATION_NAME.equalsIgnoreCase(getApplicationName());
     }
 
+    public static int getThemeId() {
+        return getInt("ui.theme.id", 1, 1, 3);
+    }
+
     public static String getEisHome() {
         return getString("eis.home", DEFAULT_EIS_HOME);
     }
@@ -628,6 +632,7 @@ public final class GlobalConfiguration {
         content.append("udv.mode=false").append(lineSeparator);
         content.append("udv.customerid=1").append(lineSeparator);
         content.append("udv.projectid=1").append(lineSeparator);
+        content.append("ui.theme.id=1").append(lineSeparator);
         content.append(lineSeparator);
     }
 

@@ -1,9 +1,11 @@
 package com.bepa.eis.server.api.web.application.views;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.BuildInfo;
 import com.bepa.eis.server.api.web.application.enums.PageType;
+import com.bepa.eis.server.api.web.application.enums.theme.Theme;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericServlet;
@@ -39,6 +41,7 @@ public class PageViewer extends GenericServlet {
 
                 String html = loadHtmlPage(pageType.getPath());
                 html = mergeTitle(pageType, webSession, html);
+                html = mergeThemeClass(html);
 
                 html = mergeBuildNumber(html);
 
@@ -84,6 +87,53 @@ public class PageViewer extends GenericServlet {
         html = html.replace("<link rel=\"stylesheet\" href=\"../css", "<link rel=\"stylesheet\" href=\"/css");
 
         return html;
+    }
+
+    private String mergeThemeClass(String html) {
+        Theme theme = Theme.fromId(GlobalConfiguration.getThemeId());
+
+        int bodyStart = html.indexOf("<body");
+        if (bodyStart < 0) {
+            return html;
+        }
+
+        int bodyEnd = html.indexOf(">", bodyStart);
+        if (bodyEnd < 0) {
+            return html;
+        }
+
+        String bodyTag = html.substring(bodyStart, bodyEnd);
+        String themeClass = theme.getCssClass();
+
+        if (bodyTag.contains("class=")) {
+            int classIndex = bodyTag.indexOf("class=");
+            int valueStart = bodyTag.indexOf('"', classIndex);
+
+            if (valueStart >= 0) {
+                int valueEnd = bodyTag.indexOf('"', valueStart + 1);
+
+                if (valueEnd > valueStart) {
+                    String classValue = bodyTag.substring(valueStart + 1, valueEnd).trim();
+
+                    if (classValue.contains(themeClass)) {
+                        return html;
+                    }
+
+                    String updatedBodyTag = bodyTag.substring(0, valueStart + 1)
+                            + classValue
+                            + (classValue.isBlank() ? "" : " ")
+                            + themeClass
+                            + bodyTag.substring(valueEnd);
+
+                    return html.substring(0, bodyStart) + updatedBodyTag + html.substring(bodyEnd);
+                }
+            }
+
+            return html;
+        }
+
+        String themedBodyTag = bodyTag + " class=\"" + themeClass + "\"";
+        return html.substring(0, bodyStart) + themedBodyTag + html.substring(bodyEnd);
     }
 
     private void setContextInResponse(HttpServletResponse response) {

@@ -343,8 +343,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 "userRole",
                 new LookupOption(String.valueOf(UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getId()), UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getLabel()),
                 new LookupOption(String.valueOf(UserRoles.CUSTOMER_ADMINISTRATOR.getId()), UserRoles.CUSTOMER_ADMINISTRATOR.getLabel()),
-                new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel()),
-                new LookupOption(String.valueOf(UserRoles.PROJECT_VIEWER.getId()), UserRoles.PROJECT_VIEWER.getLabel())
+                new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel())
         );
         xml.append("</lookups>");
     }
