@@ -29,6 +29,7 @@ import com.bepa.eis.common.providers.customer.SubscriptionPlanProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
@@ -278,7 +279,7 @@ public class CustomerAdministrationServlet extends AbstractAdminServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+                TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.ADMIN_CUSTOMER_PAGE);
 
             if (topPanel != null && topPanel.getTopPanelElements() != null) {
                 topPanel.getTopPanelElements().getElements().forEach(field -> {

@@ -11,6 +11,7 @@ import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
@@ -65,7 +66,7 @@ public class UserMainInfo extends GenericXmlDocument {
         }
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.USER_EDIT_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
     }
 

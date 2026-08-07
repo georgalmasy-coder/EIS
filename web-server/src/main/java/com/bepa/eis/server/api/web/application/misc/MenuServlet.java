@@ -283,7 +283,7 @@ public class MenuServlet extends GenericServlet {
         if (webSession != null) {
             try {
                 TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-                TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+                TopPanel topPanel = topPanelProvider.getTopPanelBySession(null);
 
                 if (topPanel != null && topPanel.getTopPanelElements() != null) {
                     topPanel.getTopPanelElements().getElements().forEach(field -> {
@@ -364,7 +364,7 @@ public class MenuServlet extends GenericServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession(null);
 
             if (topPanel != null && topPanel.getTopPanelElements() != null) {
                 topPanel.getTopPanelElements().getElements().forEach(field -> {

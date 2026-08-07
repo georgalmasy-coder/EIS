@@ -1,52 +1,93 @@
 .topbar{
     display: flex;
-    gap: 12px;
-    align-items: stretch;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 0;
     flex: 0 0 auto;
-    margin: 0;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    margin: -18px -18px 0;
+    background: var(--app-topbar-background, var(--app-surface-background));
+    border-bottom: 1px solid var(--app-topbar-border, var(--app-border-default));
 }
 
-.topbar-meta{
+.topbar-shell{
     display: grid;
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
-}
-
-.topbar-status-panel{
-    display: none;
-    min-width: 260px;
-    align-content: start;
-}
-
-.topbar-meta-content{
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(300px, 460px) minmax(120px, 1fr);
-    grid-template-areas: "meta search logo";
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 640px) minmax(0, 1fr);
     align-items: center;
     gap: 16px;
-    width: 100%;
+    padding: 2px 18px 8px;
+    min-height: 52px;
+    justify-items: stretch;
 }
 
-.topbar-meta-lines{
-    grid-area: meta;
-    display: grid;
-    gap: 6px;
+.topbar-left,
+.topbar-center,
+.topbar-right{
     min-width: 0;
+}
+
+.topbar-left{
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    justify-self: start;
+}
+
+.topbar-title{
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--app-topbar-title-color, var(--app-text-primary));
+    font-size: 14px;
+    line-height: 1.1;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-title-prefix{
+    color: var(--app-topbar-title-prefix-color, #0b5f46);
+    font-weight: 600;
+}
+
+.topbar-title-separator{
+    margin: 0 8px;
+    color: var(--app-text-secondary);
+    font-weight: 500;
+}
+
+.topbar-title-value{
+    color: var(--app-topbar-title-color, var(--app-text-primary));
+    display: inline-block;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.topbar-center{
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+    justify-self: center;
 }
 
 .topbar-search{
-    grid-area: search;
-    justify-self: center;
     display: flex;
     align-items: center;
     gap: 6px;
     width: 100%;
-    min-width: 300px;
-    padding: 4px 8px 4px 12px;
+    min-width: 0;
+    padding: 3px 10px 3px 12px;
     border: 1px solid var(--app-border-default);
-    border-radius: 999px;
+    border-radius: 12px;
     background: var(--app-surface-background);
     box-shadow: var(--app-shadow);
 }
@@ -110,9 +151,64 @@
 
 .topbar-search-icon{
     flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
     color: var(--app-text-secondary);
-    font-size: 22px;
+}
+
+.topbar-search-icon svg{
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.topbar-right{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 32px;
+    justify-self: end;
+}
+
+.topbar-help-button{
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: 1px solid var(--app-topbar-help-border, var(--app-icon-border));
+    border-radius: 10px;
+    background: var(--app-topbar-help-background, var(--app-icon-background));
+    color: var(--app-topbar-help-foreground, var(--app-icon-foreground));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: 500;
     line-height: 1;
+    transition: background-color .15s ease, border-color .15s ease, transform .08s ease;
+}
+
+.topbar-help-button:hover{
+    background: var(--app-topbar-help-hover-background, var(--app-icon-hover-background));
+    border-color: var(--app-accent-primary);
+}
+
+.topbar-help-button:active{
+    transform: translateY(1px);
+    background: var(--app-topbar-help-active-background, var(--app-icon-active-background));
+    color: var(--app-topbar-help-active-foreground, var(--app-icon-active-foreground));
+}
+
+.topbar-help-button svg{
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    stroke: currentColor;
 }
 
 .topbar-search-highlight{
@@ -127,40 +223,42 @@
     color: var(--app-text-primary);
 }
 
-.topbar-logo{
-    grid-area: logo;
-    justify-self: end;
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+.topbar-status-panel{
+    display: none;
+    margin: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    box-shadow: none;
 }
 
-.eis-logo{
-    display: block;
-    max-height: 40px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+.topbar-status-panel .meta-line{
+    color: var(--app-text-secondary);
 }
 
 @media (max-width: 900px){
-    .topbar-meta-content{
+    .topbar{
+        margin: -18px -18px 0;
+    }
+
+    .topbar-shell{
         grid-template-columns: 1fr;
-        grid-template-areas:
-            "meta"
-            "search"
-            "logo";
+        gap: 10px;
+        padding: 12px 16px;
+    }
+
+    .topbar-left,
+    .topbar-center,
+    .topbar-right{
+        justify-content: flex-start;
     }
 
     .topbar-search{
-        justify-self: stretch;
         width: 100%;
-        min-width: 0;
     }
 
-    .topbar-logo{
-        justify-self: start;
+    .topbar-right{
         justify-content: flex-start;
     }
 }

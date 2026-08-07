@@ -34,6 +34,25 @@ body.stakeholderrequirement-main-document{
     min-height: 0;
 }
 
+.stakeholderrequirement-main-topbar .topbar-shell{
+    padding: 4px 18px 10px;
+    min-height: 54px;
+}
+
+.stakeholderrequirement-main-topbar .topbar-left,
+.stakeholderrequirement-main-topbar .topbar-right{
+    min-height: 34px;
+}
+
+.stakeholderrequirement-main-topbar .topbar-title{
+    line-height: 1;
+}
+
+.stakeholderrequirement-main-topbar .topbar-search{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
 .stakeholderrequirement-main-layout{
     display: flex;
     flex-direction: column;

@@ -21,6 +21,7 @@ import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
 import com.bepa.eis.server.dataprovider.fields.timestamp.StartDate;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class ProjectList extends GenericXmlDocument {
 
     private void appendTopPanel(WebSession webSession) throws Exception {
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.PROJECT_MAIN_PAGE);
 
         rootElement.addElement(topPanel.getTopPanelElements());
     }

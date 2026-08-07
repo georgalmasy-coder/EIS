@@ -1,58 +1,74 @@
 <header class="topbar" data-component="topbar">
-    <section class="panel meta topbar-meta" aria-label="Header metadata">
-        <div class="topbar-meta-content">
-            <div class="topbar-meta-lines">
-                <div class="meta-line"><span id="customerNameLabel" data-topbar-label="customerName"></span>: <strong id="customerName" data-topbar="customerName">—</strong></div>
-                <div class="meta-line"><span id="projectNameLabel" data-topbar-label="projectName"></span>: <strong id="projectName" data-topbar="projectName">—</strong></div>
-                <div class="meta-line"><span id="userNameLabel" data-topbar-label="userName"></span>: <strong id="userName" data-topbar="userName">—</strong></div>
-            </div>
+    <section class="topbar-shell" aria-label="Header">
+        <div class="topbar-left">
+            <div id="topPanelTitle" class="topbar-title" data-topbar="topPanelTitle"></div>
+        </div>
 
+        <div class="topbar-center">
             <div class="topbar-search" role="search" aria-label="Find på siden">
+                <span class="topbar-search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+                        <path d="M16 16l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                    </svg>
+                </span>
+
                 <input
-                        id="topbarSearchInput"
-                        class="topbar-search-input"
-                        type="search"
-                        placeholder="What are you looking for?"
-                        aria-label="Search on page"
+                    id="topbarSearchInput"
+                    class="topbar-search-input"
+                    type="text"
+                    inputmode="search"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="Search requirements, structures or commands..."
+                    aria-label="Search on page"
                 />
 
-                <span
+                <div class="topbar-search-actions" aria-label="Search navigation">
+                    <span
                         id="topbarSearchCount"
                         class="topbar-search-count"
                         aria-live="polite"
                         aria-label="Search result count"
-                ></span>
+                    ></span>
 
-                <div class="topbar-search-actions" aria-label="Search navigation">
                     <button
-                            id="topbarSearchPrevious"
-                            class="topbar-search-button"
-                            type="button"
-                            aria-label="Previous search result"
-                            title="Previous"
-                            hidden
+                        id="topbarSearchPrevious"
+                        class="topbar-search-button"
+                        type="button"
+                        aria-label="Previous search result"
+                        title="Previous"
+                        hidden
                     >
                         ↑
                     </button>
 
                     <button
-                            id="topbarSearchNext"
-                            class="topbar-search-button"
-                            type="button"
-                            aria-label="Next search result"
-                            title="Next"
-                            hidden
+                        id="topbarSearchNext"
+                        class="topbar-search-button"
+                        type="button"
+                        aria-label="Next search result"
+                        title="Next"
+                        hidden
                     >
                         ↓
                     </button>
                 </div>
-
-                <span class="topbar-search-icon" aria-hidden="true">⌕</span>
             </div>
+        </div>
 
-            <div class="topbar-logo">
-                <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" data-topbar="logo" />
-            </div>
+        <div class="topbar-right">
+            <button
+                id="topbarHelpButton"
+                class="topbar-help-button"
+                type="button"
+                aria-label="Open help"
+                title="Help"
+                hidden
+            >
+                ?
+            </button>
         </div>
     </section>
 

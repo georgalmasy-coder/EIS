@@ -7,6 +7,7 @@ import com.bepa.eis.server.api.web.application.views.common.*;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
@@ -70,7 +71,7 @@ public class ProjectInfo extends GenericXmlDocument {
 
     private void appendTopPanel(WebSession webSession) throws Exception {
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.PROJECT_EDIT_PAGE);
 
         rootElement.addElement(topPanel.getTopPanelElements());
     }

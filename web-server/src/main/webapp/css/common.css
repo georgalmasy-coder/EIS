@@ -14,9 +14,9 @@
     --menu-handle-width: 22px;
     --menu-content-offset: 0px;
     --menu-open-offset: calc(var(--menu-width) + var(--menu-open-gap));
-    --edit-dialog-width: min(1320px, 92vw);
+    --edit-dialog-width: min(1240px, 90vw);
     --edit-dialog-max-height: 80vh;
-    --edit-dialog-min-height: 900px;
+    --edit-dialog-min-height: 820px;
 
     --app-page-background: #f4f7f3;
     --app-surface-background: #ffffff;
@@ -36,6 +36,16 @@
     --app-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
     --app-backdrop: rgba(15, 23, 42, 0.30);
     --app-table-header-background: #f8fafc;
+    --app-topbar-background: #ffffff;
+    --app-topbar-border: #e5e7eb;
+    --app-topbar-title-prefix-color: #6b7280;
+    --app-topbar-title-color: #111827;
+    --app-topbar-help-background: #ffffff;
+    --app-topbar-help-border: #d1d5db;
+    --app-topbar-help-foreground: #111827;
+    --app-topbar-help-hover-background: #f3f4f6;
+    --app-topbar-help-active-background: #e5e7eb;
+    --app-topbar-help-active-foreground: #111827;
 }
 
 body.theme-light{
@@ -66,6 +76,16 @@ body.theme-light{
     --app-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
     --app-backdrop: rgba(15, 23, 42, 0.30);
     --app-table-header-background: #f8fafc;
+    --app-topbar-background: #ffffff;
+    --app-topbar-border: #dbe1e8;
+    --app-topbar-title-prefix-color: #0b5f46;
+    --app-topbar-title-color: #111827;
+    --app-topbar-help-background: #ffffff;
+    --app-topbar-help-border: #d1d5db;
+    --app-topbar-help-foreground: #111827;
+    --app-topbar-help-hover-background: #f3f4f6;
+    --app-topbar-help-active-background: #e5e7eb;
+    --app-topbar-help-active-foreground: #111827;
     --app-table-header-foreground: #6b7280;
     --app-icon-background: #ffffff;
     --app-icon-border: #d1d5db;
@@ -118,6 +138,16 @@ body.theme-blue{
     --app-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
     --app-backdrop: rgba(15, 23, 42, 0.34);
     --app-table-header-background: #f7f9fc;
+    --app-topbar-background: #ffffff;
+    --app-topbar-border: #d0dceb;
+    --app-topbar-title-prefix-color: #2563eb;
+    --app-topbar-title-color: #132033;
+    --app-topbar-help-background: #ffffff;
+    --app-topbar-help-border: #c7d7ea;
+    --app-topbar-help-foreground: #132033;
+    --app-topbar-help-hover-background: rgba(37, 99, 235, 0.08);
+    --app-topbar-help-active-background: rgba(37, 99, 235, 0.14);
+    --app-topbar-help-active-foreground: #1d4ed8;
     --app-icon-background: #ffffff;
     --app-icon-border: #c7d7ea;
     --app-icon-foreground: #132033;
@@ -169,6 +199,16 @@ body.theme-black{
     --app-shadow: 0 12px 30px rgba(0, 0, 0, 0.40);
     --app-backdrop: rgba(0, 0, 0, 0.55);
     --app-table-header-background: #131c27;
+    --app-topbar-background: #111923;
+    --app-topbar-border: #253244;
+    --app-topbar-title-prefix-color: #93a2b7;
+    --app-topbar-title-color: #f8fafc;
+    --app-topbar-help-background: #111923;
+    --app-topbar-help-border: #334255;
+    --app-topbar-help-foreground: #f8fafc;
+    --app-topbar-help-hover-background: rgba(102, 163, 255, 0.12);
+    --app-topbar-help-active-background: rgba(102, 163, 255, 0.18);
+    --app-topbar-help-active-foreground: #ffffff;
     --app-icon-background: #111923;
     --app-icon-border: #334255;
     --app-icon-foreground: #f8fafc;
@@ -413,7 +453,7 @@ dialog.eis-edit-dialog{
     display: flex;
     flex-direction: column;
     width: var(--edit-dialog-width);
-    min-width: min(980px, 92vw);
+    min-width: min(880px, 90vw);
     min-height: var(--edit-dialog-min-height);
     max-height: var(--edit-dialog-max-height);
     padding: 0;
@@ -507,7 +547,7 @@ dialog::backdrop{
     border: 1px solid var(--app-input-border);
     background: var(--app-input-background);
     color: var(--app-text-primary);
-    padding: 8px 10px;
+    padding: 6px 10px;
     border-radius: 10px;
     outline: none;
     font: inherit;

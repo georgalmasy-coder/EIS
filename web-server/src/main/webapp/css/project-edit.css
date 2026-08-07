@@ -63,18 +63,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-control-border, var(--border));
     border-radius: 10px;
-    color: var(--text);
-    background: rgba(15,23,42,.55);
+    color: var(--app-control-foreground, var(--text));
+    background: var(--app-control-background, var(--app-surface-background));
     cursor: pointer;
     padding: 0;
     transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
 .project-edit-help-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, var(--app-accent-soft));
+    border-color: var(--app-accent-primary);
 }
 
 .project-edit-help-button:active {
@@ -311,7 +311,7 @@
 }
 
 .project-edit-column-resizer:hover {
-    background: rgba(47, 156, 255, 0.22);
+    background: var(--app-accent-soft);
 }
 
 .note-dlg,
@@ -327,7 +327,7 @@
 
 .note-editor-label,
 .attachment-editor-label {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 12px;
     font-weight: 800;
 }
@@ -337,11 +337,11 @@
 .attachment-input {
     width: 100%;
     min-width: 0;
-    padding: 9px 10px;
-    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border: 1px solid var(--app-input-border, var(--border));
     border-radius: 8px;
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.045);
+    color: var(--app-text-primary, var(--text));
+    background: var(--app-input-background, var(--app-surface-background));
     font: inherit;
     font-size: 13px;
     outline: none;
@@ -350,8 +350,8 @@
 .note-textarea:focus,
 .attachment-textarea:focus,
 .attachment-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(47, 156, 255, 0.12);
+    border-color: var(--app-accent-primary);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .attachment-editor-row {

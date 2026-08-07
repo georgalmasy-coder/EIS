@@ -17,6 +17,8 @@ import org.w3c.dom.Element;
 import java.sql.Timestamp;
 import java.util.List;
 
+import static com.bepa.eis.server.api.web.application.enums.PageType.BASELINE_MAIN_PAGE;
+
 @WebServlet(name = "BaselineServlet", urlPatterns = { "/basis/baseline" })
 public class BaselineServlet extends GenericDataProviderServlet {
 
@@ -269,7 +271,7 @@ public class BaselineServlet extends GenericDataProviderServlet {
         }
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(BASELINE_MAIN_PAGE);
 
         if (topPanel == null || topPanel.getTopPanelElements() == null) {
             return;

@@ -6,9 +6,11 @@ import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.web.application.cache.CustomerBasisInfo;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.ProjectBasisInfo;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.UserId;
+import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.strings.CustomerName;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.strings.UserName;
@@ -42,10 +44,30 @@ public class TopPanelProvider extends GenericProvider {
      * @return the {@code Customer} object corresponding to the customer ID provided in the {@code WebSession}.
      * @throws SQLException if no customer is found for the given customer ID or if a database access error occurs.
      */
+    /*
     public TopPanel getTopPanelBySession() throws SQLException {
+        return getTopPanelBySession(false);
+    }
+    */
+
+    public TopPanel getTopPanelBySession(PageType pageType) throws SQLException {
         findCustomerInfo();
         findProjectInfo();
         findUserInfo();
+        if (pageType != null) {
+
+            if (pageType.isHelpEnabled()) {
+                HelpFileName pageName = new HelpFileName();
+                pageName.setFieldNotVisible();
+                pageName.setValue(pageType.getPageName());
+                getTopPanelElement().addElement(pageName);
+            }
+
+            TopPanelTitle topPanelTitle = new TopPanelTitle();
+            topPanelTitle.setFieldNotVisible();
+            topPanelTitle.setValue(projectName.getValue() + " - " + pageType.getTitle());
+            getTopPanelElement().addElement(topPanelTitle);
+        }
         return topPanel;
     }
 
@@ -159,4 +181,52 @@ public class TopPanelProvider extends GenericProvider {
             log.error("User not found for userId: {}", getWebSession().getUserId());
         }
     }
+
+    private static class HelpFileName extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "HelpFileName";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class TopPanelTitle extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "TopPanelTitle";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+
 }

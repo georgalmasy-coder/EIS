@@ -2,15 +2,14 @@ import { cssEscape } from "../core/css.js";
 import { getDirectChild } from "../core/xml.js";
 
 let mountedTopbarSearch = null;
+let topbarSearchKeyGuardInstalled = false;
 
-const TOPBAR_FIELDS = [
-    { id: "customerName", labelId: "customerNameLabel", fallbackLabel: "Customer Name" },
-    { id: "projectName", labelId: "projectNameLabel", fallbackLabel: "Project Name" },
-    { id: "userName", labelId: "userNameLabel", fallbackLabel: "User Name" }
-];
+const TOPBAR_TITLE_PREFIX = "Projects";
 
 export function mountTopbar(root = document) {
+    ensureTopbarStructure(root);
     ensureTopbarSearchMarkup(root);
+    installTopbarSearchKeyGuard();
 
     const input = findElement(root, "topbarSearchInput");
     const count = findElement(root, "topbarSearchCount");
@@ -208,11 +207,7 @@ export function mountTopbar(root = document) {
         updateCount(true);
 
         if (shouldScroll) {
-            activeMatch.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-                inline: "nearest"
-            });
+            scrollMatchIntoView(activeMatch);
         }
     }
 
@@ -250,6 +245,7 @@ export function mountTopbar(root = document) {
     input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
+            event.stopPropagation();
 
             if (event.shiftKey) {
                 goToPreviousMatch();
@@ -259,6 +255,8 @@ export function mountTopbar(root = document) {
         }
 
         if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
             input.value = "";
             search();
             input.blur();
@@ -279,33 +277,99 @@ export function mountTopbar(root = document) {
     return mountedTopbarSearch;
 }
 
+function scrollMatchIntoView(match) {
+    if (!match || typeof match.getBoundingClientRect !== "function") {
+        return;
+    }
+
+    const container = findScrollableAncestor(match);
+
+    if (!container) {
+        match.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+        });
+        return;
+    }
+
+    const matchRect = match.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const currentTop = container.scrollTop;
+    const currentLeft = container.scrollLeft;
+    const targetTop = currentTop + (matchRect.top - containerRect.top) - (container.clientHeight / 2) + (matchRect.height / 2);
+    const targetLeft = currentLeft + (matchRect.left - containerRect.left) - (container.clientWidth / 2) + (matchRect.width / 2);
+
+    container.scrollTo({
+        top: Math.max(0, targetTop),
+        left: Math.max(0, targetLeft),
+        behavior: "smooth"
+    });
+}
+
+function findScrollableAncestor(node) {
+    let current = node?.parentElement || null;
+
+    while (current && current !== document.body) {
+        const style = window.getComputedStyle(current);
+        const overflowY = style.overflowY;
+        const overflowX = style.overflowX;
+        const scrollableY = (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay")
+            && current.scrollHeight > current.clientHeight + 1;
+        const scrollableX = (overflowX === "auto" || overflowX === "scroll" || overflowX === "overlay")
+            && current.scrollWidth > current.clientWidth + 1;
+
+        if (scrollableY || scrollableX) {
+            return current;
+        }
+
+        current = current.parentElement;
+    }
+
+    return null;
+}
+
+function installTopbarSearchKeyGuard() {
+    if (topbarSearchKeyGuardInstalled) {
+        return;
+    }
+
+    window.addEventListener("keydown", (event) => {
+        const target = event.target;
+        const isTopbarSearchInput = target instanceof HTMLElement
+            && target.id === "topbarSearchInput";
+
+        if (!isTopbarSearchInput) {
+            return;
+        }
+
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }, true);
+
+    topbarSearchKeyGuardInstalled = true;
+}
+
 export function readTopbarMetadata(source = {}) {
     if (!source) {
-        return {
-            customerName: "—",
-            customerNameLabel: "Customer Name",
-            projectName: "—",
-            projectNameLabel: "Project Name",
-            userName: "—",
-            userNameLabel: "User Name"
-        };
+        return createEmptyTopbarMetadata();
     }
 
     if (source.nodeType === Node.DOCUMENT_NODE || source.nodeType === Node.ELEMENT_NODE) {
         return readTopbarMetadataFromXml(source);
     }
 
-    const customerName = String(source.customerName ?? "—").trim() || "—";
-    const projectName = String(source.projectName ?? "—").trim() || "—";
-    const userName = String(source.userName ?? "—").trim() || "—";
-
     return {
-        customerName,
+        customerName: String(source.customerName ?? "â€”").trim() || "â€”",
         customerNameLabel: String(source.customerNameLabel ?? "Customer Name").trim() || "Customer Name",
-        projectName,
+        projectName: String(source.projectName ?? "â€”").trim() || "â€”",
         projectNameLabel: String(source.projectNameLabel ?? "Project Name").trim() || "Project Name",
-        userName,
-        userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name"
+        userName: String(source.userName ?? "â€”").trim() || "â€”",
+        userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name",
+        topPanelTitle: String(source.topPanelTitle ?? "").trim(),
+        helpFileName: String(source.helpFileName ?? "").trim()
     };
 }
 
@@ -316,44 +380,9 @@ export function applyTopbarMetadata(root = document, topPanel = {}) {
 
     const metadata = readTopbarMetadata(topPanel);
 
-    TOPBAR_FIELDS.forEach((field) => {
-        const valueElement = findElement(root, field.id);
-        const labelElement = findElement(root, field.labelId);
-
-        if (!valueElement && !labelElement) {
-            return;
-        }
-
-        const label = resolveTopbarLabel(metadata, field.labelId, field.fallbackLabel);
-        const value = resolveTopbarValue(metadata, field.id, "—");
-        const line = valueElement?.closest(".meta-line") || labelElement?.closest(".meta-line");
-
-        if (labelElement) {
-            labelElement.textContent = label;
-        }
-
-        if (valueElement) {
-            valueElement.textContent = value;
-        }
-
-        if (line) {
-            const content = [];
-
-            if (labelElement) {
-                content.push(labelElement);
-            } else if (label) {
-                content.push(document.createTextNode(label));
-            }
-
-            content.push(document.createTextNode(": "));
-
-            if (valueElement) {
-                content.push(valueElement);
-            }
-
-            line.replaceChildren(...content);
-        }
-    });
+    ensureTopbarStructure(root);
+    updateTopbarTitle(root, metadata);
+    updateTopbarHelpButton(root, metadata);
 }
 
 function findElement(searchRoot, id) {
@@ -376,22 +405,8 @@ function ensureTopbarSearchMarkup(root = document) {
         return;
     }
 
-    ensureTopbarStructure(topbar);
-
-    const metaContent = topbar.querySelector(".topbar-meta-content");
-
-    if (!metaContent) {
-        return;
-    }
-
-    const logo = metaContent.querySelector(".topbar-logo");
-    const search = createTopbarSearch();
-
-    if (logo) {
-        metaContent.insertBefore(search, logo);
-    } else {
-        metaContent.appendChild(search);
-    }
+    const container = topbar.querySelector(".topbar-center") || topbar;
+    container.appendChild(createTopbarSearch());
 }
 
 function ensureTopbarSearchCount(root = document) {
@@ -416,68 +431,64 @@ function ensureTopbarSearchCount(root = document) {
     }
 }
 
-function ensureTopbarStructure(topbar) {
-    const metaSection = topbar.querySelector(".topbar-meta") || topbar.querySelector(".meta");
+function ensureTopbarStructure(root) {
+    const topbar = root.querySelector(".topbar");
 
-    if (!metaSection) {
+    if (!topbar) {
         return;
     }
 
-    metaSection.classList.add("topbar-meta");
+    let shell = topbar.querySelector(".topbar-shell");
 
-    let metaContent = metaSection.querySelector(".topbar-meta-content");
+    if (!shell) {
+        shell = document.createElement("section");
+        shell.className = "topbar-shell";
+        shell.setAttribute("aria-label", "Header");
 
-    if (!metaContent) {
-        metaContent = document.createElement("div");
-        metaContent.className = "topbar-meta-content";
+        const left = document.createElement("div");
+        left.className = "topbar-left";
+        shell.appendChild(left);
 
-        const metaLines = document.createElement("div");
-        metaLines.className = "topbar-meta-lines";
+        const center = document.createElement("div");
+        center.className = "topbar-center";
+        shell.appendChild(center);
 
-        const logo = topbar.querySelector(".topbar-logo");
+        const right = document.createElement("div");
+        right.className = "topbar-right";
+        shell.appendChild(right);
 
-        Array.from(metaSection.children).forEach(function (child) {
-            if (child !== logo) {
-                metaLines.appendChild(child);
+        Array.from(topbar.children).forEach((child) => {
+            if (!child.classList.contains("topbar-status-panel")) {
+                child.remove();
             }
         });
 
-        metaContent.appendChild(metaLines);
-
-        if (logo) {
-            metaContent.appendChild(logo);
-        }
-
-        metaSection.appendChild(metaContent);
+        topbar.insertBefore(shell, topbar.firstChild);
     }
 
-    let metaLines = metaContent.querySelector(".topbar-meta-lines");
+    const left = shell.querySelector(".topbar-left") || shell.appendChild(Object.assign(document.createElement("div"), { className: "topbar-left" }));
+    const center = shell.querySelector(".topbar-center") || shell.appendChild(Object.assign(document.createElement("div"), { className: "topbar-center" }));
+    const right = shell.querySelector(".topbar-right") || shell.appendChild(Object.assign(document.createElement("div"), { className: "topbar-right" }));
 
-    if (!metaLines) {
-        metaLines = document.createElement("div");
-        metaLines.className = "topbar-meta-lines";
-
-        Array.from(metaContent.children).forEach(function (child) {
-            if (!child.classList.contains("topbar-logo") && !child.classList.contains("topbar-search")) {
-                metaLines.appendChild(child);
-            }
-        });
-
-        metaContent.insertBefore(metaLines, metaContent.firstChild);
+    if (!left.querySelector(".topbar-title")) {
+        const title = document.createElement("div");
+        title.id = "topPanelTitle";
+        title.className = "topbar-title";
+        title.setAttribute("data-topbar", "topPanelTitle");
+        left.appendChild(title);
     }
 
-    let logo = metaContent.querySelector(".topbar-logo");
+    if (!center.querySelector(".topbar-search")) {
+        center.appendChild(createTopbarSearch());
+    }
 
-    if (!logo) {
-        const image = topbar.querySelector(".eis-logo");
+    if (!right.querySelector(".topbar-help-button")) {
+        right.appendChild(createTopbarHelpButton());
+    }
 
-        if (image) {
-            logo = document.createElement("div");
-            logo.className = "topbar-logo";
-            image.parentElement?.insertBefore(logo, image);
-            logo.appendChild(image);
-            metaContent.appendChild(logo);
-        }
+    const statusPanel = topbar.querySelector(".topbar-status-panel");
+    if (statusPanel) {
+        statusPanel.classList.add("topbar-status-panel");
     }
 }
 
@@ -485,29 +496,156 @@ function readTopbarMetadataFromXml(source) {
     const topPanel = findTopPanelElement(source);
 
     if (!topPanel) {
-        return readTopbarMetadata({});
+        return createEmptyTopbarMetadata();
     }
 
     return {
         customerNameLabel: getFieldLabel(topPanel, "CustomerName", "Customer Name"),
-        customerName: getFieldValue(topPanel, "CustomerName", "—"),
+        customerName: getFieldValue(topPanel, "CustomerName", "â€”"),
         projectNameLabel: getFieldLabel(topPanel, "ProjectName", "Project Name"),
-        projectName: getFieldValue(topPanel, "ProjectName", "—"),
+        projectName: getFieldValue(topPanel, "ProjectName", "â€”"),
         userNameLabel: getFieldLabel(topPanel, ["UserName", "Name"], "User Name"),
-        userName: getFieldValue(topPanel, ["UserName", "Name"], "—")
+        userName: getFieldValue(topPanel, ["UserName", "Name"], "â€”"),
+        topPanelTitle: getFieldValue(topPanel, "TopPanelTitle", ""),
+        helpFileName: getFieldValue(topPanel, "HelpFileName", "")
     };
 }
 
-function resolveTopbarLabel(topPanel, labelId, fallbackLabel) {
-    const value = String(topPanel?.[labelId] || "").trim();
+function updateTopbarTitle(root, metadata) {
+    const titleElement = findElement(root, "topPanelTitle");
 
-    return value || fallbackLabel;
+    if (!titleElement) {
+        return;
+    }
+
+    const title = String(metadata?.topPanelTitle || "").trim();
+    const prefix = document.createElement("span");
+    prefix.className = "topbar-title-prefix";
+    prefix.textContent = TOPBAR_TITLE_PREFIX;
+
+    titleElement.replaceChildren(prefix);
+
+    if (title) {
+        const separator = document.createElement("span");
+        separator.className = "topbar-title-separator";
+        separator.textContent = " / ";
+
+        const value = document.createElement("span");
+        value.className = "topbar-title-value";
+        value.textContent = title;
+
+        titleElement.append(separator, value);
+    }
+
+    titleElement.title = title ? `${TOPBAR_TITLE_PREFIX} / ${title}` : TOPBAR_TITLE_PREFIX;
 }
 
-function resolveTopbarValue(topPanel, fieldId, fallbackValue) {
-    const value = String(topPanel?.[fieldId] || "").trim();
+function updateTopbarHelpButton(root, metadata) {
+    const helpButton = findElement(root, "topbarHelpButton");
 
-    return value || fallbackValue;
+    if (!helpButton) {
+        return;
+    }
+
+    const helpFileName = String(metadata?.helpFileName || "").trim();
+
+    if (!helpFileName) {
+        helpButton.hidden = true;
+        helpButton.removeAttribute("data-help-page");
+        helpButton.removeAttribute("data-help-title");
+        return;
+    }
+
+    helpButton.hidden = false;
+    helpButton.setAttribute("data-help-page", helpFileName);
+    helpButton.setAttribute("data-help-title", String(metadata?.topPanelTitle || "").trim() || "Help");
+}
+
+function createTopbarHelpButton() {
+    const button = document.createElement("button");
+    button.id = "topbarHelpButton";
+    button.className = "topbar-help-button";
+    button.type = "button";
+    button.setAttribute("aria-label", "Open help");
+    button.title = "Help";
+    button.hidden = true;
+    button.textContent = "?";
+
+    return button;
+}
+
+function createTopbarSearch() {
+    const search = document.createElement("div");
+    search.className = "topbar-search";
+    search.setAttribute("role", "search");
+    search.setAttribute("aria-label", "Search on page");
+
+    search.innerHTML = `
+        <span class="topbar-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+                <path d="M16 16l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+            </svg>
+        </span>
+
+        <input
+            id="topbarSearchInput"
+            class="topbar-search-input"
+            type="text"
+            inputmode="search"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Search requirements, structures or commands..."
+            aria-label="Search on page"
+        />
+
+        <div class="topbar-search-actions" aria-label="Search navigation">
+            <span
+                id="topbarSearchCount"
+                class="topbar-search-count"
+                aria-live="polite"
+                aria-label="Search result count"
+            ></span>
+
+            <button
+                id="topbarSearchPrevious"
+                class="topbar-search-button"
+                type="button"
+                aria-label="Previous search result"
+                title="Previous"
+                hidden
+            >
+                ↑
+            </button>
+
+            <button
+                id="topbarSearchNext"
+                class="topbar-search-button"
+                type="button"
+                aria-label="Next search result"
+                title="Next"
+                hidden
+            >
+                ↓
+            </button>
+        </div>
+    `;
+
+    return search;
+}
+
+function createEmptyTopbarMetadata() {
+    return {
+        customerName: "â€”",
+        customerNameLabel: "Customer Name",
+        projectName: "â€”",
+        projectNameLabel: "Project Name",
+        userName: "â€”",
+        userNameLabel: "User Name",
+        topPanelTitle: "",
+        helpFileName: ""
+    };
 }
 
 function findTopPanelElement(source) {
@@ -554,56 +692,4 @@ function getFieldValue(parent, tagNames, fallback = "") {
     }
 
     return fallback;
-}
-
-function createTopbarSearch() {
-    const search = document.createElement("div");
-    search.className = "topbar-search";
-    search.setAttribute("role", "search");
-    search.setAttribute("aria-label", "Search on page");
-
-    search.innerHTML = `
-        <input
-            id="topbarSearchInput"
-            class="topbar-search-input"
-            type="search"
-            placeholder="What are you looking for?"
-            aria-label="Search on page"
-        />
-
-        <span
-            id="topbarSearchCount"
-            class="topbar-search-count"
-            aria-live="polite"
-            aria-label="Search result count"
-        ></span>
-
-        <div class="topbar-search-actions" aria-label="Search navigation">
-            <button
-                id="topbarSearchPrevious"
-                class="topbar-search-button"
-                type="button"
-                aria-label="Previous search result"
-                title="Previous"
-                hidden
-            >
-                ↑
-            </button>
-
-            <button
-                id="topbarSearchNext"
-                class="topbar-search-button"
-                type="button"
-                aria-label="Next search result"
-                title="Next"
-                hidden
-            >
-                ↓
-            </button>
-        </div>
-
-        <span class="topbar-search-icon" aria-hidden="true">⌕</span>
-    `;
-
-    return search;
 }

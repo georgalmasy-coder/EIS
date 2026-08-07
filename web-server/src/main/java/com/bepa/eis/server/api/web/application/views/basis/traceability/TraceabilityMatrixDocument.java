@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMENT;
 import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
+import static com.bepa.eis.server.api.web.application.enums.PageType.BASIS_TRACEABILITY_MATRIX_PAGE;
 
 /**
  * Traceability matrix rules:
@@ -89,7 +90,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(BASIS_TRACEABILITY_MATRIX_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         buildTraceabilityMatrixDocument();

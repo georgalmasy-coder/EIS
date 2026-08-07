@@ -1,3 +1,5 @@
+let helpDialogDelegatedListenerInstalled = false;
+
 export function initHelpDialog() {
     const dialog = document.getElementById("helpDialog");
     const titleElement = document.getElementById("helpDialogTitle");
@@ -9,8 +11,14 @@ export function initHelpDialog() {
         return;
     }
 
-    document.querySelectorAll("[data-help-page]").forEach((button) => {
-        button.addEventListener("click", async () => {
+    if (!helpDialogDelegatedListenerInstalled) {
+        document.addEventListener("click", async (event) => {
+            const button = event.target.closest?.("[data-help-page]");
+
+            if (!button) {
+                return;
+            }
+
             const page = button.getAttribute("data-help-page");
             const title = button.getAttribute("data-help-title") || "Help";
 
@@ -22,7 +30,9 @@ export function initHelpDialog() {
                 title
             });
         });
-    });
+
+        helpDialogDelegatedListenerInstalled = true;
+    }
 
     closeButton?.addEventListener("click", () => {
         closeHelpDialog(dialog);

@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.views.basis.systemrequirement;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.Entities;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
@@ -20,7 +21,7 @@ public class SystemRequirementList extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.SYSTEM_REQUIREMENT_MAIN_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         SystemRequirementProvider systemRequirementProvider = new SystemRequirementProvider(webSession);

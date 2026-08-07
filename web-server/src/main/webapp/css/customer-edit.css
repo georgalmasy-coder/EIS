@@ -63,18 +63,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-control-border, var(--border));
     border-radius: 10px;
-    color: var(--text);
-    background: rgba(15,23,42,.55);
+    color: var(--app-control-foreground, var(--text));
+    background: var(--app-control-background, var(--app-surface-background));
     cursor: pointer;
     padding: 0;
     transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
 .customer-edit-help-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, var(--app-accent-soft));
+    border-color: var(--app-accent-primary);
 }
 
 .customer-edit-help-button:active {
@@ -149,7 +149,7 @@
     overflow-y: auto;
     scrollbar-gutter: stable;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-border-strong, #94a3b8) var(--app-surface-subtle-background, var(--app-surface-background));
     padding-right: 10px;
     box-sizing: border-box;
 }

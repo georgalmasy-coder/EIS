@@ -5,6 +5,7 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
@@ -49,7 +50,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.RFLP_RELATION_DIAGRAM_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         relationDiagramDocument();

@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.views.pro.dashboard.systemsteamw
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
@@ -44,7 +45,7 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.DASHBOARD_SYSTEMS_TEAMWORK_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         dashboardDocument();

@@ -8,6 +8,7 @@ import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -371,7 +372,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         if (webSession != null) {
             try {
                 TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-                TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.ADMIN_USER_ADMINISTRATION_PAGE);
 
                 if (topPanel != null && topPanel.getTopPanelElements() != null) {
                     topPanel.getTopPanelElements().getElements().forEach(field -> {
