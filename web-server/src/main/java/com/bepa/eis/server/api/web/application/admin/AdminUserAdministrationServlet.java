@@ -9,7 +9,6 @@ import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
-import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -345,7 +344,8 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 "userRole",
                 new LookupOption(String.valueOf(UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getId()), UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getLabel()),
                 new LookupOption(String.valueOf(UserRoles.CUSTOMER_ADMINISTRATOR.getId()), UserRoles.CUSTOMER_ADMINISTRATOR.getLabel()),
-                new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel())
+                new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel()),
+                new LookupOption(String.valueOf(UserRoles.PROJECT_VIEWER.getId()), UserRoles.PROJECT_VIEWER.getLabel())
         );
         xml.append("</lookups>");
     }

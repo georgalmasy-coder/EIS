@@ -38,19 +38,19 @@ body.baseline-document {
 
 .baseline-topbar .topbar-meta,
 .baseline-topbar .topbar-status-panel {
-    background: var(--app-surface-background, var(--panel));
-    border: 1px solid var(--app-border-default, var(--border));
+    background: var(--panel);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    color: var(--app-text-primary, var(--text));
-    box-shadow: var(--app-shadow, var(--shadow));
+    color: var(--text);
+    box-shadow: var(--shadow);
 }
 
 .baseline-topbar .meta-line {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
 }
 
 .baseline-topbar .meta-line strong {
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-topbar .eis-logo {
@@ -83,12 +83,12 @@ body.baseline-document {
     font-size: 15px;
     line-height: 1.1;
     font-weight: 700;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-section-subtitle {
     margin: 4px 0 0;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 13px;
     line-height: 1.4;
 }
@@ -108,9 +108,9 @@ body.baseline-document {
     height: 38px;
     min-height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--app-icon-border, var(--border));
-    background: var(--app-icon-background, rgba(15, 23, 42, .55));
-    color: var(--app-icon-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -120,8 +120,8 @@ body.baseline-document {
 }
 
 .baseline-icon-button:hover {
-    background: var(--app-icon-hover-background, rgba(96, 165, 250, .14));
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .45));
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
 }
 
 .baseline-icon-button:active {
@@ -158,9 +158,9 @@ body.baseline-document {
     flex: 0 0 auto;
     margin-bottom: 12px;
     padding: 10px 12px;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .35));
+    background: rgba(15, 23, 42, .35);
 }
 
 .baseline-info-item {
@@ -168,16 +168,16 @@ body.baseline-document {
     align-items: center;
     gap: 6px;
     min-width: 0;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     font-size: 13px;
 }
 
 .baseline-info-label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
 }
 
 .baseline-info-item strong {
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 /* List table */
@@ -212,7 +212,7 @@ body.baseline-document {
     overscroll-behavior: contain;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: auto;
-    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
     padding-right: 2px;
 }
 
@@ -226,28 +226,28 @@ body.baseline-document {
 .baseline-scroll::-webkit-scrollbar-track,
 .baseline-detail-body::-webkit-scrollbar-track,
 .baseline-detail-scroll::-webkit-scrollbar-track {
-    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
-    border-left: 1px solid var(--app-border-default, rgba(148, 163, 184, .35));
+    background: rgba(15, 23, 42, .80);
+    border-left: 1px solid rgba(148, 163, 184, .35);
 }
 
 .baseline-scroll::-webkit-scrollbar-thumb,
 .baseline-detail-body::-webkit-scrollbar-thumb,
 .baseline-detail-scroll::-webkit-scrollbar-thumb {
-    background: var(--app-text-tertiary, #94a3b8);
-    border: 3px solid var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
+    background: #94a3b8;
+    border: 3px solid rgba(15, 23, 42, .80);
     border-radius: 999px;
 }
 
 .baseline-scroll::-webkit-scrollbar-thumb:hover,
 .baseline-detail-body::-webkit-scrollbar-thumb:hover,
 .baseline-detail-scroll::-webkit-scrollbar-thumb:hover {
-    background: var(--app-border-strong, #cbd5e1);
+    background: #cbd5e1;
 }
 
 .baseline-scroll::-webkit-scrollbar-corner,
 .baseline-detail-body::-webkit-scrollbar-corner,
 .baseline-detail-scroll::-webkit-scrollbar-corner {
-    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
+    background: rgba(15, 23, 42, .80);
 }
 
 .baseline-table {
@@ -293,9 +293,9 @@ body.baseline-document {
     position: sticky;
     top: 0;
     z-index: 3;
-    background: var(--app-table-header-background, rgba(17, 28, 51, .98));
-    color: var(--app-table-header-foreground, var(--app-text-secondary));
-    border-bottom: 1px solid var(--app-border-default, var(--border));
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
     padding: 10px 12px;
     font-size: 13px;
     font-weight: 700;
@@ -303,33 +303,33 @@ body.baseline-document {
 }
 
 .baseline-table tbody td {
-    border-bottom: 1px solid var(--app-border-default, rgba(35, 52, 84, .55));
+    border-bottom: 1px solid rgba(35, 52, 84, .55);
     padding: 10px 12px;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     font-size: 13px;
     vertical-align: top;
 }
 
 .baseline-table tbody tr {
     cursor: pointer;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-table tbody tr:hover,
 .baseline-table tbody tr:focus-within {
-    background: var(--app-table-row-hover, rgba(96, 165, 250, .12));
-    color: var(--app-text-primary, var(--text));
+    background: rgba(96, 165, 250, .12);
+    color: var(--text);
 }
 
 .baseline-table tbody tr:hover td,
 .baseline-table tbody tr:focus-within td {
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-table tbody tr.is-selected,
 .baseline-table tbody tr.is-selected td {
-    background: var(--app-table-row-selected, rgba(96, 165, 250, .16));
-    color: var(--app-text-primary, var(--text));
+    background: rgba(96, 165, 250, .16);
+    color: var(--text);
 }
 
 .baseline-table .sort {
@@ -342,7 +342,7 @@ body.baseline-document {
 .baseline-table .sort-indicator {
     display: inline-block;
     min-width: 10px;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 11px;
     opacity: .85;
 }
@@ -354,7 +354,7 @@ body.baseline-document {
 }
 
 .baseline-empty {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     padding: 14px;
     font-size: 13px;
 }
@@ -367,16 +367,16 @@ body.baseline-document {
     max-height: 96vh;
     max-height: 96dvh;
     overflow: hidden;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: var(--app-surface-background, rgba(17, 28, 51, .98));
-    color: var(--app-text-primary, var(--text));
-    box-shadow: var(--app-shadow, var(--shadow));
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
+    box-shadow: var(--shadow);
     padding: 0;
 }
 
 .baseline-dialog::backdrop {
-    background: var(--app-backdrop, rgba(0, 0, 0, .55));
+    background: rgba(0, 0, 0, .55);
 }
 
 .baseline-form {
@@ -385,8 +385,8 @@ body.baseline-document {
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: var(--app-surface-background, rgba(17, 28, 51, .98));
-    color: var(--app-text-primary, var(--text));
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
 }
 
 .baseline-dialog-head {
@@ -405,12 +405,12 @@ body.baseline-document {
     line-height: 1.2;
     font-size: 16px;
     font-weight: 700;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-dialog-status {
     font-size: 12px;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     margin-bottom: 12px;
     line-height: 1.25;
     min-height: 16px;
@@ -436,7 +436,7 @@ body.baseline-document {
 }
 
 .baseline-field-grid label span {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 13px;
     font-weight: 400;
 }
@@ -444,9 +444,9 @@ body.baseline-document {
 .baseline-field-grid input,
 .baseline-field-grid textarea {
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, rgba(15, 23, 42, .65));
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -468,13 +468,13 @@ body.baseline-document {
 
 .baseline-field-grid input::placeholder,
 .baseline-field-grid textarea::placeholder {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
 }
 
 .baseline-field-grid input:focus,
 .baseline-field-grid textarea:focus {
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .baseline-field-wide {
@@ -487,16 +487,16 @@ body.baseline-document {
     gap: 10px;
     padding-top: 8px;
     margin-top: 12px;
-    border-top: 1px solid var(--app-border-default, rgba(35, 52, 84, .65));
+    border-top: 1px solid rgba(35, 52, 84, .65);
     flex: 0 0 auto;
 }
 
 .baseline-dialog-footer button,
 .baseline-primary-button,
 .baseline-secondary-button {
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, rgba(15, 23, 42, .65));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     padding: 8px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -508,9 +508,9 @@ body.baseline-document {
 
 .baseline-dialog-footer button.primary,
 .baseline-primary-button {
-    background: var(--app-accent-soft, rgba(96, 165, 250, .20));
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .55));
-    color: var(--app-text-primary, var(--text));
+    background: rgba(96, 165, 250, .20);
+    border-color: rgba(96, 165, 250, .55);
+    color: var(--text);
 }
 
 .baseline-dialog-footer button:hover,
@@ -523,9 +523,9 @@ body.baseline-document {
 
 .baseline-detail-card {
     flex: 0 0 auto;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: var(--app-surface-subtle-background, var(--panel2));
+    background: var(--panel2);
     padding: 14px;
     margin-bottom: 12px;
 }
@@ -544,13 +544,13 @@ body.baseline-document {
 }
 
 .baseline-detail-field strong {
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     font-size: 13px;
     overflow-wrap: anywhere;
 }
 
 .baseline-detail-label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 12px;
     font-weight: 650;
 }
@@ -561,7 +561,7 @@ body.baseline-document {
 
 .baseline-detail-field-wide p {
     margin: 0;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     font-size: 13px;
     line-height: 1.5;
     white-space: pre-wrap;
@@ -580,13 +580,13 @@ body.baseline-document {
     padding-right: 2px;
     scrollbar-gutter: stable;
     scrollbar-width: auto;
-    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
 }
 
 .baseline-collapse-section {
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: var(--app-surface-subtle-background, var(--panel2));
+    background: var(--panel2);
     overflow: hidden;
     flex: 0 0 auto;
 }
@@ -595,8 +595,8 @@ body.baseline-document {
     width: 100%;
     border: 0;
     border-radius: 0;
-    background: var(--app-table-header-background, rgba(17, 28, 51, .98));
-    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
     cursor: pointer;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -610,15 +610,15 @@ body.baseline-document {
 }
 
 .baseline-collapse-header:hover {
-    background: var(--app-accent-soft, rgba(96, 165, 250, .14));
+    background: rgba(96, 165, 250, .14);
 }
 
 .baseline-collapse-header strong {
     min-width: 30px;
     border-radius: 999px;
-    border: 1px solid var(--app-accent-primary, rgba(96, 165, 250, .45));
-    background: var(--app-accent-soft, rgba(96, 165, 250, .16));
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid rgba(96, 165, 250, .45);
+    background: rgba(96, 165, 250, .16);
+    color: var(--text);
     padding: 2px 8px;
     font-size: 12px;
     text-align: center;
@@ -626,13 +626,13 @@ body.baseline-document {
 
 .baseline-collapse-icon {
     width: 18px;
-    color: var(--app-text-secondary, #bfdbfe);
+    color: #bfdbfe;
     font-size: 15px;
 }
 
 .baseline-collapse-panel {
     padding: 12px;
-    border-top: 1px solid var(--app-border-default, var(--border));
+    border-top: 1px solid var(--border);
 }
 
 .baseline-detail-frame {
@@ -641,9 +641,9 @@ body.baseline-document {
     max-height: 360px;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: var(--app-surface-subtle-background, var(--panel2));
+    background: var(--panel2);
     overflow: hidden;
     position: relative;
 }
@@ -658,7 +658,7 @@ body.baseline-document {
     overscroll-behavior: contain;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: auto;
-    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
+    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
     padding-right: 2px;
 }
 
@@ -668,7 +668,7 @@ body.baseline-document {
     table-layout: fixed;
     border-collapse: collapse;
     background: transparent;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .baseline-change-table th,
@@ -682,25 +682,25 @@ body.baseline-document {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: var(--app-table-header-background, rgba(17, 28, 51, .98));
+    background: rgba(17, 28, 51, .98);
     text-align: left;
-    border-bottom: 1px solid var(--app-border-default, var(--border));
+    border-bottom: 1px solid var(--border);
     padding: 10px 12px;
-    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    color: var(--text);
     font-size: 13px;
     font-weight: 700;
 }
 
 .baseline-change-table tbody td {
-    border-bottom: 1px solid var(--app-border-default, rgba(35, 52, 84, .55));
+    border-bottom: 1px solid rgba(35, 52, 84, .55);
     padding: 10px 12px;
     vertical-align: top;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     font-size: 13px;
 }
 
 .baseline-change-table tbody tr:hover {
-    background: var(--app-table-row-hover, rgba(96, 165, 250, .12));
+    background: rgba(96, 165, 250, .12);
 }
 
 .baseline-change-table th:nth-child(1),
@@ -730,9 +730,9 @@ body.baseline-document {
     min-width: 86px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid var(--app-border-default, rgba(170, 180, 194, .35));
-    background: var(--app-surface-background, rgba(15, 23, 42, .65));
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid rgba(170, 180, 194, .35);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     font-size: 12px;
     line-height: 1.4;
     font-weight: 650;

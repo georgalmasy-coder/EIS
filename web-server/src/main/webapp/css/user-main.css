@@ -94,7 +94,7 @@ body.user-main-document {
 }
 
 .user-main-filter-label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 13px;
     white-space: nowrap;
 }
@@ -109,9 +109,9 @@ body.user-main-document {
 
 .user-main-search-input {
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, #ffffff);
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     padding: 8px 68px 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -130,14 +130,14 @@ body.user-main-document {
 }
 
 .user-main-search-input:focus {
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-main-search-icon {
     position: absolute;
     right: 11px;
-    color: var(--app-text-tertiary, var(--muted));
+    color: var(--muted);
     pointer-events: none;
     line-height: 1;
     display: inline-flex;
@@ -160,7 +160,7 @@ body.user-main-document {
     border-radius: 999px;
     padding: 0;
     background: transparent;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,13 +168,13 @@ body.user-main-document {
 }
 
 .user-main-search-clear:hover {
-    color: var(--app-text-primary, var(--text));
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .12));
+    color: var(--text);
+    background: rgba(96, 165, 250, .12);
 }
 
 .user-main-search-clear:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-main-search-clear svg {
@@ -188,9 +188,9 @@ body.user-main-document {
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, rgba(15, 23, 42, .55));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -200,8 +200,8 @@ body.user-main-document {
 }
 
 .user-main-icon-button:hover {
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .14));
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .45));
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
 }
 
 .user-main-icon-button:active {
@@ -278,11 +278,11 @@ body.user-main-document {
     bottom: 8px;
     left: 3px;
     width: 1px;
-    background: var(--app-border-strong, rgba(148, 163, 184, .35));
+    background: rgba(148, 163, 184, .35);
 }
 
 .user-main-column-resizer:hover::after {
-    background: var(--app-accent-primary, rgba(96, 165, 250, .85));
+    background: rgba(96, 165, 250, .85);
 }
 
 body.user-main-column-resizing {
@@ -309,9 +309,9 @@ body.user-main-column-resizing * {
     min-width: 96px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid var(--app-chip-border, rgba(170, 180, 194, .35));
-    background: var(--app-chip-background, rgba(15, 23, 42, .55));
-    color: var(--app-chip-foreground, var(--text));
+    border: 1px solid rgba(170, 180, 194, .35);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     font-size: 12px;
     line-height: 1.4;
 }
@@ -370,13 +370,13 @@ dialog.eis-edit-dialog.user-main-edit-dialog {
     height: 12px;
     border-radius: 999px;
     display: inline-block;
-    border: 1px solid var(--app-border-strong, rgba(148, 163, 184, .55));
+    border: 1px solid rgba(148, 163, 184, .55);
 }
 
 .user-administration-active-dot.is-active {
-    background: var(--app-text-tertiary, #94a3b8);
-    border-color: var(--app-border-default, #cbd5e1);
-    box-shadow: 0 0 0 3px var(--app-accent-soft, rgba(148, 163, 184, .12));
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, .12);
 }
 
 .user-administration-active-dot.is-inactive {

@@ -26,7 +26,6 @@ public enum UserRoles {
             true
                 ),
 
-    /*
     PROJECT_VIEWER(
             4,
             "Project viewer",
@@ -34,7 +33,6 @@ public enum UserRoles {
             true,
             false
     ),
-    */
 
     INVASIVE_USER_ROLE(
             -1,

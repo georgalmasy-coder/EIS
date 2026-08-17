@@ -8,7 +8,6 @@ import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
-import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;

@@ -14,9 +14,9 @@
 }
 
 .tab-btn{
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, rgba(15,23,42,.55));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
     padding: 8px 12px;
     border-radius: 12px;
     cursor: pointer;
@@ -25,8 +25,8 @@
 }
 
 .tab-btn.is-active{
-    border-color: var(--app-accent-primary, rgba(96,165,250,.55));
-    background: var(--app-accent-soft, rgba(96,165,250,.16));
+    border-color: rgba(96,165,250,.55);
+    background: rgba(96,165,250,.16);
 }
 
 .tab-panels{
@@ -49,10 +49,10 @@
 /* Generic table frame for reusable list pages */
 .table-frame{
     width: 100%;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
-    background: var(--app-surface-subtle-background, var(--panel2));
+    background: var(--panel2);
     min-height: 0;
 }
 
@@ -77,9 +77,8 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: var(--app-table-header-background, rgba(15,23,42,.96));
-    color: var(--app-table-header-foreground, var(--app-text-secondary));
-    border-bottom: 1px solid var(--app-border-default, var(--border));
+    background: rgba(15,23,42,.96);
+    border-bottom: 1px solid var(--border);
     text-align: left;
     padding: 10px 10px;
     user-select: none;
@@ -96,16 +95,16 @@
 }
 
 .sort-indicator{
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 12px;
     min-width: 14px;
     text-align: center;
 }
 
 .data-table tbody td{
-    border-bottom: 1px solid var(--app-border-default, rgba(35,52,84,.55));
+    border-bottom: 1px solid rgba(35,52,84,.55);
     padding: 9px 10px;
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
     vertical-align: top;
     max-width: 100ch;
 }

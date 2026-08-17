@@ -73,9 +73,9 @@ body.stakeholderrequirement-edit-document{
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, var(--app-surface-background));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.55);
+    color: var(--text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,8 +92,8 @@ body.stakeholderrequirement-edit-document{
 }
 
 .stakeholderrequirement-edit-help-button:hover{
-    background: var(--app-control-hover-background, var(--app-accent-soft));
-    border-color: var(--app-accent-primary);
+    background: rgba(96,165,250,.14);
+    border-color: rgba(96,165,250,.45);
 }
 
 .stakeholderrequirement-edit-help-button:active{
@@ -159,8 +159,8 @@ body.stakeholderrequirement-edit-document{
 }
 
 .page-tab-btn.is-active{
-    background: var(--app-accent-soft);
-    border-color: var(--app-accent-primary);
+    background: rgba(96,165,250,.20);
+    border-color: rgba(96,165,250,.55);
 }
 
 .stakeholderrequirement-edit-panels{
@@ -264,10 +264,10 @@ body.stakeholderrequirement-edit-document{
 .page-field textarea,
 .page-field select{
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, var(--app-surface-background));
-    color: var(--app-text-primary, var(--text));
-    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
     border-radius: 10px;
     outline: none;
     font: inherit;
@@ -277,8 +277,8 @@ body.stakeholderrequirement-edit-document{
 .page-field input:focus,
 .page-field textarea:focus,
 .page-field select:focus{
-    border-color: var(--app-accent-primary);
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
 .page-field input[readonly],
@@ -521,10 +521,10 @@ body.stakeholderrequirement-edit-document{
     min-height: 220px;
     resize: vertical;
     overflow: auto;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, var(--app-surface-background));
-    color: var(--app-text-primary, var(--text));
-    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
     border-radius: 10px;
     outline: none;
     font: inherit;
@@ -533,8 +533,8 @@ body.stakeholderrequirement-edit-document{
 }
 
 .note-textarea:focus{
-    border-color: var(--app-accent-primary);
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
 .attachment-editor{
@@ -551,10 +551,10 @@ body.stakeholderrequirement-edit-document{
 .attachment-input,
 .attachment-textarea{
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, var(--app-surface-background));
-    color: var(--app-text-primary, var(--text));
-    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23,42,.65);
+    color: var(--text);
+    padding: 8px 10px;
     border-radius: 10px;
     outline: none;
     font: inherit;
@@ -568,8 +568,8 @@ body.stakeholderrequirement-edit-document{
 
 .attachment-input:focus,
 .attachment-textarea:focus{
-    border-color: var(--app-accent-primary);
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+    border-color: rgba(96,165,250,.65);
+    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
 body.stakeholderrequirement-edit-readonly .page-field input,

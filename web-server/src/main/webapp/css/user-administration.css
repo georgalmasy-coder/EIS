@@ -55,7 +55,7 @@
 }
 
 .user-administration-filter-label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 13px;
     white-space: nowrap;
 }
@@ -70,9 +70,9 @@
 
 .user-administration-search-input {
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, #ffffff);
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     padding: 8px 68px 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -91,14 +91,14 @@
 }
 
 .user-administration-search-input:focus {
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-administration-search-icon {
     position: absolute;
     right: 11px;
-    color: var(--app-text-tertiary, var(--muted));
+    color: var(--muted);
     pointer-events: none;
     line-height: 1;
     display: inline-flex;
@@ -121,7 +121,7 @@
     border-radius: 999px;
     padding: 0;
     background: transparent;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -129,13 +129,13 @@
 }
 
 .user-administration-search-clear:hover {
-    color: var(--app-text-primary, var(--text));
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .12));
+    color: var(--text);
+    background: rgba(96, 165, 250, .12);
 }
 
 .user-administration-search-clear:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-administration-search-clear svg {
@@ -149,9 +149,9 @@
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, rgba(15, 23, 42, .55));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -161,8 +161,8 @@
 }
 
 .user-administration-icon-button:hover {
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .14));
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .45));
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
 }
 
 .user-administration-icon-button:active {
@@ -208,7 +208,7 @@
     height: 42px;
     flex: 1 1 630px;
     min-width: 390px;
-    border: 1px dashed var(--app-border-default, rgba(128, 128, 128, 0.45));
+    border: 1px dashed rgba(128, 128, 128, 0.45);
     border-radius: 6px;
     padding: 6px 34px 6px 6px;
     display: flex;
@@ -217,7 +217,7 @@
     align-content: center;
     flex-wrap: wrap;
     box-sizing: border-box;
-    background: var(--app-surface-subtle-background, rgba(255, 255, 255, 0.03));
+    background: rgba(255, 255, 255, 0.03);
     overflow: hidden;
 }
 
@@ -232,11 +232,11 @@
     align-items: center;
     gap: 6px;
     padding: 5px 8px;
-    border: 1px solid var(--app-chip-border, rgba(128, 128, 128, 0.35));
+    border: 1px solid rgba(128, 128, 128, 0.35);
     border-radius: 999px;
     cursor: grab;
     user-select: none;
-    background: var(--app-chip-background, rgba(255, 255, 255, 0.06));
+    background: rgba(255, 255, 255, 0.06);
     font-size: 12px;
 }
 
@@ -263,7 +263,7 @@
     border-radius: 999px;
     padding: 0;
     background: transparent;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -273,13 +273,13 @@
 }
 
 .user-grouping-clear:hover {
-    color: var(--app-text-primary, var(--text));
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .12));
+    color: var(--text);
+    background: rgba(96, 165, 250, .12);
 }
 
 .user-grouping-clear:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-grouping-clear svg {
@@ -297,9 +297,9 @@
     min-width: 42px;
     height: 42px;
     border-radius: 10px;
-    border: 1px solid var(--app-control-border, var(--border));
-    background: var(--app-control-background, rgba(15, 23, 42, .55));
-    color: var(--app-control-foreground, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -309,8 +309,8 @@
 }
 
 .user-administration-help-button:hover {
-    background: var(--app-control-hover-background, rgba(96, 165, 250, .14));
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .45));
+    background: rgba(96, 165, 250, .14);
+    border-color: rgba(96, 165, 250, .45);
 }
 
 .user-administration-help-button:active {
@@ -354,20 +354,20 @@ body.user-administration-column-resizing * {
     right: 3px;
     width: 1px;
     height: 60%;
-    background: var(--app-border-strong, rgba(170, 180, 194, .35));
+    background: rgba(170, 180, 194, .35);
 }
 
 .user-administration-table .col-resizer:hover::after {
-    background: var(--app-accent-primary, rgba(96, 165, 250, .75));
+    background: rgba(96, 165, 250, .75);
 }
 
 .user-group-row td {
-    background: var(--app-table-row-alt, rgba(128, 128, 128, 0.08));
+    background: rgba(128, 128, 128, 0.08);
     font-weight: 600;
 }
 
 .user-group-row.is-collapsed td {
-    background: var(--app-table-row-selected, rgba(128, 128, 128, 0.14));
+    background: rgba(128, 128, 128, 0.14);
 }
 
 .user-group-row .group-toggle {
@@ -402,13 +402,13 @@ body.user-administration-column-resizing * {
     height: 12px;
     border-radius: 999px;
     display: inline-block;
-    border: 1px solid var(--app-border-strong, rgba(148,163,184,.55));
+    border: 1px solid rgba(148,163,184,.55);
 }
 
 .user-administration-active-dot.is-active{
-    background: var(--app-text-tertiary, #94a3b8);
-    border-color: var(--app-border-default, #cbd5e1);
-    box-shadow: 0 0 0 3px var(--app-accent-soft, rgba(148,163,184,.12));
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148,163,184,.12);
 }
 
 .user-administration-active-dot.is-inactive{
@@ -429,9 +429,9 @@ body.user-administration-column-resizing * {
     min-width: 96px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid var(--app-chip-border, rgba(170, 180, 194, .35));
-    background: var(--app-chip-background, rgba(15, 23, 42, .55));
-    color: var(--app-chip-foreground, var(--text));
+    border: 1px solid rgba(170, 180, 194, .35);
+    background: rgba(15, 23, 42, .55);
+    color: var(--text);
     font-size: 12px;
     line-height: 1.4;
 }
@@ -486,8 +486,8 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     padding: 14px 14px 8px;
     display: block;
     overflow: hidden;
-    background: var(--app-surface-background, rgba(17, 28, 51, .98));
-    color: var(--app-text-primary, var(--text));
+    background: rgba(17, 28, 51, .98);
+    color: var(--text);
 }
 
 .user-edit-form .page-dialog-head,
@@ -528,7 +528,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     flex-wrap: wrap;
     margin: 0 0 10px;
     font-size: 12px;
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
 }
 
 .user-field-legend-item {
@@ -587,9 +587,9 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     min-height: 0;
     flex: 1 1 auto;
     overflow: auto;
-    border: 1px solid var(--app-border-default, var(--border));
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--app-surface-subtle-background, rgba(255, 255, 255, 0.025));
+    background: rgba(255, 255, 255, 0.025);
 }
 
 .user-projects-table {
@@ -601,13 +601,13 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-projects-table th,
 .user-projects-table td {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--app-border-default, var(--border));
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
 }
 
 .user-projects-table thead th {
-    background: var(--app-table-header-background, rgba(255, 255, 255, 0.03));
-    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
     font-size: 12px;
     font-weight: 600;
     text-align: left;
@@ -660,12 +660,12 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 
 .user-field-mandatory > span,
 .user-field-mandatory .field-label {
-    color: var(--app-text-primary, var(--text));
+    color: var(--text);
 }
 
 .user-field-readonly > span,
 .user-field-readonly .field-label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
 }
 
 .user-field-grid input,
@@ -683,9 +683,9 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-field-grid select,
 .user-field-grid textarea {
     width: 100%;
-    border: 1px solid var(--app-input-border, var(--border));
-    background: var(--app-input-background, #ffffff);
-    color: var(--app-text-primary, var(--text));
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, .65);
+    color: var(--text);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -698,8 +698,8 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-field-grid input:not([type="checkbox"]):not([type="hidden"]):focus,
 .user-field-grid select:focus,
 .user-field-grid textarea:focus {
-    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
-    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
+    border-color: rgba(96, 165, 250, .65);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
 }
 
 .user-field-grid input[readonly],
@@ -718,7 +718,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 
 .user-field-grid input[readonly]::placeholder,
 .user-field-grid textarea[readonly]::placeholder {
-    color: var(--app-text-tertiary, rgba(203, 213, 225, .55));
+    color: rgba(203, 213, 225, .55);
 }
 
 .user-field-grid input[disabled],
@@ -746,7 +746,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 }
 
 .user-phone-field > label {
-    color: var(--app-text-secondary, var(--muted));
+    color: var(--muted);
     font-size: 13px;
     font-weight: 400;
 }
@@ -774,7 +774,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 }
 
 .user-field-readonly.user-active-field input[type="checkbox"] {
-    accent-color: var(--app-text-tertiary, #94a3b8);
+    accent-color: #94a3b8;
 }
 
 .action-row {
