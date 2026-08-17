@@ -12,15 +12,19 @@ public enum PageType {
 
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder", "Work with stakeholder records in the workspace below."),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
+
     SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
     SYSTEM_REQUIREMENT_MAIN_LIST_PAGE("systemrequirement-main-list","html-pages/systemrequirement-main-list.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
     SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
     SYSTEM_REQUIREMENT_MAIN_VERTICAL_PAGE("systemrequirement-main-vertical","html-pages/systemrequirement-main-vertical.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
     SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement Edit", "Edit the current system requirement in the workspace below."),
-    STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
-    STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement Edit", "Edit the current stakeholder requirement in the workspace below."),
 
     /* */
+    STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
+    STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement Edit", "Edit the current stakeholder requirement in the workspace below."),
+    STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
+    STAKEHOLDER_REQUIREMENT_MAIN_VERTICAL_PAGE("stakeholderrequirement-main-vertical","html-pages/stakeholderrequirement-main-vertical.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
+
     FUNCTIONAL_STRUCTURE_MAIN_PAGE("functionalstructure-main","html-pages/functionalstructure-main.html", "Functional", true, "R-F-L-P MODEL - FUNCTIONS", "Functions", "Work with functional design in the workspace below."),
     FUNCTIONAL_STRUCTURE_EDIT_PAGE("functionalstructure-edit","html-pages/functionalstructure-edit.html", "Functional Structure Edit", true, "R-F-L-P MODEL - FUNCTION", "Functional Design Edit", "Edit the current functional design in the workspace below."),
     FUNCTIONAL_STRUCTURE_MAIN_HORIZONTAL_PAGE("functionalstructure-main-horizontal","html-pages/functionalstructure-main-horizontal.html", "Function Design", true, "R-F-L-P MODEL - FUNCTIONS", "Functional Design", "Work with functional design in the workspace below."),
@@ -39,9 +43,6 @@ public enum PageType {
     /* */
 
     LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification", "Manage lookup values in the workspace below."),
-    STAKEHOLDER_REQUIREMENT_MAIN_LIST_PAGE("stakeholderrequirement-main-list","html-pages/stakeholderrequirement-main-list.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
-    STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
-    STAKEHOLDER_REQUIREMENT_MAIN_VERTICAL_PAGE("stakeholderrequirement-main-vertical","html-pages/stakeholderrequirement-main-vertical.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),

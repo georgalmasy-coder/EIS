@@ -60,11 +60,15 @@
             </section>
         </header>
 
-        <section class="panel page-layout stakeholderrequirement-main-layout" aria-label="Stakeholder Requirement">
-            <div class="section-header stakeholderrequirement-main-section-header">
-                <h2>Stakeholder Requirement</h2>
+        <section class="page-layout stakeholderrequirement-main-layout" aria-label="Stakeholder Requirement">
+            <div class="stakeholderrequirement-main-header-row">
+                <div class="workspace-header stakeholderrequirement-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow stakeholderrequirement-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading stakeholderrequirement-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext stakeholderrequirement-workspace-helptext"></div>
+                </div>
 
-                <div class="stakeholderrequirement-view-switcher" role="group" aria-label="Select view type">
+                <div class="stakeholderrequirement-main-header-actions" role="group" aria-label="View actions">
                     <button
                             id="btnViewList"
                             class="stakeholderrequirement-view-button is-active"
@@ -108,62 +112,7 @@
                             <path d="M9 3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v2H8a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H8v-1h8v1h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1v-1a2 2 0 0 0-2-2h-3v-2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H9z"></path>
                         </svg>
                     </button>
-                </div>
-            </div>
 
-            <div class="stakeholderrequirement-main-info-bar" aria-label="Stakeholder requirement information">
-                <div class="stakeholderrequirement-main-info-item">
-                    <span class="stakeholderrequirement-main-info-label">Stakeholder requirements:</span>
-                    <strong id="stakeholderRequirementCount">—</strong>
-                </div>
-
-                <div class="stakeholderrequirement-main-info-item">
-                    <span class="stakeholderrequirement-main-info-label">Current view:</span>
-                    <strong id="currentViewLabel">Liste-visning</strong>
-                </div>
-            </div>
-
-            <div class="stakeholderrequirement-main-toolbar" aria-label="Stakeholder requirement toolbar">
-                <div class="stakeholderrequirement-filter-group">
-                    <label class="stakeholderrequirement-search-filter" for="filterRequirementText">
-                        <span class="stakeholderrequirement-filter-label">Search</span>
-                        <span class="stakeholderrequirement-search-box">
-                            <input
-                                    id="filterRequirementText"
-                                    class="stakeholderrequirement-search-input"
-                                    type="search"
-                                    placeholder="Search in ID, name or description..."
-                                    autocomplete="off"
-                                    aria-label="Search in ID, name or description"
-                            >
-                            <span class="stakeholderrequirement-search-icon" aria-hidden="true">⌕</span>
-                        </span>
-                    </label>
-
-                    <label class="stakeholderrequirement-active-filter" for="filterActiveOnly">
-                        <input
-                                id="filterActiveOnly"
-                                type="checkbox"
-                                checked
-                        >
-                        <span>Aktiv</span>
-                    </label>
-
-                    <button
-                            id="btnClearFilter"
-                            class="stakeholderrequirement-secondary-button"
-                            type="button"
-                    >
-                        Clear filter
-                    </button>
-
-                    <div id="groupByBar" class="stakeholderrequirement-grouping-bar" aria-label="Group by controls">
-                        <div class="stakeholderrequirement-grouping-label">Group by</div>
-                        <div id="groupByZone" class="stakeholderrequirement-grouping-zone" aria-label="Group by area" tabindex="0"></div>
-                    </div>
-                </div>
-
-                <div class="stakeholderrequirement-action-group" aria-label="View actions">
                     <button
                             id="btnImport"
                             class="stakeholderrequirement-icon-button stakeholderrequirement-list-action"
@@ -217,8 +166,91 @@
                             <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800" fill="rgb(15,23,42)">PDF</text>
                         </svg>
                     </button>
-
                 </div>
+            </div>
+
+            <div class="stakeholderrequirement-main-info-bar" aria-label="Stakeholder requirement information">
+                <div class="stakeholderrequirement-main-info-item">
+                    <span class="stakeholderrequirement-main-info-label">Stakeholder requirements:</span>
+                    <strong id="stakeholderRequirementCount">—</strong>
+                </div>
+
+                <div class="stakeholderrequirement-main-info-item">
+                    <span class="stakeholderrequirement-main-info-label">Current view:</span>
+                    <strong id="currentViewLabel">Liste-visning</strong>
+                </div>
+            </div>
+
+            <div class="stakeholderrequirement-main-toolbar" aria-label="Stakeholder requirement toolbar">
+                <div class="stakeholderrequirement-filter-group">
+                    <label class="stakeholderrequirement-search-filter" for="filterRequirementText">
+                        <span class="stakeholderrequirement-filter-label">Filter</span>
+                        <span class="stakeholderrequirement-search-box">
+                            <input
+                                    id="filterRequirementText"
+                                    class="stakeholderrequirement-search-input"
+                                    type="search"
+                                    placeholder="Search in ID, name or description..."
+                                    autocomplete="off"
+                                    aria-label="Search in ID, name or description"
+                            >
+                            <span class="stakeholderrequirement-search-icon" aria-hidden="true">⌕</span>
+                        </span>
+                    </label>
+
+                    <label class="stakeholderrequirement-active-filter" for="filterActiveOnly">
+                        <input
+                                id="filterActiveOnly"
+                                type="checkbox"
+                                checked
+                        >
+                        <span>Aktiv</span>
+                    </label>
+
+                    <button
+                            id="btnClearFilter"
+                            class="stakeholderrequirement-secondary-button"
+                            type="button"
+                    >
+                        Clear filter
+                    </button>
+
+                    <div id="groupByBar" class="stakeholderrequirement-grouping-bar" aria-label="Group by controls">
+                        <div class="stakeholderrequirement-grouping-label">Group by</div>
+                        <div id="groupByZone" class="stakeholderrequirement-grouping-zone" aria-label="Group by area" tabindex="0"></div>
+                    </div>
+
+                    <div class="stakeholderrequirement-columns-control" id="columnsControl">
+                        <button
+                                id="btnColumns"
+                                class="stakeholderrequirement-secondary-button stakeholderrequirement-columns-button"
+                                type="button"
+                                aria-haspopup="dialog"
+                                aria-controls="columnsPopover"
+                                aria-expanded="false"
+                                title="Choose columns"
+                        >
+                            Columns
+                        </button>
+
+                        <div id="columnsPopover" class="stakeholderrequirement-columns-popover" hidden role="dialog" aria-label="Choose columns">
+                            <div class="stakeholderrequirement-columns-popover-head">
+                                <span>Columns</span>
+                                <button
+                                        id="btnCloseColumns"
+                                        class="stakeholderrequirement-columns-close"
+                                        type="button"
+                                        aria-label="Close column chooser"
+                                        title="Close"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <div id="columnsList" class="stakeholderrequirement-columns-list"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="page-body stakeholderrequirement-main-body">
@@ -228,7 +260,7 @@
                         data-view-panel="list"
                         aria-label="Stakeholder requirement list view"
                 >
-                    <div class="table-frame page-frame stakeholderrequirement-list-frame" aria-label="Stakeholder requirement list frame">
+                    <div class="table-frame page-frame has-table-footer stakeholderrequirement-list-frame" aria-label="Stakeholder requirement list frame">
                         <div class="table-scroll stakeholderrequirement-list-scroll" id="tableScroll">
                             <table class="data-table page-table stakeholderrequirement-table" aria-label="Stakeholder requirement list">
                                 <colgroup id="mainColGroup"></colgroup>
@@ -241,6 +273,9 @@
                             <div class="empty page-empty stakeholderrequirement-empty" id="listEmptyState">
                                 Loading stakeholder requirements…
                             </div>
+                        </div>
+                        <div class="data-table-footer stakeholderrequirement-table-footer" aria-live="polite">
+                            <span class="data-table-footer-count" id="stakeholderrequirementTableCount">0 of 0</span>
                         </div>
                     </div>
                 </section>

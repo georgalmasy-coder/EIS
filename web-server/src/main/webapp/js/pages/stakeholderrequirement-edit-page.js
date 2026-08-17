@@ -212,12 +212,10 @@ async function loadDetail() {
 
     if (!detailUrl) {
         setText("loadStatus", "Error");
-        setText("dlgStatus", "Could not determine detail URL.");
         return;
     }
 
     setText("loadStatus", "Loading");
-    setText("dlgStatus", "Loading stakeholder requirement details…");
 
     try {
         const response = await fetch(detailUrl, {
@@ -264,11 +262,9 @@ async function loadDetail() {
         initializeResizableEditTables();
 
         setText("loadStatus", "Loaded");
-        setText("dlgStatus", "Loaded.");
     } catch (error) {
         console.error("Failed to load stakeholder requirement detail", error);
         setText("loadStatus", "Error");
-        setText("dlgStatus", `Could not load stakeholder requirement detail. ${error.message}`);
     }
 }
 
@@ -333,18 +329,17 @@ function applyModeUi() {
     }
 
     setText("pageModeLabel", getModeLabel());
-    setText("entityMeta", getEntityMetaLabel());
-
     if (state.readOnly) {
         setFormFieldsReadOnly();
     }
 }
 
 function getModeLabel() {
+    if (state.mode === MODES.edit) return "";
     if (state.mode === MODES.editVersion) return buildHistoricalVersionLabel();
     if (state.mode === MODES.createChild) return "Create Sub Stakeholder Requirement";
     if (state.mode === MODES.createRoot) return "Create Root Stakeholder Requirement";
-    return "Edit Stakeholder Requirement";
+    return "";
 }
 
 function buildHistoricalVersionLabel() {
@@ -567,7 +562,6 @@ async function saveCurrentRequirement() {
     const validationErrors = validateCurrentRequirement();
 
     if (validationErrors.length) {
-        setText("dlgStatus", "Validation failed.");
         setText("loadStatus", "Validation error");
         window.alert(validationErrors.join("\n"));
         focusFirstInvalidField(document.getElementById("basisInfoFields") || document);
@@ -575,7 +569,6 @@ async function saveCurrentRequirement() {
     }
 
     try {
-        setText("dlgStatus", "Saving…");
         setText("loadStatus", "Saving");
 
         const payload = buildSavePayload();
@@ -594,7 +587,6 @@ async function saveCurrentRequirement() {
             throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
-        setText("dlgStatus", "Saved.");
         setText("loadStatus", "Saved");
 
         if (state.modal && notifyEditDialogSaved({
@@ -608,7 +600,6 @@ async function saveCurrentRequirement() {
         returnToPreviousPage();
     } catch (error) {
         console.error("Failed to save stakeholder requirement", error);
-        setText("dlgStatus", `Save failed. ${error.message}`);
         setText("loadStatus", "Error");
     }
 }

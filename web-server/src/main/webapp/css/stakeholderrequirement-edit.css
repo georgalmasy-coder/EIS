@@ -68,14 +68,18 @@ body.stakeholderrequirement-edit-document{
     line-height: 1.25;
 }
 
+.stakeholderrequirement-edit-mode-label:empty{
+    display: none;
+}
+
 .stakeholderrequirement-edit-help-button{
     width: 42px;
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,8 +96,8 @@ body.stakeholderrequirement-edit-document{
 }
 
 .stakeholderrequirement-edit-help-button:hover{
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
 }
 
 .stakeholderrequirement-edit-help-button:active{
@@ -110,31 +114,6 @@ body.stakeholderrequirement-edit-document{
     color: #fde68a;
     font-size: 13px;
     line-height: 1.35;
-}
-
-.stakeholderrequirement-edit-status-row{
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-    min-width: 0;
-}
-
-.page-dialog-status{
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.25;
-}
-
-.stakeholderrequirement-edit-entity-meta{
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.25;
-    text-align: right;
-    min-width: 0;
-    overflow-wrap: anywhere;
 }
 
 .stakeholderrequirement-edit-tab-bar{
@@ -156,11 +135,20 @@ body.stakeholderrequirement-edit-document{
     border-radius: 10px;
     white-space: nowrap;
     flex: 0 0 auto;
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border: 1px solid var(--app-border-default);
 }
 
 .page-tab-btn.is-active{
-    background: rgba(96,165,250,.20);
-    border-color: rgba(96,165,250,.55);
+    background: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+    border-color: var(--app-tab-active-background);
+}
+
+.page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
 }
 
 .stakeholderrequirement-edit-panels{
@@ -251,7 +239,7 @@ body.stakeholderrequirement-edit-document{
 }
 
 .page-field label{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
 }
 
@@ -264,9 +252,9 @@ body.stakeholderrequirement-edit-document{
 .page-field textarea,
 .page-field select{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -277,8 +265,8 @@ body.stakeholderrequirement-edit-document{
 .page-field input:focus,
 .page-field textarea:focus,
 .page-field select:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .page-field input[readonly],
@@ -510,7 +498,7 @@ body.stakeholderrequirement-edit-document{
 
 .note-editor-label,
 .attachment-editor-label{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
 }
 
@@ -521,9 +509,9 @@ body.stakeholderrequirement-edit-document{
     min-height: 220px;
     resize: vertical;
     overflow: auto;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -533,8 +521,8 @@ body.stakeholderrequirement-edit-document{
 }
 
 .note-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .attachment-editor{
@@ -551,9 +539,9 @@ body.stakeholderrequirement-edit-document{
 .attachment-input,
 .attachment-textarea{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -568,8 +556,8 @@ body.stakeholderrequirement-edit-document{
 
 .attachment-input:focus,
 .attachment-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 body.stakeholderrequirement-edit-readonly .page-field input,
@@ -596,16 +584,6 @@ body.stakeholderrequirement-edit-readonly .page-field select{
 @media (max-width: 900px){
     .stakeholderrequirement-edit-section-header{
         align-items: flex-start;
-    }
-
-    .stakeholderrequirement-edit-status-row{
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-    }
-
-    .stakeholderrequirement-edit-entity-meta{
-        text-align: left;
     }
 
     .note-dlg,
