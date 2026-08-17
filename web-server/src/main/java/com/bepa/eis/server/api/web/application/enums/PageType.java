@@ -31,13 +31,13 @@ public enum PageType {
     LOGICAL_STRUCTURE_MAIN_HORIZONTAL_PAGE("logicalstructure-main-horizontal","html-pages/logicalstructure-main-horizontal.html", "Logical Structure", true, "R-F-L-P MODEL - LOGICAL DESIGN", "Logical Design", "Work with logical structures in the workspace below."),
     LOGICAL_STRUCTURE_MAIN_VERTICAL_PAGE("logicalstructure-main-vertical","html-pages/logicalstructure-main-vertical.html", "Logical Structure", true, "R-F-L-P MODEL - LOGICAL DESIGN", "Logical Design", "Work with logical structures in the workspace below."),
 
+    SYSTEMS_BREAKDOWN_MAIN_PAGE("systemsbreakdown-main","html-pages/systemsbreakdown-main.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
+    SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Physical Structure Edit", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure Edit", "Edit the current physical structure item in the workspace below."),
+    SYSTEMS_BREAKDOWN_MAIN_HORIZONTAL_PAGE("systemsbreakdown-main-horizontal","html-pages/systemsbreakdown-main-horizontal.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
+    SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
+
     /* */
 
-    SYSTEMS_BREAKDOWN_MAIN_PAGE("systemsbreakdown-main","html-pages/systemsbreakdown-main.html", "Physical Structure", true, "R-F-L-P MODEL - STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
-    SYSTEMS_BREAKDOWN_MAIN_LIST_PAGE("systemsbreakdown-main-list","html-pages/systemsbreakdown-main-list.html", "Physical Structure", true, "R-F-L-P MODEL - STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
-    SYSTEMS_BREAKDOWN_MAIN_HORIZONTAL_PAGE("systemsbreakdown-main-horizontal","html-pages/systemsbreakdown-main-horizontal.html", "Physical Structure", true, "R-F-L-P MODEL - STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
-    SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
-    SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Physical Structure Edit", true, "R-F-L-P MODEL - STRUCTURES", "Physical Structure Edit", "Edit the current physical structure item in the workspace below."),
     LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification", "Manage lookup values in the workspace below."),
     STAKEHOLDER_REQUIREMENT_MAIN_LIST_PAGE("stakeholderrequirement-main-list","html-pages/stakeholderrequirement-main-list.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),

@@ -8,7 +8,7 @@ import {
     notifyEditDialogSaved,
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { createHistoryTable } from "../components/history-table.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
@@ -89,7 +89,11 @@ const state = {
     topPanel: {
         customerName: "—",
         projectName: "—",
-        userName: "—"
+        userName: "—",
+        helpFileName: "",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     }
 };
 
@@ -332,9 +336,6 @@ function applyModeUi() {
         readOnlyBanner.hidden = !state.readOnly;
     }
 
-    setText("pageModeLabel", getModeLabel());
-    setText("entityMeta", getEntityMetaLabel());
-
     if (state.readOnly) {
         setFormFieldsReadOnly();
     }
@@ -351,13 +352,6 @@ function buildHistoricalVersionLabel() {
     return state.version
         ? `Historical version ${state.version}`
         : "Historical version";
-}
-
-function getEntityMetaLabel() {
-    if (state.mode === MODES.createRoot) return "New root system";
-    if (state.mode === MODES.createChild) return state.id ? `Parent Entity ID: ${state.id}` : "New child system";
-    if (state.mode === MODES.editVersion) return `Entity ID: ${state.id || "—"} · Version: ${state.version || "—"}`;
-    return `Entity ID: ${state.id || "—"}`;
 }
 
 function getEntityIdFromCurrentDoc() {
@@ -385,25 +379,15 @@ function setFormFieldsReadOnly() {
 }
 
 function parseTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector("TopPanel");
-
-    if (!topPanelElement) {
-        return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanelElement, "CustomerName", "—"),
-        projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
-    };
+    return parsePageTopPanel(xmlDocument);
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName"
+    });
 }
 
 function renderAllFromDoc(doc) {
@@ -899,13 +883,6 @@ function ensureChild(doc, parent, tagName) {
     }
 
     return child;
-}
-
-function getChildText(parent, tagName, fallback = "") {
-    const element = parent?.getElementsByTagName(tagName)?.[0];
-    const value = element?.textContent?.trim();
-
-    return value || fallback;
 }
 
 function getFirstFieldRawValue(node, fieldNames, fallback = "") {

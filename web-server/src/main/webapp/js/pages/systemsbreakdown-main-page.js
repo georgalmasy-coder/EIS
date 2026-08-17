@@ -1,7 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
@@ -31,6 +31,7 @@ const STORAGE_KEYS = {
     sortKey: "basis.systemsbreakdown.main.sortKey",
     sortDirection: "basis.systemsbreakdown.main.sortDirection",
     columnWidths: "basis.systemsbreakdown.main.columnWidths",
+    hiddenColumns: "basis.systemsbreakdown.main.hiddenColumns",
     groupBy: "basis.systemsbreakdown.main.groupBy",
     groupCollapsed: "basis.systemsbreakdown.main.groupCollapsed"
 };
@@ -52,7 +53,7 @@ const PROJECT_NODE_HEIGHT = 104;
 const SYSTEM_NODE_HEIGHT = 124;
 
 const VIEW_PAGE_URLS = {
-    list: "/web/view?page=systemsbreakdown-main-list",
+    list: "/web/view?page=systemsbreakdown-main",
     horizontal: "/web/view?page=systemsbreakdown-main-horizontal",
     vertical: "/web/view?page=systemsbreakdown-main-vertical"
 };
@@ -64,7 +65,11 @@ const state = {
     topPanel: {
         customerName: "—",
         projectName: "—",
-        userName: "—"
+        userName: "—",
+        helpFileName: "",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     systems: [],
     filteredSystems: [],
@@ -72,11 +77,13 @@ const state = {
     selectedView: VIEW_TYPES.list,
     sortKey: "",
     sortDirection: "asc",
+    hiddenColumns: loadHiddenColumns(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
     contextSystem: null,
-    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
+    columnsMenuOpen: false
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -156,6 +163,9 @@ function initializeEvents() {
     const activeOnlyInput = document.getElementById("filterActiveOnly");
     const clearFilterButton = document.getElementById("btnClearFilter");
     const groupByZone = document.getElementById("groupByZone");
+    const columnsButton = document.getElementById("btnColumns");
+    const columnsCloseButton = document.getElementById("btnCloseColumns");
+    const columnsList = document.getElementById("columnsList");
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -215,6 +225,28 @@ function initializeEvents() {
     document.addEventListener("dragend", () => {
         groupByZone?.classList.remove("is-drag-over");
     });
+
+    columnsButton?.addEventListener("click", () => {
+        toggleColumnsMenu();
+    });
+
+    columnsCloseButton?.addEventListener("click", () => {
+        closeColumnsMenu();
+    });
+
+    columnsList?.addEventListener("change", (event) => {
+        const input = event.target?.closest?.("input[type='checkbox'][data-column-key]");
+        const columnKey = input?.getAttribute("data-column-key");
+
+        if (!input || !columnKey) {
+            return;
+        }
+
+        setColumnVisibility(columnKey, input.checked);
+    });
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    document.addEventListener("keydown", handleDocumentKeyDown);
 
     addRootButton?.addEventListener("click", () => {
         openCreateRootSystem();
@@ -287,9 +319,11 @@ async function loadSystemsBreakdown() {
 
         state.xmlDocument = xmlDocument;
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(xmlDocument);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.systems = parseSystemsBreakdown(xmlDocument);
         state.listColumns = buildListColumns(state.systems);
+        applyStoredColumnVisibility();
+        renderColumnsMenu();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
             state.sortKey = "";
@@ -313,26 +347,15 @@ async function loadSystemsBreakdown() {
     }
 }
 
-function parseTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector("TopPanel");
-
-    if (!topPanelElement) {
-        return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanelElement, "CustomerName", "—"),
-        projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
-    };
-}
-
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseSystemsBreakdown(xmlDocument) {
@@ -826,7 +849,11 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
-    setElementHidden("btnHelp", false);
+    setElementHidden("columnsControl", !isListView);
+
+    if (!isListView) {
+        closeColumnsMenu();
+    }
 }
 
 function setElementHidden(id, hidden) {
@@ -853,6 +880,186 @@ function persistFilters() {
 function persistSorting() {
     localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
     localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+}
+
+function loadHiddenColumns() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.hiddenColumns);
+
+        if (!raw) {
+            return [];
+        }
+
+        const parsed = JSON.parse(raw);
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistHiddenColumns() {
+    localStorage.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
+}
+
+function applyStoredColumnVisibility() {
+    const validKeys = new Set(state.listColumns.map((column) => column.key));
+    const nextHidden = state.hiddenColumns.filter((key) => validKeys.has(key));
+
+    state.hiddenColumns = nextHidden;
+
+    if (!state.listColumns.length) {
+        persistHiddenColumns();
+        return;
+    }
+
+    if (getVisibleListColumns().length === 0) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== state.listColumns[0].key);
+    }
+
+    persistHiddenColumns();
+}
+
+function getVisibleListColumns() {
+    const hidden = new Set(state.hiddenColumns);
+
+    return state.listColumns.filter((column) => !hidden.has(column.key));
+}
+
+function getVisibleListColumnCount() {
+    return getVisibleListColumns().length;
+}
+
+function renderColumnsMenu() {
+    const columnsList = document.getElementById("columnsList");
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsList || !columnsButton) {
+        return;
+    }
+
+    const visibleCount = getVisibleListColumnCount();
+
+    columnsList.innerHTML = state.listColumns.map((column) => {
+        const checked = !state.hiddenColumns.includes(column.key);
+        const disableToggle = checked && visibleCount <= 1;
+
+        return `
+            <label class="systemsbreakdown-column-option ${checked ? "" : "is-hidden"}">
+                <input
+                        type="checkbox"
+                        data-column-key="${escapeHtml(column.key)}"
+                        ${checked ? "checked" : ""}
+                        ${disableToggle ? "disabled" : ""}
+                >
+                <span class="systemsbreakdown-column-option-label">${escapeHtml(column.label)}</span>
+            </label>
+        `;
+    }).join("");
+
+    updateColumnsButtonState();
+}
+
+function updateColumnsButtonState() {
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsButton) {
+        return;
+    }
+
+    const hiddenCount = state.hiddenColumns.length;
+    const hasHiddenColumns = hiddenCount > 0;
+
+    columnsButton.classList.toggle("is-partial", hasHiddenColumns);
+    columnsButton.setAttribute("aria-expanded", state.columnsMenuOpen ? "true" : "false");
+    columnsButton.setAttribute("aria-label", hasHiddenColumns ? `Columns, ${hiddenCount} hidden` : "Columns");
+    columnsButton.title = hasHiddenColumns ? `${hiddenCount} hidden column${hiddenCount === 1 ? "" : "s"}` : "Choose columns";
+}
+
+function openColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (!columnsPopover) {
+        state.columnsMenuOpen = false;
+        updateColumnsButtonState();
+        return;
+    }
+
+    renderColumnsMenu();
+    columnsPopover.hidden = false;
+    state.columnsMenuOpen = true;
+    updateColumnsButtonState();
+}
+
+function closeColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (columnsPopover) {
+        columnsPopover.hidden = true;
+    }
+
+    state.columnsMenuOpen = false;
+    updateColumnsButtonState();
+}
+
+function toggleColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (!columnsPopover || columnsPopover.hidden) {
+        openColumnsMenu();
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentPointerDown(event) {
+    const columnsControl = document.getElementById("columnsControl");
+
+    if (!columnsControl || !state.columnsMenuOpen) {
+        return;
+    }
+
+    if (columnsControl.contains(event.target)) {
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentKeyDown(event) {
+    if (event.key === "Escape" && state.columnsMenuOpen) {
+        closeColumnsMenu();
+    }
+}
+
+function setColumnVisibility(columnKey, visible) {
+    const column = state.listColumns.find((item) => item.key === columnKey);
+
+    if (!column) {
+        return;
+    }
+
+    const currentlyVisible = !state.hiddenColumns.includes(columnKey);
+
+    if (visible === currentlyVisible) {
+        return;
+    }
+
+    if (!visible && getVisibleListColumnCount() <= 1) {
+        renderColumnsMenu();
+        return;
+    }
+
+    if (visible) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== columnKey);
+    } else if (!state.hiddenColumns.includes(columnKey)) {
+        state.hiddenColumns = [...state.hiddenColumns, columnKey];
+    }
+
+    persistHiddenColumns();
+    renderColumnsMenu();
+    renderListView();
 }
 
 function loadGroupBy() {
@@ -1161,7 +1368,7 @@ function renderListView() {
         return;
     }
 
-    const columns = state.listColumns;
+    const columns = getVisibleListColumns();
     const rows = getSortedSystems(state.filteredSystems);
     const responsiveWidths = getResponsiveColumnWidths(columns);
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
@@ -1216,7 +1423,7 @@ function renderListView() {
         });
     });
 
-    initializeColumnResize(headerRow, colGroup, table);
+    initializeColumnResize(headerRow, colGroup, table, columns);
 
     tbody.innerHTML = state.groupBy.length
         ? renderGroupedRows(rows, columns)
@@ -1255,6 +1462,17 @@ function renderListView() {
     } else {
         hideListEmptyState();
     }
+
+    if (table) {
+        table.dataset.filteredRowCount = String(rows.length);
+        table.dataset.totalRowCount = String(state.systems.length);
+    }
+
+    if (window.syncDataTableFooters) {
+        window.syncDataTableFooters(table || document);
+    }
+
+    renderColumnsMenu();
 }
 
 function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
@@ -1313,7 +1531,7 @@ function renderSystemRow(system, columns) {
     `;
 }
 
-function initializeColumnResize(headerRow, colGroup, table) {
+function initializeColumnResize(headerRow, colGroup, table, columns) {
     const handles = Array.from(headerRow.querySelectorAll(".systemsbreakdown-column-resizer"));
 
     handles.forEach((handle) => {
@@ -1337,14 +1555,14 @@ function initializeColumnResize(headerRow, colGroup, table) {
                 const delta = moveEvent.clientX - startX;
                 const nextWidth = Math.max(50, startWidth + delta);
 
-                updateColumnWidth(columnKey, nextWidth, colGroup, table);
+                updateColumnWidth(columnKey, nextWidth, colGroup, table, columns);
             }
 
             function onMouseUp(upEvent) {
                 const delta = upEvent.clientX - startX;
                 const nextWidth = Math.max(50, startWidth + delta);
 
-                updateColumnWidth(columnKey, nextWidth, colGroup, table);
+                updateColumnWidth(columnKey, nextWidth, colGroup, table, columns);
                 persistColumnWidth(columnKey, nextWidth);
                 renderListView();
 
@@ -1359,15 +1577,19 @@ function initializeColumnResize(headerRow, colGroup, table) {
     });
 }
 
-function updateColumnWidth(columnKey, widthPx, colGroup, table) {
+function updateColumnWidth(columnKey, widthPx, colGroup, table, columns) {
     const width = `${Math.max(50, Math.round(widthPx))}px`;
-    const columnIndex = state.listColumns.findIndex((column) => column.key === columnKey);
+    const columnIndex = columns.findIndex((column) => column.key === columnKey);
 
     if (columnIndex < 0) {
         return;
     }
 
-    state.listColumns[columnIndex].width = width;
+    const stateColumnIndex = state.listColumns.findIndex((column) => column.key === columnKey);
+
+    if (stateColumnIndex >= 0) {
+        state.listColumns[stateColumnIndex].width = width;
+    }
 
     const col = colGroup?.children?.[columnIndex];
 
@@ -1376,7 +1598,7 @@ function updateColumnWidth(columnKey, widthPx, colGroup, table) {
     }
 
     if (table) {
-        const totalWidth = state.listColumns.reduce((sum, column) => {
+        const totalWidth = columns.reduce((sum, column) => {
             return sum + widthToPixels(column.width, 180);
         }, 0);
 
