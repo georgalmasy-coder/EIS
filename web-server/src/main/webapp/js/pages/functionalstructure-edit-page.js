@@ -263,8 +263,8 @@ async function loadDetail() {
         applyModeUi();
         initializeResizableEditTables();
 
-        setText("loadStatus", "Loaded");
-        setText("dlgStatus", "Loaded.");
+        setText("loadStatus", "");
+        setText("dlgStatus", "");
     } catch (error) {
         console.error("Failed to load functional structure detail", error);
         setText("loadStatus", "Error");
@@ -332,8 +332,8 @@ function applyModeUi() {
         readOnlyBanner.hidden = !state.readOnly;
     }
 
-    setText("pageModeLabel", getModeLabel());
-    setText("entityMeta", getEntityMetaLabel());
+    setText("pageModeLabel", getModeLabel(), "");
+    setText("entityMeta", getEntityMetaLabel(), "");
 
     if (state.readOnly) {
         setFormFieldsReadOnly();
@@ -341,10 +341,7 @@ function applyModeUi() {
 }
 
 function getModeLabel() {
-    if (state.mode === MODES.editVersion) return buildHistoricalVersionLabel();
-    if (state.mode === MODES.createChild) return "Create Sub Functional Structure";
-    if (state.mode === MODES.createRoot) return "Create Root Functional Structure";
-    return "Edit Functional Structure";
+    return "";
 }
 
 function buildHistoricalVersionLabel() {
@@ -355,9 +352,16 @@ function buildHistoricalVersionLabel() {
 
 function getEntityMetaLabel() {
     if (state.mode === MODES.createRoot) return "New root requirement";
-    if (state.mode === MODES.createChild) return state.id ? `Parent Entity ID: ${state.id}` : "New child requirement";
-    if (state.mode === MODES.editVersion) return `Entity ID: ${state.id || "â€”"} Â· Version: ${state.version || "â€”"}`;
-    return `Entity ID: ${state.id || "â€”"}`;
+    if (state.mode === MODES.createChild) return state.id ? `Parent Entity ID: ${state.id}` : "";
+    if (state.mode === MODES.editVersion) {
+        if (!state.id && !state.version) return "";
+
+        const idPart = state.id ? `Entity ID: ${state.id}` : "";
+        const versionPart = state.version ? `Version: ${state.version}` : "";
+
+        return [idPart, versionPart].filter(Boolean).join(" · ");
+    }
+    return state.id ? `Entity ID: ${state.id}` : "";
 }
 
 function getEntityIdFromCurrentDoc() {

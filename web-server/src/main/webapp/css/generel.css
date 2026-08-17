@@ -5,6 +5,46 @@
     min-height: 0;
 }
 
+.workspace-header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+    padding: 0;
+    margin: 5px 0 14px 5px;
+}
+
+.workspace-eyebrow{
+    color: var(--app-topbar-title-prefix-color);
+    font-size: 12px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.workspace-heading{
+    color: var(--app-text-primary);
+    font-size: 28px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.workspace-helptext{
+    color: var(--app-text-secondary);
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 500;
+}
+
+.workspace-eyebrow:empty,
+.workspace-heading:empty,
+.workspace-helptext:empty{
+    display: none;
+}
+
 .page-body{
     display: flex;
     flex-direction: column;
@@ -105,9 +145,9 @@
 .page-field textarea,
 .page-field select{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 5px 10px;
     border-radius: 10px;
     outline: none;
@@ -120,8 +160,8 @@
 .page-field input:focus,
 .page-field textarea:focus,
 .page-field select:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .page-field textarea{
@@ -214,11 +254,20 @@
 .page-tab-btn{
     padding: 8px 12px;
     border-radius: 10px;
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border: 1px solid var(--app-border-default);
 }
 
 .page-tab-btn.is-active{
-    background: rgba(96,165,250,.20);
-    border-color: rgba(96,165,250,.55);
+    background: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+    border-color: var(--app-tab-active-background);
+}
+
+.page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
 }
 
 .page-tab-panels{

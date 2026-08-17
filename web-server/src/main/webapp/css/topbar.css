@@ -15,7 +15,7 @@
 
 .topbar-content{
     display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(420px, 760px) minmax(120px, 1fr);
+    grid-template-columns: minmax(240px, 1fr) minmax(210px, 380px) minmax(120px, 1fr);
     align-items: center;
     gap: 16px;
     min-width: 0;
@@ -69,6 +69,7 @@
     gap: 8px;
     min-width: 0;
     width: 100%;
+    max-width: 380px;
     padding: 8px 14px 8px 40px;
     border: 1px solid var(--app-input-border);
     border-radius: 12px;

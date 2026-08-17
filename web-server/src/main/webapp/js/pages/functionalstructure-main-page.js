@@ -1,7 +1,7 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
@@ -31,6 +31,7 @@ const STORAGE_KEYS = {
     sortKey: "pro.functionalstructure.main.sortKey",
     sortDirection: "pro.functionalstructure.main.sortDirection",
     columnWidths: "pro.functionalstructure.main.columnWidths",
+    hiddenColumns: "pro.functionalstructure.main.hiddenColumns",
     groupBy: "pro.functionalstructure.main.groupBy",
     groupCollapsed: "pro.functionalstructure.main.groupCollapsed"
 };
@@ -42,7 +43,7 @@ const VIEW_TYPES = {
 };
 
 const VIEW_PAGE_URLS = {
-    list: "/web/view?page=functionalstructure-main-list",
+    list: "/web/view?page=functionalstructure-main",
     horizontal: "/web/view?page=functionalstructure-main-horizontal",
     vertical: "/web/view?page=functionalstructure-main-vertical"
 };
@@ -65,7 +66,11 @@ const state = {
     topPanel: {
         customerName: "â€”",
         projectName: "â€”",
-        userName: "â€”"
+        userName: "â€”",
+        helpFileName: "",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     requirements: [],
     filteredRequirements: [],
@@ -73,11 +78,13 @@ const state = {
     selectedView: VIEW_TYPES.list,
     sortKey: "",
     sortDirection: "asc",
+    hiddenColumns: loadHiddenColumns(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
     contextRequirement: null,
-    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
+    columnsMenuOpen: false
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -156,6 +163,9 @@ function initializeEvents() {
     const activeOnlyInput = document.getElementById("filterActiveOnly");
     const clearFilterButton = document.getElementById("btnClearFilter");
     const groupByZone = document.getElementById("groupByZone");
+    const columnsButton = document.getElementById("btnColumns");
+    const columnsCloseButton = document.getElementById("btnCloseColumns");
+    const columnsList = document.getElementById("columnsList");
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -215,6 +225,28 @@ function initializeEvents() {
     document.addEventListener("dragend", () => {
         groupByZone?.classList.remove("is-drag-over");
     });
+
+    columnsButton?.addEventListener("click", () => {
+        toggleColumnsMenu();
+    });
+
+    columnsCloseButton?.addEventListener("click", () => {
+        closeColumnsMenu();
+    });
+
+    columnsList?.addEventListener("change", (event) => {
+        const input = event.target?.closest?.("input[type='checkbox'][data-column-key]");
+        const columnKey = input?.getAttribute("data-column-key");
+
+        if (!input || !columnKey) {
+            return;
+        }
+
+        setColumnVisibility(columnKey, input.checked);
+    });
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    document.addEventListener("keydown", handleDocumentKeyDown);
 
     addRootButton?.addEventListener("click", () => {
         openCreateRootRequirement();
@@ -287,10 +319,12 @@ async function loadFunctionalStructures() {
 
         state.xmlDocument = xmlDocument;
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(xmlDocument);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.requirements = parseFunctionalStructures(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         state.listColumns = buildListColumns(state.requirements);
+        applyStoredColumnVisibility();
+        renderColumnsMenu();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
             state.sortKey = "";
@@ -314,26 +348,15 @@ async function loadFunctionalStructures() {
     }
 }
 
-function parseTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector("TopPanel");
-
-    if (!topPanelElement) {
-        return {
-            customerName: "â€”",
-            projectName: "â€”",
-            userName: "â€”"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanelElement, "CustomerName", "â€”"),
-        projectName: getChildText(topPanelElement, "ProjectName", "â€”"),
-        userName: getChildText(topPanelElement, "Name", "â€”")
-    };
-}
-
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseFunctionalStructures(xmlDocument) {
@@ -724,7 +747,12 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
-    setElementHidden("btnHelp", false);
+    setElementHidden("columnsControl", !isListView);
+    setElementHidden("btnHelp", !isListView);
+
+    if (!isListView) {
+        closeColumnsMenu();
+    }
 }
 
 function setElementHidden(id, hidden) {
@@ -766,6 +794,191 @@ function loadGroupBy() {
 
 function persistGroupBy() {
     localStorage.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
+}
+
+function loadHiddenColumns() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.hiddenColumns);
+
+        if (!raw) {
+            return [];
+        }
+
+        const parsed = JSON.parse(raw);
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistHiddenColumns() {
+    localStorage.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
+}
+
+function applyStoredColumnVisibility() {
+    const validKeys = new Set(state.listColumns.map((column) => column.key));
+    const nextHidden = state.hiddenColumns.filter((key) => validKeys.has(key));
+
+    state.hiddenColumns = nextHidden;
+
+    if (!state.listColumns.length) {
+        persistHiddenColumns();
+        return;
+    }
+
+    if (getVisibleListColumns().length === 0) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== state.listColumns[0].key);
+    }
+
+    persistHiddenColumns();
+}
+
+function getVisibleListColumns() {
+    const hidden = new Set(state.hiddenColumns);
+
+    return state.listColumns.filter((column) => !hidden.has(column.key));
+}
+
+function getVisibleListColumnCount() {
+    return getVisibleListColumns().length;
+}
+
+function renderColumnsMenu() {
+    const columnsList = document.getElementById("columnsList");
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsList || !columnsButton) {
+        return;
+    }
+
+    const visibleCount = getVisibleListColumnCount();
+
+    columnsList.innerHTML = state.listColumns.map((column) => {
+        const checked = !state.hiddenColumns.includes(column.key);
+        const disableToggle = checked && visibleCount <= 1;
+
+        return `
+            <label class="functionalstructure-column-option ${checked ? "" : "is-hidden"}">
+                <input
+                        type="checkbox"
+                        data-column-key="${escapeHtml(column.key)}"
+                        ${checked ? "checked" : ""}
+                        ${disableToggle ? "disabled" : ""}
+                >
+                <span class="functionalstructure-column-option-label">${escapeHtml(column.label)}</span>
+            </label>
+        `;
+    }).join("");
+
+    updateColumnsButtonState();
+}
+
+function updateColumnsButtonState() {
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsButton) {
+        return;
+    }
+
+    const hiddenCount = state.hiddenColumns.length;
+    const hasHiddenColumns = hiddenCount > 0;
+
+    columnsButton.classList.toggle("is-partial", hasHiddenColumns);
+    columnsButton.setAttribute("aria-expanded", state.columnsMenuOpen ? "true" : "false");
+    columnsButton.setAttribute("aria-label", hasHiddenColumns
+        ? `Columns, ${hiddenCount} hidden`
+        : "Columns");
+    columnsButton.title = hasHiddenColumns
+        ? `${hiddenCount} hidden column${hiddenCount === 1 ? "" : "s"}`
+        : "Choose columns";
+}
+
+function openColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsPopover || !columnsButton) {
+        state.columnsMenuOpen = false;
+        updateColumnsButtonState();
+        return;
+    }
+
+    renderColumnsMenu();
+    columnsPopover.hidden = false;
+    state.columnsMenuOpen = true;
+    updateColumnsButtonState();
+}
+
+function closeColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (columnsPopover) {
+        columnsPopover.hidden = true;
+    }
+
+    state.columnsMenuOpen = false;
+    updateColumnsButtonState();
+}
+
+function toggleColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (!columnsPopover || columnsPopover.hidden) {
+        openColumnsMenu();
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentPointerDown(event) {
+    const columnsControl = document.getElementById("columnsControl");
+
+    if (!columnsControl || !state.columnsMenuOpen) {
+        return;
+    }
+
+    if (columnsControl.contains(event.target)) {
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentKeyDown(event) {
+    if (event.key === "Escape" && state.columnsMenuOpen) {
+        closeColumnsMenu();
+    }
+}
+
+function setColumnVisibility(columnKey, visible) {
+    const column = state.listColumns.find((item) => item.key === columnKey);
+
+    if (!column) {
+        return;
+    }
+
+    const currentlyVisible = !state.hiddenColumns.includes(columnKey);
+
+    if (visible === currentlyVisible) {
+        return;
+    }
+
+    if (!visible && getVisibleListColumnCount() <= 1) {
+        renderColumnsMenu();
+        return;
+    }
+
+    if (visible) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== columnKey);
+    } else if (!state.hiddenColumns.includes(columnKey)) {
+        state.hiddenColumns = [...state.hiddenColumns, columnKey];
+    }
+
+    persistHiddenColumns();
+    renderColumnsMenu();
+    renderListView();
 }
 
 function loadCollapsedGroupPaths() {
@@ -1040,7 +1253,7 @@ function renderListView() {
         return;
     }
 
-    const columns = state.listColumns;
+    const columns = getVisibleListColumns();
     const rows = getSortedRequirements(state.filteredRequirements);
     const responsiveWidths = getResponsiveColumnWidths(columns);
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
@@ -1054,7 +1267,7 @@ function renderListView() {
 
     headerRow.innerHTML = columns.map((column) => {
         const activeSort = state.sortKey === column.key;
-        const indicator = activeSort ? (state.sortDirection === "asc" ? "â–²" : "â–¼") : "";
+        const indicator = activeSort ? (state.sortDirection === "asc" ? "\u25B2" : "\u25BC") : "";
 
         return `
             <th data-key="${escapeHtml(column.key)}" draggable="true" class="functionalstructure-resizable-th">
@@ -1095,7 +1308,7 @@ function renderListView() {
         });
     });
 
-    initializeColumnResize(headerRow, colGroup, table);
+    initializeColumnResize(headerRow, colGroup, table, columns);
 
     tbody.innerHTML = state.groupBy.length
         ? renderGroupedRows(rows, columns)
@@ -1129,11 +1342,22 @@ function renderListView() {
         });
     });
 
+    if (table) {
+        table.dataset.filteredRowCount = String(rows.length);
+        table.dataset.totalRowCount = String(state.requirements.length);
+    }
+
+    if (window.syncDataTableFooters) {
+        window.syncDataTableFooters(table || document);
+    }
+
     if (rows.length === 0) {
         showListEmptyState("No functional structures match the current filters.");
     } else {
         hideListEmptyState();
     }
+
+    renderColumnsMenu();
 }
 
 function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
@@ -1192,7 +1416,7 @@ function renderRequirementRow(requirement, columns) {
     `;
 }
 
-function initializeColumnResize(headerRow, colGroup, table) {
+function initializeColumnResize(headerRow, colGroup, table, columns) {
     const handles = Array.from(headerRow.querySelectorAll(".functionalstructure-column-resizer"));
 
     handles.forEach((handle) => {
@@ -1216,14 +1440,14 @@ function initializeColumnResize(headerRow, colGroup, table) {
                 const delta = moveEvent.clientX - startX;
                 const nextWidth = Math.max(50, startWidth + delta);
 
-                updateColumnWidth(columnKey, nextWidth, colGroup, table);
+                updateColumnWidth(columnKey, nextWidth, colGroup, table, columns);
             }
 
             function onMouseUp(upEvent) {
                 const delta = upEvent.clientX - startX;
                 const nextWidth = Math.max(50, startWidth + delta);
 
-                updateColumnWidth(columnKey, nextWidth, colGroup, table);
+                updateColumnWidth(columnKey, nextWidth, colGroup, table, columns);
                 persistColumnWidth(columnKey, nextWidth);
                 renderListView();
 
@@ -1238,15 +1462,19 @@ function initializeColumnResize(headerRow, colGroup, table) {
     });
 }
 
-function updateColumnWidth(columnKey, widthPx, colGroup, table) {
+function updateColumnWidth(columnKey, widthPx, colGroup, table, columns) {
     const width = `${Math.max(50, Math.round(widthPx))}px`;
-    const columnIndex = state.listColumns.findIndex((column) => column.key === columnKey);
+    const columnIndex = columns.findIndex((column) => column.key === columnKey);
 
     if (columnIndex < 0) {
         return;
     }
 
-    state.listColumns[columnIndex].width = width;
+    const stateColumnIndex = state.listColumns.findIndex((column) => column.key === columnKey);
+
+    if (stateColumnIndex >= 0) {
+        state.listColumns[stateColumnIndex].width = width;
+    }
 
     const col = colGroup?.children?.[columnIndex];
 
@@ -1255,7 +1483,7 @@ function updateColumnWidth(columnKey, widthPx, colGroup, table) {
     }
 
     if (table) {
-        const totalWidth = state.listColumns.reduce((sum, column) => {
+        const totalWidth = columns.reduce((sum, column) => {
             return sum + widthToPixels(column.width, 180);
         }, 0);
 

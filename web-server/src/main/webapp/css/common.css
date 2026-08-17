@@ -30,7 +30,7 @@
     --app-accent-primary: #0b3f31;
     --app-accent-hover: #145645;
     --app-accent-soft: rgba(11, 63, 49, 0.10);
-    --app-table-row-hover: #edf6ef;
+    --app-table-row-hover: #e6efe8;
     --app-input-background: #ffffff;
     --app-input-border: #ccd6d0;
     --app-input-focus-ring: rgba(11, 63, 49, 0.18);
@@ -47,6 +47,17 @@
     --app-topbar-help-hover-background: #f3f4f6;
     --app-topbar-help-active-background: #e5e7eb;
     --app-topbar-help-active-foreground: #111827;
+    --app-tab-background: #e6efe8;
+    --app-tab-foreground: #111827;
+    --app-tab-hover-background: #dde9df;
+    --app-tab-hover-foreground: #111827;
+    --app-tab-active-background: #0b3f31;
+    --app-tab-active-foreground: #ffffff;
+    --app-diagram-background: #f4f7f3;
+    --app-diagram-node-background: #ffffff;
+    --app-diagram-node-foreground: #111827;
+    --app-diagram-node-border: #111827;
+    --app-diagram-edge-foreground: #000000;
 }
 
 body.theme-light{
@@ -87,6 +98,17 @@ body.theme-light{
     --app-topbar-help-hover-background: #f3f4f6;
     --app-topbar-help-active-background: #e5e7eb;
     --app-topbar-help-active-foreground: #111827;
+    --app-tab-background: #e6efe8;
+    --app-tab-foreground: #111827;
+    --app-tab-hover-background: #dde9df;
+    --app-tab-hover-foreground: #111827;
+    --app-tab-active-background: #0b3f31;
+    --app-tab-active-foreground: #ffffff;
+    --app-diagram-background: #f4f7f3;
+    --app-diagram-node-background: #ffffff;
+    --app-diagram-node-foreground: #111827;
+    --app-diagram-node-border: #111827;
+    --app-diagram-edge-foreground: #000000;
     --app-table-header-foreground: #6b7280;
     --app-icon-background: #ffffff;
     --app-icon-border: #d1d5db;
@@ -104,7 +126,7 @@ body.theme-light{
     --app-chip-border: #e5e7eb;
     --app-chip-foreground: #1f2937;
     --app-chip-hover-background: #eef2f7;
-    --app-table-row-hover: #edf5fd;
+    --app-table-row-hover: #e6efe8;
     --app-table-row-selected: #eef2f7;
     --app-table-row-alt: #fbfdff;
     --app-drag-zone-background: #f8fafc;
@@ -149,6 +171,17 @@ body.theme-blue{
     --app-topbar-help-hover-background: rgba(37, 99, 235, 0.08);
     --app-topbar-help-active-background: rgba(37, 99, 235, 0.14);
     --app-topbar-help-active-foreground: #1d4ed8;
+    --app-tab-background: #e6efe8;
+    --app-tab-foreground: #111827;
+    --app-tab-hover-background: #dde9df;
+    --app-tab-hover-foreground: #111827;
+    --app-tab-active-background: #0b3f31;
+    --app-tab-active-foreground: #ffffff;
+    --app-diagram-background: #f4f7f3;
+    --app-diagram-node-background: #ffffff;
+    --app-diagram-node-foreground: #111827;
+    --app-diagram-node-border: #111827;
+    --app-diagram-edge-foreground: #000000;
     --app-icon-background: #ffffff;
     --app-icon-border: #c7d7ea;
     --app-icon-foreground: #132033;
@@ -210,6 +243,17 @@ body.theme-black{
     --app-topbar-help-hover-background: rgba(102, 163, 255, 0.12);
     --app-topbar-help-active-background: rgba(102, 163, 255, 0.18);
     --app-topbar-help-active-foreground: #ffffff;
+    --app-tab-background: #e6efe8;
+    --app-tab-foreground: #111827;
+    --app-tab-hover-background: #dde9df;
+    --app-tab-hover-foreground: #111827;
+    --app-tab-active-background: #0b3f31;
+    --app-tab-active-foreground: #ffffff;
+    --app-diagram-background: #f4f7f3;
+    --app-diagram-node-background: #ffffff;
+    --app-diagram-node-foreground: #111827;
+    --app-diagram-node-border: #111827;
+    --app-diagram-edge-foreground: #000000;
     --app-icon-background: #111923;
     --app-icon-border: #334255;
     --app-icon-foreground: #f8fafc;
@@ -289,6 +333,7 @@ body.menu-preparing .side-menu{
     flex-direction: column;
     gap: 12px;
     padding: 18px;
+    background: var(--app-page-background);
 }
 
 .topbar{

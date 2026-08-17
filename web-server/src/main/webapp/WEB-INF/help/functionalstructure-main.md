@@ -1,6 +1,6 @@
-﻿# Functional Structure
+﻿# Functions
 
-This page is used to get an overview of the projectâ€™s functional structures.
+This page is used to get an overview of the project's functional structures.
 
 You can work with functional structures in three views:
 

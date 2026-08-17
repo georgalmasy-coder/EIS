@@ -49,11 +49,16 @@
 /* Generic table frame for reusable list pages */
 .table-frame{
     width: 100%;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 12px;
     overflow: hidden;
-    background: var(--panel2);
+    background: var(--app-surface-background);
     min-height: 0;
+}
+
+.table-frame.has-table-footer{
+    display: flex;
+    flex-direction: column;
 }
 
 /* Generic scroll container for reusable list pages */
@@ -63,6 +68,30 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: auto;
+}
+
+.table-frame.has-table-footer .table-scroll{
+    flex: 1 1 auto;
+    height: auto;
+}
+
+.data-table-footer{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 12px;
+    border-top: 1px solid var(--app-border-default);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table-footer-count{
+    white-space: nowrap;
 }
 
 .data-table{
@@ -77,8 +106,9 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: rgba(15,23,42,.96);
-    border-bottom: 1px solid var(--border);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-secondary);
+    border-bottom: 1px solid var(--app-border-default);
     text-align: left;
     padding: 10px 10px;
     user-select: none;
@@ -102,9 +132,9 @@
 }
 
 .data-table tbody td{
-    border-bottom: 1px solid rgba(35,52,84,.55);
+    border-bottom: 1px solid var(--app-border-default);
     padding: 9px 10px;
-    color: var(--text);
+    color: var(--app-text-primary);
     vertical-align: top;
     max-width: 100ch;
 }
@@ -143,7 +173,7 @@
 }
 
 .data-table tbody tr:hover{
-    background: rgba(96,165,250,.10);
+    background: var(--app-table-row-hover);
 }
 
 .empty{

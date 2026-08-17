@@ -292,7 +292,10 @@ export function readTopbarMetadata(source = {}) {
             projectNameLabel: "Project Name",
             userName: "—",
             userNameLabel: "User Name",
-            helpFileName: ""
+            helpFileName: "",
+            workspaceEyebrow: "",
+            workspaceHeading: "",
+            workspaceHelpText: ""
         };
     }
 
@@ -304,6 +307,9 @@ export function readTopbarMetadata(source = {}) {
     const projectName = String(source.projectName ?? "—").trim() || "—";
     const userName = String(source.userName ?? "—").trim() || "—";
     const helpFileName = String(source.helpFileName ?? "").trim();
+    const workspaceEyebrow = String(source.workspaceEyebrow ?? "").trim();
+    const workspaceHeading = String(source.workspaceHeading ?? "").trim();
+    const workspaceHelpText = String(source.workspaceHelpText ?? "").trim();
 
     return {
         customerName,
@@ -312,7 +318,10 @@ export function readTopbarMetadata(source = {}) {
         projectNameLabel: String(source.projectNameLabel ?? "Project Name").trim() || "Project Name",
         userName,
         userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name",
-        helpFileName
+        helpFileName,
+        workspaceEyebrow,
+        workspaceHeading,
+        workspaceHelpText
     };
 }
 

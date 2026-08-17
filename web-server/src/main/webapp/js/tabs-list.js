@@ -64,6 +64,78 @@
             .forEach(wrapCellContent);
     }
 
+    function ensureTableFooter(table) {
+        const frame = table?.closest?.(".table-frame.has-table-footer");
+
+        if (!frame) {
+            return null;
+        }
+
+        let footer = frame.querySelector(".data-table-footer");
+
+        if (footer) {
+            return footer;
+        }
+
+        footer = document.createElement("div");
+        footer.className = "data-table-footer";
+        footer.innerHTML = `
+            <span class="data-table-footer-count" aria-live="polite"></span>
+        `;
+
+        const scroll = frame.querySelector(".table-scroll");
+
+        if (scroll?.nextSibling) {
+            frame.insertBefore(footer, scroll.nextSibling);
+        } else {
+            frame.appendChild(footer);
+        }
+
+        return footer;
+    }
+
+    function countVisibleRows(table) {
+        const tbody = table?.tBodies?.[0] || table?.querySelector?.("tbody");
+
+        if (!tbody) {
+            return 0;
+        }
+
+        return Array.from(tbody.querySelectorAll("tr"))
+            .filter((row) => !row.hidden && window.getComputedStyle(row).display !== "none")
+            .length;
+    }
+
+    function getFooterCount(table, key, fallback) {
+        const value = Number.parseInt(table?.dataset?.[key] || "", 10);
+        return Number.isFinite(value) ? value : fallback;
+    }
+
+    function syncTableFooter(table) {
+        const footer = ensureTableFooter(table);
+
+        if (!footer) {
+            return;
+        }
+
+        const countElement = footer.querySelector(".data-table-footer-count");
+
+        if (!countElement) {
+            return;
+        }
+
+        const visibleCount = getFooterCount(table, "filteredRowCount", countVisibleRows(table));
+        const totalCount = getFooterCount(table, "totalRowCount", visibleCount);
+
+        countElement.textContent = `${visibleCount} of ${totalCount}`;
+    }
+
+    function syncDataTableFooters(root = document) {
+        const scope = root && root.querySelectorAll ? root : document;
+
+        scope.querySelectorAll(".data-table").forEach(syncTableFooter);
+    }
+
     function observeTableChanges() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -78,6 +150,16 @@
                     }
 
                     wrapTableCells(node);
+
+                    const table = node.matches?.(".data-table")
+                        ? node
+                        : node.closest?.(".data-table");
+
+                    if (table) {
+                        syncTableFooter(table);
+                    } else {
+                        syncDataTableFooters(node);
+                    }
                 });
             });
         });
@@ -90,5 +172,8 @@
 
     initTabs();
     wrapTableCells(document);
+    syncDataTableFooters(document);
     observeTableChanges();
+
+    window.syncDataTableFooters = syncDataTableFooters;
 })();

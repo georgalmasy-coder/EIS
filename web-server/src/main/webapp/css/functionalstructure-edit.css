@@ -68,6 +68,10 @@ body.functionalstructure-edit-document{
     line-height: 1.25;
 }
 
+.functionalstructure-edit-mode-label:empty{
+    display: none;
+}
+
 .functionalstructure-edit-help-button{
     width: 42px;
     min-width: 42px;
@@ -112,31 +116,6 @@ body.functionalstructure-edit-document{
     line-height: 1.35;
 }
 
-.functionalstructure-edit-status-row{
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-    min-width: 0;
-}
-
-.page-dialog-status{
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.25;
-}
-
-.functionalstructure-edit-entity-meta{
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.25;
-    text-align: right;
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
 .functionalstructure-edit-tab-bar{
     flex: 0 0 auto;
     display: flex;
@@ -156,11 +135,24 @@ body.functionalstructure-edit-document{
     border-radius: 10px;
     white-space: nowrap;
     flex: 0 0 auto;
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border: 1px solid var(--app-border-default);
 }
 
 .page-tab-btn.is-active{
-    background: rgba(96,165,250,.20);
-    border-color: rgba(96,165,250,.55);
+    background: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+    border-color: var(--app-tab-active-background);
+}
+
+.page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.functionalstructure-edit-status-row .page-dialog-status:empty{
+    display: none;
 }
 
 .functionalstructure-edit-panels{
@@ -264,9 +256,9 @@ body.functionalstructure-edit-document{
 .page-field textarea,
 .page-field select{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -277,8 +269,8 @@ body.functionalstructure-edit-document{
 .page-field input:focus,
 .page-field textarea:focus,
 .page-field select:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .page-field input[readonly],
