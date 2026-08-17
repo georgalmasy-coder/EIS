@@ -223,9 +223,9 @@ body{
 .page-field textarea,
 .page-field select{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, rgba(15,23,42,.65));
+    color: var(--app-text-primary, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -236,8 +236,8 @@ body{
 .page-field input:focus,
 .page-field textarea:focus,
 .page-field select:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary, rgba(96,165,250,.65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96,165,250,.18));
 }
 
 .page-field textarea{
@@ -407,8 +407,8 @@ body{
 }
 
 .page-tab-btn.is-active{
-    background: rgba(96,165,250,.20);
-    border-color: rgba(96,165,250,.55);
+    background: var(--app-accent-soft, rgba(96,165,250,.20));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.55));
 }
 
 .history-table-frame{
@@ -511,9 +511,9 @@ body{
     min-height: 220px;
     resize: vertical;
     overflow: auto;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, rgba(15,23,42,.65));
+    color: var(--app-text-primary, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -523,13 +523,13 @@ body{
 }
 
 .note-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary, rgba(96,165,250,.65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96,165,250,.18));
 }
 
 .relation-dummy-content{
     padding: 18px 4px 24px;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 14px;
 }
 

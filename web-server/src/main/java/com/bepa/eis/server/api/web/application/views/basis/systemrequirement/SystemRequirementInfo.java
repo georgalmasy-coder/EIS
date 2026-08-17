@@ -5,6 +5,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.*;
 import com.bepa.eis.server.dataprovider.entities.Entities;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;

@@ -94,7 +94,7 @@ body.project-main-document {
 }
 
 .project-main-filter-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     white-space: nowrap;
 }
@@ -109,9 +109,9 @@ body.project-main-document {
 
 .project-main-search-input {
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, #ffffff);
+    color: var(--app-text-primary, var(--text));
     padding: 8px 68px 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -130,14 +130,14 @@ body.project-main-document {
 }
 
 .project-main-search-input:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .project-main-search-icon {
     position: absolute;
     right: 11px;
-    color: var(--muted);
+    color: var(--app-text-tertiary, var(--muted));
     pointer-events: none;
     line-height: 1;
     display: inline-flex;
@@ -160,7 +160,7 @@ body.project-main-document {
     border-radius: 999px;
     padding: 0;
     background: transparent;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,13 +168,13 @@ body.project-main-document {
 }
 
 .project-main-search-clear:hover {
-    color: var(--text);
-    background: rgba(96, 165, 250, .12);
+    color: var(--app-text-primary, var(--text));
+    background: var(--app-control-hover-background, rgba(96, 165, 250, .12));
 }
 
 .project-main-search-clear:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .project-main-search-clear svg {
@@ -188,9 +188,9 @@ body.project-main-document {
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15,23,42,.55));
+    color: var(--app-control-foreground, var(--text));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -200,8 +200,8 @@ body.project-main-document {
 }
 
 .project-main-icon-button:hover{
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, rgba(96,165,250,.14));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.45));
 }
 
 .project-main-icon-button:active{
@@ -272,11 +272,11 @@ body.project-main-document {
     bottom: 8px;
     left: 3px;
     width: 1px;
-    background: rgba(148,163,184,.35);
+    background: var(--app-border-strong, rgba(148,163,184,.35));
 }
 
 .project-main-column-resizer:hover::after{
-    background: rgba(96,165,250,.85);
+    background: var(--app-accent-primary, rgba(96,165,250,.85));
 }
 
 body.project-main-column-resizing{

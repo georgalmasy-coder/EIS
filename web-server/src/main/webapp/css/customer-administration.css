@@ -47,7 +47,7 @@
     font-size: 15px;
     line-height: 1.1;
     font-weight: 700;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-administration-section-header .section-header-actions {
@@ -73,10 +73,10 @@
     width: 100%;
     height: 38px;
     padding: 8px 68px 8px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-input-border, var(--border));
     border-radius: 10px;
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    background: var(--app-input-background, #ffffff);
+    color: var(--app-text-primary, var(--text));
     font: inherit;
     font-size: 13px;
     outline: none;
@@ -94,12 +94,12 @@
 }
 
 .customer-administration-filter::placeholder {
-    color: var(--muted);
+    color: var(--app-text-tertiary, var(--muted));
 }
 
 .customer-administration-filter:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .customer-administration-search-filter {
@@ -111,7 +111,7 @@
 }
 
 .customer-administration-filter-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     white-space: nowrap;
 }
@@ -137,7 +137,7 @@
     border-radius: 999px;
     padding: 0;
     background: transparent;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -145,13 +145,13 @@
 }
 
 .customer-administration-search-clear:hover {
-    color: var(--text);
-    background: rgba(96, 165, 250, .12);
+    color: var(--app-text-primary, var(--text));
+    background: var(--app-control-hover-background, rgba(96, 165, 250, .12));
 }
 
 .customer-administration-search-clear:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .customer-administration-search-clear svg {
@@ -163,7 +163,7 @@
 .customer-administration-search-icon {
     position: absolute;
     right: 11px;
-    color: var(--muted);
+    color: var(--app-text-tertiary, var(--muted));
     pointer-events: none;
     line-height: 1;
     display: inline-flex;
@@ -207,7 +207,7 @@
     overscroll-behavior: contain;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
     padding-right: 2px;
 }
 
@@ -223,16 +223,16 @@
 .customer-dialog-table-frame .table-scroll::-webkit-scrollbar-track,
 .customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-track,
 .customer-edit-form .page-tab-bar::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, .80);
-    border-left: 1px solid rgba(148, 163, 184, .35);
+    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
+    border-left: 1px solid var(--app-border-default, rgba(148, 163, 184, .35));
 }
 
 .customer-administration-scroll::-webkit-scrollbar-thumb,
 .customer-dialog-table-frame .table-scroll::-webkit-scrollbar-thumb,
 .customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-thumb,
 .customer-edit-form .page-tab-bar::-webkit-scrollbar-thumb {
-    background: #94a3b8;
-    border: 3px solid rgba(15, 23, 42, .80);
+    background: var(--app-text-tertiary, #94a3b8);
+    border: 3px solid var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
     border-radius: 999px;
 }
 
@@ -240,14 +240,14 @@
 .customer-dialog-table-frame .table-scroll::-webkit-scrollbar-thumb:hover,
 .customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-thumb:hover,
 .customer-edit-form .page-tab-bar::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
+    background: var(--app-text-secondary, #cbd5e1);
 }
 
 .customer-administration-scroll::-webkit-scrollbar-corner,
 .customer-dialog-table-frame .table-scroll::-webkit-scrollbar-corner,
 .customer-dialog-panels .tab-panel.is-active::-webkit-scrollbar-corner,
 .customer-edit-form .page-tab-bar::-webkit-scrollbar-corner {
-    background: rgba(15, 23, 42, .80);
+    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .80));
 }
 
 .customer-administration-table {
@@ -277,9 +277,9 @@
     position: sticky;
     top: 0;
     z-index: 3;
-    background: rgba(17, 28, 51, .98);
-    color: var(--text);
-    border-bottom: 1px solid var(--border);
+    background: var(--app-table-header-background, rgba(17, 28, 51, .98));
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default, var(--border));
     padding: 10px 12px;
     font-size: 13px;
     font-weight: 700;
@@ -287,33 +287,33 @@
 }
 
 .customer-administration-table tbody td {
-    border-bottom: 1px solid rgba(35, 52, 84, .55);
+    border-bottom: 1px solid var(--app-border-default, rgba(35, 52, 84, .55));
     padding: 10px 12px;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 13px;
     vertical-align: top;
 }
 
 .customer-administration-table tbody tr {
     cursor: default;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-administration-table tbody tr:hover,
 .customer-administration-table tbody tr:focus-within {
-    background: rgba(96, 165, 250, .12);
-    color: var(--text);
+    background: var(--app-table-row-hover, rgba(96, 165, 250, .12));
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-administration-table tbody tr:hover td,
 .customer-administration-table tbody tr:focus-within td {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-administration-table tbody tr.is-selected,
 .customer-administration-table tbody tr.is-selected td {
     background: inherit;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-administration-table .sort {
@@ -326,7 +326,7 @@
 .customer-administration-table .sort-indicator {
     display: inline-block;
     min-width: 10px;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 11px;
     opacity: .85;
 }
@@ -349,11 +349,11 @@
     right: 3px;
     width: 1px;
     height: 60%;
-    background: rgba(170, 180, 194, .35);
+    background: var(--app-border-strong, rgba(170, 180, 194, .35));
 }
 
 .customer-administration-table .col-resizer:hover::after {
-    background: rgba(96, 165, 250, .75);
+    background: var(--app-accent-primary, rgba(96, 165, 250, .75));
 }
 
 .customer-status-pill,
@@ -364,9 +364,9 @@
     min-width: 72px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(170, 180, 194, .35);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-chip-border, rgba(170, 180, 194, .35));
+    background: var(--app-chip-background, rgba(15, 23, 42, .65));
+    color: var(--app-chip-foreground, var(--text));
     font-size: 12px;
     line-height: 1.4;
 }
@@ -435,11 +435,11 @@
     max-height: 96vh;
     max-height: 96dvh;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 14px;
-    background: rgba(17, 28, 51, .98);
-    color: var(--text);
-    box-shadow: var(--shadow);
+    background: var(--app-surface-background, rgba(17, 28, 51, .98));
+    color: var(--app-text-primary, var(--text));
+    box-shadow: var(--app-shadow, var(--shadow));
     padding: 0;
 }
 
@@ -453,8 +453,8 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: rgba(17, 28, 51, .98);
-    color: var(--text);
+    background: var(--app-surface-background, rgba(17, 28, 51, .98));
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-edit-form .page-dialog-head {
@@ -473,12 +473,12 @@
     line-height: 1.2;
     font-size: 16px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-edit-form .page-dialog-status {
     font-size: 12px;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     margin-bottom: 12px;
     line-height: 1.25;
     min-height: 16px;
@@ -499,7 +499,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-gutter: stable;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
 }
 
 .customer-edit-form .page-tab-btn,
@@ -508,9 +508,9 @@
     border-radius: 10px;
     white-space: nowrap;
     flex: 0 0 auto;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15, 23, 42, .65));
+    color: var(--app-control-foreground, var(--text));
     cursor: pointer;
     font-weight: 650;
     font-size: 13px;
@@ -524,9 +524,9 @@
 
 .customer-edit-form .page-tab-btn.is-active,
 .customer-edit-form .tab-btn.is-active {
-    background: rgba(96, 165, 250, .20);
-    border-color: rgba(96, 165, 250, .55);
-    color: var(--text);
+    background: var(--app-control-active-background, rgba(96, 165, 250, .20));
+    border-color: var(--app-control-active-border, rgba(96, 165, 250, .55));
+    color: var(--app-control-foreground, var(--text));
 }
 
 .customer-dialog-panels {
@@ -555,7 +555,7 @@
     flex: 1 1 auto;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
     padding-right: 10px;
 }
 
@@ -580,7 +580,7 @@
 }
 
 .customer-field-grid label span {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     font-weight: 400;
 }
@@ -589,9 +589,9 @@
 .customer-field-grid select,
 .customer-field-grid textarea {
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, #ffffff);
+    color: var(--app-text-primary, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -615,14 +615,14 @@
 .customer-field-grid input:focus,
 .customer-field-grid select:focus,
 .customer-field-grid textarea:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .customer-field-grid input[readonly],
 .customer-field-grid textarea[readonly] {
-    background: rgba(15, 23, 42, .42);
-    color: var(--muted);
+    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .42));
+    color: var(--app-text-secondary, var(--muted));
 }
 
 .customer-field-grid input[type="hidden"] {
@@ -658,7 +658,7 @@
 
 .customer-phone-field > span,
 .customer-phone-controls label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     font-weight: 400;
 }
@@ -666,9 +666,9 @@
 .customer-phone-country select,
 .customer-phone-input input {
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15, 23, 42, .65));
+    color: var(--app-control-foreground, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -678,15 +678,15 @@
 
 .customer-phone-field .field-help {
     margin: 6px 0 0;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 12px;
     line-height: 1.35;
 }
 
 .customer-phone-country select:focus,
 .customer-phone-input input:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .customer-summary-strip {
@@ -702,19 +702,19 @@
     gap: 4px;
     min-width: 0;
     padding: 10px 12px;
-    border: 1px solid rgba(35, 52, 84, .75);
+    border: 1px solid var(--app-border-default, rgba(35, 52, 84, .75));
     border-radius: 10px;
-    background: rgba(15, 23, 42, .42);
+    background: var(--app-surface-subtle-background, rgba(15, 23, 42, .42));
 }
 
 .customer-summary-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 12px;
     line-height: 1.2;
 }
 
 .customer-summary-value {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 13px;
     line-height: 1.35;
     min-width: 0;
@@ -729,12 +729,12 @@
     max-width: 100%;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, .55);
-    background: rgba(96, 165, 250, .14);
+    border: 1px solid var(--app-chip-border, rgba(96, 165, 250, .55));
+    background: var(--app-chip-background, rgba(96, 165, 250, .14));
 }
 
 .customer-summary-value.is-muted {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
 }
 
 .customer-dialog-table-frame {
@@ -744,9 +744,9 @@
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 14px;
-    background: var(--panel2);
+    background: var(--app-surface-background, var(--panel2));
     overflow: hidden;
     position: relative;
 }
@@ -767,7 +767,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-gutter: stable both-edges;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-text-tertiary, #94a3b8) var(--app-surface-subtle-background, rgba(15, 23, 42, .70));
     padding-right: 2px;
 }
 
@@ -778,7 +778,7 @@
     table-layout: fixed;
     border-collapse: collapse;
     background: transparent;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .customer-modules-table th,
@@ -786,22 +786,22 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: rgba(17, 28, 51, .98);
+    background: var(--app-table-header-background, rgba(17, 28, 51, .98));
     text-align: left;
     white-space: nowrap;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--app-border-default, var(--border));
     padding: 10px 12px;
-    color: var(--text);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-size: 13px;
     font-weight: 700;
 }
 
 .customer-modules-table td,
 .customer-workflow-events-table td {
-    border-bottom: 1px solid rgba(35, 52, 84, .55);
+    border-bottom: 1px solid var(--app-border-default, rgba(35, 52, 84, .55));
     padding: 10px 12px;
     vertical-align: top;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 13px;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -810,15 +810,15 @@
 
 .customer-modules-table tbody tr:hover,
 .customer-workflow-events-table tbody tr:hover {
-    background: rgba(96, 165, 250, .12);
+    background: var(--app-table-row-hover, rgba(96, 165, 250, .12));
 }
 
 .customer-modules-table input,
 .customer-modules-table select {
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, #ffffff);
+    color: var(--app-text-primary, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -829,8 +829,8 @@
 
 .customer-modules-table input:focus,
 .customer-modules-table select:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .customer-technical-field {
@@ -839,7 +839,7 @@
 
 .customer-subsection-title {
     margin: 22px 0 10px 0;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 15px;
     font-weight: 700;
 }
@@ -850,14 +850,14 @@
     gap: 10px;
     padding-top: 8px;
     margin-top: 8px;
-    border-top: 1px solid rgba(35, 52, 84, .65);
+    border-top: 1px solid var(--app-border-default, rgba(35, 52, 84, .65));
     flex: 0 0 auto;
 }
 
 .customer-edit-form .dlg-footer button {
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15, 23, 42, .65));
+    color: var(--app-control-foreground, var(--text));
     padding: 8px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -868,9 +868,9 @@
 
 .customer-edit-form .dlg-footer button.primary,
 .customer-edit-form .dlg-footer #btnSaveCustomer {
-    background: rgba(96, 165, 250, .20);
-    border-color: rgba(96, 165, 250, .55);
-    color: var(--text);
+    background: var(--app-control-active-background, rgba(96, 165, 250, .20));
+    border-color: var(--app-control-active-border, rgba(96, 165, 250, .55));
+    color: var(--app-control-foreground, var(--text));
 }
 
 .customer-edit-form .dlg-footer button:hover {

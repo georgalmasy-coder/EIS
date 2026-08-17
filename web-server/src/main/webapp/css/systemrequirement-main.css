@@ -69,9 +69,9 @@ body.systemrequirement-main-document{
     height: 38px;
     min-width: 42px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15,23,42,.55));
+    color: var(--app-control-foreground, var(--text));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -87,8 +87,8 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-view-button:hover{
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, rgba(96,165,250,.14));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.45));
 }
 
 .systemrequirement-view-button:active{
@@ -97,10 +97,10 @@ body.systemrequirement-main-document{
 
 .systemrequirement-view-button.is-active,
 .systemrequirement-view-button[aria-pressed="true"]{
-    background: rgba(96,165,250,.22);
-    border-color: rgba(96,165,250,.70);
-    color: #bfdbfe;
-    box-shadow: 0 0 0 3px rgba(96,165,250,.16);
+    background: var(--app-control-active-background, rgba(96,165,250,.22));
+    border-color: var(--app-control-active-border, rgba(96,165,250,.70));
+    color: var(--app-icon-active-foreground, #bfdbfe);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96,165,250,.16));
 }
 
 /*
@@ -119,11 +119,11 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-main-info-label{
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
 }
 
 .systemrequirement-main-info-item strong{
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .systemrequirement-main-toolbar{
@@ -156,7 +156,7 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-grouping-label{
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     white-space: nowrap;
     flex: 0 0 auto;
@@ -168,7 +168,7 @@ body.systemrequirement-main-document{
     min-height: 42px;
     flex: 1 1 auto;
     min-width: 300px;
-    border: 1px dashed rgba(148,163,184,.45);
+    border: 1px dashed var(--app-drag-zone-border, rgba(148,163,184,.45));
     border-radius: 10px;
     padding: 6px 34px 6px 6px;
     display: flex;
@@ -177,17 +177,17 @@ body.systemrequirement-main-document{
     gap: 6px;
     flex-wrap: wrap;
     box-sizing: border-box;
-    background: rgba(15,23,42,.28);
+    background: var(--app-drag-zone-background, rgba(15,23,42,.28));
     overflow: hidden;
 }
 
 .systemrequirement-grouping-zone.is-drag-over{
-    border-color: rgba(96,165,250,.72);
-    background: rgba(96,165,250,.12);
+    border-color: var(--app-accent-primary, rgba(96,165,250,.72));
+    background: var(--app-accent-soft, rgba(96,165,250,.12));
 }
 
 .systemrequirement-grouping-zone .empty{
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
 }
 
@@ -197,10 +197,10 @@ body.systemrequirement-main-document{
     gap: 6px;
     max-width: 100%;
     padding: 5px 9px;
-    border: 1px solid rgba(148,163,184,.35);
+    border: 1px solid var(--app-chip-border, rgba(148,163,184,.35));
     border-radius: 999px;
-    background: rgba(255,255,255,.06);
-    color: var(--text);
+    background: var(--app-chip-background, rgba(255,255,255,.06));
+    color: var(--app-chip-foreground, var(--text));
     cursor: grab;
     user-select: none;
     white-space: nowrap;
@@ -229,7 +229,7 @@ body.systemrequirement-main-document{
     border: 0;
     border-radius: 999px;
     background: transparent;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -240,8 +240,8 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-grouping-clear:hover{
-    color: var(--text);
-    background: rgba(96,165,250,.12);
+    color: var(--app-text-primary, var(--text));
+    background: var(--app-control-hover-background, rgba(96,165,250,.12));
 }
 
 .systemrequirement-grouping-clear:active{
@@ -295,9 +295,9 @@ body.systemrequirement-main-document{
 
 .systemrequirement-search-input{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, rgba(15,23,42,.65));
+    color: var(--app-text-primary, var(--text));
     padding: 8px 34px 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -306,8 +306,8 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-search-input:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-accent-primary, rgba(96,165,250,.65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96,165,250,.18));
 }
 
 .systemrequirement-search-icon{
@@ -338,17 +338,17 @@ body.systemrequirement-main-document{
 .systemrequirement-secondary-button{
     min-height: 36px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15,23,42,.55));
+    color: var(--app-control-foreground, var(--text));
     padding: 7px 12px;
     font: inherit;
     cursor: pointer;
 }
 
 .systemrequirement-secondary-button:hover{
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, rgba(96,165,250,.14));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.45));
 }
 
 .systemrequirement-icon-button{
@@ -356,9 +356,9 @@ body.systemrequirement-main-document{
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-icon-border, var(--border));
+    background: var(--app-icon-background, rgba(15,23,42,.55));
+    color: var(--app-icon-foreground, var(--text));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -387,8 +387,8 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-icon-button:hover{
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-icon-hover-background, rgba(96,165,250,.14));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.45));
 }
 
 .systemrequirement-icon-button:active{
@@ -396,7 +396,7 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-help-button{
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .systemrequirement-help-button svg{
@@ -494,17 +494,17 @@ body.systemrequirement-main-document{
 }
 
 .systemrequirement-table tbody tr[data-entity-id]:hover{
-    background: rgba(96,165,250,.08);
+    background: var(--app-table-row-hover, rgba(96,165,250,.08));
 }
 
 .systemrequirement-group-row td{
-    background: rgba(148,163,184,.08);
+    background: var(--app-table-row-alt, rgba(148,163,184,.08));
     font-weight: 600;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .systemrequirement-group-row.is-collapsed td{
-    background: rgba(148,163,184,.14);
+    background: var(--app-table-row-selected, rgba(148,163,184,.14));
 }
 
 .systemrequirement-group-row-inner{
@@ -674,12 +674,12 @@ body.systemrequirement-column-resizing *{
     flex-direction: column;
     justify-content: stretch;
     width: 260px;
-    border: 1px solid rgba(86,95,115,.9);
+    border: 1px solid var(--app-border-strong, rgba(86,95,115,.9));
     border-radius: 14px;
-    background: rgba(15,23,42,.88);
-    color: #fff;
+    background: var(--app-surface-background, rgba(15,23,42,.88));
+    color: var(--app-text-primary, var(--text));
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.28);
+    box-shadow: var(--app-shadow, 0 4px 12px rgba(0,0,0,.28));
     user-select: none;
 }
 
@@ -694,15 +694,15 @@ body.systemrequirement-column-resizing *{
 
 .systemrequirement-diagram-requirement-node:hover{
     transform: translateY(-2px);
-    border-color: #ffffff;
-    box-shadow: 0 8px 20px rgba(0,0,0,.38);
+    border-color: var(--app-accent-primary, #ffffff);
+    box-shadow: var(--app-shadow, 0 8px 20px rgba(0,0,0,.38));
     filter: brightness(1.08);
 }
 
 .systemrequirement-diagram-project-node{
     cursor: default;
-    background: #4b5563;
-    border-color: #7c8798;
+    background: var(--app-surface-strong-background, #4b5563);
+    border-color: var(--app-border-strong, #7c8798);
 }
 
 .systemrequirement-diagram-node-head{
@@ -716,7 +716,7 @@ body.systemrequirement-column-resizing *{
     display: block;
     flex: 0 0 auto;
     padding: 0.2rem 0.35rem;
-    color: #e5e7eb;
+    color: var(--app-text-primary, var(--text));
     font-size: 0.74rem;
     font-weight: 800;
     line-height: 1.1;
@@ -738,7 +738,7 @@ body.systemrequirement-column-resizing *{
     align-items: center;
     justify-content: center;
     padding: 0.15rem 0.5rem;
-    color: #ffffff;
+    color: var(--app-text-primary, var(--text));
     font-size: 0.82rem;
     font-weight: 700;
     line-height: 1.22;
@@ -749,7 +749,7 @@ body.systemrequirement-column-resizing *{
     display: block;
     flex: 0 0 auto;
     padding: 0.2rem 0.4rem;
-    color: #ffffff;
+    color: var(--app-text-primary, var(--text));
     font-size: 0.74rem;
     font-weight: 800;
     line-height: 1.1;
@@ -759,7 +759,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-diagram-project-node .systemrequirement-diagram-node-footer{
-    background: #6d28d9;
+    background: var(--app-accent-primary, #6d28d9);
 }
 
 .systemrequirement-diagram-status-bars{
@@ -782,7 +782,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-diagram-status-value{
-    color: #fff;
+    color: var(--app-text-primary, var(--text));
     font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -854,7 +854,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-diagram-edge{
-    stroke: rgba(148,163,184,.55);
+    stroke: var(--app-border-strong, rgba(148,163,184,.55));
     stroke-width: 1.6;
     stroke-linecap: butt;
     stroke-linejoin: round;
@@ -862,7 +862,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-diagram-edge-highlight{
-    stroke: rgba(96,165,250,.85);
+    stroke: var(--app-accent-primary, rgba(96,165,250,.85));
     stroke-width: 2.1;
 }
 
@@ -871,10 +871,10 @@ body.systemrequirement-column-resizing *{
     z-index: 2000;
     min-width: 230px;
     padding: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 12px;
-    background: rgba(15,23,42,.97);
-    box-shadow: 0 20px 45px rgba(0,0,0,.36);
+    background: var(--app-surface-background, rgba(15,23,42,.97));
+    box-shadow: var(--app-shadow, 0 20px 45px rgba(0,0,0,.36));
     display: none;
 }
 
@@ -887,7 +887,7 @@ body.systemrequirement-column-resizing *{
     width: 100%;
     border: 0;
     background: transparent;
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     text-align: left;
     padding: 9px 10px;
     border-radius: 9px;
@@ -897,7 +897,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-context-menu button:hover{
-    background: rgba(96,165,250,.16);
+    background: var(--app-accent-soft, rgba(96,165,250,.16));
 }
 
 .systemrequirement-context-menu button[hidden]{

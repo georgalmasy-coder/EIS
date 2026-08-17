@@ -1,0 +1,170 @@
+﻿# Functional Structure
+
+This page is used to view, create, edit, import and export functional structures for the selected project.
+
+Functional structures describe needs, expectations, constraints or requests from stakeholders. These functional structures can later be linked to system requirements and other engineering information.
+
+## What does this page show?
+
+The page shows a table of functional structures.
+
+At the top of the page, you can see:
+
+- customer name
+- project name
+- user name
+- data loading status
+
+The main table contains the functional structures available for the selected project.
+
+![System Connections](/images/help/SystemConnections.jpg)
+
+## Main actions
+
+The page contains the following main actions:
+
+- **Import**
+- **Export**
+- **Help**
+- **Add Functional Structure**
+
+## Import
+
+Use **Import** to import functional structures from a file.
+
+The import file may be one of the supported formats shown in the import dialog.
+
+Typical formats may include:
+
+- XML
+- XLSX
+- CSV
+
+After selecting a file, the import dialog can be used to start the import.
+
+## Export
+
+Use **Export** to export functional structures from the current project.
+
+The export dialog allows you to choose the export format.
+
+Available export formats may include:
+
+- XLSX
+- CSV
+- PDF
+- XML
+
+The export dialog may also include options such as whether inactive functional structures should be included.
+
+## Add Functional Structure
+
+Use **Add Functional Structure** to create a new functional structure.
+
+When adding or editing a functional structure, a dialog is opened with several tabs.
+
+## Edit dialog
+
+The edit dialog contains the following tabs:
+
+- **Basis Info**
+- **History**
+- **Attachments**
+- **Notes**
+- **Links**
+- **Linked To ...**
+
+## Basis Info
+
+The **Basis Info** tab contains the main information about the functional structure.
+
+Depending on the project configuration, the fields may include information such as:
+
+- logical code
+- logical name
+- logical description
+- status
+- priority
+- owner
+- dates
+- other project-specific fields
+
+Some fields may be read-only, while others can be edited.
+
+Required fields may be marked with an asterisk.
+
+## History
+
+The **History** tab shows previous changes to the functional structure.
+
+The history table may include:
+
+- changed date and time
+- changed by
+- version
+
+This can be used to understand when the functional structure was updated and by whom.
+
+## Attachments
+
+The **Attachments** tab shows files attached to the functional structure.
+
+Use **Add Attachment** to add a new file.
+
+When adding an attachment, select a file and enter a description.
+
+Attachments can be useful for supporting documentation such as:
+
+- drawings
+- specifications
+- meeting notes
+- external documents
+- screenshots
+
+## Notes
+
+The **Notes** tab shows notes related to the functional structure.
+
+Use **Add Note** to create a new note.
+
+Notes can be used for comments, clarification, review input or internal observations.
+
+## Links
+
+The **Links** tab is reserved for links related to the functional structure.
+
+If the tab shows **Under Construction**, the functionality is not yet available.
+
+## Linked To ...
+
+The **Linked To ...** tab shows relations from the functional structure to other entities.
+
+This can help show how a functional structure is connected to other parts of the project, such as system requirements.
+
+## Saving changes
+
+Use **Save** in the edit dialog to save changes.
+
+Use **Cancel** to close the dialog without saving.
+
+## If data is not shown
+
+If no functional structures are shown, it may be because:
+
+- data is still loading
+- no functional structures exist for the selected project
+- there was an error while loading data
+- the current user does not have access to the expected data
+
+Check the **Data** field at the top of the page to see whether data has been loaded or whether an error occurred.
+
+## Good practices
+
+- Use clear and consistent logical names.
+- Write descriptions so they can be understood by both technical and non-technical stakeholders.
+- Add notes when clarification is needed.
+- Use attachments for supporting documentation.
+- Use relations to connect functional structures to relevant system requirements.
+- Export the list when functional structures need to be reviewed outside the system.
+
+

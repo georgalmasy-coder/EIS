@@ -2,7 +2,7 @@
     "use strict";
 
     const CUSTOMERS_XML_URL = "/api/customersprojects";
-    const PROJECT_SELECTED_URL = "/api/projectselected";
+    const PROJECT_SELECTED_URL = "/Menu";
 
     const form = document.getElementById("selectProjectForm");
     const customerSelect = document.getElementById("customerSelect");
@@ -229,6 +229,7 @@
 
     async function postProjectSelected(customerId, projectId) {
         const body = new URLSearchParams();
+        body.set("cmd", "selectproject");
         body.set("customerId", customerId);
         body.set("projectId", projectId);
 

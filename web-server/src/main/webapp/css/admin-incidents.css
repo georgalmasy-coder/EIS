@@ -74,13 +74,13 @@ body.incident-main-document {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     white-space: nowrap;
 }
 
 .incident-main-row-count strong {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .incident-main-count-field {
@@ -92,16 +92,16 @@ body.incident-main-document {
 }
 
 .incident-main-field-label {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 13px;
     white-space: nowrap;
 }
 
 .incident-main-count-input {
     width: 120px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border, var(--border));
+    background: var(--app-input-background, #ffffff);
+    color: var(--app-text-primary, var(--text));
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -119,8 +119,8 @@ body.incident-main-document {
 }
 
 .incident-main-count-input:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-accent-primary, rgba(96, 165, 250, .65));
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring, rgba(96, 165, 250, .18));
 }
 
 .incident-main-icon-button {
@@ -128,9 +128,9 @@ body.incident-main-document {
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-control-border, var(--border));
+    background: var(--app-control-background, rgba(15,23,42,.55));
+    color: var(--app-control-foreground, var(--text));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -140,8 +140,8 @@ body.incident-main-document {
 }
 
 .incident-main-icon-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-control-hover-background, rgba(96,165,250,.14));
+    border-color: var(--app-accent-primary, rgba(96,165,250,.45));
 }
 
 .incident-main-icon-button:active {
@@ -199,11 +199,11 @@ body.incident-main-document {
 }
 
 .incident-main-primary-value {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
 }
 
 .incident-main-secondary-value {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 11px;
     line-height: 1.15;
 }
@@ -235,11 +235,11 @@ body.incident-main-document {
     bottom: 8px;
     left: 3px;
     width: 1px;
-    background: rgba(148,163,184,.35);
+    background: var(--app-border-strong, rgba(148,163,184,.35));
 }
 
 .incident-main-column-resizer:hover::after {
-    background: rgba(96,165,250,.85);
+    background: var(--app-accent-primary, rgba(96,165,250,.85));
 }
 
 .incident-main-column-resizing {
@@ -258,7 +258,7 @@ body.incident-main-document {
 .incident-main-table tbody tr:hover,
 .incident-main-table tbody tr.is-previewed,
 .incident-main-table tbody tr:focus-visible {
-    background: rgba(96, 165, 250, .08);
+    background: var(--app-table-row-hover, rgba(96, 165, 250, .08));
 }
 
 .incident-main-empty {
@@ -278,10 +278,10 @@ body.incident-main-document {
     flex-direction: column;
     gap: 8px;
     padding: 12px;
-    border: 1px solid rgba(35,52,84,.95);
+    border: 1px solid var(--app-border-default, rgba(35,52,84,.95));
     border-radius: 12px;
-    background: rgba(8, 14, 28, .98);
-    box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    background: var(--app-surface-background, rgba(8, 14, 28, .98));
+    box-shadow: var(--app-shadow, 0 20px 50px rgba(0,0,0,.45));
     pointer-events: none;
 }
 
@@ -294,14 +294,14 @@ body.incident-main-document {
 }
 
 .incident-main-trace-tooltip-title {
-    color: var(--text);
+    color: var(--app-text-primary, var(--text));
     font-size: 13px;
     font-weight: 700;
     min-width: 0;
 }
 
 .incident-main-trace-tooltip-meta {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 11px;
     text-align: right;
     min-width: 0;
@@ -312,9 +312,9 @@ body.incident-main-document {
     overflow: auto;
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid rgba(35,52,84,.8);
-    background: rgba(2, 8, 23, .78);
-    color: var(--text);
+    border: 1px solid var(--app-border-default, rgba(35,52,84,.8));
+    background: var(--app-surface-subtle-background, rgba(2, 8, 23, .78));
+    color: var(--app-text-primary, var(--text));
     font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     white-space: pre-wrap;
     word-break: break-word;
@@ -323,15 +323,15 @@ body.incident-main-document {
 .incident-main-trace-dialog {
     width: min(1100px, calc(100vw - 24px));
     max-width: 1100px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default, var(--border));
     border-radius: 12px;
-    background: rgba(15, 23, 42, .98);
+    background: var(--app-surface-background, rgba(15, 23, 42, .98));
     padding: 0;
     box-shadow: var(--shadow);
 }
 
 .incident-main-trace-dialog::backdrop {
-    background: rgba(15, 23, 42, .5);
+    background: var(--app-backdrop, rgba(15, 23, 42, .5));
 }
 
 .incident-main-trace-dialog-form {
@@ -358,19 +358,19 @@ body.incident-main-document {
 .incident-main-trace-dialog-close {
     width: 32px;
     height: 32px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-control-border, var(--border));
     border-radius: 999px;
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    background: var(--app-control-background, rgba(15,23,42,.55));
+    color: var(--app-control-foreground, var(--text));
     cursor: pointer;
 }
 
 .incident-main-trace-dialog-close:hover {
-    background: rgba(96,165,250,.14);
+    background: var(--app-control-hover-background, rgba(96,165,250,.14));
 }
 
 .incident-main-trace-dialog-meta {
-    color: var(--muted);
+    color: var(--app-text-secondary, var(--muted));
     font-size: 12px;
     margin-bottom: 12px;
 }
@@ -382,9 +382,9 @@ body.incident-main-document {
     overflow: auto;
     padding: 12px;
     border-radius: 12px;
-    border: 1px solid rgba(35,52,84,.8);
-    background: rgba(2, 8, 23, .78);
-    color: var(--text);
+    border: 1px solid var(--app-border-default, rgba(35,52,84,.8));
+    background: var(--app-surface-subtle-background, rgba(2, 8, 23, .78));
+    color: var(--app-text-primary, var(--text));
     font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     white-space: pre-wrap;
     word-break: break-word;
