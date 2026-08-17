@@ -332,32 +332,9 @@ function applyModeUi() {
         readOnlyBanner.hidden = !state.readOnly;
     }
 
-    setText("pageModeLabel", getModeLabel());
-    setText("entityMeta", getEntityMetaLabel());
-
     if (state.readOnly) {
         setFormFieldsReadOnly();
     }
-}
-
-function getModeLabel() {
-    if (state.mode === MODES.editVersion) return buildHistoricalVersionLabel();
-    if (state.mode === MODES.createChild) return "Create Sub Logical Structure";
-    if (state.mode === MODES.createRoot) return "Create Root Logical Structure";
-    return "Edit Logical Structure";
-}
-
-function buildHistoricalVersionLabel() {
-    return state.version
-        ? `Historical version ${state.version}`
-        : "Historical version";
-}
-
-function getEntityMetaLabel() {
-    if (state.mode === MODES.createRoot) return "New root requirement";
-    if (state.mode === MODES.createChild) return state.id ? `Parent Entity ID: ${state.id}` : "New child requirement";
-    if (state.mode === MODES.editVersion) return `Entity ID: ${state.id || "—"} · Version: ${state.version || "—"}`;
-    return `Entity ID: ${state.id || "—"}`;
 }
 
 function getEntityIdFromCurrentDoc() {
