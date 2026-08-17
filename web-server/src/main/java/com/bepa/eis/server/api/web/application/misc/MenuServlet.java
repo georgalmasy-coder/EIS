@@ -12,6 +12,7 @@ import com.bepa.eis.server.api.DTO.CustomerProject;
 import com.bepa.eis.server.api.DTO.Menu;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericServlet;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.misc.CustomerProjectProvider;
 import com.bepa.eis.server.dataprovider.misc.MenuProvider;
@@ -252,7 +253,7 @@ public class MenuServlet extends GenericServlet {
         StringBuilder xml = new StringBuilder();
         appendXmlHeader(xml);
         xml.append("<menuEditor>");
-        appendTopPanel(xml, webSession);
+        appendTopPanel(xml, webSession, PageType.ADMIN_MENU_EDITOR_PAGE);
         appendLookups(xml, menuProvider);
         appendMenuItems(xml, menuProvider.getAllMenuRows());
         xml.append("</menuEditor>");
@@ -267,7 +268,7 @@ public class MenuServlet extends GenericServlet {
         StringBuilder xml = new StringBuilder();
         appendXmlHeader(xml);
         xml.append("<menuEditor>");
-        appendTopPanel(xml, webSession);
+        appendTopPanel(xml, webSession, PageType.ADMIN_MENU_EDITOR_PAGE);
         appendLookups(xml, menuProvider);
         appendMenuItemDetail(xml, menuRow);
         xml.append("</menuEditor>");
@@ -276,14 +277,15 @@ public class MenuServlet extends GenericServlet {
 
     private void appendTopPanel(
             StringBuilder xml,
-            WebSession webSession
+            WebSession webSession,
+            PageType pageType
     ) {
         xml.append("<TopPanel>");
 
         if (webSession != null) {
             try {
                 TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-                TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+                TopPanel topPanel = topPanelProvider.getTopPanelBySession(pageType);
 
                 if (topPanel != null && topPanel.getTopPanelElements() != null) {
                     topPanel.getTopPanelElements().getElements().forEach(field -> {
@@ -364,17 +366,9 @@ public class MenuServlet extends GenericServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
-
-            if (topPanel != null && topPanel.getTopPanelElements() != null) {
-                topPanel.getTopPanelElements().getElements().forEach(field -> {
-                    if (field == null || field.getFieldName() == null || field.getFieldName().isBlank()) {
-                        return;
-                    }
-
-                    appendElement(topPanelElement, field.getFieldName(), field.toString());
-                });
-            }
+            appendElement(topPanelElement, "CustomerName", topPanelProvider.getCustomerName());
+            appendElement(topPanelElement, "ProjectName", topPanelProvider.getProjectName());
+            appendElement(topPanelElement, "UserName", topPanelProvider.getUserName());
         } catch (Exception ignored) {
             // Best-effort for the public menu payload.
         }

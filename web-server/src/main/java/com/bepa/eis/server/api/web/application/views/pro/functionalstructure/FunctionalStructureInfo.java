@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
 import com.bepa.eis.server.api.web.application.views.common.*;
 import com.bepa.eis.server.dataprovider.entities.Entities;
@@ -33,7 +34,7 @@ public class FunctionalStructureInfo extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.FUNCTIONAL_STRUCTURE_EDIT_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         Entities functionalStructures;

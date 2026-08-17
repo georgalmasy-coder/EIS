@@ -81,6 +81,7 @@ public final class GlobalConfiguration {
     private static final long FILE_LISTENER_INTERVAL_MILLIS = 5000L;
 
     private static final AtomicReference<Properties> PROPERTIES = new AtomicReference<>(new Properties());
+    private static volatile String currentThemeName = "LIGHT";
 
     private static final File CONFIG_FILE = resolveConfigurationFile();
 
@@ -118,6 +119,23 @@ public final class GlobalConfiguration {
 
     public static boolean isWebServerApplication() {
         return WEB_SERVER_APPLICATION_NAME.equalsIgnoreCase(getApplicationName());
+    }
+
+    public static String getCurrentThemeName() {
+        return currentThemeName;
+    }
+
+    public static synchronized void setCurrentThemeName(String themeName) {
+        if (isEmpty(themeName)) {
+            currentThemeName = "LIGHT";
+            return;
+        }
+
+        currentThemeName = themeName.trim().toUpperCase(Locale.ENGLISH);
+    }
+
+    public static int getThemeId() {
+        return getInt("ui.theme.id", 1, 1, 3);
     }
 
     public static String getEisHome() {
@@ -628,6 +646,7 @@ public final class GlobalConfiguration {
         content.append("udv.mode=false").append(lineSeparator);
         content.append("udv.customerid=1").append(lineSeparator);
         content.append("udv.projectid=1").append(lineSeparator);
+        content.append("ui.theme.id=1").append(lineSeparator);
         content.append(lineSeparator);
     }
 

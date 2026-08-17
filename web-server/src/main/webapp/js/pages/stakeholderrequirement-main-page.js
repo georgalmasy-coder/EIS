@@ -1,12 +1,12 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadStakeholderRequirementDiagramPdf } from "./stakeholderrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import {
     getDirectChild,
     getDirectText,
@@ -65,7 +65,10 @@ const state = {
     topPanel: {
         customerName: "—",
         projectName: "—",
-        userName: "—"
+        userName: "—",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     requirements: [],
     filteredRequirements: [],
@@ -287,7 +290,7 @@ async function loadStakeholderRequirements() {
 
         state.xmlDocument = xmlDocument;
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(xmlDocument);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.requirements = parseStakeholderRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         state.listColumns = buildListColumns(state.requirements);
@@ -321,19 +324,32 @@ function parseTopPanel(xmlDocument) {
         return {
             customerName: "—",
             projectName: "—",
-            userName: "—"
+            userName: "—",
+            workspaceEyebrow: "",
+            workspaceHeading: "",
+            workspaceHelpText: ""
         };
     }
 
     return {
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
+        userName: getChildText(topPanelElement, "Name", "—"),
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseStakeholderRequirements(xmlDocument) {
@@ -732,7 +748,6 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
-    setElementHidden("btnHelp", false);
 }
 
 function setElementHidden(id, hidden) {

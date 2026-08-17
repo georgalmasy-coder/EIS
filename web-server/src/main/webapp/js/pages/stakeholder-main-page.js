@@ -6,6 +6,7 @@ import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { fieldDisplayValue, fieldHeader, fieldVisible, fieldControl, fieldValue } from "../core/field-display.js";
 import { compareSortableValues, applySortIndicators } from "../components/sortable-table.js";
+import { parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
 import { isTruthy } from "../core/utils.js";
 
@@ -103,7 +104,7 @@ async function loadStakeholders() {
             || xmlDocument.documentElement;
 
         state.xmlDocument = xmlDocument;
-        state.topPanel = parseTopPanel(root);
+        state.topPanel = parsePageTopPanel(root);
         state.rows = parseRows(root);
         state.columns = buildColumns(state.rows);
 

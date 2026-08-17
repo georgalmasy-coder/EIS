@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import jakarta.servlet.annotation.WebServlet;
@@ -87,7 +88,7 @@ public class IncidentMaintenanceServlet extends GenericDataProviderServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.INCIDENT_MAIN_PAGE);
 
             if (topPanel != null && topPanel.getTopPanelElements() != null) {
                 for (com.bepa.eis.server.dataprovider.fields.AbstractField field : topPanel.getTopPanelElements().getElements()) {

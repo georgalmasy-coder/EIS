@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
@@ -89,7 +90,8 @@ public class BaselineServlet extends GenericDataProviderServlet {
         appendTopPanel(
                 xmlDocument,
                 root,
-                webSession
+                webSession,
+                PageType.BASELINE_MAIN_PAGE
         );
 
         xmlDocument.appendTextElement(
@@ -145,7 +147,8 @@ public class BaselineServlet extends GenericDataProviderServlet {
         appendTopPanel(
                 xmlDocument,
                 root,
-                webSession
+                webSession,
+                PageType.BASELINE_DETAIL_PAGE
         );
 
         appendBaseline(
@@ -213,7 +216,8 @@ public class BaselineServlet extends GenericDataProviderServlet {
         appendTopPanel(
                 xmlDocument,
                 root,
-                webSession
+                webSession,
+                PageType.BASELINE_MAIN_PAGE
         );
 
         Element baseline = xmlDocument.appendElement(
@@ -257,7 +261,8 @@ public class BaselineServlet extends GenericDataProviderServlet {
     private void appendTopPanel(
             BaselineXmlDocument xmlDocument,
             Element parent,
-            WebSession webSession
+            WebSession webSession,
+            PageType pageType
     ) throws Exception {
         Element topPanelElement = xmlDocument.appendElement(
                 parent,
@@ -269,7 +274,7 @@ public class BaselineServlet extends GenericDataProviderServlet {
         }
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(pageType);
 
         if (topPanel == null || topPanel.getTopPanelElements() == null) {
             return;

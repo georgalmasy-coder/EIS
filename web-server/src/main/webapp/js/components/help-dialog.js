@@ -1,28 +1,62 @@
+let helpDialogInitialized = false;
+
 export function initHelpDialog() {
+    bindHelpDialogEvents();
+}
+
+export async function openHelpDialogForPage(page, title = "Help") {
+    const normalizedPage = String(page || "").trim();
+
+    if (!normalizedPage) {
+        return false;
+    }
+
     const dialog = document.getElementById("helpDialog");
     const titleElement = document.getElementById("helpDialogTitle");
     const contentElement = document.getElementById("helpDialogContent");
-    const closeButton = document.getElementById("helpDialogCloseButton");
-    const okButton = document.getElementById("helpDialogOkButton");
 
     if (!dialog || !titleElement || !contentElement) {
-        return;
+        try {
+            await fetchHelpMarkdown(normalizedPage);
+        } catch (error) {
+            console.error("Failed to load help", error);
+        }
+
+        return false;
     }
 
-    document.querySelectorAll("[data-help-page]").forEach((button) => {
-        button.addEventListener("click", async () => {
+    await openHelpDialog({
+        dialog,
+        titleElement,
+        contentElement,
+        page: normalizedPage,
+        title
+    });
+
+    return true;
+}
+
+function bindHelpDialogEvents() {
+    if (!helpDialogInitialized) {
+        helpDialogInitialized = true;
+
+        document.addEventListener("click", async (event) => {
+            const button = event.target?.closest?.("[data-help-page]");
+
+            if (!button) {
+                return;
+            }
+
             const page = button.getAttribute("data-help-page");
             const title = button.getAttribute("data-help-title") || "Help";
 
-            await openHelpDialog({
-                dialog,
-                titleElement,
-                contentElement,
-                page,
-                title
-            });
+            await openHelpDialogForPage(page, title);
         });
-    });
+    }
+
+    const dialog = document.getElementById("helpDialog");
+    const closeButton = document.getElementById("helpDialogCloseButton");
+    const okButton = document.getElementById("helpDialogOkButton");
 
     closeButton?.addEventListener("click", () => {
         closeHelpDialog(dialog);

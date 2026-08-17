@@ -6,9 +6,11 @@ import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.web.application.cache.CustomerBasisInfo;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.ProjectBasisInfo;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.UserId;
+import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.strings.CustomerName;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.strings.UserName;
@@ -36,16 +38,46 @@ public class TopPanelProvider extends GenericProvider {
     private UserId userId = null;
     private UserName userName = null;
 
-    /**
-     * Retrieves a {@code Customer} object using the customer ID from the provided {@code WebSession}.
-     *
-     * @return the {@code Customer} object corresponding to the customer ID provided in the {@code WebSession}.
-     * @throws SQLException if no customer is found for the given customer ID or if a database access error occurs.
-     */
-    public TopPanel getTopPanelBySession() throws SQLException {
+    public TopPanel getTopPanelBySession(PageType pageType) throws SQLException {
         findCustomerInfo();
         findProjectInfo();
         findUserInfo();
+        if (pageType != null) {
+
+            if (pageType.isHelpEnabled()) {
+                HelpFileName pageName = new HelpFileName();
+                pageName.setFieldNotVisible();
+                pageName.setValue(pageType.getPageName());
+                getTopPanelElement().addElement(pageName);
+            }
+
+            TopPanelTitle topPanelTitle = new TopPanelTitle();
+            topPanelTitle.setFieldNotVisible();
+            topPanelTitle.setValue(projectName.getValue() + " - " + pageType.getTitle().toLowerCase());
+            getTopPanelElement().addElement(topPanelTitle);
+
+            if (pageType.getWorkspaceEyebrow() != null && !pageType.getWorkspaceEyebrow().isBlank()) {
+                WorkspaceEyebrow workspaceEyebrow = new WorkspaceEyebrow();
+                workspaceEyebrow.setFieldNotVisible();
+                workspaceEyebrow.setValue(pageType.getWorkspaceEyebrow());
+                getTopPanelElement().addElement(workspaceEyebrow);
+            }
+
+            if (pageType.getWorkspaceHeading() != null && !pageType.getWorkspaceHeading().isBlank()) {
+                WorkspaceHeading workspaceHeading = new WorkspaceHeading();
+                workspaceHeading.setFieldNotVisible();
+                workspaceHeading.setValue(pageType.getWorkspaceHeading());
+                getTopPanelElement().addElement(workspaceHeading);
+            }
+
+            if (pageType.getWorkspaceHelpText() != null && !pageType.getWorkspaceHelpText().isBlank()) {
+                WorkspaceHelpText workspaceHelpText = new WorkspaceHelpText();
+                workspaceHelpText.setFieldNotVisible();
+                workspaceHelpText.setValue(pageType.getWorkspaceHelpText());
+                getTopPanelElement().addElement(workspaceHelpText);
+            }
+
+        }
         return topPanel;
     }
 
@@ -61,7 +93,9 @@ public class TopPanelProvider extends GenericProvider {
 
     private void findUserInfo() throws SQLException {
         getTopPanelElement().addElement(new UserId(getUserId()));
-        getTopPanelElement().addElement(new UserName(getUserName()));
+        Name name = new Name();
+        name.setValue(getUserName());
+        getTopPanelElement().addElement(name);
     }
 
     private ListOfElements getTopPanelElement() {
@@ -157,6 +191,159 @@ public class TopPanelProvider extends GenericProvider {
             userId = new UserId( 0);
             userName = new UserName("--");
             log.error("User not found for userId: {}", getWebSession().getUserId());
+        }
+    }
+
+    private static class HelpFileName extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "HelpFileName";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class TopPanelTitle extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "TopPanelTitle";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class WorkspaceEyebrow extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "WorkspaceEyebrow";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class WorkspaceHeading extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "WorkspaceHeading";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class WorkspaceHelpText extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "WorkspaceHelpText";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
+        }
+    }
+
+    private static class Name extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "Name";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "User Name";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "User Name";
+        }
+
+        @Override
+        public Integer getFieldMinLength() {
+            return 5;
+        }
+
+        @Override
+        public Integer getFieldMaxLength() {
+            return 100;
+        }
+
+        @Override
+        public Integer getFieldDisplayLength() {
+            return 25;
+        }
+
+        @Override
+        public String toString() {
+            return getValue() != null  ? getValue() : "";
         }
     }
 }

@@ -22,7 +22,11 @@ export function parseTopPanel(xmlDocument, options = {}) {
         ...readTopbarMetadata(topPanelElement),
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: userName || "—"
+        userName: userName || "—",
+        helpFileName: getChildText(topPanelElement, "HelpFileName", ""),
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
 }
 
@@ -38,6 +42,9 @@ export function applyTopPanel(topPanel, elements, options = {}) {
     setText(elements.customerName, metadata.customerName);
     setText(elements.projectName, metadata.projectName);
     setText(elements.userName, metadata.userName);
+    setText(elements.workspaceEyebrow, metadata.workspaceEyebrow, "");
+    setText(elements.workspaceHeading, metadata.workspaceHeading, "");
+    setText(elements.workspaceHelpText, metadata.workspaceHelpText, "");
 }
 
 export function applyTopPanelFromDocument(xmlDocument, elements, options = {}) {

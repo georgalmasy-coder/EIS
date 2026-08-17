@@ -1,54 +1,79 @@
 .topbar{
-    display: flex;
-    gap: 12px;
-    align-items: stretch;
-    justify-content: space-between;
-    flex: 0 0 auto;
-    margin: 0;
-}
-
-.topbar-meta{
-    display: grid;
-    gap: 6px;
-    flex: 1;
+    --topbar-breakout: 18px;
+    display: block;
+    width: calc(100% + (var(--topbar-breakout) * 2));
+    margin: calc(-1 * var(--topbar-breakout)) calc(-1 * var(--topbar-breakout)) 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #f9fafc 0%, #eef1f5 100%);
+    border: 0;
+    border-top: 1px solid #303846;
+    border-bottom: 1px solid rgba(150, 158, 170, 0.45);
+    box-shadow: none;
     min-width: 0;
 }
 
-.topbar-status-panel{
-    display: none;
-    min-width: 260px;
-    align-content: start;
-}
-
-.topbar-meta-content{
+.topbar-content{
     display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(300px, 460px) minmax(120px, 1fr);
-    grid-template-areas: "meta search logo";
+    grid-template-columns: minmax(240px, 1fr) minmax(420px, 760px) minmax(120px, 1fr);
     align-items: center;
     gap: 16px;
+    min-width: 0;
     width: 100%;
+    min-height: 84px;
+    padding: 0 22px 0 0;
+    box-sizing: border-box;
 }
 
-.topbar-meta-lines{
-    grid-area: meta;
-    display: grid;
-    gap: 6px;
+.topbar-project{
     min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    justify-self: start;
+    padding-left: 22px;
+}
+
+.topbar-project-prefix{
+    color: var(--app-topbar-title-prefix-color);
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.topbar-project-separator{
+    color: var(--app-topbar-title-prefix-color);
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.topbar-project strong{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--app-topbar-title-color);
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 800;
 }
 
 .topbar-search{
-    grid-area: search;
+    position: relative;
     justify-self: center;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    min-width: 0;
     width: 100%;
-    min-width: 300px;
-    padding: 4px 8px 4px 12px;
-    border: 1px solid rgba(120, 120, 120, 0.35);
-    border-radius: 999px;
-    background: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 8px 14px 8px 40px;
+    border: 1px solid var(--app-input-border);
+    border-radius: 12px;
+    background: var(--app-input-background);
+    box-shadow: none;
 }
 
 .topbar-search-input{
@@ -58,18 +83,18 @@
     outline: 0;
     background: transparent;
     font: inherit;
-    color: #111827;
-    caret-color: #111827;
+    color: var(--app-topbar-title-color);
+    caret-color: var(--app-topbar-title-color);
 }
 
 .topbar-search-input::placeholder{
-    color: #6b7280;
+    color: var(--app-text-tertiary);
 }
 
 .topbar-search-count{
     flex: 0 0 auto;
     min-width: 44px;
-    color: #374151;
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1;
     text-align: center;
@@ -93,74 +118,97 @@
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: #333333;
+    color: var(--app-topbar-help-foreground);
     cursor: pointer;
     line-height: 1;
     font-size: 15px;
 }
 
 .topbar-search-button:hover{
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--app-control-hover-background);
 }
 
 .topbar-search-button:focus{
-    outline: 2px solid rgba(4, 107, 210, 0.35);
+    outline: 2px solid var(--app-input-focus-ring);
     outline-offset: 1px;
 }
 
 .topbar-search-icon{
-    flex: 0 0 auto;
-    color: #374151;
-    font-size: 22px;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    color: var(--app-text-secondary);
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     line-height: 1;
+    transform: translateY(-50%);
+    pointer-events: none;
 }
 
-.topbar-search-highlight{
-    padding: 0 1px;
-    border-radius: 2px;
-    background: rgba(37, 99, 235, 0.96);
-    color: #ffffff;
-}
-
-.topbar-search-highlight-active{
-    background: #ff9800;
-    color: #111827;
-}
-
-.topbar-logo{
-    grid-area: logo;
-    justify-self: end;
-    flex: 0 0 auto;
+.topbar-actions{
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    min-width: 0;
+    justify-self: end;
+    padding-right: 2px;
 }
 
-.eis-logo{
-    display: block;
-    max-height: 40px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+.topbar-help-button{
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--app-control-border);
+    background: var(--app-control-background);
+    color: var(--app-topbar-help-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .08s ease;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.topbar-help-button svg{
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+.topbar-help-button:hover{
+    background: var(--app-control-hover-background);
+}
+
+.topbar-help-button:active{
+    transform: translateY(1px);
 }
 
 @media (max-width: 900px){
-    .topbar-meta-content{
+    .topbar{
+        --topbar-breakout: 12px;
+    }
+
+    .topbar-content{
         grid-template-columns: 1fr;
-        grid-template-areas:
-            "meta"
-            "search"
-            "logo";
+        gap: 12px;
+        min-height: 84px;
     }
 
     .topbar-search{
-        justify-self: stretch;
         width: 100%;
-        min-width: 0;
     }
 
-    .topbar-logo{
-        justify-self: start;
-        justify-content: flex-start;
+    .topbar-actions{
+        justify-content: flex-end;
     }
 }

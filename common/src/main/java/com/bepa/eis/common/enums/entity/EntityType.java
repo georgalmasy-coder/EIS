@@ -47,7 +47,7 @@ public enum EntityType {
             CONTRACTORNAME
     ),
 
-    STAKEHOLDER_REQUIREMENT(5, "STH", "Stakeholder requirement", "stakeholderRequirementDocument", "stakeholderRequirements", "stakeholderRequirement",
+    STAKEHOLDER_REQUIREMENT(5, "STK", "Stakeholder requirement", "stakeholderRequirementDocument", "stakeholderRequirements", "stakeholderRequirement",
             new EntityDataElement[]{
                     BASISREQCODE,
                     CODELEVEL,

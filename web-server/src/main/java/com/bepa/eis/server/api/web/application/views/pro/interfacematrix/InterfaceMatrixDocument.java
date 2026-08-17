@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
@@ -36,7 +37,7 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession();
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.INTERFACE_MANAGEMENT_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         buildInterfaceMatrixDocument();

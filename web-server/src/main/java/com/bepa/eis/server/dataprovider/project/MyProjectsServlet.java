@@ -3,12 +3,14 @@ package com.bepa.eis.server.dataprovider.project;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.basis.baseline.BaselineXmlDocument;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.projectstatus.overview.NotificationProvider;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
@@ -253,24 +255,21 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.MY_PROJECTS_PAGE);
 
-            xmlDocument.appendTextElement(
-                    topPanelElement,
-                    "CustomerName",
-                    topPanelProvider.getCustomerName()
-            );
+            if (topPanel != null && topPanel.getTopPanelElements() != null) {
+                topPanel.getTopPanelElements().getElements().forEach(field -> {
+                    if (field == null || field.getFieldName() == null || field.getFieldName().isBlank()) {
+                        return;
+                    }
 
-            xmlDocument.appendTextElement(
-                    topPanelElement,
-                    "ProjectName",
-                    topPanelProvider.getProjectName()
-            );
-
-            xmlDocument.appendTextElement(
-                    topPanelElement,
-                    "UserName",
-                    topPanelProvider.getUserName()
-            );
+                    xmlDocument.appendTextElement(
+                            topPanelElement,
+                            field.getFieldName(),
+                            field.toString()
+                    );
+                });
+            }
         } catch (Exception exception) {
             xmlDocument.appendTextElement(
                     topPanelElement,

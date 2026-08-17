@@ -1,4 +1,6 @@
 import { initMenu } from "../components/menu.js";
+import { initHelpDialog } from "../components/help-dialog.js";
+import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 
 const DATA_URL = "/project/myprojects?cmd=list";
@@ -12,18 +14,10 @@ function byId(id) {
 
 function getElements() {
     return {
-        customerName: byId("customerName"),
         projectName: byId("projectName"),
-        userName: byId("userName"),
         loadStatus: byId("loadStatus"),
         projectsGrid: byId("projectsGrid")
     };
-}
-
-function setLoadStatus(elements, value) {
-    if (elements.loadStatus) {
-        elements.loadStatus.textContent = value;
-    }
 }
 
 async function fetchXml(url) {
@@ -138,42 +132,6 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;")
         .replaceAll("\"", "&quot;")
         .replaceAll("'", "&#039;");
-}
-
-function applyTopPanel(root, elements) {
-    const topPanel = getDirectChild(root, "TopPanel");
-
-    if (!topPanel) {
-        return;
-    }
-
-    const customerName =
-        directTextOf(topPanel, "CustomerName") ||
-        directTextOf(topPanel, "Customer") ||
-        "—";
-
-    const projectName =
-        directTextOf(topPanel, "ProjectName") ||
-        directTextOf(topPanel, "Project") ||
-        "—";
-
-    const userName =
-        directTextOf(topPanel, "UserName") ||
-        directTextOf(topPanel, "Name") ||
-        directTextOf(topPanel, "User") ||
-        "—";
-
-    if (elements.customerName) {
-        elements.customerName.textContent = customerName;
-    }
-
-    if (elements.projectName) {
-        elements.projectName.textContent = projectName;
-    }
-
-    if (elements.userName) {
-        elements.userName.textContent = userName;
-    }
 }
 
 function readProjects(root) {
@@ -555,7 +513,7 @@ function applyMyProjectsXml(doc, elements) {
     const root = doc.getElementsByTagName("MyProjects")[0] || doc.documentElement;
     const projects = readProjects(root);
 
-    applyTopPanel(root, elements);
+    applyTopbarMetadata(document, doc);
     renderProjects(projects, elements);
 }
 
@@ -564,6 +522,8 @@ async function startPage() {
 
     try {
         await initMenu();
+        initHelpDialog();
+        mountTopbar(document);
 
         elements.projectsGrid?.addEventListener("click", (event) => {
             const link = event.target.closest(".project-edit-link");
@@ -604,7 +564,9 @@ async function startPage() {
             });
         });
 
-        setLoadStatus(elements, "Loading…");
+        if (elements.loadStatus) {
+            elements.loadStatus.textContent = "Loading…";
+        }
 
         if (elements.projectsGrid) {
             elements.projectsGrid.innerHTML = `<div class="empty">Loading projects…</div>`;
@@ -613,11 +575,15 @@ async function startPage() {
         const doc = await fetchXml(DATA_URL);
 
         applyMyProjectsXml(doc, elements);
-        setLoadStatus(elements, "Loaded");
+        if (elements.loadStatus) {
+            elements.loadStatus.textContent = "Loaded";
+        }
     } catch (error) {
         console.error(error);
 
-        setLoadStatus(elements, "Error");
+        if (elements.loadStatus) {
+            elements.loadStatus.textContent = "Error";
+        }
 
         if (elements.projectsGrid) {
             elements.projectsGrid.innerHTML = `<div class="empty error">Failed to load projects.</div>`;

@@ -1,10 +1,10 @@
-# Customer Edit
+# Company Edit
 
 This page is used to view and edit a company profile.
 
 ## What you can do
 
-- edit customer basis information
+- edit company basis information
 - manage security settings
 - review subscription details
 - manage payment settings

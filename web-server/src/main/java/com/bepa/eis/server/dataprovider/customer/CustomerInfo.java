@@ -15,6 +15,7 @@ import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
+import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
@@ -122,7 +123,7 @@ public class CustomerInfo extends GenericXmlDocument {
 
     private void appendTopPanel(WebSession webSession) throws Exception {
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession();
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.CUSTOMER_EDIT_PAGE);
 
         if (topPanel != null && topPanel.getTopPanelElements() != null) {
             rootElement.addElement(topPanel.getTopPanelElements());

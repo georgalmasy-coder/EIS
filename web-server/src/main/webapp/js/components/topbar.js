@@ -1,5 +1,6 @@
 import { cssEscape } from "../core/css.js";
 import { getDirectChild } from "../core/xml.js";
+import { initHelpDialog, openHelpDialogForPage } from "./help-dialog.js";
 
 let mountedTopbarSearch = null;
 
@@ -11,6 +12,9 @@ const TOPBAR_FIELDS = [
 
 export function mountTopbar(root = document) {
     ensureTopbarSearchMarkup(root);
+    ensureHelpDialogMarkup(root);
+    initHelpDialog();
+    bindTopbarHelpButton(root);
 
     const input = findElement(root, "topbarSearchInput");
     const count = findElement(root, "topbarSearchCount");
@@ -287,7 +291,8 @@ export function readTopbarMetadata(source = {}) {
             projectName: "—",
             projectNameLabel: "Project Name",
             userName: "—",
-            userNameLabel: "User Name"
+            userNameLabel: "User Name",
+            helpFileName: ""
         };
     }
 
@@ -298,6 +303,7 @@ export function readTopbarMetadata(source = {}) {
     const customerName = String(source.customerName ?? "—").trim() || "—";
     const projectName = String(source.projectName ?? "—").trim() || "—";
     const userName = String(source.userName ?? "—").trim() || "—";
+    const helpFileName = String(source.helpFileName ?? "").trim();
 
     return {
         customerName,
@@ -305,7 +311,8 @@ export function readTopbarMetadata(source = {}) {
         projectName,
         projectNameLabel: String(source.projectNameLabel ?? "Project Name").trim() || "Project Name",
         userName,
-        userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name"
+        userNameLabel: String(source.userNameLabel ?? "User Name").trim() || "User Name",
+        helpFileName
     };
 }
 
@@ -313,6 +320,8 @@ export function applyTopbarMetadata(root = document, topPanel = {}) {
     if (!root) {
         return;
     }
+
+    mountTopbar(root);
 
     const metadata = readTopbarMetadata(topPanel);
 
@@ -354,6 +363,70 @@ export function applyTopbarMetadata(root = document, topPanel = {}) {
             line.replaceChildren(...content);
         }
     });
+
+    updateTopbarHelpButton(root, metadata);
+}
+
+function updateTopbarHelpButton(root, metadata) {
+    const helpButton = findElement(root, "topbarHelpButton");
+    const topbar = root.querySelector?.(".topbar");
+
+    if (!helpButton) {
+        return;
+    }
+
+    const helpFileName = String(metadata?.helpFileName || "").trim();
+
+    if (!helpFileName) {
+        helpButton.hidden = true;
+        helpButton.removeAttribute("data-help-page");
+        helpButton.removeAttribute("data-help-bound-page");
+
+        if (topbar) {
+            topbar.removeAttribute("data-help-page");
+        }
+
+        return;
+    }
+
+    helpButton.hidden = false;
+    helpButton.setAttribute("data-help-page", helpFileName);
+    helpButton.setAttribute("data-help-title", "Help");
+    helpButton.setAttribute("title", "Open help");
+
+    if (topbar) {
+        topbar.setAttribute("data-help-page", helpFileName);
+        topbar.setAttribute("data-help-title", "Help");
+    }
+
+    bindTopbarHelpButton(root);
+}
+
+function bindTopbarHelpButton(root = document) {
+    const helpButton = findElement(root, "topbarHelpButton");
+
+    if (!helpButton || helpButton.dataset.helpBound === "true") {
+        return;
+    }
+
+    helpButton.dataset.helpBound = "true";
+    helpButton.addEventListener("click", handleTopbarHelpClick);
+}
+
+async function handleTopbarHelpClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const helpButton = event.currentTarget;
+    const topbar = helpButton?.closest?.(".topbar");
+    const page = helpButton?.getAttribute("data-help-page")
+        || topbar?.getAttribute("data-help-page")
+        || "";
+    const title = helpButton?.getAttribute("data-help-title")
+        || topbar?.getAttribute("data-help-title")
+        || "Help";
+
+    await openHelpDialogForPage(page, title);
 }
 
 function findElement(searchRoot, id) {
@@ -378,19 +451,22 @@ function ensureTopbarSearchMarkup(root = document) {
 
     ensureTopbarStructure(topbar);
 
-    const metaContent = topbar.querySelector(".topbar-meta-content");
+    const content = topbar.querySelector(".topbar-content") || topbar;
 
-    if (!metaContent) {
+    if (!content) {
         return;
     }
 
-    const logo = metaContent.querySelector(".topbar-logo");
     const search = createTopbarSearch();
+    const actions = content.querySelector(".topbar-actions");
+    const helpButton = content.querySelector(".topbar-help-button");
 
-    if (logo) {
-        metaContent.insertBefore(search, logo);
+    if (actions) {
+        content.insertBefore(search, actions);
+    } else if (helpButton) {
+        content.insertBefore(search, helpButton);
     } else {
-        metaContent.appendChild(search);
+        content.appendChild(search);
     }
 }
 
@@ -417,67 +493,37 @@ function ensureTopbarSearchCount(root = document) {
 }
 
 function ensureTopbarStructure(topbar) {
-    const metaSection = topbar.querySelector(".topbar-meta") || topbar.querySelector(".meta");
+    let content = topbar.querySelector(".topbar-content");
 
-    if (!metaSection) {
-        return;
+    if (!content) {
+        topbar.replaceChildren();
+        content = document.createElement("div");
+        content.className = "topbar-content";
+        topbar.appendChild(content);
     }
 
-    metaSection.classList.add("topbar-meta");
-
-    let metaContent = metaSection.querySelector(".topbar-meta-content");
-
-    if (!metaContent) {
-        metaContent = document.createElement("div");
-        metaContent.className = "topbar-meta-content";
-
-        const metaLines = document.createElement("div");
-        metaLines.className = "topbar-meta-lines";
-
-        const logo = topbar.querySelector(".topbar-logo");
-
-        Array.from(metaSection.children).forEach(function (child) {
-            if (child !== logo) {
-                metaLines.appendChild(child);
-            }
-        });
-
-        metaContent.appendChild(metaLines);
-
-        if (logo) {
-            metaContent.appendChild(logo);
-        }
-
-        metaSection.appendChild(metaContent);
+    if (!content.querySelector(".topbar-project")) {
+        const project = document.createElement("div");
+        project.className = "topbar-project";
+        project.setAttribute("aria-label", "Current project");
+        project.innerHTML = `
+            <span class="topbar-project-prefix">Project</span>
+            <span class="topbar-project-separator" aria-hidden="true">/</span>
+            <strong id="projectName" data-topbar="projectName">—</strong>
+        `;
+        content.insertBefore(project, content.firstChild);
     }
 
-    let metaLines = metaContent.querySelector(".topbar-meta-lines");
-
-    if (!metaLines) {
-        metaLines = document.createElement("div");
-        metaLines.className = "topbar-meta-lines";
-
-        Array.from(metaContent.children).forEach(function (child) {
-            if (!child.classList.contains("topbar-logo") && !child.classList.contains("topbar-search")) {
-                metaLines.appendChild(child);
-            }
-        });
-
-        metaContent.insertBefore(metaLines, metaContent.firstChild);
+    if (!content.querySelector(".topbar-actions")) {
+        const actions = document.createElement("div");
+        actions.className = "topbar-actions";
+        content.appendChild(actions);
     }
 
-    let logo = metaContent.querySelector(".topbar-logo");
+    const actions = content.querySelector(".topbar-actions");
 
-    if (!logo) {
-        const image = topbar.querySelector(".eis-logo");
-
-        if (image) {
-            logo = document.createElement("div");
-            logo.className = "topbar-logo";
-            image.parentElement?.insertBefore(logo, image);
-            logo.appendChild(image);
-            metaContent.appendChild(logo);
-        }
+    if (actions && !actions.querySelector(".topbar-help-button")) {
+        actions.appendChild(createTopbarHelpButton());
     }
 }
 
@@ -494,7 +540,8 @@ function readTopbarMetadataFromXml(source) {
         projectNameLabel: getFieldLabel(topPanel, "ProjectName", "Project Name"),
         projectName: getFieldValue(topPanel, "ProjectName", "—"),
         userNameLabel: getFieldLabel(topPanel, ["UserName", "Name"], "User Name"),
-        userName: getFieldValue(topPanel, ["UserName", "Name"], "—")
+        userName: getFieldValue(topPanel, ["UserName", "Name"], "—"),
+        helpFileName: getFieldValue(topPanel, "HelpFileName", "")
     };
 }
 
@@ -602,8 +649,63 @@ function createTopbarSearch() {
             </button>
         </div>
 
-        <span class="topbar-search-icon" aria-hidden="true">⌕</span>
+        <svg class="topbar-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="M16.2 16.2L21 21"></path>
+        </svg>
     `;
 
     return search;
+}
+
+function createTopbarHelpButton() {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "topbar-help-button";
+    button.id = "topbarHelpButton";
+    button.hidden = true;
+    button.setAttribute("aria-label", "Open help");
+    button.setAttribute("data-help-title", "Help");
+    button.setAttribute("title", "Open help");
+    button.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+        </svg>
+    `;
+    return button;
+}
+
+function ensureHelpDialogMarkup(root = document) {
+    if (findElement(root, "helpDialog")) {
+        return;
+    }
+
+    const body = root.body || document.body;
+
+    if (!body) {
+        return;
+    }
+
+    const dialog = document.createElement("dialog");
+    dialog.id = "helpDialog";
+    dialog.className = "help-dialog";
+    dialog.setAttribute("aria-labelledby", "helpDialogTitle");
+    dialog.innerHTML = `
+        <form method="dialog" class="help-dialog-form">
+            <div class="help-dialog-head">
+                <h3 id="helpDialogTitle">Help</h3>
+                <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">×</button>
+            </div>
+
+            <div id="helpDialogContent" class="help-dialog-content">Loading help…</div>
+
+            <div class="help-dialog-footer">
+                <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+            </div>
+        </form>
+    `;
+
+    body.appendChild(dialog);
 }
