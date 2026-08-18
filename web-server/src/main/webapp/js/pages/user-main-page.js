@@ -5,6 +5,7 @@ import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import {
     getChildText,
     getDirectChild,
@@ -41,7 +42,10 @@ const state = {
     topPanel: {
         customerName: "—",
         projectName: "—",
-        userName: "—"
+        userName: "—",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     users: [],
     filteredUsers: [],
@@ -66,6 +70,7 @@ function initializeShell() {
     setText("projectName", "—", "");
     setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
+    setText("userTableCount", "0 of 0", "");
 
     initMenu(document);
     initHelpDialog();
@@ -158,7 +163,7 @@ async function loadUsers() {
 
         const root = xmlDocument.getElementsByTagName("UserMain")[0] || xmlDocument.documentElement;
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(root);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.users = parseUsers(root);
 
         if (state.sortKey && !state.columns.some((column) => column.key === state.sortKey)) {
@@ -178,26 +183,16 @@ async function loadUsers() {
     }
 }
 
-function parseTopPanel(root) {
-    const topPanel = getDirectChild(root, "TopPanel");
-
-    if (!topPanel) {
-        return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanel, "CustomerName", "—"),
-        projectName: getChildText(topPanel, "ProjectName", "—"),
-        userName: getChildText(topPanel, "UserName", getChildText(topPanel, "Name", "—"))
-    };
-}
-
 function applyTopPanel() {
     applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseUsers(root) {
@@ -257,6 +252,7 @@ function renderTable() {
     const colGroup = document.getElementById("mainColGroup");
     const headerRow = document.getElementById("mainHeaderRow");
     const body = document.getElementById("tbody");
+    const count = document.getElementById("userTableCount");
     const table = document.querySelector(".user-main-table");
 
     if (!colGroup || !headerRow || !body) {
@@ -330,8 +326,14 @@ function renderTable() {
 
     if (rows.length === 0) {
         showEmptyState("No users found.");
+        if (count) {
+            count.textContent = "0 of 0";
+        }
     } else {
         hideEmptyState();
+        if (count) {
+            count.textContent = `${rows.length} of ${state.filteredUsers.length}`;
+        }
     }
 }
 

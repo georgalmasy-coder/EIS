@@ -58,59 +58,6 @@ body.user-edit-document {
     margin: 0;
 }
 
-.user-edit-mode-label {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.35;
-}
-
-.user-edit-help-button {
-    width: 42px;
-    min-width: 42px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    background: rgba(15,23,42,.55);
-    cursor: pointer;
-    padding: 0;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.user-edit-help-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
-}
-
-.user-edit-help-button:active {
-    transform: translateY(1px);
-}
-
-.user-edit-help-button svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
-}
-
-.user-edit-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.user-edit-entity-meta {
-    color: var(--muted);
-    font-size: 12px;
-    white-space: nowrap;
-}
-
 .user-edit-tab-bar {
     flex: 0 0 auto;
     margin-top: 12px;
@@ -302,17 +249,151 @@ body.user-edit-document {
     background: rgba(255, 255, 255, 0.045);
 }
 
+.user-edit-layout{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-section-header{
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.user-edit-title-group{
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.user-edit-title-group h2{
+    margin: 0;
+    line-height: 1.2;
+    color: var(--app-text-primary);
+}
+
+.user-edit-tab-bar{
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-top: 0;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.page-tab-btn{
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border-color: var(--app-border-default);
+    padding: 8px 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.page-tab-btn.is-active{
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.user-edit-panels{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-edit-panels .tab-panel{
+    display: none;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-panels .tab-panel.is-active{
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-edit-field-grid{
+    background: transparent;
+}
+
+.user-edit-field-grid .page-field label,
+.user-edit-phone-field .field-help,
+.user-edit-project-name-cell label{
+    color: var(--app-text-secondary);
+}
+
+.user-edit-field-grid input,
+.user-edit-field-grid textarea,
+.user-edit-field-grid select,
+.user-edit-project-access-checkbox,
+.user-edit-phone-country-code select,
+.user-edit-phone-input,
+.user-edit-projects-table-wrap{
+    border-color: var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+}
+
+.user-edit-field-grid input:focus,
+.user-edit-field-grid textarea:focus,
+.user-edit-field-grid select:focus{
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.user-edit-projects-table-wrap{
+    border: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+}
+
+.user-edit-projects-table thead th{
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+}
+
+.user-edit-projects-table tbody tr:hover{
+    background: var(--app-table-row-hover);
+}
+
+.user-edit-footer{
+    border-top: 1px solid var(--app-border-default);
+}
+
+.user-edit-dialog-status{
+    color: var(--app-text-secondary);
+}
+
+body.user-edit-document .user-edit-projects-table{
+    background: var(--app-surface-background);
+}
+
 @media (max-width: 900px) {
     .user-edit-phone-controls {
         grid-template-columns: 1fr;
-    }
-
-    .user-edit-status-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .user-edit-entity-meta {
-        white-space: normal;
     }
 }
