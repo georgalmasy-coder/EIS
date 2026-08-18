@@ -636,3 +636,125 @@ body.stakeholder-edit-readonly .page-field select{
         min-width: 680px;
     }
 }
+
+.stakeholder-edit-header-row{
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.stakeholder-edit-title-group h2{
+    font-size: 28px;
+    line-height: 1.08;
+    color: var(--app-text-primary);
+}
+
+.stakeholder-edit-mode-label{
+    color: var(--app-text-secondary);
+}
+
+.stakeholder-edit-mode-label:empty{
+    display: none;
+}
+
+.stakeholder-edit-help-button{
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
+}
+
+.stakeholder-edit-help-button:hover{
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
+}
+
+.stakeholder-edit-help-button:active{
+    transform: translateY(1px);
+}
+
+.stakeholder-edit-tab-bar .page-tab-btn{
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border: 1px solid var(--app-border-default);
+}
+
+.stakeholder-edit-tab-bar .page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.stakeholder-edit-tab-bar .page-tab-btn.is-active{
+    background: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+    border-color: var(--app-tab-active-background);
+}
+
+.stakeholder-edit-layout .page-field label,
+.stakeholder-edit-layout .note-editor-label,
+.stakeholder-edit-layout .attachment-editor-label,
+.stakeholder-edit-layout .page-dialog-status{
+    color: var(--app-text-secondary);
+}
+
+.stakeholder-edit-layout .page-field input,
+.stakeholder-edit-layout .page-field textarea,
+.stakeholder-edit-layout .page-field select,
+.stakeholder-edit-layout .note-textarea,
+.stakeholder-edit-layout .attachment-input,
+.stakeholder-edit-layout .attachment-textarea{
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+}
+
+.stakeholder-edit-layout .page-field input:focus,
+.stakeholder-edit-layout .page-field textarea:focus,
+.stakeholder-edit-layout .page-field select:focus,
+.stakeholder-edit-layout .note-textarea:focus,
+.stakeholder-edit-layout .attachment-input:focus,
+.stakeholder-edit-layout .attachment-textarea:focus{
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.stakeholder-edit-layout .history-table thead th,
+.stakeholder-edit-layout .notes-table thead th,
+.stakeholder-edit-layout .attachments-table thead th{
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+}
+
+.stakeholder-edit-layout .history-table tbody tr:hover,
+.stakeholder-edit-layout .notes-table tbody tr:hover,
+.stakeholder-edit-layout .attachments-table tbody tr:hover{
+    background: var(--app-table-row-hover);
+}
+
+.stakeholder-edit-layout .history-table-frame,
+.stakeholder-edit-layout .notes-table-frame,
+.stakeholder-edit-layout .attachments-table-frame{
+    background: var(--app-surface-background);
+}
+
+@media (max-width: 1100px){
+    .stakeholder-edit-header-row{
+        gap: 10px;
+    }
+}
+
+@media (max-width: 900px){
+    .stakeholder-edit-header-row{
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 700px){
+    .stakeholder-edit-header-row{
+        gap: 8px;
+    }
+}

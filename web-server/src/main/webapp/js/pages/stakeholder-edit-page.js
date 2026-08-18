@@ -2,7 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import { applyEditDialogShellMode, closeEditDialog, getEditDialogPageContext, notifyEditDialogSaved, requestHistoricalEditDialog } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import { createHistoryTable } from "../components/history-table.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
@@ -400,7 +400,11 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName"
+    });
 }
 
 function renderAllFromDoc(doc) {

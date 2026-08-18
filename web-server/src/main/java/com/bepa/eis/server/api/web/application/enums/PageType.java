@@ -10,10 +10,11 @@ public enum PageType {
     DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT DASHBOARD", "Dashboard IRL", "Monitor the current status and key metrics."),
     DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),
 
-    STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder", "Work with stakeholder records in the workspace below."),
-    STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
-
     /* */
+
+    STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "R-F-L-P MODEL - STAKEHOLDERS", "Stakeholder", "Work with stakeholder records in the workspace below."),
+    STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "R-F-L-P MODEL - STAKEHOLDERS", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
+
     STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement Edit", "Edit the current stakeholder requirement in the workspace below."),
     STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),

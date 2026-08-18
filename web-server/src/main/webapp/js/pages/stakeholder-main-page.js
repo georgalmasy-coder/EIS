@@ -1,19 +1,18 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { fieldDisplayValue, fieldHeader, fieldVisible, fieldControl, fieldValue } from "../core/field-display.js";
 import { compareSortableValues, applySortIndicators } from "../components/sortable-table.js";
-import { parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
 import { isTruthy } from "../core/utils.js";
 
 const LIST_URL = "/basis/stakeholder?cmd=list";
 const ROW_TAGS = ["stakeholder", "Stakeholder"];
 const LIST_CONTAINER_TAGS = ["stakeholders", "Stakeholders", "stakeholderList", "StakeholderList"];
-const TOP_PANEL_TAG = "TopPanel";
 const STORAGE_KEYS = {
     sortKey: "stakeholder.main.sortKey",
     sortDirection: "stakeholder.main.sortDirection",
@@ -124,29 +123,19 @@ async function loadStakeholders() {
         console.error("Failed to load stakeholders", error);
         setText("loadStatus", "Error", "-");
         setText("emptyState", `Could not load stakeholders. ${error.message}`, "");
+        setText("stakeholderTableCount", "0 of 0", "");
     }
-}
-
-function parseTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector(TOP_PANEL_TAG);
-
-    if (!topPanelElement) {
-        return {
-            customerName: "-",
-            projectName: "-",
-            userName: "-"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanelElement, "CustomerName", "-"),
-        projectName: getChildText(topPanelElement, "ProjectName", "-"),
-        userName: getChildText(topPanelElement, ["UserName", "Name"], "-")
-    };
 }
 
 function renderTopPanel() {
-    applyTopbarMetadata(document, state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseRows(root) {
@@ -240,6 +229,7 @@ function renderTable() {
         colGroup.innerHTML = "";
         emptyState.hidden = false;
         setText(emptyState, "No stakeholders returned from the web service.", "");
+        setText("stakeholderTableCount", "0 of 0", "");
         return;
     }
 
@@ -289,6 +279,7 @@ function renderTable() {
     body.innerHTML = rows.map((row) => createRowMarkup(row)).join("");
     emptyState.hidden = true;
     setText(emptyState, "", "");
+    setText("stakeholderTableCount", `${rows.length} of ${state.rows.length}`, "");
 
     body.querySelectorAll("tr[data-entity-id]").forEach((rowElement) => {
         rowElement.addEventListener("dblclick", () => {
@@ -452,21 +443,6 @@ function parseActiveFlag(node) {
     const value = getFirstFieldRawValue(node, ["Active", "IsActive"], "");
 
     return isTruthy(value);
-}
-
-function getChildText(parent, tagNames, fallback = "") {
-    const names = Array.isArray(tagNames) ? tagNames : [tagNames];
-
-    for (const tagName of names) {
-        const element = parent?.getElementsByTagName?.(tagName)?.[0];
-        const value = element?.textContent?.trim();
-
-        if (value) {
-            return value;
-        }
-    }
-
-    return fallback;
 }
 
 function getFirstFieldRawValue(node, fieldNames, fallback = "") {
