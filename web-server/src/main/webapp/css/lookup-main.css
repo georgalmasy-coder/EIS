@@ -1,9 +1,59 @@
-.lookup-main-toolbar {
+.lookup-main-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.lookup-main-content {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.lookup-main-topbar {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.lookup-main-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.lookup-main-header-row {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
+}
+
+.lookup-main-workspace-header {
+    margin: 5px 0 0 5px;
+}
+
+.lookup-main-toolbar {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
     align-items: end;
+    justify-content: space-between;
     gap: 16px;
-    padding: 0 0 12px;
+    min-width: 0;
 }
 
 .lookup-main-type-filter {
@@ -14,27 +64,27 @@
 }
 
 .lookup-main-filter-label {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0;
-    color: var(--text-muted, #5b6472);
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
 }
 
 .lookup-main-type-select {
     width: 100%;
-    min-height: 36px;
-    border: 1px solid var(--border-color, #c9d1dc);
-    border-radius: 6px;
-    background: #fff;
-    color: #111827;
-    padding: 0 10px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid var(--app-input-border);
+    border-radius: 10px;
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     font: inherit;
+    outline: none;
+    box-sizing: border-box;
 }
 
-.lookup-main-type-select option,
-.lookup-main-dialog-grid select option {
-    color: #e5e7eb;
-    background: rgba(15,23,42,.98);
+.lookup-main-type-select:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .lookup-main-action-group {
@@ -51,9 +101,9 @@
     height: 38px;
     min-height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .55);
-    color: var(--text);
+    border: 1px solid var(--app-border-default);
+    background: var(--app-control-background);
+    color: var(--app-control-foreground);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -63,35 +113,172 @@
 }
 
 .lookup-main-icon-button:hover {
-    background: rgba(96, 165, 250, .14);
-    border-color: rgba(96, 165, 250, .45);
+    background: var(--app-control-hover-background);
 }
 
 .lookup-main-icon-button:active {
     transform: translateY(1px);
 }
 
-.lookup-main-icon-button svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
+.lookup-main-icon-button svg,
 .lookup-main-icon-button path {
+    width: 20px;
+    height: 20px;
     fill: currentColor;
 }
 
-.lookup-main-add-button svg {
-    width: 20px;
-    height: 20px;
+.lookup-main-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .lookup-main-list-frame {
-    min-height: calc(100vh - 240px);
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: var(--app-surface-background);
 }
 
-.lookup-main-table tr[data-lookup-id] {
+.lookup-main-list-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-x: auto !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: auto;
+    scrollbar-color: var(--app-border-strong) var(--app-surface-background);
+    padding-right: 2px;
+}
+
+.lookup-main-list-scroll::-webkit-scrollbar,
+.lookup-main-dialog-form .page-tab-bar::-webkit-scrollbar,
+.lookup-main-dialog .table-scroll::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+.lookup-main-list-scroll::-webkit-scrollbar-track,
+.lookup-main-dialog-form .page-tab-bar::-webkit-scrollbar-track,
+.lookup-main-dialog .table-scroll::-webkit-scrollbar-track {
+    background: var(--app-surface-background);
+    border-left: 1px solid var(--app-border-default);
+}
+
+.lookup-main-list-scroll::-webkit-scrollbar-thumb,
+.lookup-main-dialog-form .page-tab-bar::-webkit-scrollbar-thumb,
+.lookup-main-dialog .table-scroll::-webkit-scrollbar-thumb {
+    background: var(--app-border-strong);
+    border: 3px solid var(--app-surface-background);
+    border-radius: 999px;
+}
+
+.lookup-main-list-scroll::-webkit-scrollbar-thumb:hover,
+.lookup-main-dialog-form .page-tab-bar::-webkit-scrollbar-thumb:hover,
+.lookup-main-dialog .table-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--app-topbar-title-prefix-color);
+}
+
+.lookup-main-list-scroll::-webkit-scrollbar-corner,
+.lookup-main-dialog-form .page-tab-bar::-webkit-scrollbar-corner,
+.lookup-main-dialog .table-scroll::-webkit-scrollbar-corner {
+    background: var(--app-surface-background);
+}
+
+.lookup-main-table {
+    width: 100%;
+    min-width: 980px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: transparent;
+    color: var(--app-text-primary);
+}
+
+.lookup-main-table th,
+.lookup-main-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lookup-main-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.lookup-main-table tbody td {
+    border-bottom: 1px solid var(--app-border-default);
+    padding: 10px 12px;
+    color: var(--app-text-primary);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.lookup-main-table tbody tr {
     cursor: default;
+    color: var(--app-text-primary);
+}
+
+.lookup-main-table tbody tr:hover,
+.lookup-main-table tbody tr:focus-within {
+    background: var(--app-table-row-hover);
+    color: var(--app-text-primary);
+}
+
+.lookup-main-table tbody tr:hover td,
+.lookup-main-table tbody tr:focus-within td {
+    color: var(--app-text-primary);
+}
+
+.lookup-main-active-cell {
+    text-align: center;
+}
+
+.lookup-main-active-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 26px;
+}
+
+.lookup-main-active-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 1px solid rgba(148, 163, 184, .55);
+}
+
+.lookup-main-active-dot.is-active {
+    background: #94a3b8;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, .12);
+}
+
+.lookup-main-active-dot.is-inactive {
+    background: #ef4444;
+    border-color: #fca5a5;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .14);
 }
 
 .lookup-main-color-cell {
@@ -132,57 +319,44 @@
     min-width: 0;
 }
 
-.lookup-main-active-cell {
-    text-align: center;
-}
-
-.lookup-main-active-state {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 26px;
-}
-
-.lookup-main-active-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    display: inline-block;
-    border: 1px solid rgba(148, 163, 184, .55);
-}
-
-.lookup-main-active-dot.is-active {
-    background: #94a3b8;
-    border-color: #cbd5e1;
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, .12);
-}
-
-.lookup-main-active-dot.is-inactive {
-    background: #ef4444;
-    border-color: #fca5a5;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, .14);
-}
-
 .lookup-main-empty {
     padding: 18px;
+}
+
+.lookup-main-table-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+    color: var(--app-text-secondary);
+}
+
+.lookup-main-table-footer .data-table-footer-count {
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    line-height: 1.25;
 }
 
 .lookup-main-dialog {
     width: min(760px, calc(100vw - 24px));
     max-width: 760px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(15, 23, 42, .96);
+    border: 1px solid var(--app-border-default);
+    border-radius: 14px;
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
     padding: 0;
     height: fit-content;
     max-height: calc(100vh - 48px);
-    overflow: visible;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
 .lookup-main-dialog::backdrop {
-    background: rgba(15, 23, 42, 0.35);
+    background: var(--app-backdrop);
 }
 
 .lookup-main-dialog-form {
@@ -191,14 +365,21 @@
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    padding: 22px;
-    display: block;
-    overflow: visible;
+    padding: 14px 14px 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
 .lookup-main-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 12px;
+    padding-top: 2px;
+    flex: 0 0 auto;
 }
 
 .lookup-main-dialog-title-group {
@@ -210,28 +391,83 @@
 .lookup-main-dialog-title-group h3 {
     margin: 0;
     line-height: 1.2;
-}
-
-.lookup-main-dialog-mode-label {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.25;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--app-text-primary);
 }
 
 .lookup-main-dialog-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 14px;
-    margin-top: 8px;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 14px 16px;
+    align-items: start;
+    min-height: 0;
+    overflow: hidden;
+    flex: 1 1 auto;
+}
+
+.lookup-main-dialog-grid .page-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.lookup-main-dialog-grid .page-field label {
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .lookup-main-wide-field {
     grid-column: 1 / -1;
 }
 
-.lookup-main-dialog-grid .page-field {
-    display: grid;
-    gap: 5px;
+.lookup-main-dialog-grid input[type="text"],
+.lookup-main-dialog-grid input[type="number"],
+.lookup-main-dialog-grid textarea,
+.lookup-main-dialog-grid select {
+    width: 100%;
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.lookup-main-dialog-grid input[type="text"],
+.lookup-main-dialog-grid input[type="number"],
+.lookup-main-dialog-grid select {
+    height: 36px;
+}
+
+.lookup-main-dialog-grid textarea {
+    resize: vertical;
+    min-height: 78px;
+    font-family: inherit;
+    line-height: 1.4;
+}
+
+.lookup-main-dialog-grid input:focus,
+.lookup-main-dialog-grid select:focus,
+.lookup-main-dialog-grid textarea:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.lookup-main-dialog-grid input[disabled],
+.lookup-main-dialog-grid select[disabled],
+.lookup-main-dialog-grid textarea[disabled] {
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-secondary);
+}
+
+.lookup-main-dialog-grid .lookup-main-dialog-readonly {
+    background: var(--app-surface-subtle-background);
+    opacity: .92;
 }
 
 .lookup-main-dialog-grid .page-field.checkbox-field {
@@ -253,60 +489,12 @@
 
 .lookup-main-dialog-grid .page-field.checkbox-field > label {
     margin: 0 !important;
-    color: var(--text);
+    color: var(--app-text-primary);
     font-size: 13px;
     line-height: 1.2;
     cursor: pointer;
     flex: 0 1 auto;
     text-align: left;
-}
-
-.lookup-main-dialog-grid input[type="text"],
-.lookup-main-dialog-grid input[type="number"],
-.lookup-main-dialog-grid textarea,
-.lookup-main-dialog-grid select {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: rgba(15,23,42,.65);
-    color: var(--text);
-    padding: 5px 10px;
-    font: inherit;
-    min-height: 32px;
-    box-sizing: border-box;
-    line-height: 1.15;
-    outline: none;
-}
-
-.lookup-main-dialog-grid input[type="text"]:focus,
-.lookup-main-dialog-grid input[type="number"]:focus,
-.lookup-main-dialog-grid textarea:focus,
-.lookup-main-dialog-grid select:focus {
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
-}
-
-.lookup-main-dialog-grid textarea {
-    resize: vertical;
-    min-height: 92px;
-}
-
-.lookup-main-dialog-grid .lookup-main-dialog-readonly {
-    background: rgba(15,23,42,.42);
-    opacity: .92;
-}
-
-.lookup-main-checkbox-field {
-    align-items: center;
-    gap: 6px;
-}
-
-.lookup-main-checkbox-field input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    min-height: 16px;
-    padding: 0;
 }
 
 .lookup-main-color-grid {
@@ -316,13 +504,17 @@
     align-items: center;
 }
 
+.lookup-main-color-select {
+    min-width: 0;
+}
+
 .lookup-main-color-picker {
     width: 56px;
     height: 36px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-input-border);
     border-radius: 10px;
-    background: rgba(15,23,42,.65);
+    background: var(--app-input-background);
 }
 
 .lookup-main-color-picker:disabled {
@@ -336,7 +528,7 @@
 }
 
 .lookup-main-preview-label {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1.25;
 }
@@ -349,36 +541,95 @@
     min-width: 120px;
     max-width: 100%;
     padding: 2px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 999px;
     box-sizing: border-box;
     white-space: nowrap;
     line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: rgba(15,23,42,.45);
-    color: var(--text);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-primary);
 }
 
 .lookup-main-preview-chip.is-empty {
     background: rgba(148, 163, 184, .12);
     border-color: rgba(148, 163, 184, .35);
-    color: var(--muted);
+    color: var(--app-text-secondary);
 }
 
 .lookup-main-preview-meta {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1.25;
 }
 
 .lookup-main-dialog-footer {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(35,52,84,.65);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+    margin-top: 12px;
+    border-top: 1px solid var(--app-border-default);
+    flex: 0 0 auto;
 }
 
-@media (max-width: 800px) {
+.lookup-main-dialog-footer button {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-control-background);
+    color: var(--app-control-foreground);
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.lookup-main-dialog-footer button.primary,
+.lookup-main-dialog-footer #lookupSaveBtn {
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.lookup-main-dialog-footer button:hover {
+    background: var(--app-control-hover-background);
+}
+
+.lookup-main-dialog-footer button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    filter: none;
+}
+
+@media (max-width: 1100px) {
+    .lookup-main-content {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .lookup-main-layout {
+        padding: 0;
+    }
+
+    .lookup-main-header-row {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .lookup-main-table {
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 980px) {
+    .lookup-main-type-filter {
+        min-width: 0;
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
     .lookup-main-toolbar {
         flex-direction: column;
         align-items: stretch;
@@ -390,6 +641,31 @@
     }
 
     .lookup-main-dialog-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .lookup-main-content {
+        padding: 8px;
+    }
+
+    .lookup-main-layout {
+        padding: 0;
+    }
+
+    .lookup-main-type-filter {
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .lookup-main-dialog {
+        width: 96vw;
+        max-width: 96vw;
+        height: 92dvh;
+    }
+
+    .lookup-main-dialog-grid {
         grid-template-columns: 1fr;
     }
 
@@ -397,7 +673,7 @@
         grid-template-columns: 1fr;
     }
 
-    .lookup-main-dialog-form {
-        padding: 16px;
+    .lookup-main-table {
+        min-width: 820px;
     }
 }

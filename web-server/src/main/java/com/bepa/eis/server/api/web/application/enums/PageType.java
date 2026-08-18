@@ -67,12 +67,13 @@ public enum PageType {
     ADMIN_DASHBOARD_USERS_PAGE("dashboard-users-view","html-pages/admin/views/dashboard-users-view.html", "", true, "TBD", "TBD", "TBD"),
     ADMIN_DASHBOARD_MAILS_PAGE("dashboard-mail-status-view","html-pages/admin/views/dashboard-mail-status-view.html", "", true, "TBD", "TBD", "TBD"),
 
-    ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS", true, "ADMINISTRATION", "Customer Administration", "Use the workspace below to manage administration data."),
-    ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
+    ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS", true, "BEPA ADMINISTRATION", "Customer Administration", "Use the workspace below to manage administration data."),
+    ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "BEPA ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
+
+    LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "BEPA ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
 
     /* */
 
-    LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
 

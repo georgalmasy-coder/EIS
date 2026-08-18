@@ -54,11 +54,10 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         Integer userId = intValue(request.getParameter("userId"));
         Integer customerId = resolveCustomerId(webSession, request);
 
-        writeXml(
-                response,
-                HttpServletResponse.SC_OK,
-                userId == null ? buildListXml(webSession, customerId) : buildDetailXml(webSession, userId)
-        );
+        String xml = userId == null ? buildListXml(webSession, customerId) : buildDetailXml(webSession, userId);
+        log.debug("XML: {}", xml);
+
+        writeXml(response, HttpServletResponse.SC_OK, xml);
     }
 
     @Override
@@ -383,7 +382,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         if (webSession != null) {
             try {
                 TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.ADMIN_USER_ADMINISTRATION_PAGE);
+                TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.ADMIN_USER_ADMINISTRATION_PAGE);
 
                 if (topPanel != null && topPanel.getTopPanelElements() != null) {
                     topPanel.getTopPanelElements().getElements().forEach(field -> {

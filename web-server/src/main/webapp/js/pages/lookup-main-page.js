@@ -1,5 +1,6 @@
 import { initMenu } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
+import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { setText } from "../core/dom.js";
 import { fetchXml, postXml } from "../core/http.js";
 import { escapeHtml } from "../core/html.js";
@@ -176,7 +177,7 @@ async function loadLookupData(typeId = state.selectedTypeId) {
         state.selectedTypeId = resolvedTypeId;
         persistSelectedLookupTypeId(state.selectedTypeId);
 
-        applyTopPanel();
+        applyWorkspaceTopPanel();
         renderLookupTypeSelect();
         renderTable();
 
@@ -190,6 +191,17 @@ async function loadLookupData(typeId = state.selectedTypeId) {
 
 function applyTopPanel() {
     applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+}
+
+function applyWorkspaceTopPanel() {
+    applyTopPanelFromDocument(state.currentDoc, {
+        customerName: byId("customerName"),
+        projectName: byId("projectName"),
+        userName: byId("userName"),
+        workspaceEyebrow: byId("pageEyebrow"),
+        workspaceHeading: byId("pageHeading"),
+        workspaceHelpText: byId("pageHelpText")
+    }, { userTagNames: ["Name", "UserName"] });
 }
 
 function parseTopPanel(xmlDocument) {
@@ -269,22 +281,30 @@ function renderLookupTypeSelect() {
 function renderTable() {
     const tbody = byId("tbody");
     const emptyState = byId("listEmptyState");
+    const tableCount = byId("lookupTableCount");
 
     if (!tbody) {
         return;
     }
 
-    const rows = getSortedLookups(state.lookups.filter((lookup) => lookup.lookupTypeId === state.selectedTypeId));
+    const filteredRows = state.lookups.filter((lookup) => lookup.lookupTypeId === state.selectedTypeId);
+    const rows = getSortedLookups(filteredRows);
     tbody.innerHTML = "";
 
     if (!rows.length) {
         showEmptyState(state.lookupTypes.length ? "No lookup rows for the selected type." : "No lookup types found.");
+        if (tableCount) {
+            tableCount.textContent = `${rows.length} of ${filteredRows.length}`;
+        }
         return;
     }
 
     hideEmptyState();
 
     tbody.innerHTML = rows.map((lookup) => renderRow(lookup)).join("");
+    if (tableCount) {
+        tableCount.textContent = `${rows.length} of ${filteredRows.length}`;
+    }
 
     tbody.querySelectorAll("tr[data-lookup-id]").forEach((row) => {
         const lookupId = row.getAttribute("data-lookup-id");

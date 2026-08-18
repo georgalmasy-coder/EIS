@@ -83,6 +83,10 @@ public class CustomerInfo extends GenericXmlDocument {
             WebSession webSession,
             Integer requestedCustomerId
     ) {
+        if (requestedCustomerId != null) {
+            return requestedCustomerId;
+        }
+
         return webSession == null ? null : webSession.getCustomerId();
     }
 

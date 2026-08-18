@@ -113,9 +113,9 @@ function collectElements() {
     els.customerName = document.getElementById("customerName");
     els.projectName = document.getElementById("projectName");
     els.userName = document.getElementById("userName");
-    els.pageEyebrow = document.getElementById("pageEyebrow");
-    els.pageHeading = document.getElementById("pageHeading");
-    els.pageHelpText = document.getElementById("pageHelpText");
+    els.workspaceEyebrow = document.getElementById("workspaceEyebrow");
+    els.workspaceHeading = document.getElementById("workspaceHeading");
+    els.workspaceHelpText = document.getElementById("workspaceHelpText");
     els.userFilter = document.getElementById("userFilter");
     els.btnClearFilter = document.getElementById("btnClearFilter");
     els.groupByZone = document.getElementById("groupByZone");
@@ -154,18 +154,18 @@ function ensureWorkspaceChrome() {
 
     const sectionHeader = document.querySelector(".section-header.user-administration-section-header");
 
-    if (sectionHeader && !document.getElementById("pageEyebrow")) {
+    if (sectionHeader && !document.getElementById("workspaceEyebrow")) {
         sectionHeader.className = "user-administration-header-row";
         sectionHeader.innerHTML = `
             <div class="workspace-header user-administration-workspace-header" aria-label="Workspace information">
-                <div id="pageEyebrow" class="workspace-eyebrow user-administration-workspace-eyebrow"></div>
-                <div id="pageHeading" class="workspace-heading user-administration-workspace-heading"></div>
-                <div id="pageHelpText" class="workspace-helptext user-administration-workspace-helptext"></div>
+                <div id="workspaceEyebrow" class="workspace-eyebrow user-administration-workspace-eyebrow"></div>
+                <div id="workspaceHeading" class="workspace-heading user-administration-workspace-heading"></div>
+                <div id="workspaceHelpText" class="workspace-helptext user-administration-workspace-helptext"></div>
             </div>
         `;
-        els.pageEyebrow = document.getElementById("pageEyebrow");
-        els.pageHeading = document.getElementById("pageHeading");
-        els.pageHelpText = document.getElementById("pageHelpText");
+        els.workspaceEyebrow = document.getElementById("workspaceEyebrow");
+        els.workspaceHeading = document.getElementById("workspaceHeading");
+        els.workspaceHelpText = document.getElementById("workspaceHelpText");
     }
 
     const frame = document.querySelector(".user-administration-frame");
@@ -1685,7 +1685,7 @@ function syncWorkspaceHeaderVisibility() {
         return;
     }
 
-    const hasWorkspaceText = [els.pageEyebrow, els.pageHeading, els.pageHelpText].some(function (element) {
+    const hasWorkspaceText = [els.workspaceEyebrow, els.workspaceHeading, els.workspaceHelpText].some(function (element) {
         return String(element?.textContent || "").trim() !== "";
     });
 

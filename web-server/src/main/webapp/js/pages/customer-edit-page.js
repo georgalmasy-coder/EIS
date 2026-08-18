@@ -1,12 +1,13 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import {
     applyEditDialogShellMode,
     closeEditDialog,
     getEditDialogPageContext
 } from "../components/edit-dialog-page.js";
+import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import { setText } from "../core/dom.js";
 import {
     getDirectChild,
@@ -74,6 +75,7 @@ function initializeShell() {
     const dialogContext = applyEditDialogShellMode(document);
     state.modal = dialogContext.modal;
 
+    mountTopbar(document);
     setText("customerName", "-");
     setText("projectName", "-");
     setText("userName", "-");
@@ -190,9 +192,9 @@ async function loadDetail() {
         }
 
         state.currentDoc = xmlDocument;
-        state.lookups = parseLookups(xmlDocument);
+        state.lookups = safeParseLookups(xmlDocument);
         state.detailNode = findDetailNode(xmlDocument);
-        state.topPanel = parseTopPanel(xmlDocument);
+        state.topPanel = safeParseTopPanel(xmlDocument);
 
         applyTopPanel();
         renderAllFromDoc(xmlDocument);
@@ -256,6 +258,32 @@ function setFormFieldsReadOnly() {
     });
 }
 
+function renderAllFromDoc(doc) {
+    safeRenderSectionFromDoc(doc, "customerBasis", "basisInfoFields");
+    safeRenderSectionFromDoc(doc, "customerSecurity", "securityFields");
+    safeRenderSectionFromDoc(doc, "customerSubscription", "subscriptionFields");
+    safeRenderSectionFromDoc(doc, "availablePlans", "availablePlansFields");
+    safeRenderSectionFromDoc(doc, "customerPaymentMethod", "paymentMethodFields");
+    safeRenderSectionFromDoc(doc, "upcomingPayments", "upcomingPaymentsFields");
+    safeRenderSectionFromDoc(doc, "completedPayments", "completedPaymentsFields");
+}
+
+function safeParseTopPanel(doc) {
+    try {
+        return parseTopPanel(doc);
+    } catch (error) {
+        console.warn("Failed to parse customer top panel", error);
+        return {
+            customerName: "-",
+            projectName: "-",
+            userName: "-",
+            workspaceEyebrow: "",
+            workspaceHeading: "",
+            workspaceHelpText: ""
+        };
+    }
+}
+
 function parseTopPanel(xmlDocument) {
     const topPanelElement = xmlDocument.querySelector("TopPanel");
 
@@ -284,25 +312,28 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    const topPanel = state.topPanel || {};
-
-    applyTopbarMetadata(document, topPanel);
-    setText("customerName", topPanel.customerName || "-", "-");
-    setText("projectName", topPanel.projectName || "-", "-");
-    setText("userName", topPanel.userName || "-", "-");
-    setText("pageEyebrow", topPanel.workspaceEyebrow || "", "");
-    setText("pageHeading", topPanel.workspaceHeading || "", "");
-    setText("pageHelpText", topPanel.workspaceHelpText || "", "");
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
-function renderAllFromDoc(doc) {
-    renderSectionFromDoc(doc, "customerBasis", "basisInfoFields");
-    renderSectionFromDoc(doc, "customerSecurity", "securityFields");
-    renderSectionFromDoc(doc, "customerSubscription", "subscriptionFields");
-    renderSectionFromDoc(doc, "availablePlans", "availablePlansFields");
-    renderSectionFromDoc(doc, "customerPaymentMethod", "paymentMethodFields");
-    renderSectionFromDoc(doc, "upcomingPayments", "upcomingPaymentsFields");
-    renderSectionFromDoc(doc, "completedPayments", "completedPaymentsFields");
+function safeRenderSectionFromDoc(doc, sectionName, containerId) {
+    try {
+        renderSectionFromDoc(doc, sectionName, containerId);
+    } catch (error) {
+        console.warn(`Failed to render customer section ${sectionName}`, error);
+
+        const container = document.getElementById(containerId);
+
+        if (container) {
+            container.innerHTML = '<div class="page-empty">Could not render this section.</div>';
+        }
+    }
 }
 
 function renderSectionFromDoc(doc, sectionName, containerId) {
@@ -329,6 +360,15 @@ function renderSectionFromDoc(doc, sectionName, containerId) {
     container.innerHTML = children
         .map(renderFieldMarkup)
         .join("");
+}
+
+function safeParseLookups(doc) {
+    try {
+        return parseLookups(doc);
+    } catch (error) {
+        console.warn("Failed to parse customer lookups", error);
+        return {};
+    }
 }
 
 function renderFieldMarkup(field) {
@@ -633,16 +673,19 @@ async function saveCurrentCustomer() {
 }
 
 function findDetailNode(root) {
-    return root?.querySelector("customerDocument > customerBasis")
-        || root?.querySelector("customerDocument customerBasis")
-        || root?.querySelector("customerDocument")
+    const customerDocument = root?.getElementsByTagName?.("customerDocument")?.[0] || null;
+
+    return getDirectChild(customerDocument, "customerBasis")
+        || customerDocument
         || null;
 }
 
 function findSectionNode(doc, sectionName) {
-    return doc?.querySelector(`customerDocument > ${sectionName}`)
-        || doc?.querySelector(`customerDocument ${sectionName}`)
-        || doc?.querySelector(sectionName)
+    const customerDocument = doc?.getElementsByTagName?.("customerDocument")?.[0] || null;
+
+    return getDirectChild(customerDocument, sectionName)
+        || customerDocument?.getElementsByTagName?.(sectionName)?.[0]
+        || doc?.getElementsByTagName?.(sectionName)?.[0]
         || null;
 }
 

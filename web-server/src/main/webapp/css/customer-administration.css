@@ -46,12 +46,6 @@
     margin: 5px 0 0 5px;
 }
 
-.customer-administration-workspace-eyebrow,
-.customer-administration-workspace-heading,
-.customer-administration-workspace-helptext {
-    color: inherit;
-}
-
 .customer-administration-search-row {
     flex: 0 0 auto;
     margin-bottom: 12px;

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../css/common.css" />
     <link rel="stylesheet" href="../../css/app.css" />
     <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/tabs-list.css" />
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
     <link rel="stylesheet" href="../../css/lookup-main.css" />
@@ -40,9 +41,9 @@
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
                     <div class="topbar-meta-lines">
-                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
-                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
-                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
                     </div>
 
                     <div class="topbar-logo">
@@ -56,9 +57,13 @@
             </section>
         </header>
 
-        <section class="panel page-layout lookup-main-layout" aria-label="Lookup administration">
-            <div class="section-header lookup-main-section-header">
-                <h2>Lookup Administration</h2>
+        <section class="page-layout lookup-main-layout" aria-label="Lookup administration">
+            <div class="lookup-main-header-row">
+                <div class="workspace-header lookup-main-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow lookup-main-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading lookup-main-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext lookup-main-workspace-helptext"></div>
+                </div>
             </div>
 
             <div class="lookup-main-toolbar" aria-label="Lookup toolbar">
@@ -83,7 +88,7 @@
             </div>
 
             <div class="page-body lookup-main-body">
-                <div class="table-frame page-frame lookup-main-list-frame" aria-label="Lookup list frame">
+                <div class="table-frame page-frame has-table-footer lookup-main-list-frame" aria-label="Lookup list frame">
                     <div class="table-scroll lookup-main-list-scroll" id="tableScroll">
                         <table class="data-table page-table lookup-main-table" aria-label="Lookup list">
                             <colgroup>
@@ -108,6 +113,10 @@
                         <div class="empty page-empty lookup-main-empty" id="listEmptyState">
                             Loading lookups...
                         </div>
+                    </div>
+
+                    <div class="data-table-footer lookup-main-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="lookupTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>

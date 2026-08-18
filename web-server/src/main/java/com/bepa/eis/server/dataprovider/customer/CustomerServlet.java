@@ -56,8 +56,6 @@ public class CustomerServlet extends GenericDataProviderServlet {
             Integer customerId,
             Integer version
     ) throws Throwable {
-        GenericXmlDocument xmlDocument = editCustomerById(webSession, customerId, version);
-        response.getWriter().write(xmlDocument.toXmlString());
         return editCustomerById(webSession, customerId, version);
     }
 
@@ -69,7 +67,9 @@ public class CustomerServlet extends GenericDataProviderServlet {
             Integer parentEntityId
     ) throws Throwable {
 
-        return handleEditEntity(webSession, request, response, webSession.getCustomerId(), null);
+        GenericXmlDocument xmlDocument = handleEditEntity(webSession, request, response, webSession.getCustomerId(), null);
+        log.debug("Customer xml : {}", xmlDocument.toXmlString());
+        return xmlDocument;
 //        throw new UnsupportedOperationException("Create new customer is not supported.");
     }
 
@@ -97,9 +97,7 @@ public class CustomerServlet extends GenericDataProviderServlet {
             Integer version
     ) {
         try {
-            Integer effectiveCustomerId = webSession == null ? null : webSession.getCustomerId();
-
-            return new CustomerInfo(webSession, EDIT_ENTITY, effectiveCustomerId, version);
+            return new CustomerInfo(webSession, EDIT_ENTITY, customerId, version);
         } catch (Exception exception) {
             log.error("Error getting customer info document: {}", exception.getMessage(), exception);
             throw new RuntimeException(exception);
