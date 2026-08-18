@@ -88,7 +88,7 @@ abstract public class AbstractAdminServlet extends HttpServlet {
         } else {
             try {
                 SessionProvider sessionProvider = new SessionProvider(null);
-                ws = sessionProvider.getBySessionId(sessionId);
+                ws = sessionId != null ? sessionProvider.getBySessionId(sessionId) : null;
             } catch (SQLException e) {
 
                 log.error("Error getting session for page viewer: {}", e.getMessage(), e);
@@ -114,7 +114,7 @@ abstract public class AbstractAdminServlet extends HttpServlet {
             if (isRequired) {
                 webSession = getWebSession(sessionId);
             } else {
-                webSession = sessionId != null ? getWebSession(sessionId) : null;
+                webSession = getWebSession(sessionId);
             }
         } catch (Exception e) {
             if (! isRequired) {

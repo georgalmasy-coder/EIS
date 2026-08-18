@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="da">
 <head>
     <meta charset="utf-8" />
@@ -41,9 +41,9 @@
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
                     <div class="topbar-meta-lines">
-                        <div class="meta-line">Customer Name: <strong id="customerName">â€”</strong></div>
-                        <div class="meta-line">Project Name: <strong id="projectName">â€”</strong></div>
-                        <div class="meta-line">User Name: <strong id="userName">â€”</strong></div>
+                        <div class="meta-line">Customer Name: <strong id="customerName">-</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">-</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">-</strong></div>
                     </div>
 
                     <div class="topbar-logo">
@@ -57,9 +57,13 @@
             </section>
         </header>
 
-        <section class="panel page-layout customer-administration-layout" aria-label="Customer administration">
-            <div class="section-header customer-administration-section-header">
-                <h2>Customer Administration</h2>
+        <section class="page-layout customer-administration-layout" aria-label="Customer administration">
+            <div class="customer-administration-header-row">
+                <div class="workspace-header customer-administration-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow customer-administration-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading customer-administration-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext customer-administration-workspace-helptext"></div>
+                </div>
             </div>
 
             <div class="customer-administration-search-row" aria-label="Customer search">
@@ -89,7 +93,7 @@
             </div>
 
             <div class="page-body customer-administration-body">
-                <div class="table-frame page-frame customer-administration-frame" aria-label="Customer list frame">
+                <div class="table-frame page-frame has-table-footer customer-administration-frame" aria-label="Customer list frame">
                     <div class="table-scroll customer-administration-scroll" id="tableScroll">
                         <table class="data-table page-table customer-administration-table" aria-label="Customer list">
                             <colgroup id="customerColGroup">
@@ -142,6 +146,10 @@
                         </table>
 
                         <div class="empty page-empty" id="customersEmpty">Loading customers...</div>
+                    </div>
+
+                    <div class="data-table-footer customer-administration-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="customerTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>
@@ -594,3 +602,4 @@
 <script type="module" src="../../js/pages/customer-administration-page.js"></script>
 </body>
 </html>
+

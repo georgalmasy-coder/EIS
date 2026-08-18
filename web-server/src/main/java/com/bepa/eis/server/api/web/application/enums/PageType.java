@@ -51,12 +51,8 @@ public enum PageType {
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "DEPARTMENT MANAGEMENT", "Department Administration", "Use the workspace below to manage administration data."),
 
     LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification Management", "Manage irl/trl/srl lookup values in the workspace below."),
-    /* */
 
-    LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
-    INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
-    ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
-
+    // BEPA admin
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS", true, "TBD", "TBD", "TBD"),
     ADMIN_DASHBOARD_ALERT_PAGE("dashboard-alerts-view","html-pages/admin/views/dashboard-alerts-view.html", "", true, "TBD", "TBD", "TBD"),
     ADMIN_DASHBOARD_AUDIT_SECURITY_PAGE("dashboard-audit-security-view","html-pages/admin/views/dashboard-audit-security-view.html", "", true, "TBD", "TBD", "TBD"),
@@ -72,6 +68,13 @@ public enum PageType {
     ADMIN_DASHBOARD_MAILS_PAGE("dashboard-mail-status-view","html-pages/admin/views/dashboard-mail-status-view.html", "", true, "TBD", "TBD", "TBD"),
 
     ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS", true, "ADMINISTRATION", "Customer Administration", "Use the workspace below to manage administration data."),
+
+    /* */
+
+    LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
+    INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
+    ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
+
     SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
     ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
 

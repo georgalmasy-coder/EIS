@@ -56,6 +56,8 @@ public class CustomerServlet extends GenericDataProviderServlet {
             Integer customerId,
             Integer version
     ) throws Throwable {
+        GenericXmlDocument xmlDocument = editCustomerById(webSession, customerId, version);
+        response.getWriter().write(xmlDocument.toXmlString());
         return editCustomerById(webSession, customerId, version);
     }
 

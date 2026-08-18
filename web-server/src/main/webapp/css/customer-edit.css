@@ -20,6 +20,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    background: var(--app-page-background);
     overflow: hidden;
 }
 
@@ -59,10 +60,10 @@
 .customer-readonly-banner {
     margin-top: 10px;
     padding: 10px 12px;
-    border: 1px solid rgba(247, 201, 72, 0.45);
+    border: 1px solid var(--app-border-strong);
     border-radius: 8px;
-    color: #f7c948;
-    background: rgba(247, 201, 72, 0.08);
+    color: var(--app-text-secondary);
+    background: var(--app-surface-subtle-background);
     font-size: 12px;
     font-weight: 700;
 }
@@ -76,6 +77,34 @@
     width: 100%;
     min-width: 0;
     -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    scrollbar-width: auto;
+    scrollbar-color: var(--app-border-strong) var(--app-surface-background);
+}
+
+.customer-edit-layout .page-tab-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    border: 1px solid var(--app-border-default);
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.customer-edit-layout .page-tab-btn:hover {
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.customer-edit-layout .page-tab-btn.is-active {
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
 }
 
 .customer-edit-panels {
@@ -102,7 +131,7 @@
     overflow-y: auto;
     scrollbar-gutter: stable;
     scrollbar-width: auto;
-    scrollbar-color: #94a3b8 rgba(15, 23, 42, .70);
+    scrollbar-color: var(--app-border-strong) var(--app-surface-background);
     padding-right: 10px;
     box-sizing: border-box;
 }
@@ -168,7 +197,7 @@
 
 .customer-phone-field .field-help {
     margin: 6px 0 0;
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 12px;
     line-height: 1.35;
 }
@@ -187,9 +216,88 @@
 
 .customer-subsection-title {
     margin: 10px 0 8px;
-    color: var(--text);
+    color: var(--app-text-primary);
     font-size: 13px;
     font-weight: 800;
+}
+
+.customer-edit-layout .page-field label {
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    line-height: 1.1;
+}
+
+.customer-edit-layout .page-field input,
+.customer-edit-layout .page-field textarea,
+.customer-edit-layout .page-field select {
+    width: 100%;
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+    padding: 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.customer-edit-layout .page-field input:focus,
+.customer-edit-layout .page-field textarea:focus,
+.customer-edit-layout .page-field select:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.customer-edit-layout .page-field input[readonly],
+.customer-edit-layout .page-field textarea[readonly],
+.customer-edit-layout .page-field select:disabled,
+.customer-edit-layout .page-field input:disabled,
+.customer-edit-layout .page-field textarea:disabled {
+    opacity: .78;
+    cursor: not-allowed;
+    background: var(--app-surface-subtle-background);
+}
+
+.customer-edit-layout .page-dialog-status {
+    color: var(--app-text-secondary);
+}
+
+.customer-edit-layout .dlg-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--app-border-default);
+    flex: 0 0 auto;
+}
+
+.customer-edit-layout .dlg-footer button {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.customer-edit-layout .dlg-footer button.primary {
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.customer-edit-layout .dlg-footer button:hover {
+    filter: brightness(1.05);
+}
+
+.customer-edit-layout .dlg-footer button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    filter: none;
 }
 
 .customer-edit-footer {

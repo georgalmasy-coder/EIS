@@ -32,10 +32,14 @@ import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
+import com.bepa.eis.common.dto.project.ProjectRecord;
+import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -54,6 +58,8 @@ import java.util.Locale;
         "/api/admin/customers"
 })
 public class CustomerAdministrationServlet extends AbstractAdminServlet {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomerAdministrationServlet.class);
 
     @Override
     public void processGet(

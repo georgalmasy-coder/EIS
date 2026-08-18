@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
@@ -48,9 +48,12 @@ const state = {
     detailNode: null,
     lookups: {},
     topPanel: {
-        customerName: "—",
-        projectName: "—",
-        userName: "—"
+        customerName: "-",
+        projectName: "-",
+        userName: "-",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     }
 };
 
@@ -71,9 +74,9 @@ function initializeShell() {
     const dialogContext = applyEditDialogShellMode(document);
     state.modal = dialogContext.modal;
 
-    setText("customerName", "—");
-    setText("projectName", "—");
-    setText("userName", "—");
+    setText("customerName", "-");
+    setText("projectName", "-");
+    setText("userName", "-");
     setText("loadStatus", "Loading");
 
     if (!state.modal) {
@@ -258,38 +261,38 @@ function parseTopPanel(xmlDocument) {
 
     if (!topPanelElement) {
         return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
+            customerName: "-",
+            projectName: "-",
+            userName: "-",
+            workspaceEyebrow: "",
+            workspaceHeading: "",
+            workspaceHelpText: ""
         };
     }
 
     return {
         customerNameLabel: getFieldLabel(topPanelElement, "CustomerName", "Customer Name"),
-        customerName: getChildText(topPanelElement, "CustomerName", "—"),
+        customerName: getChildText(topPanelElement, "CustomerName", "-"),
         projectNameLabel: getFieldLabel(topPanelElement, "ProjectName", "Project Name"),
-        projectName: getChildText(topPanelElement, "ProjectName", "—"),
+        projectName: getChildText(topPanelElement, "ProjectName", "-"),
         userNameLabel: getFieldLabel(topPanelElement, "Name", "User Name"),
-        userName: getChildText(topPanelElement, "Name", "—")
-    };
-}
-
-function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
-    const workspace = readWorkspaceHeader(state.currentDoc);
-    setText("pageEyebrow", workspace.workspaceEyebrow || "", "");
-    setText("pageHeading", workspace.workspaceHeading || "", "");
-    setText("pageHelpText", workspace.workspaceHelpText || "", "");
-}
-
-function readWorkspaceHeader(xmlDocument) {
-    const topPanelElement = xmlDocument?.querySelector("TopPanel");
-
-    return {
+        userName: getChildText(topPanelElement, "Name", "-"),
         workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
         workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
         workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
+}
+
+function applyTopPanel() {
+    const topPanel = state.topPanel || {};
+
+    applyTopbarMetadata(document, topPanel);
+    setText("customerName", topPanel.customerName || "-", "-");
+    setText("projectName", topPanel.projectName || "-", "-");
+    setText("userName", topPanel.userName || "-", "-");
+    setText("pageEyebrow", topPanel.workspaceEyebrow || "", "");
+    setText("pageHeading", topPanel.workspaceHeading || "", "");
+    setText("pageHelpText", topPanel.workspaceHelpText || "", "");
 }
 
 function renderAllFromDoc(doc) {
@@ -664,3 +667,5 @@ function getFieldLabel(parent, tagName, fallback = "") {
 
     return String(label || fallback).trim() || fallback;
 }
+
+

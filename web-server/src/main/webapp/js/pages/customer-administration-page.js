@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+﻿import { initMenu } from "../components/menu.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", initialize);
 function initialize() {
     initMenu();
     collectElements();
+    syncWorkspaceHeaderVisibility();
     applyColumnWidths();
     bindEvents();
     initializeTabs();
@@ -69,6 +70,7 @@ function collectElements() {
     els.customerHeaderRow = document.getElementById("customerHeaderRow");
     els.customersBody = document.getElementById("customersBody");
     els.customersEmpty = document.getElementById("customersEmpty");
+    els.customerTableCount = document.getElementById("customerTableCount");
 
     els.customerEditDialog = document.getElementById("customerEditDialog");
     els.customerEditForm = document.getElementById("customerEditForm");
@@ -89,6 +91,13 @@ function collectElements() {
     document.querySelectorAll("[id]").forEach(function (element) {
         els[element.id] = element;
     });
+
+    els.pageEyebrow = document.getElementById("pageEyebrow");
+    els.pageHeading = document.getElementById("pageHeading");
+    els.pageHelpText = document.getElementById("pageHelpText");
+    els.workspaceEyebrow = els.pageEyebrow;
+    els.workspaceHeading = els.pageHeading;
+    els.workspaceHelpText = els.pageHelpText;
 }
 
 function bindEvents() {
@@ -178,6 +187,7 @@ async function loadCustomers() {
     try {
         const doc = await fetchXml(API_URL);
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        syncWorkspaceHeaderVisibility();
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
 
@@ -209,6 +219,7 @@ async function openCustomerDetail(customerId) {
     try {
         const doc = await fetchXml(`${API_URL}?customerId=${encodeURIComponent(customerId)}`);
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        syncWorkspaceHeaderVisibility();
         state.lookups = parseLookups(doc);
         fillAllLookupSelects();
 
@@ -571,6 +582,8 @@ function renderCustomers() {
             els.customersEmpty.textContent = state.customers.length ? "No customers match the filter." : "No customers.";
         }
 
+        updateCustomerTableCount();
+
         return;
     }
 
@@ -609,6 +622,8 @@ function renderCustomers() {
             openCustomerDetail(customerId);
         });
     });
+
+    updateCustomerTableCount();
 }
 
 function renderStatus(status, label) {
@@ -635,7 +650,7 @@ function updateSortIndicators() {
     const indicator = document.getElementById(`si-${state.sortKey}`);
 
     if (indicator) {
-        indicator.textContent = state.sortDirection === "asc" ? "â–²" : "â–¼";
+        indicator.textContent = state.sortDirection === "asc" ? "\u25B2" : "\u25BC";
     }
 }
 
@@ -676,6 +691,28 @@ function syncFilterClearButton(filterInput) {
     }
 
     clearButton.hidden = String(filterInput.value || "") === "";
+}
+
+function updateCustomerTableCount() {
+    if (!els.customerTableCount) {
+        return;
+    }
+
+    els.customerTableCount.textContent = `${state.filteredCustomers.length} of ${state.customers.length}`;
+}
+
+function syncWorkspaceHeaderVisibility() {
+    const workspaceRow = document.querySelector(".customer-administration-header-row");
+
+    if (!workspaceRow) {
+        return;
+    }
+
+    const hasWorkspaceText = [els.pageEyebrow, els.pageHeading, els.pageHelpText].some(function (element) {
+        return String(element?.textContent || "").trim() !== "";
+    });
+
+    workspaceRow.hidden = !hasWorkspaceText;
 }
 
 function applyColumnWidths() {
@@ -1520,3 +1557,4 @@ function escapeHtml(itemValue) {
 function escapeAttribute(itemValue) {
     return escapeHtml(itemValue);
 }
+
