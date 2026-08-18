@@ -1,6 +1,7 @@
 let helpDialogInitialized = false;
 
 export function initHelpDialog() {
+    normalizeHelpDialogMarkup();
     bindHelpDialogEvents();
 }
 
@@ -55,16 +56,19 @@ function bindHelpDialogEvents() {
     }
 
     const dialog = document.getElementById("helpDialog");
-    const closeButton = document.getElementById("helpDialogCloseButton");
     const okButton = document.getElementById("helpDialogOkButton");
-
-    closeButton?.addEventListener("click", () => {
-        closeHelpDialog(dialog);
-    });
 
     okButton?.addEventListener("click", () => {
         closeHelpDialog(dialog);
     });
+}
+
+function normalizeHelpDialogMarkup() {
+    const closeButton = document.getElementById("helpDialogCloseButton");
+
+    if (closeButton) {
+        closeButton.remove();
+    }
 }
 
 async function openHelpDialog(options) {

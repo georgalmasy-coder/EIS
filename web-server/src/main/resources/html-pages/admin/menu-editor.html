@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../css/menu.css" />
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/help-dialog.css" />
     <link rel="stylesheet" href="../../css/menu-editor.css" />
 </head>
 
@@ -56,16 +57,18 @@
             </section>
         </header>
 
-        <section class="panel page-layout menu-editor-layout" aria-label="Menu editor">
-            <div class="section-header menu-editor-section-header">
-                <h2>Menu Editor</h2>
-            </div>
+        <section class="page-layout menu-editor-layout" aria-label="Menu editor">
+            <div class="menu-editor-header-row">
+                <div class="workspace-header menu-editor-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow menu-editor-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading menu-editor-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext menu-editor-workspace-helptext"></div>
+                </div>
 
-            <div class="menu-editor-toolbar" aria-label="Menu actions">
-                <div class="menu-editor-toolbar-group">
+                <div class="menu-editor-header-actions" role="group" aria-label="Menu actions">
                     <button
                             id="btnRefreshMenu"
-                            class="page-icon-button menu-editor-icon-button"
+                            class="menu-editor-icon-button"
                             type="button"
                             aria-label="Reload menu"
                             title="Reload menu"
@@ -77,7 +80,7 @@
 
                     <button
                             id="btnAddParentMenuItem"
-                            class="page-icon-button menu-editor-icon-button"
+                            class="menu-editor-icon-button"
                             type="button"
                             aria-label="Create parent menu item"
                             title="Create parent menu item"
@@ -90,7 +93,7 @@
             </div>
 
             <div class="page-body menu-editor-body">
-                <div class="table-frame page-frame menu-editor-tree-frame" aria-label="Menu tree frame">
+                <div class="table-frame page-frame has-table-footer menu-editor-tree-frame" aria-label="Menu tree frame">
                     <div class="table-scroll menu-editor-tree-scroll" id="treeScroll">
                         <table class="data-table page-table menu-editor-table" aria-label="Menu tree">
                             <colgroup>
@@ -121,6 +124,10 @@
                         <div class="empty page-empty menu-editor-empty" id="menuEmptyState">
                             Loading menu items...
                         </div>
+                    </div>
+
+                    <div class="data-table-footer menu-editor-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="menuTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>
