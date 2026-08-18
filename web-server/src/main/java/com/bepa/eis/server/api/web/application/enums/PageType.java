@@ -38,10 +38,12 @@ public enum PageType {
     SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
 
     // Admin
+    CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),
+
     PROJECT_MAIN_PAGE("project-main","html-pages/project-main.html", "Projects", true, "PROJECT MANAGEMENT", "Projects", "Review and manage projects in the workspace below."),
     PROJECT_EDIT_PAGE("project-edit","html-pages/project-edit.html", "Project", true, "PROJECT MANAGEMENT", "Project", "Edit the current project in the workspace below."),
 
-    USER_MAIN_PAGE("user-main","html-pages/user-main.html", "User Administration", true, "USER MANAGEMENT", "User Administration", "Use the workspace below to manage users."),
+    USER_MAIN_PAGE("user-main","html-pages/user-main.html", "User Administration", true, "USER MANAGEMENT", "User Accounts", "Use the workspace below to manage users."),
     USER_EDIT_PAGE("user-edit","html-pages/user-edit.html", "User Account", true, "USER MANAGEMENT", "User Account", "Edit the current user account in the workspace below."),
 
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "STAKEHOLDER MANAGEMENT", "Stakeholder", "Work with stakeholder records in the workspace below."),
@@ -77,7 +79,6 @@ public enum PageType {
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
-    CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Customer", true, "ADMINISTRATION", "Customer", "Edit the current customer in the workspace below."),
 
     NONE("invalid", "", "", true, "TBD", "TBD", "TBD") ;
 

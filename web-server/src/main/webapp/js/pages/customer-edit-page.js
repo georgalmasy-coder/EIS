@@ -234,28 +234,9 @@ function applyModeUi() {
         readOnlyBanner.hidden = !state.readOnly;
     }
 
-    setText("pageModeLabel", getModeLabel());
-    setText("entityMeta", getEntityMetaLabel());
-
     if (state.readOnly) {
         setFormFieldsReadOnly();
     }
-}
-
-function getModeLabel() {
-    if (state.mode === MODES.editVersion) {
-        return state.version ? `Historical version ${state.version}` : "Historical version";
-    }
-
-    return "Edit Customer";
-}
-
-function getEntityMetaLabel() {
-    if (state.mode === MODES.editVersion) {
-        return `Version: ${state.version || "—"}`;
-    }
-
-    return "Current customer";
 }
 
 function setFormFieldsReadOnly() {
@@ -295,6 +276,20 @@ function parseTopPanel(xmlDocument) {
 
 function applyTopPanel() {
     applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    const workspace = readWorkspaceHeader(state.currentDoc);
+    setText("pageEyebrow", workspace.workspaceEyebrow || "", "");
+    setText("pageHeading", workspace.workspaceHeading || "", "");
+    setText("pageHelpText", workspace.workspaceHelpText || "", "");
+}
+
+function readWorkspaceHeader(xmlDocument) {
+    const topPanelElement = xmlDocument?.querySelector("TopPanel");
+
+    return {
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
+    };
 }
 
 function renderAllFromDoc(doc) {

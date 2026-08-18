@@ -37,54 +37,23 @@
     overflow: hidden;
 }
 
-.customer-edit-section-header {
+.customer-edit-header-row {
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    display: flex;
     align-items: flex-start;
+    justify-content: flex-start;
+    gap: 12px;
 }
 
-.customer-edit-title-group {
-    display: grid;
-    gap: 4px;
+.customer-edit-workspace-header {
+    margin: 5px 0 0 5px;
 }
 
-.customer-edit-title-group h2 {
-    margin: 0;
-}
-
-.customer-edit-mode-label {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.35;
-}
-
-.customer-edit-help-button {
-    width: 42px;
-    min-width: 42px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    background: rgba(15,23,42,.55);
-    cursor: pointer;
-    padding: 0;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.customer-edit-help-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
-}
-
-.customer-edit-help-button:active {
-    transform: translateY(1px);
-}
-
-.customer-edit-help-button svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
+.customer-workspace-eyebrow:empty,
+.customer-workspace-heading:empty,
+.customer-workspace-helptext:empty {
+    display: none;
 }
 
 .customer-readonly-banner {
@@ -96,22 +65,6 @@
     background: rgba(247, 201, 72, 0.08);
     font-size: 12px;
     font-weight: 700;
-}
-
-.customer-edit-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.customer-edit-entity-meta {
-    color: var(--muted);
-    font-size: 12px;
-    white-space: nowrap;
 }
 
 .customer-edit-tab-bar {
@@ -252,14 +205,5 @@
 @media (max-width: 760px) {
     .customer-phone-controls {
         grid-template-columns: 1fr;
-    }
-
-    .customer-edit-status-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .customer-edit-entity-meta {
-        white-space: normal;
     }
 }
