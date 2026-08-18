@@ -1,12 +1,12 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemRequirementDiagramPdf } from "./systemrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import {
     getDirectChild,
     getDirectText,
@@ -42,6 +42,7 @@ const STORAGE_KEYS = {
     sortKey: "basis.systemrequirement.main.sortKey",
     sortDirection: "basis.systemrequirement.main.sortDirection",
     columnWidths: "basis.systemrequirement.main.columnWidths",
+    hiddenColumns: "basis.systemrequirement.main.hiddenColumns",
     groupBy: "basis.systemrequirement.main.groupBy",
     groupCollapsed: "basis.systemrequirement.main.groupCollapsed"
 };
@@ -59,7 +60,7 @@ const VIEW_LABELS = {
 };
 
 const VIEW_PAGE_URLS = {
-    list: "/web/view?page=systemrequirement-main-list",
+    list: "/web/view?page=systemrequirement-main",
     horizontal: "/web/view?page=systemrequirement-main-horizontal",
     vertical: "/web/view?page=systemrequirement-main-vertical"
 };
@@ -84,11 +85,13 @@ const state = {
     selectedView: VIEW_TYPES.list,
     sortKey: "",
     sortDirection: "asc",
+    hiddenColumns: loadHiddenColumns(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
     contextTargetType: "",
     contextRequirement: null,
-    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : ""
+    fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
+    columnsMenuOpen: false
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -167,6 +170,9 @@ function initializeEvents() {
     const activeOnlyInput = document.getElementById("filterActiveOnly");
     const clearFilterButton = document.getElementById("btnClearFilter");
     const groupByZone = document.getElementById("groupByZone");
+    const columnsButton = document.getElementById("btnColumns");
+    const columnsCloseButton = document.getElementById("btnCloseColumns");
+    const columnsList = document.getElementById("columnsList");
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -223,9 +229,31 @@ function initializeEvents() {
         addGroupByKey(event.dataTransfer.getData("text/plain"));
     });
 
+    columnsButton?.addEventListener("click", () => {
+        toggleColumnsMenu();
+    });
+
+    columnsCloseButton?.addEventListener("click", () => {
+        closeColumnsMenu();
+    });
+
+    columnsList?.addEventListener("change", (event) => {
+        const input = event.target?.closest?.("input[type='checkbox'][data-column-key]");
+        const columnKey = input?.getAttribute("data-column-key");
+
+        if (!input || !columnKey) {
+            return;
+        }
+
+        setColumnVisibility(columnKey, input.checked);
+    });
+
     document.addEventListener("dragend", () => {
         groupByZone?.classList.remove("is-drag-over");
     });
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    document.addEventListener("keydown", handleDocumentKeyDown);
 
     addRootButton?.addEventListener("click", () => {
         openCreateRootRequirement();
@@ -302,6 +330,7 @@ async function loadSystemRequirements() {
         state.requirements = parseSystemRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         state.listColumns = buildListColumns(state.requirements);
+        sanitizeHiddenColumns();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
             state.sortKey = "";
@@ -311,6 +340,7 @@ async function loadSystemRequirements() {
 
         sanitizeGroupByKeys();
         renderGroupByZone();
+        renderColumnsMenu();
 
         applyTopPanel();
         applyFiltersAndRender();
@@ -339,12 +369,22 @@ function parseTopPanel(xmlDocument) {
     return {
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
+        userName: getChildText(topPanelElement, "Name", "—"),
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseSystemRequirements(xmlDocument) {
@@ -769,7 +809,7 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnAddRoot", !isListView);
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
-    setElementHidden("btnHelp", false);
+    setElementHidden("columnsControl", !isListView);
 }
 
 function setElementHidden(id, hidden) {
@@ -796,6 +836,49 @@ function persistFilters() {
 function persistSorting() {
     localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
     localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+}
+
+function loadHiddenColumns() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.hiddenColumns);
+        const parsed = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
+    } catch {
+        return [];
+    }
+}
+
+function persistHiddenColumns() {
+    localStorage.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
+}
+
+function sanitizeHiddenColumns() {
+    const validKeys = new Set(state.listColumns.map((column) => column.key));
+    const nextHidden = state.hiddenColumns.filter((key) => validKeys.has(key));
+
+    state.hiddenColumns = nextHidden;
+
+    if (!state.listColumns.length) {
+        persistHiddenColumns();
+        return;
+    }
+
+    if (getVisibleListColumns().length === 0) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== state.listColumns[0].key);
+    }
+
+    persistHiddenColumns();
+}
+
+function getVisibleListColumns() {
+    const hidden = new Set(state.hiddenColumns);
+
+    return state.listColumns.filter((column) => !hidden.has(column.key));
+}
+
+function getVisibleListColumnCount() {
+    return getVisibleListColumns().length;
 }
 
 function loadGroupBy() {
@@ -942,6 +1025,142 @@ function renderGroupByZone() {
     });
 }
 
+function renderColumnsMenu() {
+    const columnsList = document.getElementById("columnsList");
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsList || !columnsButton) {
+        return;
+    }
+
+    const visibleCount = getVisibleListColumnCount();
+
+    columnsList.innerHTML = state.listColumns.map((column) => {
+        const checked = !state.hiddenColumns.includes(column.key);
+        const disableToggle = checked && visibleCount <= 1;
+
+        return `
+            <label class="systemrequirement-column-option ${checked ? "" : "is-hidden"}">
+                <input
+                        type="checkbox"
+                        data-column-key="${escapeHtml(column.key)}"
+                        ${checked ? "checked" : ""}
+                        ${disableToggle ? "disabled" : ""}
+                >
+                <span class="systemrequirement-column-option-label">${escapeHtml(column.label)}</span>
+            </label>
+        `;
+    }).join("");
+
+    updateColumnsButtonState();
+}
+
+function updateColumnsButtonState() {
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsButton) {
+        return;
+    }
+
+    const hiddenCount = state.hiddenColumns.length;
+    const hasHiddenColumns = hiddenCount > 0;
+
+    columnsButton.classList.toggle("is-partial", hasHiddenColumns);
+    columnsButton.setAttribute("aria-expanded", state.columnsMenuOpen ? "true" : "false");
+    columnsButton.setAttribute("aria-label", hasHiddenColumns
+        ? `Columns, ${hiddenCount} hidden`
+        : "Columns");
+    columnsButton.title = hasHiddenColumns
+        ? `${hiddenCount} hidden column${hiddenCount === 1 ? "" : "s"}`
+        : "Choose columns";
+}
+
+function openColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+    const columnsButton = document.getElementById("btnColumns");
+
+    if (!columnsPopover || !columnsButton) {
+        state.columnsMenuOpen = false;
+        updateColumnsButtonState();
+        return;
+    }
+
+    renderColumnsMenu();
+    columnsPopover.hidden = false;
+    state.columnsMenuOpen = true;
+    updateColumnsButtonState();
+}
+
+function closeColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (columnsPopover) {
+        columnsPopover.hidden = true;
+    }
+
+    state.columnsMenuOpen = false;
+    updateColumnsButtonState();
+}
+
+function toggleColumnsMenu() {
+    const columnsPopover = document.getElementById("columnsPopover");
+
+    if (!columnsPopover || columnsPopover.hidden) {
+        openColumnsMenu();
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentPointerDown(event) {
+    const columnsControl = document.getElementById("columnsControl");
+
+    if (!columnsControl || !state.columnsMenuOpen) {
+        return;
+    }
+
+    if (columnsControl.contains(event.target)) {
+        return;
+    }
+
+    closeColumnsMenu();
+}
+
+function handleDocumentKeyDown(event) {
+    if (event.key === "Escape" && state.columnsMenuOpen) {
+        closeColumnsMenu();
+    }
+}
+
+function setColumnVisibility(columnKey, visible) {
+    const column = state.listColumns.find((item) => item.key === columnKey);
+
+    if (!column) {
+        return;
+    }
+
+    const currentlyVisible = !state.hiddenColumns.includes(columnKey);
+
+    if (currentlyVisible === visible) {
+        if (visible) {
+            renderColumnsMenu();
+        }
+
+        return;
+    }
+
+    if (visible) {
+        state.hiddenColumns = state.hiddenColumns.filter((key) => key !== columnKey);
+    } else if (!state.hiddenColumns.includes(columnKey)) {
+        state.hiddenColumns = [...state.hiddenColumns, columnKey];
+    }
+
+    persistHiddenColumns();
+    renderColumnsMenu();
+    renderListView();
+}
+
 function addGroupByKey(key) {
     if (!key || state.groupBy.includes(key) || !state.listColumns.some((column) => column.key === key)) {
         return;
@@ -1085,7 +1304,7 @@ function renderListView() {
         return;
     }
 
-    const columns = state.listColumns;
+    const columns = getVisibleListColumns();
     const rows = getSortedRequirements(state.filteredRequirements);
     const responsiveWidths = getResponsiveColumnWidths(columns);
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
@@ -1178,6 +1397,15 @@ function renderListView() {
         showListEmptyState("No system requirements match the current filters.");
     } else {
         hideListEmptyState();
+    }
+
+    if (table) {
+        table.dataset.filteredRowCount = String(rows.length);
+        table.dataset.totalRowCount = String(state.requirements.length);
+    }
+
+    if (window.syncDataTableFooters) {
+        window.syncDataTableFooters(table || document);
     }
 }
 

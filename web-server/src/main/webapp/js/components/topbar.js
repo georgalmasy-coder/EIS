@@ -378,7 +378,6 @@ export function applyTopbarMetadata(root = document, topPanel = {}) {
 
 function updateTopbarHelpButton(root, metadata) {
     const helpButton = findElement(root, "topbarHelpButton");
-    const topbar = root.querySelector?.(".topbar");
 
     if (!helpButton) {
         return;
@@ -391,10 +390,6 @@ function updateTopbarHelpButton(root, metadata) {
         helpButton.removeAttribute("data-help-page");
         helpButton.removeAttribute("data-help-bound-page");
 
-        if (topbar) {
-            topbar.removeAttribute("data-help-page");
-        }
-
         return;
     }
 
@@ -402,11 +397,6 @@ function updateTopbarHelpButton(root, metadata) {
     helpButton.setAttribute("data-help-page", helpFileName);
     helpButton.setAttribute("data-help-title", "Help");
     helpButton.setAttribute("title", "Open help");
-
-    if (topbar) {
-        topbar.setAttribute("data-help-page", helpFileName);
-        topbar.setAttribute("data-help-title", "Help");
-    }
 
     bindTopbarHelpButton(root);
 }
@@ -550,7 +540,10 @@ function readTopbarMetadataFromXml(source) {
         projectName: getFieldValue(topPanel, "ProjectName", "—"),
         userNameLabel: getFieldLabel(topPanel, ["UserName", "Name"], "User Name"),
         userName: getFieldValue(topPanel, ["UserName", "Name"], "—"),
-        helpFileName: getFieldValue(topPanel, "HelpFileName", "")
+        helpFileName: getFieldValue(topPanel, "HelpFileName", ""),
+        workspaceEyebrow: getFieldValue(topPanel, "WorkspaceEyebrow", ""),
+        workspaceHeading: getFieldValue(topPanel, "WorkspaceHeading", ""),
+        workspaceHelpText: getFieldValue(topPanel, "WorkspaceHelpText", "")
     };
 }
 

@@ -361,25 +361,39 @@ function calculateAxisRanges({
 
     const ranges = [];
     let start = 0;
+    let safetyCounter = 0;
+    const maxRanges = Math.max(1, Math.ceil(Math.max(totalSize, 1) / Math.max(preferredPageSize, 1)) * 4 + 8);
 
-    while (start < totalSize) {
+    while (start < totalSize && safetyCounter < maxRanges) {
         let end = Math.min(start + preferredPageSize, totalSize);
 
         if (end < totalSize) {
             let nextEnd = end;
+            let stabilizationCounter = 0;
 
-            do {
+            while (stabilizationCounter < 64) {
                 end = nextEnd;
                 nextEnd = adjustPageBreakToAvoidCuttingNodes(start, end, spans, preferredPageSize, orientation);
-            } while (nextEnd !== end);
+
+                if (!Number.isFinite(nextEnd) || nextEnd === end) {
+                    break;
+                }
+
+                stabilizationCounter += 1;
+            }
         }
 
-        if (end <= start) {
+        if (!Number.isFinite(end) || end <= start) {
             end = Math.min(start + preferredPageSize, totalSize);
+        }
+
+        if (!Number.isFinite(end) || end <= start) {
+            break;
         }
 
         ranges.push({ start, end });
         start = end;
+        safetyCounter += 1;
     }
 
     if (!ranges.length) {

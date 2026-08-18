@@ -60,11 +60,15 @@
             </section>
         </header>
 
-        <section class="panel page-layout systemrequirement-main-layout" aria-label="System Requirement">
-            <div class="section-header systemrequirement-main-section-header">
-                <h2>System Requirement</h2>
+        <section class="page-layout systemrequirement-main-layout" aria-label="System Requirement">
+            <div class="systemrequirement-main-header-row">
+                <div class="workspace-header systemrequirement-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow systemrequirement-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading systemrequirement-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext systemrequirement-workspace-helptext"></div>
+                </div>
 
-                <div class="systemrequirement-view-switcher" role="group" aria-label="Select view type">
+                <div class="systemrequirement-main-header-actions" role="group" aria-label="View actions">
                     <button
                             id="btnViewList"
                             class="systemrequirement-view-button is-active"
@@ -108,62 +112,7 @@
                             <path d="M9 3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v2H8a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H8v-1h8v1h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1v-1a2 2 0 0 0-2-2h-3v-2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H9z"></path>
                         </svg>
                     </button>
-                </div>
-            </div>
 
-            <div class="systemrequirement-main-info-bar" aria-label="System requirement information">
-                <div class="systemrequirement-main-info-item">
-                    <span class="systemrequirement-main-info-label">System requirements:</span>
-                    <strong id="systemRequirementCount">—</strong>
-                </div>
-
-                <div class="systemrequirement-main-info-item">
-                    <span class="systemrequirement-main-info-label">Current view:</span>
-                    <strong id="currentViewLabel">Liste-visning</strong>
-                </div>
-            </div>
-
-            <div class="systemrequirement-main-toolbar" aria-label="System requirement toolbar">
-                <div class="systemrequirement-filter-group">
-                    <label class="systemrequirement-search-filter" for="filterRequirementText">
-                        <span class="systemrequirement-filter-label">Search</span>
-                        <span class="systemrequirement-search-box">
-                            <input
-                                    id="filterRequirementText"
-                                    class="systemrequirement-search-input"
-                                    type="search"
-                                    placeholder="Search in ID, name or description..."
-                                    autocomplete="off"
-                                    aria-label="Search in ID, name or description"
-                            >
-                            <span class="systemrequirement-search-icon" aria-hidden="true">⌕</span>
-                        </span>
-                    </label>
-
-                    <label class="systemrequirement-active-filter" for="filterActiveOnly">
-                        <input
-                                id="filterActiveOnly"
-                                type="checkbox"
-                                checked
-                        >
-                        <span>Aktiv</span>
-                    </label>
-
-                    <button
-                            id="btnClearFilter"
-                            class="systemrequirement-secondary-button"
-                            type="button"
-                    >
-                        Clear filter
-                    </button>
-
-                    <div id="groupByBar" class="systemrequirement-grouping-bar" aria-label="Group by controls">
-                        <div class="systemrequirement-grouping-label">Group by</div>
-                        <div id="groupByZone" class="systemrequirement-grouping-zone" aria-label="Group by area" tabindex="0"></div>
-                    </div>
-                </div>
-
-                <div class="systemrequirement-action-group" aria-label="View actions">
                     <button
                             id="btnImport"
                             class="systemrequirement-icon-button systemrequirement-list-action"
@@ -217,22 +166,89 @@
                             <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800" fill="rgb(15,23,42)">PDF</text>
                         </svg>
                     </button>
+                </div>
+            </div>
+
+            <div class="systemrequirement-main-info-bar" aria-label="System requirement information">
+                <div class="systemrequirement-main-info-item">
+                    <span class="systemrequirement-main-info-label">System requirements:</span>
+                    <strong id="systemRequirementCount">—</strong>
+                </div>
+
+                <div class="systemrequirement-main-info-item">
+                    <span class="systemrequirement-main-info-label">Current view:</span>
+                    <strong id="currentViewLabel">Liste-visning</strong>
+                </div>
+            </div>
+
+            <div class="systemrequirement-main-toolbar" aria-label="System requirement toolbar">
+                <div class="systemrequirement-filter-group">
+                    <label class="systemrequirement-search-filter" for="filterRequirementText">
+                        <span class="systemrequirement-filter-label">Filter</span>
+                        <span class="systemrequirement-search-box">
+                            <input
+                                    id="filterRequirementText"
+                                    class="systemrequirement-search-input"
+                                    type="search"
+                                    placeholder="Search in ID, name or description..."
+                                    autocomplete="off"
+                                    aria-label="Search in ID, name or description"
+                            >
+                            <span class="systemrequirement-search-icon" aria-hidden="true">⌕</span>
+                        </span>
+                    </label>
+
+                    <label class="systemrequirement-active-filter" for="filterActiveOnly">
+                        <input
+                                id="filterActiveOnly"
+                                type="checkbox"
+                                checked
+                        >
+                        <span>Aktiv</span>
+                    </label>
 
                     <button
-                            id="btnHelp"
-                            class="systemrequirement-icon-button systemrequirement-help-button"
+                            id="btnClearFilter"
+                            class="systemrequirement-secondary-button"
                             type="button"
-                            data-help-page="systemrequirement-main"
-                            data-help-title="Help - System Requirement"
-                            title="Open help"
-                            aria-label="Open help for System Requirement"
                     >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
-                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
-                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
-                        </svg>
+                        Clear filter
                     </button>
+
+                    <div id="groupByBar" class="systemrequirement-grouping-bar" aria-label="Group by controls">
+                        <div class="systemrequirement-grouping-label">Group by</div>
+                        <div id="groupByZone" class="systemrequirement-grouping-zone" aria-label="Group by area" tabindex="0"></div>
+                    </div>
+
+                    <div class="systemrequirement-columns-control" id="columnsControl">
+                        <button
+                                id="btnColumns"
+                                class="systemrequirement-secondary-button systemrequirement-columns-button"
+                                type="button"
+                                aria-haspopup="dialog"
+                                aria-controls="columnsPopover"
+                                aria-expanded="false"
+                                title="Choose columns"
+                        >
+                            Columns
+                        </button>
+
+                        <div id="columnsPopover" class="systemrequirement-columns-popover" hidden role="dialog" aria-label="Choose columns">
+                            <div class="systemrequirement-columns-popover-head">
+                                <span>Columns</span>
+                                <button
+                                        id="btnCloseColumns"
+                                        class="systemrequirement-columns-close"
+                                        type="button"
+                                        aria-label="Close column chooser"
+                                        title="Close"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <div id="columnsList" class="systemrequirement-columns-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -243,7 +259,7 @@
                         data-view-panel="list"
                         aria-label="System requirement list view"
                 >
-                    <div class="table-frame page-frame systemrequirement-list-frame" aria-label="System requirement list frame">
+                    <div class="table-frame page-frame has-table-footer systemrequirement-list-frame" aria-label="System requirement list frame">
                         <div class="table-scroll systemrequirement-list-scroll" id="tableScroll">
                             <table class="data-table page-table systemrequirement-table" aria-label="System requirement list">
                                 <colgroup id="mainColGroup"></colgroup>
@@ -256,6 +272,9 @@
                             <div class="empty page-empty systemrequirement-empty" id="listEmptyState">
                                 Loading system requirements…
                             </div>
+                        </div>
+                        <div class="data-table-footer systemrequirement-table-footer" aria-live="polite">
+                            <span class="data-table-footer-count" id="systemrequirementTableCount">0 of 0</span>
                         </div>
                     </div>
                 </section>

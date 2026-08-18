@@ -60,6 +60,7 @@ const MAX_REQUIREMENT_LEVEL = 4;
 const DIAGRAM_NODE_WIDTH = 260;
 const PROJECT_NODE_HEIGHT = 104;
 const REQUIREMENT_NODE_HEIGHT = 124;
+let pdfDownloadInProgress = false;
 
 const state = {
     xmlDocument: null,
@@ -149,13 +150,12 @@ function initializeEvents() {
                 localStorage.setItem(STORAGE_KEYS.selectedView, viewType);
             }
 
-            if (targetUrl) {
-                window.location.href = targetUrl;
-                return;
-            }
-
             applyView(viewType, { persist: true });
             applyFiltersAndRender();
+
+            if (targetUrl) {
+                window.history.replaceState({}, "", targetUrl);
+            }
         });
     });
 
@@ -253,7 +253,21 @@ function initializeEvents() {
     });
 
     pdfButton?.addEventListener("click", () => {
-        downloadCurrentDiagramPdf();
+        if (pdfDownloadInProgress) {
+            return;
+        }
+
+        pdfDownloadInProgress = true;
+        pdfButton.disabled = true;
+
+        try {
+            downloadCurrentDiagramPdf();
+        } finally {
+            window.setTimeout(() => {
+                pdfDownloadInProgress = false;
+                pdfButton.disabled = false;
+            }, 750);
+        }
     });
 
     initializeContextMenuEvents();

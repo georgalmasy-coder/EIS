@@ -8,7 +8,7 @@ import {
     notifyEditDialogSaved,
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
+import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import { createHistoryTable } from "../components/history-table.js";
 import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
@@ -313,6 +313,8 @@ function buildCurrentEditReturnUrl(entityId = "") {
 function applyModeUi() {
     const saveButton = document.getElementById("btnSave");
     const readOnlyBanner = document.getElementById("readOnlyBanner");
+    const pageModeLabel = document.getElementById("pageModeLabel");
+    const modeLabel = getModeLabel();
 
     document.body.classList.toggle("systemrequirement-edit-readonly", state.readOnly);
 
@@ -332,7 +334,11 @@ function applyModeUi() {
         readOnlyBanner.hidden = !state.readOnly;
     }
 
-    setText("pageModeLabel", getModeLabel());
+    if (pageModeLabel) {
+        pageModeLabel.textContent = modeLabel;
+        pageModeLabel.hidden = !modeLabel;
+    }
+
     setText("entityMeta", getEntityMetaLabel());
 
     if (state.readOnly) {
@@ -341,10 +347,11 @@ function applyModeUi() {
 }
 
 function getModeLabel() {
+    if (state.mode === MODES.edit) return "";
     if (state.mode === MODES.editVersion) return buildHistoricalVersionLabel();
     if (state.mode === MODES.createChild) return "Create Sub System Requirement";
     if (state.mode === MODES.createRoot) return "Create Root System Requirement";
-    return "Edit System Requirement";
+    return "";
 }
 
 function buildHistoricalVersionLabel() {
@@ -398,12 +405,22 @@ function parseTopPanel(xmlDocument) {
     return {
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
+        userName: getChildText(topPanelElement, "Name", "—"),
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function renderAllFromDoc(doc) {

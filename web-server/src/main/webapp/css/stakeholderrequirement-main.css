@@ -1228,11 +1228,9 @@ body.stakeholderrequirement-column-resizing *{
     min-height: 0;
     flex: 1 1 auto;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 14px;
-    background:
-            radial-gradient(circle at top left, rgba(96,165,250,.10), transparent 34%),
-            rgba(15,23,42,.35);
+    background: var(--app-diagram-background);
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
 }
@@ -1268,12 +1266,12 @@ body.stakeholderrequirement-column-resizing *{
 .stakeholderrequirement-diagram-node{
     position: absolute;
     width: 260px;
-    border: 1px solid rgba(86,95,115,.9);
+    border: 1px solid var(--app-diagram-node-border);
     border-radius: 14px;
-    background: rgba(15,23,42,.88);
-    color: #fff;
+    background: var(--app-diagram-node-background);
+    color: var(--app-diagram-node-foreground);
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.28);
+    box-shadow: none;
     overflow: hidden;
     cursor: pointer;
     user-select: none;
@@ -1283,15 +1281,15 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-diagram-node:hover{
-    border-color: #ffffff;
-    box-shadow: 0 8px 20px rgba(0,0,0,.38);
-    filter: brightness(1.08);
+    border-color: var(--app-diagram-node-border);
+    box-shadow: none;
+    filter: none;
 }
 
 .stakeholderrequirement-diagram-node.is-project-node{
     cursor: default;
-    background: #4b5563;
-    border-color: #7c8798;
+    background: var(--app-diagram-node-background);
+    border-color: var(--app-diagram-node-border);
 }
 
 .stakeholderrequirement-diagram-node.is-project-node .stakeholderrequirement-diagram-node-code{
@@ -1299,29 +1297,29 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-diagram-node.is-project-node .stakeholderrequirement-diagram-node-footer{
-    background: #6d28d9;
+    background: var(--app-diagram-node-background);
 }
 
 .stakeholderrequirement-diagram-node.is-project-node:hover{
-    border-color: #ffffff;
-    box-shadow: 0 8px 20px rgba(0,0,0,.38);
-    filter: brightness(1.08);
+    border-color: var(--app-diagram-node-border);
+    box-shadow: none;
+    filter: none;
 }
 
 .stakeholderrequirement-diagram-node-head{
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
-    border-bottom: 1px solid rgba(148,163,184,.22);
+    border-bottom: 1px solid var(--app-diagram-node-border);
 }
 
 .stakeholderrequirement-diagram-node-code{
     display: block;
     flex: 0 0 auto;
     padding: 0.2rem 0.35rem;
-    color: #e5e7eb;
-    font-size: 0.74rem;
-    font-weight: 700;
+    color: var(--app-diagram-node-foreground);
+    font-size: 0.95rem;
+    font-weight: 800;
     line-height: 1.1;
     text-align: left;
     overflow-wrap: anywhere;
@@ -1341,9 +1339,9 @@ body.stakeholderrequirement-column-resizing *{
     align-items: center;
     justify-content: center;
     padding: 0.15rem 0.5rem;
-    color: #ffffff;
-    font-size: 0.82rem;
-    font-weight: 700;
+    color: var(--app-diagram-node-foreground);
+    font-size: 1rem;
+    font-weight: 800;
     line-height: 1.22;
     overflow-wrap: anywhere;
 }
@@ -1354,9 +1352,9 @@ body.stakeholderrequirement-column-resizing *{
     align-items: center;
     justify-content: center;
     padding: 0.15rem 0.5rem;
-    color: #ffffff;
-    font-size: 0.82rem;
-    font-weight: 700;
+    color: var(--app-diagram-node-foreground);
+    font-size: 1rem;
+    font-weight: 800;
     line-height: 1.22;
     overflow-wrap: anywhere;
 }
@@ -1365,8 +1363,8 @@ body.stakeholderrequirement-column-resizing *{
     display: block;
     flex: 0 0 auto;
     padding: 0.2rem 0.4rem;
-    color: #ffffff;
-    font-size: 0.74rem;
+    color: var(--app-diagram-node-foreground);
+    font-size: 0.95rem;
     font-weight: 800;
     line-height: 1.1;
     white-space: nowrap;
@@ -1378,8 +1376,8 @@ body.stakeholderrequirement-column-resizing *{
     display: block;
     flex: 0 0 auto;
     padding: 0.2rem 0.4rem;
-    color: #ffffff;
-    font-size: 0.74rem;
+    color: var(--app-diagram-node-foreground);
+    font-size: 0.95rem;
     font-weight: 800;
     line-height: 1.1;
     text-align: center;
@@ -1393,7 +1391,7 @@ body.stakeholderrequirement-column-resizing *{
     grid-template-columns: 1fr;
     gap: 0;
     flex: 0 0 auto;
-    border-top: 1px solid rgba(148,163,184,.22);
+    border-top: 1px solid var(--app-diagram-node-border);
 }
 
 .stakeholderrequirement-diagram-status-bar{
@@ -1408,7 +1406,7 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-diagram-status-value{
-    color: #fff;
+    color: var(--app-diagram-node-foreground);
     font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1416,13 +1414,13 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-diagram-edge{
-    stroke: rgba(148,163,184,.55);
+    stroke: var(--app-diagram-edge-foreground);
     stroke-width: 1.6;
     fill: none;
 }
 
 .stakeholderrequirement-diagram-edge-highlight{
-    stroke: rgba(96,165,250,.85);
+    stroke: var(--app-diagram-edge-foreground);
     stroke-width: 2.1;
 }
 
@@ -1431,10 +1429,11 @@ body.stakeholderrequirement-column-resizing *{
     z-index: 2000;
     min-width: 250px;
     padding: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 12px;
-    background: rgba(15,23,42,.97);
-    box-shadow: 0 20px 45px rgba(0,0,0,.36);
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
     display: none;
 }
 
@@ -1447,7 +1446,7 @@ body.stakeholderrequirement-column-resizing *{
     width: 100%;
     border: 0;
     background: transparent;
-    color: var(--text);
+    color: var(--app-text-primary);
     text-align: left;
     padding: 9px 10px;
     border-radius: 9px;
@@ -1457,7 +1456,7 @@ body.stakeholderrequirement-column-resizing *{
 }
 
 .stakeholderrequirement-context-menu button:hover{
-    background: rgba(96,165,250,.16);
+    background: var(--app-surface-subtle-background);
 }
 
 .stakeholderrequirement-context-menu button[hidden]{
