@@ -38,6 +38,9 @@ public enum PageType {
     SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
 
     // Admin
+    PROJECT_MAIN_PAGE("project-main","html-pages/project-main.html", "Projects", true, "PROJECT MANAGEMENT", "Projects", "Review and manage projects in the workspace below."),
+    PROJECT_EDIT_PAGE("project-edit","html-pages/project-edit.html", "Project", true, "PROJECT MANAGEMENT", "Project", "Edit the current project in the workspace below."),
+
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "ADMINISTRATION", "Stakeholder", "Work with stakeholder records in the workspace below."),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "ADMINISTRATION", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "ADMINISTRATION", "Department Administration", "Use the workspace below to manage administration data."),
@@ -70,8 +73,6 @@ public enum PageType {
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
-    PROJECT_MAIN_PAGE("project-main","html-pages/project-main.html", "Projects", true, "PROJECT MANAGEMENT", "Projects", "Review and manage projects in the workspace below."),
-    PROJECT_EDIT_PAGE("project-edit","html-pages/project-edit.html", "Project", true, "PROJECT MANAGEMENT", "Project", "Edit the current project in the workspace below."),
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Customer", true, "ADMINISTRATION", "Customer", "Edit the current customer in the workspace below."),
     USER_MAIN_PAGE("user-main","html-pages/user-main.html", "User Administration", true, "ADMINISTRATION", "User Administration", "Use the workspace below to manage users."),
     USER_EDIT_PAGE("user-edit","html-pages/user-edit.html", "User Account", true, "ADMINISTRATION", "User Account", "Edit the current user account in the workspace below."),

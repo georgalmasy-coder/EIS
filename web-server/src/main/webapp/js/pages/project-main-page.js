@@ -6,6 +6,7 @@ import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
 import { escapeHtml } from "../core/html.js";
 import { sanitizeCssColor } from "../core/css.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import {
     getChildText,
     getDirectChild,
@@ -31,7 +32,10 @@ const state = {
     topPanel: {
         customerName: "—",
         projectName: "—",
-        userName: "—"
+        userName: "—",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     projects: [],
     filteredProjects: [],
@@ -144,7 +148,7 @@ async function loadProjects() {
         const root = xmlDocument.getElementsByTagName("ProjectList")[0] || xmlDocument.documentElement;
 
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(root);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.projects = parseProjects(root);
         state.listColumns = buildListColumns(state.projects);
 
@@ -165,26 +169,16 @@ async function loadProjects() {
     }
 }
 
-function parseTopPanel(root) {
-    const topPanel = getDirectChild(root, "TopPanel");
-
-    if (!topPanel) {
-        return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanel, "CustomerName", "—"),
-        projectName: getChildText(topPanel, "ProjectName", "—"),
-        userName: getChildText(topPanel, "Name", "—")
-    };
-}
-
 function applyTopPanel() {
     applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseProjects(root) {
@@ -306,6 +300,7 @@ function renderTable() {
     const colGroup = document.getElementById("mainColGroup");
     const headerRow = document.getElementById("mainHeaderRow");
     const body = document.getElementById("tbody");
+    const count = document.getElementById("projectTableCount");
     const table = document.querySelector(".project-main-table");
 
     if (!colGroup || !headerRow || !body) {
@@ -383,8 +378,14 @@ function renderTable() {
 
     if (rows.length === 0) {
         showEmptyState("No projects found.");
+        if (count) {
+            count.textContent = "0 of 0";
+        }
     } else {
         hideEmptyState();
+        if (count) {
+            count.textContent = `${rows.length} of ${state.filteredProjects.length}`;
+        }
     }
 }
 

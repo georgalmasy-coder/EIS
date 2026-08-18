@@ -392,6 +392,154 @@ body.project-edit-document .attachments-table td {
     vertical-align: top;
 }
 
+.project-edit-layout{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-edit-section-header{
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.project-edit-title-group{
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.project-edit-title-group h2{
+    margin: 0;
+    line-height: 1.2;
+    color: var(--app-text-primary);
+}
+
+.project-edit-mode-label{
+    color: var(--app-text-secondary);
+}
+
+.project-readonly-banner{
+    border-color: rgba(251,191,36,.45);
+    background: rgba(251,191,36,.12);
+    color: #fde68a;
+}
+
+.project-edit-status-row{
+    color: var(--app-text-secondary);
+}
+
+.project-edit-entity-meta{
+    color: var(--app-text-secondary);
+}
+
+.page-tab-btn{
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+    border-color: var(--app-border-default);
+}
+
+.page-tab-btn:hover{
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.page-tab-btn.is-active{
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.tab-panel{
+    background: transparent;
+}
+
+.project-basis-info-fields .page-field label,
+.note-editor-label,
+.attachment-editor-label{
+    color: var(--app-text-secondary);
+}
+
+.project-basis-info-fields input,
+.project-basis-info-fields textarea,
+.project-basis-info-fields select,
+.note-textarea,
+.attachment-textarea,
+.attachment-input{
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+}
+
+.project-basis-info-fields input:focus,
+.project-basis-info-fields textarea:focus,
+.project-basis-info-fields select:focus,
+.note-textarea:focus,
+.attachment-textarea:focus,
+.attachment-input:focus{
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.project-basis-info-fields input[readonly],
+.project-basis-info-fields textarea[readonly],
+.project-basis-info-fields select:disabled,
+.project-basis-info-fields input:disabled,
+.project-basis-info-fields textarea:disabled{
+    opacity: .72;
+}
+
+.project-notes-frame,
+.project-attachments-frame{
+    background: var(--app-surface-background);
+}
+
+#tabPanel2 .table-frame,
+#tabPanel3 .table-frame{
+    background: var(--app-surface-background);
+}
+
+body.project-edit-document .notes-table th,
+body.project-edit-document .attachments-table th{
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+}
+
+body.project-edit-document .notes-table tbody tr:hover,
+body.project-edit-document .attachments-table tbody tr:hover{
+    background: var(--app-table-row-hover);
+}
+
+.project-edit-footer{
+    border-top: 1px solid var(--app-border-default);
+}
+
+.project-edit-dialog,
+.note-dlg,
+.attachment-dlg{
+    background: var(--app-surface-background);
+    border: 1px solid var(--app-border-default);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
+}
+
+.note-editor-label,
+.attachment-editor-label{
+    color: var(--app-text-secondary);
+}
+
+body.project-edit-document .notes-table,
+body.project-edit-document .attachments-table{
+    background: var(--app-surface-background);
+}
+
 @media (max-width: 760px) {
     .project-edit-status-row {
         flex-direction: column;

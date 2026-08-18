@@ -58,9 +58,27 @@
             </section>
         </header>
 
-        <section class="panel page-layout project-main-layout" aria-label="Projects">
-            <div class="section-header project-main-section-header">
-                <h2>Projects</h2>
+        <section class="page-layout project-main-layout" aria-label="Projects">
+            <div class="project-main-header-row">
+                <div class="workspace-header project-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow project-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading project-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext project-workspace-helptext"></div>
+                </div>
+
+                <div class="project-main-header-actions" role="group" aria-label="View actions">
+                    <button
+                            id="btnAddProject"
+                            class="project-main-icon-button"
+                            type="button"
+                            aria-label="Create project"
+                            title="Create project"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="project-main-toolbar" aria-label="Project toolbar">
@@ -90,39 +108,11 @@
                     </label>
                 </div>
 
-                <div class="project-main-action-group" aria-label="View actions">
-                    <button
-                            id="btnAddProject"
-                            class="project-main-icon-button"
-                            type="button"
-                            aria-label="Create project"
-                            title="Create project"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
-                        </svg>
-                    </button>
-
-                    <button
-                            id="btnHelp"
-                            class="project-main-icon-button"
-                            type="button"
-                            data-help-page="project-main"
-                            data-help-title="Help - Projects"
-                            title="Open help"
-                            aria-label="Open help for Projects"
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
-                            <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
-                            <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
-                        </svg>
-                    </button>
-                </div>
+                <div class="project-main-action-group" aria-label="View actions"></div>
             </div>
 
             <div class="page-body project-main-body">
-                <div class="table-frame page-frame project-main-list-frame" aria-label="Project list frame">
+                <div class="table-frame page-frame has-table-footer project-main-list-frame" aria-label="Project list frame">
                     <div class="table-scroll project-main-list-scroll" id="tableScroll">
                         <table class="data-table page-table project-main-table" aria-label="Project list">
                             <colgroup id="mainColGroup"></colgroup>
@@ -135,6 +125,10 @@
                         <div class="empty page-empty project-main-empty" id="listEmptyState">
                             Loading projects...
                         </div>
+                    </div>
+
+                    <div class="data-table-footer project-main-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="projectTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>
