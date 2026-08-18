@@ -153,6 +153,7 @@ public class UserMainServlet extends GenericDataProviderServlet {
                 integerValue(fieldValue(userElement, "DepartmentId")),
                 booleanValue(fieldValue(userElement, "Active"), true),
                 UserRoles.fromIdOrDefault(integerValue(fieldValue(userElement, "UserRole")), UserRoles.CUSTOMER_ADMINISTRATOR),
+                integerValue(fieldValue(userElement, "ThemeId")),
                 timestampValue(fieldValue(userElement, "LockedUntil")),
                 false,
                 false,

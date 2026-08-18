@@ -94,6 +94,7 @@ function initialize() {
     initMenu();
     initHelpDialog();
     collectElements();
+    ensureWorkspaceChrome();
     applyColumnWidths();
     bindEvents();
     initializeTabs();
@@ -112,6 +113,9 @@ function collectElements() {
     els.customerName = document.getElementById("customerName");
     els.projectName = document.getElementById("projectName");
     els.userName = document.getElementById("userName");
+    els.pageEyebrow = document.getElementById("pageEyebrow");
+    els.pageHeading = document.getElementById("pageHeading");
+    els.pageHelpText = document.getElementById("pageHelpText");
     els.userFilter = document.getElementById("userFilter");
     els.btnClearFilter = document.getElementById("btnClearFilter");
     els.groupByZone = document.getElementById("groupByZone");
@@ -119,6 +123,7 @@ function collectElements() {
     els.userHeaderRow = document.getElementById("userHeaderRow");
     els.usersBody = document.getElementById("usersBody");
     els.usersEmpty = document.getElementById("usersEmpty");
+    els.userTableCount = document.getElementById("userTableCount");
 
     els.userEditDialog = document.getElementById("userEditDialog");
     els.userEditForm = document.getElementById("userEditForm");
@@ -138,6 +143,45 @@ function collectElements() {
     document.querySelectorAll("[id]").forEach(function (element) {
         els[element.id] = element;
     });
+}
+
+function ensureWorkspaceChrome() {
+    const layout = document.querySelector(".user-administration-layout");
+
+    if (layout) {
+        layout.classList.remove("panel");
+    }
+
+    const sectionHeader = document.querySelector(".section-header.user-administration-section-header");
+
+    if (sectionHeader && !document.getElementById("pageEyebrow")) {
+        sectionHeader.className = "user-administration-header-row";
+        sectionHeader.innerHTML = `
+            <div class="workspace-header user-administration-workspace-header" aria-label="Workspace information">
+                <div id="pageEyebrow" class="workspace-eyebrow user-administration-workspace-eyebrow"></div>
+                <div id="pageHeading" class="workspace-heading user-administration-workspace-heading"></div>
+                <div id="pageHelpText" class="workspace-helptext user-administration-workspace-helptext"></div>
+            </div>
+        `;
+        els.pageEyebrow = document.getElementById("pageEyebrow");
+        els.pageHeading = document.getElementById("pageHeading");
+        els.pageHelpText = document.getElementById("pageHelpText");
+    }
+
+    const frame = document.querySelector(".user-administration-frame");
+
+    if (frame && !document.getElementById("userTableCount")) {
+        frame.insertAdjacentHTML(
+            "beforeend",
+            `
+                <div class="data-table-footer user-administration-table-footer" aria-live="polite">
+                    <span class="data-table-footer-count" id="userTableCount">0 of 0</span>
+                </div>
+            `
+        );
+        els.userTableCount = document.getElementById("userTableCount");
+        frame.classList.add("has-table-footer");
+    }
 }
 
 function bindEvents() {
@@ -281,6 +325,7 @@ async function loadUsers() {
     try {
         const doc = await fetchXml(API_URL);
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        syncWorkspaceHeaderVisibility();
         state.customerId = parseCustomerId(doc);
         state.lookups = parseLookups(doc);
         state.users = parseUsers(doc);
@@ -318,6 +363,7 @@ async function openUserDetail(userId, customerId = state.customerId) {
         const doc = await fetchXml(`${API_URL}?${query.join("&")}`);
         state.currentDoc = doc;
         applyTopPanelFromDocument(doc, els, { userTagNames: ["Name", "UserName"] });
+        syncWorkspaceHeaderVisibility();
         state.customerId = parseCustomerId(doc) ?? state.customerId;
         state.lookups = parseLookups(doc);
         fillLookupSelect("fieldUserMfaPolicy", "userMfaPolicy");
@@ -464,6 +510,7 @@ function parseUserNode(node) {
         active: boolText(node, "active"),
         userRole: intText(node, "userRole"),
         userRoleLabel: text(node, "userRoleLabel"),
+        themeId: intText(node, "themeId"),
         lockedUntil: text(node, "lockedUntil"),
         lastLoginAt: text(node, "lastLoginAt"),
         mfaEnabled: boolText(node, "mfaEnabled"),
@@ -550,6 +597,7 @@ function fillDialog(detail) {
     setValue("fieldName", user.name);
     setValue("fieldEmail", user.email);
     fillLookupSelect("fieldUserRole", "userRole", user.userRole == null ? "1" : String(user.userRole));
+    fillLookupSelect("fieldTheme", "theme", user.themeId == null ? "" : String(user.themeId));
     setValue("fieldPhone", user.phone);
     initPhoneField(els.fieldPhone, {
         initialCountry: String(linkedCountry || "dk").toLowerCase() || "dk",
@@ -678,7 +726,7 @@ function fillLookupSelect(selectId, lookupName, selectedValue) {
     }
 
     const options = state.lookups[lookupName] || [];
-    const currentValue = selectedValue == null ? String(select.value || "") : String(selectedValue);
+    const currentValue = selectedValue == null ? "" : String(selectedValue);
 
     select.innerHTML = options.map(function (lookupOption) {
         const selected = lookupOption.code === currentValue ? " selected" : "";
@@ -951,6 +999,7 @@ function buildSaveXml() {
     appendXmlElement(xml, "name", value("fieldName"));
     appendXmlElement(xml, "email", value("fieldEmail"));
     appendXmlElement(xml, "userRole", value("fieldUserRole"));
+    appendXmlElement(xml, "themeId", value("fieldTheme"));
     appendXmlElement(xml, "phone", phone);
     appendXmlElement(xml, "departmentId", value("fieldDepartmentId"));
     appendXmlElement(xml, "active", document.getElementById("fieldActive") && document.getElementById("fieldActive").checked ? "true" : "false");
@@ -1177,6 +1226,7 @@ function renderUsers() {
             els.usersEmpty.hidden = false;
             els.usersEmpty.textContent = state.users.length ? "No users match the filter." : "No users.";
         }
+        updateUserTableCount();
         return;
     }
 
@@ -1189,6 +1239,7 @@ function renderUsers() {
         : state.filteredUsers.map(renderUserRow).join("");
 
     els.usersBody.innerHTML = rowsHtml;
+    updateUserTableCount();
 
     els.usersBody.querySelectorAll(".group-toggle").forEach(function (button) {
         button.addEventListener("click", function (event) {
@@ -1217,6 +1268,14 @@ function renderUsers() {
             openUserDetail(userId, state.customerId);
         });
     });
+}
+
+function updateUserTableCount() {
+    if (!els.userTableCount) {
+        return;
+    }
+
+    els.userTableCount.textContent = `${state.filteredUsers.length} of ${state.users.length}`;
 }
 
 function renderGroupedRows(rows, groupKeys, pathParts) {
@@ -1617,6 +1676,20 @@ function syncFilterClearButton(filterInput) {
     }
 
     clearButton.hidden = String(filterInput.value || "") === "";
+}
+
+function syncWorkspaceHeaderVisibility() {
+    const workspaceRow = document.querySelector(".user-administration-header-row");
+
+    if (!workspaceRow) {
+        return;
+    }
+
+    const hasWorkspaceText = [els.pageEyebrow, els.pageHeading, els.pageHelpText].some(function (element) {
+        return String(element?.textContent || "").trim() !== "";
+    });
+
+    workspaceRow.hidden = !hasWorkspaceText;
 }
 
 function setDialogStatus(textValue, className) {

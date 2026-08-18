@@ -21,8 +21,9 @@ public class SessionProvider extends GenericProvider {
                 SessionId,
                 CustomerId,
                 ProjectId,
-                UserId,
-                Created,
+                U.UserId,
+                U.ThemeId,
+                S.Created,
                 LastAccessed,
                 IpAddress,
                 UserAgent,
@@ -36,8 +37,10 @@ public class SessionProvider extends GenericProvider {
                 LogoutAt,
                 ExpiredAt,
                 EndedReason
-            FROM [dbo].[SESSION]
-            WHERE SessionId = ?
+            FROM [dbo].[SESSION] S
+            LEFT JOIN [dbo].[USERS] U
+                ON U.UserId = S.UserId
+            WHERE S.SessionId = ?
             """;
 
     private static final String UPDATE_SESSION_INFO_SQL = """
@@ -261,6 +264,7 @@ public class SessionProvider extends GenericProvider {
         ws.setCustomerId(getNullableInt(rs, "CustomerId"));
         ws.setProjectId(getNullableInt(rs, "ProjectId"));
         ws.setUserId(rs.getInt("UserId"));
+        ws.setThemeId(getNullableInt(rs, "ThemeId"));
         ws.setCreated(toDate(rs.getTimestamp("Created")));
         ws.setLastAccessed(toDate(rs.getTimestamp("LastAccessed")));
         ws.setIpAddress(rs.getString("IpAddress"));

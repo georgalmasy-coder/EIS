@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="../../css/help-dialog.css" />
     <link rel="stylesheet" href="../../css/user-administration.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css" />
 </head>
 <body>
 <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">›</button>
@@ -46,10 +45,13 @@
                 <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
             </section>
         </header>
-
-        <section class="panel page-layout user-administration-layout" aria-label="User administration">
-            <div class="section-header user-administration-section-header">
-                <h2>User Administration</h2>
+        <section class="page-layout user-administration-layout" aria-label="User administration">
+            <div class="user-administration-header-row">
+                <div class="workspace-header user-administration-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow user-administration-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading user-administration-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext user-administration-workspace-helptext"></div>
+                </div>
             </div>
 
             <div class="user-administration-toolbar" aria-label="User toolbar">
@@ -94,7 +96,7 @@
             </div>
 
             <div class="page-body user-administration-body">
-                <div class="table-frame page-frame user-administration-frame" aria-label="User list frame">
+                <div class="table-frame page-frame has-table-footer user-administration-frame" aria-label="User list frame">
                     <div class="table-scroll user-administration-scroll" id="tableScroll">
                         <table class="data-table page-table user-administration-table" aria-label="User list">
                             <colgroup id="userColGroup">
@@ -125,7 +127,10 @@
                             </thead>
                             <tbody id="usersBody"></tbody>
                         </table>
-                        <div class="empty page-empty" id="usersEmpty">Loading users…</div>
+                        <div class="empty page-empty" id="usersEmpty">Loading users...</div>
+                    </div>
+                    <div class="data-table-footer user-administration-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="userTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>
@@ -134,7 +139,7 @@
 </main>
 
 <dialog id="userEditDialog" class="user-edit-dialog user-edit-dialog-fixed" aria-label="User edit dialog">
-    <form id="userEditForm" method="dialog" class="user-edit-form">
+    <form id="userEditForm" method="dialog" class="dlg user-edit-form">
         <div class="page-dialog-head">
             <h3 id="userDialogTitle">User Administration</h3>
         </div>
@@ -166,6 +171,7 @@
                     </div>
                     <label class="user-department-field"><span>Department</span><select id="fieldDepartmentId"></select></label>
                     <label><span>Locked until</span><input id="fieldLockedUntil" type="datetime-local" step="1" /></label>
+                    <label><span>Theme</span><select id="fieldTheme"></select></label>
                     <label class="user-active-field"><span>Active</span><input id="fieldActive" type="checkbox" /></label>
                 </div>
             </section>
@@ -225,9 +231,8 @@
         </div>
     </form>
 </dialog>
-
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/intlTelInput.min.js"></script>
 <script type="module" src="../../js/pages/user-administration-page.js"></script>
 </body>
 </html>
+

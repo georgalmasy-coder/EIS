@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.generic;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.server.api.web.application.enums.theme.Theme;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +39,7 @@ public class GenericServlet extends HttpServlet {
             ws.setCustomerId(1);
             ws.setProjectId(1);
             ws.setUserId(1);
+            ws.setThemeId(Theme.fromId(String.valueOf(GlobalConfiguration.getThemeId())).getCssId());
             return ws;
         } else {
             try {

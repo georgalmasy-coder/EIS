@@ -8,6 +8,7 @@ import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.web.application.enums.PageType;
+import com.bepa.eis.server.api.web.application.enums.theme.Theme;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
@@ -286,6 +287,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 intValue(text(userElement, "departmentId")),
                 booleanValue(text(userElement, "active"), true),
                 UserRoles.fromIdOrDefault(intValue(text(userElement, "userRole")), UserRoles.BEPA_SYSTEM_ADMINISTRATOR),
+                intValue(text(userElement, "themeId")),
                 timestampValue(text(userElement, "lockedUntil")),
                 false,
                 false,
@@ -346,6 +348,14 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
                 new LookupOption(String.valueOf(UserRoles.CUSTOMER_ADMINISTRATOR.getId()), UserRoles.CUSTOMER_ADMINISTRATOR.getLabel()),
                 new LookupOption(String.valueOf(UserRoles.PROJECT_MEMBER.getId()), UserRoles.PROJECT_MEMBER.getLabel()),
                 new LookupOption(String.valueOf(UserRoles.PROJECT_VIEWER.getId()), UserRoles.PROJECT_VIEWER.getLabel())
+        );
+        appendStaticLookup(
+                xml,
+                "theme",
+                new LookupOption("", "—"),
+                new LookupOption(String.valueOf(Theme.LIGHT.getCssId()), "Light"),
+                new LookupOption(String.valueOf(Theme.BLUE.getCssId()), "Blue"),
+                new LookupOption(String.valueOf(Theme.BLACK.getCssId()), "Black")
         );
         xml.append("</lookups>");
     }
@@ -409,6 +419,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
         appendElement(xml, "active", user != null && user.active());
         appendElement(xml, "userRole", user == null || user.userRole() == null ? null : user.userRole().getId());
         appendElement(xml, "userRoleLabel", user == null || user.userRole() == null ? null : user.userRole().getLabel());
+        appendElement(xml, "themeId", user == null ? null : user.themeId());
         appendElement(xml, "lockedUntil", timestampText(user == null ? null : user.lockedUntil()));
         appendElement(xml, "mfaEnabled", user != null && user.mfaEnabled());
         appendElement(xml, "mfaVerified", user != null && user.mfaVerified());

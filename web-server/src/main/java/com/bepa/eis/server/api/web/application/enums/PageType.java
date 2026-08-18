@@ -68,6 +68,7 @@ public enum PageType {
     ADMIN_DASHBOARD_MAILS_PAGE("dashboard-mail-status-view","html-pages/admin/views/dashboard-mail-status-view.html", "", true, "TBD", "TBD", "TBD"),
 
     ADMIN_CUSTOMER_PAGE("customer-admin","html-pages/admin/customer-administration.html", "Customer Administration | BEPA EIS", true, "ADMINISTRATION", "Customer Administration", "Use the workspace below to manage administration data."),
+    ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
 
     /* */
 
@@ -76,7 +77,6 @@ public enum PageType {
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
 
     SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
-    ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
 
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),

@@ -172,6 +172,7 @@ public class UserProvider extends GenericProvider {
                 U.DepartmentId,
                 U.Active,
                 U.UserRole,
+                U.ThemeId,
                 U.LockedUntil,
                 U.MfaEnabled,
                 U.MfaVerified,
@@ -220,6 +221,7 @@ public class UserProvider extends GenericProvider {
                 U.DepartmentId,
                 U.Active,
                 U.UserRole,
+                U.ThemeId,
                 U.LockedUntil,
                 U.MfaEnabled,
                 U.MfaVerified,
@@ -263,6 +265,7 @@ public class UserProvider extends GenericProvider {
                 U.DepartmentId,
                 U.Active,
                 U.UserRole,
+                U.ThemeId,
                 U.LockedUntil,
                 U.MfaEnabled,
                 U.MfaVerified,
@@ -333,6 +336,7 @@ public class UserProvider extends GenericProvider {
                 DepartmentId,
                 Active,
                 UserRole,
+                ThemeId,
                 FailedLoginCount,
                 MfaEnabled,
                 MfaVerified,
@@ -341,7 +345,7 @@ public class UserProvider extends GenericProvider {
                 Password,
                 LockedUntil
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private static final String UPDATE_USER_SQL = """
@@ -354,6 +358,7 @@ public class UserProvider extends GenericProvider {
                 DepartmentId = ?,
                 Active = ?,
                 UserRole = ?,
+                ThemeId = ?,
                 UserMfaPolicy = ?,
                 LockedUntil = ?
             WHERE UserId = ?
@@ -1411,17 +1416,22 @@ public class UserProvider extends GenericProvider {
 
             statement.setBoolean(6, user.active());
             statement.setInt(7, user.userRole() == null ? UserRoles.CUSTOMER_ADMINISTRATOR.getId() : user.userRole().getId());
-            statement.setInt(8, 0);
-            statement.setBoolean(9, false);
+            if (user.themeId() == null) {
+                statement.setNull(8, Types.INTEGER);
+            } else {
+                statement.setInt(8, user.themeId());
+            }
+            statement.setInt(9, 0);
             statement.setBoolean(10, false);
             statement.setBoolean(11, false);
-            statement.setString(12, normalizeUserMfaPolicy(user.userMfaPolicy()));
-            statement.setString(13, "");
+            statement.setBoolean(12, false);
+            statement.setString(13, normalizeUserMfaPolicy(user.userMfaPolicy()));
+            statement.setString(14, "");
 
             if (user.lockedUntil() == null) {
-                statement.setNull(14, Types.TIMESTAMP);
+                statement.setNull(15, Types.TIMESTAMP);
             } else {
-                statement.setTimestamp(14, user.lockedUntil());
+                statement.setTimestamp(15, user.lockedUntil());
             }
 
             int updatedRows = statement.executeUpdate();
@@ -1702,6 +1712,7 @@ public class UserProvider extends GenericProvider {
         Integer userId = resultSet.getInt("UserId");
         Integer departmentId = resultSet.getObject("DepartmentId") == null ? null : resultSet.getInt("DepartmentId");
         Integer userRoleId = resultSet.getObject("UserRole") == null ? null : resultSet.getInt("UserRole");
+        Integer themeId = resultSet.getObject("ThemeId") == null ? null : resultSet.getInt("ThemeId");
         Integer mfaResetByUserId = resultSet.getObject("MfaResetByUserId") == null ? null : resultSet.getInt("MfaResetByUserId");
 
         return new UserAdministrationRow(
@@ -1713,6 +1724,7 @@ public class UserProvider extends GenericProvider {
                 departmentId,
                 resultSet.getBoolean("Active"),
                 UserRoles.fromIdOrDefault(userRoleId, UserRoles.BEPA_SYSTEM_ADMINISTRATOR),
+                themeId,
                 resultSet.getTimestamp("LockedUntil"),
                 resultSet.getBoolean("MfaEnabled"),
                 resultSet.getBoolean("MfaVerified"),
@@ -1747,17 +1759,22 @@ public class UserProvider extends GenericProvider {
 
             statement.setBoolean(6, user.active());
             statement.setInt(7, user.userRole() == null ? UserRoles.BEPA_SYSTEM_ADMINISTRATOR.getId() : user.userRole().getId());
-            statement.setString(8, user.userMfaPolicy() == null || user.userMfaPolicy().isBlank()
+            if (user.themeId() == null) {
+                statement.setNull(8, Types.INTEGER);
+            } else {
+                statement.setInt(8, user.themeId());
+            }
+            statement.setString(9, user.userMfaPolicy() == null || user.userMfaPolicy().isBlank()
                     ? MfaConfig.UserMfaPolicy.DEFAULT.name()
                     : user.userMfaPolicy());
 
             if (user.lockedUntil() == null) {
-                statement.setNull(9, Types.TIMESTAMP);
+                statement.setNull(10, Types.TIMESTAMP);
             } else {
-                statement.setTimestamp(9, user.lockedUntil());
+                statement.setTimestamp(10, user.lockedUntil());
             }
 
-            statement.setInt(10, user.userId());
+            statement.setInt(11, user.userId());
 
             return statement.executeUpdate() > 0;
         }
@@ -2244,6 +2261,7 @@ public class UserProvider extends GenericProvider {
             Integer departmentId,
             boolean active,
             UserRoles userRole,
+            Integer themeId,
             Timestamp lockedUntil,
             boolean mfaEnabled,
             boolean mfaVerified,

@@ -84,6 +84,7 @@ public class UserMainInfo extends GenericXmlDocument {
                     true,
                     UserRoles.CUSTOMER_ADMINISTRATOR,
                     null,
+                    null,
                     false,
                     false,
                     "",
@@ -250,6 +251,7 @@ public class UserMainInfo extends GenericXmlDocument {
                 null,
                 true,
                 UserRoles.CUSTOMER_ADMINISTRATOR,
+                null,
                 null,
                 false,
                 false,
@@ -552,3 +554,6 @@ public class UserMainInfo extends GenericXmlDocument {
         return value.trim();
     }
 }
+
+
+

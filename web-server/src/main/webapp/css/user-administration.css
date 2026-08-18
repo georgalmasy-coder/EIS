@@ -467,6 +467,11 @@ body.user-administration-column-resizing * {
     max-height: 64vh;
     height: auto;
     overflow: hidden;
+    border: 1px solid var(--app-border-default);
+    border-radius: 14px;
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
     padding: 0;
 }
 
@@ -486,8 +491,8 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     padding: 14px 14px 8px;
     display: block;
     overflow: hidden;
-    background: rgba(17, 28, 51, .98);
-    color: var(--text);
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
 }
 
 .user-edit-form .page-dialog-head,
@@ -528,7 +533,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     flex-wrap: wrap;
     margin: 0 0 10px;
     font-size: 12px;
-    color: var(--muted);
+    color: var(--app-text-secondary);
 }
 
 .user-field-legend-item {
@@ -587,9 +592,9 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     min-height: 0;
     flex: 1 1 auto;
     overflow: auto;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.025);
+    background: var(--app-surface-background);
 }
 
 .user-projects-table {
@@ -601,13 +606,13 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-projects-table th,
 .user-projects-table td {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--app-border-default);
     vertical-align: middle;
 }
 
 .user-projects-table thead th {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--muted);
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-size: 12px;
     font-weight: 600;
     text-align: left;
@@ -683,9 +688,9 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-field-grid select,
 .user-field-grid textarea {
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -698,8 +703,8 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 .user-field-grid input:not([type="checkbox"]):not([type="hidden"]):focus,
 .user-field-grid select:focus,
 .user-field-grid textarea:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .user-field-grid input[readonly],
@@ -718,7 +723,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 
 .user-field-grid input[readonly]::placeholder,
 .user-field-grid textarea[readonly]::placeholder {
-    color: rgba(203, 213, 225, .55);
+    color: var(--app-text-tertiary);
 }
 
 .user-field-grid input[disabled],
@@ -746,7 +751,7 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
 }
 
 .user-phone-field > label {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
     font-weight: 400;
 }
@@ -817,4 +822,574 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
         min-width: 0;
         width: 100%;
     }
+}
+
+.user-administration-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-administration-content {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+    background: var(--app-page-background);
+}
+
+.user-administration-topbar {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.user-administration-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-administration-header-row {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.user-administration-workspace-header {
+    margin: 5px 0 0 5px;
+}
+
+.user-administration-workspace-eyebrow,
+.user-administration-workspace-heading,
+.user-administration-workspace-helptext {
+    color: inherit;
+}
+
+.user-administration-toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.user-administration-filter-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+}
+
+.user-administration-search-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(420px, 100%);
+    flex: 0 1 520px;
+}
+
+.user-administration-filter-label {
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.user-administration-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 220px;
+}
+
+.user-administration-search-input {
+    width: 100%;
+    height: 38px;
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+    padding: 8px 68px 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.user-administration-search-input::-webkit-search-decoration,
+.user-administration-search-input::-webkit-search-cancel-button,
+.user-administration-search-input::-webkit-search-results-button,
+.user-administration-search-input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.user-administration-search-input:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.user-administration-search-icon {
+    position: absolute;
+    right: 11px;
+    color: var(--app-topbar-title-prefix-color);
+    pointer-events: none;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-administration-search-clear {
+    position: absolute;
+    right: 32px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: var(--app-text-tertiary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.user-administration-search-clear:hover {
+    color: var(--app-text-primary);
+    background: var(--app-surface-subtle-background);
+}
+
+.user-administration-search-clear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.user-grouping-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 1 780px;
+    min-width: 0;
+    margin: 0 0 0 auto;
+    padding: 0;
+    flex-wrap: nowrap;
+}
+
+.user-grouping-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    opacity: 0.75;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    color: var(--app-text-secondary);
+}
+
+.user-grouping-zone {
+    position: relative;
+    min-height: 42px;
+    height: 42px;
+    flex: 1 1 630px;
+    min-width: 390px;
+    border: 1px dashed var(--app-border-strong);
+    border-radius: 6px;
+    padding: 6px 34px 6px 6px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    background: var(--app-surface-background);
+    overflow: hidden;
+}
+
+.user-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid var(--app-border-default);
+    border-radius: 999px;
+    cursor: grab;
+    user-select: none;
+    background: var(--app-surface-subtle-background);
+    font-size: 12px;
+    color: var(--app-text-primary);
+}
+
+.user-grouping-clear {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: var(--app-text-tertiary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.user-grouping-clear:hover {
+    color: var(--app-text-primary);
+    background: var(--app-surface-subtle-background);
+}
+
+.user-grouping-clear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.user-grouping-clear svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.user-grouping-clear[hidden] {
+    display: none !important;
+}
+
+.user-administration-help-button {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.user-administration-help-button:hover {
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
+}
+
+.user-administration-help-button:active {
+    transform: translateY(1px);
+}
+
+.user-administration-help-button svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+.user-administration-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.user-administration-frame {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: var(--app-surface-background);
+}
+
+.user-administration-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-x: auto !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    scrollbar-width: auto;
+    scrollbar-color: var(--app-border-strong) var(--app-surface-background);
+    padding-right: 2px;
+}
+
+.user-administration-table {
+    width: 100%;
+    min-width: 1310px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.user-administration-table th,
+.user-administration-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-administration-table th {
+    position: relative;
+    user-select: none;
+}
+
+.user-administration-table th[data-key] {
+    cursor: pointer;
+}
+
+.user-administration-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.user-administration-table tbody td {
+    border-bottom: 1px solid var(--app-border-default);
+    padding: 10px 12px;
+    color: var(--app-text-primary);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.user-administration-table tbody tr:hover,
+.user-administration-table tbody tr:focus-within {
+    background: var(--app-table-row-hover);
+}
+
+.user-administration-table .sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100% - 10px);
+}
+
+.user-administration-table .sort-indicator {
+    display: inline-block;
+    min-width: 10px;
+    color: var(--app-text-tertiary);
+    font-size: 11px;
+    opacity: .85;
+}
+
+.user-administration-table .col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+}
+
+.user-administration-table .col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    right: 3px;
+    width: 1px;
+    height: 60%;
+    background: var(--app-border-strong);
+}
+
+.user-administration-table .col-resizer:hover::after {
+    background: var(--app-topbar-title-prefix-color);
+}
+
+.user-administration-table-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+    color: var(--app-text-secondary);
+}
+
+.user-administration-table-footer .data-table-footer-count {
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+.user-edit-dialog {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
+}
+
+dialog.user-edit-dialog.user-edit-dialog-fixed {
+    width: 1100px;
+    min-width: 1100px;
+    max-width: none;
+    height: 610px;
+    min-height: 610px;
+    max-height: none;
+}
+
+.user-edit-form {
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+}
+
+.user-edit-form .page-dialog-head h3 {
+    color: var(--app-text-primary);
+}
+
+.user-edit-form .page-dialog-status,
+.user-field-legend,
+.user-field-readonly > span,
+.user-field-readonly .field-label {
+    color: var(--app-text-secondary);
+}
+
+.user-edit-form .page-tab-btn,
+.user-edit-form .tab-btn {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-tab-background);
+    color: var(--app-tab-foreground);
+}
+
+.user-edit-form .page-tab-btn:hover,
+.user-edit-form .tab-btn:hover {
+    background: var(--app-tab-hover-background);
+    color: var(--app-tab-hover-foreground);
+}
+
+.user-edit-form .page-tab-btn.is-active,
+.user-edit-form .tab-btn.is-active {
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.user-dialog-panels .tab-panel.is-active {
+    scrollbar-color: var(--app-border-strong) var(--app-surface-background);
+}
+
+.user-field-grid label {
+    color: var(--app-text-secondary);
+}
+
+.user-field-grid input,
+.user-field-grid select,
+.user-phone-country select,
+.user-phone-input input {
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+}
+
+.user-field-grid input:focus,
+.user-field-grid select:focus,
+.user-phone-country select:focus,
+.user-phone-input input:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.user-field-grid input[readonly],
+.user-field-grid select:disabled,
+.user-field-grid input:disabled {
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-secondary);
+}
+
+.user-projects-table-wrap {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-surface-background);
+}
+
+.user-projects-table thead th {
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
+    border-bottom: 1px solid var(--app-border-default);
+}
+
+.user-projects-table th,
+.user-projects-table td {
+    border-bottom: 1px solid var(--app-border-default);
+    color: var(--app-text-primary);
+}
+
+.user-role-pill,
+.user-mfa-pill {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-primary);
+}
+
+.user-edit-form .dlg-footer {
+    border-top: 1px solid var(--app-border-default);
+}
+
+.user-edit-form .dlg-footer button {
+    border: 1px solid var(--app-border-default);
+    background: var(--app-control-background);
+    color: var(--app-control-foreground);
+}
+
+.user-edit-form .dlg-footer button.primary,
+.user-edit-form .dlg-footer #btnSaveUser {
+    background: var(--app-tab-active-background);
+    border-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
+}
+
+.user-edit-form .dlg-footer button:hover {
+    background: var(--app-control-hover-background);
+}
+
+#userDialogStatus.is-error {
+    color: #b91c1c;
+}
+
+#userDialogStatus.is-ok {
+    color: #166534;
+}
+
+#userDialogStatus.is-loading {
+    color: #1d4ed8;
 }

@@ -1,6 +1,5 @@
 package com.bepa.eis.server.api.web.application.views;
 
-import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.BuildInfo;
@@ -41,7 +40,7 @@ public class PageViewer extends GenericServlet {
 
                 String html = loadHtmlPage(pageType.getPath());
                 html = mergeTitle(pageType, webSession, html);
-                html = mergeThemeClass(html);
+                html = mergeThemeClass(webSession, html);
 
                 html = mergeBuildNumber(html);
 
@@ -89,8 +88,8 @@ public class PageViewer extends GenericServlet {
         return html;
     }
 
-    private String mergeThemeClass(String html) {
-        Theme theme = Theme.fromName(GlobalConfiguration.getCurrentThemeName());
+    private String mergeThemeClass(WebSession webSession, String html) {
+        Theme theme = resolveTheme(webSession);
 
         int bodyStart = html.indexOf("<body");
         if (bodyStart < 0) {
@@ -134,6 +133,16 @@ public class PageViewer extends GenericServlet {
 
         String themedBodyTag = bodyTag + " class=\"" + themeClass + "\"";
         return html.substring(0, bodyStart) + themedBodyTag + html.substring(bodyEnd);
+    }
+
+    private Theme resolveTheme(WebSession webSession) {
+        Integer themeId = webSession == null ? null : webSession.getThemeId();
+
+        if (themeId == null) {
+            return Theme.LIGHT;
+        }
+
+        return Theme.fromId(themeId.toString());
     }
 
     private void setContextInResponse(HttpServletResponse response) {

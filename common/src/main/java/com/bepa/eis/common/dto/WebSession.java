@@ -9,6 +9,7 @@ public class WebSession {
     private Integer customerId;
     private Integer projectId;
     private Integer userId;
+    private Integer themeId;
     private Date created;
     private Date lastAccessed;
 
@@ -46,6 +47,10 @@ public class WebSession {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public void setThemeId(Integer themeId) {
+        this.themeId = themeId;
     }
 
     public void setCreated(Date created) {
@@ -122,6 +127,10 @@ public class WebSession {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public Integer getThemeId() {
+        return themeId;
     }
 
     public Date getCreated() {
