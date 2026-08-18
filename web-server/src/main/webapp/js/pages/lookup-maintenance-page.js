@@ -67,7 +67,10 @@ const state = {
     topPanel: {
         customerName: "-",
         projectName: "-",
-        userName: "-"
+        userName: "-",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     rows: {
         TRL: [],
@@ -96,6 +99,9 @@ function initializeShell() {
     setText("projectName", "-", "");
     setText("userName", "-", "");
     setText("loadStatus", "Loading", "");
+    setText("pageEyebrow", "", "");
+    setText("pageHeading", "", "");
+    setText("pageHelpText", "", "");
 
     initMenu(document);
     mountTopbar(document);
@@ -193,6 +199,7 @@ async function loadData() {
         state.activeTab = resolveActiveTab();
 
         applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+        applyWorkspaceHeader();
         renderTabs();
         renderAllCards();
         setText("loadStatus", "Loaded", "");
@@ -217,8 +224,17 @@ function parseTopPanel(xmlDocument) {
     return {
         customerName: getChildText(topPanel, "CustomerName", "-"),
         projectName: getChildText(topPanel, "ProjectName", "-"),
-        userName: getChildText(topPanel, "Name", getChildText(topPanel, "UserName", "-"))
+        userName: getChildText(topPanel, "Name", getChildText(topPanel, "UserName", "-")),
+        workspaceEyebrow: getChildText(topPanel, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanel, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanel, "WorkspaceHelpText", "")
     };
+}
+
+function applyWorkspaceHeader() {
+    setText("pageEyebrow", state.topPanel?.workspaceEyebrow || "", "");
+    setText("pageHeading", state.topPanel?.workspaceHeading || "", "");
+    setText("pageHelpText", state.topPanel?.workspaceHelpText || "", "");
 }
 
 function parseRows(xmlDocument, containerName, rowName) {

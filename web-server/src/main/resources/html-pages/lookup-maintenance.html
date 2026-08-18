@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/lookup-maintenance.css" />
 </head>
 
@@ -57,34 +58,44 @@
             </section>
         </header>
 
-        <section class="panel page-layout lookup-maintenance-layout" aria-label="Lookup maintenance">
-            <div class="section-header lookup-maintenance-section-header">
-                <h2>Lookup Maintenance</h2>
+        <section class="page-layout lookup-maintenance-layout" aria-label="Lookup maintenance">
+            <div class="lookup-maintenance-header-row">
+                <div class="workspace-header lookup-maintenance-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext"></div>
+                </div>
             </div>
 
-            <div class="page-tab-bar lookup-maintenance-tab-bar" role="tablist" aria-label="Lookup tables">
-                <button id="trlTabButton" class="tab-btn" type="button" role="tab" aria-selected="true" aria-controls="trlPanel">TRL</button>
-                <button id="irlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="irlPanel">IRL</button>
-                <button id="srlTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="srlPanel">SRL</button>
-                <button id="classificationTabButton" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="classificationPanel">Classification</button>
-            </div>
+            <div class="page-body lookup-maintenance-body">
+                <div class="table-frame page-frame lookup-maintenance-frame">
+                    <div class="page-tab-bar lookup-maintenance-tab-bar" role="tablist" aria-label="Lookup tables">
+                        <button id="trlTabButton" class="tab-btn page-tab-btn" type="button" role="tab" aria-selected="true" aria-controls="trlPanel">TRL</button>
+                        <button id="irlTabButton" class="tab-btn page-tab-btn" type="button" role="tab" aria-selected="false" aria-controls="irlPanel">IRL</button>
+                        <button id="srlTabButton" class="tab-btn page-tab-btn" type="button" role="tab" aria-selected="false" aria-controls="srlPanel">SRL</button>
+                        <button id="classificationTabButton" class="tab-btn page-tab-btn" type="button" role="tab" aria-selected="false" aria-controls="classificationPanel">Classification</button>
+                    </div>
 
-            <div class="tab-panels lookup-maintenance-panels">
-                <section id="trlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="trlTabButton">
-                    <div id="trlCards" class="lookup-maintenance-card-grid" aria-label="TRL rows"></div>
-                </section>
+                    <div class="table-scroll lookup-maintenance-scroll">
+                        <div class="tab-panels lookup-maintenance-panels">
+                            <section id="trlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="trlTabButton">
+                                <div id="trlCards" class="lookup-maintenance-card-grid" aria-label="TRL rows"></div>
+                            </section>
 
-                <section id="irlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="irlTabButton" hidden>
-                    <div id="irlCards" class="lookup-maintenance-card-grid" aria-label="IRL rows"></div>
-                </section>
+                            <section id="irlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="irlTabButton" hidden>
+                                <div id="irlCards" class="lookup-maintenance-card-grid" aria-label="IRL rows"></div>
+                            </section>
 
-                <section id="srlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="srlTabButton" hidden>
-                    <div id="srlCards" class="lookup-maintenance-card-grid" aria-label="SRL rows"></div>
-                </section>
+                            <section id="srlPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="srlTabButton" hidden>
+                                <div id="srlCards" class="lookup-maintenance-card-grid" aria-label="SRL rows"></div>
+                            </section>
 
-                <section id="classificationPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="classificationTabButton" hidden>
-                    <div id="classificationCards" class="lookup-maintenance-card-grid" aria-label="Classification rows"></div>
-                </section>
+                            <section id="classificationPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="classificationTabButton" hidden>
+                                <div id="classificationCards" class="lookup-maintenance-card-grid" aria-label="Classification rows"></div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>

@@ -47,9 +47,10 @@ public enum PageType {
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "STAKEHOLDER MANAGEMENT", "Stakeholder", "Work with stakeholder records in the workspace below."),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "STAKEHOLDER MANAGEMENT", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "DEPARTMENT MANAGEMENT", "Department Administration", "Use the workspace below to manage administration data."),
+
+    LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification Management", "Manage irl/trl/srl lookup values in the workspace below."),
     /* */
 
-    LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification", "Manage lookup values in the workspace below."),
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
