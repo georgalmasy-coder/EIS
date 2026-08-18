@@ -4,6 +4,8 @@ import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { fetchXml, postXml } from "../core/http.js";
 import { escapeHtml } from "../core/html.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
+import { applySortIndicators, bindSortableHeaders, compareSortableValues } from "../components/sortable-table.js";
 import { escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
 
 const LIST_URL = "/api/admin/departments?cmd=list";
@@ -16,12 +18,19 @@ const state = {
     topPanel: {
         customerName: "-",
         projectName: "-",
-        userName: "-"
+        userName: "-",
+        workspaceEyebrow: "",
+        workspaceHeading: "",
+        workspaceHelpText: ""
     },
     departments: [],
     currentDepartment: null,
     mode: "create",
-    dirty: false
+    dirty: false,
+    sortState: {
+        key: "departmentName",
+        dir: "asc"
+    }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -39,6 +48,7 @@ function initializeShell() {
     setText("projectName", "-", "");
     setText("userName", "-", "");
     setText("loadStatus", "Loading", "");
+    setText("departmentTableCount", "0 of 0", "");
 
     initMenu(document);
     initHelpDialog();
@@ -94,7 +104,7 @@ async function loadDepartmentData() {
         }
 
         state.currentDoc = xmlDocument;
-        state.topPanel = parseTopPanel(xmlDocument);
+        state.topPanel = parsePageTopPanel(xmlDocument);
         state.departments = parseDepartments(xmlDocument);
 
         applyTopPanel();
@@ -105,29 +115,20 @@ async function loadDepartmentData() {
         console.error("Failed to load departments", error);
         setText("loadStatus", "Error", "");
         showEmptyState(`Could not load departments. ${error.message}`);
+        setText("departmentTableCount", "0 of 0", "");
     }
 }
 
 function applyTopPanel() {
     applyTopbarMetadata(document, state.currentDoc || state.topPanel);
-}
-
-function parseTopPanel(xmlDocument) {
-    const topPanel = getDirectChild(xmlDocument.documentElement, "TopPanel");
-
-    if (!topPanel) {
-        return {
-            customerName: "-",
-            projectName: "-",
-            userName: "-"
-        };
-    }
-
-    return {
-        customerName: getChildText(topPanel, "CustomerName", "-"),
-        projectName: getChildText(topPanel, "ProjectName", "-"),
-        userName: getChildText(topPanel, "Name", getChildText(topPanel, "UserName", "-"))
-    };
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseDepartments(xmlDocument) {
@@ -147,20 +148,34 @@ function parseDepartments(xmlDocument) {
 function renderTable() {
     const tbody = byId("tbody");
     const emptyState = byId("listEmptyState");
+    const count = byId("departmentTableCount");
+    const headerRow = byId("mainHeaderRow");
 
-    if (!tbody) {
+    if (!tbody || !headerRow) {
         return;
     }
 
-    const rows = [...state.departments].sort((left, right) => String(left.departmentName || "").localeCompare(String(right.departmentName || ""), "da", {
-        numeric: true,
-        sensitivity: "base"
-    }));
+    headerRow.innerHTML = renderHeaderRowMarkup();
+    bindSortableHeaders(headerRow, (key) => {
+        if (state.sortState.key === key) {
+            state.sortState.dir = state.sortState.dir === "asc" ? "desc" : "asc";
+        } else {
+            state.sortState.key = key;
+            state.sortState.dir = "asc";
+        }
+
+        renderTable();
+    });
+
+    const rows = [...state.departments].sort(compareRows);
 
     tbody.innerHTML = "";
 
     if (!rows.length) {
         showEmptyState("No departments found for the current customer.");
+        if (count) {
+            count.textContent = "0 of 0";
+        }
         return;
     }
 
@@ -185,6 +200,12 @@ function renderTable() {
     if (emptyState) {
         emptyState.classList.remove("is-visible");
     }
+
+    if (count) {
+        count.textContent = `${rows.length} of ${state.departments.length}`;
+    }
+
+    applySortIndicators(["departmentName", "departmentDescription", "active"], state.sortState, "si-h-");
 }
 
 function renderRow(department) {
@@ -201,6 +222,37 @@ function renderActiveIcon(value) {
     return value
         ? '<span class="department-main-active-state" title="Active" aria-label="Active"><span class="department-main-active-dot is-active" aria-hidden="true"></span></span>'
         : '<span class="department-main-active-state" title="Inactive" aria-label="Inactive"><span class="department-main-active-dot is-inactive" aria-hidden="true"></span></span>';
+}
+
+function renderHeaderRowMarkup() {
+    return `
+        <th data-key="departmentName" class="department-main-sortable-th department-main-name-header">
+            <span class="sort">Department <span class="sort-indicator" id="si-h-departmentName"></span></span>
+        </th>
+        <th data-key="departmentDescription" class="department-main-sortable-th">
+            <span class="sort">Description <span class="sort-indicator" id="si-h-departmentDescription"></span></span>
+        </th>
+        <th data-key="active" class="department-main-sortable-th department-main-active-header">
+            <span class="sort">Active <span class="sort-indicator" id="si-h-active"></span></span>
+        </th>
+    `;
+}
+
+function compareRows(left, right) {
+    const direction = state.sortState.dir === "desc" ? -1 : 1;
+    const key = state.sortState.key || "departmentName";
+
+    switch (key) {
+        case "departmentDescription":
+            return compareSortableValues(left.departmentDescription, right.departmentDescription) * direction;
+        case "active":
+            return compareSortableValues(Number(Boolean(left.active)), Number(Boolean(right.active))) * direction;
+        case "departmentId":
+            return compareSortableValues(left.departmentId, right.departmentId) * direction;
+        case "departmentName":
+        default:
+            return compareSortableValues(left.departmentName, right.departmentName) * direction;
+    }
 }
 
 function openDepartmentDialog(mode, departmentId = null) {

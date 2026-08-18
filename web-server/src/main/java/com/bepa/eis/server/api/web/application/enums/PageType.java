@@ -12,9 +12,6 @@ public enum PageType {
 
     /* */
 
-    STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "R-F-L-P MODEL - STAKEHOLDERS", "Stakeholder", "Work with stakeholder records in the workspace below."),
-    STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "R-F-L-P MODEL - STAKEHOLDERS", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
-
     STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement Edit", "Edit the current stakeholder requirement in the workspace below."),
     STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
@@ -40,13 +37,16 @@ public enum PageType {
     SYSTEMS_BREAKDOWN_MAIN_HORIZONTAL_PAGE("systemsbreakdown-main-horizontal","html-pages/systemsbreakdown-main-horizontal.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
     SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
 
+    // Admin
+    STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "ADMINISTRATION", "Stakeholder", "Work with stakeholder records in the workspace below."),
+    STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "ADMINISTRATION", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
+    DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "ADMINISTRATION", "Department Administration", "Use the workspace below to manage administration data."),
     /* */
 
     LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification", "Manage lookup values in the workspace below."),
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
-    DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "ADMINISTRATION", "Department Administration", "Use the workspace below to manage administration data."),
 
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS", true, "TBD", "TBD", "TBD"),
     ADMIN_DASHBOARD_ALERT_PAGE("dashboard-alerts-view","html-pages/admin/views/dashboard-alerts-view.html", "", true, "TBD", "TBD", "TBD"),
