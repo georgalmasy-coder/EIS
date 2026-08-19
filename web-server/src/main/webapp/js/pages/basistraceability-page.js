@@ -1,7 +1,6 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import {
     closeDialogElement,
@@ -9,6 +8,7 @@ import {
     setText,
     showDialog
 } from "../core/dom.js";
+import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import {
     getAttribute,
     getBooleanAttribute,
@@ -276,13 +276,14 @@ function addCell(cellsByRow, rowIndex, columnIndex, cell) {
 }
 
 function applyTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector("TopPanel");
-
-    if (!topPanelElement) {
-        return;
-    }
-
-    applyTopbarMetadata(document, xmlDocument);
+    applyPageHeaderFromDocument(xmlDocument, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function injectTraceabilityStyles(styles) {
@@ -339,7 +340,6 @@ function renderLegend(styles) {
 }
 
 function renderTraceabilityMatrix(matrix) {
-    setText("traceabilityTitle", matrix.title || "Traceability Matrix", "");
     setText("traceabilityRowCount", String(matrix.rows.length || matrix.rowCount), "");
     setText("traceabilityColumnCount", String(matrix.columns.length || matrix.columnCount), "");
     setText("traceabilityColumnGroupLabel", matrix.columnGroupLabel || "System Requirement", "");

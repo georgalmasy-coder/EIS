@@ -90,7 +90,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.BASIS_TRACEABILITY_MATRIX_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.TRACEABILITY_MATRIX_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         buildTraceabilityMatrixDocument();

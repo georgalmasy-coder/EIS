@@ -5,7 +5,6 @@ public enum PageType {
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
     BASIS_RELATION_DIAGRAM_PAGE("basisrelationdiagram","html-pages/basisrelationdiagram.html", "Relation Diagram", true, "BASIS MODEL - RELATION DIAGRAM", "Relation Diagram", "Inspect relations and dependencies in the basis model."),
     RFLP_RELATION_DIAGRAM_PAGE("rflprelationdiagram","html-pages/rflprelationdiagram.html", "RFLP Relation Diagram", true, "R-F-L-P MODEL - REQUIREMENTS", "Requirements", "Work with requirements and related traceability."),
-    BASIS_TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix", true, "BASIS MODEL - TRACEABILITY MATRIX", "Traceability Matrix", "Review traceability links across the model."),
     INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management", true, "INTERFACE MANAGEMENT", "Interface Management", "Manage interfaces and related relationships."),
     DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT DASHBOARD", "Dashboard IRL", "Monitor the current status and key metrics."),
     DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),
@@ -36,6 +35,8 @@ public enum PageType {
     SYSTEMS_BREAKDOWN_EDIT_PAGE("systemsbreakdown-edit","html-pages/systemsbreakdown-edit.html", "Physical Structure Edit", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure Edit", "Edit the current physical structure item in the workspace below."),
     SYSTEMS_BREAKDOWN_MAIN_HORIZONTAL_PAGE("systemsbreakdown-main-horizontal","html-pages/systemsbreakdown-main-horizontal.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
     SYSTEMS_BREAKDOWN_MAIN_VERTICAL_PAGE("systemsbreakdown-main-vertical","html-pages/systemsbreakdown-main-vertical.html", "Physical Structure", true, "R-F-L-P MODEL - PHYSICAL STRUCTURES", "Physical Structure", "Work with physical structure items in the workspace below."),
+
+    TRACEABILITY_MATRIX_PAGE("basistraceabilitymatrix","html-pages/basistraceabilitymatrix.html", "Traceability Matrix", true, "R-F-L-P MODEL - TRACEABILITY MATRIX", "Traceability Matrix", "Review traceability links across the model."),
 
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),

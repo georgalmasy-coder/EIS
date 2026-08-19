@@ -6,10 +6,10 @@
     --traceability-header-row-2-height: 104px;
     --traceability-row-height: 54px;
 
-    --traceability-border-color: #c9d2df;
-    --traceability-header-bg: #eef3f8;
-    --traceability-row-header-bg: #f7f9fc;
-    --traceability-axis-bg: #edf2f7;
+    --traceability-border-color: var(--app-border-default);
+    --traceability-header-bg: var(--app-table-header-background);
+    --traceability-row-header-bg: var(--app-table-header-background);
+    --traceability-axis-bg: var(--app-table-header-background);
 
     --traceability-white: #ffffff;
     --traceability-red: #ffc7ce;
@@ -25,17 +25,22 @@ body.traceability-document {
 }
 
 .traceability-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
     height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
 .traceability-content {
     display: flex;
     flex-direction: column;
+    gap: 12px;
     height: 100%;
     max-height: 100%;
     min-height: 0;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     overflow: hidden;
 }
 
@@ -52,14 +57,15 @@ body.traceability-document {
     overflow: hidden;
 }
 
-.traceability-section-header {
-    flex: 0 0 auto;
-    margin-bottom: 0;
-    padding-bottom: 0.25rem;
+.traceability-header-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    margin-bottom: 12px;
 }
 
-.traceability-section-header h2 {
-    margin-bottom: 0;
+.traceability-workspace-header {
+    margin: 5px 0 0 5px;
 }
 
 .traceability-body {
@@ -80,55 +86,23 @@ body.traceability-document {
     flex-wrap: wrap;
     padding: 0.35rem 0.75rem;
     margin-top: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f8fafc;
-    font-size: 0.875rem;
-}
-
-.traceability-help-button {
-    width: 42px;
-    min-width: 42px;
-    height: 38px;
-    margin-left: 0;
+    margin-bottom: 12px;
+    border: 1px solid var(--app-border-default);
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .55);
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    cursor: pointer;
-    flex: 0 0 auto;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.traceability-help-button svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
-}
-
-.traceability-help-button:hover {
-    background: rgba(96, 165, 250, .14);
-    border-color: rgba(96, 165, 250, .45);
-}
-
-.traceability-help-button:active {
-    transform: translateY(1px);
+    background: var(--app-surface-background);
+    font-size: 0.875rem;
 }
 
 .traceability-info-item {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: #243447;
+    color: var(--app-text-primary);
     white-space: nowrap;
 }
 
 .traceability-info-label {
-    color: #526273;
+    color: var(--app-text-secondary);
 }
 
 .traceability-system-label {
@@ -138,7 +112,7 @@ body.traceability-document {
 }
 
 .traceability-system-label strong {
-    color: #1f2937;
+    color: var(--app-text-primary);
     font-size: 1.26rem;
     line-height: 1.05;
     font-weight: 800;
@@ -157,7 +131,7 @@ body.traceability-document {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: #334155;
+    color: var(--app-text-primary);
     white-space: nowrap;
 }
 
@@ -179,8 +153,8 @@ body.traceability-document {
     max-width: 100%;
     overflow: hidden;
     border: 1px solid var(--traceability-border-color);
-    border-radius: 0.35rem;
-    background: #ffffff;
+    border-radius: 8px;
+    background: var(--app-surface-background);
 }
 
 .traceability-table-scroll {
@@ -191,7 +165,7 @@ body.traceability-document {
     width: 100%;
     max-width: 100%;
     overflow: auto;
-    background: #ffffff;
+    background: var(--app-surface-background);
 }
 
 .traceability-table {
@@ -201,7 +175,7 @@ body.traceability-document {
     width: max-content;
     min-width: 100%;
     font-size: 0.84rem;
-    color: #1f2937;
+    color: var(--app-text-primary);
 }
 
 .traceability-table th,
@@ -227,6 +201,7 @@ body.traceability-document {
     width: var(--traceability-cell-width);
     max-width: var(--traceability-cell-width);
     background: var(--traceability-header-bg);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     text-align: center;
     cursor: pointer;
 }
@@ -241,6 +216,7 @@ body.traceability-document {
     top: 0;
     height: var(--traceability-header-row-2-height);
     background: var(--traceability-header-bg);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
 }
 
 .traceability-second-corner-axis {
@@ -277,6 +253,7 @@ body.traceability-document {
     width: var(--traceability-axis-width);
     max-width: var(--traceability-axis-width);
     background: var(--traceability-axis-bg);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     text-align: center;
     padding: 0 !important;
     vertical-align: top !important;
@@ -302,7 +279,7 @@ body.traceability-document {
     font-size: 1.26rem;
     line-height: 1.05;
     font-weight: 800;
-    color: #1f2937;
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     letter-spacing: 0.015em;
 }
 
@@ -315,8 +292,18 @@ body.traceability-document {
     max-width: var(--traceability-row-header-width);
     height: var(--traceability-row-height);
     background: var(--traceability-row-header-bg);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-weight: 600;
     cursor: pointer;
+}
+
+.traceability-table .traceability-column-header,
+.traceability-table .traceability-second-corner-axis,
+.traceability-table .traceability-second-corner-row,
+.traceability-table .traceability-axis-cell,
+.traceability-table .traceability-row-header {
+    background: var(--app-table-header-background) !important;
+    color: var(--app-table-header-foreground, var(--app-text-secondary)) !important;
 }
 
 .traceability-row-header:hover {
