@@ -3,8 +3,9 @@ package com.bepa.eis.server.api.web.application.enums;
 public enum PageType {
 
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
-    MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
 
+    MY_PROJECTS_PAGE("myprojects-old","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
+    ALL_PROJECTS_PAGE("myprojects", "html-pages/allProjects.html", "All Projects", true, "PORTFOLIO", "Projects", "Choose a project or continue the work that needs attention."),
 
     /* */
 

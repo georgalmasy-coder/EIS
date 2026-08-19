@@ -1,7 +1,6 @@
 package com.bepa.eis.server.dataprovider.entities.common;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +11,7 @@ public class EntityElementRecord {
     private Double doubleValue;
     private BigDecimal currencyValue;
     private String stringValue;
-    private Date localDateValue;
+    private LocalDate localDateValue;
     private Timestamp localDateTimeValue;
     private Boolean booleanValue;
 
@@ -21,7 +20,7 @@ public class EntityElementRecord {
                                Double doubleValue,
                                BigDecimal currencyValue,
                                String stringValue,
-                               Date localDateValue,
+                               LocalDate localDateValue,
                                Timestamp localDateTimeValue,
                                Boolean booleanValue) {
         this.entityDataElementType = entityDataElementTyp;
@@ -55,7 +54,7 @@ public class EntityElementRecord {
     }
 
     public LocalDate getLocalDateValue() {
-        return localDateValue != null ? localDateValue.toLocalDate() : null;
+        return localDateValue;
     }
 
     public LocalDateTime getLocalDateTimeValue() {

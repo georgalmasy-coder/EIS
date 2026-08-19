@@ -86,7 +86,7 @@ function getStoredProjectId() {
     }
 }
 
-function setStoredProjectId(projectId) {
+export function setStoredProjectId(projectId) {
     try {
         if (projectId) {
             window.localStorage.setItem(MENU_SELECTED_PROJECT_STORAGE_KEY, String(projectId));

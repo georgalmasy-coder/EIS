@@ -13,10 +13,7 @@ import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.projectstatus.overview.NotificationProvider;
-import com.bepa.eis.server.dataprovider.entities.EntityProvider;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
-import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
-import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
+import com.bepa.eis.server.dataprovider.entities.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -167,7 +164,9 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws Throwable {
-        return createMyProjectsDocument(webSession);
+        GenericXmlDocument xmlDocument = createMyProjectsDocument(webSession, request);
+        log.debug("My Project document : \n{}", xmlDocument.toXmlString());
+        return xmlDocument;
     }
 
     @Override
@@ -206,10 +205,10 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws Throwable {
-        return createMyProjectsDocument(webSession);
+        return createMyProjectsDocument(webSession, request);
     }
 
-    private GenericXmlDocument createMyProjectsDocument(WebSession webSession) throws Exception {
+    private GenericXmlDocument createMyProjectsDocument(WebSession webSession, HttpServletRequest request) throws Exception {
         BaselineXmlDocument xmlDocument = new BaselineXmlDocument(
                 webSession,
                 "MyProjects"
@@ -218,7 +217,8 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         appendTopPanel(
                 webSession,
                 xmlDocument,
-                xmlDocument.root()
+                xmlDocument.root(),
+                request
         );
 
         Element projectsElement = xmlDocument.appendElement(
@@ -246,16 +246,23 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
     private void appendTopPanel(
             WebSession webSession,
             BaselineXmlDocument xmlDocument,
-            Element rootElement
+            Element rootElement,
+            HttpServletRequest request
     ) throws Exception {
         Element topPanelElement = xmlDocument.appendElement(
                 rootElement,
                 "TopPanel"
         );
 
+        String pageParam = request.getParameter("page");
+        PageType pageType = PageType.mapToType(pageParam);
+        if (pageType == PageType.NONE) {
+            pageType = PageType.MY_PROJECTS_PAGE;
+        }
+
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-            TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.MY_PROJECTS_PAGE);
+            TopPanel topPanel = topPanelProvider.getTopPanelBySession(pageType);
 
             if (topPanel != null && topPanel.getTopPanelElements() != null) {
                 topPanel.getTopPanelElements().getElements().forEach(field -> {
@@ -337,6 +344,9 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(projectElement, "changedbyuserid", value(project.getChangedByUserId()));
         xmlDocument.appendTextElement(projectElement, "changeddatetime", formatDateTime(project.getChangedDateTime()));
 
+        xmlDocument.appendTextElement(projectElement, "nextStep", "Has to be reviewed");
+        xmlDocument.appendTextElement(projectElement, "lastUpdated", formatDate(getLastUpdatedProject(project)));
+
         appendProjectDashboardPlaceholders(
                 xmlDocument,
                 projectElement,
@@ -400,6 +410,16 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         return systemBreakdownProvider.getListOfTrlRecords(
                 customerId,
                 projectId
+        );
+    }
+
+    private LocalDate getLastUpdatedProject(
+            ProjectRecord project
+    ) {
+        ProjectEntityProvider projectEntityProvider = new ProjectEntityProvider(getWebSession());
+        return projectEntityProvider.getLastUpdatedProject(
+                project.getCustomerId(),
+                project.getProjectId()
         );
     }
 
@@ -474,11 +494,13 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
             ProjectRecord project,
             List<TrlRecord> trlRecordList
     ) {
-        xmlDocument.appendTextElement(projectElement, "countnotifications", getMyNotificationCount(project));
-        xmlDocument.appendTextElement(projectElement, "countstakeholderrequirement", getActiveStakeholderRequirementCount(project));
-        xmlDocument.appendTextElement(projectElement, "countsystemrequirement", getActiveSystemRequirementCount(project));
-        xmlDocument.appendTextElement(projectElement, "countsystembreakdown", getActiveSystemsBreakDownCount(project));
-        xmlDocument.appendTextElement(projectElement, "nexttrldeadline", getNextTrlDeadLine(trlRecordList));
+        if (false) {
+            xmlDocument.appendTextElement(projectElement, "countnotifications", getMyNotificationCount(project));
+            xmlDocument.appendTextElement(projectElement, "countstakeholderrequirement", getActiveStakeholderRequirementCount(project));
+            xmlDocument.appendTextElement(projectElement, "countsystemrequirement", getActiveSystemRequirementCount(project));
+            xmlDocument.appendTextElement(projectElement, "countsystembreakdown", getActiveSystemsBreakDownCount(project));
+            xmlDocument.appendTextElement(projectElement, "nexttrldeadline", getNextTrlDeadLine(trlRecordList));
+        }
     }
 
     private void appendTrls(

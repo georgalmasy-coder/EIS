@@ -1,0 +1,284 @@
+.all-projects-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.all-projects-content {
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+
+.all-projects-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+
+.new-project-button {
+    background-color: var(--app-tab-active-background);
+    color: white;
+    border: 1px solid var(--app-tab-active-background);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.new-project-button:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 12px rgba(11, 63, 49, 0.2);
+}
+
+.all-projects-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.search-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    stroke: var(--app-text-tertiary);
+    stroke-width: 2;
+    fill: none;
+}
+
+#projectSearch {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border-radius: 10px;
+    border: 1px solid var(--app-border-default);
+    background-color: var(--app-input-background);
+    color: var(--app-text-primary);
+    font-size: 14px;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    background-color: var(--app-surface-subtle-background);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.filter-tab {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-tab.is-active {
+    background-color: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.filter-tab .count {
+    font-size: 11px;
+    background-color: var(--app-surface-strong-background);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.projects-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.project-card {
+    background-color: var(--app-surface-background);
+    border: 1px solid var(--app-border-default);
+    border-radius: 12px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 2fr 120px 3fr auto;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-card:hover {
+    border-color: var(--app-border-default);
+    background-color: var(--app-surface-subtle-background);
+}
+
+.project-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--app-tab-active-background);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.project-card:hover::before {
+    opacity: 1;
+}
+
+.project-info .project-name {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--app-text-primary);
+}
+
+.project-info .project-owner {
+    font-size: 12px;
+    color: var(--app-text-secondary);
+    margin: 0;
+}
+
+.project-status-badge {
+    justify-self: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-planned { background-color: #eff6ff; color: #2563eb; }
+.status-needs-attention { background-color: #fff1f2; color: #e11d48; }
+.status-created { background-color: var(--app-surface-strong-background); color: var(--app-text-secondary); }
+
+.project-details-group {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.project-next-step {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+}
+
+.next-step-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--app-text-tertiary);
+    letter-spacing: 0.05em;
+}
+
+.next-step-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    line-height: 1.4;
+}
+
+.project-updated {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.updated-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--app-text-tertiary);
+    letter-spacing: 0.05em;
+}
+
+.updated-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+}
+
+.btn-open-project {
+    background-color: var(--app-tab-active-background);
+    color: white;
+    border: 1px solid var(--app-tab-active-background);
+    padding: 8px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-open-project:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 8px rgba(11, 63, 49, 0.15);
+}
+
+.all-projects-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding: 12px 5px;
+    border-top: 1px solid var(--app-border-default);
+}
+
+.project-count-info {
+    font-size: 12px;
+    color: var(--app-text-secondary);
+}
+
+.footer-note {
+    font-size: 12px;
+    color: var(--app-text-tertiary);
+}
+
+.loading-message, .empty-message, .error-message {
+    padding: 40px;
+    text-align: center;
+    color: var(--app-text-secondary);
+    font-style: italic;
+}
+
+.error-message {
+    color: #e11d48;
+}

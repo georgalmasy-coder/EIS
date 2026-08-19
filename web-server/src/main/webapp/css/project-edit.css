@@ -56,6 +56,10 @@
     line-height: 1.35;
 }
 
+.eis-edit-dialog-mode .project-edit-mode-label {
+    display: none;
+}
+
 .project-edit-help-button {
     width: 42px;
     min-width: 42px;
@@ -106,6 +110,10 @@
     margin-top: 10px;
     color: var(--muted);
     font-size: 12px;
+}
+
+.eis-edit-dialog-mode .project-edit-status-row {
+    display: none;
 }
 
 .project-edit-entity-meta {

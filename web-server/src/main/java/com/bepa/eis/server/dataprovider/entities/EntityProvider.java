@@ -29,14 +29,16 @@ import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Date;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static java.time.LocalDate.now;
 
 abstract public class EntityProvider extends GenericProvider {
 
@@ -136,6 +138,15 @@ abstract public class EntityProvider extends GenericProvider {
                     "WHERE CustomerId = ? " +
                     "AND ProjectId = ? " +
                     "AND EntityType = ? " +
+                    "AND Active = 1 " +
+                    "AND Latest = 1 ";
+
+
+    private static final String SELECT_LAST_UPDATED_ENTITY_SQL =
+            "SELECT MAX(ChangedDateTime) AS LAST_UPDATED_ENTITY_DATE_TIME " +
+                    "FROM ENTITY " +
+                    "WHERE CustomerId = ? " +
+                    "AND ProjectId = ? " +
                     "AND Active = 1 " +
                     "AND Latest = 1 ";
 
@@ -542,9 +553,9 @@ abstract public class EntityProvider extends GenericProvider {
         return rs.wasNull() ? null : value;
     }
 
-    private Date getNullableDate(ResultSet rs) throws SQLException {
-        Date value = rs.getDate("LocalDateValue");
-        return rs.wasNull() ? null : value;
+    private LocalDate getNullableDate(ResultSet rs) throws SQLException {
+        java.sql.Date value = rs.getDate("LocalDateValue");
+        return rs.wasNull() ? null : value.toLocalDate();
     }
 
     private Timestamp getNullableTimestamp(ResultSet rs) throws SQLException {
@@ -830,7 +841,7 @@ abstract public class EntityProvider extends GenericProvider {
                     }
                     case LOCAL_DATE -> {
                         if (dataElement.getLocalDateValue() != null) {
-                            ps.setDate(7, Date.valueOf(dataElement.getLocalDateValue()));
+                            ps.setObject(7, dataElement.getLocalDateValue());
                         } else {
                             ps.setNull(7, java.sql.Types.DATE);
                         }
@@ -886,6 +897,28 @@ abstract public class EntityProvider extends GenericProvider {
 
             }
         }
+    }
+
+    public LocalDate getLastUpdatedProject(Integer customerId, Integer projectId) {
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(SELECT_LAST_UPDATED_ENTITY_SQL)) {
+
+            setInt(ps, customerId, 1);
+            setInt(ps, projectId, 2);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    java.sql.Date sqlDate = rs.getDate("LAST_UPDATED_ENTITY_DATE_TIME");
+                    return sqlDate != null ? sqlDate.toLocalDate() : now();
+                }
+                return now();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public int getActiveEntityCount(Integer customerId, Integer projectId, EntityType entityType) {
