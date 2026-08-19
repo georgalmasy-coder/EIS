@@ -11,11 +11,12 @@
     <link rel="stylesheet" href="../css/tabs-list.css" />
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/customer-administration.css" />
     <link rel="stylesheet" href="../css/subscription-editor.css" />
 </head>
 
-<body>
+<body class="subscription-editor-document">
 <button
         id="menuToggle"
         class="menu-toggle"
@@ -35,8 +36,8 @@
     <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
 </nav>
 
-<main class="app customer-administration-app">
-    <div class="content customer-administration-content">
+<main class="app customer-administration-app subscription-editor-app">
+    <div class="content customer-administration-content subscription-editor-content">
         <header class="topbar customer-administration-topbar">
             <section class="panel meta topbar-meta" aria-label="Header metadata">
                 <div class="topbar-meta-content">
@@ -57,9 +58,23 @@
             </section>
         </header>
 
-        <section class="panel page-layout customer-administration-layout subscription-editor-layout" aria-label="Subscription editor">
-            <div class="section-header customer-administration-section-header">
-                <h2>Subscription Editor</h2>
+        <section class="page-layout subscription-editor-layout" aria-label="Subscription editor">
+            <div class="subscription-editor-header-row">
+                <div class="workspace-header subscription-editor-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow subscription-editor-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading subscription-editor-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext subscription-editor-workspace-helptext"></div>
+                </div>
+
+                <div class="subscription-editor-header-actions">
+                    <div class="subscription-editor-create">
+                        <label for="createModuleCode">New subscription</label>
+                        <div class="subscription-editor-create-row">
+                            <select id="createModuleCode"></select>
+                            <button id="btnCreateSubscription" type="button" class="button button-primary">Create</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="customer-administration-search-row subscription-editor-toolbar">
@@ -86,20 +101,12 @@
                         </span>
                     </span>
                 </label>
-
-                <div class="subscription-editor-create">
-                    <label for="createModuleCode">New subscription</label>
-                    <div class="subscription-editor-create-row">
-                        <select id="createModuleCode"></select>
-                        <button id="btnCreateSubscription" type="button" class="button button-primary">Create</button>
-                    </div>
-                </div>
             </div>
 
             <div class="page-body customer-administration-body">
-                <div class="table-frame page-frame customer-administration-frame" aria-label="Subscription list frame">
-                    <div class="table-scroll customer-administration-scroll">
-                        <table class="data-table page-table customer-administration-table" aria-label="Subscription list">
+                <div class="table-frame page-frame has-table-footer subscription-editor-frame" aria-label="Subscription list frame">
+                    <div class="table-scroll customer-administration-scroll subscription-editor-scroll">
+                        <table class="data-table page-table customer-administration-table subscription-editor-table" aria-label="Subscription list">
                             <colgroup>
                                 <col style="width: 150px;" />
                                 <col />
@@ -120,6 +127,10 @@
                         </table>
 
                         <div class="empty page-empty" id="plansEmpty">Loading subscriptions...</div>
+                    </div>
+
+                    <div class="data-table-footer subscription-editor-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="planTableCount">0 of 0</span>
                     </div>
                 </div>
             </div>

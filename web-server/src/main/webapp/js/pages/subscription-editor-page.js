@@ -1,4 +1,5 @@
 import { initMenu } from "../components/menu.js";
+import { mountTopbar } from "../components/topbar.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { closeDialogElement, clearChildren, setText, showDialog } from "../core/dom.js";
 import { escapeXml, getAttribute, getDirectChild, getDirectChildren, getChildText, hasXmlParseError, parseXml } from "../core/xml.js";
@@ -53,6 +54,7 @@ document.addEventListener("DOMContentLoaded", initialize);
 
 function initialize() {
     initMenu();
+    mountTopbar(document);
     collectElements();
     bindEvents();
     loadPlans();
@@ -62,6 +64,10 @@ function collectElements() {
     document.querySelectorAll("[id]").forEach(function (element) {
         els[element.id] = element;
     });
+
+    els.workspaceEyebrow = els.pageEyebrow;
+    els.workspaceHeading = els.pageHeading;
+    els.workspaceHelpText = els.pageHelpText;
 }
 
 function bindEvents() {
@@ -227,6 +233,8 @@ function renderPlans() {
             return normalizeText(value).includes(filter);
         });
     });
+
+    setPlanTableCount(state.filteredPlans.length, state.plans.length);
 
     if (!state.filteredPlans.length) {
         body.innerHTML = "";
@@ -577,6 +585,10 @@ function setActiveTab(tabName) {
 
 function setLoadStatus(textValue) {
     setText(els.loadStatus, textValue, "");
+}
+
+function setPlanTableCount(filteredCount, totalCount) {
+    setText(els.planTableCount, `${filteredCount} of ${totalCount}`, "");
 }
 
 function setDialogStatus(textValue) {
