@@ -77,6 +77,7 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         SessionProvider sessionProvider = new SessionProvider(null);
         try {
             webSession = sessionProvider.getBySessionId(sessionId);
+            sessionId = webSession.getSessionId();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

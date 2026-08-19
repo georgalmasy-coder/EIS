@@ -1,9 +1,13 @@
 package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.DTO.Project;
+import com.bepa.eis.server.api.DTO.TrlRecord;
+import com.bepa.eis.server.dataprovider.entities.*;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
+import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
 import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
@@ -13,6 +17,7 @@ import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectStatus;
+import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
@@ -21,10 +26,11 @@ import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 public class ProjectOverviewProvider extends GenericProvider {
 
@@ -151,6 +157,37 @@ public class ProjectOverviewProvider extends GenericProvider {
         ChangedDateTime changedDateTime = new ChangedDateTime(rs.getTimestamp(ChangedDateTime.FIELD_NAME));
         changedDateTime.setFieldNotEditable();
         getProjectElement().addElement(changedDateTime);
+
+        List<TrlRecord> trlRecords = getActiveTrlRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+
+        getNextTrlDeadLine(trlRecords);
+
+        NextTrlReview nextTrlReview = new NextTrlReview();
+        nextTrlReview.setValue(getNextTrlDeadLine(trlRecords));
+        getProjectElement().addElement(nextTrlReview);
+
+
+        int stakeholderRequirementCount = getActiveStakeholderRequirementCount();
+        int systemRequirementCount = getActiveSystemRequirementCount();
+        CountRequirement countRequirement = new CountRequirement();
+        countRequirement.setValue(stakeholderRequirementCount + systemRequirementCount);
+        getProjectElement().addElement(countRequirement);
+
+        int logicalStructureCount = getActiveLogicalStructureCount();
+        CountLogicalStructure countLogicalStructure = new CountLogicalStructure();
+        countLogicalStructure.setValue(logicalStructureCount);
+        getProjectElement().addElement(countLogicalStructure);
+
+        int functionalStructureCount = getActiveFunctionalStructureCount();
+        CountFunctionalStructure countFunctionalStructure = new CountFunctionalStructure();
+        countFunctionalStructure.setValue(functionalStructureCount);
+        getProjectElement().addElement(countFunctionalStructure);
+
+        int physicalStructureCount = getActivePhysicalStructureCount();
+        CountPhysicalStructure countPhysicalStructure = new CountPhysicalStructure();
+        countPhysicalStructure.setValue(physicalStructureCount);
+        getProjectElement().addElement(countPhysicalStructure);
+
     }
 
     private Integer getNullableInteger(
@@ -164,5 +201,190 @@ public class ProjectOverviewProvider extends GenericProvider {
 
     private ListOfElements getProjectElement() {
         return project.getProjectElements();
+    }
+
+
+    private List<TrlRecord> getActiveTrlRecords(
+            Integer customerId,
+            Integer projectId
+    ) {
+        SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
+
+        return systemBreakdownProvider.getListOfTrlRecords(
+                customerId,
+                projectId
+        );
+    }
+
+    private String getNextTrlDeadLine(List<TrlRecord> trlRecordList) {
+        Timestamp nextTrlDeadline = null;
+
+        if (trlRecordList != null) {
+            for (TrlRecord trlRecord : trlRecordList) {
+                Timestamp deadline = trlRecord.getNextTrlDeadline();
+
+                if (deadline == null || !deadline.after(now())) {
+                    continue;
+                }
+
+                if (nextTrlDeadline == null || deadline.before(nextTrlDeadline)) {
+                    nextTrlDeadline = deadline;
+                }
+            }
+
+            if (trlRecordList.isEmpty()) {
+                return "-";
+            }
+
+            if (nextTrlDeadline == null) {
+                return "Over due";
+            }
+
+        }
+        return daysUntil(nextTrlDeadline) + " days";
+    }
+
+    private Long daysUntil(Timestamp nextTrlDeadline) {
+        if (nextTrlDeadline == null) {
+            return 0L;
+        }
+
+        LocalDate today = now().toLocalDateTime().toLocalDate();
+        LocalDate deadlineDate = nextTrlDeadline.toLocalDateTime().toLocalDate();
+
+        return ChronoUnit.DAYS.between(
+                today,
+                deadlineDate
+        );
+    }
+
+    private Timestamp now() {
+        return Timestamp.from(Instant.now());
+    }
+
+    private void getTrlRecords() {
+        List<TrlRecord> trlRecords = getActiveTrlRecords(
+                getWebSession().getCustomerId(),
+                getWebSession().getProjectId()
+        );
+
+    }
+
+    private Integer getActiveStakeholderRequirementCount() {
+        return getActiveEntityCount(new StakeholderRequirementProvider(getWebSession()));
+    }
+
+    private Integer getActiveSystemRequirementCount() {
+        return getActiveEntityCount(new SystemRequirementProvider(getWebSession()));
+    }
+
+    private Integer getActiveLogicalStructureCount() {
+        return getActiveEntityCount(new LogicalStructureProvider(getWebSession()));
+    }
+
+    private Integer getActiveFunctionalStructureCount() {
+        return getActiveEntityCount(new FunctionalStructureProvider(getWebSession()));
+    }
+
+    private Integer getActivePhysicalStructureCount() {
+        return getActiveEntityCount(new SystemBreakdownProvider(getWebSession()));
+    }
+
+    private int getActiveEntityCount(EntityProvider entityProvider) {
+        return entityProvider.getActiveEntityCount(
+                getWebSession().getCustomerId(),
+                getWebSession().getProjectId(),
+                entityProvider.getEntityType()
+        );
+    }
+
+    private static class NextTrlReview extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "NextTrlReview";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Next Trl Review";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Next Trl Review";
+        }
+    }
+
+    private static class CountRequirement extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountRequirement";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "CountRequirement";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "CountRequirement";
+        }
+    }
+
+    private static class CountLogicalStructure extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountLogicalStructure";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Count Logical Structure";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Count Logical Structure";
+        }
+    }
+
+    private static class CountFunctionalStructure extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountFunctionalStructure";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Count Functional Structure";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Count Functional Structure";
+        }
+    }
+
+    private static class CountPhysicalStructure extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountPhysicalStructure";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Count Physical Structure";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Count Physical Structure";
+        }
     }
 }

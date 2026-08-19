@@ -64,6 +64,7 @@ public class ProjectOverviewServlet extends GenericDataProviderServlet  {
         return getProjectOverview(webSession);
     }
 
+
     public GenericXmlDocument getProjectOverview(WebSession webSession) throws Throwable {
         ProjectOverview projectOverview;
 

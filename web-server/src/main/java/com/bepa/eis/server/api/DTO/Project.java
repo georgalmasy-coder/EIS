@@ -11,6 +11,7 @@ import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;
 import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectStatus;
+import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
@@ -37,6 +38,7 @@ public class Project {
     private BudgetInValue budgetInValue;
     private CustomerDepartment departmentId;
     private ChangedDateTime changedDateTime;
+    private  NextTrlReview nextTrlReview;
 
     public Project(WebSession webSession) {
         this.webSession = webSession;
@@ -167,5 +169,28 @@ public class Project {
 
     public ChangedDateTime getChangedDateTime() {
         return changedDateTime;
+    }
+
+    public void setNextTrlReview(String nextTrlReview) {
+        this.nextTrlReview = new NextTrlReview();
+        this.nextTrlReview.setValue(nextTrlReview);
+    }
+
+    private static class NextTrlReview extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "NextTrlReview";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Next Trl Review";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Next Trl Review";
+        }
     }
 }

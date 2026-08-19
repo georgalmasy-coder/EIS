@@ -2,12 +2,13 @@ package com.bepa.eis.server.api.web.application.enums;
 
 public enum PageType {
 
-    PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
+    OLD_PROJECT_OVERVIEW_PAGE("projectoverview-old","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
+    PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/projectoverview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
+
+    /* */
 
     MY_PROJECTS_PAGE("myprojects-old","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
     ALL_PROJECTS_PAGE("myprojects", "html-pages/allProjects.html", "All Projects", true, "PORTFOLIO", "Projects", "Choose a project or continue the work that needs attention."),
-
-    /* */
 
     DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT MANAGEMENT", "Dashboard", "Monitor the current status and key metrics."),
     DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),

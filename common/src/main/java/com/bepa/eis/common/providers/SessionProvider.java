@@ -1,5 +1,6 @@
 package com.bepa.eis.common.providers;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import java.sql.*;
 import java.util.Date;
@@ -162,19 +163,33 @@ public class SessionProvider extends GenericProvider {
     }
 
     public WebSession getBySessionId(String sessionId) throws SQLException {
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_SESSION_BY_SESSION_ID_SQL)) {
+        if (sessionId != null && ! sessionId.isBlank()) {
+            try (Connection con = getDataSource().getConnection();
+                 PreparedStatement ps = con.prepareStatement(SELECT_SESSION_BY_SESSION_ID_SQL)) {
 
-            ps.setString(1, sessionId);
+                ps.setString(1, sessionId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("No session found for sessionId: " + sessionId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("No session found for sessionId: " + sessionId);
+                    }
+
+                    return mapWebSession(rs);
                 }
-
-                return mapWebSession(rs);
             }
         }
+
+        if (GlobalConfiguration.isUdvMode()) {
+            WebSession ws = new WebSession();
+            ws.setId(1);
+            ws.setSessionId("georg.almasy@mail.com");
+            ws.setCustomerId(GlobalConfiguration.getDefaultCustomerId());
+            ws.setProjectId(GlobalConfiguration.getDefaultProjectId());
+            ws.setUserId(1);
+            return ws;
+        }
+
+        return null;
     }
 
     public boolean upsertSession(WebSession webSession) throws SQLException {

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/projectoverview.css" />
+</head>
+
+<body class="project-overview-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app project-overview-app">
+    <div class="content project-overview-content">
+        <header class="topbar project-overview-topbar">
+            <section class="panel meta topbar-meta" aria-label="Header metadata">
+                <div class="topbar-meta-content">
+                    <div class="topbar-meta-lines">
+                        <div class="meta-line">Customer Name: <strong id="customerName">—</strong></div>
+                        <div class="meta-line">Project Name: <strong id="projectName">—</strong></div>
+                        <div class="meta-line">User Name: <strong id="userName">—</strong></div>
+                    </div>
+
+                    <div class="topbar-logo">
+                        <img src="../images/EIS-logo.png" alt="EIS logo" class="eis-logo" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel status-panel topbar-status-panel" aria-label="Load status">
+                <div class="meta-line">Data: <strong id="loadStatus">Idle</strong></div>
+            </section>
+
+            <div class="topbar-actions">
+                <button
+                        id="topbarHelpButton"
+                        class="topbar-help-button"
+                        type="button"
+                        hidden
+                        aria-label="Open help"
+                        data-help-page="projectoverview"
+                        data-help-title="Help"
+                        title="Open help"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18.2A8.2 8.2 0 1 1 12 3.8a8.2 8.2 0 0 1 0 16.4z"></path>
+                        <path d="M12 16.75a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3z"></path>
+                        <path d="M12.05 5.25c-2.05 0-3.55 1.25-3.8 3.15a.95.95 0 0 0 1.88.25c.13-.96.84-1.55 1.87-1.55 1.13 0 1.9.67 1.9 1.65 0 .82-.42 1.24-1.32 1.88-1.12.8-1.78 1.48-1.78 3.02v.45a.95.95 0 1 0 1.9 0v-.45c0-.68.22-.94 1-1.5 1.04-.74 2.1-1.54 2.1-3.4 0-2.03-1.56-3.5-3.75-3.5z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="page-layout project-overview-layout" aria-label="Project Overview">
+            <div class="all-projects-header-row">
+                <div class="workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow">FORSKNINGSSKIBET DANA IV</div>
+                    <div id="pageHeading" class="workspace-heading">Project overview</div>
+                    <div id="pageHelpText" class="workspace-helptext">Continue the most important work and understand the project at a glance.</div>
+                </div>
+                <div class="all-projects-actions">
+                    <button class="btn-ghost" id="btnProjectDetails">Project details</button>
+                    <button class="btn-primary" id="btnContinueEngineering">Continue engineering &rarr;</button>
+                </div>
+            </div>
+
+            <div class="overview-main-grid">
+                <div class="column-main">
+                    <!-- Recommended Next Step -->
+                    <section class="card recommended-step-card">
+                        <div class="card-header-with-badge">
+                            <div class="header-content">
+                                <span class="card-label label-green">RECOMMENDED NEXT STEP</span>
+                                <h2>Review unlinked requirements</h2>
+                                <p>Resolve requirement gaps before the next baseline and TRL review.</p>
+                            </div>
+                            <div class="badge-container">
+                                <span class="badge badge-error" id="requirementGaps">12 gaps</span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn-primary-dark">Review requirements &rarr;</button>
+                        </div>
+
+                        <div class="sub-cards-row">
+                            <div class="sub-card">
+                                <div class="sub-card-icon icon-orange">P</div>
+                                <div class="sub-card-info">
+                                    <div class="sub-card-title">Assign structure owners</div>
+                                    <div class="sub-card-meta"><span id="physicalCountSub">12</span> physical structures</div>
+                                </div>
+                                <a href="#" class="sub-card-link">Open &rarr;</a>
+                            </div>
+                            <div class="sub-card">
+                                <div class="sub-card-icon icon-blue">F</div>
+                                <div class="sub-card-info">
+                                    <div class="sub-card-title">Complete functional model</div>
+                                    <div class="sub-card-meta"><span id="functionsCoverCount">3</span> functions cover <span id="requirementsCoverCount">196</span> requirements</div>
+                                </div>
+                                <a href="#" class="sub-card-link">Open &rarr;</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Systems Engineering Assets -->
+                    <section class="card systems-engineering-card">
+                        <div class="card-header-row">
+                            <h3>Systems Engineering</h3>
+                            <a href="#" class="link-action">Open model &rarr;</a>
+                        </div>
+                        <div class="assets-grid">
+                            <div class="asset-box">
+                                <div class="asset-header">
+                                    <span class="asset-letter color-green">R</span>
+                                    <span class="asset-label">Requirements</span>
+                                    <span class="asset-count" id="countR">196</span>
+                                </div>
+                                <div class="asset-status" id="statusR">12 gaps</div>
+                            </div>
+                            <div class="asset-box">
+                                <div class="asset-header">
+                                    <span class="asset-letter color-blue">F</span>
+                                    <span class="asset-label">Functions</span>
+                                    <span class="asset-count" id="countF">3</span>
+                                </div>
+                                <div class="asset-status" id="statusF">Needs work</div>
+                            </div>
+                            <div class="asset-box">
+                                <div class="asset-header">
+                                    <span class="asset-letter color-purple">L</span>
+                                    <span class="asset-label">Logical</span>
+                                    <span class="asset-count" id="countL">1</span>
+                                </div>
+                                <div class="asset-status" id="statusL">In progress</div>
+                            </div>
+                            <div class="asset-box">
+                                <div class="asset-header">
+                                    <span class="asset-letter color-orange">P</span>
+                                    <span class="asset-label">Physical</span>
+                                    <span class="asset-count" id="countP">369</span>
+                                </div>
+                                <div class="asset-status" id="statusP">12 unassigned</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="column-sidebar">
+                    <!-- Project Status -->
+                    <section class="card status-sidebar-card">
+                        <div class="card-header-row">
+                            <h3>Project status</h3>
+                            <span id="projectStatusBadge" class="status-badge-pill badge-planned">Planned</span>
+                        </div>
+                        <div class="status-list">
+                            <div class="status-item">
+                                <span class="status-label">Next review</span>
+                                <span class="status-value" id="nextReview">TRL review &middot; 58 days</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Active baseline</span>
+                                <span class="status-value" id="activeBaseline">Version 15</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Owner</span>
+                                <span class="status-value" id="projectOwner">Anders Knudsen</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Last updated</span>
+                                <span class="status-value" id="lastUpdated">27 Jun 2026</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Recent Changes -->
+                    <section class="card changes-sidebar-card">
+                        <div class="card-header-row">
+                            <h3>Recent changes</h3>
+                            <a href="#" class="link-action">View all</a>
+                        </div>
+                        <div class="changes-list">
+                            <div class="change-item">
+                                <div class="change-title">Centralized Dashboard</div>
+                                <div class="change-meta">Requirement updated &middot; 15 Jul</div>
+                            </div>
+                            <div class="change-item">
+                                <div class="change-title" id="baselineNameRecent">Baseline v15</div>
+                                <div class="change-meta">Activated &middot; 27 Jun</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
+    <form method="dialog" class="help-dialog-form">
+        <div class="help-dialog-head">
+            <h3 id="helpDialogTitle">Help</h3>
+            <button id="helpDialogCloseButton" class="help-dialog-close-button" type="button" aria-label="Close help">
+                ×
+            </button>
+        </div>
+
+        <div id="helpDialogContent" class="help-dialog-content">
+            Loading help…
+        </div>
+
+        <div class="help-dialog-footer">
+            <button id="helpDialogOkButton" class="primary" type="button">Close</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/projectoverview-page.js"></script>
+</body>
+</html>
