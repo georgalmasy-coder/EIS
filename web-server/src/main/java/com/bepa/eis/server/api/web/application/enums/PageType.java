@@ -38,6 +38,10 @@ public enum PageType {
     RELATION_DIAGRAM_PAGE("basisrelationdiagram","html-pages/basisrelationdiagram.html", "Relation Diagram", true, "BASIS MODEL - RELATION DIAGRAM", "Relation Diagram", "Inspect relations and dependencies in the basis model."),
     RFLP_RELATION_DIAGRAM_PAGE("rflprelationdiagram","html-pages/rflprelationdiagram.html", "RFLP Relation Diagram", true, "R-F-L-P MODEL - RELATION DIAGRAM", "Relation Diagram", "Inspect relations and dependencies in the R-F-L-P model."),
 
+    BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
+    BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
+
+
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),
 
@@ -79,9 +83,6 @@ public enum PageType {
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
 
     SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
-
-    BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
-    BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
 

@@ -1,8 +1,8 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { hasXmlParseError } from "../core/xml.js";
 
 const API_URL = "/basis/baseline";
@@ -98,7 +98,7 @@ async function loadBaselines() {
         const doc = await fetchXml(`${API_URL}?cmd=list`);
 
         state.currentDoc = doc;
-        state.topPanel = parseTopPanel(doc);
+        state.topPanel = parsePageTopPanel(doc);
         state.baselines = parseBaselines(doc);
 
         applyTopPanel();
@@ -144,7 +144,14 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseBaselines(doc) {
@@ -187,7 +194,7 @@ function renderBaselines(baselines) {
     clear(els.baselineBody);
 
     if (els.baselineCount) {
-        els.baselineCount.textContent = String(baselines.length);
+        els.baselineCount.textContent = `${baselines.length} of ${state.baselines.length}`;
     }
 
     if (!baselines.length) {

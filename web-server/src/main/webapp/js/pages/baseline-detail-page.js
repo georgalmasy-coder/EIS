@@ -1,9 +1,9 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { hasXmlParseError } from "../core/xml.js";
 import { downloadBaselineDetailPdf } from "./baseline-detail-pdf.js";
 
@@ -161,7 +161,7 @@ async function loadBaselineDetail(baselinePK) {
         const doc = await fetchXml(`${API_URL}?cmd=edit&id=${encodeURIComponent(String(baselinePK))}`);
 
         state.currentDoc = doc;
-        state.topPanel = parseTopPanel(doc);
+        state.topPanel = parsePageTopPanel(doc);
         state.baseline = parseBaseline(doc);
 
         state.stakeholderRequirements = parseChanges(
@@ -282,7 +282,14 @@ function parseTopPanel(xmlDocument) {
 }
 
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    applyPageHeader(state.topPanel, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function parseBaseline(doc) {
