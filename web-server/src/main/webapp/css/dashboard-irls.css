@@ -1,12 +1,12 @@
 :root {
     --dashboard-irls-header-height: 60px;
     --dashboard-irls-row-height: 50px;
-    --dashboard-irls-border-color: rgba(255, 255, 255, 0.10);
-    --dashboard-irls-header-bg: #122033;
-    --dashboard-irls-cell-bg: #0e1626;
-    --dashboard-irls-cell-alt-bg: #101b2d;
-    --dashboard-irls-sticky-bg: #13253b;
-    --dashboard-irls-overdue-bg: #1a2030;
+    --dashboard-irls-border-color: var(--app-border-default);
+    --dashboard-irls-header-bg: var(--app-table-header-background);
+    --dashboard-irls-cell-bg: var(--app-surface-background);
+    --dashboard-irls-cell-alt-bg: var(--app-surface-subtle-background);
+    --dashboard-irls-sticky-bg: var(--app-table-header-background);
+    --dashboard-irls-overdue-bg: var(--dashboard-irls-cell-bg);
     --dashboard-irls-pill-red-bg: rgba(239, 68, 68, 0.16);
     --dashboard-irls-pill-red-border: #ef4444;
 }
@@ -19,17 +19,24 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-app {
+    width: 100%;
     height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     overflow: hidden;
 }
 
 .dashboard-irls-content {
     display: flex;
     flex-direction: column;
+    gap: 12px;
     height: 100%;
     max-height: 100%;
     min-height: 0;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     overflow: hidden;
 }
 
@@ -45,18 +52,16 @@ body.dashboard-irls-document {
     overflow: hidden;
 }
 
-.dashboard-irls-section-header {
+.dashboard-irls-header-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 0 0 auto;
-    margin-bottom: 0;
-    padding-bottom: 0.25rem;
+    align-items: start;
+    column-gap: 16px;
+    margin-bottom: 12px;
 }
 
-.dashboard-irls-section-header h2 {
-    margin-bottom: 0;
+.dashboard-irls-workspace-header {
+    margin: 5px 0 0 5px;
 }
 
 .dashboard-irls-actions {
@@ -65,6 +70,7 @@ body.dashboard-irls-document {
     justify-content: flex-end;
     gap: 0.5rem;
     flex: 0 0 auto;
+    align-self: center;
 }
 
 .dashboard-irls-icon-button {
@@ -72,9 +78,9 @@ body.dashboard-irls-document {
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid rgba(148, 163, 184, 0.28);
-    background: rgba(15, 23, 42, 0.55);
-    color: var(--text, #ffffff);
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -90,8 +96,8 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-icon-button:hover {
-    background: rgba(96, 165, 250, 0.14);
-    border-color: rgba(96, 165, 250, 0.45);
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
 }
 
 .dashboard-irls-icon-button:active {
@@ -130,10 +136,11 @@ body.dashboard-irls-document {
     gap: 0.9rem 1rem;
     flex-wrap: wrap;
     padding: 0.35rem 0.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(11, 34, 52, 0.85);
-    color: #ffffff;
+    margin-bottom: 12px;
+    border: 1px solid var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
     font-size: 0.875rem;
 }
 
@@ -146,7 +153,7 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-info-label {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--app-text-secondary);
     font-weight: 600;
 }
 
@@ -159,7 +166,7 @@ body.dashboard-irls-document {
     width: 0.95rem;
     height: 0.95rem;
     margin: 0;
-    accent-color: #60a5fa;
+    accent-color: var(--app-accent-primary);
 }
 
 .dashboard-irls-trl-filter-inline {
@@ -171,7 +178,7 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-trl-filter-inline-label {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--app-text-secondary);
     font-weight: 600;
 }
 
@@ -187,7 +194,7 @@ body.dashboard-irls-document {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #ffffff;
+    color: var(--app-text-primary);
     cursor: pointer;
     user-select: none;
 }
@@ -196,7 +203,7 @@ body.dashboard-irls-document {
     width: 0.95rem;
     height: 0.95rem;
     margin: 0;
-    accent-color: #60a5fa;
+    accent-color: var(--app-accent-primary);
 }
 
 .dashboard-irls-trl-filter-code {
@@ -215,8 +222,8 @@ body.dashboard-irls-document {
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 0.45rem;
+    border: 1px solid var(--app-border-default);
+    border-radius: 8px;
     background: var(--dashboard-irls-cell-bg);
 }
 
@@ -234,7 +241,7 @@ body.dashboard-irls-document {
     table-layout: fixed;
     width: max-content;
     min-width: 100%;
-    color: #ffffff;
+    color: var(--app-text-primary);
     font-size: 0.82rem;
 }
 
@@ -254,6 +261,7 @@ body.dashboard-irls-document {
     z-index: 30;
     height: var(--dashboard-irls-header-height);
     background: var(--dashboard-irls-header-bg);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     text-align: left;
     font-size: 0.82rem;
 }
@@ -331,7 +339,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-header-label {
     display: block;
-    color: #ffffff;
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-weight: 800;
     line-height: 1.04;
     word-break: break-word;
@@ -339,7 +347,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-header-sublabel {
     display: block;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-weight: 700;
     line-height: 1.04;
 }
@@ -348,7 +356,7 @@ body.dashboard-irls-document {
     min-height: var(--dashboard-irls-row-height);
     height: auto;
     background: var(--dashboard-irls-cell-bg);
-    color: #ffffff;
+    color: var(--app-text-primary);
     line-height: 1.08;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -366,9 +374,9 @@ body.dashboard-irls-document {
     min-width: 24px;
     padding: 1px 9px;
     border-radius: 999px;
-    border: 1px solid var(--dashboard-irls-pill-color, rgba(255, 255, 255, 0.22));
-    background: color-mix(in srgb, var(--dashboard-irls-pill-color, #ffffff) 22%, transparent);
-    color: #ffffff;
+    border: 1px solid var(--dashboard-irls-pill-color, var(--app-border-default));
+    background: color-mix(in srgb, var(--dashboard-irls-pill-color, var(--app-surface-background)) 22%, transparent);
+    color: var(--app-text-primary);
     font-weight: 850;
     text-align: center;
     box-sizing: border-box;
@@ -455,9 +463,9 @@ body.dashboard-irls-document {
     min-height: 18px;
     padding: 1px 7px;
     border-radius: 999px;
-    background: rgba(47, 156, 255, 0.12);
-    color: #dbeafe;
-    border: 1px solid rgba(96, 165, 250, 0.35);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-primary);
+    border: 1px solid var(--app-border-default);
     font-size: 0.72rem;
     font-weight: 850;
     white-space: nowrap;
@@ -466,9 +474,9 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-pill--neutral {
-    background: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--app-surface-subtle-background);
+    color: var(--app-text-primary);
+    border-color: var(--app-border-default);
 }
 
 .dashboard-irls-pill--error {
@@ -488,9 +496,13 @@ body.dashboard-irls-document {
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: rgba(11, 34, 52, 0.88);
-    color: rgba(255, 255, 255, 0.78);
+    background: color-mix(in srgb, var(--app-surface-background) 88%, transparent);
+    color: var(--app-text-secondary);
     font-size: 0.95rem;
+}
+
+.dashboard-irls-table-footer .data-table-footer-count {
+    color: var(--app-text-secondary);
 }
 
 .dashboard-irls-empty.is-visible {

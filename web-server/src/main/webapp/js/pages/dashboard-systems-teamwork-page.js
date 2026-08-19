@@ -1,9 +1,10 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { downloadDashboardSystemsTeamworkPdf } from "./dashboard-systems-teamwork-pdf.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
 
 const DASHBOARD_ENDPOINT = "/pro/systemsteamwork?cmd=overview";
@@ -94,7 +95,7 @@ async function loadDashboard() {
         state.topPanel = parseTopPanel(xmlDocument);
         state.dashboard = parseDashboardDocument(xmlDocument);
 
-        applyTopbarMetadata(document, xmlDocument);
+        applyTopPanel(xmlDocument);
         renderDashboard(state.dashboard);
         setText("loadStatus", "Loaded", "");
     } catch (error) {
@@ -144,8 +145,22 @@ function parseTopPanel(xmlDocument) {
     return {
         customerName: getChildText(topPanelElement, "CustomerName", "—"),
         projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—")
+        userName: getChildText(topPanelElement, "Name", "—"),
+        workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
     };
+}
+
+function applyTopPanel(xmlDocument) {
+    state.topPanel = applyPageHeaderFromDocument(xmlDocument, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    }, { userTagNames: ["Name", "UserName"] });
 }
 
 function parseLookupMap(parentElement, selector, idAttribute) {
@@ -194,8 +209,6 @@ function parseInterfaces(dashboardElement) {
 }
 
 function renderDashboard(dashboard) {
-    setText("dashboardSystemsTeamworkTitle", dashboard.title || "Systems Teamwork", "");
-
     const header = document.getElementById("dashboardSystemsTeamworkHeader");
     const tableBody = document.getElementById("dashboardSystemsTeamworkTableBody");
     const colGroup = document.getElementById("dashboardSystemsTeamworkColGroup");
@@ -214,6 +227,7 @@ function renderDashboard(dashboard) {
 
     const visibleRecords = filterInterfaces(dashboard.interfaces);
     renderBody(tableBody, dashboard, visibleRecords);
+    updateTableFooter(visibleRecords.length, dashboard.interfaces.length);
     applyColumnWidths();
     initializeColumnResizers();
     applyHeaderLayout();
@@ -225,6 +239,14 @@ function renderDashboard(dashboard) {
     } else {
         hideEmptyState();
     }
+}
+
+function updateTableFooter(visibleCount, totalCount) {
+    const count = document.getElementById("dashboardSystemsTeamworkTableCount");
+    const visible = Number.isFinite(Number(visibleCount)) ? Number(visibleCount) : 0;
+    const total = Number.isFinite(Number(totalCount)) ? Number(totalCount) : visible;
+
+    setText(count, `${visible} of ${total}`, "");
 }
 
 function handleDownloadPdf() {

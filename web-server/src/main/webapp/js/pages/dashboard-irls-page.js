@@ -1,9 +1,10 @@
 import { initMenu } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { downloadDashboardIrlPdf } from "./dashboard-irls-pdf.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
 
 const DASHBOARD_ENDPOINT = "/pro/dashboardirl?cmd=overview";
@@ -203,16 +204,17 @@ function buildIrlTotals(structures) {
 }
 
 function applyTopPanel(xmlDocument) {
-    if (!xmlDocument.querySelector("TopPanel")) {
-        return;
-    }
-
-    applyTopbarMetadata(document, xmlDocument);
+    state.topPanel = applyPageHeaderFromDocument(xmlDocument, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    }, { userTagNames: ["Name", "UserName"] });
 }
 
 function renderDashboard(dashboard) {
-    setText("dashboardIrlTitle", dashboard.title || "Dashboard IRL", "");
-
     const filterToggle = document.getElementById("dashboardIrlOverdueOnlyToggle");
     if (filterToggle) {
         filterToggle.checked = state.filterMode === "overdue";
@@ -251,11 +253,13 @@ function renderDashboard(dashboard) {
     tableBody.innerHTML = "";
 
     if (!dashboard.structures.length) {
+        updateTableFooter(0, 0);
         showEmptyState("No physical structures returned from endpoint.");
         return;
     }
 
     if (!view.length) {
+        updateTableFooter(0, dashboard.structures.length);
         showEmptyState("No rows match the current filters.");
         return;
     }
@@ -358,6 +362,25 @@ function renderBody(tableBody, dashboard, rows) {
     }
 
     tableBody.replaceChildren(fragment);
+    updateTableFooter(rows.length, dashboard.structures.length);
+}
+
+function updateTableFooter(visibleCount, totalCount) {
+    const table = document.querySelector(".dashboard-irls-table");
+    const count = document.getElementById("dashboardIrlTableCount");
+    const visible = Number.isFinite(Number(visibleCount)) ? Number(visibleCount) : 0;
+    const total = Number.isFinite(Number(totalCount)) ? Number(totalCount) : visible;
+
+    setText(count, `${visible} of ${total}`, "");
+
+    if (table) {
+        table.dataset.filteredRowCount = String(visible);
+        table.dataset.totalRowCount = String(total);
+    }
+
+    if (window.syncDataTableFooters) {
+        window.syncDataTableFooters(document);
+    }
 }
 
 function buildTextCell(className, value, title, color) {

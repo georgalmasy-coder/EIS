@@ -3,10 +3,13 @@ package com.bepa.eis.server.api.web.application.enums;
 public enum PageType {
 
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
-    DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT DASHBOARD", "Dashboard IRL", "Monitor the current status and key metrics."),
-    DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),
+    MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
+
 
     /* */
+
+    DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT MANAGEMENT", "Dashboard", "Monitor the current status and key metrics."),
+    DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),
 
     STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     STAKEHOLDER_REQUIREMENT_EDIT_PAGE("stakeholderrequirement-edit","html-pages/stakeholderrequirement-edit.html", "Stakeholder Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement Edit", "Edit the current stakeholder requirement in the workspace below."),
@@ -82,8 +85,6 @@ public enum PageType {
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
 
     /* */
-
-    MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
 
     NONE("invalid", "", "", true, "TBD", "TBD", "TBD") ;
 
