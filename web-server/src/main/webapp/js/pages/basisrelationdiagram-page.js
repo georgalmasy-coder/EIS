@@ -1,9 +1,9 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createRelationCreationDialogController } from "../components/relation-creation-dialog.js";
 import { setText } from "../core/dom.js";
+import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import {
     getChildText,
     hasXmlParseError
@@ -324,13 +324,14 @@ function parseRelations(relationDiagramElement) {
 }
 
 function applyTopPanel(xmlDocument) {
-    const topPanelElement = xmlDocument.querySelector("TopPanel");
-
-    if (!topPanelElement) {
-        return;
-    }
-
-    applyTopbarMetadata(document, xmlDocument);
+    applyPageHeaderFromDocument(xmlDocument, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function setRelationDiagramState(diagram) {

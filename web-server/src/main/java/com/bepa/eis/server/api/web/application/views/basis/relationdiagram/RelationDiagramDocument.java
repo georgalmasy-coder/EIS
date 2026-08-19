@@ -45,7 +45,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.BASIS_RELATION_DIAGRAM_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.RELATION_DIAGRAM_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         relationDiagramDocument();

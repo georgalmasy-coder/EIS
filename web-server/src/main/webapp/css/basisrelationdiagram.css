@@ -1,8 +1,8 @@
 :root {
-    --relationdiagram-border-color: #c9d2df;
-    --relationdiagram-header-bg: #eef3f8;
-    --relationdiagram-panel-bg: #172640;
-    --relationdiagram-list-bg: #172640;
+    --relationdiagram-border-color: var(--app-border-default);
+    --relationdiagram-header-bg: var(--app-table-header-background);
+    --relationdiagram-panel-bg: var(--app-surface-background);
+    --relationdiagram-list-bg: var(--app-surface-background);
     --relationdiagram-card-bg: #ffffff;
     --relationdiagram-card-hover-bg: #b3ecff;
     --relationdiagram-card-active-bg: #b3ecff;
@@ -13,8 +13,8 @@
     --relationdiagram-line-muted: #e5e7eb;
     --relationdiagram-line-active: #1976d2;
 
-    --relationdiagram-text: #1f2937;
-    --relationdiagram-muted-text: #64748b;
+    --relationdiagram-text: var(--app-text-primary);
+    --relationdiagram-muted-text: var(--app-text-secondary);
     --relationdiagram-blue: #1976d2;
     --relationdiagram-green: #16a34a;
 }
@@ -27,17 +27,22 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
     height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
 .relationdiagram-content {
     display: flex;
     flex-direction: column;
+    gap: 12px;
     height: 100%;
     max-height: 100%;
     min-height: 0;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     overflow: hidden;
 }
 
@@ -54,14 +59,15 @@ body.relationdiagram-document {
     overflow: hidden;
 }
 
-.relationdiagram-section-header {
-    flex: 0 0 auto;
-    margin-bottom: 0;
-    padding-bottom: 0.25rem;
+.relationdiagram-header-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    margin-bottom: 12px;
 }
 
-.relationdiagram-section-header h2 {
-    margin-bottom: 0;
+.relationdiagram-workspace-header {
+    margin: 5px 0 0 5px;
 }
 
 .relationdiagram-info-bar {
@@ -72,9 +78,10 @@ body.relationdiagram-document {
     flex-wrap: wrap;
     padding: 0.35rem 0.75rem;
     margin-top: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #eef5ff;
+    margin-bottom: 12px;
+    border: 1px solid var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-surface-background);
     font-size: 0.875rem;
 }
 
@@ -82,12 +89,12 @@ body.relationdiagram-document {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: #243447;
+    color: var(--app-text-primary);
     white-space: nowrap;
 }
 
 .relationdiagram-info-label {
-    color: #526273;
+    color: var(--app-text-secondary);
 }
 
 .relationdiagram-legend {
@@ -115,8 +122,7 @@ body.relationdiagram-document {
     background: #ffffff;
 }
 
-.relationdiagram-view-button,
-.relationdiagram-help-button {
+.relationdiagram-view-button {
     width: 42px;
     min-width: 42px;
     height: 38px;
@@ -137,8 +143,7 @@ body.relationdiagram-document {
             transform 80ms ease;
 }
 
-.relationdiagram-view-button svg,
-.relationdiagram-help-button svg {
+.relationdiagram-view-button svg {
     width: 20px;
     height: 20px;
     fill: none;
@@ -148,14 +153,12 @@ body.relationdiagram-document {
     stroke-linejoin: round;
 }
 
-.relationdiagram-view-button:hover,
-.relationdiagram-help-button:hover {
+.relationdiagram-view-button:hover {
     background: #f8fafc;
     border-color: #93c5fd;
 }
 
-.relationdiagram-view-button:active,
-.relationdiagram-help-button:active {
+.relationdiagram-view-button:active {
     transform: translateY(1px);
 }
 
@@ -169,7 +172,7 @@ body.relationdiagram-document {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: #334155;
+    color: var(--app-text-primary);
     white-space: nowrap;
 }
 
@@ -200,8 +203,10 @@ body.relationdiagram-document {
     gap: 1rem;
     flex-wrap: wrap;
     padding: 0.55rem 0.75rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #ffffff;
+    margin-bottom: 12px;
+    border: 1px solid var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-surface-background);
     font-size: 0.9rem;
 }
 
@@ -227,7 +232,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-search-label {
-    color: #526273;
+    color: var(--app-text-secondary);
     font-weight: 600;
 }
 
@@ -240,18 +245,18 @@ body.relationdiagram-document {
 .relationdiagram-search-input {
     width: min(320px, 32vw);
     min-width: 230px;
-    border: 1px solid var(--relationdiagram-border-color);
-    border-radius: 0.35rem;
-    background: #ffffff;
-    color: var(--relationdiagram-text);
+    border: 1px solid var(--app-input-border);
+    border-radius: 10px;
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 0.38rem 2rem 0.38rem 0.6rem;
     font: inherit;
 }
 
 .relationdiagram-search-input:focus {
-    border-color: var(--relationdiagram-blue);
-    outline: 3px solid rgba(25, 118, 210, 0.16);
-    outline-offset: 1px;
+    border-color: var(--app-accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .relationdiagram-search-icon {
@@ -267,13 +272,15 @@ body.relationdiagram-document {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    flex: 1 1 320px;
-    min-width: min(420px, 100%);
+    flex: 0 1 360px;
+    width: min(36vw, 472px);
+    min-width: min(360px, 100%);
+    max-width: 472px;
     padding: 0.45rem 0.7rem;
-    border: 1px dashed #93c5fd;
-    border-radius: 0.35rem;
-    background: #eff6ff;
-    color: var(--relationdiagram-text);
+    border: 1px dashed var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     user-select: none;
     cursor: copy;
 }
@@ -296,14 +303,14 @@ body.relationdiagram-document {
 
 .relationdiagram-focus-dropzone-label {
     flex: 0 0 auto;
-    color: #526273;
+    color: var(--app-text-secondary);
     font-weight: 700;
 }
 
 .relationdiagram-focus-dropzone-text {
     flex: 1 1 auto;
     min-width: 0;
-    color: #1f2937;
+    color: var(--app-text-primary);
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -357,16 +364,20 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-secondary-button {
-    border: 1px solid var(--relationdiagram-border-color);
-    border-radius: 0.35rem;
-    background: #eef5ff;
-    color: var(--relationdiagram-text);
-    padding: 0.35rem 0.7rem;
+    min-height: 36px;
+    border: 1px solid var(--app-topbar-help-border);
+    border-radius: 10px;
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-title-prefix-color);
+    padding: 7px 12px;
+    font: inherit;
     cursor: pointer;
 }
 
 .relationdiagram-secondary-button:hover {
-    background: #f1f5f9;
+    background: var(--app-surface-background);
+    border-color: var(--app-topbar-title-prefix-color);
+    color: var(--app-topbar-title-prefix-color);
 }
 
 .relationdiagram-body {
@@ -391,7 +402,7 @@ body.relationdiagram-document {
     max-width: 100%;
     overflow: hidden;
     border: 1px solid var(--relationdiagram-border-color);
-    border-radius: 0.35rem;
+    border-radius: 8px;
     background: var(--relationdiagram-panel-bg);
 }
 
@@ -434,8 +445,8 @@ body.relationdiagram-document {
     flex: 0 0 auto;
     padding: 0.7rem 0.85rem;
     border-bottom: 1px solid var(--relationdiagram-border-color);
-    background: var(--relationdiagram-header-bg);
-    color: #1f2937;
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     font-weight: 800;
     letter-spacing: 0.015em;
 }
@@ -532,8 +543,7 @@ body.relationdiagram-document {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background:
-            linear-gradient(90deg, rgba(23, 38, 64, 0.92), rgba(23, 38, 64, 1), rgba(23, 38, 64, 0.92));
+    background: var(--app-surface-background);
 }
 
 .relationdiagram-svg {
