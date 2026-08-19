@@ -1,13 +1,15 @@
 import { initMenu } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
 import { fetchXml } from "../core/http.js";
 import { escapeHtml } from "../core/html.js";
+import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
 
 const API_URL = "/api/admin/incidents";
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 1000;
+const STORAGE_KEY_FILTER_TEXT = "adminIncidents.filterText";
 const STORAGE_KEY_COLUMN_WIDTHS = "adminIncidents.table.columnWidths";
 const MIN_COLUMN_WIDTH = 70;
 const DEFAULT_COLUMN_WIDTHS = {
@@ -29,6 +31,7 @@ const state = {
         userName: "-"
     },
     incidents: [],
+    filteredIncidents: [],
     hoveredIncidentIndex: -1,
     columnWidths: loadColumnWidths(),
     loading: false
@@ -38,6 +41,7 @@ document.addEventListener("DOMContentLoaded", start);
 
 function start() {
     initializeShell();
+    initializeStateFromStorage();
     initializeEvents();
     loadIncidents();
 }
@@ -52,9 +56,19 @@ function initializeShell() {
     mountTopbar(document);
 }
 
+function initializeStateFromStorage() {
+    const filterInput = byId("filterIncidentText");
+
+    if (filterInput) {
+        filterInput.value = sessionStorage.getItem(STORAGE_KEY_FILTER_TEXT) || "";
+    }
+}
+
 function initializeEvents() {
     const refreshButton = byId("btnRefreshIncidents");
     const countInput = byId("incidentCountInput");
+    const filterInput = byId("filterIncidentText");
+    const clearFilterButton = byId("btnClearFilter");
     const traceDialog = byId("incidentTraceDialog");
     const traceDialogClose = byId("incidentTraceDialogClose");
     const traceDialogOk = byId("incidentTraceDialogOk");
@@ -68,6 +82,29 @@ function initializeEvents() {
             event.preventDefault();
             loadIncidents();
         }
+    });
+
+    filterInput?.addEventListener("input", debounce(() => {
+        persistFilter();
+        applyFiltersAndRender();
+    }, 120));
+
+    filterInput?.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            filterInput.value = "";
+            persistFilter();
+            applyFiltersAndRender();
+            filterInput.blur();
+        }
+    });
+
+    clearFilterButton?.addEventListener("click", () => {
+        if (filterInput) {
+            filterInput.value = "";
+        }
+
+        persistFilter();
+        applyFiltersAndRender();
     });
 
     traceDialogClose?.addEventListener("click", closeTraceDialog);
@@ -116,6 +153,7 @@ async function loadIncidents() {
         state.currentDoc = xmlDocument;
         state.topPanel = parseTopPanel(xmlDocument);
         state.incidents = parseIncidents(xmlDocument);
+        state.filteredIncidents = filterIncidents(state.incidents);
         state.hoveredIncidentIndex = -1;
 
         applyTopPanel();
@@ -127,6 +165,7 @@ async function loadIncidents() {
         console.error("Failed to load incidents", error);
         state.currentDoc = null;
         state.incidents = [];
+        state.filteredIncidents = [];
         state.hoveredIncidentIndex = -1;
         renderTable();
         updateRowCount();
@@ -184,12 +223,69 @@ function parseTopPanel(xmlDocument) {
     return {
         customerName: getChildText(topPanel, "CustomerName", "-"),
         projectName: getChildText(topPanel, "ProjectName", "-"),
-        userName: getChildText(topPanel, "Name", getChildText(topPanel, "UserName", "-"))
+        userName: getChildText(topPanel, "Name", getChildText(topPanel, "UserName", "-")),
+        workspaceEyebrow: getChildText(topPanel, "WorkspaceEyebrow", ""),
+        workspaceHeading: getChildText(topPanel, "WorkspaceHeading", ""),
+        workspaceHelpText: getChildText(topPanel, "WorkspaceHelpText", "")
     };
 }
 
+function persistFilter() {
+    sessionStorage.setItem(STORAGE_KEY_FILTER_TEXT, byId("filterIncidentText")?.value || "");
+}
+
+function applyFiltersAndRender() {
+    state.filteredIncidents = filterIncidents(state.incidents);
+    state.hoveredIncidentIndex = -1;
+    renderTable();
+    updateRowCount();
+}
+
+function filterIncidents(incidents) {
+    const filterText = String(byId("filterIncidentText")?.value || "").trim().toLowerCase();
+
+    if (!filterText) {
+        return [...incidents];
+    }
+
+    return incidents.filter((incident) => getIncidentFilterValues(incident)
+        .some((value) => String(value || "").toLowerCase().includes(filterText)));
+}
+
+function getIncidentFilterValues(incident) {
+    return [
+        incident.incidentId,
+        incident.logCreated,
+        incident.customer,
+        incident.project,
+        incident.user,
+        incident.serviceType,
+        incident.severityType,
+        incident.module,
+        incident.message,
+        incident.trace
+    ];
+}
+
 function applyTopPanel() {
-    applyTopbarMetadata(document, state.currentDoc || state.topPanel);
+    if (state.currentDoc) {
+        state.topPanel = applyTopPanelFromDocument(state.currentDoc, {
+            customerName: "customerName",
+            projectName: "projectName",
+            userName: "userName",
+            workspaceEyebrow: "pageEyebrow",
+            workspaceHeading: "pageHeading",
+            workspaceHelpText: "pageHelpText"
+        }, { userTagNames: ["Name", "UserName"] });
+        return;
+    }
+
+    setText("customerName", state.topPanel.customerName, "");
+    setText("projectName", state.topPanel.projectName, "");
+    setText("userName", state.topPanel.userName, "");
+    setText("pageEyebrow", state.topPanel.workspaceEyebrow, "");
+    setText("pageHeading", state.topPanel.workspaceHeading, "");
+    setText("pageHelpText", state.topPanel.workspaceHelpText, "");
 }
 
 function parseIncidents(xmlDocument) {
@@ -225,7 +321,7 @@ function renderTable() {
     }
 
     const columns = getIncidentColumns();
-    const incidents = state.incidents;
+    const incidents = state.filteredIncidents;
     const totalWidth = columns.reduce((sum, column) => sum + widthToPixels(column.width, 180), 0);
 
     table.style.minWidth = `${Math.max(totalWidth, 1180)}px`;
@@ -243,7 +339,7 @@ function renderTable() {
 
     tbody.querySelectorAll("tr[data-incident-index]").forEach((row) => {
         const incidentIndex = Number(row.getAttribute("data-incident-index"));
-        const incident = Number.isFinite(incidentIndex) ? state.incidents[incidentIndex] : null;
+        const incident = Number.isFinite(incidentIndex) ? state.filteredIncidents[incidentIndex] : null;
 
         if (!incident) {
             return;
@@ -270,7 +366,7 @@ function renderTable() {
     syncHoveredRow();
 
     if (incidents.length === 0) {
-        showEmptyState("No incidents found.");
+        showEmptyState(state.incidents.length ? "No incidents match the current filter." : "No incidents found.");
         clearHoverState();
     } else {
         hideEmptyState();
@@ -365,11 +461,11 @@ function closeTraceDialog() {
 }
 
 function openTraceDialog(index) {
-    if (!Number.isFinite(index) || index < 0 || index >= state.incidents.length) {
+    if (!Number.isFinite(index) || index < 0 || index >= state.filteredIncidents.length) {
         return;
     }
 
-    const incident = state.incidents[index];
+    const incident = state.filteredIncidents[index];
     const dialog = byId("incidentTraceDialog");
     const title = byId("incidentTraceDialogTitle");
     const meta = byId("incidentTraceDialogMeta");
@@ -389,13 +485,76 @@ function openTraceDialog(index) {
         incident.severityType || "-",
         incident.module || "-"
     ].join(" | ");
-    body.textContent = incident.trace || "No trace available.";
+    renderTraceDialogBody(body, incident.trace || "No trace available.");
 
     if (typeof dialog.showModal === "function") {
         dialog.showModal();
     } else {
         dialog.setAttribute("open", "open");
     }
+
+    scrollTraceDialogToMatch(body);
+}
+
+function renderTraceDialogBody(body, traceText) {
+    const filterText = String(byId("filterIncidentText")?.value || "").trim();
+
+    if (!filterText) {
+        body.textContent = traceText;
+        return;
+    }
+
+    const lowerTrace = String(traceText || "").toLowerCase();
+    const lowerFilter = filterText.toLowerCase();
+
+    if (!lowerTrace.includes(lowerFilter)) {
+        body.textContent = traceText;
+        return;
+    }
+
+    body.innerHTML = highlightText(traceText, filterText);
+}
+
+function highlightText(text, term) {
+    const source = String(text || "");
+    const needle = String(term || "");
+
+    if (!needle) {
+        return escapeHtml(source);
+    }
+
+    const lowerSource = source.toLowerCase();
+    const lowerNeedle = needle.toLowerCase();
+    let cursor = 0;
+    let html = "";
+
+    while (cursor < source.length) {
+        const index = lowerSource.indexOf(lowerNeedle, cursor);
+
+        if (index < 0) {
+            html += escapeHtml(source.slice(cursor));
+            break;
+        }
+
+        html += escapeHtml(source.slice(cursor, index));
+        html += `<mark class="incident-main-trace-match">${escapeHtml(source.slice(index, index + needle.length))}</mark>`;
+        cursor = index + needle.length;
+    }
+
+    return html;
+}
+
+function scrollTraceDialogToMatch(body) {
+    const match = body?.querySelector?.(".incident-main-trace-match");
+
+    if (!match) {
+        body.scrollTop = 0;
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        match.scrollIntoView({ block: "center", inline: "nearest" });
+    });
 }
 
 function initializeColumnResize(headerRow, colGroup, table) {
@@ -542,16 +701,23 @@ function hideEmptyState() {
 }
 
 function updateRowCount() {
-    const rowCount = byId("incidentRowCount");
+    const tableCount = byId("incidentTableCount");
     const tbody = byId("tbody");
 
-    if (!rowCount) {
-        return;
+    const renderedRows = tbody ? tbody.querySelectorAll("tr[data-incident-index]").length : state.filteredIncidents.length;
+    const totalRows = state.incidents.length;
+
+    setText(tableCount, `${renderedRows} of ${totalRows}`, "");
+
+    const table = byId("incidentTable");
+    if (table) {
+        table.dataset.filteredRowCount = String(renderedRows);
+        table.dataset.totalRowCount = String(totalRows);
     }
 
-    const renderedRows = tbody ? tbody.querySelectorAll("tr[data-incident-index]").length : state.incidents.length;
-
-    rowCount.textContent = String(renderedRows);
+    if (window.syncDataTableFooters) {
+        window.syncDataTableFooters(document);
+    }
 }
 
 function byId(id) {
@@ -567,4 +733,13 @@ function parseNullableInt(value) {
 
     const parsed = Number.parseInt(normalized, 10);
     return Number.isFinite(parsed) ? parsed : null;
+}
+
+function debounce(fn, delay) {
+    let timeoutId = null;
+
+    return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => fn(...args), delay);
+    };
 }

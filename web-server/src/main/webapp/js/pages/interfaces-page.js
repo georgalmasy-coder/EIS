@@ -1,6 +1,6 @@
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
+import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import {
     closeDialogElement,
@@ -8,6 +8,7 @@ import {
     setText,
     showDialog
 } from "../core/dom.js";
+import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import {
     getAttribute,
     getChildText,
@@ -200,17 +201,19 @@ function parseCells(matrixElement, lookup) {
 }
 
 function applyTopPanel(xmlDocument) {
-    if (!xmlDocument.querySelector("TopPanel")) {
-        return;
-    }
-
-    applyTopbarMetadata(document, xmlDocument);
+    applyPageHeaderFromDocument(xmlDocument, {
+        customerName: "customerName",
+        projectName: "projectName",
+        userName: "userName",
+        workspaceEyebrow: "pageEyebrow",
+        workspaceHeading: "pageHeading",
+        workspaceHelpText: "pageHelpText"
+    });
 }
 
 function renderInterfaceMatrix(matrix) {
     const view = buildVisibleMatrix(matrix, state.showOverdueOnly, state.selectedIrlIds);
 
-    setText("interfacesTitle", matrix.title || "Interface Management", "");
     setText(
         "interfacesStructureCount",
         (state.showOverdueOnly || state.selectedIrlIds.length > 0)
@@ -273,7 +276,6 @@ function renderHeader(tableHead, matrix) {
         th.scope = "col";
         th.title = `${buildStructureLabel(column.id, column.name)}\nDouble-click to edit Physical Structure`;
         th.dataset.entityId = column.entityId || "";
-        applyBackgroundColor(th, column.trlColor);
         th.appendChild(buildStructureHeaderContent(column));
 
         th.addEventListener("dblclick", () => {
@@ -315,7 +317,6 @@ function renderBody(tableBody, matrix) {
         rowHeader.scope = "row";
         rowHeader.title = `${buildStructureLabel(fromStructure.id, fromStructure.name)}\nDouble-click to edit Physical Structure`;
         rowHeader.dataset.entityId = fromStructure.entityId || "";
-        applyBackgroundColor(rowHeader, fromStructure.trlColor);
         rowHeader.appendChild(buildStructureHeaderContent(fromStructure));
 
         rowHeader.addEventListener("dblclick", () => {

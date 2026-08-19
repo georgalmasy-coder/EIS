@@ -42,18 +42,15 @@ body.incident-main-document {
     overflow: hidden;
 }
 
-.incident-main-section-header {
-    flex: 0 0 auto;
+.incident-main-header-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
 }
 
-.incident-main-section-header h2 {
-    margin: 0;
-    min-width: 0;
+.incident-main-workspace-header {
+    margin: 5px 0 0 5px;
 }
 
 .incident-main-toolbar {
@@ -66,21 +63,83 @@ body.incident-main-document {
     min-width: 0;
 }
 
-.incident-main-toolbar-spacer {
+.incident-main-filter-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    min-width: 0;
     flex: 1 1 auto;
+    flex-wrap: wrap;
 }
 
-.incident-main-row-count {
+.incident-main-search-filter {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    color: var(--muted);
+    gap: 8px;
+    min-width: min(280px, 100%);
+    flex: 0 1 350px;
+}
+
+.incident-main-filter-label {
+    color: var(--app-text-secondary);
     font-size: 13px;
     white-space: nowrap;
 }
 
-.incident-main-row-count strong {
-    color: var(--text);
+.incident-main-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 160px;
+}
+
+.incident-main-search-input {
+    width: 100%;
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+    padding: 8px 34px 8px 10px;
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.incident-main-search-input:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.incident-main-search-icon {
+    position: absolute;
+    right: 11px;
+    color: var(--app-text-secondary);
+    pointer-events: none;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.incident-main-secondary-button {
+    min-height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--app-topbar-title-prefix-color);
+    background: var(--app-surface-background);
+    color: var(--app-topbar-title-prefix-color);
+    padding: 7px 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.incident-main-secondary-button:hover {
+    background: var(--app-surface-background);
+    border-color: var(--app-topbar-title-prefix-color);
+    color: var(--app-topbar-title-prefix-color);
+}
+
+.incident-main-toolbar-spacer {
+    flex: 1 1 auto;
 }
 
 .incident-main-count-field {
@@ -88,20 +147,20 @@ body.incident-main-document {
     align-items: center;
     gap: 8px;
     min-width: 0;
-    flex: 0 1 320px;
+    flex: 0 0 auto;
 }
 
 .incident-main-field-label {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
     white-space: nowrap;
 }
 
 .incident-main-count-input {
     width: 120px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -119,8 +178,8 @@ body.incident-main-document {
 }
 
 .incident-main-count-input:focus {
-    border-color: rgba(96, 165, 250, .65);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, .18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .incident-main-icon-button {
@@ -128,9 +187,9 @@ body.incident-main-document {
     min-width: 42px;
     height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -140,8 +199,8 @@ body.incident-main-document {
 }
 
 .incident-main-icon-button:hover {
-    background: rgba(96,165,250,.14);
-    border-color: rgba(96,165,250,.45);
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
 }
 
 .incident-main-icon-button:active {
@@ -170,19 +229,38 @@ body.incident-main-document {
 .incident-main-list-frame {
     flex: 1 1 auto;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--app-border-default);
+    border-radius: 8px;
+    background: var(--app-surface-background);
 }
 
 .incident-main-list-scroll {
+    flex: 1 1 auto;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
+    overflow: auto;
+    background: var(--app-surface-background);
+}
+
+.incident-main-table-footer .data-table-footer-count {
+    color: var(--app-text-secondary);
 }
 
 .incident-main-table {
     min-width: 1180px;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .incident-main-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-secondary));
     white-space: nowrap;
 }
 
@@ -199,11 +277,11 @@ body.incident-main-document {
 }
 
 .incident-main-primary-value {
-    color: var(--text);
+    color: var(--app-text-primary);
 }
 
 .incident-main-secondary-value {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 11px;
     line-height: 1.15;
 }
@@ -235,11 +313,11 @@ body.incident-main-document {
     bottom: 8px;
     left: 3px;
     width: 1px;
-    background: rgba(148,163,184,.35);
+    background: var(--app-border-default);
 }
 
 .incident-main-column-resizer:hover::after {
-    background: rgba(96,165,250,.85);
+    background: var(--app-topbar-title-prefix-color);
 }
 
 .incident-main-column-resizing {
@@ -258,7 +336,7 @@ body.incident-main-document {
 .incident-main-table tbody tr:hover,
 .incident-main-table tbody tr.is-previewed,
 .incident-main-table tbody tr:focus-visible {
-    background: rgba(96, 165, 250, .08);
+    background: var(--app-table-row-hover);
 }
 
 .incident-main-empty {
@@ -323,15 +401,16 @@ body.incident-main-document {
 .incident-main-trace-dialog {
     width: min(1100px, calc(100vw - 24px));
     max-width: 1100px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(15, 23, 42, .98);
+    border: 1px solid var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
     padding: 0;
-    box-shadow: var(--shadow);
+    box-shadow: var(--app-shadow);
 }
 
 .incident-main-trace-dialog::backdrop {
-    background: rgba(15, 23, 42, .5);
+    background: rgba(15, 23, 42, .45);
 }
 
 .incident-main-trace-dialog-form {
@@ -339,7 +418,8 @@ body.incident-main-document {
     flex-direction: column;
     max-height: min(80vh, calc(100dvh - 24px));
     margin: 0;
-    padding: 18px;
+    padding: 0;
+    background: var(--app-surface-background);
 }
 
 .incident-main-trace-dialog-head {
@@ -347,32 +427,40 @@ body.incident-main-document {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 10px;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--app-border-default);
+    background: var(--app-table-header-background);
+    color: var(--app-table-header-foreground, var(--app-text-primary));
 }
 
 .incident-main-trace-dialog-head h3 {
     margin: 0;
     font-size: 16px;
+    color: inherit;
 }
 
 .incident-main-trace-dialog-close {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: rgba(15,23,42,.55);
-    color: var(--text);
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    border: 1px solid var(--app-topbar-help-border);
+    border-radius: 8px;
+    background: var(--app-topbar-help-background);
+    color: var(--app-topbar-help-foreground);
     cursor: pointer;
 }
 
 .incident-main-trace-dialog-close:hover {
-    background: rgba(96,165,250,.14);
+    background: var(--app-topbar-help-hover-background);
+    border-color: var(--app-topbar-help-border);
 }
 
 .incident-main-trace-dialog-meta {
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 12px;
-    margin-bottom: 12px;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--app-border-default);
+    background: var(--app-surface-subtle-background);
 }
 
 .incident-main-trace-dialog-body {
@@ -380,26 +468,62 @@ body.incident-main-document {
     flex: 1 1 auto;
     min-height: 0;
     overflow: auto;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(35,52,84,.8);
-    background: rgba(2, 8, 23, .78);
-    color: var(--text);
+    padding: 1rem;
+    border: 0;
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
     font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     white-space: pre-wrap;
     word-break: break-word;
 }
 
+.incident-main-trace-match {
+    border-radius: 3px;
+    background: var(--app-accent-soft);
+    color: var(--app-text-primary);
+    padding: 0 2px;
+    font-weight: 700;
+}
+
 .incident-main-trace-dialog-footer {
     display: flex;
     justify-content: flex-end;
-    margin-top: 12px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--app-border-default);
+    background: var(--app-surface-subtle-background);
+}
+
+.incident-main-trace-dialog-footer .primary {
+    min-height: 36px;
+    border: 1px solid var(--app-topbar-title-prefix-color);
+    border-radius: 10px;
+    background: var(--app-topbar-title-prefix-color);
+    color: var(--app-topbar-title-foreground, #ffffff);
+    padding: 7px 14px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.incident-main-trace-dialog-footer .primary:hover {
+    border-color: var(--app-topbar-title-prefix-color);
+    background: var(--app-topbar-title-prefix-color);
+    color: var(--app-topbar-title-foreground, #ffffff);
 }
 
 @media (max-width: 900px) {
     .incident-main-toolbar {
         align-items: stretch;
         flex-wrap: wrap;
+    }
+
+    .incident-main-filter-group {
+        width: 100%;
+    }
+
+    .incident-main-search-filter {
+        flex: 1 1 350px;
+        min-width: min(280px, 100%);
     }
 
     .incident-main-count-field {
@@ -412,5 +536,16 @@ body.incident-main-document {
 
     .incident-main-trace-tooltip-meta {
         text-align: left;
+    }
+}
+
+@media (max-width: 700px) {
+    .incident-main-filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .incident-main-secondary-button {
+        width: 100%;
     }
 }

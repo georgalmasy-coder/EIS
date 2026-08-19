@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../css/common.css" />
     <link rel="stylesheet" href="../../css/app.css" />
     <link rel="stylesheet" href="../../css/menu.css" />
+    <link rel="stylesheet" href="../../css/tabs-list.css" />
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
     <link rel="stylesheet" href="../../css/admin-incidents.css" />
@@ -56,9 +57,13 @@
             </section>
         </header>
 
-        <section class="panel page-layout incident-main-layout" aria-label="Incidents">
-            <div class="section-header incident-main-section-header">
-                <h2>Incidents</h2>
+        <section class="page-layout incident-main-layout" aria-label="Incidents">
+            <div class="incident-main-header-row">
+                <div class="workspace-header incident-main-workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow incident-main-workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading incident-main-workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext incident-main-workspace-helptext"></div>
+                </div>
             </div>
 
             <div class="incident-main-toolbar" aria-label="Incident toolbar">
@@ -78,8 +83,29 @@
                     />
                 </label>
 
-                <div class="incident-main-row-count" aria-live="polite">
-                    Rows: <strong id="incidentRowCount">0</strong>
+                <div class="incident-main-filter-group">
+                    <label class="incident-main-search-filter" for="filterIncidentText">
+                        <span class="incident-main-filter-label">Filter</span>
+                        <span class="incident-main-search-box">
+                            <input
+                                    id="filterIncidentText"
+                                    class="incident-main-search-input"
+                                    type="search"
+                                    placeholder="Search in incidents..."
+                                    autocomplete="off"
+                                    aria-label="Search in incidents"
+                            >
+                            <span class="incident-main-search-icon" aria-hidden="true">&#8981;</span>
+                        </span>
+                    </label>
+
+                    <button
+                            id="btnClearFilter"
+                            class="incident-main-secondary-button"
+                            type="button"
+                    >
+                        Clear filter
+                    </button>
                 </div>
 
                 <div class="incident-main-toolbar-spacer"></div>
@@ -97,9 +123,9 @@
                 </button>
             </div>
 
-                <div class="page-body incident-main-body">
-                    <div class="table-frame page-frame incident-main-list-frame" aria-label="Incident list frame">
-                        <div class="table-scroll incident-main-list-scroll" id="tableScroll">
+            <div class="page-body incident-main-body">
+                <div class="table-frame page-frame has-table-footer incident-main-list-frame" aria-label="Incident list frame">
+                    <div class="table-scroll incident-main-list-scroll" id="tableScroll">
                         <table id="incidentTable" class="data-table page-table incident-main-table" aria-label="Incident list">
                             <colgroup id="incidentColGroup"></colgroup>
                             <thead>
@@ -117,14 +143,17 @@
                             <tbody id="tbody"></tbody>
                         </table>
 
-                            <div class="empty page-empty incident-main-empty" id="listEmptyState">
-                                Loading incidents...
-                            </div>
+                        <div class="empty page-empty incident-main-empty" id="listEmptyState">
+                            Loading incidents...
                         </div>
                     </div>
+                    <div class="data-table-footer incident-main-table-footer" aria-live="polite">
+                        <span class="data-table-footer-count" id="incidentTableCount">0 of 0</span>
+                    </div>
                 </div>
-            </section>
-        </div>
+            </div>
+        </section>
+    </div>
 </main>
 
 <div id="incidentTraceTooltip" class="incident-main-trace-tooltip" role="tooltip" aria-hidden="true" hidden>
@@ -155,5 +184,6 @@
 </dialog>
 
 <script type="module" src="../../js/pages/admin-incidents-page.js"></script>
+<script src="../../js/tabs-list.js"></script>
 </body>
 </html>

@@ -3,7 +3,6 @@ package com.bepa.eis.server.api.web.application.enums;
 public enum PageType {
 
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/overview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
-    INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management", true, "INTERFACE MANAGEMENT", "Interface Management", "Manage interfaces and related relationships."),
     DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT DASHBOARD", "Dashboard IRL", "Monitor the current status and key metrics."),
     DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Systems Teamwork", true, "PROJECT DASHBOARD", "Systems Teamwork", "Monitor the current status and key metrics."),
 
@@ -41,6 +40,7 @@ public enum PageType {
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
+    INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management", "Manage interfaces and related relationships."),
 
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),
@@ -76,13 +76,12 @@ public enum PageType {
     ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "BEPA ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
 
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "BEPA ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
-
-    /* */
+    ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
+    SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
 
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
-    ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
 
-    SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
+    /* */
 
     MY_PROJECTS_PAGE("myprojects","html-pages/myprojects.html", "My Projects", true, "PROJECT MANAGEMENT", "My Projects", "Review your projects in the workspace below."),
 
