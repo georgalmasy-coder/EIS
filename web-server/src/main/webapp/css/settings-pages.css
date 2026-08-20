@@ -1,0 +1,63 @@
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+    padding: 12px 5px;
+}
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid var(--app-border-strong, #e2e8f0);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border-color: var(--app-accent-primary, #10b981);
+}
+
+.settings-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+}
+
+.settings-card-description {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    flex-grow: 1;
+    min-height: 1.5em;
+}
+
+.settings-card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-top: 8px;
+}
+
+.settings-card-action::after {
+    content: "→";
+    transition: transform 0.2s ease;
+    margin-left: 4px;
+}
+
+.settings-card:hover .settings-card-action::after {
+    transform: translateX(4px);
+}

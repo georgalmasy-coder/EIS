@@ -476,6 +476,7 @@ public class MenuServlet extends GenericServlet {
         appendElement(xml, "MenuItemType", menuRow == null ? null : menuRow.menuItemType());
         appendElement(xml, "SubscriptionCode", menuRow == null ? null : menuRow.subscriptionCode());
         appendElement(xml, "IconId", menuRow == null ? null : menuRow.iconId());
+        appendElement(xml, "Description", menuRow == null ? null : menuRow.description());
 
         if (includeDisplayOrder) {
             appendElement(xml, "DisplayOrder", menuRow == null ? null : menuRow.displayOrder());
@@ -514,7 +515,8 @@ public class MenuServlet extends GenericServlet {
                 boolValue(text(menuElement, "CustomerIdRequired"), false),
                 boolValue(text(menuElement, "ProjectIdRequired"), false),
                 text(menuElement, "UserRoles"),
-                boolValue(text(menuElement, "Active"), true)
+                boolValue(text(menuElement, "Active"), true),
+                text(menuElement, "Description")
         );
     }
 
@@ -531,7 +533,8 @@ public class MenuServlet extends GenericServlet {
                 Boolean.FALSE,
                 Boolean.FALSE,
                 "",
-                Boolean.TRUE
+                Boolean.TRUE,
+                ""
         );
     }
 

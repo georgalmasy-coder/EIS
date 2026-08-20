@@ -23,9 +23,10 @@ public class Menu {
             int displayOrder,
             Integer iconId,
             String menuItemType,
-            String iconSvg
+            String iconSvg,
+            String description
     ) {
-        MainMenuItem mainMenuItem = new MainMenuItem(menuItemId, menuItemText, menuItemUrl, displayOrder, iconId, menuItemType, iconSvg);
+        MainMenuItem mainMenuItem = new MainMenuItem(menuItemId, menuItemText, menuItemUrl, displayOrder, iconId, menuItemType, iconSvg, description);
         mainMenuItems.add(mainMenuItem);
         return mainMenuItem;
     }
@@ -75,6 +76,12 @@ public class Menu {
                 mainMenuEl.appendChild(urlEL);
             }
 
+            if (m.description != null && !m.description.isEmpty()) {
+                Element descEL = doc.createElement("description");
+                descEL.setTextContent(m.description);
+                mainMenuEl.appendChild(descEL);
+            }
+
             Element displayOrderEL = doc.createElement("displayOrder");
             displayOrderEL.setTextContent(String.valueOf(m.displayOrder));
             mainMenuEl.appendChild(displayOrderEL);
@@ -86,6 +93,8 @@ public class Menu {
                 Element subMenuDdisplayEL = doc.createElement("display");
                 subMenuDdisplayEL.setTextContent(String.valueOf(s.menuItemText));
                 subMenuEl.appendChild(subMenuDdisplayEL);
+
+
 
                 if (s.menuItemType != null) {
                     Element subMenuTypeEL = doc.createElement("menuItemType");
@@ -109,6 +118,12 @@ public class Menu {
                 subMenuUrlEL.setTextContent(String.valueOf(s.menuItemUrl));
                 subMenuEl.appendChild(subMenuUrlEL);
 
+                if (s.description != null && !s.description.isEmpty()) {
+                    Element subMenuDescEL = doc.createElement("description");
+                    subMenuDescEL.setTextContent(s.description);
+                    subMenuEl.appendChild(subMenuDescEL);
+                }
+
                 Element subMenuDisplayOrderEL = doc.createElement("displayOrder");
                 subMenuDisplayOrderEL.setTextContent(String.valueOf(s.displayOrder));
                 subMenuEl.appendChild(subMenuDisplayOrderEL);
@@ -127,6 +142,7 @@ public class Menu {
         private final Integer iconId;
         private final String iconSvg;
         private final String menuItemType;
+        private final String description;
         private final List<SubMenuItem> subMenuItems = new ArrayList<>();
 
         private MainMenuItem(
@@ -136,7 +152,8 @@ public class Menu {
                 int displayOrder,
                 Integer iconId,
                 String menuItemType,
-                String iconSvg
+                String iconSvg,
+                String description
         ) {
             this.menuItemId = menuItemId;
             this.menuItemText = menuItemText;
@@ -145,6 +162,7 @@ public class Menu {
             this.iconId = iconId;
             this.iconSvg = iconSvg;
             this.menuItemType = menuItemType;
+            this.description = description;
         }
 
         public int getMenuItemId() {
@@ -159,9 +177,10 @@ public class Menu {
                 int displayOrder,
                 Integer iconId,
                 String menuItemType,
-                String iconSvg
+                String iconSvg,
+                String description
         ) {
-            SubMenuItem subMenuItem = new SubMenuItem(menuItemId, menuItemText, menuItemUrl, parentMenuItemId, displayOrder, iconId, menuItemType, iconSvg);
+            SubMenuItem subMenuItem = new SubMenuItem(menuItemId, menuItemText, menuItemUrl, parentMenuItemId, displayOrder, iconId, menuItemType, iconSvg, description);
             subMenuItems.add(subMenuItem);
         }
     }
@@ -175,6 +194,7 @@ public class Menu {
         private final Integer iconId;
         private final String iconSvg;
         private final String menuItemType;
+        private final String description;
 
         private SubMenuItem(
                 int menuItemId,
@@ -184,7 +204,8 @@ public class Menu {
                 int displayOrder,
                 Integer iconId,
                 String menuItemType,
-                String iconSvg
+                String iconSvg,
+                String description
         ) {
             this.menuItemId = menuItemId;
             this.menuItemText = menuItemText;
@@ -194,6 +215,7 @@ public class Menu {
             this.iconId = iconId;
             this.iconSvg = iconSvg;
             this.menuItemType = menuItemType;
+            this.description = description;
         }
     }
 

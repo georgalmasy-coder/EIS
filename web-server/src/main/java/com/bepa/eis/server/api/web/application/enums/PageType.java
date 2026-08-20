@@ -85,6 +85,9 @@ public enum PageType {
     SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
 
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
+    
+    PROJECT_SETTINGS_PAGE("projectsettings","html-pages/projectsettings.html", "Project Settings", true, "SETTINGS", "Project settings", "Manage project details, fields, departments and project access."),
+    ORGANISATION_SETTINGS_PAGE("organisationsettings","html-pages/organisationsettings.html", "Organisation Settings", true, "SETTINGS", "Organisation settings", "Manage organisation details, users, and global settings."),
 
     /* */
 

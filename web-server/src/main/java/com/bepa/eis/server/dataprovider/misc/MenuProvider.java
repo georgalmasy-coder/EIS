@@ -29,7 +29,7 @@ public class MenuProvider extends GenericProvider {
     private static final Logger log = LoggerFactory.getLogger(MenuProvider.class);
 
     private static final String SELECT_ALL_MENU_ROWS_SQL =
-            "SELECT MenuId, MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active " +
+            "SELECT MenuId, MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active, Description " +
             "FROM MENU ";
 
     private static final String SELECT_MENU_ROW_SQL =
@@ -41,12 +41,12 @@ public class MenuProvider extends GenericProvider {
             SELECT_ALL_MENU_ROWS_SQL + " WHERE ((ParentMenuId IS NULL AND ? IS NULL) OR ParentMenuId = ?) ";
 
     private static final String INSERT_MENU_ROW_SQL =
-            "INSERT INTO dbo.MENU (MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO dbo.MENU (MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active, Description) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_MENU_ROW_SQL =
             "UPDATE dbo.MENU " +
-            "SET MenuItemText = ?, MenuItemUrl = ?, ParentMenuId = ?, MenuItemType = ?, SubscriptionCode = ?, IconId = ?, DisplayOrder = ?, CustomerIdRequired = ?, ProjectIdRequired = ?, UserRoles = ?, Active = ? " +
+            "SET MenuItemText = ?, MenuItemUrl = ?, ParentMenuId = ?, MenuItemType = ?, SubscriptionCode = ?, IconId = ?, DisplayOrder = ?, CustomerIdRequired = ?, ProjectIdRequired = ?, UserRoles = ?, Active = ?, Description = ? " +
             "WHERE MenuId = ?";
 
     private static final String UPDATE_MENU_ORDER_SQL =
@@ -132,6 +132,7 @@ public class MenuProvider extends GenericProvider {
         boolean header = menuItemType.isHeader();
         String menuItemUrl = header ? null : normalizeUrl(menuRow.menuItemUrl());
         String userRoles = header ? "" : normalizeRoles(menuRow.userRoles());
+        String description = safeText(menuRow.description());
         boolean customerIdRequired = header ? false : toBoolean(menuRow.customerIdRequired());
         boolean projectIdRequired = header ? false : toBoolean(menuRow.projectIdRequired());
         boolean active = menuRow.active() == null || menuRow.active();
@@ -162,7 +163,8 @@ public class MenuProvider extends GenericProvider {
                             customerIdRequired,
                             projectIdRequired,
                             userRoles,
-                            active
+                            active,
+                            description
                     );
                 } else {
                     MenuRow existingMenuRow = getMenuRow(connection, menuId);
@@ -199,7 +201,8 @@ public class MenuProvider extends GenericProvider {
                             customerIdRequired,
                             projectIdRequired,
                             userRoles,
-                            active
+                            active,
+                            description
                     );
                 }
 
@@ -303,7 +306,8 @@ public class MenuProvider extends GenericProvider {
                     displayOrder,
                     parentRow.iconId(),
                     parentType.name(),
-                    parentIcon == null ? null : parentIcon.getSvgCode()
+                    parentIcon == null ? null : parentIcon.getSvgCode(),
+                    parentRow.description()
             );
 
             List<MenuRow> childRows = childRowsByParent.getOrDefault(parentRow.menuId(), List.of());
@@ -317,12 +321,13 @@ public class MenuProvider extends GenericProvider {
                             childRow.displayOrder() == null ? childRow.menuId() : childRow.displayOrder(),
                             childRow.iconId(),
                             MenuItemType.MENU_ITEM.name(),
-                            MenuIcon.fromId(childRow.iconId()) == null ? null : MenuIcon.fromId(childRow.iconId()).getSvgCode()
+                            MenuIcon.fromId(childRow.iconId()) == null ? null : MenuIcon.fromId(childRow.iconId()).getSvgCode(),
+                            childRow.description()
                     ));
         }
 
         // Add exit menu item
-        menu.addMainMenuItem(999, "Exit EIS", "/api/logout", 999, null, MenuItemType.MENU_ITEM.name(), null);
+        //menu.addMainMenuItem(999, "Exit EIS", "/api/logout", 999, null, MenuItemType.MENU_ITEM.name(), null);
 
         return menu;
     }
@@ -353,7 +358,8 @@ public class MenuProvider extends GenericProvider {
             boolean customerIdRequired,
             boolean projectIdRequired,
             String userRoles,
-            boolean active
+            boolean active,
+            String description
     ) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_MENU_ROW_SQL, Statement.RETURN_GENERATED_KEYS)) {
             setString(statement, menuItemText, 1);
@@ -367,6 +373,7 @@ public class MenuProvider extends GenericProvider {
             setBoolean(statement, projectIdRequired, 9);
             setString(statement, userRoles, 10);
             setBoolean(statement, active, 11);
+            setString(statement, description, 12);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -396,7 +403,8 @@ public class MenuProvider extends GenericProvider {
             boolean customerIdRequired,
             boolean projectIdRequired,
             String userRoles,
-            boolean active
+            boolean active,
+            String description
     ) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_MENU_ROW_SQL)) {
             setString(statement, menuItemText, 1);
@@ -410,7 +418,8 @@ public class MenuProvider extends GenericProvider {
             setBoolean(statement, projectIdRequired, 9);
             setString(statement, userRoles, 10);
             setBoolean(statement, active, 11);
-            setInt(statement, menuId, 12);
+            setString(statement, description, 12);
+            setInt(statement, menuId, 13);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -491,7 +500,8 @@ public class MenuProvider extends GenericProvider {
                 getNullableBoolean(resultSet, "CustomerIdRequired"),
                 getNullableBoolean(resultSet, "ProjectIdRequired"),
                 safeText(resultSet.getString("UserRoles")),
-                getNullableBoolean(resultSet, "Active")
+                getNullableBoolean(resultSet, "Active"),
+                safeText(resultSet.getString("Description"))
         );
     }
 
@@ -757,7 +767,8 @@ public class MenuProvider extends GenericProvider {
             Boolean customerIdRequired,
             Boolean projectIdRequired,
             String userRoles,
-            Boolean active
+            Boolean active,
+            String description
     ) {
     }
 }

@@ -79,7 +79,7 @@ function bindEvents() {
         state.dialogParentMenuId = null;
     });
 
-    ["fieldMenuItemText", "fieldMenuItemUrl", "fieldMenuItemType", "fieldSubscriptionCode", "fieldIconId", "fieldCustomerIdRequired", "fieldProjectIdRequired", "fieldActive"].forEach((id) => {
+    ["fieldMenuItemText", "fieldMenuItemUrl", "fieldDescription", "fieldMenuItemType", "fieldSubscriptionCode", "fieldIconId", "fieldCustomerIdRequired", "fieldProjectIdRequired", "fieldActive"].forEach((id) => {
         const element = byId(id);
         element?.addEventListener("input", markDirty);
         element?.addEventListener("change", markDirty);
@@ -232,6 +232,7 @@ function parseMenuItems(xmlDocument) {
         menuId: parseNullableInt(getChildText(node, "MenuId", "")),
         menuItemText: getChildText(node, "MenuItemText", ""),
         menuItemUrl: getChildText(node, "MenuItemUrl", ""),
+        description: getChildText(node, "Description", ""),
         parentMenuId: parseNullableInt(getChildText(node, "ParentMenuId", "")),
         menuItemType: getChildText(node, "MenuItemType", ""),
         subscriptionCode: getChildText(node, "SubscriptionCode", ""),
@@ -679,6 +680,7 @@ function parseMenuItem(node) {
         menuId: parseNullableInt(getChildText(node, "MenuId", "")),
         menuItemText: getChildText(node, "MenuItemText", ""),
         menuItemUrl: getChildText(node, "MenuItemUrl", ""),
+        description: getChildText(node, "Description", ""),
         parentMenuId: parseNullableInt(getChildText(node, "ParentMenuId", "")),
         menuItemType: getChildText(node, "MenuItemType", ""),
         subscriptionCode: getChildText(node, "SubscriptionCode", ""),
@@ -696,6 +698,7 @@ function buildEmptyMenuItem(parentMenuId) {
         menuId: null,
         menuItemText: "",
         menuItemUrl: "",
+        description: "",
         parentMenuId: parentMenuId ?? null,
         menuItemType: "",
         subscriptionCode: "",
@@ -716,6 +719,7 @@ function fillMenuDialog(menuItem, mode) {
     setValue("fieldIconId", menuItem.iconId);
     setValue("fieldMenuItemText", menuItem.menuItemText);
     setValue("fieldMenuItemUrl", menuItem.menuItemUrl);
+    setValue("fieldDescription", menuItem.description);
     setChecked("fieldCustomerIdRequired", menuItem.customerIdRequired);
     setChecked("fieldProjectIdRequired", menuItem.projectIdRequired);
     setChecked("fieldActive", menuItem.active);
@@ -758,6 +762,7 @@ function clearMenuDialogFields() {
     setValue("fieldIconId", "");
     setValue("fieldMenuItemText", "");
     setValue("fieldMenuItemUrl", "");
+    setValue("fieldDescription", "");
     setChecked("fieldCustomerIdRequired", false);
     setChecked("fieldProjectIdRequired", false);
     setChecked("fieldActive", true);
@@ -785,6 +790,7 @@ async function saveMenuItem() {
 
     const menuItemText = getValue("fieldMenuItemText").trim();
     const menuItemUrl = getValue("fieldMenuItemUrl").trim();
+    const description = getValue("fieldDescription").trim();
     const menuItem = state.currentItem || buildEmptyMenuItem(parseNullableInt(getValue("fieldParentMenuId")));
     const selectedRoles = Array.from(els.userRolesGrid?.querySelectorAll("input[type='checkbox']:checked") || [])
         .map((checkbox) => String(checkbox.value || "").trim())
@@ -808,6 +814,7 @@ async function saveMenuItem() {
                 <IconId>${escapeXml(iconId === null ? "" : String(iconId))}</IconId>
                 <MenuItemText>${escapeXml(menuItemText)}</MenuItemText>
                 <MenuItemUrl>${escapeXml(menuItemUrl)}</MenuItemUrl>
+                <Description>${escapeXml(description)}</Description>
                 <CustomerIdRequired>${escapeXml(getChecked("fieldCustomerIdRequired") ? "true" : "false")}</CustomerIdRequired>
                 <ProjectIdRequired>${escapeXml(getChecked("fieldProjectIdRequired") ? "true" : "false")}</ProjectIdRequired>
                 <UserRoles>${escapeXml(selectedRoles.join(","))}</UserRoles>

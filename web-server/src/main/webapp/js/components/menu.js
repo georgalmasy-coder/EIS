@@ -36,7 +36,10 @@ const state = {
         customerName: "-",
         projectName: "-",
         userName: "-"
-    }
+    },
+    userMenu: null,
+    projectSettingsMenu: null,
+    organisationSettingsMenu: null
 };
 
 let sideMenu = null;
@@ -243,6 +246,7 @@ function closeAllExcept(root, exceptLi) {
 function buildMenu(doc, statusElement, rootElement) {
     clear(rootElement);
 
+    state.userMenu = null;
     const mainItems = Array.from(doc.getElementsByTagName("main-menu-item"));
 
     if (!mainItems.length) {
@@ -252,6 +256,22 @@ function buildMenu(doc, statusElement, rootElement) {
 
     mainItems.forEach((mainItem) => {
         const mainText = directTextOf(mainItem, "display") || "Untitled";
+
+        if (mainText === "[USER-MENU]") {
+            state.userMenu = mainItem;
+            return;
+        }
+
+        if (mainText === "[PROJECT-SETTINGS]") {
+            state.projectSettingsMenu = mainItem;
+            return;
+        }
+
+        if (mainText === "[ORGANISATION-SETTINGS]") {
+            state.organisationSettingsMenu = mainItem;
+            return;
+        }
+
         const mainUrl = directTextOf(mainItem, "url") || "";
         const mainType = getMenuItemTypeId(mainItem);
         const mainIconSvg = directTextOf(mainItem, "iconSvg") || "";
@@ -321,6 +341,13 @@ function buildMenu(doc, statusElement, rootElement) {
         label.textContent = mainText;
 
         button.append(label);
+
+        if (subItems.length > 0) {
+            const badge = document.createElement("span");
+            badge.className = "menu-item-badge";
+            badge.textContent = subItems.length;
+            button.appendChild(badge);
+        }
 
         const ulSub = document.createElement("ul");
         ulSub.className = "menu-sub";
@@ -497,11 +524,33 @@ function createSidebarFooter(doc) {
                 <strong id="menuFooterUserName" class="menu-footer-value menu-footer-user" aria-label="User name">-</strong>
                 <strong id="menuFooterCustomerName" class="menu-footer-value menu-footer-customer" aria-label="Customer name">-</strong>
             </div>
+            <button type="button" class="menu-footer-more" aria-haspopup="true" aria-expanded="false" title="More options">
+                <span>...</span>
+            </button>
+            <div class="menu-footer-sub-menu" hidden></div>
         </div>
     `;
 
     const collapse = footer.querySelector(".menu-footer-collapse");
     collapse?.appendChild(createCollapseButton(doc));
+
+    const moreBtn = footer.querySelector(".menu-footer-more");
+    const subMenu = footer.querySelector(".menu-footer-sub-menu");
+
+    moreBtn?.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isHidden = subMenu.hidden;
+        subMenu.hidden = !isHidden;
+        moreBtn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (subMenu && !subMenu.hidden && !footer.contains(event.target)) {
+            subMenu.hidden = true;
+            moreBtn?.setAttribute("aria-expanded", "false");
+        }
+    });
 
     return footer;
 }
@@ -658,6 +707,8 @@ function refreshSidebarChrome() {
     const menuFooterUserName = byId("menuFooterUserName");
     const menuFooterCustomerName = byId("menuFooterCustomerName");
     const avatar = sideMenu?.querySelector(".menu-footer-avatar");
+    const moreBtn = sideMenu?.querySelector(".menu-footer-more");
+    const subMenu = sideMenu?.querySelector(".menu-footer-sub-menu");
 
     if (menuFooterUserName) {
         menuFooterUserName.textContent = userName;
@@ -672,9 +723,45 @@ function refreshSidebarChrome() {
         avatar.textContent = initials || "U";
     }
 
+    if (moreBtn) {
+        const shouldShow = !state.collapsed && state.userMenu != null;
+        moreBtn.style.display = shouldShow ? "flex" : "none";
+    }
+
+    if (subMenu && state.userMenu) {
+        renderUserSubMenu(subMenu, state.userMenu);
+    }
+
     if (projectPickerValue) {
         renderProjectPicker();
     }
+}
+
+function renderUserSubMenu(container, userMenuNode) {
+    container.replaceChildren();
+    const subItems = Array.from(userMenuNode.getElementsByTagName("submain-menu-item"));
+
+    if (subItems.length === 0) {
+        container.hidden = true;
+        return;
+    }
+
+    const ul = document.createElement("ul");
+    ul.className = "menu-footer-sub-menu-list";
+
+    subItems.forEach((subItem) => {
+        const text = textOf(subItem, "display") || "Untitled";
+        const url = textOf(subItem, "url") || "#";
+
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = url;
+        a.textContent = text;
+        li.appendChild(a);
+        ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
 }
 
 function updateSidebarBrandLogo() {
@@ -709,6 +796,7 @@ function applyLayoutState() {
     body.style.setProperty("--menu-content-offset", `${getMenuContentOffset()}px`);
 
     sideMenu.classList.toggle("is-collapsed", state.collapsed);
+    refreshSidebarChrome();
 
     if (collapseButton) {
         collapseButton.classList.toggle("is-active", state.collapsed);
@@ -738,6 +826,10 @@ function applyLayoutState() {
 
     if (state.collapsed) {
         closeProjectPickerPanel();
+        const moreBtn = sideMenu?.querySelector(".menu-footer-more");
+        const subMenu = sideMenu?.querySelector(".menu-footer-sub-menu");
+        if (subMenu) subMenu.hidden = true;
+        if (moreBtn) moreBtn.setAttribute("aria-expanded", "false");
     }
 
     if (initialStateApplied && body.classList.contains("menu-preparing") && !menuPreparingReleaseScheduled) {
@@ -804,6 +896,16 @@ function initializeSidebar() {
         event.stopPropagation();
         toggleCollapsedMenu();
     });
+}
+
+export function getMenuSection(displayName) {
+    if (displayName === "[PROJECT-SETTINGS]") return state.projectSettingsMenu;
+    if (displayName === "[ORGANISATION-SETTINGS]") return state.organisationSettingsMenu;
+    return null;
+}
+
+export function getTopbarMetadata() {
+    return state.topPanel;
 }
 
 export async function initMenu() {

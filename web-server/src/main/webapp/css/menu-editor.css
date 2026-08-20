@@ -523,7 +523,8 @@ body.menu-editor-document {
     display: none !important;
 }
 
-.menu-editor-dialog-grid input[type="text"] {
+.menu-editor-dialog-grid input[type="text"],
+.menu-editor-dialog-grid textarea {
     width: 100%;
     border: 1px solid var(--app-input-border);
     border-radius: 8px;
@@ -537,9 +538,17 @@ body.menu-editor-document {
     outline: none;
 }
 
-.menu-editor-dialog-grid input[type="text"]:focus {
+.menu-editor-dialog-grid input[type="text"]:focus,
+.menu-editor-dialog-grid textarea:focus {
     border-color: var(--app-input-border);
     box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.menu-editor-dialog-grid textarea {
+    min-height: 80px;
+    resize: vertical;
+    padding: 8px 10px;
+    line-height: 1.4;
 }
 
 .menu-editor-dialog-grid select {
