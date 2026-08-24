@@ -5,6 +5,7 @@ import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
+import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemsBreakdownParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SBSCodeType;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemDepartment;
@@ -126,6 +127,12 @@ public class SystemBreakdownEntity extends AbstractEntity {
             sbsCodeType.setFieldEditable();
             sbsCodeType.setFieldRequired();
             entityElement.addElement(sbsCodeType);
+        } else {
+            ParentEntityId parentId = new ParentEntityId(parentEntityId);
+            parentId.setFieldNotEditable();
+            parentId.setFieldRequired();
+            parentId.setFieldNotVisible();
+            entityElement.addElement(parentId);
         }
 
         String nextCode = parentCodeSelector.getNextAvailableCodeValue(getWebSession(), parentEntityId);

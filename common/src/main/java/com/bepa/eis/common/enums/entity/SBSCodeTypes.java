@@ -1,5 +1,7 @@
 package com.bepa.eis.common.enums.entity;
 
+import com.bepa.eis.common.enums.customer.CustomerModuleStatus;
+
 public enum SBSCodeTypes {
     FUNCTIONAL (1,  "Function", "=", true),
     LOCATION(2, "Location", "+", true),
@@ -40,6 +42,25 @@ public enum SBSCodeTypes {
 
     public boolean isActive() {
         return active;
+    }
+
+    public static SBSCodeTypes fromCode(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            Integer normalizedCode = Integer.valueOf(code.trim());
+            for (SBSCodeTypes type : values()) {
+                if (type.getId() == normalizedCode) {
+                    return type;
+                }
+            }
+        } catch (Exception e) {
+        }
+
+
+        return FUNCTIONAL;
     }
 
 }

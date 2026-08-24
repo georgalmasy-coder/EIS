@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.systemsbreakdown;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.SBSCodeTypes;
 import com.bepa.eis.common.providers.misc.EventProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericExporters;
@@ -11,6 +12,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.SystemsBreakdownParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.system.SBSCodeType;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
@@ -154,32 +156,27 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
         Boolean active = boolValue(systemBreakdown, Active.FIELD_NAME);
 
         String sbsCode = "";
-//GFA        Integer sbsCodeLevel;
-
-//GFA        SBSCodeParentSystem parentSystem = new SBSCodeParentSystem();
         SystemsBreakdownParentCodeSelector parentCodeSelector = new SystemsBreakdownParentCodeSelector(webSession);
 
-        if (entityId == null && parentEntityId != null) {
-            sbsCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
+        if (entityId == null ) {
+
+            if (parentEntityId != null) {
+                sbsCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
+            } else {
+                String sbsCodeType = textValue(systemBreakdown, SBSCodeType.FIELD_NAME);
+
+                String selectedSbsCodeType = sbsCodeType.split("\n")[0];
+                SBSCodeTypes type = SBSCodeTypes.fromCode(selectedSbsCodeType);
+
+                sbsCode = parentCodeSelector.getNextAvailableCodeValue(webSession, parentEntityId);
+                sbsCode = type.getPrefix() + sbsCode;
+
+            }
         } else {
             sbsCode = textValue(systemBreakdown, SBSCode.FIELD_NAME);
         }
         Integer sbsCodeLevel = parentCodeSelector.getCodeLevel(sbsCode);
 
-        /* GFA
-        if (entityId == null) {
-            SBSCodeParentSystem parentSystem = new SBSCodeParentSystem();
-            String sbsCodeType = textValue(systemBreakdown, SBSCodeType.FIELD_NAME);
-            String sbsCodeParentSystem = textValue(systemBreakdown, SBSCodeParentSystem.FIELD_NAME);
-
-            sbsCode = parentSystem.getNextAvailableSBSCode(webSession, sbsCodeType, sbsCodeParentSystem);
-            sbsCodeLevel = parentSystem.getCodeLevel(sbsCode);
-        } else {
-            sbsCode = textValue(systemBreakdown, SBSCode.FIELD_NAME);
-            sbsCodeLevel = intValue(systemBreakdown, CodeLevel.FIELD_NAME);
-        }
-
-         */
 
         systemBreakdownEntity.setEntityId(entityId);
         systemBreakdownEntity.setVersion(version);
