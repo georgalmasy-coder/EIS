@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.project.ProjectStatus;
 import com.bepa.eis.common.providers.GenericProvider;
+import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.server.dataprovider.entities.ProjectEntityProvider;
 import com.bepa.eis.server.entites.project.ProjectEntity;
 import org.slf4j.Logger;
@@ -318,6 +319,11 @@ public class ProjectProvider extends GenericProvider {
                 projectRecord.getProjectPK(),
                 projectRecord.getVersion()
         );
+
+        if (projectRecord.getChangedByUserId() != null) {
+            UserProvider userProvider = new UserProvider(getWebSession());
+            userProvider.linkUserToProject(connection, projectRecord.getChangedByUserId(), projectRecord.getProjectId());
+        }
 
         InstallDefaultConfiguration installDefaultConfiguration = new InstallDefaultConfiguration(getWebSession());
         installDefaultConfiguration.installDefaultTrlConfiguration(projectRecord.getCustomerId(), projectRecord.getProjectId());

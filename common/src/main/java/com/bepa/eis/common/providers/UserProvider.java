@@ -1796,6 +1796,22 @@ public class UserProvider extends GenericProvider {
         }
     }
 
+    public void linkUserToProject(
+            Connection connection,
+            Integer userId,
+            Integer projectId
+    ) throws SQLException {
+        if (userId == null || projectId == null) {
+            return;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_USER_PROJECT_SQL)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, projectId);
+            statement.executeUpdate();
+        }
+    }
+
     private Integer getLinkedCustomerId(
             Connection connection,
             Integer userId
