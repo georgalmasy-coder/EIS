@@ -323,6 +323,7 @@ public class ProjectProvider extends GenericProvider {
         installDefaultConfiguration.installDefaultTrlConfiguration(projectRecord.getCustomerId(), projectRecord.getProjectId());
         installDefaultConfiguration.installDefaultIrlConfiguration(projectRecord.getCustomerId(), projectRecord.getProjectId());
         installDefaultConfiguration.installDefaultSrlConfiguration(projectRecord.getCustomerId(), projectRecord.getProjectId());
+        installDefaultConfiguration.installDefaultClassConfiguration(projectRecord.getCustomerId(), projectRecord.getProjectId());
 
         return getLatestProjectByProjectId(connection, projectRecord.getProjectId());
     }

@@ -1,6 +1,7 @@
 package com.bepa.eis.server.dataprovider.project;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.project.ClassificationType;
 import com.bepa.eis.common.enums.project.IrlType;
 import com.bepa.eis.common.enums.project.SrlType;
 import com.bepa.eis.common.enums.project.TrlType;
@@ -47,6 +48,18 @@ public class InstallDefaultConfiguration extends GenericProvider {
                     "TRLDescription, " +
                     "Active" +
                     ") VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String INSERT_CLASS_SQL =
+            "INSERT INTO CLASSIFICATION (" +
+                    "CustomerId, " +
+                    "ProjectId, " +
+                    "ClassId, " +
+                    "Code, " +
+                    "Description, " +
+                    "Example, " +
+                    "Active" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+
 
     public InstallDefaultConfiguration(WebSession webSession) {
         super(webSession);
@@ -112,6 +125,28 @@ public class InstallDefaultConfiguration extends GenericProvider {
                 ps.setString(4, trlType.getTrlName());
                 ps.setString(5, trlType.getTrlDescription());
                 ps.setBoolean(6, trlType.isActive());
+
+                executeInsertIgnoringDuplicateKey(ps);
+            }
+        }
+    }
+
+    public void installDefaultClassConfiguration(Integer customerId, Integer projectId) throws SQLException {
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(INSERT_CLASS_SQL)) {
+
+            for (ClassificationType classificationType : ClassificationType.values()) {
+                if (classificationType == ClassificationType.INVALID_CLASS) {
+                    continue;
+                }
+
+                setInt(ps, customerId, 1);
+                setInt(ps, projectId, 2);
+                ps.setInt(3, classificationType.getClassId());
+                ps.setString(4, classificationType.getCode());
+                ps.setString(5, classificationType.getCodeDescription());
+                ps.setString(6, classificationType.getCodeExample());
+                ps.setBoolean(7, classificationType.isActive());
 
                 executeInsertIgnoringDuplicateKey(ps);
             }
