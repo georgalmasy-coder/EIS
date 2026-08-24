@@ -1052,10 +1052,11 @@ body.systemrequirement-column-resizing *{
     z-index: 2000;
     min-width: 230px;
     padding: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--app-border-default);
     border-radius: 12px;
-    background: rgba(15,23,42,.97);
-    box-shadow: 0 20px 45px rgba(0,0,0,.36);
+    background: var(--app-surface-background);
+    color: var(--app-text-primary);
+    box-shadow: var(--app-shadow);
     display: none;
 }
 
@@ -1068,7 +1069,7 @@ body.systemrequirement-column-resizing *{
     width: 100%;
     border: 0;
     background: transparent;
-    color: var(--text);
+    color: var(--app-text-primary);
     text-align: left;
     padding: 9px 10px;
     border-radius: 9px;
@@ -1078,7 +1079,7 @@ body.systemrequirement-column-resizing *{
 }
 
 .systemrequirement-context-menu button:hover{
-    background: rgba(96,165,250,.16);
+    background: var(--app-surface-subtle-background);
 }
 
 .systemrequirement-context-menu button[hidden]{
