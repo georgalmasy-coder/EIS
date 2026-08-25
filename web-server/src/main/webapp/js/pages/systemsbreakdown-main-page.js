@@ -1672,7 +1672,22 @@ function renderListCell(system, column) {
     const colorStyle = displayColor ? ` style="${escapeHtml(buildColorChipStyle(displayColor))}"` : "";
     const colorClass = displayColor ? " select-chip" : "";
 
-    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}"${colorStyle}>${escapeHtml(displayValue)}</span></td>`;
+    let indentationStyle = "";
+    const isCodeColumn = ["SBSCode", "SystemCode", "SystemBreakdownCode", "SystemId", "Code"].includes(column.key);
+    if (isCodeColumn && value) {
+        const dots = (String(value).match(/\./g) || []).length;
+        if (dots > 0) {
+            indentationStyle = `padding-left: ${dots * 15}px;`;
+        }
+    }
+
+    const combinedStyle = [colorStyle.replace(' style="', '').replace('"', ''), indentationStyle]
+        .filter(Boolean)
+        .join(" ");
+
+    const styleAttr = combinedStyle ? ` style="${escapeHtml(combinedStyle)}"` : "";
+
+    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}"${styleAttr}>${escapeHtml(displayValue)}</span></td>`;
 }
 
 function formatListCellValue(value, control) {
