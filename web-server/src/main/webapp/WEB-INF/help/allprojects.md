@@ -1,27 +1,27 @@
 # All Projects
 
-Denne side giver et komplet overblik over alle projekter i porteføljen. Her kan du søge efter specifikke projekter, filtrere efter status og få et hurtigt overblik over næste skridt og seneste opdateringer.
+This page provides a complete overview of all projects in the portfolio. Here you can search for specific projects, filter by status, and get a quick overview of next steps and latest updates.
 
-## Funktioner
+## Features
 
-### Søgning
-Brug søgefeltet øverst til at finde projekter baseret på projektnavn eller ejer.
+### Search
+Use the search field at the top to find projects based on project name or owner.
 
-### Filtrering
-Du kan filtrere projektlisten ved hjælp af fanerne:
-- **Active**: Viser alle aktive projekter.
-- **Needs attention**: Viser projekter, der kræver særlig opmærksomhed.
-- **Archived**: Viser arkiverede projekter.
+### Filtering
+You can filter the project list using the tabs:
+- **Active**: Shows all active projects.
+- **Needs attention**: Shows projects that require special attention.
+- **Archived**: Shows archived projects.
 
-### Projektkort
-Hvert projektkort viser:
-- **Projektnavn og ejer**: Grundlæggende information om projektet.
-- **Status**: Den aktuelle status (f.eks. Planned, Created).
-- **Next step**: Det næste planlagte skridt i projektet.
-- **Updated**: Hvornår projektet sidst blev opdateret.
+### Project Cards
+Each project card displays:
+- **Project name and owner**: Basic information about the project.
+- **Status**: The current status (e.g., Planned, Created).
+- **Next step**: The next planned step in the project.
+- **Updated**: When the project was last updated.
 
-### Åbn projekt
-Klik på **Open** knappen for at arbejde med det valgte projekt. Dette vil indlæse projektet i dit arbejdsområde.
+### Open Project
+Click the **Open** button to work with the selected project. This will load the project into your workspace.
 
-### Opret nyt projekt
-Brug knappen **+ New project** for at åbne en dialog, hvor du kan oprette et helt nyt projekt i systemet.
+### Create New Project
+Use the **+ New project** button to open a dialog where you can create a completely new project in the system.

@@ -31,7 +31,7 @@ public class ProjectOverview extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.OLD_PROJECT_OVERVIEW_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.PROJECT_OVERVIEW_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         if (false) {
