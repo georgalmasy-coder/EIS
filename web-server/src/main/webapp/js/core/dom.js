@@ -23,6 +23,18 @@ export function setText(target, value, fallback = "—") {
 
     const normalized = String(value ?? "").trim();
     element.textContent = normalized || fallback;
+
+    if (element.id === "loadStatus") {
+        const spinner = document.getElementById("topbarGlobalSpinner");
+        if (spinner) {
+            const val = normalized.toLowerCase();
+            if (val === "loading" || val === "booting" || val === "processing") {
+                spinner.classList.add("is-loading");
+            } else {
+                spinner.classList.remove("is-loading");
+            }
+        }
+    }
 }
 
 export function setInputValue(target, value, fallback = "") {

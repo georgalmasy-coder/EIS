@@ -283,6 +283,14 @@ export function mountTopbar(root = document) {
     return mountedTopbarSearch;
 }
 
+if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => mountTopbar(document));
+    } else {
+        mountTopbar(document);
+    }
+}
+
 export function readTopbarMetadata(source = {}) {
     if (!source) {
         return {
@@ -495,9 +503,13 @@ function ensureTopbarStructure(topbar) {
     let content = topbar.querySelector(".topbar-content");
 
     if (!content) {
-        topbar.replaceChildren();
         content = document.createElement("div");
         content.className = "topbar-content";
+
+        while (topbar.firstChild) {
+            content.appendChild(topbar.firstChild);
+        }
+
         topbar.appendChild(content);
     }
 
@@ -511,6 +523,24 @@ function ensureTopbarStructure(topbar) {
             <strong id="projectName" data-topbar="projectName">—</strong>
         `;
         content.insertBefore(project, content.firstChild);
+    }
+
+    if (!content.querySelector(".topbar-spinner")) {
+        const spinner = document.createElement("div");
+        spinner.className = "topbar-spinner";
+        spinner.id = "topbarGlobalSpinner";
+        spinner.innerHTML = "<div></div>".repeat(12);
+        content.appendChild(spinner);
+
+        // Inject hidden elements for legacy scripts
+        const hidden = document.createElement("div");
+        hidden.style.display = "none";
+        hidden.innerHTML = `
+            <span id="customerName"></span>
+            <span id="userName"></span>
+            <span id="loadStatus"></span>
+        `;
+        content.appendChild(hidden);
     }
 
     if (!content.querySelector(".topbar-actions")) {

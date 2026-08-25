@@ -23,6 +23,59 @@
     min-height: 84px;
     padding: 0 22px 0 0;
     box-sizing: border-box;
+    position: relative;
+}
+
+.topbar-logo,
+.topbar-meta-lines,
+.topbar-status-panel,
+.topbar-meta {
+    display: none !important;
+}
+
+.topbar-spinner {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    z-index: 9999;
+}
+
+.topbar-spinner.is-loading {
+    display: block;
+}
+
+.topbar-spinner div {
+    position: absolute;
+    width: 8.4%;
+    height: 25%;
+    background: #5f6d67;
+    left: 45.8%;
+    top: 37.5%;
+    opacity: 0;
+    border-radius: 50px;
+    animation: topbar-spinner-fade 1s linear infinite;
+}
+
+.topbar-spinner div:nth-child(1) { transform: rotate(0deg) translate(0, -130%); animation-delay: 0s; }
+.topbar-spinner div:nth-child(2) { transform: rotate(30deg) translate(0, -130%); animation-delay: -0.9167s; }
+.topbar-spinner div:nth-child(3) { transform: rotate(60deg) translate(0, -130%); animation-delay: -0.8333s; }
+.topbar-spinner div:nth-child(4) { transform: rotate(90deg) translate(0, -130%); animation-delay: -0.75s; }
+.topbar-spinner div:nth-child(5) { transform: rotate(120deg) translate(0, -130%); animation-delay: -0.6667s; }
+.topbar-spinner div:nth-child(6) { transform: rotate(150deg) translate(0, -130%); animation-delay: -0.5833s; }
+.topbar-spinner div:nth-child(7) { transform: rotate(180deg) translate(0, -130%); animation-delay: -0.5s; }
+.topbar-spinner div:nth-child(8) { transform: rotate(210deg) translate(0, -130%); animation-delay: -0.4167s; }
+.topbar-spinner div:nth-child(9) { transform: rotate(240deg) translate(0, -130%); animation-delay: -0.3333s; }
+.topbar-spinner div:nth-child(10) { transform: rotate(270deg) translate(0, -130%); animation-delay: -0.25s; }
+.topbar-spinner div:nth-child(11) { transform: rotate(300deg) translate(0, -130%); animation-delay: -0.1667s; }
+.topbar-spinner div:nth-child(12) { transform: rotate(330deg) translate(0, -130%); animation-delay: -0.0833s; }
+
+@keyframes topbar-spinner-fade {
+    from { opacity: 1; }
+    to { opacity: 0.25; }
 }
 
 .topbar-project{
