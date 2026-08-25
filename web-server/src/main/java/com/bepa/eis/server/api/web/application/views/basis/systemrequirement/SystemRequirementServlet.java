@@ -31,7 +31,7 @@ import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.CR
 import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.EDIT_ENTITY;
 import static com.bepa.eis.common.enums.entity.EntityDataElement.SYSTEMREQCODE;
 
-@WebServlet(name = "BasisSystemRequirementServlet", urlPatterns = { "/basis/systemrequirement" })
+@WebServlet(name = "SystemRequirementServlet", urlPatterns = { "/basis/systemrequirement" })
 @MultipartConfig
 
 public class SystemRequirementServlet extends GenericDataProviderServlet {
@@ -61,6 +61,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
                 Element noteSection = firstChild(rootElement, "EntityNotes");
                 Element linkSection = firstChild(rootElement, "EntityLinks");
                 Element attachmentSection = firstChild(rootElement, "EntityAttachments");
+                Element relationSection = firstChild(rootElement, "EntityRelations");
 
                 SystemRequirementEntity systemRequirementEntity = parseBasisSystemRequirementDocument(webSession, systemRequirement);
                 SystemRequirementProvider requirementProvider = new SystemRequirementProvider(webSession);
@@ -68,6 +69,7 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
                 parseNoteDocument(systemRequirementEntity, noteSection);
                 parseLinkDocument(systemRequirementEntity, linkSection);
                 parseAttachmentDocument(systemRequirementEntity, attachmentSection);
+                parseRelationDocument(systemRequirementEntity, relationSection);
 
                 requirementProvider.persist(systemRequirementEntity);
 

@@ -9,10 +9,10 @@ import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.generic.GenericServlet;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
-import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
-import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
+import com.bepa.eis.server.dataprovider.entities.*;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
+import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
+import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
@@ -29,7 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.util.*;
 
-import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
+import static com.bepa.eis.common.enums.entity.EntityType.*;
 
 /**
  * Dummy relation list endpoint used by the relation dialog.
@@ -99,6 +99,12 @@ public class EntityRelationListServlet extends GenericServlet {
 
     private static final List<RelationType> CONFIRMED_AND_NOT_RELEVANT_RELATIONS = List.of(RelationType.CONFIRMED, RelationType.NOT_RELEVANT);
     private static final List<RelationType> CONFIRMED_RELATION = List.of(RelationType.CONFIRMED);
+
+    private static final String LABEL_STAKEHOLDER_REQUIREMENT = "Stakeholder requirements";
+    private static final String LABEL_SYSTEM_REQUIREMENT = "System requirement";
+    private static final String LABEL_FUNCTIONAL_STRUCTURE = "Functions";
+    private static final String LABEL_LOGICAL_STRUCTURE = "Logical Design";
+    private static final String LABEL_SYSTEMS_BREAKDOWN = "Physical Structure";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -235,8 +241,13 @@ public class EntityRelationListServlet extends GenericServlet {
 
         switch (request.fromEntityType()) {
             case STAKEHOLDER_REQUIREMENT -> {
-                if (request.toEntityType() == SYSTEM_REQUIREMENT) {
-                    return CONFIRMED_AND_NOT_RELEVANT_RELATIONS;
+                switch (request.toEntityType()) {
+                    case SYSTEM_REQUIREMENT -> {
+                        return CONFIRMED_AND_NOT_RELEVANT_RELATIONS;
+                    }
+                    default -> {
+                        return CONFIRMED_RELATION;
+                    }
                 }
             }
             case SYSTEM_REQUIREMENT -> {
@@ -244,31 +255,34 @@ public class EntityRelationListServlet extends GenericServlet {
                     case STAKEHOLDER_REQUIREMENT -> {
                         return CONFIRMED_AND_NOT_RELEVANT_RELATIONS;
                     }
-                    case SYSTEMS_BREAKDOWN -> {
+                    default -> {
                         return CONFIRMED_RELATION;
                     }
                 }
             }
             case SYSTEMS_BREAKDOWN -> {
-                switch (request.toEntityType()) {
-                    case SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN, LOGICAL_STRUCTURE -> {
-                        return CONFIRMED_RELATION;
-                    }
-                }
+                return CONFIRMED_RELATION;
+//                switch (request.toEntityType()) {
+//                    case SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN, LOGICAL_STRUCTURE -> {
+//                        return CONFIRMED_RELATION;
+//                    }
+//                }
             }
             case FUNCTIONAL_STRUCTURE -> {
-                switch (request.toEntityType()) {
-                    case LOGICAL_STRUCTURE, SYSTEM_REQUIREMENT -> {
-                        return CONFIRMED_RELATION;
-                    }
-                }
+                return CONFIRMED_RELATION;
+//                switch (request.toEntityType()) {
+//                    case LOGICAL_STRUCTURE, SYSTEM_REQUIREMENT -> {
+//                        return CONFIRMED_RELATION;
+//                    }
+//                }
             }
             case LOGICAL_STRUCTURE -> {
-                switch (request.toEntityType()) {
-                    case SYSTEMS_BREAKDOWN, FUNCTIONAL_STRUCTURE -> {
-                        return CONFIRMED_RELATION;
-                    }
-                }
+                return CONFIRMED_RELATION;
+//                switch (request.toEntityType()) {
+//                    case SYSTEMS_BREAKDOWN, FUNCTIONAL_STRUCTURE -> {
+//                        return CONFIRMED_RELATION;
+//                    }
+//                }
             }
         }
 
@@ -508,24 +522,74 @@ public class EntityRelationListServlet extends GenericServlet {
 
         if (entityType == EntityType.STAKEHOLDER_REQUIREMENT) {
             lists.add(new RelationListSpec(
-                    "System requirements",
+                    LABEL_STAKEHOLDER_REQUIREMENT,
+                    true,
+                    false,
+                    buildStakeholderRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEM_REQUIREMENT,
                     true,
                     true,
                     buildSystemRequirementOptionList(webSession, requestData)
             ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_FUNCTIONAL_STRUCTURE,
+                    true,
+                    false,
+                    buildFunctionStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_LOGICAL_STRUCTURE,
+                    true,
+                    false,
+                    buildLogicalStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEMS_BREAKDOWN,
+                    true,
+                    false,
+                    buildSystemsBreadownOptionList(webSession, requestData)
+            ));
+
             return lists;
         }
 
         if (entityType == SYSTEM_REQUIREMENT) {
             lists.add(new RelationListSpec(
-                    "Stakeholder requirements",
+                    LABEL_STAKEHOLDER_REQUIREMENT,
                     true,
                     true,
                     buildStakeholderRequirementOptionList(webSession, requestData)
             ));
 
             lists.add(new RelationListSpec(
-                    "Systems breakdowns",
+                    LABEL_SYSTEM_REQUIREMENT,
+                    true,
+                    false,
+                    buildSystemRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_FUNCTIONAL_STRUCTURE,
+                    true,
+                    false,
+                    buildFunctionStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_LOGICAL_STRUCTURE,
+                    true,
+                    false,
+                    buildLogicalStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEMS_BREAKDOWN,
                     true,
                     false,
                     buildSystemsBreadownOptionList(webSession, requestData)
@@ -533,16 +597,114 @@ public class EntityRelationListServlet extends GenericServlet {
             return lists;
         }
 
-        if (entityType == EntityType.SYSTEMS_BREAKDOWN) {
+        if (entityType == FUNCTIONAL_STRUCTURE) {
             lists.add(new RelationListSpec(
-                    "System requirements",
+                    LABEL_STAKEHOLDER_REQUIREMENT,
+                    true,
+                    false,
+                    buildStakeholderRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEM_REQUIREMENT,
+                    true,
+                    false,
+                    buildSystemRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_FUNCTIONAL_STRUCTURE,
+                    true,
+                    false,
+                    buildFunctionStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_LOGICAL_STRUCTURE,
+                    true,
+                    false,
+                    buildLogicalStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEMS_BREAKDOWN,
+                    true,
+                    false,
+                    buildSystemsBreadownOptionList(webSession, requestData)
+            ));
+            return lists;
+        }
+
+        if (entityType == LOGICAL_STRUCTURE) {
+            lists.add(new RelationListSpec(
+                    LABEL_STAKEHOLDER_REQUIREMENT,
+                    true,
+                    false,
+                    buildStakeholderRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEM_REQUIREMENT,
+                    true,
+                    false,
+                    buildSystemRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_FUNCTIONAL_STRUCTURE,
+                    true,
+                    false,
+                    buildFunctionStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_LOGICAL_STRUCTURE,
+                    true,
+                    false,
+                    buildLogicalStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEMS_BREAKDOWN,
+                    true,
+                    false,
+                    buildSystemsBreadownOptionList(webSession, requestData)
+            ));
+            return lists;
+        }
+
+
+        if (entityType == SYSTEMS_BREAKDOWN) {
+            lists.add(new RelationListSpec(
+                    LABEL_STAKEHOLDER_REQUIREMENT,
+                    true,
+                    false,
+                    buildStakeholderRequirementOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEM_REQUIREMENT,
                     true,
                     false,
                     buildSystemRequirementOptionList(webSession, requestData)
             )) ;
 
             lists.add(new RelationListSpec(
-                    "Systems breakdowns",
+                    LABEL_FUNCTIONAL_STRUCTURE,
+                    true,
+                    false,
+                    buildFunctionStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_LOGICAL_STRUCTURE,
+                    true,
+                    false,
+                    buildLogicalStructureOptionList(webSession, requestData)
+            ));
+
+            lists.add(new RelationListSpec(
+                    LABEL_SYSTEMS_BREAKDOWN,
                     true,
                     false,
                     buildSystemsBreadownOptionList(webSession, requestData)
@@ -588,6 +750,44 @@ public class EntityRelationListServlet extends GenericServlet {
         for (SystemRequirementEntity systemRequirement : systemRequirements) {
             EntityType entityType = systemRequirement.getEntityType();
             options.add(new RelationOption(systemRequirement.getEntityId(), entityType, entityType.getDescription(), systemRequirement.getRequirementCode().getValue(), systemRequirement.getRequirementName().getValue()));
+        }
+        return options;
+    }
+
+    private List<RelationOption> buildFunctionStructureOptionList(WebSession webSession, WebRequest requestData) {
+
+        List<FunctionalStructureEntity> loadedFunctionStructures = getFunctionStructure(webSession);
+        List<FunctionalStructureEntity> functionalStructures = new ArrayList<>();
+
+        for (FunctionalStructureEntity functionalStructure : loadedFunctionStructures) {
+            if (!hasExistingRelation(functionalStructure.getEntityType(), functionalStructure.getEntityId(), requestData)) {
+                functionalStructures.add(functionalStructure);
+            }
+        }
+
+        List<RelationOption> options = new ArrayList<>();
+        for (FunctionalStructureEntity functionalStructure : functionalStructures) {
+            EntityType entityType = functionalStructure.getEntityType();
+            options.add(new RelationOption(functionalStructure.getEntityId(), entityType, entityType.getDescription(), functionalStructure.getFunctionalCode().getValue(), functionalStructure.getFunctionalName().getValue()));
+        }
+        return options;
+    }
+
+    private List<RelationOption> buildLogicalStructureOptionList(WebSession webSession, WebRequest requestData) {
+
+        List<LogicalStructureEntity> loadedFunctionStructures = getLogicalStructure(webSession);
+        List<LogicalStructureEntity> logicalStructures = new ArrayList<>();
+
+        for (LogicalStructureEntity logicalStructure : loadedFunctionStructures) {
+            if (!hasExistingRelation(logicalStructure.getEntityType(), logicalStructure.getEntityId(), requestData)) {
+                logicalStructures.add(logicalStructure);
+            }
+        }
+
+        List<RelationOption> options = new ArrayList<>();
+        for (LogicalStructureEntity logicalStructure : logicalStructures) {
+            EntityType entityType = logicalStructure.getEntityType();
+            options.add(new RelationOption(logicalStructure.getEntityId(), entityType, entityType.getDescription(), logicalStructure.getLogicalCode().getValue(), logicalStructure.getLogicalName().getValue()));
         }
         return options;
     }
@@ -650,6 +850,20 @@ public class EntityRelationListServlet extends GenericServlet {
         return listOfSystemBreakdownEntities;
     }
 
+    private List<FunctionalStructureEntity> getFunctionStructure(WebSession webSession)  {
+        FunctionalStructureProvider functionalStructureProvider = new FunctionalStructureProvider(webSession);
+        List<FunctionalStructureEntity> listOfFunctionEntities;
+        listOfFunctionEntities = functionalStructureProvider.getAllFunctionalStructure(false);
+        return listOfFunctionEntities;
+    }
+
+    private List<LogicalStructureEntity> getLogicalStructure(WebSession webSession)  {
+        LogicalStructureProvider logicalStructureProvider = new LogicalStructureProvider(webSession);
+        List<LogicalStructureEntity> listOfLogicalEntities;
+        listOfLogicalEntities = logicalStructureProvider.getAllLogicalStructures(false);
+        return listOfLogicalEntities;
+    }
+
     private Set<String> parseExistingRelations(Element root) {
         Set<String> keys = new HashSet<>();
         Element relationsNode = firstChild(root, "EntityRelations");
@@ -686,11 +900,11 @@ public class EntityRelationListServlet extends GenericServlet {
                 } else if (servletPath.contains("systemrequirement")) {
                     entityTypeId = SYSTEM_REQUIREMENT.getId();
                 } else if (servletPath.contains("systemsbreakdown")) {
-                    entityTypeId = EntityType.SYSTEMS_BREAKDOWN.getId();
+                    entityTypeId = SYSTEMS_BREAKDOWN.getId();
                 } else if (servletPath.contains("functionalstructure")) {
                     entityTypeId = EntityType.FUNCTIONAL_STRUCTURE.getId();
                 } else if (servletPath.contains("logicalstructure")) {
-                    entityTypeId = EntityType.LOGICAL_STRUCTURE.getId();
+                    entityTypeId = LOGICAL_STRUCTURE.getId();
                 }
             }
         }

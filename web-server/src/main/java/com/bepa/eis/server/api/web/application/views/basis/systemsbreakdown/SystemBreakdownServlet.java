@@ -65,6 +65,7 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
                 Element noteSection = firstChild(rootElement, "EntityNotes");
                 Element linkSection = firstChild(rootElement, "EntityLinks");
                 Element attachmentSection = firstChild(rootElement, "EntityAttachments");
+                Element relationSection = firstChild(rootElement, "EntityRelations");
 
                 SystemBreakdownEntity systemBreakdownEntity = parseSystemBreakdownDocument(webSession, systemBreakdown);
                 SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(webSession);
@@ -72,6 +73,7 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
                 parseNoteDocument(systemBreakdownEntity, noteSection);
                 parseLinkDocument(systemBreakdownEntity, linkSection);
                 parseAttachmentDocument(systemBreakdownEntity, attachmentSection);
+                parseRelationDocument(systemBreakdownEntity, relationSection);
 
                 systemBreakdownProvider.persist(systemBreakdownEntity);
 

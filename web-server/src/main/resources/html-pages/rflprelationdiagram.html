@@ -99,94 +99,27 @@
                 </div>
 
                 <div class="relationdiagram-info-actions">
-                    <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view modes">
-                        <button
-                                id="relationdiagramViewStakeholderSystem"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="stakeholder-system"
-                                title="Stakeholder Requirements to System Requirements"
-                                aria-label="Show Stakeholder Requirements to System Requirements"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
-                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
-                                <path d="M10 12h5"></path>
-                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewSystemFunctional"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="system-functional"
-                                title="System Requirements to Functional Structures"
-                                aria-label="Show System Requirements to Functional Structures"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
-                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
-                                <path d="M10 12h5"></path>
-                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewFunctionalLogical"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="functional-logical"
-                                title="Functional Structures to Logical Structures"
-                                aria-label="Show Functional Structures to Logical Structures"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
-                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
-                                <path d="M10 12h5"></path>
-                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewLogicalPhysical"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="logical-physical"
-                                title="Logical Structures to Physical Structures"
-                                aria-label="Show Logical Structures to Physical Structures"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
-                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
-                                <path d="M10 12h5"></path>
-                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewFull"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="full"
-                                title="Stakeholder Requirements to Physical Structures"
-                                aria-label="Show Stakeholder Requirements to Physical Structures"
-                                aria-pressed="true"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="2.5" y="5" width="3.5" height="14" rx="1"></rect>
-                                <rect x="7.4" y="5" width="3.5" height="14" rx="1"></rect>
-                                <rect x="12.3" y="5" width="3.5" height="14" rx="1"></rect>
-                                <rect x="17.2" y="5" width="3.5" height="14" rx="1"></rect>
-                                <path d="M6.1 12h1.2"></path>
-                                <path d="M11 12h1.2"></path>
-                                <path d="M15.9 12h1.2"></path>
-                            </svg>
-                        </button>
+                    <div class="relationdiagram-view-options" role="group" aria-label="Relation diagram view options">
+                        <label class="relationdiagram-view-option">
+                            <input id="viewStakeholder" type="checkbox" checked>
+                            <span>STK</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewSystem" type="checkbox" checked>
+                            <span>SYS</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewFunctional" type="checkbox" checked>
+                            <span>F-SYS</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewLogical" type="checkbox" checked>
+                            <span>L-SYS</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewPhysical" type="checkbox" checked>
+                            <span>P-SYS</span>
+                        </label>
                     </div>
 
                 </div>
@@ -249,43 +182,35 @@
 
             <div class="page-body relationdiagram-body">
                 <div class="relationdiagram-frame" id="relationdiagramFrame" aria-label="Relation diagram frame">
-                    <div class="relationdiagram-column relationdiagram-column-stakeholder" data-entity-type="stakeholder" aria-label="Stakeholder requirements">
+                    <div class="relationdiagram-column" data-entity-type="stakeholder" aria-label="Stakeholder requirements">
                         <div class="relationdiagram-column-header">Stakeholder Requirements</div>
                         <div class="relationdiagram-list" id="stakeholderRequirementsList"></div>
                     </div>
 
-                    <div class="relationdiagram-canvas-wrap" aria-hidden="true">
-                        <svg class="relationdiagram-svg" id="relationsSvgStakeholderSystem"></svg>
-                    </div>
+                    <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
-                    <div class="relationdiagram-column relationdiagram-column-system" data-entity-type="system" aria-label="System requirements">
+                    <div class="relationdiagram-column" data-entity-type="system" aria-label="System requirements">
                         <div class="relationdiagram-column-header">System Requirements</div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
                     </div>
 
-                    <div class="relationdiagram-canvas-wrap" aria-hidden="true">
-                        <svg class="relationdiagram-svg" id="relationsSvgSystemFunctional"></svg>
-                    </div>
+                    <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
-                    <div class="relationdiagram-column relationdiagram-column-functional" data-entity-type="functional" aria-label="Functional structures">
+                    <div class="relationdiagram-column" data-entity-type="functional" aria-label="Functional structures">
                         <div class="relationdiagram-column-header">Functional Structures</div>
                         <div class="relationdiagram-list" id="functionalStructuresList"></div>
                     </div>
 
-                    <div class="relationdiagram-canvas-wrap" aria-hidden="true">
-                        <svg class="relationdiagram-svg" id="relationsSvgFunctionalLogical"></svg>
-                    </div>
+                    <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
-                    <div class="relationdiagram-column relationdiagram-column-logical" data-entity-type="logical" aria-label="Logical structures">
+                    <div class="relationdiagram-column" data-entity-type="logical" aria-label="Logical structures">
                         <div class="relationdiagram-column-header">Logical Structures</div>
                         <div class="relationdiagram-list" id="logicalStructuresList"></div>
                     </div>
 
-                    <div class="relationdiagram-canvas-wrap" aria-hidden="true">
-                        <svg class="relationdiagram-svg" id="relationsSvgLogicalPhysical"></svg>
-                    </div>
+                    <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
-                    <div class="relationdiagram-column relationdiagram-column-physical" data-entity-type="physical" aria-label="Physical structures">
+                    <div class="relationdiagram-column" data-entity-type="physical" aria-label="Physical structures">
                         <div class="relationdiagram-column-header">Physical Structures</div>
                         <div class="relationdiagram-list" id="physicalStructuresList"></div>
                     </div>
@@ -293,6 +218,7 @@
                     <div class="relationdiagram-empty is-visible" id="relationdiagramEmptyState">
                         Loading relation diagram...
                     </div>
+                    <svg class="relationdiagram-svg" id="relationsSvgGlobal"></svg>
                 </div>
             </div>
         </section>

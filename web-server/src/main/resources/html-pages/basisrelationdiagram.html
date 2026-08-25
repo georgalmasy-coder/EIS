@@ -107,59 +107,19 @@
 
                 <div class="relationdiagram-info-actions">
                     <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view modes">
-                        <button
-                                id="relationdiagramViewStakeholderSystem"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="stakeholder-system"
-                                title="Stakeholder Requirements to System Requirements"
-                                aria-label="Show stakeholder requirements to system requirements"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="6" height="14" rx="1"></rect>
-                                <rect x="15" y="5" width="6" height="14" rx="1"></rect>
-                                <path d="M10 12h5"></path>
-                                <path d="M13.5 9.5 16 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewStakeholderSystemBreakdown"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="stakeholder-system-breakdown"
-                                title="Stakeholder Requirements to System Requirements to Physical Structures"
-                                aria-label="Show Stakeholder Requirements, System Requirements and Physical Structures"
-                                aria-pressed="true"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="2.5" y="5" width="5" height="14" rx="1"></rect>
-                                <rect x="9.5" y="5" width="5" height="14" rx="1"></rect>
-                                <rect x="16.5" y="5" width="5" height="14" rx="1"></rect>
-                                <path d="M7.5 12h2"></path>
-                                <path d="M14.5 12h2"></path>
-                            </svg>
-                        </button>
-
-                        <button
-                                id="relationdiagramViewSystemBreakdown"
-                                class="relationdiagram-view-button"
-                                type="button"
-                                data-view-mode="system-breakdown"
-                                title="System Requirements to Physical Structures"
-                                aria-label="Show System Requirements to Physical Structures"
-                                aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="3" y="5" width="7" height="14" rx="1"></rect>
-                                <rect x="14" y="5" width="7" height="14" rx="1"></rect>
-                                <path d="M11 12h3"></path>
-                                <path d="M12.5 9.5 15 12l-2.5 2.5"></path>
-                            </svg>
-                        </button>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewStakeholder" type="checkbox" checked>
+                            <span>STK</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewSystem" type="checkbox" checked>
+                            <span>SYS</span>
+                        </label>
+                        <label class="relationdiagram-view-option">
+                            <input id="viewSystemsBreakdown" type="checkbox" checked>
+                            <span>P-SYS</span>
+                        </label>
                     </div>
-
                 </div>
             </div>
 
@@ -252,6 +212,7 @@
                     <div class="relationdiagram-empty is-visible" id="relationdiagramEmptyState">
                         Loading relation diagram…
                     </div>
+                    <svg class="relationdiagram-svg" id="relationsSvgGlobal"></svg>
                 </div>
             </div>
         </section>
@@ -280,14 +241,7 @@
                 <div class="relationdiagram-dialog-value relationdiagram-dialog-description" id="dialogRequirementDescription">—</div>
             </div>
 
-            <div class="relationdiagram-dialog-field">
-                <div class="relationdiagram-dialog-label">Related stakeholder requirements</div>
-                <ul class="relationdiagram-related-list" id="dialogRelatedRequirements"></ul>
-            </div>
-
-            <div class="relationdiagram-dialog-field" id="dialogRelatedSystemsBreakdownsField">
-                <div class="relationdiagram-dialog-label">Related physical structures</div>
-                <ul class="relationdiagram-related-list" id="dialogRelatedSystemsBreakdowns"></ul>
+            <div class="relationdiagram-dialog-field" id="dialogRelatedGroups">
             </div>
         </div>
 

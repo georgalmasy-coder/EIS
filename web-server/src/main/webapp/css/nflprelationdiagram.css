@@ -1,39 +1,5 @@
 @import url("basisrelationdiagram.css");
 
-.relationdiagram-frame {
-    grid-template-columns:
-            minmax(220px, 1fr)
-            minmax(96px, 150px)
-            minmax(220px, 1fr)
-            minmax(96px, 150px)
-            minmax(220px, 1fr)
-            minmax(96px, 150px)
-            minmax(220px, 1fr)
-            minmax(96px, 150px)
-            minmax(220px, 1fr);
-}
-
-.relationdiagram-frame[data-view-mode="stakeholder-system"],
-.relationdiagram-frame[data-view-mode="system-functional"],
-.relationdiagram-frame[data-view-mode="functional-logical"],
-.relationdiagram-frame[data-view-mode="logical-physical"] {
-    grid-template-columns: minmax(220px, 1fr) minmax(96px, 150px) minmax(220px, 1fr);
-}
-
-.relationdiagram-view-toggle {
-    flex-wrap: wrap;
-    gap: 0.25rem;
-}
-
-.relationdiagram-info-actions {
-    margin-left: auto;
-}
-
-.relationdiagram-view-button {
-    width: 38px;
-    min-width: 38px;
-}
-
 .relationdiagram-column {
     border-left: 1px solid var(--relationdiagram-border-color);
     border-right: 1px solid var(--relationdiagram-border-color);
@@ -49,52 +15,12 @@
 }
 
 @media (max-width: 1000px) {
-    .relationdiagram-frame {
-        grid-template-columns:
-                minmax(180px, 1fr)
-                minmax(84px, 120px)
-                minmax(180px, 1fr)
-                minmax(84px, 120px)
-                minmax(180px, 1fr)
-                minmax(84px, 120px)
-                minmax(180px, 1fr)
-                minmax(84px, 120px)
-                minmax(180px, 1fr);
-    }
-
-    .relationdiagram-frame[data-view-mode="stakeholder-system"],
-    .relationdiagram-frame[data-view-mode="system-functional"],
-    .relationdiagram-frame[data-view-mode="functional-logical"],
-    .relationdiagram-frame[data-view-mode="logical-physical"] {
-        grid-template-columns: minmax(180px, 1fr) minmax(84px, 120px) minmax(180px, 1fr);
+    .relationdiagram-column {
+        min-width: 180px;
     }
 }
 
 @media (max-width: 720px) {
-    .relationdiagram-frame {
-        grid-template-columns: 1fr;
-        grid-template-rows:
-                minmax(220px, 1fr)
-                82px
-                minmax(220px, 1fr)
-                82px
-                minmax(220px, 1fr)
-                82px
-                minmax(220px, 1fr)
-                82px
-                minmax(220px, 1fr);
-    }
-
-    .relationdiagram-frame[data-view-mode="stakeholder-system"],
-    .relationdiagram-frame[data-view-mode="system-functional"],
-    .relationdiagram-frame[data-view-mode="functional-logical"],
-    .relationdiagram-frame[data-view-mode="logical-physical"] {
-        grid-template-rows:
-                minmax(220px, 1fr)
-                82px
-                minmax(220px, 1fr);
-    }
-
     .relationdiagram-column {
         border-right: 0;
         border-bottom: 1px solid var(--relationdiagram-border-color);

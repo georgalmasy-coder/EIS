@@ -6,6 +6,7 @@ import { setText } from "../core/dom.js";
 import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import {
     getChildText,
+    directTextOf,
     hasXmlParseError
 } from "../core/xml.js";
 import { cssEscape } from "../core/css.js";
@@ -20,10 +21,28 @@ const ENTITY_TYPE_LABELS = {
     systemsBreakdown: "Physical Structure"
 };
 
-const VIEW_MODES = {
-    stakeholderSystem: "stakeholder-system",
-    stakeholderSystemBreakdown: "stakeholder-system-breakdown",
-    systemBreakdown: "system-breakdown"
+const RELATED_GROUPS = {
+    stakeholder: [
+        { type: "stakeholder", label: "Related stakeholder requirements" },
+        { type: "system", label: "Related system requirements" },
+        { type: "systemsBreakdown", label: "Related physical structures" }
+    ],
+    system: [
+        { type: "stakeholder", label: "Related stakeholder requirements" },
+        { type: "system", label: "Related system requirements" },
+        { type: "systemsBreakdown", label: "Related physical structures" }
+    ],
+    systemsBreakdown: [
+        { type: "stakeholder", label: "Related stakeholder requirements" },
+        { type: "system", label: "Related system requirements" },
+        { type: "systemsBreakdown", label: "Related physical structures" }
+    ]
+};
+
+const TYPE_ORDER = {
+    stakeholder: 0,
+    system: 1,
+    systemsBreakdown: 2
 };
 
 const state = {
@@ -32,7 +51,11 @@ const state = {
     systemsBreakdowns: [],
     requirementsByInternalId: new Map(),
     relations: [],
-    viewMode: VIEW_MODES.stakeholderSystemBreakdown,
+    columnVisibility: {
+        stakeholder: true,
+        system: true,
+        systemsBreakdown: true
+    },
     focusedInternalId: null,
     selectedInternalId: null,
     hoverInternalId: null,
@@ -84,7 +107,7 @@ function initializePageShell() {
 
     initMenu();
     initHelpDialog();
-    applyViewMode(state.viewMode, { redraw: false });
+    applyViewMode(null, { redraw: false });
 }
 
 function initializeEvents() {
@@ -97,7 +120,25 @@ function initializeEvents() {
     const dialogFocusButton = document.getElementById("dialogFocusButton");
     const dialogEditButton = document.getElementById("dialogEditButton");
     const dialogCloseButton = document.getElementById("dialogCloseButton");
-    const viewButtons = document.querySelectorAll("[data-view-mode]");
+
+    const viewStakeholder = document.getElementById("viewStakeholder");
+    const viewSystem = document.getElementById("viewSystem");
+    const viewSystemsBreakdown = document.getElementById("viewSystemsBreakdown");
+
+    viewStakeholder?.addEventListener("change", () => {
+        state.columnVisibility.stakeholder = viewStakeholder.checked;
+        applyViewMode();
+    });
+
+    viewSystem?.addEventListener("change", () => {
+        state.columnVisibility.system = viewSystem.checked;
+        applyViewMode();
+    });
+
+    viewSystemsBreakdown?.addEventListener("change", () => {
+        state.columnVisibility.systemsBreakdown = viewSystemsBreakdown.checked;
+        applyViewMode();
+    });
 
     filterOnlyWithoutRelations?.addEventListener("change", () => {
         if (filterOnlyWithoutRelations.checked && filterOnlyWithRelations) {
@@ -168,16 +209,10 @@ function initializeEvents() {
         }
     });
 
-    viewButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            const viewMode = button.getAttribute("data-view-mode");
-            if (viewMode) {
-                applyViewMode(viewMode);
-            }
-        });
-    });
 
     window.addEventListener("resize", debounce(() => {
+        const frame = document.getElementById("relationdiagramFrame");
+        if (frame) updateGridLayout(frame);
         drawRelations();
         updateHighlight();
     }, 80));
@@ -290,7 +325,7 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
         const internalId = requirementElement.getAttribute("id") || "";
         const entityTypeId = parseInteger(requirementElement.getAttribute("entityType"));
         const entityId = parseInteger(requirementElement.getAttribute("entityId"))
-            ?? parseEntityId(internalId, getChildText(requirementElement, "id", ""));
+            ?? parseEntityId(internalId, directTextOf(requirementElement, "code") || directTextOf(requirementElement, "id"));
         const requirementType = groupSelector === "stakeholderRequirements"
             ? "stakeholder"
             : groupSelector === "systemRequirements"
@@ -299,9 +334,9 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
 
         return {
             internalId,
-            visibleId: getChildText(requirementElement, "id", "—"),
-            name: getChildText(requirementElement, "name", "—"),
-            description: getChildText(requirementElement, "description", ""),
+            visibleId: directTextOf(requirementElement, "code") || directTextOf(requirementElement, "id") || "—",
+            name: directTextOf(requirementElement, "name") || "—",
+            description: directTextOf(requirementElement, "description") || "",
             type: requirementType,
             entityId,
             entityTypeId,
@@ -312,14 +347,19 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
 
 function parseRelations(relationDiagramElement) {
     const relationElements = relationDiagramElement.querySelectorAll(
-        ":scope > StakeholderRequirementToSystemRequirementRelations > relation, :scope > SystemRequirementToSystemsBreakdownRelations > relation"
+        ":scope > StakeholderRequirementToSystemRequirementRelations > relation, " +
+        ":scope > SystemRequirementToSystemsBreakdownRelations > relation, " +
+        ":scope > StakeholderRequirementToSystemsBreakdownRelations > relation, " +
+        ":scope > StakeholderRequirementToStakeholderRequirementRelations > relation, " +
+        ":scope > SystemRequirementToSystemRequirementRelations > relation, " +
+        ":scope > SystemsBreakdownToSystemsBreakdownRelations > relation"
     );
 
     return Array.from(relationElements).map((relationElement, index) => ({
         id: `relation-${index}`,
-        from: getChildText(relationElement, "from", ""),
-        to: getChildText(relationElement, "to", ""),
-        type: getChildText(relationElement, "type", "")
+        from: directTextOf(relationElement, "from"),
+        to: directTextOf(relationElement, "to"),
+        type: directTextOf(relationElement, "type")
     })).filter((relation) => relation.from && relation.to);
 }
 
@@ -356,7 +396,7 @@ function setRelationDiagramState(diagram) {
         state.requirementsByInternalId.set(requirement.internalId, requirement);
     }
 
-    applyViewMode(state.viewMode, { redraw: false });
+    applyViewMode(null, { redraw: false });
 }
 
 function renderRelationDiagram() {
@@ -389,7 +429,7 @@ function renderRelationDiagram() {
     renderRequirementCards(systemsBreakdownsList, state.systemsBreakdowns);
     updateFocusDropZone();
 
-    applyViewMode(state.viewMode, { redraw: false });
+    applyViewMode(null, { redraw: false });
     setupScrollListeners();
     setupResizeObserver();
 
@@ -435,7 +475,7 @@ function renderRequirementCards(container, requirements) {
         });
 
         card.addEventListener("dragstart", (event) => {
-            event.dataTransfer?.setData("text/plain", requirement.internalId);
+            event.dataTransfer?.setData("text/plain", requirement.visibleId);
             event.dataTransfer?.setData("application/x-relationdiagram-internal-id", requirement.internalId);
             if (event.dataTransfer) {
                 event.dataTransfer.effectAllowed = "copy";
@@ -690,15 +730,20 @@ function handleFocusDrop(event) {
         return;
     }
 
-    const internalId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
+    const dataId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
         || event.dataTransfer?.getData("text/plain")
         || "";
 
-    if (!internalId || !state.requirementsByInternalId.has(internalId)) {
+    if (!dataId) {
         return;
     }
 
-    setFocusedRequirement(internalId);
+    const requirement = findRequirementById(dataId);
+    if (!requirement) {
+        return;
+    }
+
+    setFocusedRequirement(requirement.internalId);
 }
 
 function handleRelationCardDragEnter(event) {
@@ -742,17 +787,17 @@ function handleRelationCardDrop(event) {
 
     card.classList.remove("is-drop-target");
 
-    const sourceInternalId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
+    const sourceDataId = event.dataTransfer?.getData("application/x-relationdiagram-internal-id")
         || event.dataTransfer?.getData("text/plain")
         || "";
 
     const targetInternalId = card.dataset.internalId || "";
 
-    if (!sourceInternalId || !targetInternalId) {
+    if (!sourceDataId || !targetInternalId) {
         return;
     }
 
-    const sourceRequirement = state.requirementsByInternalId.get(sourceInternalId);
+    const sourceRequirement = findRequirementById(sourceDataId);
     const targetRequirement = state.requirementsByInternalId.get(targetInternalId);
 
     if (!sourceRequirement || !targetRequirement || !relationCreationDialog) {
@@ -774,6 +819,19 @@ function handleRelationCardDrop(event) {
         console.error("Failed to open relation creation dialog", error);
         window.alert(error?.message || "Failed to open relation creation dialog.");
     });
+}
+
+function findRequirementById(id) {
+    if (!id) {
+        return null;
+    }
+
+    if (state.requirementsByInternalId.has(id)) {
+        return state.requirementsByInternalId.get(id);
+    }
+
+    return Array.from(state.requirementsByInternalId.values())
+        .find((r) => r.visibleId === id) || null;
 }
 
 function parseInteger(value) {
@@ -814,53 +872,33 @@ function requirementMatchesSearch(requirement, searchText) {
 }
 
 function drawRelations() {
-    const showStakeholderSystem = state.viewMode === VIEW_MODES.stakeholderSystem
-        || state.viewMode === VIEW_MODES.stakeholderSystemBreakdown;
-    const showSystemBreakdown = state.viewMode === VIEW_MODES.stakeholderSystemBreakdown
-        || state.viewMode === VIEW_MODES.systemBreakdown;
+    drawGlobalRelations("relationsSvgGlobal");
 
-    drawRelationsInCanvas(
-        "relationsSvgStakeholderSystem",
-        "stakeholder",
-        "system",
-        showStakeholderSystem
-    );
-
-    drawRelationsInCanvas(
-        "relationsSvgSystemBreakdown",
-        "system",
-        "systemsBreakdown",
-        showSystemBreakdown
-    );
+    const oldSvgs = ["relationsSvgStakeholderSystem", "relationsSvgSystemBreakdown"];
+    for (const id of oldSvgs) {
+        const svg = document.getElementById(id);
+        if (svg) svg.innerHTML = "";
+    }
 }
 
-function drawRelationsInCanvas(svgId, leftType, rightType, isEnabled) {
+function drawGlobalRelations(svgId) {
     const svg = document.getElementById(svgId);
-    const canvasWrap = svg?.parentElement;
+    const frame = document.getElementById("relationdiagramFrame");
 
-    if (!svg || !canvasWrap) {
+    if (!svg || !frame) {
         return;
     }
 
     svg.innerHTML = "";
 
-    if (!isEnabled) {
-        return;
-    }
+    const frameRect = frame.getBoundingClientRect();
+    svg.setAttribute("viewBox", `0 0 ${frameRect.width} ${frameRect.height}`);
+    svg.setAttribute("width", String(frameRect.width));
+    svg.setAttribute("height", String(frameRect.height));
 
-    const canvasRect = canvasWrap.getBoundingClientRect();
-    svg.setAttribute("viewBox", `0 0 ${canvasRect.width} ${canvasRect.height}`);
-    svg.setAttribute("width", String(canvasRect.width));
-    svg.setAttribute("height", String(canvasRect.height));
+    const { stakeholder, system, systemsBreakdown } = state.columnVisibility;
 
     for (const relation of state.relations) {
-        const fromCard = findVisibleRequirementCard(relation.from);
-        const toCard = findVisibleRequirementCard(relation.to);
-
-        if (!fromCard || !toCard) {
-            continue;
-        }
-
         const fromRequirement = state.requirementsByInternalId.get(relation.from);
         const toRequirement = state.requirementsByInternalId.get(relation.to);
 
@@ -868,7 +906,22 @@ function drawRelationsInCanvas(svgId, leftType, rightType, isEnabled) {
             continue;
         }
 
-        const points = getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement, leftType, rightType);
+        // Tjek synlighed af kolonner
+        if (fromRequirement.type === "stakeholder" && !stakeholder) continue;
+        if (toRequirement.type === "stakeholder" && !stakeholder) continue;
+        if (fromRequirement.type === "system" && !system) continue;
+        if (toRequirement.type === "system" && !system) continue;
+        if (fromRequirement.type === "systemsBreakdown" && !systemsBreakdown) continue;
+        if (toRequirement.type === "systemsBreakdown" && !systemsBreakdown) continue;
+
+        const fromCard = findVisibleRequirementCard(relation.from);
+        const toCard = findVisibleRequirementCard(relation.to);
+
+        if (!fromCard || !toCard) {
+            continue;
+        }
+
+        const points = getGlobalRelationPoints(fromCard, toCard, frameRect, fromRequirement, toRequirement);
 
         if (!points) {
             continue;
@@ -879,49 +932,77 @@ function drawRelationsInCanvas(svgId, leftType, rightType, isEnabled) {
         path.dataset.relationId = relation.id;
         path.dataset.from = relation.from;
         path.dataset.to = relation.to;
-        path.setAttribute("d", buildCurvePath(points));
+        
+        if (points.isInternal) {
+            path.setAttribute("d", buildInternalCurvePath(points, fromRequirement.type));
+        } else {
+            path.setAttribute("d", buildCurvePath(points));
+        }
 
         svg.appendChild(path);
     }
 }
 
-function getRelationPoints(fromCard, toCard, canvasRect, fromRequirement, toRequirement, leftType, rightType) {
+function getGlobalRelationPoints(fromCard, toCard, frameRect, fromRequirement, toRequirement) {
     const fromRect = fromCard.getBoundingClientRect();
     const toRect = toCard.getBoundingClientRect();
 
-    const fromIsLeft = fromRequirement.type === leftType;
-    const fromIsRight = fromRequirement.type === rightType;
-    const toIsLeft = toRequirement.type === leftType;
-    const toIsRight = toRequirement.type === rightType;
+    const fromOrder = TYPE_ORDER[fromRequirement.type];
+    const toOrder = TYPE_ORDER[toRequirement.type];
 
-    let leftRect;
-    let rightRect;
+    let x1, y1, x2, y2, isInternal = false;
 
-    if (fromIsLeft && toIsRight) {
-        leftRect = fromRect;
-        rightRect = toRect;
-    } else if (fromIsRight && toIsLeft) {
-        leftRect = toRect;
-        rightRect = fromRect;
+    if (fromOrder < toOrder) {
+        x1 = fromRect.right - frameRect.left;
+        x2 = toRect.left - frameRect.left;
+        y1 = fromRect.top + fromRect.height / 2 - frameRect.top;
+        y2 = toRect.top + toRect.height / 2 - frameRect.top;
+    } else if (fromOrder > toOrder) {
+        x1 = fromRect.left - frameRect.left;
+        x2 = toRect.right - frameRect.left;
+        y1 = fromRect.top + fromRect.height / 2 - frameRect.top;
+        y2 = toRect.top + toRect.height / 2 - frameRect.top;
     } else {
-        return null;
+        isInternal = true;
+        if (fromRequirement.type === "systemsBreakdown") {
+            x1 = fromRect.right - frameRect.left;
+            x2 = toRect.right - frameRect.left;
+        } else {
+            x1 = fromRect.left - frameRect.left;
+            x2 = toRect.left - frameRect.left;
+        }
+        y1 = fromRect.top + fromRect.height / 2 - frameRect.top;
+        y2 = toRect.top + toRect.height / 2 - frameRect.top;
     }
 
-    return {
-        x1: 0,
-        y1: leftRect.top + leftRect.height / 2 - canvasRect.top,
-        x2: canvasRect.width,
-        y2: rightRect.top + rightRect.height / 2 - canvasRect.top
-    };
+    return { x1, y1, x2, y2, isInternal };
+}
+
+function buildInternalCurvePath(points, type) {
+    const height = Math.abs(points.y2 - points.y1);
+    const x = points.x1;
+    const sign = type === "systemsBreakdown" ? 1 : -1;
+    
+    if (height < 1) {
+        // Selv-relation eller næsten samme position
+        const size = 30;
+        return `M ${x} ${points.y1} C ${x + sign * size} ${points.y1 - size}, ${x + sign * size} ${points.y1 + size}, ${x} ${points.y1}`;
+    }
+    const curveWidth = Math.min(60, height / 2 + 20);
+    return `M ${x} ${points.y1} C ${x + sign * curveWidth} ${points.y1}, ${x + sign * curveWidth} ${points.y2}, ${x} ${points.y2}`;
 }
 
 function buildCurvePath(points) {
-    const distance = Math.max(40, Math.abs(points.x2 - points.x1));
+    const dx = points.x2 - points.x1;
+    const distance = Math.max(40, Math.abs(dx));
     const controlOffset = distance * 0.45;
+    
+    // Determine direction to avoid bending "into" the boxes
+    const sign = dx > 0 ? 1 : -1;
 
-    const c1x = points.x1 + controlOffset;
+    const c1x = points.x1 + (controlOffset * sign);
     const c1y = points.y1;
-    const c2x = points.x2 - controlOffset;
+    const c2x = points.x2 - (controlOffset * sign);
     const c2y = points.y2;
 
     return `M ${points.x1} ${points.y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${points.x2} ${points.y2}`;
@@ -956,6 +1037,53 @@ function updateHighlight() {
     }
 }
 
+function renderRelatedGroups(requirement) {
+    const container = document.getElementById("dialogRelatedGroups");
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+
+    const groupDefinitions = RELATED_GROUPS[requirement.type] || [];
+
+    groupDefinitions.forEach((group) => {
+        const relatedRequirements = getRelatedRequirements(
+            requirement.internalId,
+            (relatedRequirement) => relatedRequirement.type === group.type
+        );
+
+        if (relatedRequirements.length > 0) {
+            const section = document.createElement("div");
+            section.className = "relationdiagram-dialog-related-group";
+
+            const label = document.createElement("div");
+            label.className = "relationdiagram-dialog-label";
+            label.textContent = group.label;
+
+            const list = document.createElement("ul");
+            list.className = "relationdiagram-related-list";
+
+            relatedRequirements.forEach((relatedRequirement) => {
+                const li = document.createElement("li");
+                li.textContent = `${relatedRequirement.visibleId} - ${relatedRequirement.name}`;
+                list.appendChild(li);
+            });
+
+            section.append(label, list);
+            container.appendChild(section);
+        }
+    });
+
+    if (container.innerHTML === "") {
+        const empty = document.createElement("div");
+        empty.className = "relationdiagram-dialog-value";
+        empty.textContent = "No related items.";
+        container.appendChild(empty);
+    }
+}
+
 function openRequirementDialog(requirement) {
     const dialog = document.getElementById("requirementDialog");
 
@@ -986,26 +1114,7 @@ function openRequirementDialog(requirement) {
         dialogEditButton.hidden = !getRequirementEditConfig(requirement);
     }
 
-    const systemsBreakdownsField = document.getElementById("dialogRelatedSystemsBreakdownsField");
-    if (systemsBreakdownsField) {
-        systemsBreakdownsField.hidden = requirement.type !== "system";
-    }
-
-    renderRelatedRequirementList(
-        "dialogRelatedRequirements",
-        getRelatedRequirements(requirement.internalId, (relatedRequirement) => relatedRequirement.type !== "systemsBreakdown"),
-        "No related requirements."
-    );
-
-    if (requirement.type === "system") {
-        renderRelatedRequirementList(
-            "dialogRelatedSystemsBreakdowns",
-            getRelatedRequirements(requirement.internalId, (relatedRequirement) => relatedRequirement.type === "systemsBreakdown"),
-            "No related physical structure."
-        );
-    } else {
-        renderRelatedRequirementList("dialogRelatedSystemsBreakdowns", [], "No related physical structure.");
-    }
+    renderRelatedGroups(requirement);
 
     if (!dialog.open) {
         dialog.showModal();
@@ -1082,28 +1191,6 @@ function getRelatedRequirementIds(internalId) {
     return relatedIds;
 }
 
-function renderRelatedRequirementList(listId, relatedRequirements, emptyMessage) {
-    const relatedList = document.getElementById(listId);
-
-    if (!relatedList) {
-        return;
-    }
-
-    relatedList.innerHTML = "";
-
-    if (!relatedRequirements.length) {
-        const li = document.createElement("li");
-        li.textContent = emptyMessage;
-        relatedList.appendChild(li);
-        return;
-    }
-
-    for (const relatedRequirement of relatedRequirements) {
-        const li = document.createElement("li");
-        li.textContent = `${relatedRequirement.visibleId} - ${relatedRequirement.name}`;
-        relatedList.appendChild(li);
-    }
-}
 
 function getRelatedRequirements(internalId, predicate = () => true) {
     const relatedIds = getRelatedRequirementIds(internalId);
@@ -1155,28 +1242,35 @@ function hideEmptyState() {
     emptyState.classList.remove("is-visible");
 }
 
-function applyViewMode(viewMode, options = {}) {
-    state.viewMode = viewMode;
-
+function applyViewMode(unused, options = {}) {
     const frame = document.getElementById("relationdiagramFrame");
     if (!frame) {
         return;
     }
 
-    const showStakeholder = viewMode === VIEW_MODES.stakeholderSystem
-        || viewMode === VIEW_MODES.stakeholderSystemBreakdown;
-    const showBreakdown = viewMode === VIEW_MODES.stakeholderSystemBreakdown
-        || viewMode === VIEW_MODES.systemBreakdown;
+    const { stakeholder, system, systemsBreakdown } = state.columnVisibility;
 
-    frame.dataset.viewMode = viewMode;
+    setViewVisibility("stakeholderRequirementsList", stakeholder);
+    setViewVisibility("systemRequirementsList", system);
+    setViewVisibility("systemsBreakdownsList", systemsBreakdown);
 
-    setViewVisibility("stakeholderRequirementsList", "relationsSvgStakeholderSystem", showStakeholder);
-    setViewVisibility("systemRequirementsList", null, true);
-    setViewVisibility("systemsBreakdownsList", "relationsSvgSystemBreakdown", showBreakdown);
+    // Mellemrum (canvas) synlighed
+    const stakeholderSystemCanvas = document.getElementById("relationsSvgStakeholderSystem")?.parentElement;
+    const systemBreakdownCanvas = document.getElementById("relationsSvgSystemBreakdown")?.parentElement;
 
-    setButtonPressed("relationdiagramViewStakeholderSystem", viewMode === VIEW_MODES.stakeholderSystem);
-    setButtonPressed("relationdiagramViewStakeholderSystemBreakdown", viewMode === VIEW_MODES.stakeholderSystemBreakdown);
-    setButtonPressed("relationdiagramViewSystemBreakdown", viewMode === VIEW_MODES.systemBreakdown);
+    // Logik for canvas (mellemrum) synlighed:
+    // Vi skal have ét canvas synligt for hvert mellemrum mellem de synlige kolonner.
+    const showGap1 = stakeholder && (system || systemsBreakdown);
+    const showGap2 = system && systemsBreakdown;
+
+    if (stakeholderSystemCanvas) {
+        stakeholderSystemCanvas.classList.toggle("is-hidden-by-view", !showGap1);
+    }
+    if (systemBreakdownCanvas) {
+        systemBreakdownCanvas.classList.toggle("is-hidden-by-view", !showGap2);
+    }
+
+    updateGridLayout(frame);
 
     if (options.redraw !== false) {
         requestAnimationFrame(() => {
@@ -1186,24 +1280,40 @@ function applyViewMode(viewMode, options = {}) {
     }
 }
 
-function setViewVisibility(listId, canvasId, isVisible) {
+function updateGridLayout(frame) {
+    const { stakeholder, system, systemsBreakdown } = state.columnVisibility;
+    
+    // Hvis vi er på mobil, lad CSS styre layoutet (grid-template-rows)
+    if (window.innerWidth <= 720) {
+        frame.style.gridTemplateColumns = "";
+        return;
+    }
+
+    const isCompact = window.innerWidth <= 1000;
+    const colWidth = isCompact ? "minmax(200px, 1fr)" : "minmax(240px, 1fr)";
+    const gapWidth = isCompact ? "minmax(96px, 140px)" : "minmax(120px, 160px)";
+
+    const columns = [];
+    if (stakeholder) columns.push(colWidth);
+    if (stakeholder && (system || systemsBreakdown)) columns.push(gapWidth);
+    if (system) columns.push(colWidth);
+    if (system && systemsBreakdown) columns.push(gapWidth);
+    if (systemsBreakdown) columns.push(colWidth);
+
+    if (columns.length === 0) {
+        frame.style.gridTemplateColumns = "1fr";
+    } else {
+        frame.style.gridTemplateColumns = columns.join(" ");
+    }
+}
+
+function setViewVisibility(listId, isVisible) {
     const list = document.getElementById(listId);
     if (list) {
         list.closest(".relationdiagram-column")?.classList.toggle("is-hidden-by-view", !isVisible);
     }
-
-    if (canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas?.parentElement?.classList.toggle("is-hidden-by-view", !isVisible);
-    }
 }
 
-function setButtonPressed(buttonId, isPressed) {
-    const button = document.getElementById(buttonId);
-    if (button) {
-        button.setAttribute("aria-pressed", String(isPressed));
-    }
-}
 
 function debounce(callback, delay) {
     let timeoutId = null;

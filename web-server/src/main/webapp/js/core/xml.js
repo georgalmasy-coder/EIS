@@ -32,7 +32,8 @@ export function directTextOf(parent, tagName) {
         return "";
     }
 
-    const el = Array.from(parent.children).find((child) => child.tagName === tagName);
+    const children = parent.children ? Array.from(parent.children) : Array.from(parent.childNodes).filter(node => node.nodeType === 1);
+    const el = children.find((child) => child.tagName === tagName || child.nodeName === tagName);
     return el ? (el.textContent || "").trim() : "";
 }
 
@@ -48,7 +49,8 @@ export function getDirectChild(parent, tagName) {
         return null;
     }
 
-    return Array.from(parent.children).find((child) => child.tagName === tagName) || null;
+    const children = parent.children ? Array.from(parent.children) : Array.from(parent.childNodes).filter(node => node.nodeType === 1);
+    return children.find((child) => child.tagName === tagName || child.nodeName === tagName) || null;
 }
 
 export function getDirectChildren(parent, tagName) {
@@ -56,7 +58,8 @@ export function getDirectChildren(parent, tagName) {
         return [];
     }
 
-    return Array.from(parent.children).filter((child) => child.tagName === tagName);
+    const children = parent.children ? Array.from(parent.children) : Array.from(parent.childNodes).filter(node => node.nodeType === 1);
+    return children.filter((child) => child.tagName === tagName || child.nodeName === tagName);
 }
 
 export function getChildText(parentElement, selector, fallback = "") {
