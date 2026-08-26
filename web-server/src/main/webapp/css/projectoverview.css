@@ -70,7 +70,7 @@
 
 .btn-primary:hover {
     filter: brightness(1.1);
-    box-shadow: 0 4px 12px rgba(11, 63, 49, 0.15);
+    box-shadow: var(--app-shadow);
 }
 
 /* Main Grid Layout */
@@ -95,16 +95,16 @@
 
 /* Card Styling */
 .card {
-    background-color: #ffffff;
+    background-color: var(--app-surface-background);
     border-radius: 16px;
     border: 2px solid var(--app-border-strong);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--app-shadow);
     padding: 24px;
 }
 
 /* Recommended Step Card */
 .recommended-step-card {
-    background: linear-gradient(to bottom right, #ffffff, #f9fafb);
+    background: var(--app-surface-background);
 }
 
 .card-header-with-badge {
@@ -121,17 +121,17 @@
     display: block;
 }
 
-.label-green { color: #059669; }
+.label-green { color: var(--app-accent-primary); }
 
 .recommended-step-card h2 {
     font-size: 24px;
     font-weight: 800;
     margin: 0 0 8px 0;
-    color: #111827;
+    color: var(--app-text-primary);
 }
 
 .recommended-step-card p {
-    color: #6b7280;
+    color: var(--app-text-secondary);
     margin: 0;
 }
 
@@ -143,8 +143,8 @@
 }
 
 .badge-error {
-    background-color: #fee2e2;
-    color: #dc2626;
+    background-color: var(--app-status-error-bg);
+    color: var(--app-status-error-text);
 }
 
 .card-actions {
@@ -170,7 +170,7 @@
 
 .sub-card:hover {
     border-color: var(--app-accent-primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--app-shadow);
 }
 
 .sub-card-icon {
@@ -184,8 +184,8 @@
     font-size: 14px;
 }
 
-.icon-orange { background-color: #fff7ed; color: #ea580c; }
-.icon-blue { background-color: #eff6ff; color: #2563eb; }
+.icon-orange { background-color: var(--app-status-warning-bg); color: var(--app-status-warning-text); }
+.icon-blue { background-color: var(--app-status-info-bg); color: var(--app-status-info-text); }
 
 .sub-card-info {
     flex: 1;
@@ -194,18 +194,18 @@
 .sub-card-title {
     font-weight: 700;
     font-size: 14px;
-    color: #111827;
+    color: var(--app-text-primary);
 }
 
 .sub-card-meta {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--app-text-secondary);
 }
 
 .sub-card-link {
     font-size: 13px;
     font-weight: 600;
-    color: #064e3b;
+    color: var(--app-accent-primary);
     text-decoration: none;
 }
 
@@ -226,7 +226,7 @@
 .link-action {
     font-size: 13px;
     font-weight: 600;
-    color: #064e3b;
+    color: var(--app-accent-primary);
     text-decoration: none;
 }
 
@@ -246,7 +246,7 @@
 
 .asset-box:hover {
     border-color: var(--app-accent-primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--app-shadow);
 }
 
 .asset-header {
@@ -261,27 +261,27 @@
     font-size: 14px;
 }
 
-.color-green { color: #059669; }
-.color-blue { color: #2563eb; }
-.color-purple { color: #7c3aed; }
-.color-orange { color: #ea580c; }
+.color-green { color: var(--app-accent-primary); }
+.color-blue { color: var(--app-status-info-text); }
+.color-purple { color: var(--app-status-purple-text); }
+.color-orange { color: var(--app-status-warning-text); }
 
 .asset-label {
     font-size: 13px;
     font-weight: 600;
-    color: #4b5563;
+    color: var(--app-text-secondary);
     flex: 1;
 }
 
 .asset-count {
     font-size: 18px;
     font-weight: 800;
-    color: #111827;
+    color: var(--app-text-primary);
 }
 
 .asset-status {
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--app-text-tertiary);
 }
 
 /* Sidebar Cards */
@@ -300,8 +300,8 @@
 }
 
 .badge-planned {
-    background-color: #eff6ff;
-    color: #2563eb;
+    background-color: var(--app-status-info-bg);
+    color: var(--app-status-info-text);
 }
 
 .status-list {
@@ -313,7 +313,7 @@
     display: flex;
     justify-content: space-between;
     padding: 12px 0;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--app-border-default);
 }
 
 .status-item:last-child {
@@ -322,13 +322,13 @@
 
 .status-label {
     font-size: 13px;
-    color: #6b7280;
+    color: var(--app-text-secondary);
 }
 
 .status-value {
     font-size: 13px;
     font-weight: 600;
-    color: #111827;
+    color: var(--app-text-primary);
 }
 
 .changes-list {
@@ -339,7 +339,7 @@
 
 .change-item {
     padding-bottom: 12px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--app-border-default);
 }
 
 .change-item:last-child {
@@ -349,19 +349,19 @@
 .change-title {
     font-size: 14px;
     font-weight: 700;
-    color: #111827;
+    color: var(--app-text-primary);
     margin-bottom: 2px;
 }
 
 .change-meta {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--app-text-secondary);
 }
 
 /* Buttons */
 .btn-primary {
-    background-color: #064e3b;
-    color: #ffffff;
+    background-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
@@ -371,8 +371,8 @@
 }
 
 .btn-primary-dark {
-    background-color: #064e3b;
-    color: #ffffff;
+    background-color: var(--app-tab-active-background);
+    color: var(--app-tab-active-foreground);
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
@@ -382,9 +382,9 @@
 }
 
 .btn-ghost {
-    background-color: #ffffff;
-    color: #111827;
-    border: 1px solid #d1d5db;
+    background-color: var(--app-control-background);
+    color: var(--app-text-primary);
+    border: 1px solid var(--app-control-border);
     padding: 10px 20px;
     border-radius: 8px;
     font-weight: 700;

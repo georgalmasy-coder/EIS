@@ -1,12 +1,11 @@
-:root {
+body {
     --dashboard-irls-header-height: 60px;
     --dashboard-irls-row-height: 50px;
     --dashboard-irls-border-color: var(--app-border-default);
     --dashboard-irls-header-bg: var(--app-table-header-background);
-    --dashboard-irls-cell-bg: var(--app-surface-background);
-    --dashboard-irls-cell-alt-bg: var(--app-surface-subtle-background);
+    --dashboard-irls-cell-bg: transparent;
+    --dashboard-irls-cell-alt-bg: var(--app-table-row-alt);
     --dashboard-irls-sticky-bg: var(--app-table-header-background);
-    --dashboard-irls-overdue-bg: var(--dashboard-irls-cell-bg);
     --dashboard-irls-pill-red-bg: rgba(239, 68, 68, 0.16);
     --dashboard-irls-pill-red-border: #ef4444;
 }
@@ -273,13 +272,13 @@ body.dashboard-irls-document {
 .dashboard-irls-header-cell--id {
     left: 0;
     z-index: 60;
-    min-width: 60px;
-    width: 60px;
-    max-width: 60px;
+    min-width: 110px;
+    width: 110px;
+    max-width: 110px;
 }
 
 .dashboard-irls-header-cell--name {
-    left: 60px;
+    left: 110px;
     z-index: 55;
     min-width: 190px;
     width: 190px;
@@ -287,7 +286,7 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-header-cell--trl {
-    left: 250px;
+    left: 300px;
     z-index: 50;
     min-width: 44px;
     width: 44px;
@@ -295,7 +294,7 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-header-cell--days {
-    left: 294px;
+    left: 344px;
     z-index: 48;
     min-width: 74px;
     width: 74px;
@@ -303,7 +302,7 @@ body.dashboard-irls-document {
 }
 
 .dashboard-irls-header-cell--interfaces {
-    left: 368px;
+    left: 418px;
     z-index: 46;
     min-width: 60px;
     width: 60px;
@@ -387,23 +386,20 @@ body.dashboard-irls-document {
     background: var(--dashboard-irls-cell-alt-bg);
 }
 
-.dashboard-irls-row--overdue .dashboard-irls-cell {
-    background: var(--dashboard-irls-overdue-bg);
-}
 
 .dashboard-irls-cell--id {
     position: sticky;
     left: 0;
     z-index: 25;
-    min-width: 60px;
-    width: 60px;
-    max-width: 60px;
+    min-width: 110px;
+    width: 110px;
+    max-width: 110px;
     font-weight: 800;
 }
 
 .dashboard-irls-cell--name {
     position: sticky;
-    left: 60px;
+    left: 110px;
     z-index: 24;
     min-width: 190px;
     width: 190px;
@@ -413,7 +409,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-cell--trl {
     position: sticky;
-    left: 250px;
+    left: 300px;
     z-index: 23;
     min-width: 44px;
     width: 44px;
@@ -424,7 +420,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-cell--days {
     position: sticky;
-    left: 294px;
+    left: 344px;
     z-index: 22;
     min-width: 74px;
     width: 74px;
@@ -435,7 +431,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-cell--interfaces {
     position: sticky;
-    left: 368px;
+    left: 418px;
     z-index: 21;
     min-width: 60px;
     width: 60px;

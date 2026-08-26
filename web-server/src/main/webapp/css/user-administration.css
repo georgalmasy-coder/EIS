@@ -292,36 +292,6 @@
     display: none !important;
 }
 
-.user-administration-help-button {
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(15, 23, 42, .55);
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    cursor: pointer;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.user-administration-help-button:hover {
-    background: rgba(96, 165, 250, .14);
-    border-color: rgba(96, 165, 250, .45);
-}
-
-.user-administration-help-button:active {
-    transform: translateY(1px);
-}
-
-.user-administration-help-button svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
-}
 
 .user-administration-scroll {
     position: relative;
@@ -1075,36 +1045,6 @@ dialog.user-edit-dialog.user-edit-dialog-fixed {
     display: none !important;
 }
 
-.user-administration-help-button {
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid var(--app-topbar-help-border);
-    background: var(--app-topbar-help-background);
-    color: var(--app-topbar-help-foreground);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    cursor: pointer;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
-}
-
-.user-administration-help-button:hover {
-    background: var(--app-topbar-help-hover-background);
-    border-color: var(--app-topbar-help-border);
-}
-
-.user-administration-help-button:active {
-    transform: translateY(1px);
-}
-
-.user-administration-help-button svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
-}
 
 .user-administration-body {
     display: flex;

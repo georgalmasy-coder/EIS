@@ -1,11 +1,11 @@
-:root {
+body {
     --dashboard-teamwork-group-header-height: 30px;
     --dashboard-teamwork-header-height: 58px;
     --dashboard-teamwork-row-height: 48px;
     --dashboard-teamwork-border-color: var(--app-border-default);
     --dashboard-teamwork-header-bg: var(--app-table-header-background);
     --dashboard-teamwork-cell-bg: var(--app-surface-background);
-    --dashboard-teamwork-cell-alt-bg: var(--app-surface-subtle-background);
+    --dashboard-teamwork-cell-alt-bg: var(--app-table-row-alt);
     --dashboard-teamwork-group-bg: var(--app-table-header-background);
     --dashboard-teamwork-pill-bg: var(--app-surface-subtle-background);
     --dashboard-teamwork-arrow-color: var(--app-accent-primary);
@@ -118,6 +118,7 @@ body.dashboard-systems-teamwork-document {
     font-family: Arial, Helvetica, sans-serif;
     letter-spacing: 0.25px;
     dominant-baseline: auto;
+    fill: var(--app-topbar-background);
 }
 
 .dashboard-systems-teamwork-body {
@@ -349,7 +350,7 @@ body.dashboard-systems-teamwork-document {
 }
 
 .dashboard-systems-teamwork-resizer:hover::after {
-    background: var(--app-topbar-title-prefix-color);
+    background: var(--app-accent-primary);
 }
 
 .dashboard-systems-teamwork-header-content {

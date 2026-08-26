@@ -22,7 +22,7 @@ const COLORS = {
 };
 
 const BASE_COLUMNS = [
-    { key: "id", label: "SBS Code", source: "id", width: 50, maxChars: 12, fixed: true },
+    { key: "id", label: "SBS Code", source: "id", width: 80, maxChars: 18, fixed: true },
     { key: "name", label: "System Name", source: "name", width: 1, maxChars: 28, fixed: true },
     { key: "trl", label: "TRL", source: "trlCode", width: 34, maxChars: 6, lookup: "trl", center: true, fixed: true },
     { key: "days", label: "Days to next TRL", source: "daysNextTrl", width: 60, maxChars: 11, fixed: true },

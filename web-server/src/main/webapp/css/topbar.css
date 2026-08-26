@@ -5,10 +5,9 @@
     margin: calc(-1 * var(--topbar-breakout)) calc(-1 * var(--topbar-breakout)) 0;
     padding: 0;
     box-sizing: border-box;
-    background: linear-gradient(180deg, #f9fafc 0%, #eef1f5 100%);
+    background: var(--app-topbar-background);
     border: 0;
-    border-top: 1px solid #303846;
-    border-bottom: 1px solid rgba(150, 158, 170, 0.45);
+    border-bottom: 1px solid var(--app-topbar-border);
     box-shadow: none;
     min-width: 0;
 }
@@ -52,7 +51,7 @@
     position: absolute;
     width: 8.4%;
     height: 25%;
-    background: #5f6d67;
+    background: var(--app-text-secondary);
     left: 45.8%;
     top: 37.5%;
     opacity: 0;
@@ -179,7 +178,7 @@
 }
 
 .topbar-search-button:hover{
-    background: var(--app-control-hover-background);
+    background: var(--app-topbar-help-hover-background);
 }
 
 .topbar-search-button:focus{
@@ -219,8 +218,8 @@
     height: 42px;
     min-height: 42px;
     border-radius: 12px;
-    border: 1px solid var(--app-control-border);
-    background: var(--app-control-background);
+    border: 1px solid var(--app-topbar-help-border);
+    background: var(--app-topbar-help-background);
     color: var(--app-topbar-help-foreground);
     display: inline-flex;
     align-items: center;
@@ -240,7 +239,7 @@
 }
 
 .topbar-help-button:hover{
-    background: var(--app-control-hover-background);
+    background: var(--app-topbar-help-hover-background);
 }
 
 .topbar-help-button:active{

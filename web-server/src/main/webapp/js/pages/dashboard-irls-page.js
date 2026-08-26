@@ -338,7 +338,13 @@ function renderBody(tableBody, dashboard, rows) {
             });
         }
 
-        tr.appendChild(buildTextCell("dashboard-irls-cell dashboard-irls-cell--id", structure.id, structure.description));
+        const idCell = buildTextCell("dashboard-irls-cell dashboard-irls-cell--id", structure.id, structure.description);
+        const dots = (String(structure.id || "").match(/\./g) || []).length;
+        if (dots > 0) {
+            idCell.style.paddingLeft = `${dots * 15}px`;
+        }
+        tr.appendChild(idCell);
+
         tr.appendChild(buildTextCell("dashboard-irls-cell dashboard-irls-cell--name", structure.name, structure.description));
         tr.appendChild(buildTextCell(
             "dashboard-irls-cell dashboard-irls-cell--trl dashboard-irls-cell--center",

@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.web.application.views;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.BuildInfo;
@@ -137,6 +138,10 @@ public class PageViewer extends GenericServlet {
 
     private Theme resolveTheme(WebSession webSession) {
         Integer themeId = webSession == null ? null : webSession.getThemeId();
+
+        if (GlobalConfiguration.isUdvMode()) {
+            themeId = GlobalConfiguration.getThemeId();
+        }
 
         if (themeId == null) {
             return Theme.LIGHT;
