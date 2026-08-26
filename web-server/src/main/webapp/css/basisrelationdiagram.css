@@ -1,8 +1,8 @@
 :root {
     --relationdiagram-border-color: var(--app-border-default);
     --relationdiagram-header-bg: var(--app-table-header-background);
-    --relationdiagram-panel-bg: var(--app-surface-background);
-    --relationdiagram-list-bg: var(--app-surface-background);
+    --relationdiagram-panel-bg: var(--app-page-background);
+    --relationdiagram-list-bg: var(--relationdiagram-panel-bg);
     --relationdiagram-card-bg: #ffffff;
     --relationdiagram-card-hover-bg: #b3ecff;
     --relationdiagram-card-active-bg: #b3ecff;
@@ -17,6 +17,12 @@
     --relationdiagram-muted-text: var(--app-text-secondary);
     --relationdiagram-blue: #1976d2;
     --relationdiagram-green: #16a34a;
+}
+
+body.theme-black {
+    --relationdiagram-panel-bg: #000000;
+    --relationdiagram-list-bg: #000000;
+    --relationdiagram-border-color: #ffffff;
 }
 
 html,
@@ -112,27 +118,30 @@ body.relationdiagram-document {
     margin-left: 0.25rem;
 }
 
-.relationdiagram-view-toggle {
+.relationdiagram-view-toggle,
+.relationdiagram-view-options {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
     padding: 0.35rem 0.6rem;
-    border: 1px solid var(--relationdiagram-border-color);
+    border: none;
     border-radius: 0.45rem;
-    background: #ffffff;
+    background: var(--app-page-background);
 }
 
-.relationdiagram-view-option {
+.relationdiagram-view-option,
+.relationdiagram-filter-option {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     cursor: pointer;
     user-select: none;
-    font-weight: 600;
+    font-weight: bold;
 }
 
-.relationdiagram-view-option input {
+.relationdiagram-view-option input,
+.relationdiagram-filter-option input {
     cursor: pointer;
 }
 
@@ -178,30 +187,18 @@ body.relationdiagram-document {
     font-size: 0.9rem;
 }
 
-.relationdiagram-filter-option {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: var(--relationdiagram-text);
-    cursor: pointer;
-    user-select: none;
-}
-
-.relationdiagram-filter-option input {
-    cursor: pointer;
-}
 
 .relationdiagram-search-filter {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     white-space: nowrap;
 }
 
 .relationdiagram-search-label {
-    color: var(--app-text-secondary);
-    font-weight: 600;
+    color: var(--app-text-primary);
+    font-weight: bold;
 }
 
 .relationdiagram-search-box {
@@ -308,7 +305,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-focus-clear-button:hover {
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     background: rgba(96, 165, 250, 0.12);
 }
 
@@ -356,6 +353,7 @@ body.relationdiagram-document {
     max-height: 100%;
     overflow: hidden;
     padding-top: 0;
+    background: var(--relationdiagram-panel-bg);
 }
 
 .relationdiagram-frame {
@@ -393,6 +391,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-column-left {
+    border-left: 1px solid var(--relationdiagram-border-color);
     border-right: 1px solid var(--relationdiagram-border-color);
 }
 
@@ -403,6 +402,7 @@ body.relationdiagram-document {
 
 .relationdiagram-column-right {
     border-left: 1px solid var(--relationdiagram-border-color);
+    border-right: 1px solid var(--relationdiagram-border-color);
 }
 
 .relationdiagram-column.is-hidden-by-view,
@@ -438,7 +438,7 @@ body.relationdiagram-document {
     border-left: 4px solid #94a3b8;
     border-radius: 0.45rem;
     background: var(--relationdiagram-card-bg);
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     text-align: left;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     cursor: pointer;
@@ -512,7 +512,7 @@ body.relationdiagram-document {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background: var(--app-surface-background);
+    background: var(--relationdiagram-panel-bg);
 }
 
 .relationdiagram-svg {
@@ -569,7 +569,7 @@ body.relationdiagram-document {
     border: 1px solid var(--relationdiagram-border-color);
     border-radius: 0.6rem;
     padding: 0;
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);
 }
 
@@ -618,7 +618,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-dialog-value {
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
     line-height: 1.4;
     white-space: pre-wrap;
 }
@@ -652,7 +652,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-dialog-line-value {
-    color: var(--relationdiagram-text);
+    color: var(--app-text-primary);
 }
 
 .relationdiagram-related-list {

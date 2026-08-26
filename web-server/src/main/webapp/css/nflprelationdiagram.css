@@ -1,5 +1,11 @@
 @import url("basisrelationdiagram.css");
 
+.relationdiagram-view-option,
+.relationdiagram-filter-option {
+    color: var(--app-text-primary);
+    font-weight: bold;
+}
+
 .relationdiagram-column {
     border-left: 1px solid var(--relationdiagram-border-color);
     border-right: 1px solid var(--relationdiagram-border-color);
