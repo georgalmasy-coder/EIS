@@ -822,6 +822,19 @@ body.systemsbreakdown-main-document{
     background: var(--app-table-row-hover);
 }
 
+.highlight-row{
+    animation: highlight-fade 2s ease-out;
+}
+
+@keyframes highlight-fade{
+    0%{
+        background-color: rgba(230, 239, 232, 1);
+    }
+    100%{
+        background-color: transparent;
+    }
+}
+
 .systemsbreakdown-group-row td{
     background: rgba(230,239,232,.9);
     font-weight: 600;

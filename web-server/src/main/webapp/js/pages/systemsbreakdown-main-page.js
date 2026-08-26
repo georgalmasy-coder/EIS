@@ -336,8 +336,15 @@ async function loadSystemsBreakdown() {
 
         applyTopPanel();
         applyFiltersAndRender();
-
         setText("loadStatus", "Loaded", "");
+
+        const scrollToId = sessionStorage.getItem("basis.systemsbreakdown.scrollToId");
+        if (scrollToId) {
+            // Give a tiny delay for the browser to finish layout after heavy DOM update
+            setTimeout(() => {
+                scrollToEntity(scrollToId);
+            }, 50);
+        }
     } catch (error) {
         console.error("Failed to load physical structure", error);
         setText("loadStatus", "Error", "");
@@ -2335,7 +2342,13 @@ function openEditSystem(system) {
         mode: "edit",
         id,
         title: "Edit System",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            const targetId = payload?.id || id;
+            if (targetId) {
+                sessionStorage.setItem("basis.systemsbreakdown.scrollToId", targetId);
+            }
+            loadSystemsBreakdown();
+        }
     });
 }
 
@@ -2352,7 +2365,13 @@ function openCreateSubSystem(system) {
         mode: "create-child",
         id,
         title: "Create Sub System",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            const targetId = payload?.id || id;
+            if (targetId) {
+                sessionStorage.setItem("basis.systemsbreakdown.scrollToId", targetId);
+            }
+            loadSystemsBreakdown();
+        }
     });
 }
 
@@ -2361,7 +2380,12 @@ function openCreateRootSystem() {
         page: "systemsbreakdown-edit",
         mode: "create-root",
         title: "Create Root System",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            if (payload?.id) {
+                sessionStorage.setItem("basis.systemsbreakdown.scrollToId", payload.id);
+            }
+            loadSystemsBreakdown();
+        }
     });
 }
 
@@ -2437,6 +2461,46 @@ function hideDiagramEmptyState(orientation) {
         emptyState.classList.remove("is-visible");
         emptyState.hidden = true;
     }
+}
+
+function scrollToEntity(entityId) {
+    if (!entityId || state.selectedView !== VIEW_TYPES.list) {
+        return;
+    }
+
+    const cleanId = String(entityId).trim();
+
+    const tryScroll = (attempts = 0) => {
+        // Try exact match first
+        let row = document.querySelector(`tr[data-entity-id="${entityId}"]`);
+
+        // If not found, try trimmed match
+        if (!row) {
+            const allRows = document.querySelectorAll("tr[data-entity-id]");
+            row = Array.from(allRows).find((r) => (r.getAttribute("data-entity-id") || "").trim() === cleanId);
+        }
+
+        if (row) {
+            row.scrollIntoView({
+                behavior: "auto",
+                block: "center"
+            });
+
+            row.classList.add("highlight-row");
+            setTimeout(() => row.classList.remove("highlight-row"), 2000);
+            sessionStorage.removeItem("basis.systemsbreakdown.scrollToId");
+        } else if (attempts < 20) {
+            // Keep trying for a bit longer, maybe the table is still rendering or layout is moving
+            // Use slightly longer delays after first few failures
+            const delay = attempts < 5 ? 50 : 150;
+            setTimeout(() => tryScroll(attempts + 1), delay);
+        } else {
+            // Give up and clean up
+            sessionStorage.removeItem("basis.systemsbreakdown.scrollToId");
+        }
+    };
+
+    tryScroll();
 }
 
 function escapeHtml(value) {

@@ -337,8 +337,14 @@ async function loadFunctionalStructures() {
 
         applyTopPanel();
         applyFiltersAndRender();
-
         setText("loadStatus", "Loaded", "");
+
+        const scrollToId = sessionStorage.getItem("basis.functionalstructure.scrollToId");
+        if (scrollToId) {
+            setTimeout(() => {
+                scrollToEntity(scrollToId);
+            }, 50);
+        }
     } catch (error) {
         console.error("Failed to load functional structures", error);
         setText("loadStatus", "Error", "");
@@ -2192,7 +2198,13 @@ function openEditRequirement(requirement) {
         mode: "edit",
         id,
         title: "Edit Functional Structure",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            const targetId = payload?.id || id;
+            if (targetId) {
+                sessionStorage.setItem("basis.functionalstructure.scrollToId", targetId);
+            }
+            loadFunctionalStructures();
+        }
     });
 }
 
@@ -2209,7 +2221,13 @@ function openCreateSubRequirement(requirement) {
         mode: "create-child",
         id,
         title: "Create Sub Functional Structure",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            const targetId = payload?.id || id;
+            if (targetId) {
+                sessionStorage.setItem("basis.functionalstructure.scrollToId", targetId);
+            }
+            loadFunctionalStructures();
+        }
     });
 }
 
@@ -2218,7 +2236,12 @@ function openCreateRootRequirement() {
         page: "functionalstructure-edit",
         mode: "create-root",
         title: "Create Root Functional Structure",
-        onSaved: () => window.location.reload()
+        onSaved: (payload) => {
+            if (payload?.id) {
+                sessionStorage.setItem("basis.functionalstructure.scrollToId", payload.id);
+            }
+            loadFunctionalStructures();
+        }
     });
 }
 
@@ -2252,6 +2275,46 @@ function downloadCurrentDiagramPdf() {
         topPanel: state.topPanel,
         requirementCount: state.filteredRequirements.length
     });
+}
+
+function scrollToEntity(entityId) {
+    if (!entityId || state.selectedView !== VIEW_TYPES.list) {
+        return;
+    }
+
+    const cleanId = String(entityId).trim();
+
+    const tryScroll = (attempts = 0) => {
+        // Try exact match first
+        let row = document.querySelector(`tr[data-entity-id="${entityId}"]`);
+
+        // If not found, try trimmed match
+        if (!row) {
+            const allRows = document.querySelectorAll("tr[data-entity-id]");
+            row = Array.from(allRows).find((r) => (r.getAttribute("data-entity-id") || "").trim() === cleanId);
+        }
+
+        if (row) {
+            row.scrollIntoView({
+                behavior: "auto",
+                block: "center"
+            });
+
+            row.classList.add("highlight-row");
+            setTimeout(() => row.classList.remove("highlight-row"), 2000);
+            sessionStorage.removeItem("basis.functionalstructure.scrollToId");
+        } else if (attempts < 20) {
+            // Keep trying for a bit longer, maybe the table is still rendering or layout is moving
+            // Use slightly longer delays after first few failures
+            const delay = attempts < 5 ? 50 : 150;
+            setTimeout(() => tryScroll(attempts + 1), delay);
+        } else {
+            // Give up and clean up
+            sessionStorage.removeItem("basis.functionalstructure.scrollToId");
+        }
+    };
+
+    tryScroll();
 }
 
 function showListEmptyState(message) {
