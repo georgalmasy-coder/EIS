@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{{title}}</title>
+
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/export-dialog.css" />
+    <link rel="stylesheet" href="../css/import-dialog.css" />
+    <link rel="stylesheet" href="../css/stakeholderrequirement-main.css" />
+    <link rel="stylesheet" href="../css/systemrequirement-main.css" />
+    <link rel="stylesheet" href="../css/requirements.css" />
+</head>
+
+<body class="requirements-document">
+<button
+        id="menuToggle"
+        class="menu-toggle"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sideMenu"
+        aria-expanded="false"
+>
+    ›
+</button>
+
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+
+<main class="app requirements-app">
+    <div class="content requirements-content">
+        <header class="topbar requirements-topbar" data-help-page="requirements" data-help-title="Requirements Help">
+        </header>
+
+        <section class="page-layout requirements-layout" aria-label="Requirements">
+            <div class="requirements-workspace-header-row">
+                <div class="workspace-header" aria-label="Workspace information">
+                    <div id="pageEyebrow" class="workspace-eyebrow"></div>
+                    <div id="pageHeading" class="workspace-heading"></div>
+                    <div id="pageHelpText" class="workspace-helptext"></div>
+                </div>
+
+                <!-- Stakeholder Header Actions -->
+                <div id="stakeholderHeaderActions" class="requirements-header-actions is-active" role="group" aria-label="View actions">
+                    <button id="stakeholderBtnViewList" class="requirements-view-button is-active" type="button" data-view-type="list" title="List view Stakeholder Requirement" aria-label="Show list view" aria-pressed="true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v1A1.5 1.5 0 0 1 18.5 8h-13A1.5 1.5 0 0 1 4 6.5v-1z"></path>
+                            <path d="M4 11.5A1.5 1.5 0 0 1 5.5 10h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 12.5v-1z"></path>
+                            <path d="M4 17.5A1.5 1.5 0 0 1 5.5 16h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnViewHorizontal" class="requirements-view-button" type="button" data-view-type="horizontal" title="Horizontal diagram Stakeholder Requirement" aria-label="Show horizontal diagram view" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h2V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9h-2v1a2 2 0 0 1-2 2H8v2h5v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-1H7a1 1 0 0 1-1-1v-3H5a2 2 0 0 1-2-2V6z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnViewVertical" class="requirements-view-button" type="button" data-view-type="vertical" title="Vertical diagram Stakeholder Requirement" aria-label="Show vertical diagram view" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9 3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v2H8a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H8v-1h8v1h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1v-1a2 2 0 0 0-2-2h-3v-2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H9z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnImport" class="requirements-icon-button" type="button" title="Import stakeholder requirements" aria-label="Import stakeholder requirements">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
+                            <path d="M5 5a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnExport" class="requirements-icon-button" type="button" title="Export stakeholder requirements" aria-label="Export stakeholder requirements">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
+                            <path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnAddRoot" class="requirements-icon-button" type="button" title="Add root stakeholder requirement" aria-label="Add root stakeholder requirement">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="stakeholderBtnDownloadDiagramPdf" class="requirements-icon-button" type="button" title="Download diagram as PDF" aria-label="Download diagram as PDF" hidden>
+                        <svg class="requirements-pdf-svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                            <path d="M8 3.5h11.5L25 9v19.5H8V3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <path d="M19.5 3.5V9H25" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <rect x="6" y="15" width="20" height="9" rx="1.6" fill="currentColor"></rect>
+                            <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800" fill="rgb(15,23,42)">PDF</text>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- System Header Actions -->
+                <div id="systemHeaderActions" class="requirements-header-actions" role="group" aria-label="View actions">
+                    <button id="systemBtnViewList" class="requirements-view-button" type="button" data-view-type="list" title="List view System Requirement" aria-label="Show list view" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v1A1.5 1.5 0 0 1 18.5 8h-13A1.5 1.5 0 0 1 4 6.5v-1z"></path>
+                            <path d="M4 11.5A1.5 1.5 0 0 1 5.5 10h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 12.5v-1z"></path>
+                            <path d="M4 17.5A1.5 1.5 0 0 1 5.5 16h13a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnViewHorizontal" class="requirements-view-button" type="button" data-view-type="horizontal" title="Horizontal diagram System Requirement" aria-label="Show horizontal diagram view" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1h2V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9h-2v1a2 2 0 0 1-2 2H8v2h5v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-1H7a1 1 0 0 1-1-1v-3H5a2 2 0 0 1-2-2V6z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnViewVertical" class="requirements-view-button" type="button" data-view-type="vertical" title="Vertical diagram System Requirement" aria-label="Show vertical diagram view" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9 3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v2H8a2 2 0 0 0-2 2v1H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H8v-1h8v1h-1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-1v-1a2 2 0 0 0-2-2h-3v-2h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H9z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnImport" class="requirements-icon-button" type="button" title="Import system requirements" aria-label="Import system requirements">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
+                            <path d="M5 5a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnExport" class="requirements-icon-button" type="button" title="Export system requirements" aria-label="Export system requirements">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
+                            <path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnAddRoot" class="requirements-icon-button" type="button" title="Add root system requirement" aria-label="Add root system requirement">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                        </svg>
+                    </button>
+                    <button id="systemBtnDownloadDiagramPdf" class="requirements-icon-button" type="button" title="Download diagram as PDF" aria-label="Download diagram as PDF" hidden>
+                        <svg class="requirements-pdf-svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                            <path d="M8 3.5h11.5L25 9v19.5H8V3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <path d="M19.5 3.5V9H25" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                            <rect x="6" y="15" width="20" height="9" rx="1.6" fill="currentColor"></rect>
+                            <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800" fill="rgb(15,23,42)">PDF</text>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="requirements-toolbar">
+                <div class="requirements-tabs">
+                    <button id="tabStakeholder" class="requirements-tab-button is-active" type="button">
+                        Stakeholder <span id="stakeholderCount" class="requirements-tab-count">0</span>
+                    </button>
+                    <button id="tabSystem" class="requirements-tab-button" type="button">
+                        System <span id="systemCount" class="requirements-tab-count">0</span>
+                    </button>
+                </div>
+
+                <!-- Stakeholder Toolbar Actions -->
+                <div id="stakeholderToolbarActions" class="stakeholderrequirement-main-toolbar requirements-actions-right is-active" aria-label="Stakeholder requirement toolbar">
+                    <div class="stakeholderrequirement-filter-group">
+                        <label class="stakeholderrequirement-search-filter" for="stakeholderSearchInput">
+                            <span class="stakeholderrequirement-filter-label">Filter</span>
+                            <span class="stakeholderrequirement-search-box">
+                                <input
+                                        id="stakeholderSearchInput"
+                                        class="stakeholderrequirement-search-input"
+                                        type="search"
+                                        placeholder="Search in ID, name or description..."
+                                        autocomplete="off"
+                                >
+                                <span class="stakeholderrequirement-search-icon" aria-hidden="true">⌕</span>
+                            </span>
+                        </label>
+
+                        <label class="stakeholderrequirement-active-filter" for="stakeholderFilterActiveOnly">
+                            <input id="stakeholderFilterActiveOnly" type="checkbox" checked>
+                            <span>Aktiv</span>
+                        </label>
+
+                        <button id="stakeholderBtnClearFilter" class="stakeholderrequirement-secondary-button" type="button">
+                            Clear filter
+                        </button>
+                    </div>
+
+                    <div class="stakeholderrequirement-action-group">
+                        <div id="stakeholderGroupByBar" class="stakeholderrequirement-grouping-bar">
+                            <div class="stakeholderrequirement-grouping-label">Group by</div>
+                            <div id="stakeholderGroupByZone" class="stakeholderrequirement-grouping-zone"></div>
+                        </div>
+
+                        <div class="stakeholderrequirement-columns-control" id="stakeholderColumnsControl">
+                            <button id="stakeholderBtnColumns" class="stakeholderrequirement-secondary-button stakeholderrequirement-columns-button" type="button" aria-haspopup="dialog" aria-controls="stakeholderColumnsPopover" aria-expanded="false" title="Choose columns">
+                                Columns
+                            </button>
+
+                            <div id="stakeholderColumnsPopover" class="stakeholderrequirement-columns-popover" hidden role="dialog" aria-label="Choose columns">
+                                <div class="stakeholderrequirement-columns-popover-head">
+                                    <span>Columns</span>
+                                    <button id="stakeholderBtnCloseColumns" class="stakeholderrequirement-columns-close" type="button" aria-label="Close column chooser" title="Close">&times;</button>
+                                </div>
+                                <div id="stakeholderColumnsList" class="stakeholderrequirement-columns-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Toolbar Actions -->
+                <div id="systemToolbarActions" class="systemrequirement-main-toolbar requirements-actions-right" aria-label="System requirement toolbar">
+                    <div class="systemrequirement-filter-group">
+                        <label class="systemrequirement-search-filter" for="systemSearchInput">
+                            <span class="systemrequirement-filter-label">Filter</span>
+                            <span class="systemrequirement-search-box">
+                                <input
+                                        id="systemSearchInput"
+                                        class="systemrequirement-search-input"
+                                        type="search"
+                                        placeholder="Search in ID, name or description..."
+                                        autocomplete="off"
+                                >
+                                <span class="systemrequirement-search-icon" aria-hidden="true">⌕</span>
+                            </span>
+                        </label>
+
+                        <label class="systemrequirement-active-filter" for="systemFilterActiveOnly">
+                            <input id="systemFilterActiveOnly" type="checkbox" checked>
+                            <span>Aktiv</span>
+                        </label>
+
+                        <button id="systemBtnClearFilter" class="systemrequirement-secondary-button" type="button">
+                            Clear filter
+                        </button>
+                    </div>
+
+                    <div class="systemrequirement-action-group">
+                        <div id="systemGroupByBar" class="systemrequirement-grouping-bar">
+                            <div class="systemrequirement-grouping-label">Group by</div>
+                            <div id="systemGroupByZone" class="systemrequirement-grouping-zone"></div>
+                        </div>
+
+                        <div class="systemrequirement-columns-control" id="systemColumnsControl">
+                            <button id="systemBtnColumns" class="systemrequirement-secondary-button systemrequirement-columns-button" type="button" aria-haspopup="dialog" aria-controls="systemColumnsPopover" aria-expanded="false" title="Choose columns">
+                                Columns
+                            </button>
+
+                            <div id="systemColumnsPopover" class="systemrequirement-columns-popover" hidden role="dialog" aria-label="Choose columns">
+                                <div class="systemrequirement-columns-popover-head">
+                                    <span>Columns</span>
+                                    <button id="systemBtnCloseColumns" class="systemrequirement-columns-close" type="button" aria-label="Close column chooser" title="Close">&times;</button>
+                                </div>
+                                <div id="systemColumnsList" class="systemrequirement-columns-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stakeholderSection" class="requirements-section is-active">
+                <!-- Stakeholder specific body content copied from stakeholderrequirement-main.html -->
+                <div class="page-body stakeholderrequirement-main-body">
+                    <section id="stakeholderListView" class="stakeholderrequirement-view-panel is-active" data-view-panel="list">
+                        <div class="table-frame page-frame has-table-footer stakeholderrequirement-list-frame">
+                            <div class="table-scroll stakeholderrequirement-list-scroll" id="stakeholderTableScroll">
+                                <table class="data-table page-table stakeholderrequirement-table">
+                                    <colgroup id="stakeholderColGroup"></colgroup>
+                                    <thead><tr id="stakeholderHeaderRow"></tr></thead>
+                                    <tbody id="stakeholderTbody"></tbody>
+                                </table>
+                                <div class="empty page-empty stakeholderrequirement-empty" id="stakeholderListEmptyState">
+                                    Loading stakeholder requirements…
+                                </div>
+                            </div>
+                            <div class="data-table-footer stakeholderrequirement-table-footer">
+                                <span class="data-table-footer-count" id="stakeholderTableCountDisplay">0 of 0</span>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="stakeholderHorizontalDiagramView" class="stakeholderrequirement-view-panel" data-view-panel="horizontal" hidden>
+                        <div class="stakeholderrequirement-diagram-frame stakeholderrequirement-horizontal-diagram-frame" id="stakeholderHorizontalDiagramFrame">
+                            <div class="stakeholderrequirement-diagram-canvas stakeholderrequirement-horizontal-diagram-canvas" id="stakeholderHorizontalDiagramCanvas">
+                                <svg class="stakeholderrequirement-diagram-svg" id="stakeholderHorizontalDiagramSvg"></svg>
+                                <div class="stakeholderrequirement-diagram-nodes" id="stakeholderHorizontalDiagramNodes"></div>
+                            </div>
+                            <div class="stakeholderrequirement-empty" id="stakeholderHorizontalDiagramEmptyState">Loading…</div>
+                        </div>
+                    </section>
+
+                    <section id="stakeholderVerticalDiagramView" class="stakeholderrequirement-view-panel" data-view-panel="vertical" hidden>
+                        <div class="stakeholderrequirement-diagram-frame stakeholderrequirement-vertical-diagram-frame" id="stakeholderVerticalDiagramFrame">
+                            <div class="stakeholderrequirement-diagram-canvas stakeholderrequirement-vertical-diagram-canvas" id="stakeholderVerticalDiagramCanvas">
+                                <svg class="stakeholderrequirement-diagram-svg" id="stakeholderVerticalDiagramSvg"></svg>
+                                <div class="stakeholderrequirement-diagram-nodes" id="stakeholderVerticalDiagramNodes"></div>
+                            </div>
+                            <div class="stakeholderrequirement-empty" id="stakeholderVerticalDiagramEmptyState">Loading…</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div id="systemSection" class="requirements-section">
+                <!-- System specific body content copied from systemrequirement-main.html -->
+                <div class="page-body systemrequirement-main-body">
+                    <section id="systemListView" class="systemrequirement-view-panel is-active" data-view-panel="list">
+                        <div class="table-frame page-frame has-table-footer systemrequirement-list-frame">
+                            <div class="table-scroll systemrequirement-list-scroll" id="systemTableScroll">
+                                <table class="data-table page-table systemrequirement-table">
+                                    <colgroup id="systemColGroup"></colgroup>
+                                    <thead><tr id="systemHeaderRow"></tr></thead>
+                                    <tbody id="systemTbody"></tbody>
+                                </table>
+                                <div class="empty page-empty systemrequirement-empty" id="systemListEmptyState">
+                                    Loading system requirements…
+                                </div>
+                            </div>
+                            <div class="data-table-footer systemrequirement-table-footer">
+                                <span class="data-table-footer-count" id="systemTableCountDisplay">0 of 0</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="systemHorizontalDiagramView" class="systemrequirement-view-panel" data-view-panel="horizontal" hidden>
+                        <div class="systemrequirement-diagram-frame systemrequirement-horizontal-diagram-frame" id="systemHorizontalDiagramFrame">
+                            <div class="systemrequirement-diagram-canvas systemrequirement-horizontal-diagram-canvas" id="systemHorizontalDiagramCanvas">
+                                <svg class="systemrequirement-diagram-svg" id="systemHorizontalDiagramSvg"></svg>
+                                <div class="systemrequirement-diagram-nodes" id="systemHorizontalDiagramNodes"></div>
+                            </div>
+                            <div class="systemrequirement-empty" id="systemHorizontalDiagramEmptyState">Loading…</div>
+                        </div>
+                    </section>
+
+                    <section id="systemVerticalDiagramView" class="systemrequirement-view-panel" data-view-panel="vertical" hidden>
+                        <div class="systemrequirement-diagram-frame systemrequirement-vertical-diagram-frame" id="systemVerticalDiagramFrame">
+                            <div class="systemrequirement-diagram-canvas systemrequirement-vertical-diagram-canvas" id="systemVerticalDiagramCanvas">
+                                <svg class="systemrequirement-diagram-svg" id="systemVerticalDiagramSvg"></svg>
+                                <div class="systemrequirement-diagram-nodes" id="systemVerticalDiagramNodes"></div>
+                            </div>
+                            <div class="systemrequirement-empty" id="systemVerticalDiagramEmptyState">Loading…</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Context Menus -->
+<div id="stakeholderRequirementContextMenu" class="stakeholderrequirement-context-menu" role="menu" aria-hidden="true">
+    <button id="stakeholderContextMenuEditRequirement" type="button" data-context-action="edit-requirement">Edit Stakeholder Requirement</button>
+    <button id="stakeholderContextMenuCreateSubRequirement" type="button" data-context-action="create-sub-requirement">Create Sub Stakeholder Requirement</button>
+    <button id="stakeholderContextMenuCreateRootRequirement" type="button" data-context-action="create-root-requirement">Create Root Stakeholder Requirement</button>
+</div>
+
+<div id="systemRequirementContextMenu" class="systemrequirement-context-menu" role="menu" aria-hidden="true">
+    <button id="systemContextMenuEditRequirement" type="button" data-context-action="edit-requirement">Edit System Requirement</button>
+    <button id="systemContextMenuCreateSubRequirement" type="button" data-context-action="create-sub-requirement">Create Sub System Requirement</button>
+    <button id="systemContextMenuCreateRootRequirement" type="button" data-context-action="create-root-requirement">Create Root System Requirement</button>
+</div>
+
+<!-- Dialogs -->
+
+<!-- Stakeholder Dialogs -->
+<dialog id="stakeholderExportDialog" class="export-dialog" aria-label="Export Stakeholder Requirement">
+    <form method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head"><h3>Export Stakeholder Requirement</h3></div>
+            <p class="export-dialog-description">
+                Choose the format for the export and whether inactive requirements should be included.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="stakeholder-export-format-title">
+                <div class="export-dialog-section-title" id="stakeholder-export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xlsx" value="xlsx" checked>
+                        <span class="export-format-label">
+                            <strong>XLSX</strong>
+                            <span>Best for Excel and analysis</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="csv" value="csv">
+                        <span class="export-format-label">
+                            <strong>CSV</strong>
+                            <span>Simple tabular export</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="pdf" value="pdf">
+                        <span class="export-format-label">
+                            <strong>PDF</strong>
+                            <span>Readable report format</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xml" value="xml">
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured integration format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="export-dialog-section" aria-labelledby="stakeholder-export-options-title">
+                <div class="export-dialog-section-title" id="stakeholder-export-options-title">Options</div>
+
+                <div class="export-check-row">
+                    <input id="stakeholderExportIncludeInactive" type="checkbox" data-export-include-inactive="true">
+                    <label for="stakeholderExportIncludeInactive">Include inactive requirements</label>
+                </div>
+            </section>
+        </div>
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="stakeholderImportDialog" class="import-dialog" aria-label="Import Stakeholder Requirement">
+    <form method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head"><h3>Import Stakeholder Requirement</h3></div>
+            <p class="import-dialog-description">
+                Select a file containing stakeholder requirements. The file must be XML, XLSX or CSV.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="stakeholder-import-file-title">
+                <div class="import-dialog-section-title" id="stakeholder-import-file-title">Import file</div>
+
+                <input id="stakeholderImportFileInput" class="import-file-native-input" type="file" accept=".xml,.xlsx,.csv" data-import-file>
+
+                <label class="import-file-picker" for="stakeholderImportFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">&#128196;</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML, XLSX or CSV</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- System Dialogs -->
+<dialog id="systemExportDialog" class="export-dialog" aria-label="Export System Requirement">
+    <form method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head"><h3>Export System Requirement</h3></div>
+            <p class="export-dialog-description">
+                Choose the format for the export and whether inactive requirements should be included.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="system-export-format-title">
+                <div class="export-dialog-section-title" id="system-export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xlsx" value="xlsx" checked>
+                        <span class="export-format-label">
+                            <strong>XLSX</strong>
+                            <span>Best for Excel and analysis</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="csv" value="csv">
+                        <span class="export-format-label">
+                            <strong>CSV</strong>
+                            <span>Simple tabular export</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="pdf" value="pdf">
+                        <span class="export-format-label">
+                            <strong>PDF</strong>
+                            <span>Readable report format</span>
+                        </span>
+                    </label>
+
+                    <label class="export-format-option">
+                        <input type="radio" name="exportFormat" data-export-format="xml" value="xml">
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured integration format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="export-dialog-section" aria-labelledby="system-export-options-title">
+                <div class="export-dialog-section-title" id="system-export-options-title">Options</div>
+
+                <div class="export-check-row">
+                    <input id="systemExportIncludeInactive" type="checkbox" data-export-include-inactive="true">
+                    <label for="systemExportIncludeInactive">Include inactive requirements</label>
+                </div>
+            </section>
+        </div>
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="systemImportDialog" class="import-dialog" aria-label="Import System Requirement">
+    <form method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head"><h3>Import System Requirement</h3></div>
+            <p class="import-dialog-description">
+                Select a file containing system requirements. The file must be XML, XLSX or CSV.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="system-import-file-title">
+                <div class="import-dialog-section-title" id="system-import-file-title">Import file</div>
+
+                <input id="systemImportFileInput" class="import-file-native-input" type="file" accept=".xml,.xlsx,.csv" data-import-file>
+
+                <label class="import-file-picker" for="systemImportFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">&#128196;</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML, XLSX or CSV</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<script type="module" src="../js/pages/requirements-page.js"></script>
+<script src="../js/tabs-list.js"></script>
+</body>
+</html>

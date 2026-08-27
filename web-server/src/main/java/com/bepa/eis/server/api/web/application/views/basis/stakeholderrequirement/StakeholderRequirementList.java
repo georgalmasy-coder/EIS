@@ -21,7 +21,7 @@ public class StakeholderRequirementList extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.STAKEHOLDER_REQUIREMENT_MAIN_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.REQUIREMENTS_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         StakeholderRequirementProvider requirementListProvider = new StakeholderRequirementProvider(webSession);

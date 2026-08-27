@@ -21,7 +21,7 @@ public class SystemRequirementList extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.SYSTEM_REQUIREMENT_MAIN_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.REQUIREMENTS_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         SystemRequirementProvider systemRequirementProvider = new SystemRequirementProvider(webSession);

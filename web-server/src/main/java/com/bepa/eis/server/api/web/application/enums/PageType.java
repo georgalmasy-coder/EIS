@@ -19,6 +19,7 @@ public enum PageType {
     SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement Edit", "Edit the current system requirement in the workspace below."),
     SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
     SYSTEM_REQUIREMENT_MAIN_VERTICAL_PAGE("systemrequirement-main-vertical","html-pages/systemrequirement-main-vertical.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
+    REQUIREMENTS_PAGE("requirements", "html-pages/requirements.html", "Requirements", true, "R-F-L-P MODEL - REQUIREMENTS", "Requirements", "Work with stakeholder and system requirements without losing project context or traceability."),
 
     FUNCTIONAL_STRUCTURE_MAIN_PAGE("functionalstructure-main","html-pages/functionalstructure-main.html", "Functional", true, "R-F-L-P MODEL - FUNCTIONS", "Functions", "Work with functional design in the workspace below."),
     FUNCTIONAL_STRUCTURE_EDIT_PAGE("functionalstructure-edit","html-pages/functionalstructure-edit.html", "Functional Structure Edit", true, "R-F-L-P MODEL - FUNCTION", "Functional Design Edit", "Edit the current functional design in the workspace below."),
