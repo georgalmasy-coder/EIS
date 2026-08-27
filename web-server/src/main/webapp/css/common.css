@@ -235,7 +235,7 @@ body.theme-black{
     --text: #ffffff;
     --muted: #a0a0a0;
     --border: #333333;
-    --accent: #4ade80;
+    --accent: #073f34;
     --shadow: 0 12px 30px rgba(255,255,255,.08);
 
     --app-page-background: #000000;
@@ -247,12 +247,12 @@ body.theme-black{
     --app-text-tertiary: #707070;
     --app-border-default: #333333;
     --app-border-strong: #444444;
-    --app-accent-primary: #4ade80;
-    --app-accent-hover: #6ee7b7;
-    --app-accent-soft: rgba(74, 222, 128, 0.14);
+    --app-accent-primary: #073f34;
+    --app-accent-hover: #0b5f46;
+    --app-accent-soft: #073f34;
     --app-input-background: #0a0a0a;
     --app-input-border: #333333;
-    --app-input-focus-ring: rgba(74, 222, 128, 0.20);
+    --app-input-focus-ring: rgba(7, 63, 52, 0.30);
     --app-shadow: 0 12px 30px rgba(255, 255, 255, 0.08);
     --app-backdrop: rgba(0, 0, 0, 0.75);
     --app-table-header-background: #181818;
@@ -263,38 +263,38 @@ body.theme-black{
     --app-topbar-help-background: #2a2a2a;
     --app-topbar-help-border: #444444;
     --app-topbar-help-foreground: #ffffff;
-    --app-topbar-help-hover-background: rgba(74, 222, 128, 0.12);
-    --app-topbar-help-active-background: rgba(74, 222, 128, 0.18);
+    --app-topbar-help-hover-background: #0b5f46;
+    --app-topbar-help-active-background: #073f34;
     --app-topbar-help-active-foreground: #ffffff;
     --app-tab-background: #1a1a1a;
     --app-tab-foreground: #ffffff;
     --app-tab-hover-background: #242424;
     --app-tab-hover-foreground: #ffffff;
-    --app-tab-active-background: #4ade80;
-    --app-tab-active-foreground: #000000;
+    --app-tab-active-background: #073f34;
+    --app-tab-active-foreground: #ffffff;
     --app-diagram-background: #000000;
     --app-diagram-node-background: #121212;
     --app-diagram-node-foreground: #ffffff;
-    --app-diagram-node-border: #4ade80;
+    --app-diagram-node-border: #073f34;
     --app-diagram-edge-foreground: #ffffff;
     --app-icon-background: #121212;
     --app-icon-border: #444444;
     --app-icon-foreground: #ffffff;
-    --app-icon-hover-background: rgba(74, 222, 128, 0.12);
-    --app-icon-active-background: rgba(74, 222, 128, 0.18);
+    --app-icon-hover-background: rgba(7, 63, 52, 0.25);
+    --app-icon-active-background: rgba(7, 63, 52, 0.35);
     --app-icon-active-foreground: #ffffff;
     --app-control-background: #121212;
     --app-control-border: #444444;
     --app-control-foreground: #ffffff;
-    --app-control-hover-background: rgba(74, 222, 128, 0.10);
-    --app-control-active-background: rgba(74, 222, 128, 0.16);
-    --app-control-active-border: #4ade80;
+    --app-control-hover-background: rgba(7, 63, 52, 0.20);
+    --app-control-active-background: rgba(7, 63, 52, 0.30);
+    --app-control-active-border: #073f34;
     --app-chip-background: #1a1a1a;
     --app-chip-border: #333333;
     --app-chip-foreground: #ffffff;
-    --app-chip-hover-background: rgba(74, 222, 128, 0.08);
-    --app-table-row-hover: rgba(74, 222, 128, 0.10);
-    --app-table-row-selected: rgba(74, 222, 128, 0.16);
+    --app-chip-hover-background: rgba(7, 63, 52, 0.15);
+    --app-table-row-hover: rgba(7, 63, 52, 0.20);
+    --app-table-row-selected: rgba(7, 63, 52, 0.30);
     --app-table-row-alt: #0a0a0a;
     --app-drag-zone-background: #1a1a1a;
     --app-drag-zone-border: #444444;
@@ -305,8 +305,8 @@ body.theme-black{
     --app-status-warning-text: #fb923c;
     --app-status-info-bg: rgba(37, 99, 235, 0.2);
     --app-status-info-text: #60a5fa;
-    --app-status-success-bg: rgba(74, 222, 128, 0.2);
-    --app-status-success-text: #4ade80;
+    --app-status-success-bg: rgba(7, 63, 52, 0.4);
+    --app-status-success-text: #6ee7b7;
     --app-status-purple-bg: rgba(167, 139, 250, 0.2);
     --app-status-purple-text: #a78bfa;
     --app-table-header-foreground: var(--app-text-secondary);
@@ -714,4 +714,102 @@ button.primary{
 
 button:hover{
     filter: brightness(1.08);
+}
+
+/* Theme Black Button Standardization */
+body.theme-black button,
+body.theme-black .button,
+body.theme-black .btn {
+    outline: none;
+    transition: outline 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+body.theme-black button:focus-visible,
+body.theme-black .button:focus-visible,
+body.theme-black .btn:focus-visible {
+    outline: 2px solid #ffffff !important;
+    outline-offset: 2px;
+}
+
+body.theme-black button.primary,
+body.theme-black .button-primary,
+body.theme-black .new-project-button,
+body.theme-black .btn-open-project,
+body.theme-black .baseline-primary-button,
+body.theme-black .import-primary-btn,
+body.theme-black .export-primary-btn,
+body.theme-black .systemsbreakdown-secondary-button,
+body.theme-black .systemsbreakdown-columns-button,
+body.theme-black .systemrequirement-secondary-button,
+body.theme-black .systemrequirement-columns-button,
+body.theme-black .logicalstructure-secondary-button,
+body.theme-black .logicalstructure-columns-button,
+body.theme-black .functionalstructure-secondary-button,
+body.theme-black .functionalstructure-columns-button,
+body.theme-black .stakeholderrequirement-secondary-button,
+body.theme-black .stakeholderrequirement-columns-button,
+body.theme-black .incident-main-secondary-button,
+body.theme-black .dashboard-systems-teamwork-secondary-button,
+body.theme-black .btn-ghost,
+body.theme-black .btn-primary,
+body.theme-black .btn-primary-dark,
+body.theme-black .baseline-secondary-button,
+body.theme-black .import-secondary-btn,
+body.theme-black .export-secondary-btn,
+body.theme-black .relationdiagram-secondary-button,
+body.theme-black #btnSave,
+body.theme-black #btnCancel,
+body.theme-black #btnClearFilter,
+body.theme-black #btnSaveBaseline,
+body.theme-black #btnCancelBaseline {
+    background-color: var(--app-accent-primary) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--app-accent-primary) !important;
+    box-shadow: none !important;
+}
+
+body.theme-black button.primary:hover,
+body.theme-black .button-primary:hover,
+body.theme-black .new-project-button:hover,
+body.theme-black .btn-open-project:hover,
+body.theme-black .baseline-primary-button:hover,
+body.theme-black .import-primary-btn:hover,
+body.theme-black .export-primary-btn:hover,
+body.theme-black .systemsbreakdown-secondary-button:hover,
+body.theme-black .systemsbreakdown-columns-button:hover,
+body.theme-black .systemrequirement-secondary-button:hover,
+body.theme-black .systemrequirement-columns-button:hover,
+body.theme-black .logicalstructure-secondary-button:hover,
+body.theme-black .logicalstructure-columns-button:hover,
+body.theme-black .functionalstructure-secondary-button:hover,
+body.theme-black .functionalstructure-columns-button:hover,
+body.theme-black .stakeholderrequirement-secondary-button:hover,
+body.theme-black .stakeholderrequirement-columns-button:hover,
+body.theme-black .incident-main-secondary-button:hover,
+body.theme-black .dashboard-systems-teamwork-secondary-button:hover,
+body.theme-black .btn-ghost:hover,
+body.theme-black .btn-primary:hover,
+body.theme-black .btn-primary-dark:hover,
+body.theme-black .baseline-secondary-button:hover,
+body.theme-black .import-secondary-btn:hover,
+body.theme-black .export-secondary-btn:hover,
+body.theme-black .relationdiagram-secondary-button:hover,
+body.theme-black #btnSave:hover,
+body.theme-black #btnCancel:hover,
+body.theme-black #btnClearFilter:hover,
+body.theme-black #btnSaveBaseline:hover,
+body.theme-black #btnCancelBaseline:hover {
+    background-color: var(--app-accent-hover) !important;
+    border-color: var(--app-accent-hover) !important;
+    color: #ffffff !important;
+}
+
+body.theme-black .systemsbreakdown-view-button.is-active,
+body.theme-black .logicalstructure-view-button.is-active,
+body.theme-black .functionalstructure-view-button.is-active,
+body.theme-black .systemrequirement-view-button.is-active,
+body.theme-black .stakeholderrequirement-view-button.is-active {
+    background-color: var(--app-accent-hover) !important;
+    border-color: var(--app-accent-hover) !important;
+    color: #ffffff !important;
 }
