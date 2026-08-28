@@ -53,7 +53,11 @@ public class TopPanelProvider extends GenericProvider {
 
             TopPanelTitle topPanelTitle = new TopPanelTitle();
             topPanelTitle.setFieldNotVisible();
-            topPanelTitle.setValue(projectName.getValue() + " - " + pageType.getTitle().toLowerCase());
+            if (projectName != null && projectName.getValue() != null && !projectName.getValue().isBlank()) {
+                topPanelTitle.setValue(projectName.getValue() + " - " + pageType.getTitle().toLowerCase());
+            } else {
+                topPanelTitle.setValue(pageType.getTitle().toLowerCase());
+            }
             getTopPanelElement().addElement(topPanelTitle);
 
             if (pageType.getWorkspaceEyebrow() != null && !pageType.getWorkspaceEyebrow().isBlank()) {
@@ -137,14 +141,14 @@ public class TopPanelProvider extends GenericProvider {
         return userId != null ? userId.getValue() : 0;
     }
 
-    public String getUserName() throws SQLException {
+    public String getUserName() {
         if (userName == null && getWebSession().getUserId() != null) {
             loadUserInfo();
         }
         return userName != null ? userName.getValue() : "";
     }
 
-    private void loadCustomerInfo() throws SQLException {
+    private void loadCustomerInfo() {
         /* Get customer info */
         if (getWebSession() != null && getWebSession().getCustomerId() != null) {
 
@@ -161,7 +165,7 @@ public class TopPanelProvider extends GenericProvider {
         }
     }
 
-    private void loadProjectInfo() throws SQLException {
+    private void loadProjectInfo(){
         /* Get project info */
 
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
@@ -180,7 +184,7 @@ public class TopPanelProvider extends GenericProvider {
         }
     }
 
-    private void loadUserInfo() throws SQLException {
+    private void loadUserInfo() {
 
         User user = CustomerLookupCache.getUser(getWebSession(), getWebSession().getUserId());
 
@@ -210,11 +214,6 @@ public class TopPanelProvider extends GenericProvider {
         public String getFieldHeaderName() {
             return "";
         }
-
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
-        }
     }
 
     private static class TopPanelTitle extends AbstractString {
@@ -234,10 +233,6 @@ public class TopPanelProvider extends GenericProvider {
             return "";
         }
 
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
-        }
     }
 
     private static class WorkspaceEyebrow extends AbstractString {
@@ -257,10 +252,6 @@ public class TopPanelProvider extends GenericProvider {
             return "";
         }
 
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
-        }
     }
 
     private static class WorkspaceHeading extends AbstractString {
@@ -279,11 +270,6 @@ public class TopPanelProvider extends GenericProvider {
         public String getFieldHeaderName() {
             return "";
         }
-
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
-        }
     }
 
     private static class WorkspaceHelpText extends AbstractString {
@@ -301,11 +287,6 @@ public class TopPanelProvider extends GenericProvider {
         @Override
         public String getFieldHeaderName() {
             return "";
-        }
-
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
         }
     }
 
@@ -339,11 +320,6 @@ public class TopPanelProvider extends GenericProvider {
         @Override
         public Integer getFieldDisplayLength() {
             return 25;
-        }
-
-        @Override
-        public String toString() {
-            return getValue() != null  ? getValue() : "";
         }
     }
 }

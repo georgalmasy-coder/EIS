@@ -12,6 +12,7 @@ import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
 import com.bepa.eis.server.api.web.application.enums.PageType;
+import com.bepa.eis.server.api.web.application.enums.theme.Theme;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.booleans.AbstractBoolean;
@@ -41,22 +42,41 @@ public class UserMainInfo extends GenericXmlDocument {
     private final Integer userId;
     private final EntityRequestType requestType;
     private final ListOfElements rootElement;
+    private final PageType pageType;
+    private final boolean includeProjectAccess;
+    private final boolean myProfileMode;
 
     public UserMainInfo(
             WebSession webSession,
             EntityRequestType requestType,
             Integer userId
     ) throws Exception {
+        this(webSession, requestType, userId, PageType.USER_EDIT_PAGE, true, false);
+    }
+
+    public UserMainInfo(
+            WebSession webSession,
+            EntityRequestType requestType,
+            Integer userId,
+            PageType pageType,
+            boolean includeProjectAccess,
+            boolean myProfileMode
+    ) throws Exception {
         super(webSession);
 
         this.requestType = requestType;
         this.userId = userId;
+        this.pageType = pageType == null ? PageType.USER_EDIT_PAGE : pageType;
+        this.includeProjectAccess = includeProjectAccess;
+        this.myProfileMode = myProfileMode;
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         appendTopPanel(webSession);
         appendUserDocument(resolveUserRecord(webSession));
-        appendProjectAccessDocument(resolveProjectAccessRows(webSession));
+        if (this.includeProjectAccess) {
+            appendProjectAccessDocument(resolveProjectAccessRows(webSession));
+        }
         appendLookups();
     }
 
@@ -66,7 +86,7 @@ public class UserMainInfo extends GenericXmlDocument {
         }
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        TopPanel topPanel = topPanelProvider.getTopPanelBySession(PageType.USER_EDIT_PAGE);
+        TopPanel topPanel = topPanelProvider.getTopPanelBySession(pageType);
         rootElement.addElement(topPanel.getTopPanelElements());
     }
 
@@ -214,7 +234,11 @@ public class UserMainInfo extends GenericXmlDocument {
 
         UserEmail userEmail = new UserEmail();
         userEmail.setValue(safeUser.email());
-        userEmail.setFieldEditable();
+        if (myProfileMode) {
+            userEmail.setFieldNotEditable();
+        } else {
+            userEmail.setFieldEditable();
+        }
         userEmail.setFieldRequired();
         userElements.addElement(userEmail);
 
@@ -232,13 +256,25 @@ public class UserMainInfo extends GenericXmlDocument {
 
         Integer roleId = safeUser.userRole() == null ? UserRoles.CUSTOMER_ADMINISTRATOR.getId() : safeUser.userRole().getId();
         UserRole userRole = new UserRole(webSession, roleId);
-        userRole.setFieldEditable();
+        if (myProfileMode) {
+            userRole.setFieldNotEditable();
+        } else {
+            userRole.setFieldEditable();
+        }
         userRole.setFieldRequired();
         userElements.addElement(userRole);
 
-        Active active = new Active(safeUser.active());
-        active.setFieldEditable();
-        userElements.addElement(active);
+        ThemeLookupField theme = new ThemeLookupField();
+        theme.setValue(safeUser.themeId());
+        theme.setFieldEditable();
+        theme.setFieldNotRequired();
+        userElements.addElement(theme);
+
+        if (!myProfileMode) {
+            Active active = new Active(safeUser.active());
+            active.setFieldEditable();
+            userElements.addElement(active);
+        }
     }
 
     private UserProvider.UserAdministrationRow createEmptyUser(WebSession webSession) {
@@ -543,6 +579,69 @@ public class UserMainInfo extends GenericXmlDocument {
         @Override
         public String toString() {
             return getLookupCode() != null ? getLookupCode() : "";
+        }
+    }
+
+    private static final class ThemeLookupField extends AbstractLookup {
+        @Override
+        public String getLookupName() {
+            return "Theme";
+        }
+
+        @Override
+        public String getDropdownSelectText() {
+            return "Select theme ...";
+        }
+
+        @Override
+        public List<LookupValue> getListOfActiveLookupValues() {
+            return Arrays.stream(Theme.values())
+                    .map(theme -> new LookupValue(
+                            null,
+                            null,
+                            theme.getCssId(),
+                            labelForTheme(theme),
+                            labelForTheme(theme),
+                            true
+                    ))
+                    .toList();
+        }
+
+        @Override
+        public void setValue(Integer value) {
+            Theme theme = value == null ? Theme.LIGHT : Theme.fromId(value.toString());
+            setLookupValue(new LookupValue(
+                    null,
+                    null,
+                    theme.getCssId(),
+                    labelForTheme(theme),
+                    labelForTheme(theme),
+                    true
+            ));
+        }
+
+        @Override
+        public String getFieldName() {
+            return "ThemeId";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Theme";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Theme";
+        }
+
+        private static String labelForTheme(Theme theme) {
+            if (theme == null) {
+                return "Light";
+            }
+
+            String name = theme.name().toLowerCase();
+            return Character.toUpperCase(name.charAt(0)) + name.substring(1);
         }
     }
 

@@ -53,6 +53,7 @@ public enum PageType {
 
     USER_MAIN_PAGE("user-main","html-pages/user-main.html", "User Administration", true, "USER MANAGEMENT", "User Accounts", "Use the workspace below to manage users."),
     USER_EDIT_PAGE("user-edit","html-pages/user-edit.html", "User Account", true, "USER MANAGEMENT", "User Account", "Edit the current user account in the workspace below."),
+    MY_PROFILE_EDIT_PAGE("myprofile-edit","html-pages/myprofile-edit.html", "My Profile", true, "USER MANAGEMENT", "My Profile", "Edit your own user account information in the workspace below."),
 
     STAKEHOLDER_MAIN_PAGE("stakeholder-main","html-pages/stakeholder-main.html", "Stakeholder", true, "STAKEHOLDER MANAGEMENT", "Stakeholder", "Work with stakeholder records in the workspace below."),
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "STAKEHOLDER MANAGEMENT", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),

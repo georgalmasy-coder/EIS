@@ -43,9 +43,21 @@ import {
     validatePhoneNumber as validateIntlPhoneNumber
 } from "../components/phone-intl-field.js";
 
-const DETAIL_URL = "/api/user-main";
-const SAVE_URL = "/api/user-main?cmd=save";
-const RETURN_URL = "/web/view?page=user-main";
+const DEFAULT_DETAIL_URL = "/api/user-main";
+const DEFAULT_SAVE_URL = "/api/user-main?cmd=save";
+const DEFAULT_RETURN_URL = "/web/view?page=user-main";
+
+const bodyDataset = document.body?.dataset || {};
+const PAGE_CONFIG = {
+    profileMode: String(bodyDataset.profileMode || "").toLowerCase() === "true",
+    detailUrl: bodyDataset.detailUrl || DEFAULT_DETAIL_URL,
+    saveUrl: bodyDataset.saveUrl || DEFAULT_SAVE_URL,
+    returnUrl: bodyDataset.returnUrl || DEFAULT_RETURN_URL,
+    pageTitle: bodyDataset.pageTitle || "User Account"
+};
+
+const PROFILE_HIDDEN_FIELDS = new Set(["Active", "LockedUntil"]);
+const PROFILE_READONLY_FIELDS = new Set(["UserEmail", "Email", "UserRole"]);
 
 const PHONE_RULES = [
     { country: "Denmark", code: "+45", min: 8, max: 8, example: "12 34 56 78" },
@@ -76,7 +88,7 @@ const DEFAULT_PHONE_RULE = PHONE_RULES[0];
 const state = {
     mode: "edit",
     id: "",
-    returnUrl: RETURN_URL,
+    returnUrl: PAGE_CONFIG.returnUrl,
     modal: false,
     currentDoc: null,
     lookups: {},
@@ -127,11 +139,15 @@ function initializeShell() {
 }
 
 function initializeTabs() {
-    initTabs([
+    const tabs = [
         { btnId: "tabBtnBasis", panelId: "tabPanelBasis" },
         { btnId: "tabBtnProjects", panelId: "tabPanelProjects" },
         { btnId: "tabBtnSecurityAndPassword", panelId: "tabPanelSecurityAndPassword" }
-    ]);
+    ].filter((tab) => document.getElementById(tab.btnId) && document.getElementById(tab.panelId));
+
+    if (tabs.length) {
+        initTabs(tabs);
+    }
 
     const securityTabButton = document.getElementById("tabBtnSecurityAndPassword");
     const securityTabPanel = document.getElementById("tabPanelSecurityAndPassword");
@@ -154,7 +170,7 @@ function initializeRouteState() {
 
     state.mode = requestedMode === "create" ? "create" : "edit";
     state.id = params.get("id") || "";
-    state.returnUrl = params.get("returnUrl") || RETURN_URL;
+    state.returnUrl = params.get("returnUrl") || PAGE_CONFIG.returnUrl;
     state.modal = state.modal || dialogContext.modal;
 }
 
@@ -255,14 +271,18 @@ async function loadDetail() {
 
 function buildDetailUrl() {
     if (state.mode === "create") {
-        return `${DETAIL_URL}?cmd=create`;
+        return `${PAGE_CONFIG.detailUrl}?cmd=create`;
     }
 
     if (!state.id) {
+        if (PAGE_CONFIG.profileMode) {
+            return `${PAGE_CONFIG.detailUrl}?cmd=edit`;
+        }
+
         return "";
     }
 
-    return `${DETAIL_URL}?cmd=edit&id=${encodeURIComponent(state.id)}`;
+    return `${PAGE_CONFIG.detailUrl}?cmd=edit&id=${encodeURIComponent(state.id)}`;
 }
 
 function applyModeUi() {
@@ -270,7 +290,7 @@ function applyModeUi() {
 
     setText("pageModeLabel", state.mode === "create" ? "Create user" : "Edit user");
     setText("entityMeta", state.mode === "create" ? "New user" : `User ID: ${state.id || "-"}`);
-    setText("pageTitle", "User Account");
+    setText("pageTitle", PAGE_CONFIG.pageTitle);
 
     if (saveButton) {
         saveButton.textContent = state.mode === "create" ? "Create" : "Save";
@@ -389,7 +409,7 @@ function renderDetailFields() {
     const projectAccessFields = document.getElementById("projectAccessFields");
     const securityAndPasswordFields = document.getElementById("securityAndPasswordFields");
 
-    if (!basisFields || !projectAccessFields || !securityAndPasswordFields) {
+    if (!basisFields) {
         return;
     }
 
@@ -401,10 +421,14 @@ function renderDetailFields() {
             .join("");
     }
 
-    if (!state.projectAccessNode) {
+    if (projectAccessFields && !state.projectAccessNode) {
         projectAccessFields.innerHTML = '<div class="page-empty">No project access XML returned.</div>';
-    } else {
+    } else if (projectAccessFields) {
         projectAccessFields.innerHTML = renderProjectAccessMarkup(state.projectAccessNode);
+    }
+
+    if (!securityAndPasswordFields) {
+        return;
     }
 
     if (!state.securityAndPasswordNode) {
@@ -434,9 +458,14 @@ function syncProjectPanelHeight() {
 
 function renderBasisInfoFieldMarkup(field) {
     const name = field.tagName;
+
+    if (PAGE_CONFIG.profileMode && PROFILE_HIDDEN_FIELDS.has(name)) {
+        return "";
+    }
+
     const label = fieldHeader(field, name);
     const control = fieldControl(field);
-    const editable = fieldEditable(field);
+    const editable = fieldEditable(field) && !(PAGE_CONFIG.profileMode && PROFILE_READONLY_FIELDS.has(name));
     const visible = fieldVisible(field);
     const required = fieldRequired(field);
     const value = getFieldUiValue(field);
@@ -616,7 +645,7 @@ async function saveCurrentUser() {
         setText("loadStatus", "Saving");
 
         const payload = buildSavePayload();
-        const response = await fetch(SAVE_URL, {
+        const response = await fetch(PAGE_CONFIG.saveUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/xml; charset=UTF-8",
