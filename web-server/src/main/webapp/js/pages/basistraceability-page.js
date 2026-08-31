@@ -791,7 +791,7 @@ function clearContextState() {
 function getTraceabilityCellActions(cell) {
     const style = String(cell?.style || "").trim().toLowerCase();
 
-    if (style.includes("yellow")) {
+    if (style.includes("yellow") || style.includes("normal") || style.includes("white")) {
         return [
             {
                 action: CELL_ACTIONS.confirmRelation,

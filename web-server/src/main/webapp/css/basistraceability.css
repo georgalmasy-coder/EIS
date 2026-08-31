@@ -297,11 +297,9 @@ body.traceability-document {
     cursor: pointer;
 }
 
-.traceability-table .traceability-column-header,
 .traceability-table .traceability-second-corner-axis,
 .traceability-table .traceability-second-corner-row,
-.traceability-table .traceability-axis-cell,
-.traceability-table .traceability-row-header {
+.traceability-table .traceability-axis-cell {
     background: var(--app-table-header-background) !important;
     color: var(--app-table-header-foreground, var(--app-text-secondary)) !important;
 }
