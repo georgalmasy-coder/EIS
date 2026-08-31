@@ -427,6 +427,7 @@
     gap: 8px;
     padding: 6px 8px 4px;
     color: var(--text);
+    font-family: inherit;
     font-size: 13px;
     font-weight: 800;
     text-transform: none;
@@ -442,6 +443,8 @@
     border-radius: 10px;
     background: transparent;
     color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
     font-weight: 650;
     text-align: left;
     cursor: pointer;
@@ -474,6 +477,8 @@
     padding: 6px 8px;
     border-radius: 10px;
     color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
     text-decoration: none;
     font-weight: 650;
 }
@@ -520,6 +525,8 @@
     padding: 6px 8px;
     border-radius: 10px;
     color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
     text-decoration: none;
     font-weight: 650;
 }
