@@ -193,6 +193,15 @@ function normalizeText(value, fallback = "-") {
     return normalized || fallback;
 }
 
+function initialsFromProjectName(projectName) {
+    return normalizeText(projectName, "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 3)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join("") || "-";
+}
+
 function readFirstText(parent, tagNames, fallback = "") {
     const names = Array.isArray(tagNames) ? tagNames : [tagNames];
 
@@ -461,7 +470,7 @@ function createSidebarProjectPicker(doc) {
 
     picker.innerHTML = `
         <button type="button" class="menu-project-picker-button" aria-haspopup="listbox" aria-expanded="false">
-            <span class="menu-project-picker-badge" aria-hidden="true">D4</span>
+            <span class="menu-project-picker-badge" aria-hidden="true">-</span>
             <span class="menu-project-picker-copy">
                 <span class="menu-project-picker-label">Active project</span>
                 <span class="menu-project-picker-value" id="menuProjectValue">-</span>
@@ -568,10 +577,11 @@ function renderProjectPicker() {
         || state.projects[0]
         || null;
 
-    projectPickerValue.textContent = selectedProject?.projectName || state.topPanel.projectName || "-";
+    const selectedProjectName = selectedProject?.projectName || state.topPanel.projectName || "-";
+    projectPickerValue.textContent = selectedProjectName;
 
     if (projectPickerBadge) {
-        projectPickerBadge.textContent = "D4";
+        projectPickerBadge.textContent = initialsFromProjectName(selectedProjectName);
     }
 
     projectPickerList.replaceChildren();
