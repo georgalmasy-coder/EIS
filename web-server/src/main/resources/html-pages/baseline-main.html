@@ -124,7 +124,7 @@
 <dialog id="baselineDialog" class="baseline-dialog" aria-label="Add new baseline dialog">
     <form id="baselineForm" method="dialog" class="dlg baseline-form">
         <div class="page-dialog-head baseline-dialog-head">
-            <h3>Add new baseline</h3>
+            <h3 id="baselineDialogTitle">Add new baseline</h3>
         </div>
 
         <div class="page-dialog-status baseline-dialog-status" id="baselineDialogStatus">Idle</div>
@@ -159,6 +159,11 @@
         </div>
     </form>
 </dialog>
+
+<div id="baselineContextMenu" class="baseline-context-menu" role="menu" hidden>
+    <button id="baselineContextOpenButton" type="button" role="menuitem">Open Baseline Detail</button>
+    <button id="baselineContextEditButton" type="button" role="menuitem">Edit Baseline Detail</button>
+</div>
 
 <dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
     <form method="dialog" class="help-dialog-form">

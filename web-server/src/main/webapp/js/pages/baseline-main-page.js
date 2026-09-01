@@ -14,6 +14,9 @@ const state = {
     sortKey: "changedDateTime",
     sortDirection: "desc",
     saving: false,
+    canAddBaseline: false,
+    editingBaseline: null,
+    contextBaseline: null,
     currentDoc: null,
     topPanel: {
         customerName: "—",
@@ -54,12 +57,16 @@ function collectElements() {
     els.btnAddBaseline = document.getElementById("btnAddBaseline");
 
     els.baselineDialog = document.getElementById("baselineDialog");
+    els.baselineDialogTitle = document.getElementById("baselineDialogTitle");
     els.baselineForm = document.getElementById("baselineForm");
     els.baselineDialogStatus = document.getElementById("baselineDialogStatus");
     els.fieldTagName = document.getElementById("fieldTagName");
     els.fieldDescription = document.getElementById("fieldDescription");
     els.btnSaveBaseline = document.getElementById("btnSaveBaseline");
     els.btnCancelBaseline = document.getElementById("btnCancelBaseline");
+    els.baselineContextMenu = document.getElementById("baselineContextMenu");
+    els.baselineContextOpenButton = document.getElementById("baselineContextOpenButton");
+    els.baselineContextEditButton = document.getElementById("baselineContextEditButton");
 }
 
 function bindEvents() {
@@ -74,6 +81,34 @@ function bindEvents() {
     if (els.btnSaveBaseline) {
         els.btnSaveBaseline.addEventListener("click", saveBaseline);
     }
+
+    els.baselineContextOpenButton?.addEventListener("click", function () {
+        const baseline = state.contextBaseline;
+        closeBaselineContextMenu();
+        openBaselineDetail(baseline?.baselinePK);
+    });
+
+    els.baselineContextEditButton?.addEventListener("click", function () {
+        const baseline = state.contextBaseline;
+        closeBaselineContextMenu();
+        if (baseline && state.canAddBaseline) {
+            openEditBaselineDialog(baseline);
+        }
+    });
+
+    document.addEventListener("pointerdown", function (event) {
+        if (els.baselineContextMenu && !els.baselineContextMenu.hidden && !els.baselineContextMenu.contains(event.target)) {
+            closeBaselineContextMenu();
+        }
+    });
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeBaselineContextMenu();
+        }
+    });
+    window.addEventListener("blur", closeBaselineContextMenu);
+    window.addEventListener("resize", closeBaselineContextMenu);
+    document.getElementById("tableScroll")?.addEventListener("scroll", closeBaselineContextMenu);
 
     if (els.baselineHeaderRow) {
         els.baselineHeaderRow.querySelectorAll("th[data-key]").forEach(function (headerCell) {
@@ -100,14 +135,18 @@ async function loadBaselines() {
         state.currentDoc = doc;
         state.topPanel = parsePageTopPanel(doc);
         state.baselines = parseBaselines(doc);
+        state.canAddBaseline = textOf(doc.documentElement, "canAddBaseline").toLowerCase() === "true";
 
         applyTopPanel();
+        updateAddBaselineButton();
         applySortAndRender();
 
         setLoadStatus("Loaded");
     } catch (error) {
         console.error(error);
         state.baselines = [];
+        state.canAddBaseline = false;
+        updateAddBaselineButton();
         renderBaselines([]);
         setLoadStatus("Error");
         showEmpty("Could not load baselines.");
@@ -226,6 +265,12 @@ function renderBaselines(baselines) {
             openBaselineDetail(baseline.baselinePK);
         });
 
+        row.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+            state.selectedBaselinePK = baseline.baselinePK;
+            openBaselineContextMenu(event.clientX, event.clientY, baseline);
+        });
+
         els.baselineBody.appendChild(row);
     });
 }
@@ -270,12 +315,17 @@ function openBaselineDetail(baselinePK) {
 }
 
 function openAddBaselineDialog() {
-    if (!els.baselineDialog) {
+    if (!state.canAddBaseline || !els.baselineDialog) {
         return;
     }
 
     if (els.baselineForm) {
         els.baselineForm.reset();
+    }
+
+    state.editingBaseline = null;
+    if (els.baselineDialogTitle) {
+        els.baselineDialogTitle.textContent = "Add new baseline";
     }
 
     clearDialogStatus();
@@ -289,6 +339,65 @@ function openAddBaselineDialog() {
     if (els.fieldTagName) {
         els.fieldTagName.focus();
     }
+}
+
+function openEditBaselineDialog(baseline) {
+    if (!state.canAddBaseline || !baseline || !els.baselineDialog) {
+        return;
+    }
+
+    state.editingBaseline = baseline;
+    if (els.baselineDialogTitle) {
+        els.baselineDialogTitle.textContent = "Edit Baseline Detail";
+    }
+    if (els.fieldTagName) {
+        els.fieldTagName.value = baseline.tagName || "";
+    }
+    if (els.fieldDescription) {
+        els.fieldDescription.value = baseline.description || "";
+    }
+    clearDialogStatus();
+    els.baselineDialog.showModal ? els.baselineDialog.showModal() : els.baselineDialog.setAttribute("open", "open");
+    els.fieldTagName?.focus();
+}
+
+function openBaselineContextMenu(x, y, baseline) {
+    if (!els.baselineContextMenu) {
+        return;
+    }
+
+    state.contextBaseline = baseline;
+    if (els.baselineContextEditButton) {
+        els.baselineContextEditButton.disabled = !state.canAddBaseline;
+        els.baselineContextEditButton.title = state.canAddBaseline ? "" : "Only the project owner can edit a baseline";
+    }
+
+    els.baselineContextMenu.hidden = false;
+    els.baselineContextMenu.style.left = "0px";
+    els.baselineContextMenu.style.top = "0px";
+    const bounds = els.baselineContextMenu.getBoundingClientRect();
+    els.baselineContextMenu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - bounds.width - 8))}px`;
+    els.baselineContextMenu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - bounds.height - 8))}px`;
+    els.baselineContextOpenButton?.focus();
+}
+
+function closeBaselineContextMenu() {
+    if (els.baselineContextMenu) {
+        els.baselineContextMenu.hidden = true;
+    }
+    state.contextBaseline = null;
+}
+
+function updateAddBaselineButton() {
+    if (!els.btnAddBaseline) {
+        return;
+    }
+
+    els.btnAddBaseline.disabled = !state.canAddBaseline;
+    els.btnAddBaseline.setAttribute("aria-disabled", String(!state.canAddBaseline));
+    els.btnAddBaseline.title = state.canAddBaseline
+        ? "Add new baseline"
+        : "Only the project owner can add a baseline";
 }
 
 function closeAddBaselineDialog() {
@@ -330,7 +439,8 @@ async function saveBaseline() {
     try {
         await postXml(`${API_URL}?cmd=save`, buildSaveXml(
             tagName,
-            description
+            description,
+            state.editingBaseline?.baselinePK
         ));
 
         closeAddBaselineDialog();
@@ -366,11 +476,13 @@ function validateBaseline(
 
 function buildSaveXml(
     tagName,
-    description
+    description,
+    baselinePK = null
 ) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <baselineDocument>
     <baseline>
+        ${baselinePK ? `<baselinePK>${baselinePK}</baselinePK>` : ""}
         <tagName>${escapeXml(tagName)}</tagName>
         <description>${escapeXml(description)}</description>
     </baseline>

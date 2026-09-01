@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.baseline;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
@@ -8,6 +9,7 @@ import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
+import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,7 @@ import org.w3c.dom.Element;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 @WebServlet(name = "BaselineServlet", urlPatterns = { "/basis/baseline" })
 public class BaselineServlet extends GenericDataProviderServlet {
@@ -38,6 +41,10 @@ public class BaselineServlet extends GenericDataProviderServlet {
             HttpServletRequest request,
             Element rootElement
     ) throws Exception {
+        if (!canAddBaseline(webSession)) {
+            throw new SecurityException("Only the project owner can create baselines.");
+        }
+
         Element baselineElement = firstChild(rootElement, "baseline");
 
         if (baselineElement == null) {
@@ -62,12 +69,15 @@ public class BaselineServlet extends GenericDataProviderServlet {
                 "description"
         );
 
+        Integer baselineId = intValue(baselineElement, "baselinePK");
+
         BaselineProvider baselineProvider = new BaselineProvider(webSession);
 
-        baselineProvider.createBaseline(
-                tagName,
-                description
-        );
+        if (baselineId == null) {
+            baselineProvider.createBaseline(tagName, description);
+        } else {
+            baselineProvider.updateBaseline(baselineId, tagName, description);
+        }
 
     }
 
@@ -106,6 +116,12 @@ public class BaselineServlet extends GenericDataProviderServlet {
                 webSession == null ? null : webSession.getProjectId()
         );
 
+        xmlDocument.appendTextElement(
+                root,
+                "canAddBaseline",
+                canAddBaseline(webSession)
+        );
+
         Element baselinesElement = xmlDocument.appendElement(
                 root,
                 "baselines"
@@ -120,6 +136,17 @@ public class BaselineServlet extends GenericDataProviderServlet {
         }
 
         return xmlDocument;
+    }
+
+    private boolean canAddBaseline(WebSession webSession) throws Exception {
+        if (webSession == null || webSession.getUserId() == null || webSession.getProjectId() == null) {
+            return false;
+        }
+
+        ProjectRecord project = new ProjectProvider(webSession)
+                .getLatestProjectByProjectId(webSession.getProjectId());
+
+        return project != null && Objects.equals(webSession.getUserId(), project.getOwnerId());
     }
 
     @Override

@@ -87,6 +87,11 @@ public class BaselineProvider extends GenericProvider {
                     ") " +
                     "VALUES (?, ?, ?, ?, ?, SYSUTCDATETIME())";
 
+    private static final String UPDATE_BASELINE_SQL =
+            "UPDATE [dbo].[BASELINE] " +
+                    "SET TagName = ?, Description = ? " +
+                    "WHERE BaselinePK = ? AND CustomerId = ? AND ProjectId = ?";
+
     public BaselineProvider(WebSession webSession) {
         super(webSession);
 
@@ -212,6 +217,40 @@ public class BaselineProvider extends GenericProvider {
                     normalizedTagName,
                     e
             );
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateBaseline(Integer baselineId, String tagName, String description) {
+        WebSession webSession = getWebSession();
+        validateWebSession(webSession);
+
+        Baseline existingBaseline = getBaselineById(baselineId);
+        if (existingBaseline == null) {
+            throw new IllegalArgumentException("Baseline was not found.");
+        }
+
+        String normalizedTagName = safeText(tagName);
+        String normalizedDescription = safeText(description);
+        validateBaselineInput(normalizedTagName, normalizedDescription);
+
+        if (!normalizedTagName.equalsIgnoreCase(safeText(existingBaseline.getTagName())) && baselineExists(normalizedTagName)) {
+            throw new IllegalArgumentException("A baseline with this tag-name already exists for the selected customer and project.");
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(UPDATE_BASELINE_SQL)) {
+            setString(statement, normalizedTagName, 1);
+            setString(statement, normalizedDescription, 2);
+            setInt(statement, baselineId, 3);
+            setInt(statement, webSession.getCustomerId(), 4);
+            setInt(statement, webSession.getProjectId(), 5);
+
+            if (statement.executeUpdate() != 1) {
+                throw new IllegalArgumentException("Baseline was not found.");
+            }
+        } catch (SQLException e) {
+            log.error("Error updating baseline. baselinePK={}", baselineId, e);
             throw new RuntimeException(e);
         }
     }
