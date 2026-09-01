@@ -1562,11 +1562,14 @@ function renderListCell(requirement, column) {
     const colorClass = displayColor ? " select-chip" : "";
 
     let indentationStyle = "";
+    let isTopLevelCode = false;
     const isCodeColumn = ["LogicalCode"].includes(column.key);
     if (isCodeColumn && value) {
         const dots = (String(value).match(/\./g) || []).length;
         if (dots > 0) {
             indentationStyle = `padding-left: ${dots * 15}px;`;
+        } else {
+            isTopLevelCode = true;
         }
     }
 
@@ -1576,7 +1579,9 @@ function renderListCell(requirement, column) {
 
     const styleAttr = combinedStyle ? ` style="${escapeHtml(combinedStyle)}"` : "";
 
-    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}"${styleAttr}>${escapeHtml(displayValue)}</span></td>`;
+    const cellValue = isTopLevelCode ? `<strong>${escapeHtml(displayValue)}</strong>` : escapeHtml(displayValue);
+    const topLevelClass = isTopLevelCode ? " is-top-level-code" : "";
+    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}${topLevelClass}"${styleAttr}>${cellValue}</span></td>`;
 }
 
 function formatListCellValue(value, control) {

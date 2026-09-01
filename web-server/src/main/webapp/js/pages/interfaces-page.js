@@ -18,6 +18,7 @@ import {
 
 const INTERFACE_ENDPOINT = "/pro/interfacematrix?cmd=overview";
 const INTERFACE_SAVE_ENDPOINT = "/pro/interfacematrix?cmd=save";
+const INTERFACE_REMOVE_ENDPOINT = "/pro/interfacematrix?cmd=remove";
 const FALLBACK_DATE = "";
 
 const state = {
@@ -25,6 +26,7 @@ const state = {
     fromStructure: null,
     toStructure: null,
     currentCell: null,
+    contextTarget: null,
     showOverdueOnly: false,
     selectedIrlIds: []
 };
@@ -49,6 +51,7 @@ function initializePageShell() {
 
 function initializeEvents() {
     initializeDialogEvents();
+    initializeContextMenuEvents();
     initializeFilterEvents();
     initializeIrlFilterEvents();
 }
@@ -342,6 +345,11 @@ function renderBody(tableBody, matrix) {
                     event.stopPropagation();
                     openInterfaceDialog(fromStructure, toStructure, cell);
                 });
+                td.addEventListener("contextmenu", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openInterfaceContextMenu(event.clientX, event.clientY, fromStructure, toStructure, cell);
+                });
             } else {
                 applyBackgroundColor(td, "");
             }
@@ -537,6 +545,84 @@ function initializeDialogEvents() {
         event.preventDefault();
         closeInterfaceDialog(dialog);
     });
+
+    const removeDialog = document.getElementById("interfaceRemoveDialog");
+    document.getElementById("interfaceRemoveDialogCancelButton")?.addEventListener("click", () => {
+        closeRemoveInterfaceDialog();
+    });
+    document.getElementById("interfaceRemoveDialogConfirmButton")?.addEventListener("click", async () => {
+        await removeCurrentInterface();
+    });
+    removeDialog?.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeRemoveInterfaceDialog();
+    });
+}
+
+function initializeContextMenuEvents() {
+    document.getElementById("interfaceContextEditButton")?.addEventListener("click", () => {
+        const target = state.contextTarget;
+        closeInterfaceContextMenu();
+        if (target) {
+            openInterfaceDialog(target.fromStructure, target.toStructure, target.cell);
+        }
+    });
+
+    document.getElementById("interfaceContextRemoveButton")?.addEventListener("click", () => {
+        const target = state.contextTarget;
+        closeInterfaceContextMenu();
+        if (target?.cell) {
+            openRemoveInterfaceDialog(target.fromStructure, target.toStructure, target.cell);
+        }
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+        const menu = document.getElementById("interfaceContextMenu");
+        if (menu && !menu.hidden && !menu.contains(event.target)) {
+            closeInterfaceContextMenu();
+        }
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeInterfaceContextMenu();
+        }
+    });
+    window.addEventListener("blur", closeInterfaceContextMenu);
+    window.addEventListener("resize", closeInterfaceContextMenu);
+    document.getElementById("interfacesTableScroll")?.addEventListener("scroll", closeInterfaceContextMenu);
+}
+
+function openInterfaceContextMenu(x, y, fromStructure, toStructure, cell) {
+    const menu = document.getElementById("interfaceContextMenu");
+    if (!menu) {
+        return;
+    }
+
+    state.contextTarget = { fromStructure, toStructure, cell };
+    const editButton = document.getElementById("interfaceContextEditButton");
+    if (editButton) {
+        editButton.textContent = cell ? "Edit Interface" : "Create Interface";
+    }
+    const removeButton = document.getElementById("interfaceContextRemoveButton");
+    if (removeButton) {
+        removeButton.disabled = !cell;
+    }
+
+    menu.hidden = false;
+    menu.style.left = "0px";
+    menu.style.top = "0px";
+    const bounds = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - bounds.width - 8))}px`;
+    menu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - bounds.height - 8))}px`;
+    document.getElementById("interfaceContextEditButton")?.focus();
+}
+
+function closeInterfaceContextMenu() {
+    const menu = document.getElementById("interfaceContextMenu");
+    if (menu) {
+        menu.hidden = true;
+    }
+    state.contextTarget = null;
 }
 
 function initializeFilterEvents() {
@@ -663,6 +749,53 @@ function openInterfaceDialog(fromStructure, toStructure, cell) {
     showDialog(dialog);
 }
 
+function openRemoveInterfaceDialog(fromStructure, toStructure, cell) {
+    const dialog = document.getElementById("interfaceRemoveDialog");
+    if (!dialog || !cell) {
+        return;
+    }
+
+    state.fromStructure = fromStructure;
+    state.toStructure = toStructure;
+    state.currentCell = cell;
+    renderStructureCard("interfaceRemoveFromFields", fromStructure);
+    renderStructureCard("interfaceRemoveToFields", toStructure);
+    renderRemoveInterfaceDetails(cell);
+    setText("interfaceRemoveDialogStatus", "Confirm that this interface should be removed.", "");
+    showDialog(dialog);
+}
+
+function renderRemoveInterfaceDetails(cell) {
+    const container = document.getElementById("interfaceRemoveDetailsFields");
+    if (!container || !state.matrix) {
+        return;
+    }
+
+    container.innerHTML = "";
+    const classifications = cell.classificationIds
+        .map((id) => resolveLookupCode(state.matrix.lookup.classificationById, id))
+        .filter(Boolean)
+        .join(", ");
+    const fields = [
+        ["IRL", cell.irlCode || "-"],
+        ["Next Irl Meeting", cell.nextIrlMeeting ? formatDanishDate(cell.nextIrlMeeting) : "-"],
+        ["Classification", classifications || "-"]
+    ];
+
+    for (const [label, value] of fields) {
+        const field = document.createElement("div");
+        field.className = "interfaces-dialog-card-field";
+        const fieldLabel = document.createElement("span");
+        fieldLabel.className = "interfaces-dialog-card-field-label";
+        fieldLabel.textContent = label;
+        const fieldValue = document.createElement("strong");
+        fieldValue.className = "interfaces-dialog-card-field-value";
+        fieldValue.textContent = value;
+        field.append(fieldLabel, fieldValue);
+        container.appendChild(field);
+    }
+}
+
 function renderStructureCard(containerId, structure) {
     const container = document.getElementById(containerId);
 
@@ -736,8 +869,78 @@ function renderClassificationList(selectedClassificationIds) {
     container.innerHTML = "";
 
     const selectedSet = new Set(selectedClassificationIds || []);
+    const classifications = Array.from(state.matrix.lookup.classificationById.values())
+        .sort((left, right) => String(left.code || "").localeCompare(String(right.code || ""), undefined, {
+            sensitivity: "base",
+            numeric: true
+        }));
+    const groupClassifications = classifications.filter((classification) => isClassificationGroupCode(classification.code));
 
-    for (const classification of state.matrix.lookup.classificationById.values()) {
+    for (const groupClassification of groupClassifications) {
+        const normalizedGroupCode = normalizeClassificationCode(groupClassification.code);
+        const groupKey = normalizedGroupCode.charAt(0);
+        const group = document.createElement("details");
+        group.className = "interfaces-dialog-classification-group-item";
+
+        const toggle = document.createElement("summary");
+        toggle.className = "interfaces-dialog-classification-toggle";
+
+        const title = document.createElement("strong");
+        title.textContent = groupClassification.code || groupClassification.id;
+        const description = document.createElement("span");
+        description.className = "interfaces-dialog-classification-group-description";
+        description.textContent = groupClassification.description || "";
+        const selectionSummary = document.createElement("span");
+        selectionSummary.className = "interfaces-dialog-classification-group-selection";
+        toggle.append(title, description, selectionSummary);
+
+        const groupItems = classifications.filter((classification) =>
+            normalizeClassificationCode(classification.code).startsWith(groupKey)
+        );
+        const groupRows = [];
+        for (const classification of groupItems) {
+            const row = buildClassificationCheckbox(classification, selectedSet);
+            row.classList.add("interfaces-dialog-classification-group-row");
+            groupRows.push(row);
+        }
+
+        if (!groupItems.length) {
+            const empty = document.createElement("span");
+            empty.className = "interfaces-dialog-classification-empty interfaces-dialog-classification-group-row";
+            empty.textContent = "No active classifications in this group.";
+            groupRows.push(empty);
+        }
+
+        const updateSelectionSummary = () => {
+            const selectedCodes = groupRows
+                .map((row) => row.querySelector?.("input[type='checkbox']:checked"))
+                .filter(Boolean)
+                .map((checkbox) => {
+                    const classification = state.matrix.lookup.classificationById.get(checkbox.value);
+                    return classification?.code || checkbox.value;
+                });
+            selectionSummary.textContent = selectedCodes.length ? `(${selectedCodes.join(", ")})` : "";
+        };
+
+        for (const row of groupRows) {
+            row.querySelector?.("input[type='checkbox']")?.addEventListener("change", updateSelectionSummary);
+        }
+        updateSelectionSummary();
+
+        group.append(toggle, ...groupRows);
+        container.appendChild(group);
+    }
+}
+
+function isClassificationGroupCode(code) {
+    return /^[A-Z]_?$/.test(normalizeClassificationCode(code));
+}
+
+function normalizeClassificationCode(code) {
+    return String(code || "").trim().toUpperCase();
+}
+
+function buildClassificationCheckbox(classification, selectedSet) {
         const row = document.createElement("label");
         row.className = "interfaces-dialog-classification-item";
 
@@ -759,8 +962,7 @@ function renderClassificationList(selectedClassificationIds) {
         text.title = classification.description || classification.code || classification.id;
 
         row.append(checkbox, text);
-        container.appendChild(row);
-    }
+        return row;
 }
 
 function getInterfaceDialogDraft() {
@@ -823,6 +1025,49 @@ async function saveCurrentInterface() {
         setText("loadStatus", "Error", "");
         window.alert(`Save failed. ${error.message}`);
     }
+}
+
+async function removeCurrentInterface() {
+    const fromEntityId = state.fromStructure?.entityId || "";
+    const toEntityId = state.toStructure?.entityId || "";
+    if (!fromEntityId || !toEntityId || !state.currentCell) {
+        window.alert("Missing interface information.");
+        return;
+    }
+
+    const confirmButton = document.getElementById("interfaceRemoveDialogConfirmButton");
+    try {
+        if (confirmButton) confirmButton.disabled = true;
+        setText("interfaceRemoveDialogStatus", "Removing...");
+        setText("loadStatus", "Removing", "");
+        const body = new URLSearchParams({ fromEntityId, toEntityId });
+        const response = await fetch(INTERFACE_REMOVE_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            body,
+            cache: "no-store"
+        });
+        if (!response.ok) {
+            const message = (await response.text()).trim();
+            throw new Error(message || `HTTP ${response.status} ${response.statusText}`);
+        }
+
+        closeRemoveInterfaceDialog();
+        await loadInterfaceMatrix();
+    } catch (error) {
+        console.error("Failed to remove interface cell", error);
+        setText("interfaceRemoveDialogStatus", `Remove failed. ${error.message}`);
+        setText("loadStatus", "Error", "");
+    } finally {
+        if (confirmButton) confirmButton.disabled = false;
+    }
+}
+
+function closeRemoveInterfaceDialog() {
+    closeDialogElement(document.getElementById("interfaceRemoveDialog"));
+    state.fromStructure = null;
+    state.toStructure = null;
+    state.currentCell = null;
 }
 
 function buildInterfaceSavePayload(draft) {

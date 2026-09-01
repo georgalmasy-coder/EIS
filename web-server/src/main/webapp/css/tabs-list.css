@@ -176,6 +176,11 @@
     background: var(--app-table-row-hover);
 }
 
+.data-table-cell-value.is-top-level-code,
+.data-table-cell-value.is-top-level-code strong{
+    font-weight: 800;
+}
+
 .empty{
     color: var(--muted);
     padding: 16px;
