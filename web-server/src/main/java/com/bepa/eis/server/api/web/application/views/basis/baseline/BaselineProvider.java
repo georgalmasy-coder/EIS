@@ -85,7 +85,7 @@ public class BaselineProvider extends GenericProvider {
                     "ChangedByUserId, " +
                     "ChangedDateTime " +
                     ") " +
-                    "VALUES (?, ?, ?, ?, ?, SYSUTCDATETIME())";
+                    "VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_BASELINE_SQL =
             "UPDATE [dbo].[BASELINE] " +
@@ -195,6 +195,7 @@ public class BaselineProvider extends GenericProvider {
             setString(statement, normalizedTagName, 3);
             setString(statement, normalizedDescription, 4);
             setInt(statement, webSession.getUserId(), 5);
+            statement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
 
             int rows = statement.executeUpdate();
 
