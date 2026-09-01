@@ -20,10 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -209,10 +206,17 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
             listOfStakeholderRequirementWrappers.add(stakeholderRequirementWrapper);
         }
 
+        listOfStakeholderRequirementWrappers.sort(
+                Comparator.comparing(
+                        StakeholderRequirementWrapper::getSortKey,
+                        Comparator.nullsLast(String::compareToIgnoreCase)
+                )
+        );
+
         return listOfStakeholderRequirementWrappers;
     }
 
-    private List<SystemRequirementWrapper> getSystemRequirements(){
+    private List<SystemRequirementWrapper> getSystemRequirements() {
         SystemRequirementProvider systemRequirementProvider =
                 new SystemRequirementProvider(getWebSession());
 
@@ -225,6 +229,13 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
             SystemRequirementWrapper systemRequirementWrapper = new SystemRequirementWrapper(entity);
             systemRequirementWrappers.add(systemRequirementWrapper);
         }
+
+        systemRequirementWrappers.sort(
+                Comparator.comparing(
+                        SystemRequirementWrapper::getSortKey,
+                        Comparator.nullsLast(String::compareToIgnoreCase)
+                )
+        );
 
         return systemRequirementWrappers;
     }
@@ -304,30 +315,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
             return new RuleResult(VALUE_NOT_RELEVANT, STYLE_GRAY_ITALIC);
         }
 
-
-
         if (hasPossibleTextBasedRelation(stakeholderRequirementWrapper, systemRequirementWrapper)) {
-
-/* GFA
-            if (isSystemRequirementNotRelevantToStakeholderRequirement(systemRequirementWrapper)) {
-
-                log.info(
-
-                        "INSERT INTO ENTITY_RELATIONS (CustomerId, ProjectId ,EntityType ,EntityId, RelatedEntityType, RelatedEntityId, RelationType, Version, Latest, CreatedById, CreatedTime) " +
-                                "VALUES ( 1 ,1  " +
-                                ", " + stakeholderRequirementWrapper.getEntityType().getId() + " " +
-                                ", " + stakeholderRequirementWrapper.getEntityId() + " " +
-                                ", " + systemRequirementWrapper.getEntityType().getId() + " " +
-                                ", " + systemRequirementWrapper.getEntityId() + " " +
-                                ",2,1,1,1,GETDATE());"
-
-
-                );
-
-                return new RuleResult(VALUE_NOT_RELEVANT, STYLE_GRAY_ITALIC);
-            }
-*/
-
             return new RuleResult(VALUE_EMPTY, STYLE_YELLOW);
         }
 

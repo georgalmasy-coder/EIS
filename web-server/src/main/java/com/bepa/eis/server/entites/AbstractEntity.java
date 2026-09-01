@@ -340,6 +340,64 @@ abstract public class AbstractEntity {
         return null;
     }
 
+    public String getSortKeyValue(String sortKey) {
+
+        int index = indexOfFirstDigit(sortKey);
+
+        if (index == -1) {
+            return sortKey;
+        }
+
+        String numericPart = sortKey.substring(index);
+
+        String[] numericValues = numericPart.split("\\.");
+        String sortKeyValue = "";
+
+        for (String numericValue : numericValues) {
+            switch (numericValue.length()) {
+                case 1:
+                    numericValue = "0000" + numericValue;
+                    break;
+                case 2:
+                    numericValue = "000" + numericValue;
+                    break;
+                case 3:
+                    numericValue = "00" + numericValue;
+                    break;
+                case 4:
+                    numericValue = "0" + numericValue;
+                    break;
+
+            }
+            sortKeyValue = sortKeyValue + "." + numericValue;
+
+        }
+
+        for (int i = numericValues.length; i < 10; i++) {
+            sortKeyValue = sortKeyValue + ".00000";
+        }
+
+        sortKeyValue = sortKeyValue.replace("..", ".");
+
+
+        return sortKeyValue;
+    }
+
+    private int indexOfFirstDigit(String value) {
+        if (value == null) {
+            return -1;
+        }
+
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c >= '0' && c <= '9') {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     @Override
     public String toString() {
         return "Entity{" + "customerId=" + customerId + ", projectId=" + projectId + ", entityId=" + entityId + ", version=" + version + ", listOfDataElements=" + listOfDataElements + ", changedByUserId=" + changedBy + ", changedDate=" + changedDateTime + ", latest=" + latest + '}';

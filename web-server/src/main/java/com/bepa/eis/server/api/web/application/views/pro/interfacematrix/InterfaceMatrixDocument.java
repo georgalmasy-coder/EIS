@@ -11,12 +11,14 @@ import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
 import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.timestamp.AbstractDate;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
+import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 
 public class InterfaceMatrixDocument extends GenericXmlDocument {
@@ -61,6 +63,15 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
         matrixCellsData = getInterfaceMatrixCellsData(getWebSession());
     }
 
+    private <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
+        entities.sort(
+                Comparator.comparing(
+                        AbstractEntity::getSortKey,
+                        Comparator.nullsLast(String::compareToIgnoreCase)
+                )
+        );
+    }
+
     private InterfaceMatrixMetaData createInterfaceMatrixMetaData() {
         InterfaceMatrixMetaData matrixMetaData = new InterfaceMatrixMetaData();
         matrixMetaData.setTitle("Interface Management");
@@ -76,7 +87,9 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
 
     private List<SystemBreakdownEntity> getPhysicalStructures() {
         SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
-        return systemBreakdownProvider.getAllSystemBreakdown(false);
+        List<SystemBreakdownEntity> listOfSystemBreakdownEntities = systemBreakdownProvider.getAllSystemBreakdown(false);
+        sortBySortKey(listOfSystemBreakdownEntities);
+        return listOfSystemBreakdownEntities;
     }
 
     private MatrixInterfaceCellsData getInterfaceMatrixCellsData(WebSession webSession) throws SQLException {

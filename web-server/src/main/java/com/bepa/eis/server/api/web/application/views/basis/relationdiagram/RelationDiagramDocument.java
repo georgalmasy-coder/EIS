@@ -13,6 +13,7 @@ import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
+import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.bepa.eis.common.enums.entity.EntityType.*;
@@ -74,6 +76,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         listOfSystemRequirements = getSystemRequirements();
         listOfStakeholderRequirements = getStakeholderRequirements();
         listOfSystemBreakdowns = getSystemBreakdowns();
+
         listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT);
         listOfSystemRequirementToSystemBreakdownRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN);
         listOfStakeholderRequirementToSystemBreakdownRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, SYSTEMS_BREAKDOWN);
@@ -88,6 +91,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         StakeholderRequirementProvider stakeholderRequirementProvider = new StakeholderRequirementProvider(getWebSession());
         List<StakeholderRequirementEntity> listOfStakeholderRequirementEntities;
         listOfStakeholderRequirementEntities = stakeholderRequirementProvider.getAllStakeholderRequirement(false);
+        sortBySortKey(listOfStakeholderRequirementEntities);
         return listOfStakeholderRequirementEntities;
     }
 
@@ -95,6 +99,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         SystemRequirementProvider systemRequirementProvider = new SystemRequirementProvider(getWebSession());
         List<SystemRequirementEntity> listOfSystemRequirementEntities;
         listOfSystemRequirementEntities = systemRequirementProvider.getAllSystemRequirement(false);
+        sortBySortKey(listOfSystemRequirementEntities);
         return listOfSystemRequirementEntities;
     }
 
@@ -102,9 +107,18 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
         List<SystemBreakdownEntity> listOfSystemBreakdownEntities;
         listOfSystemBreakdownEntities = systemBreakdownProvider.getAllSystemBreakdown(false);
+        sortBySortKey(listOfSystemBreakdownEntities);
         return listOfSystemBreakdownEntities;
     }
 
+    private <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
+        entities.sort(
+                Comparator.comparing(
+                        AbstractEntity::getSortKey,
+                        Comparator.nullsLast(String::compareToIgnoreCase)
+                )
+        );
+    }
 
     private List<EntityRelationRecord> getEntityRelations(EntityType entityType, EntityType relatedEentityType) throws SQLException {
         EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());

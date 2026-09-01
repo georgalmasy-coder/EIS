@@ -11,6 +11,7 @@ import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
+import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
 import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.bepa.eis.common.enums.entity.EntityType.*;
@@ -169,6 +171,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         StakeholderRequirementProvider stakeholderRequirementProvider = new StakeholderRequirementProvider(getWebSession());
         List<StakeholderRequirementEntity> listOfStakeholderRequirementEntities;
         listOfStakeholderRequirementEntities = stakeholderRequirementProvider.getAllStakeholderRequirement(false);
+        sortBySortKey(listOfStakeholderRequirementEntities);
         return listOfStakeholderRequirementEntities;
     }
 
@@ -176,6 +179,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         SystemRequirementProvider systemRequirementProvider = new SystemRequirementProvider(getWebSession());
         List<SystemRequirementEntity> listOfSystemRequirementEntities;
         listOfSystemRequirementEntities = systemRequirementProvider.getAllSystemRequirement(false);
+        sortBySortKey(listOfSystemRequirementEntities);
         return listOfSystemRequirementEntities;
     }
 
@@ -183,6 +187,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         FunctionalStructureProvider functionalStructureProvider = new FunctionalStructureProvider(getWebSession());
         List<FunctionalStructureEntity> listOfFunctionalStructureEntities;
         listOfFunctionalStructureEntities = functionalStructureProvider.getAllFunctionalStructure(false);
+        sortBySortKey(listOfFunctionalStructureEntities);
         return listOfFunctionalStructureEntities;
     }
 
@@ -190,6 +195,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         LogicalStructureProvider logicalStructureProvider = new LogicalStructureProvider(getWebSession());
         List<LogicalStructureEntity> listOfFunctionalStructureEntities;
         listOfFunctionalStructureEntities = logicalStructureProvider.getAllLogicalStructures(false);
+        sortBySortKey(listOfFunctionalStructureEntities);
         return listOfFunctionalStructureEntities;
     }
 
@@ -197,9 +203,18 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
         List<SystemBreakdownEntity> listOfSystemBreakdownEntities;
         listOfSystemBreakdownEntities = systemBreakdownProvider.getAllSystemBreakdown(false);
+        sortBySortKey(listOfSystemBreakdownEntities);
         return listOfSystemBreakdownEntities;
     }
 
+    private <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
+        entities.sort(
+                Comparator.comparing(
+                        AbstractEntity::getSortKey,
+                        Comparator.nullsLast(String::compareToIgnoreCase)
+                )
+        );
+    }
 
     private List<EntityRelationRecord> getEntityRelations(EntityType entityType, EntityType relatedEentityType) throws SQLException {
         EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());

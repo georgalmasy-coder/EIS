@@ -31,8 +31,6 @@ public class SystemRequirementWrapper {
 
     protected boolean hasRelationToStakeholderRequirement(StakeholderRequirementWrapper stakeholderRequirementWrapper) {
 
-
-
         for (EntityRelationRecord relation : listOfRelationsToStakeholderRequirements) {
             if (Objects.equals(relation.getRelatedEntityId(), stakeholderRequirementWrapper.getEntityId())
                     && relation.getRelatedEntityType() == STAKEHOLDER_REQUIREMENT) {
@@ -46,21 +44,16 @@ public class SystemRequirementWrapper {
         return false;
     }
 
-    protected boolean hasRelationToAnyStakeholderRequirement() {
-        for (StakeholderRequirementWrapper stakeholderRequirementWrapper : listOfStakeholderRequirementWrappers) {
-            if (hasRelationToStakeholderRequirement(stakeholderRequirementWrapper)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     protected EntityId getEntityId() {
         return systemRequirementEntity.getEntityId();
     }
 
     protected EntityType getEntityType() {
         return systemRequirementEntity.getEntityType();
+    }
+
+    protected String getSortKey() {
+        return systemRequirementEntity.getSortKey();
     }
 
     protected String getRequirementCode() {

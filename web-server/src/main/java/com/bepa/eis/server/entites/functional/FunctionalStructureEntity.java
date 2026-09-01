@@ -43,6 +43,11 @@ public class FunctionalStructureEntity extends AbstractEntity {
     }
 
     @Override
+    public String getSortKey() {
+        return getSortKeyValue(getCode());
+    }
+
+    @Override
     public void initializeFields() {
         functionalCode = new FunctionalCode();
         functionalCodeLevel = new CodeLevel();

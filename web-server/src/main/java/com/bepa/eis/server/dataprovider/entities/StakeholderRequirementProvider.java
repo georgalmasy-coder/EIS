@@ -47,7 +47,7 @@ public class StakeholderRequirementProvider extends EntityProvider {
         List<StakeholderRequirementEntity> listOfEntitiesForExport = new ArrayList<>();
         try {
             List<EntityRecord> entityRecords = getListOfEntityRecords(entityType, includeInactive);
-            for (EntityRecord entityRecord : entityRecords) {
+           for (EntityRecord entityRecord : entityRecords) {
                 StakeholderRequirementEntity basisSystemRequirementEntity = new StakeholderRequirementEntity(getWebSession(), entityRecord);
                 listOfEntitiesForExport.add(basisSystemRequirementEntity);
             }

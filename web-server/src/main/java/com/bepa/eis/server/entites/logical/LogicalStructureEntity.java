@@ -43,6 +43,11 @@ public class LogicalStructureEntity extends AbstractEntity {
     }
 
     @Override
+    public String getSortKey() {
+        return getSortKeyValue(getCode());
+    }
+
+    @Override
     public void initializeFields() {
         logicalCode = new LogicalCode();
         logicalCodeLevel = new CodeLevel();

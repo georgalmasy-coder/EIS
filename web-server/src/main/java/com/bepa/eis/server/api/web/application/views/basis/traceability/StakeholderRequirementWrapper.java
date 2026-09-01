@@ -24,6 +24,10 @@ public class StakeholderRequirementWrapper {
         return stakeholderRequirementEntity.getEntityType();
     }
 
+    protected String getSortKey() {
+        return stakeholderRequirementEntity.getSortKey();
+    }
+
     protected String getRequirementCode() {
         return stakeholderRequirementEntity.getRequirementCode().getValue();
     }

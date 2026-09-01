@@ -62,7 +62,7 @@ public class SystemBreakdownEntity extends AbstractEntity {
 
     @Override
     public String getSortKey() {
-        return getSbsCode().getValue();
+        return getSortKeyValue(getSbsCode().getValue());
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
-import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementVerificationStatus;
 import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
@@ -43,6 +42,11 @@ public class StakeholderRequirementEntity extends AbstractEntity {
     @Override
     public String getDescription() {
         return requirementDescription.getValue();
+    }
+
+    @Override
+    public String getSortKey() {
+        return getSortKeyValue(getRequirementCode().getSortKey());
     }
 
     @Override

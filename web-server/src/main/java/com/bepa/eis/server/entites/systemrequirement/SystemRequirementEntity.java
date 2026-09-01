@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
 
@@ -62,6 +63,11 @@ public class SystemRequirementEntity extends AbstractEntity {
     @Override
     public String getDescription() {
         return requirementDescription.getValue();
+    }
+
+    @Override
+    public String getSortKey() {
+        return getSortKeyValue(getRequirementCode().getSortKey());
     }
 
     @Override
