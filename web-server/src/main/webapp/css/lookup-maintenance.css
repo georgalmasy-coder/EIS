@@ -190,6 +190,8 @@
 
 .lookup-maintenance-table {
     width: 100%;
+    min-width: 900px;
+    table-layout: fixed;
 }
 
 .lookup-maintenance-table thead th {
@@ -205,9 +207,56 @@
     opacity: 0.5;
 }
 
+.lookup-maintenance-table tbody tr {
+    cursor: pointer;
+}
+
+.lookup-maintenance-table tbody tr:hover,
+.lookup-maintenance-table tbody tr:focus-visible {
+    background: var(--app-table-row-hover);
+    outline: none;
+}
+
+.lookup-maintenance-classification-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-bottom: 8px;
+}
+
+.lookup-maintenance-icon-button {
+    width: 42px;
+    height: 38px;
+    border: 1px solid var(--app-border-default);
+    border-radius: 10px;
+    background: var(--app-control-background);
+    color: var(--app-control-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+}
+
+.lookup-maintenance-icon-button:hover {
+    background: var(--app-control-hover-background);
+}
+
+.lookup-maintenance-icon-button svg,
+.lookup-maintenance-icon-button path {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
 .lookup-maintenance-classification-active-cell {
     text-align: center;
     vertical-align: middle;
+}
+
+.lookup-maintenance-table thead th:last-child {
+    text-align: center;
 }
 
 .lookup-maintenance-classification-active {
@@ -889,4 +938,62 @@
 .lookup-maintenance-classification-dot.is-inactive {
     background: #ef4444;
     border-color: #fca5a5;
+}
+
+/* Keep the classification editor inside short viewports. */
+.lookup-maintenance-dialog {
+    max-height: calc(100dvh - 48px);
+    overflow: hidden;
+}
+
+.lookup-maintenance-dialog-form {
+    max-height: calc(100dvh - 48px) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.lookup-maintenance-dialog-head,
+.lookup-maintenance-dialog-footer {
+    flex: 0 0 auto;
+}
+
+.lookup-maintenance-dialog-grid {
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+@media (max-height: 800px) {
+    .lookup-maintenance-dialog-grid textarea {
+        height: clamp(56px, 9dvh, 80px);
+        min-height: 56px;
+    }
+}
+
+.lookup-maintenance-dialog-grid.is-classification {
+    grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.lookup-maintenance-preview-chip.is-editable {
+    cursor: text;
+    outline: none;
+}
+
+.lookup-maintenance-preview-chip.is-editable:focus {
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
+}
+
+.lookup-maintenance-preview-chip.is-editable:empty::before {
+    content: "Code";
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+@media (max-width: 760px) {
+    .lookup-maintenance-dialog-grid.is-classification {
+        grid-template-columns: 1fr;
+    }
 }

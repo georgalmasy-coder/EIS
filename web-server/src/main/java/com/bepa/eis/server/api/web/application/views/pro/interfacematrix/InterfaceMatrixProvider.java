@@ -230,6 +230,44 @@ public class InterfaceMatrixProvider extends GenericProvider {
         }
     }
 
+    public boolean removeInterfaceRecord(Integer fromEntityId, Integer toEntityId) throws SQLException {
+        validateSession();
+
+        if (fromEntityId == null || toEntityId == null) {
+            throw new IllegalArgumentException("FromEntityId and ToEntityId are required.");
+        }
+
+        try (Connection connection = getDataSource().getConnection()) {
+            boolean originalAutoCommit = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                int updated;
+                try (PreparedStatement ps = connection.prepareStatement(UPDATE_LATEST_FALSE_SQL)) {
+                    setInt(ps, getWebSession().getCustomerId(), 1);
+                    setInt(ps, getWebSession().getProjectId(), 2);
+                    setInt(ps, fromEntityId, 3);
+                    setInt(ps, toEntityId, 4);
+                    updated = ps.executeUpdate();
+                }
+                connection.commit();
+                return updated > 0;
+            } catch (SQLException | RuntimeException ex) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackError) {
+                    log.warn("Rollback failed while removing interface record", rollbackError);
+                }
+                throw ex;
+            } finally {
+                try {
+                    connection.setAutoCommit(originalAutoCommit);
+                } catch (SQLException ignored) {
+                    // ignore
+                }
+            }
+        }
+    }
+
     private InterfaceRecord getLatestInterfaceRecord(Connection connection, Integer fromEntityId, Integer toEntityId) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACE_SQL)) {
             setInt(ps, getWebSession().getCustomerId(), 1);

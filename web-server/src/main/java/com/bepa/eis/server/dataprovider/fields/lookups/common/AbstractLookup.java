@@ -59,7 +59,7 @@ abstract public class AbstractLookup extends AbstractInteger {
         if (lookupValue != null) {
             return lookupValue.getLookupId();
         }
-        return -1;
+        return null;
 //        throw new IllegalStateException("Failed to getLookupId ");
     }
 

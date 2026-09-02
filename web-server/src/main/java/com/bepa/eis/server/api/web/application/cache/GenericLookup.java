@@ -1,7 +1,6 @@
 package com.bepa.eis.server.api.web.application.cache;
 
 import com.bepa.eis.common.GlobalConfiguration;
-import com.bepa.eis.common.dto.WebSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,5 +113,12 @@ public class GenericLookup {
         mapOfValues.put(lookupValue.getLookupId(), lookupValue);
     }
 
+    public List<LookupValue> getMapOfValues() {
+        return listOfAllLookupValues;
+    }
+
+    public int nbrOfValues() {
+        return  mapOfValues != null ?  mapOfValues.size() : 0;
+    }
 
 }

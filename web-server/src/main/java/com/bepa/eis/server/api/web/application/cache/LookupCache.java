@@ -123,7 +123,7 @@ public class LookupCache {
         return null;
     }
 
-    public List<LookupValue> getClassificationLookupValues(Integer customerId, Integer projectId) {
+    public List<ClassLookupValue> getClassificationLookupValues(Integer customerId, Integer projectId) {
 
         if (customerId != null && projectId != null ) {
             LookupProjectCache projectCache = getLookupProjectCache(customerId, projectId);

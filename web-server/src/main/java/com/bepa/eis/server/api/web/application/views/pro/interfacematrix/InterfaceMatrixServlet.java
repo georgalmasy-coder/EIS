@@ -32,8 +32,6 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-        String pathInfo = normalizePathInfo(request.getPathInfo());
-
         WebSession webSession = getWebSessionFromRequest(request);
         setWebSession(webSession);
 
@@ -41,12 +39,36 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
         long startTime = System.currentTimeMillis();
 
         try {
-            super.doPost(request, response);
+            if ("remove".equals(getCommandParameter(request))) {
+                handleRemove(webSession, request, response);
+            } else {
+                super.doPost(request, response);
+            }
         } catch (Throwable throwable) {
             IncidentProvider incidentProvider = new IncidentProvider(webSession);
             incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
             log.error("Error processing traceability matrix action: {}", throwable.getMessage(), throwable);
             writeJsonError(response, throwable);
+        }
+    }
+
+    private void handleRemove(WebSession webSession, HttpServletRequest request, HttpServletResponse response) {
+        Integer fromEntityId = toInteger(request.getParameter("fromEntityId"));
+        Integer toEntityId = toInteger(request.getParameter("toEntityId"));
+
+        if (fromEntityId == null || toEntityId == null) {
+            throw new IllegalArgumentException("fromEntityId and toEntityId are required.");
+        }
+
+        try {
+            InterfaceMatrixProvider provider = new InterfaceMatrixProvider(webSession);
+            if (!provider.removeInterfaceRecord(fromEntityId, toEntityId)) {
+                throw new IllegalArgumentException("Interface was not found or has already been removed.");
+            }
+            response.setStatus(HttpServletResponse.SC_OK);
+            log.info("Removed interface cell. fromEntityId={}, toEntityId={}", fromEntityId, toEntityId);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to remove interface cell", e);
         }
     }
 
@@ -149,14 +171,6 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
                 nextIrlMeeting,
                 classificationIds
         );
-    }
-
-    private String normalizePathInfo(String pathInfo) {
-        if (pathInfo == null || pathInfo.isBlank()) {
-            return "";
-        }
-
-        return pathInfo.trim().toLowerCase();
     }
 
     private void writeJsonError(HttpServletResponse response, Throwable throwable) throws ServletException {

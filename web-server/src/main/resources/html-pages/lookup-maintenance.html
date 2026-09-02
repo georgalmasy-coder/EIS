@@ -74,7 +74,32 @@
                             </section>
 
                             <section id="classificationPanel" class="tab-panel lookup-maintenance-panel" role="tabpanel" aria-labelledby="classificationTabButton" hidden>
-                                <div id="classificationCards" class="lookup-maintenance-card-grid" aria-label="Classification rows"></div>
+                                <div class="lookup-maintenance-classification-toolbar">
+                                    <button id="btnAddClassification" class="lookup-maintenance-icon-button" type="button" aria-label="Create classification" title="Create classification">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M12 4a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 0 1 1-1z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="table-frame page-frame has-table-footer lookup-maintenance-table-frame" aria-label="Classification list frame">
+                                    <div class="table-scroll lookup-maintenance-table-scroll">
+                                        <table class="data-table page-table lookup-maintenance-table" aria-label="Classification list">
+                                            <colgroup>
+                                                <col style="width: 10%;">
+                                                <col style="width: 25%;">
+                                                <col style="width: 25%;">
+                                                <col style="width: 30%;">
+                                                <col style="width: 10%;">
+                                            </colgroup>
+                                            <thead><tr><th>Code</th><th>Intended purpose / Definition of subclass</th><th>Examples of terms describing or examples of components</th><th>Examples of typical components</th><th>Active</th></tr></thead>
+                                            <tbody id="classificationTableBody"></tbody>
+                                        </table>
+                                        <div id="classificationEmptyState" class="empty page-empty lookup-maintenance-empty" hidden></div>
+                                    </div>
+                                    <div class="data-table-footer lookup-maintenance-table-footer" aria-live="polite">
+                                        <span id="classificationTableCount" class="data-table-footer-count">0 of 0</span>
+                                    </div>
+                                </div>
                             </section>
                         </div>
                     </div>
@@ -105,7 +130,7 @@
 
             <div class="page-field lookup-maintenance-wide-field" id="lookupCodeField" hidden>
                 <label for="lookupCodeInput" id="lookupCodeLabel">Code</label>
-                <input id="lookupCodeInput" type="text" maxlength="10" autocomplete="off" />
+                <input id="lookupCodeInput" type="text" maxlength="2" autocomplete="off" />
             </div>
 
             <div class="page-field lookup-maintenance-wide-field" id="lookupNameField">
@@ -113,17 +138,22 @@
                 <input id="lookupNameInput" type="text" maxlength="255" autocomplete="off" required />
             </div>
 
-            <div class="page-field lookup-maintenance-wide-field">
-                <label for="lookupDescriptionInput">Description <span aria-hidden="true">*</span></label>
+            <div class="page-field lookup-maintenance-wide-field" id="lookupDescriptionField">
+                <label for="lookupDescriptionInput" id="lookupDescriptionLabel">Description <span aria-hidden="true">*</span></label>
                 <textarea id="lookupDescriptionInput" rows="5" maxlength="4000" required></textarea>
             </div>
 
             <div class="page-field lookup-maintenance-wide-field" id="lookupExampleField" hidden>
-                <label for="lookupExampleInput">Example</label>
-                <textarea id="lookupExampleInput" rows="4" maxlength="255"></textarea>
+                <label for="lookupExampleInput" id="lookupExampleLabel">Example</label>
+                <textarea id="lookupExampleInput" rows="4"></textarea>
             </div>
 
-            <div class="page-field checkbox-field lookup-maintenance-checkbox-field">
+            <div class="page-field lookup-maintenance-wide-field" id="lookupUsageExampleField" hidden>
+                <label for="lookupUsageExampleInput" id="lookupUsageExampleLabel">Usage Example</label>
+                <textarea id="lookupUsageExampleInput" rows="4"></textarea>
+            </div>
+
+            <div class="page-field checkbox-field lookup-maintenance-checkbox-field" id="lookupActiveField">
                 <input id="lookupActiveInput" type="checkbox" checked />
                 <label for="lookupActiveInput">Active</label>
             </div>

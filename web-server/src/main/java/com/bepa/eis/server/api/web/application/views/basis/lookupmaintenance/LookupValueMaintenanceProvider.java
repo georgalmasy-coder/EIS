@@ -39,7 +39,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             "ORDER BY SRLLevel";
 
     private static final String SELECT_CLASSIFICATION_ROWS_SQL =
-            "SELECT ClassificationId, CustomerId, ProjectId, ClassId, Code, Description, Example, Active " +
+            "SELECT ClassificationId, CustomerId, ProjectId, ClassId, Code, Description, Example, UsageExample, Active " +
             "FROM dbo.CLASSIFICATION " +
             "WHERE CustomerId = ? AND ProjectId = ? " +
             "ORDER BY Code";
@@ -82,12 +82,13 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                     "Code, " +
                     "Description, " +
                     "Example, " +
+                    "UsageExample, " +
                     "Active" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_CLASSIFICATION_SQL =
             "UPDATE dbo.CLASSIFICATION " +
-            "SET Code = ?, Description = ?, Example = ?, Active = ? " +
+            "SET Code = ?, Description = ?, Example = ?, UsageExample = ?, Active = ? " +
             "WHERE ClassificationId = ? AND CustomerId = ? AND ProjectId = ?";
 
     public LookupValueMaintenanceProvider(WebSession webSession) {
@@ -229,7 +230,12 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             connection.setAutoCommit(false);
 
             try {
-                updateClassificationRow(connection, customerId, projectId, classificationRow);
+                ensureClassificationCodeIsUnique(connection, customerId, projectId, classificationRow);
+                if (classificationRow.classificationId() == null) {
+                    insertClassificationRow(connection, customerId, projectId, classificationRow);
+                } else {
+                    updateClassificationRow(connection, customerId, projectId, classificationRow);
+                }
                 connection.commit();
             } catch (SQLException | RuntimeException e) {
                 connection.rollback();
@@ -245,6 +251,38 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         }
     }
 
+    private void ensureClassificationCodeIsUnique(
+            Connection connection,
+            Integer customerId,
+            Integer projectId,
+            ClassificationRow row
+    ) throws SQLException {
+        String sql = "SELECT COUNT(1) FROM dbo.CLASSIFICATION WITH (UPDLOCK, HOLDLOCK) " +
+                "WHERE CustomerId = ? AND ProjectId = ? AND Code = ? " +
+                "AND (? IS NULL OR ClassificationId <> ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            setString(statement, safeText(row.code()), 3);
+
+            if (row.classificationId() == null) {
+                statement.setNull(4, java.sql.Types.INTEGER);
+                statement.setNull(5, java.sql.Types.INTEGER);
+            } else {
+                setInt(statement, row.classificationId(), 4);
+                setInt(statement, row.classificationId(), 5);
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next() && resultSet.getInt(1) > 0) {
+                    throw new IllegalArgumentException("A classification with code '" + safeText(row.code()) +
+                            "' already exists for the current project.");
+                }
+            }
+        }
+    }
+
     private void updateClassificationRow(
             Connection connection,
             Integer customerId,
@@ -255,20 +293,58 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             throw new IllegalArgumentException("Classification row id is required.");
         }
 
+        String usageExample = isClassificationGroupCode(classificationRow.code())
+                ? normalizeNullableText(classificationRow.usageExample())
+                : null;
+
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_CLASSIFICATION_SQL)) {
             setString(statement, safeText(classificationRow.code()), 1);
             setString(statement, safeText(classificationRow.description()), 2);
             setString(statement, normalizeNullableText(classificationRow.example()), 3);
-            setBoolean(statement, classificationRow.active(), 4);
-            setInt(statement, classificationRow.classificationId(), 5);
-            setInt(statement, customerId, 6);
-            setInt(statement, projectId, 7);
+            setString(statement, usageExample, 4);
+            setBoolean(statement, classificationRow.active(), 5);
+            setInt(statement, classificationRow.classificationId(), 6);
+            setInt(statement, customerId, 7);
+            setInt(statement, projectId, 8);
 
             int rows = statement.executeUpdate();
             if (rows == 0) {
                 throw new IllegalArgumentException("Classification row was not found for current customer and project.");
             }
         }
+    }
+
+    private void insertClassificationRow(Connection connection, Integer customerId, Integer projectId, ClassificationRow row) throws SQLException {
+        int classId;
+        String nextIdSql = "SELECT COALESCE(MAX(ClassId), 0) + 1 FROM dbo.CLASSIFICATION WITH (UPDLOCK, HOLDLOCK) WHERE CustomerId = ? AND ProjectId = ?";
+        try (PreparedStatement statement = connection.prepareStatement(nextIdSql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) throw new SQLException("Could not determine the next ClassId.");
+                classId = resultSet.getInt(1);
+            }
+        }
+
+        String usageExample = isClassificationGroupCode(row.code())
+                ? normalizeNullableText(row.usageExample())
+                : null;
+
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_CLASSIFICATION_SQL)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            setInt(statement, classId, 3);
+            setString(statement, safeText(row.code()), 4);
+            setString(statement, safeText(row.description()), 5);
+            setString(statement, normalizeNullableText(row.example()), 6);
+            setString(statement, usageExample, 7);
+            setBoolean(statement, row.active(), 8);
+            statement.executeUpdate();
+        }
+    }
+
+    private boolean isClassificationGroupCode(String code) {
+        return safeText(code).matches("(?i)^[a-z]_?$");
     }
 
     private void ensureClassificationRows(Connection connection, Integer customerId, Integer projectId) throws SQLException {
@@ -310,7 +386,8 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                 statement.setString(4, classificationType.getCode());
                 statement.setString(5, classificationType.getCodeDescription());
                 statement.setString(6, normalizeNullableText(classificationType.getCodeExample()));
-                statement.setBoolean(7, classificationType.isActive());
+                statement.setNull(7, java.sql.Types.NVARCHAR);
+                statement.setBoolean(8, classificationType.isActive());
                 statement.executeUpdate();
             }
         }
@@ -454,6 +531,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                 resultSet.getString("Code"),
                 resultSet.getString("Description"),
                 resultSet.getString("Example"),
+                resultSet.getString("UsageExample"),
                 resultSet.getBoolean("Active")
         );
     }
@@ -520,10 +598,6 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
     }
 
     private void validateClassificationRow(ClassificationRow classificationRow) {
-        if (classificationRow.classificationId() == null) {
-            throw new IllegalArgumentException("ClassificationId is required.");
-        }
-
         if (safeText(classificationRow.code()).isBlank()) {
             throw new IllegalArgumentException("Code is required.");
         }
@@ -532,17 +606,14 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             throw new IllegalArgumentException("Description is required.");
         }
 
-        if (safeText(classificationRow.code()).length() > 10) {
-            throw new IllegalArgumentException("Code must be maximum 10 characters.");
+        if (safeText(classificationRow.code()).length() > 2) {
+            throw new IllegalArgumentException("Code must be maximum 2 characters.");
         }
 
         if (safeText(classificationRow.description()).length() > 255) {
             throw new IllegalArgumentException("Description must be maximum 255 characters.");
         }
 
-        if (normalizeNullableText(classificationRow.example()) != null && normalizeNullableText(classificationRow.example()).length() > 255) {
-            throw new IllegalArgumentException("Example must be maximum 255 characters.");
-        }
     }
 
     private Integer requireCustomerId() {
@@ -654,6 +725,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             String code,
             String description,
             String example,
+            String usageExample,
             boolean active
     ) {
     }

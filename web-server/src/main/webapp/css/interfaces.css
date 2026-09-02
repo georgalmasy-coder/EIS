@@ -94,6 +94,13 @@ body.interfaces-document {
     font-size: 0.875rem;
 }
 
+body.theme-black .interfaces-info-bar {
+    --app-text-primary: #000000;
+    --app-text-secondary: #000000;
+    background: #ffffff;
+    color: #000000;
+}
+
 .interfaces-info-item {
     display: inline-flex;
     align-items: center;
@@ -421,6 +428,11 @@ body.interfaces-document {
     color: var(--app-text-primary);
 }
 
+body.theme-black .interfaces-cell-line-label,
+body.theme-black .interfaces-cell-line-value {
+    color: #000000;
+}
+
 .interfaces-cell-line-value--irl {
     display: inline-block;
     max-width: 16ch;
@@ -463,6 +475,44 @@ body.interfaces-document {
 
 .interfaces-empty.is-visible {
     display: flex;
+}
+
+.interfaces-context-menu {
+    position: fixed;
+    z-index: 1200;
+    display: grid;
+    min-width: 12rem;
+    padding: 0.35rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.45rem;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
+}
+
+.interfaces-context-menu[hidden] {
+    display: none;
+}
+
+.interfaces-context-menu button {
+    border: 0;
+    border-radius: 0.3rem;
+    background: transparent;
+    color: #1f2937;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.interfaces-context-menu button:hover,
+.interfaces-context-menu button:focus-visible {
+    background: #f1f5f9;
+    outline: none;
+}
+
+.interfaces-context-menu button:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
 }
 
 .interfaces-dialog {
@@ -593,14 +643,88 @@ body.interfaces-document {
 
 .interfaces-dialog-classification-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 0.45rem 0.75rem;
-    max-height: 11rem;
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 0.45rem;
+    max-height: 18rem;
     overflow: auto;
     padding: 0.75rem;
     border: 1px solid #cbd5e1;
     border-radius: 0.5rem;
     background: #f8fafc;
+}
+
+.interfaces-dialog-classification-group-item {
+    overflow: visible;
+    border: 1px solid #d7dee8;
+    border-radius: 0.4rem;
+    background: #ffffff;
+}
+
+.interfaces-dialog-classification-group-item[open] {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.interfaces-dialog-classification-toggle {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr;
+    align-items: baseline;
+    gap: 0.45rem;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #1f2937;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    list-style: none;
+    grid-column: 1 / -1;
+}
+
+.interfaces-dialog-classification-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.interfaces-dialog-classification-toggle::before {
+    content: "▸";
+    width: 0.8rem;
+    color: #64748b;
+}
+
+.interfaces-dialog-classification-group-item[open] > .interfaces-dialog-classification-toggle::before {
+    content: "▾";
+}
+
+.interfaces-dialog-classification-toggle:hover,
+.interfaces-dialog-classification-toggle:focus-visible {
+    background: #f1f5f9;
+    outline: none;
+}
+
+.interfaces-dialog-classification-group-description {
+    color: #64748b;
+    font-size: 0.88rem;
+}
+
+.interfaces-dialog-classification-group-selection {
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.interfaces-dialog-classification-group-row {
+    display: flex;
+    margin: 0;
+    padding: 0.5rem 0.7rem 0.5rem 1.95rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.interfaces-dialog-classification-empty {
+    color: #64748b;
+    font-size: 0.88rem;
+    font-style: italic;
 }
 
 .interfaces-dialog-classification-item {
@@ -617,7 +741,7 @@ body.interfaces-document {
     gap: 0.25rem;
     align-items: baseline;
     min-width: 0;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 .interfaces-dialog-classification-text strong {
@@ -679,6 +803,25 @@ body.interfaces-document {
     color: #1f2937;
 }
 
+.interfaces-dialog-footer-actions .danger,
+.interfaces-dialog-footer-actions .danger:not(.primary) {
+    border-color: #b91c1c;
+    background: #b91c1c;
+    color: #ffffff;
+}
+
+.interfaces-dialog-footer-actions .danger:hover,
+.interfaces-dialog-footer-actions .danger:not(.primary):hover {
+    border-color: #991b1b;
+    background: #991b1b;
+    color: #ffffff;
+}
+
+.interfaces-dialog-footer-actions button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 body.interfaces-document .left-hover-zone {
     z-index: 1000;
 }
@@ -706,6 +849,16 @@ body.interfaces-document .side-menu {
     }
 
     .interfaces-dialog-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .interfaces-dialog-classification-group-item[open] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .interfaces-dialog-classification-group-item[open] {
         grid-template-columns: 1fr;
     }
 }

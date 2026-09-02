@@ -73,11 +73,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
 
         } catch (Throwable throwable) {
-            IncidentProvider incidentProvider = new IncidentProvider(webSession);
-            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
-
-            log.error("Error processing request: {}", throwable.getMessage(), throwable);
-            throw new ServletException("Error processing request", throwable);
+            logError(module, throwable);
         }
     }
 
@@ -120,11 +116,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             }
 
         } catch (Throwable throwable) {
-            IncidentProvider incidentProvider = new IncidentProvider(webSession);
-            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
-
-            log.error("Error processing request: {}", throwable.getMessage(), throwable);
-            throw new ServletException("Error processing request", throwable);
+            logError(module, throwable);
         }
 
     }
@@ -169,8 +161,22 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
 
         } catch (Throwable throwable) {
-            log.error("Error processing request: {}", throwable.getMessage(), throwable);
             setErrorResponse(response, throwable);
+            logError(module,
+                    throwable);
+        }
+    }
+
+    private void logError(String module, Throwable throwable) throws ServletException{
+        if (throwable instanceof IllegalArgumentException) {
+            // Ignore IllegalArgumentExceptions, they are not errors.
+            // They are just used to indicate that the request is invalid.
+            // We don't want to log them as errors.
+        } else {
+
+            IncidentProvider incidentProvider = new IncidentProvider(webSession);
+            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
+
             throw new ServletException("Error processing request", throwable);
         }
     }
@@ -247,11 +253,8 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     private void setErrorResponse(HttpServletResponse response, Throwable throwable) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-//        String message = "<error><message>#MSG#</message></error>";
-//        message = message.replace("#MSG#", throwable.getMessage());
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         try {
-//            response.getWriter().write(message);
             response.getWriter().write("Error occurred : " + throwable.getMessage());
         } catch (IOException e) {
             log.error("Unable to response client : {}", throwable.getMessage(), throwable);

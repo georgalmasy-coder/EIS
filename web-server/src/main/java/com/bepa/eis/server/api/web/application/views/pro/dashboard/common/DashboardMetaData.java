@@ -2,6 +2,7 @@ package com.bepa.eis.server.api.web.application.views.pro.dashboard.common;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.User;
+import com.bepa.eis.server.api.web.application.cache.ClassLookupValue;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import org.w3c.dom.Document;
@@ -45,7 +46,7 @@ public class DashboardMetaData {
     }
 
     private void loadClassificationLookup(WebSession webSession) {
-        List<LookupValue> lookupValues = CustomerLookupCache.getClassificationLookupValues(webSession);
+        List<ClassLookupValue> lookupValues = CustomerLookupCache.getClassificationLookupValues(webSession);
         for (LookupValue lookupValue : lookupValues) {
             if (lookupValue.getLookupId() >= 0) {
                 classificationList.add(new MetaClassificationLookup(lookupValue.getLookupId(), lookupValue.getLookupCode(), lookupValue.getLookupDescription(), lookupValue.getLookupColor()));

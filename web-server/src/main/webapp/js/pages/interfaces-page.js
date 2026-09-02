@@ -137,7 +137,9 @@ function parseLookupMap(parentElement, selector, idAttribute) {
             id,
             code: getAttribute(element, "code", id),
             description: getAttribute(element, "description", ""),
-            color: getAttribute(element, "color", "")
+            color: getAttribute(element, "color", ""),
+            example: getAttribute(element, "example", ""),
+            usageExample: getAttribute(element, "usageExample", "")
         });
     }
 
@@ -508,6 +510,18 @@ function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfRefere
     lines.push(`Changed By: ${resolveLookupCode(lookup?.userById, cell.changedBy) || "-"}`);
     lines.push(`Changed: ${cell.changed || "-"}`);
 
+    lines.push("Classification:");
+    const classifications = cell.classificationIds
+        .map((classificationId) => lookup?.classificationById?.get(classificationId))
+        .filter(Boolean);
+
+    if (classifications.length) {
+        for (const classification of classifications) {
+            lines.push(`${classification.code || classification.id} ${classification.description || ""}`.trim());
+        }
+    } else {
+        lines.push("-");
+    }
     return lines.join("\n");
 }
 
@@ -884,6 +898,7 @@ function renderClassificationList(selectedClassificationIds) {
 
         const toggle = document.createElement("summary");
         toggle.className = "interfaces-dialog-classification-toggle";
+        toggle.title = buildClassificationTooltip(groupClassification);
 
         const title = document.createElement("strong");
         title.textContent = groupClassification.code || groupClassification.id;
@@ -959,10 +974,29 @@ function buildClassificationCheckbox(classification, selectedSet) {
         descriptionSpan.textContent = classification.description ? ` - ${classification.description}` : "";
 
         text.append(codeSpan, descriptionSpan);
-        text.title = classification.description || classification.code || classification.id;
+        row.title = buildClassificationTooltip(classification);
 
         row.append(checkbox, text);
         return row;
+}
+
+function buildClassificationTooltip(classification) {
+    const isGroup = isClassificationGroupCode(classification.code);
+    const lines = [
+        `Code :\n${classification.code || classification.id || ""}`,
+        `${isGroup
+            ? "Intended purpose or task of object"
+            : "Definition of subclass based on input measured variable"} :\n${classification.description || ""}`,
+        `${isGroup
+            ? "Examples of terms describing the intended purpose or the task of objects"
+            : "Examples of components"} :\n${classification.example || ""}`
+    ];
+
+    if (isGroup) {
+        lines.push(`Examples of typical components :\n${classification.usageExample || ""}`);
+    }
+
+    return lines.join("\n\n");
 }
 
 function getInterfaceDialogDraft() {

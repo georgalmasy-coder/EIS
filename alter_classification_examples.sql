@@ -1,0 +1,13 @@
+SET XACT_ABORT ON;
+GO
+
+ALTER TABLE [dbo].[CLASSIFICATION]
+ALTER COLUMN [Example] [nvarchar](max) NULL;
+GO
+
+IF COL_LENGTH(N'dbo.CLASSIFICATION', N'UsageExample') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[CLASSIFICATION]
+    ADD [UsageExample] [nvarchar](max) NULL;
+END;
+GO

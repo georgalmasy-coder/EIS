@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.web.application.cache;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LookupProjectCache {
@@ -41,20 +42,19 @@ public class LookupProjectCache {
         return irlCache.getListOfActiveLookupValues();
     }
 
-    public LookupValue getSrlLookupValue(Integer lookupId) {
-        return lookupId != null ? srlCache.getLookupValueById(lookupId) : null;
-    }
-
-    public List<LookupValue> getSrlLookupValues() {
-        return srlCache.getListOfActiveLookupValues();
-    }
-
     public LookupValue getClassificationLookupValue(Integer lookupId) {
         return lookupId != null ? classificationCache.getLookupValueById(lookupId) : null;
     }
 
-    public List<LookupValue> getClassificationLookupValues() {
-        return classificationCache.getListOfActiveLookupValues();
+    public List<ClassLookupValue> getClassificationLookupValues() {
+        List<LookupValue> listOfValues = classificationCache.getListOfActiveLookupValues();
+        List<ClassLookupValue> listOfSrlValues = new ArrayList<>();
+
+        for (LookupValue lookupValue : listOfValues) {
+            listOfSrlValues.add((ClassLookupValue) lookupValue);
+        }
+
+        return listOfSrlValues;
     }
 
     public LookupValue getStakeholderLookupValue(Integer lookupId) {

@@ -46,6 +46,7 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
                     textValue(lookupElement, "LookupCode"),
                     textValue(lookupElement, "LookupDescription"),
                     textValue(lookupElement, "LookupExample"),
+                    textValue(lookupElement, "LookupUsageExample"),
                     activeValue == null || activeValue
             );
 
@@ -197,6 +198,7 @@ public class LookupValueMaintenanceServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(rowElement, "Code", row.code());
         xmlDocument.appendTextElement(rowElement, "Description", row.description());
         xmlDocument.appendTextElement(rowElement, "Example", row.example());
+        xmlDocument.appendTextElement(rowElement, "UsageExample", row.usageExample());
         xmlDocument.appendTextElement(rowElement, "Active", row.active());
     }
 

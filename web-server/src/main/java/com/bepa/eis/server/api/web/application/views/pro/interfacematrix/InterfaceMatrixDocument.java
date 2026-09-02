@@ -39,7 +39,7 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.INTERFACE_MANAGEMENT_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(PageType.PSYS_INTERFACE_MANAGEMENT_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
         buildInterfaceMatrixDocument();

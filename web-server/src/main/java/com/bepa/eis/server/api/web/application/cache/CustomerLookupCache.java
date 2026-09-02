@@ -85,7 +85,7 @@ public class CustomerLookupCache {
         return getLookupCache(customerId, projectId).getClassificationLookupValue(customerId, projectId, lookupId);
     }
 
-    public static List<LookupValue> getClassificationLookupValues(WebSession webSession) {
+    public static List<ClassLookupValue> getClassificationLookupValues(WebSession webSession) {
         return getLookupCache(webSession).getClassificationLookupValues(webSession.getCustomerId(), webSession.getProjectId());
     }
 

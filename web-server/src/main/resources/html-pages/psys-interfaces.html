@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/interfaces.css" />
+    <link rel="stylesheet" href="../css/interfaces.css?rev=classification-tooltips-1" />
 </head>
 
 <body class="interfaces-document">
@@ -90,6 +90,11 @@
     </div>
 </main>
 
+<div id="interfaceContextMenu" class="interfaces-context-menu" role="menu" hidden>
+    <button id="interfaceContextEditButton" type="button" role="menuitem">Edit Interface</button>
+    <button id="interfaceContextRemoveButton" type="button" role="menuitem">Remove Interface</button>
+</div>
+
 <dialog id="interfaceDialog" class="interfaces-dialog" aria-labelledby="interfaceDialogTitle">
     <form method="dialog" class="interfaces-dialog-form">
         <div class="interfaces-dialog-head">
@@ -139,6 +144,39 @@
     </form>
 </dialog>
 
+<dialog id="interfaceRemoveDialog" class="interfaces-dialog" aria-labelledby="interfaceRemoveDialogTitle">
+    <form method="dialog" class="interfaces-dialog-form">
+        <div class="interfaces-dialog-head">
+            <h3 id="interfaceRemoveDialogTitle">Remove Interface</h3>
+        </div>
+
+        <div class="interfaces-dialog-content">
+            <section class="interfaces-dialog-card" aria-labelledby="interfaceRemoveFromTitle">
+                <h4 id="interfaceRemoveFromTitle">From Physical Structure</h4>
+                <div class="interfaces-dialog-card-fields" id="interfaceRemoveFromFields"></div>
+            </section>
+
+            <section class="interfaces-dialog-card" aria-labelledby="interfaceRemoveToTitle">
+                <h4 id="interfaceRemoveToTitle">To Physical Structure</h4>
+                <div class="interfaces-dialog-card-fields" id="interfaceRemoveToFields"></div>
+            </section>
+
+            <section class="interfaces-dialog-card interfaces-dialog-card--full" aria-labelledby="interfaceRemoveDetailsTitle">
+                <h4 id="interfaceRemoveDetailsTitle">Interface Details</h4>
+                <div class="interfaces-dialog-card-fields" id="interfaceRemoveDetailsFields"></div>
+            </section>
+        </div>
+
+        <div class="interfaces-dialog-footer">
+            <div class="interfaces-dialog-footer-note" id="interfaceRemoveDialogStatus">Confirm that this interface should be removed.</div>
+            <div class="interfaces-dialog-footer-actions">
+                <button id="interfaceRemoveDialogConfirmButton" class="danger" type="button">Remove Interface</button>
+                <button id="interfaceRemoveDialogCancelButton" type="button">Cancel</button>
+            </div>
+        </div>
+    </form>
+</dialog>
+
 <dialog id="helpDialog" class="help-dialog" aria-labelledby="helpDialogTitle">
     <form method="dialog" class="help-dialog-form">
         <div class="help-dialog-head">
@@ -158,7 +196,7 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/interfaces-page.js"></script>
+<script type="module" src="../js/pages/interfaces-page.js?rev=cell-classification-tooltip-2"></script>
 </body>
 </html>
 

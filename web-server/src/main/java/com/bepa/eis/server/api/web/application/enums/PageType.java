@@ -43,7 +43,7 @@ public enum PageType {
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
-    INTERFACE_MANAGEMENT_PAGE("interfaces","html-pages/interfaces.html", "Interface Management", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management", "Manage interfaces and related relationships."),
+    PSYS_INTERFACE_MANAGEMENT_PAGE("psys-interfaces","html-pages/psys-interfaces.html", "Interface Management", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Physical Structure", "Manage interfaces and related relationships."),
 
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),

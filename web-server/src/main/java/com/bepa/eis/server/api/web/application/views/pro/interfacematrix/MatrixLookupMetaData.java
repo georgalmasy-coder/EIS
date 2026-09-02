@@ -3,10 +3,12 @@ package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
+import com.bepa.eis.server.api.web.application.cache.ClassLookupValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class MatrixLookupMetaData {
@@ -44,12 +46,21 @@ public class MatrixLookupMetaData {
     }
 
     private void loadClassificationLookup(WebSession webSession) {
-        List<LookupValue> lookupValues = CustomerLookupCache.getClassificationLookupValues(webSession);
-        for (LookupValue lookupValue : lookupValues) {
-            if (lookupValue.isActive()) {
-                classificationList.add(new MetaDataLookup(lookupValue.getLookupId(), lookupValue.getLookupCode(), lookupValue.getLookupDescription(), lookupValue.getLookupColor()));
-            }
-        }
+        List<ClassLookupValue> lookupValues = CustomerLookupCache.getClassificationLookupValues(webSession);
+        lookupValues.stream()
+                .filter(LookupValue::isActive)
+                .sorted(Comparator.comparing(
+                        LookupValue::getLookupCode,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                ))
+                .forEach(lookupValue -> classificationList.add(new MetaDataSrlLookup(
+                        lookupValue.getLookupId(),
+                        lookupValue.getLookupCode(),
+                        lookupValue.getLookupDescription(),
+                        lookupValue.getLookupColor(),
+                        lookupValue.getExample(),
+                        lookupValue.getUsageExample()
+                )));
     }
 
     private void loadUserLookup(WebSession webSession) {
@@ -114,6 +125,10 @@ public class MatrixLookupMetaData {
         addLookupAttribute(trlElement, "code", metaDataLookup.code);
         addLookupAttribute(trlElement, "description", metaDataLookup.description);
         addLookupAttribute(trlElement, "color", metaDataLookup.color);
+        if (metaDataLookup instanceof MetaDataSrlLookup classification) {
+            addLookupAttribute(trlElement, "example", classification.example);
+            addLookupAttribute(trlElement, "usageExample", classification.usageExample);
+        }
         parentElement.appendChild(trlElement);
     }
 
@@ -135,4 +150,16 @@ public class MatrixLookupMetaData {
             this.color = color;
         }
     }
+
+    private static class MetaDataSrlLookup extends  MetaDataLookup {
+        String example;
+        String usageExample;
+
+        public MetaDataSrlLookup(Integer id, String code, String description, String color, String example, String usageExample) {
+            super(id, code, description, color);
+            this.example = example;
+            this.usageExample = usageExample;
+        }
+    }
+
 }
