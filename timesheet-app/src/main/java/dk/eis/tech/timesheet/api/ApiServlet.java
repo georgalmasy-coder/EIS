@@ -16,9 +16,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -147,24 +144,6 @@ public class ApiServlet extends HttpServlet {
                 request.getSession(true).setAttribute("selectedCustomerId", selection.customerId());
             }
             writeJson(response, Map.of("selectedCustomerId", selection.customerId()));
-            return;
-        }
-        if (path.equals("/invoice/pdf")) {
-            long customerId = requiredLong(request, "customerId");
-            int year = requiredInt(request, "year");
-            int month = requiredInt(request, "month");
-            byte[] pdf = request.getInputStream().readAllBytes();
-            Path transferDir = resolveTransferDirectory(request);
-            Files.createDirectories(transferDir);
-            String invoiceNumber = customerId + String.format("%04d%02d", year, month);
-            Path target = transferDir.resolve("invoice-" + invoiceNumber + ".pdf");
-            Files.write(target, pdf, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-            response.setStatus(HttpServletResponse.SC_CREATED);
-            writeJson(response, Map.of(
-                    "stored", true,
-                    "invoiceNumber", invoiceNumber,
-                    "fileName", target.getFileName().toString()
-            ));
             return;
         }
         if (path.equals("/customers")) {
@@ -565,11 +544,4 @@ public class ApiServlet extends HttpServlet {
         JsonSupport.mapper().writeValue(response.getOutputStream(), Map.of("error", message == null ? "Unknown error" : message));
     }
 
-    private Path resolveTransferDirectory(HttpServletRequest request) {
-        String realPath = request.getServletContext().getRealPath("/WEB-INF/transfer");
-        if (realPath != null && !realPath.isBlank()) {
-            return Path.of(realPath);
-        }
-        return Path.of(System.getProperty("user.dir"), "transfer");
-    }
 }

@@ -21,7 +21,6 @@ const api = {
     selection: 'api/selection',
     calendar: 'api/calendar',
     invoice: 'api/invoice',
-    invoicePdf: 'api/invoice/pdf'
 };
 
 document.addEventListener('DOMContentLoaded', init);
@@ -334,7 +333,7 @@ async function renderTimeView(root) {
 }
 
 async function renderMaterialsView(root) {
-    await renderCalendarSection(root, 'materials');
+    await renderCalendarSection(root, 'material');
 }
 
 async function renderInvoiceView(root) {
@@ -450,6 +449,7 @@ async function renderCalendarSection(root, kind) {
             </div>
             <div class="toolbar">
                 ${kind === 'time' ? '<button class="btn" data-action="add-time-today"><span class="icon" data-icon="plus"></span><span>Add time today</span></button>' : ''}
+                ${kind === 'material' ? '<button class="btn" data-action="new-material"><span class="icon" data-icon="plus"></span><span>Add material</span></button>' : ''}
                 <button class="btn-secondary" data-action="prev-month">Previous month</button>
                 <button class="btn-secondary" data-action="next-month">Next month</button>
             </div>
@@ -577,7 +577,7 @@ function renderTimeForm(date = todayIso(), formId = 'timeForm') {
 function renderMaterialForm() {
     return `
         <form id="materialForm" class="grid-4">
-            <div class="field"><label>Date</label><input name="entryDate" type="date" value="${todayIso()}"></div>
+            <div class="field"><label>Date</label><input name="entryDate" type="date" value="${materialDateForCurrentView()}"></div>
             <div class="field"><label>Quantity</label><input name="quantity" type="number" step="0.01" min="0" required></div>
             <div class="field"><label>Unit</label><input name="unit" placeholder="pcs, m, kg" required></div>
             <div class="field"><label>Unit price</label><input name="unitPrice" type="number" step="0.01" min="0" required></div>
@@ -645,7 +645,7 @@ async function handleAction(event) {
             await createInvoicePdf();
             break;
         case 'new-material':
-            await setView('materials');
+            await materialDialog();
             break;
         case 'open-day':
             await openDayDialog(date);
@@ -912,14 +912,17 @@ async function bindMaterialForm() {
         body.customerId = state.selectedCustomerId;
         await fetchJson(`${api.customers}/${state.selectedCustomerId}/materials`, { method: 'POST', body });
         form.reset();
-        form.querySelector('[name="entryDate"]').value = todayIso();
+        const [entryYear, entryMonth] = body.entryDate.split('-').map(Number);
+        state.year = entryYear;
+        state.month = entryMonth;
+        form.querySelector('[name="entryDate"]').value = materialDateForCurrentView();
         await reloadCurrentView();
     }));
 }
 
 async function materialDialog(entry = null) {
     const result = await promptDialog(entry ? 'Edit material' : 'New material', [
-        { name: 'entryDate', label: 'Date', type: 'date', value: entry?.entryDate ?? todayIso(), required: true },
+        { name: 'entryDate', label: 'Date', type: 'date', value: entry?.entryDate ?? materialDateForCurrentView(), required: true },
         { name: 'quantity', label: 'Quantity', type: 'number', step: '0.01', value: entry?.quantity ?? '', required: true },
         { name: 'unit', label: 'Unit', type: 'text', value: entry?.unit ?? '', required: true },
         { name: 'unitPrice', label: 'Unit price', type: 'number', step: '0.01', value: entry?.unitPrice ?? '', required: true },
@@ -939,6 +942,9 @@ async function materialDialog(entry = null) {
     } else {
         await fetchJson(`${api.customers}/${state.selectedCustomerId}/materials`, { method: 'POST', body });
     }
+    const [entryYear, entryMonth] = body.entryDate.split('-').map(Number);
+    state.year = entryYear;
+    state.month = entryMonth;
     await reloadCurrentView();
 }
 
@@ -1181,6 +1187,15 @@ function todayIso() {
     return new Date().toISOString().slice(0, 10);
 }
 
+function materialDateForCurrentView() {
+    const today = todayIso();
+    const [todayYear, todayMonth] = today.split('-').map(Number);
+    if (state.year === todayYear && state.month === todayMonth) {
+        return today;
+    }
+    return `${state.year}-${String(state.month).padStart(2, '0')}-01`;
+}
+
 function escapeHtml(value) {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -1208,7 +1223,6 @@ async function createInvoicePdf() {
         return;
     }
 
-    const previewWindow = window.open('', '_blank');
     try {
         showBanner('Generating PDF...');
 
@@ -1232,46 +1246,22 @@ async function createInvoicePdf() {
             summary
         });
 
-        await uploadInvoicePdf(pdfBlob, invoiceNumber);
-
-        const objectUrl = URL.createObjectURL(pdfBlob);
-        if (previewWindow) {
-            previewWindow.location = objectUrl;
-            previewWindow.focus();
-        } else {
-            window.open(objectUrl, '_blank', 'noopener');
-        }
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-        showBanner(`PDF created and transferred as invoice-${invoiceNumber}.pdf.`);
+        downloadInvoicePdf(pdfBlob, invoiceNumber);
+        showBanner(`PDF downloaded as invoice-${invoiceNumber}.pdf.`);
     } catch (error) {
-        if (previewWindow) previewWindow.close();
         reportError(error);
     }
 }
 
-async function uploadInvoicePdf(blob, invoiceNumber) {
-    const response = await fetch(`${api.invoicePdf}?customerId=${state.selectedCustomerId}&year=${state.year}&month=${state.month}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/pdf',
-            'X-File-Name': `invoice-${invoiceNumber}.pdf`
-        },
-        body: blob
-    });
-
-    if (!response.ok) {
-        const text = await response.text();
-        let message = text || response.statusText;
-        try {
-            const parsed = JSON.parse(text);
-            message = parsed.error || message;
-        } catch {
-            // ignore
-        }
-        throw new Error(message || 'Unable to transfer PDF');
-    }
-
-    return response.json().catch(() => null);
+function downloadInvoicePdf(blob, invoiceNumber) {
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = `invoice-${invoiceNumber}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
 async function buildInvoicePdfBlob({ customer, invoice, invoiceNumber, invoiceDate, summary }) {

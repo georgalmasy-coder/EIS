@@ -20,7 +20,7 @@ public final class CompanyFooterConfig {
     public static final List<String> MIDDLE_INFO_LINES = List.of(
             "Phone: 2171 7344",
             "E-mail: georg.almasy@gmail.com",
-            "CVR no.: XXXX YYYY"
+            "CVR no.: 29453268"
     );
 
     public static final List<String> RIGHT_BANK_LINES = List.of(
