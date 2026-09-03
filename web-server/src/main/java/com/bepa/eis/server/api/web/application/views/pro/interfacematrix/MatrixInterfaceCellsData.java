@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -11,12 +12,12 @@ import java.util.List;
 
 public class MatrixInterfaceCellsData {
 
-    private static final DateTimeFormatter DANESE_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private static final DateTimeFormatter DANISH_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     private final List<InterfaceMatrixProvider.InterfaceRecord> cellList;
 
-    public MatrixInterfaceCellsData(WebSession webSession) throws SQLException {
-        InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession);
+    public MatrixInterfaceCellsData(WebSession webSession, EntityType entityType) throws SQLException {
+        InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
         this.cellList = interfaceMatrixProvider.getLatestInterfaceRecords();
     }
 
@@ -57,6 +58,6 @@ public class MatrixInterfaceCellsData {
             return "";
         }
 
-        return changedDateTime.toLocalDateTime().format(DANESE_DATE_TIME_FORMATTER);
+        return changedDateTime.toLocalDateTime().format(DANISH_DATE_TIME_FORMATTER);
     }
 }

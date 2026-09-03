@@ -73,7 +73,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
 
         } catch (Throwable throwable) {
-            logError(module, throwable);
+            logIncidentError(module, throwable);
         }
     }
 
@@ -116,7 +116,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             }
 
         } catch (Throwable throwable) {
-            logError(module, throwable);
+            logIncidentError(module, throwable);
         }
 
     }
@@ -162,12 +162,12 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
         } catch (Throwable throwable) {
             setErrorResponse(response, throwable);
-            logError(module,
+            logIncidentError(module,
                     throwable);
         }
     }
 
-    private void logError(String module, Throwable throwable) throws ServletException{
+    public void logIncidentError(String module, Throwable throwable) throws ServletException {
         if (throwable instanceof IllegalArgumentException) {
             // Ignore IllegalArgumentExceptions, they are not errors.
             // They are just used to indicate that the request is invalid.

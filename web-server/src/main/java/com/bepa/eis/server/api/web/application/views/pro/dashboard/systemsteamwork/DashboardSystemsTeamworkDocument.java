@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.dashboard.systemsteamwork;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
@@ -78,7 +79,10 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     }
 
     private void buildSystemsTeamwork() throws SQLException  {
-        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession());
+        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(
+                getWebSession(),
+                EntityType.SYSTEMS_BREAKDOWN
+        );
         interfaces = interfaceManagementProvider.getAllInterfaceRecords();
 
         if (interfaces != null) {

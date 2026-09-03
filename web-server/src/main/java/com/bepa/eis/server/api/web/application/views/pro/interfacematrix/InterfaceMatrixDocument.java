@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
@@ -21,17 +22,28 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
-public class InterfaceMatrixDocument extends GenericXmlDocument {
+abstract class InterfaceMatrixDocument extends GenericXmlDocument {
 
     private static final Logger log = LoggerFactory.getLogger(InterfaceMatrixDocument.class);
+
+    public static final String ENTITIES_ELEMENT_NAME = "entities";
+    public static final String ENTITY_ELEMENT_NAME = "entity";
+
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
 
     private InterfaceMatrixMetaData interfaceMatrixMetaData;
     private MatrixLookupMetaData matrixLookupMetaData;
-    private List<SystemBreakdownEntity> listOfPhysicalStructuresEntities;
     private MatrixInterfaceCellsData matrixCellsData;
+
+    abstract public PageType getPageType();
+    abstract public EntityType getEntityType();
+    abstract public String getTitle();
+    abstract public String getColumnGroupLabel();
+    abstract public String getRowGroupLabel();
+    abstract public Element getEntityElements();
+    abstract public String getEntityCount();
 
     protected InterfaceMatrixDocument(WebSession webSession) throws Exception {
         super(webSession);
@@ -39,7 +51,7 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.PSYS_INTERFACE_MANAGEMENT_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(getPageType());
         rootElement.addElement(topPanel.getTopPanelElements());
 
         buildInterfaceMatrixDocument();
@@ -52,18 +64,18 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
         matrixElement.appendChild(matrixLookupMetaData.getClassificationElement(getDoc()));
         matrixElement.appendChild(matrixLookupMetaData.getUserElement(getDoc()));
         matrixElement.appendChild(matrixLookupMetaData.getDepartmentElement(getDoc()));
-        matrixElement.appendChild(getPhysicalStructureElements());
+        matrixElement.appendChild(getEntityElements());
+
         matrixElement.appendChild(matrixCellsData.getCellElement(getDoc()));
     }
 
     private void buildInterfaceMatrixDocument() throws Exception {
         interfaceMatrixMetaData = createInterfaceMatrixMetaData();
         matrixLookupMetaData = createMatrixLookupData();
-        listOfPhysicalStructuresEntities = getPhysicalStructures();
         matrixCellsData = getInterfaceMatrixCellsData(getWebSession());
     }
 
-    private <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
+    public  <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
         entities.sort(
                 Comparator.comparing(
                         AbstractEntity::getSortKey,
@@ -74,9 +86,9 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
 
     private InterfaceMatrixMetaData createInterfaceMatrixMetaData() {
         InterfaceMatrixMetaData matrixMetaData = new InterfaceMatrixMetaData();
-        matrixMetaData.setTitle("Interface Management");
-        matrixMetaData.setColumnGroupLabel("To Physical Structure");
-        matrixMetaData.setRowGroupLabel("From Physical Structure");
+        matrixMetaData.setTitle(getTitle());
+        matrixMetaData.setColumnGroupLabel(getColumnGroupLabel());
+        matrixMetaData.setRowGroupLabel(getRowGroupLabel());
         matrixMetaData.setGeneratedAt();
         return matrixMetaData;
     }
@@ -93,28 +105,10 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
     }
 
     private MatrixInterfaceCellsData getInterfaceMatrixCellsData(WebSession webSession) throws SQLException {
-        return new MatrixInterfaceCellsData(webSession);
+        return new MatrixInterfaceCellsData(webSession, getEntityType());
     }
 
-    private Element getPhysicalStructureElements() {
-        Element physicalStructuresElement = getDoc().createElement("physicalStructures");
-
-        for (SystemBreakdownEntity entity : listOfPhysicalStructuresEntities) {
-            Element entityElement = getDoc().createElement("physicalStructure");
-            addEntityElement(entityElement, "entityId", entity.getEntityId());
-            addEntityElement(entityElement, "id", entity.getSbsCode());
-            addEntityElement(entityElement, "name", entity.getSystemName());
-            addEntityElement(entityElement, "systemOwner", entity.getSystemOwner());
-            addEntityElement(entityElement, "trlId", entity.getTrl());
-            addEntityElement(entityElement, "departmentId", entity.getSystemDepartment());
-            addEntityElement(entityElement, "deadlineNextTrl", entity.getDeadlineNextTrlField());
-            physicalStructuresElement.appendChild(entityElement);
-        }
-
-        return physicalStructuresElement;
-    }
-
-    private void addEntityElement(Element parentElement, String elementName, AbstractField field) {
+    protected void addEntityElement(Element parentElement, String elementName, AbstractField field) {
         if (field == null) {
             Element element = getDoc().createElement(elementName);
             parentElement.appendChild(element);
@@ -137,7 +131,7 @@ public class InterfaceMatrixDocument extends GenericXmlDocument {
 
     private Element buildMatrixElement() {
         Element matrixElement = getDoc().createElement("interfaceMatrix");
-        matrixElement.setAttribute("entityCount", String.valueOf(listOfPhysicalStructuresEntities.size()));
+        matrixElement.setAttribute("entityCount", getEntityCount());
         matrixElement.setAttribute("version", "1");
         return matrixElement;
     }

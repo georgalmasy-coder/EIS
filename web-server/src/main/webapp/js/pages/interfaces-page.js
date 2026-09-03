@@ -16,9 +16,9 @@ import {
     serializeXml
 } from "../core/xml.js";
 
-const INTERFACE_ENDPOINT = "/pro/interfacematrix?cmd=overview";
-const INTERFACE_SAVE_ENDPOINT = "/pro/interfacematrix?cmd=save";
-const INTERFACE_REMOVE_ENDPOINT = "/pro/interfacematrix?cmd=remove";
+const INTERFACE_ENDPOINT = "/pro/psys/interfacematrix?cmd=overview";
+const INTERFACE_SAVE_ENDPOINT = "/pro/psys/interfacematrix?cmd=save";
+const INTERFACE_REMOVE_ENDPOINT = "/pro/psys/interfacematrix?cmd=remove";
 const FALLBACK_DATE = "";
 
 const state = {
@@ -147,7 +147,7 @@ function parseLookupMap(parentElement, selector, idAttribute) {
 }
 
 function parsePhysicalStructures(matrixElement, lookup) {
-    const structureElements = Array.from(matrixElement.querySelectorAll(":scope > physicalStructures > physicalStructure"));
+    const structureElements = Array.from(matrixElement.querySelectorAll(":scope > entities > entity"));
 
     return structureElements.map((structureElement, index) => {
         const entityId = getChildText(structureElement, "entityId", String(index));

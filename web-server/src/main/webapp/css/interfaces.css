@@ -662,8 +662,7 @@ body.theme-black .interfaces-cell-line-value {
 }
 
 .interfaces-dialog-classification-group-item[open] {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: block;
 }
 
 .interfaces-dialog-classification-toggle {
@@ -742,6 +741,12 @@ body.theme-black .interfaces-cell-line-value {
     align-items: baseline;
     min-width: 0;
     white-space: nowrap;
+}
+
+.interfaces-dialog-classification-item.interfaces-dialog-classification-group-row {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .interfaces-dialog-classification-text strong {
@@ -852,13 +857,7 @@ body.interfaces-document .side-menu {
         grid-template-columns: 1fr;
     }
 
-    .interfaces-dialog-classification-group-item[open] {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 @media (max-width: 560px) {
-    .interfaces-dialog-classification-group-item[open] {
-        grid-template-columns: 1fr;
-    }
 }

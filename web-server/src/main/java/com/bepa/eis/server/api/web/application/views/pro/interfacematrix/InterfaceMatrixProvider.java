@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 [InterfacePK],
                 [CustomerId],
                 [ProjectId],
+                [EntityType],
                 [Version],
                 [Latest],
                 [ChangedByUserId],
@@ -37,6 +39,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             FROM [dbo].[INTERFACES]
             WHERE [CustomerId] = ?
               AND [ProjectId] = ?
+              AND [EntityType] = ?
               AND [Latest] = 1
             ORDER BY [FromEntityId], [ToEntityId], [Version]
             """;
@@ -46,6 +49,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 [InterfacePK],
                 [CustomerId],
                 [ProjectId],
+                [EntityType],
                 [Version],
                 [Latest],
                 [ChangedByUserId],
@@ -58,6 +62,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             FROM [dbo].[INTERFACES]
             WHERE [CustomerId] = ?
               AND [ProjectId] = ?
+              AND [EntityType] = ?
               AND [FromEntityId] = ?
               AND [ToEntityId] = ?
               AND [Latest] = 1
@@ -69,6 +74,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             SET [Latest] = 0
             WHERE [CustomerId] = ?
               AND [ProjectId] = ?
+              AND [EntityType] = ?
               AND [FromEntityId] = ?
               AND [ToEntityId] = ?
               AND [Latest] = 1
@@ -84,6 +90,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 [InterfacePK],
                 [CustomerId],
                 [ProjectId],
+                [EntityType],
                 [Version],
                 [Latest],
                 [ChangedByUserId],
@@ -93,11 +100,17 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 [IrlId],
                 [NextIrlMeeting],
                 [ClassificationIds]
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
-    public InterfaceMatrixProvider(WebSession webSession) {
+    private final EntityType entityType;
+
+    public InterfaceMatrixProvider(WebSession webSession, EntityType entityType) {
         super(webSession);
+        if (entityType == null) {
+            throw new IllegalArgumentException("EntityType is required.");
+        }
+        this.entityType = entityType;
     }
 
     public List<InterfaceRecord> getLatestInterfaceRecords() throws SQLException {
@@ -121,6 +134,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
              PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_SQL)) {
             setInt(ps, customerId, 1);
             setInt(ps, projectId, 2);
+            setInt(ps, entityType.getId(), 3);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -139,8 +153,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
              PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACE_SQL)) {
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
-            setInt(ps, fromEntityId, 3);
-            setInt(ps, toEntityId, 4);
+            setInt(ps, entityType.getId(), 3);
+            setInt(ps, fromEntityId, 4);
+            setInt(ps, toEntityId, 5);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -188,6 +203,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                             interfacePk,
                             getWebSession().getCustomerId(),
                             getWebSession().getProjectId(),
+                            entityType.getId(),
                             nextVersion,
                             true,
                             getWebSession().getUserId(),
@@ -245,8 +261,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 try (PreparedStatement ps = connection.prepareStatement(UPDATE_LATEST_FALSE_SQL)) {
                     setInt(ps, getWebSession().getCustomerId(), 1);
                     setInt(ps, getWebSession().getProjectId(), 2);
-                    setInt(ps, fromEntityId, 3);
-                    setInt(ps, toEntityId, 4);
+                    setInt(ps, entityType.getId(), 3);
+                    setInt(ps, fromEntityId, 4);
+                    setInt(ps, toEntityId, 5);
                     updated = ps.executeUpdate();
                 }
                 connection.commit();
@@ -272,8 +289,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
         try (PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACE_SQL)) {
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
-            setInt(ps, fromEntityId, 3);
-            setInt(ps, toEntityId, 4);
+            setInt(ps, entityType.getId(), 3);
+            setInt(ps, fromEntityId, 4);
+            setInt(ps, toEntityId, 5);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -289,8 +307,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
         try (PreparedStatement ps = connection.prepareStatement(UPDATE_LATEST_FALSE_SQL)) {
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
-            setInt(ps, fromEntityId, 3);
-            setInt(ps, toEntityId, 4);
+            setInt(ps, entityType.getId(), 3);
+            setInt(ps, fromEntityId, 4);
+            setInt(ps, toEntityId, 5);
             ps.executeUpdate();
         }
     }
@@ -313,6 +332,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             setInt(ps, record.interfacePk(), index++);
             setInt(ps, record.customerId(), index++);
             setInt(ps, record.projectId(), index++);
+            setInt(ps, record.entityType(), index++);
             setInt(ps, record.version(), index++);
             ps.setBoolean(index++, record.latest());
             setInt(ps, record.changedByUserId(), index++);
@@ -344,6 +364,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 rs.getInt("InterfacePK"),
                 rs.getInt("CustomerId"),
                 rs.getInt("ProjectId"),
+                rs.getInt("EntityType"),
                 rs.getInt("Version"),
                 rs.getBoolean("Latest"),
                 rs.getInt("ChangedByUserId"),
@@ -375,6 +396,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             Integer interfacePk,
             Integer customerId,
             Integer projectId,
+            Integer entityType,
             Integer version,
             Boolean latest,
             Integer changedByUserId,

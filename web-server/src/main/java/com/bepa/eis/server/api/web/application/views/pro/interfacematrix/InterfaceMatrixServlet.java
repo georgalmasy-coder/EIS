@@ -2,6 +2,7 @@ package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.SeverityType;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
@@ -18,17 +19,22 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 
+/*
 @WebServlet(
         name = "InterfaceMatrixServlet",
         urlPatterns = {
-                "/pro/interfacematrix",
-                "/pro/interfacematrix/*"
+                "/pro/psys/interfacematrix",
+                "/pro/psys/interfacematrix/*"
         }
 )
 @MultipartConfig
-public class InterfaceMatrixServlet extends GenericDataProviderServlet {
+
+ */
+abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(InterfaceMatrixServlet.class);
+
+    abstract GenericXmlDocument buildInterfaceMatrix (WebSession webSession, EntityType entityType);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
@@ -36,8 +42,6 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
-        long startTime = System.currentTimeMillis();
-
         try {
             if ("remove".equals(getCommandParameter(request))) {
                 handleRemove(webSession, request, response);
@@ -61,7 +65,8 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
         }
 
         try {
-            InterfaceMatrixProvider provider = new InterfaceMatrixProvider(webSession);
+            EntityType entityType = resolveEntityType(request);
+            InterfaceMatrixProvider provider = new InterfaceMatrixProvider(webSession, entityType);
             if (!provider.removeInterfaceRecord(fromEntityId, toEntityId)) {
                 throw new IllegalArgumentException("Interface was not found or has already been removed.");
             }
@@ -72,13 +77,12 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
         }
     }
 
-
-
+/*
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
-        return buildInterfaceMatrix(webSession);
+        return buildInterfaceMatrix(webSession, resolveEntityType(request));
     }
-
+*/
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
         throw new RuntimeException("Invalid import request");
@@ -102,7 +106,8 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
             }
 
             InterfaceMatrixProvider.InterfaceSaveRecord saveRecord = parseSaveRecord(cellElement);
-            InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession);
+            EntityType entityType = resolveEntityType(request);
+            InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
             interfaceMatrixProvider.saveInterfaceRecord(saveRecord);
 
             log.info(
@@ -136,13 +141,30 @@ public class InterfaceMatrixServlet extends GenericDataProviderServlet {
         throw new RuntimeException("Invalid export request");
     }
 
-    private GenericXmlDocument buildInterfaceMatrix(WebSession webSession) {
+/*
+    protected GenericXmlDocument buildInterfaceMatrix(WebSession webSession, EntityType entityType) {
         try {
-            return new InterfaceMatrixDocument(webSession);
+            return new PsysInterfaceMatrixDocument(webSession, entityType);
         } catch (Exception e) {
-            log.error("Error getting traceability matrix of stakeholder/system requirements: {}", e.getMessage(), e);
+            try {
+                logIncidentError("InterfaceMatrixServlet", e);
+            } catch (Throwable throwable) {
+                // Ignore error
+            }
+
+            log.error("Error getting interface management matrix document: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+*/
+
+    protected EntityType resolveEntityType(HttpServletRequest request) {
+        return switch (request.getServletPath()) {
+            case "/pro/psys/interfacematrix" -> EntityType.SYSTEMS_BREAKDOWN;
+            default -> throw new IllegalArgumentException(
+                    "No EntityType configured for interface matrix endpoint: " + request.getServletPath()
+            );
+        };
     }
 
     private InterfaceMatrixProvider.InterfaceSaveRecord parseSaveRecord(Element cellElement) {
