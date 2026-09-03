@@ -18,7 +18,7 @@ public class MatrixInterfaceCellsData {
 
     public MatrixInterfaceCellsData(WebSession webSession, EntityType entityType) throws SQLException {
         InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
-        this.cellList = interfaceMatrixProvider.getLatestInterfaceRecords();
+        this.cellList = interfaceMatrixProvider.getLatestInterfaceRecords(entityType);
     }
 
     protected Element getCellElement(Document doc) {

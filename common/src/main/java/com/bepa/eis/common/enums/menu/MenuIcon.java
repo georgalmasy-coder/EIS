@@ -41,8 +41,11 @@ public enum MenuIcon {
     FUNCTIONAL(
             7,
             "Functional",
-            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">F</text></svg>"
+//            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">F</text></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><rect x=\"2\" y=\"2\" width=\"20\" height=\"20\" rx=\"6\" fill=\"#1f4b50\"/><text x=\"12\" y=\"15.4\" text-anchor=\"middle\" fill=\"#72c5da\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"700\"  fill=\"currentColor\">F</text></svg>"
     ),
+
+    //<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="#1f4b50"/><text x="12" y="15.4" text-anchor="middle" fill="#72c5da" font-family="Inter,Arial,sans-serif" font-size="10" font-weight="700">F</text></svg>
 
     LOGICAL(
             8,
@@ -108,6 +111,12 @@ public enum MenuIcon {
             18,
             "Settings",
             "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0 0 14.8 6L14.5 3h-5L9.2 6a8 8 0 0 0-1.7 1.1l-2.4-1-2 3.4L5.1 11a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A8 8 0 0 0 9.2 18l.3 3h5l.3-3a8 8 0 0 0 1.7-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z\"/></svg>"
+    ),
+
+    N2(
+            19,
+            "N2",
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#1f4b50\"/><text x=\"12\" y=\"15.5\" text-anchor=\"middle\" fill=\"#ffffff\" font-family=\"Inter,Arial,sans-serif\" font-size=\"9.5\" font-weight=\"700\">N2</text></svg>"
     )
     /*,
 

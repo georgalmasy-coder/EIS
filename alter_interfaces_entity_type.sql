@@ -1,0 +1,14 @@
+SET XACT_ABORT ON;
+GO
+
+ALTER TABLE [dbo].[INTERFACES]
+ADD [EntityType] [int] NULL;
+GO
+
+UPDATE [dbo].[INTERFACES]
+SET [EntityType] = 2;
+GO
+
+ALTER TABLE [dbo].[INTERFACES]
+ALTER COLUMN [EntityType] [int] NOT NULL;
+GO

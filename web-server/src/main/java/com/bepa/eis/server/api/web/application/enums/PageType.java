@@ -43,7 +43,11 @@ public enum PageType {
     BASELINE_MAIN_PAGE("baseline-main","html-pages/baseline-main.html", "Baselines", true, "PROJECT MANAGEMENT", "Baselines", "Review baseline data in the workspace below."),
     BASELINE_DETAIL_PAGE("baseline-detail","html-pages/baseline-detail.html", "Baseline detail", true, "PROJECT MANAGEMENT", "Baseline Detail", "Review baseline details in the workspace below."),
 
-    PSYS_INTERFACE_MANAGEMENT_PAGE("psys-interfaces","html-pages/psys-interfaces.html", "Interface Management", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Physical Structure", "Manage interfaces and related relationships."),
+    PSYS_INTERFACE_MANAGEMENT_PAGE("psys-interfaces","html-pages/psys-interfaces.html", "N2 Physical Structure", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Physical Structure", "Manage interfaces and related relationships."),
+    LSYS_INTERFACE_MANAGEMENT_PAGE("lsys-interfaces","html-pages/lsys-interfaces.html", "N2 Logical Design", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Logical Design", "Manage interfaces and related relationships."),
+    FSYS_INTERFACE_MANAGEMENT_PAGE("fsys-interfaces","html-pages/fsys-interfaces.html", "N2 Functions", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Functions", "Manage interfaces and related relationships."),
+    STK_INTERFACE_MANAGEMENT_PAGE("stk-interfaces","html-pages/stk-interfaces.html", "N2 Stakeholder Requirement", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Stakeholder Requirement", "Manage interfaces and related relationships."),
+    SYS_INTERFACE_MANAGEMENT_PAGE("sys-interfaces","html-pages/sys-interfaces.html", "N2 System Requirement", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - System Requirement", "Manage interfaces and related relationships."),
 
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),

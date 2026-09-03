@@ -113,17 +113,17 @@ public class InterfaceMatrixProvider extends GenericProvider {
         this.entityType = entityType;
     }
 
-    public List<InterfaceRecord> getLatestInterfaceRecords() throws SQLException {
+    public List<InterfaceRecord> getLatestInterfaceRecords(EntityType entityType) throws SQLException {
         validateSession();
-        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
     }
 
-    public List<InterfaceRecord> getAllInterfaceRecords() throws SQLException {
+    public List<InterfaceRecord> getAllInterfaceRecords(EntityType entityType) throws SQLException {
         validateSession();
-        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+        return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
     }
 
-    public List<InterfaceRecord> getLatestInterfaceRecords(Integer customerId, Integer projectId) throws SQLException {
+    public List<InterfaceRecord> getLatestInterfaceRecords(Integer customerId, Integer projectId, EntityType entityType) throws SQLException {
         if (customerId == null || projectId == null) {
             throw new IllegalArgumentException("CustomerId and ProjectId are required.");
         }
@@ -146,7 +146,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
         return records;
     }
 
-    public InterfaceRecord getLatestInterfaceRecord(Integer fromEntityId, Integer toEntityId) throws SQLException {
+    public InterfaceRecord getLatestInterfaceRecord(Integer fromEntityId, Integer toEntityId, EntityType entityType) throws SQLException {
         validateSession();
 
         try (Connection connection = getDataSource().getConnection();

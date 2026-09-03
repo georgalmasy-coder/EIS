@@ -79,11 +79,9 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     }
 
     private void buildSystemsTeamwork() throws SQLException  {
-        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(
-                getWebSession(),
-                EntityType.SYSTEMS_BREAKDOWN
-        );
-        interfaces = interfaceManagementProvider.getAllInterfaceRecords();
+        EntityType entityType = EntityType.SYSTEMS_BREAKDOWN;
+        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(), entityType);
+        interfaces = interfaceManagementProvider.getAllInterfaceRecords(entityType);
 
         if (interfaces != null) {
             for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {

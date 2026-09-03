@@ -52,10 +52,6 @@ public class LsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
             addEntityElement(entityElement, "entityId", entity.getEntityId());
             addEntityElement(entityElement, "id", entity.getLogicalCode());
             addEntityElement(entityElement, "name", entity.getLogicalName());
-//            addEntityElement(entityElement, "systemOwner", entity.getSystemOwner());
-//            addEntityElement(entityElement, "trlId", entity.getTrl());
-//            addEntityElement(entityElement, "departmentId", entity.getSystemDepartment());
-//            addEntityElement(entityElement, "deadlineNextTrl", entity.getDeadlineNextTrlField());
             physicalStructuresElement.appendChild(entityElement);
         }
 

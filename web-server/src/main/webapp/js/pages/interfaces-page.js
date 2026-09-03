@@ -16,9 +16,12 @@ import {
     serializeXml
 } from "../core/xml.js";
 
-const INTERFACE_ENDPOINT = "/pro/psys/interfacematrix?cmd=overview";
-const INTERFACE_SAVE_ENDPOINT = "/pro/psys/interfacematrix?cmd=save";
-const INTERFACE_REMOVE_ENDPOINT = "/pro/psys/interfacematrix?cmd=remove";
+const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/pro/psys/interfacematrix";
+const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=overview`;
+const INTERFACE_SAVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=save`;
+const INTERFACE_REMOVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=remove`;
+const INTERFACE_STRUCTURE_LABEL = document.body.dataset.interfaceStructureLabel || "Physical Structure";
+const INTERFACE_EDIT_PAGE = document.body.dataset.interfaceEditPage || "systemsbreakdown-edit";
 const FALLBACK_DATE = "";
 
 const state = {
@@ -112,9 +115,9 @@ function parseInterfaceMatrixDocument(xmlDocument) {
     };
 
     return {
-        title: "Interface Management",
-        columnGroupLabel: "To Physical Structure",
-        rowGroupLabel: "From Physical Structure",
+        title: getChildText(metaElement, "title", "Interface Management"),
+        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "To Physical Structure"),
+        rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "From Physical Structure"),
         generatedAt: getChildText(metaElement, "generatedAt", ""),
         structures: parsePhysicalStructures(matrixElement, lookup),
         cellsByKey: parseCells(matrixElement, lookup),
@@ -158,13 +161,17 @@ function parsePhysicalStructures(matrixElement, lookup) {
             entityId,
             id,
             name,
+            hasSystemOwner: Boolean(structureElement.querySelector(":scope > systemOwner")),
             systemOwnerId: getChildText(structureElement, "systemOwner", ""),
             systemOwnerCode: resolveLookupCode(lookup.userById, getChildText(structureElement, "systemOwner", "")),
+            hasTrl: Boolean(structureElement.querySelector(":scope > trlId")),
             trlId: getChildText(structureElement, "trlId", ""),
             trlCode: resolveLookupCode(lookup.trlById, getChildText(structureElement, "trlId", "")),
             trlColor: resolveLookupColor(lookup.trlById, getChildText(structureElement, "trlId", "")),
+            hasDepartment: Boolean(structureElement.querySelector(":scope > departmentId")),
             departmentId: getChildText(structureElement, "departmentId", ""),
             departmentCode: resolveLookupCode(lookup.departmentById, getChildText(structureElement, "departmentId", "")),
+            hasDeadlineNextTrl: Boolean(structureElement.querySelector(":scope > deadlineNextTrl")),
             deadlineNextTrl: getChildText(structureElement, "deadlineNextTrl", FALLBACK_DATE),
             label: buildStructureLabel(id, name)
         };
@@ -246,7 +253,7 @@ function renderInterfaceMatrix(matrix) {
     tableBody.innerHTML = "";
 
     if (!matrix.structures.length) {
-        showEmptyState("No physical structures returned from endpoint.");
+        showEmptyState(`No ${INTERFACE_STRUCTURE_LABEL.toLowerCase()} records returned from endpoint.`);
         return;
     }
 
@@ -279,12 +286,12 @@ function renderHeader(tableHead, matrix) {
         const th = document.createElement("th");
         th.className = "interfaces-column-header";
         th.scope = "col";
-        th.title = `${buildStructureLabel(column.id, column.name)}\nDouble-click to edit Physical Structure`;
+        th.title = `${buildStructureLabel(column.id, column.name)}\nDouble-click to edit ${INTERFACE_STRUCTURE_LABEL}`;
         th.dataset.entityId = column.entityId || "";
         th.appendChild(buildStructureHeaderContent(column));
 
         th.addEventListener("dblclick", () => {
-            openPhysicalStructureEditPage(column);
+            openStructureEditPage(column);
         });
 
         headerRow.appendChild(th);
@@ -320,12 +327,12 @@ function renderBody(tableBody, matrix) {
         const rowHeader = document.createElement("th");
         rowHeader.className = "interfaces-row-header";
         rowHeader.scope = "row";
-        rowHeader.title = `${buildStructureLabel(fromStructure.id, fromStructure.name)}\nDouble-click to edit Physical Structure`;
+        rowHeader.title = `${buildStructureLabel(fromStructure.id, fromStructure.name)}\nDouble-click to edit ${INTERFACE_STRUCTURE_LABEL}`;
         rowHeader.dataset.entityId = fromStructure.entityId || "";
         rowHeader.appendChild(buildStructureHeaderContent(fromStructure));
 
         rowHeader.addEventListener("dblclick", () => {
-            openPhysicalStructureEditPage(fromStructure);
+            openStructureEditPage(fromStructure);
         });
 
         tr.appendChild(rowHeader);
@@ -525,19 +532,19 @@ function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfRefere
     return lines.join("\n");
 }
 
-function openPhysicalStructureEditPage(structure) {
+function openStructureEditPage(structure) {
     const id = structure?.entityId || "";
 
     if (!id) {
-        window.alert("Physical Structure has no entity id.");
+        window.alert(`${INTERFACE_STRUCTURE_LABEL} has no entity id.`);
         return;
     }
 
     openEditDialog({
-        page: "systemsbreakdown-edit",
+        page: INTERFACE_EDIT_PAGE,
         mode: "edit",
         id,
-        title: "Edit Physical Structure",
+        title: `Edit ${INTERFACE_STRUCTURE_LABEL}`,
         onSaved: () => window.location.reload()
     });
 }
@@ -751,8 +758,7 @@ function openInterfaceDialog(fromStructure, toStructure, cell) {
     state.toStructure = toStructure || null;
     state.currentCell = cell || null;
 
-    setText("interfaceDialogTitle", "Interface", "");
-    setText("interfaceDialogStatus", cell ? "Editing existing interface" : "Creating new interface", "");
+    setText("interfaceDialogTitle", cell ? "Edit Interface" : "Create Interface", "");
 
     renderStructureCard("interfaceFromFields", fromStructure);
     renderStructureCard("interfaceToFields", toStructure);
@@ -822,10 +828,10 @@ function renderStructureCard(containerId, structure) {
     const fields = [
         ["ID", structure?.id || "-"],
         ["Name", structure?.name || "-"],
-        ["System Owner", structure?.systemOwnerCode || "-"],
-        ["TRL", structure?.trlCode || "-"],
-        ["Department", structure?.departmentCode || "-"],
-        ["Deadline Next Trl", structure?.deadlineNextTrl || "-"]
+        ...(structure?.hasSystemOwner ? [["System Owner", structure.systemOwnerCode || "-"]] : []),
+        ...(structure?.hasTrl ? [["TRL", structure.trlCode || "-"]] : []),
+        ...(structure?.hasDepartment ? [["Department", structure.departmentCode || "-"]] : []),
+        ...(structure?.hasDeadlineNextTrl ? [["Deadline Next Trl", structure.deadlineNextTrl || "-"]] : [])
     ];
 
     for (const [label, value] of fields) {

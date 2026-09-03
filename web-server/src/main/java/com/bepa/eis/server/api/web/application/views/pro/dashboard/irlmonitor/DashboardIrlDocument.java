@@ -76,11 +76,11 @@ public class DashboardIrlDocument extends GenericXmlDocument {
     }
 
     private void calculateIrlCounts() throws SQLException  {
-        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(
-                getWebSession(),
-                EntityType.SYSTEMS_BREAKDOWN
-        );
-        List<InterfaceMatrixProvider.InterfaceRecord> interfaces = interfaceManagementProvider.getAllInterfaceRecords();
+
+        EntityType entityType = EntityType.SYSTEMS_BREAKDOWN;
+
+        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(),entityType);
+        List<InterfaceMatrixProvider.InterfaceRecord> interfaces = interfaceManagementProvider.getAllInterfaceRecords(entityType);
 
         for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {
             PhysicalStructureWrapper fromSys = mapOfPhysicalStructures.get(interfaceRecord.fromEntityId());

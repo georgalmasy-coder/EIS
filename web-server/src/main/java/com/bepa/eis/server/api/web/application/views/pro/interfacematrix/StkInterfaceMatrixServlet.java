@@ -11,16 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @WebServlet(
-        name = "LsysInterfaceMatrixServlet",
+        name = "StkInterfaceMatrixServlet",
         urlPatterns = {
-                "/pro/lsys/interfacematrix",
-                "/pro/lsys/interfacematrix/*"
+                "/pro/stk/interfacematrix",
+                "/pro/stk/interfacematrix/*"
         }
 )
 @MultipartConfig
-public class LsysInterfaceMatrixServlet extends InterfaceMatrixServlet {
+public class StkInterfaceMatrixServlet extends InterfaceMatrixServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LsysInterfaceMatrixServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(StkInterfaceMatrixServlet.class);
 
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
@@ -30,16 +30,16 @@ public class LsysInterfaceMatrixServlet extends InterfaceMatrixServlet {
     @Override
     public GenericXmlDocument buildInterfaceMatrix (WebSession webSession, EntityType entityType) {
         try {
-            return new LsysInterfaceMatrixDocument(webSession, entityType);
+            return new StkInterfaceMatrixDocument(webSession);
         } catch (Exception e) {
             try {
 
-                logIncidentError("L-SYS-InterfaceMatrixServlet", e);
+                logIncidentError("STK-InterfaceMatrixServlet", e);
             } catch (Throwable throwable) {
                 // Ignore error
             }
 
-            log.error("Error getting l-sys interface management matrix document: {}", e.getMessage(), e);
+            log.error("Error getting stk interface management matrix document: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
 
