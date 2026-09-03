@@ -3,9 +3,7 @@ package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.web.application.enums.PageType;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
-import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
 import org.w3c.dom.Element;
 

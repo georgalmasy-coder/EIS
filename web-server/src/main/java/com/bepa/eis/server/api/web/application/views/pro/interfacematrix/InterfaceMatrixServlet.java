@@ -7,8 +7,6 @@ import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -18,18 +16,6 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-
-/*
-@WebServlet(
-        name = "InterfaceMatrixServlet",
-        urlPatterns = {
-                "/pro/psys/interfacematrix",
-                "/pro/psys/interfacematrix/*"
-        }
-)
-@MultipartConfig
-
- */
 abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(InterfaceMatrixServlet.class);
@@ -77,12 +63,6 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
         }
     }
 
-/*
-    @Override
-    public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
-        return buildInterfaceMatrix(webSession, resolveEntityType(request));
-    }
-*/
     @Override
     public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
         throw new RuntimeException("Invalid import request");
@@ -140,23 +120,6 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
     public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
         throw new RuntimeException("Invalid export request");
     }
-
-/*
-    protected GenericXmlDocument buildInterfaceMatrix(WebSession webSession, EntityType entityType) {
-        try {
-            return new PsysInterfaceMatrixDocument(webSession, entityType);
-        } catch (Exception e) {
-            try {
-                logIncidentError("InterfaceMatrixServlet", e);
-            } catch (Throwable throwable) {
-                // Ignore error
-            }
-
-            log.error("Error getting interface management matrix document: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-    }
-*/
 
     protected EntityType resolveEntityType(HttpServletRequest request) {
         return switch (request.getServletPath()) {

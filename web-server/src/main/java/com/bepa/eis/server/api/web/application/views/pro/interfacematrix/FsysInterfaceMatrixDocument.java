@@ -4,9 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.dataprovider.entities.FunctionalStructureProvider;
-import com.bepa.eis.server.dataprovider.entities.LogicalStructureProvider;
 import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
-import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 import org.w3c.dom.Element;
 
 import java.util.List;
