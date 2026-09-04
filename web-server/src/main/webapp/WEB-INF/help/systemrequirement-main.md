@@ -1,6 +1,6 @@
-# System Requirement
+# Systems Requirement
 
-This page is used to work with System Requirements in the selected project.
+This page is used to work with Systems Requirements in the selected project.
 
 The page contains three views:
 
@@ -12,7 +12,7 @@ You can switch between the views by using the buttons at the top of the page.
 
 ## List View
 
-The list view shows System Requirements in a table.
+The list view shows Systems Requirements in a table.
 
 From this view you can:
 
@@ -49,19 +49,19 @@ Columns can be resized by dragging the resize handle in the column header.
 
 Column widths are saved locally in the browser.
 
-## Opening a System Requirement
+## Opening a Systems Requirement
 
 Double-click a row to open the requirement in the edit page.
 
 You can also use the context menu on the row.
 
-## Creating a Root System Requirement
+## Creating a Root Systems Requirement
 
 Use the **Add Root** button to create a new root requirement.
 
 A root requirement is a requirement at the top level of the hierarchy.
 
-## Creating a Sub System Requirement
+## Creating a Sub Systems Requirement
 
 Sub requirements are created from an existing requirement.
 
@@ -108,13 +108,13 @@ If the diagram contains many requirements, the PDF is split across multiple page
 
 ## Import
 
-Import is used to load System Requirements from a file.
+Import is used to load Systems Requirements from a file.
 
 After import, the list is reloaded so the new or updated requirements are shown.
 
 ## Export
 
-Export is used to export System Requirements.
+Export is used to export Systems Requirements.
 
 Depending on the configuration, different formats may be available, for example:
 

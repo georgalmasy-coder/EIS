@@ -34,12 +34,12 @@ public class SysInterfaceMatrixDocument extends InterfaceMatrixDocument {
 
     @Override
     public String getColumnGroupLabel() {
-        return "To System Requirement";
+        return "To Systems Requirement";
     }
 
     @Override
     public String getRowGroupLabel() {
-        return "From System Requirement";
+        return "From Systems Requirement";
     }
 
 

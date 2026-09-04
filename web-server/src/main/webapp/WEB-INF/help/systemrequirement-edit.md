@@ -1,6 +1,6 @@
-# Edit System Requirement
+# Edit Systems Requirement
 
-This page is used to create, edit and view details for a System Requirement.
+This page is used to create, edit and view details for a Systems Requirement.
 
 The page contains several tabs:
 
@@ -30,11 +30,11 @@ Which fields can be changed depends on whether the page is opened in edit mode o
 
 ## Edit Mode
 
-When the page is opened normally from the System Requirement list, the requirement can be edited.
+When the page is opened normally from the Systems Requirement list, the requirement can be edited.
 
 You can change fields and click **Save** to save the changes.
 
-Click **Cancel** to return to the System Requirement list.
+Click **Cancel** to return to the Systems Requirement list.
 
 ## Read-Only Mode
 

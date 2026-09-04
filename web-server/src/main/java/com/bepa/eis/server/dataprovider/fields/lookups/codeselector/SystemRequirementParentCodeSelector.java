@@ -18,12 +18,12 @@ public class SystemRequirementParentCodeSelector extends AbstractParentCodeSelec
 
     @Override
     public String getFieldLabelName() {
-        return "Parent System Requirement ID";
+        return "Parent Systems Requirement ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Parent System Requirement ID";
+        return "Parent Systems Requirement ID";
     }
 
     @Override

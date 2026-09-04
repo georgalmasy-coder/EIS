@@ -2,9 +2,9 @@
 
 The relation diagram shows requirement relationships across three possible views:
 
-1. Stakeholder Requirements -> System Requirements
-2. Stakeholder Requirements -> System Requirements -> Physical Structure
-3. System Requirements -> Physical Structure
+1. Stakeholder Requirements -> Systems Requirements
+2. Stakeholder Requirements -> Systems Requirements -> Physical Structure
+3. Systems Requirements -> Physical Structure
 
 Use the view buttons in the top-right corner to switch between these layouts.
 
@@ -29,5 +29,5 @@ Use the view buttons in the top-right corner to switch between these layouts.
 
 ## Notes
 
-- The default view is Stakeholder Requirements -> System Requirements -> Physical Structure.
+- The default view is Stakeholder Requirements -> Systems Requirements -> Physical Structure.
 - In the single-relation views, the unused column is hidden together with its lines.

@@ -184,8 +184,8 @@
     font-size: 14px;
 }
 
-.icon-orange { background-color: var(--app-status-warning-bg); color: var(--app-status-warning-text); }
-.icon-blue { background-color: var(--app-status-info-bg); color: var(--app-status-info-text); }
+.icon-orange { background-color: var(--app-status-warning-bg); color: #e1b66e; }
+.icon-blue { background-color: var(--app-status-info-bg); color: #72c5da; }
 
 .sub-card-info {
     flex: 1;
@@ -261,10 +261,10 @@
     font-size: 14px;
 }
 
-.color-green { color: var(--app-accent-primary); }
-.color-blue { color: var(--app-status-info-text); }
-.color-purple { color: var(--app-status-purple-text); }
-.color-orange { color: var(--app-status-warning-text); }
+.color-green { color: #8ed1b4; }
+.color-blue { color: #72c5da; }
+.color-purple { color: #8aa6d2; }
+.color-orange { color: #e1b66e; }
 
 .asset-label {
     font-size: 13px;

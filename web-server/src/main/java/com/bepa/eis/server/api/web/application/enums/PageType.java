@@ -15,10 +15,10 @@ public enum PageType {
     STAKEHOLDER_REQUIREMENT_MAIN_HORIZONTAL_PAGE("stakeholderrequirement-main-horizontal","html-pages/stakeholderrequirement-main-horizontal.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
     STAKEHOLDER_REQUIREMENT_MAIN_VERTICAL_PAGE("stakeholderrequirement-main-vertical","html-pages/stakeholderrequirement-main-vertical.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),
 
-    SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
-    SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "System Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement Edit", "Edit the current system requirement in the workspace below."),
-    SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
-    SYSTEM_REQUIREMENT_MAIN_VERTICAL_PAGE("systemrequirement-main-vertical","html-pages/systemrequirement-main-vertical.html", "System Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "System Requirement", "Work with system requirements in the workspace below."),
+    SYSTEM_REQUIREMENT_MAIN_PAGE("systemrequirement-main","html-pages/systemrequirement-main.html", "Systems Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Systems Requirement", "Work with system requirements in the workspace below."),
+    SYSTEM_REQUIREMENT_EDIT_PAGE("systemrequirement-edit","html-pages/systemrequirement-edit.html", "Systems Requirement Edit", true, "R-F-L-P MODEL - REQUIREMENTS", "Systems Requirement Edit", "Edit the current system requirement in the workspace below."),
+    SYSTEM_REQUIREMENT_MAIN_HORIZONTAL_PAGE("systemrequirement-main-horizontal","html-pages/systemrequirement-main-horizontal.html", "Systems Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Systems Requirement", "Work with system requirements in the workspace below."),
+    SYSTEM_REQUIREMENT_MAIN_VERTICAL_PAGE("systemrequirement-main-vertical","html-pages/systemrequirement-main-vertical.html", "Systems Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Systems Requirement", "Work with system requirements in the workspace below."),
     REQUIREMENTS_PAGE("requirements", "html-pages/requirements.html", "Requirements", true, "R-F-L-P MODEL - REQUIREMENTS", "Requirements", "Work with stakeholder and system requirements without losing project context or traceability."),
 
     FUNCTIONAL_STRUCTURE_MAIN_PAGE("functionalstructure-main","html-pages/functionalstructure-main.html", "Functional", true, "R-F-L-P MODEL - FUNCTIONS", "Functions", "Work with functional design in the workspace below."),
@@ -47,7 +47,7 @@ public enum PageType {
     LSYS_INTERFACE_MANAGEMENT_PAGE("lsys-interfaces","html-pages/lsys-interfaces.html", "N2 Logical Design", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Logical Design", "Manage interfaces and related relationships."),
     FSYS_INTERFACE_MANAGEMENT_PAGE("fsys-interfaces","html-pages/fsys-interfaces.html", "N2 Functions", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Functions", "Manage interfaces and related relationships."),
     STK_INTERFACE_MANAGEMENT_PAGE("stk-interfaces","html-pages/stk-interfaces.html", "N2 Stakeholder Requirement", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Stakeholder Requirement", "Manage interfaces and related relationships."),
-    SYS_INTERFACE_MANAGEMENT_PAGE("sys-interfaces","html-pages/sys-interfaces.html", "N2 System Requirement", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - System Requirement", "Manage interfaces and related relationships."),
+    SYS_INTERFACE_MANAGEMENT_PAGE("sys-interfaces","html-pages/sys-interfaces.html", "N2 Systems Requirement", true, "R-F-L-P MODEL - INTERFACE MANAGEMENT", "Interface Management - Systems Requirement", "Manage interfaces and related relationships."),
 
     // Admin
     CUSTOMER_EDIT_PAGE("customer-edit","html-pages/customer-edit.html", "Company Profile", true, "COMPANY MANAGEMENT", "Company Profile", "Edit the current company profile in the workspace below."),

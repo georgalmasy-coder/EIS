@@ -77,7 +77,7 @@ public final class SystemRequirementImporters extends GenericImporters {
 
     @Override
     protected String getImportEntitiesButtonText() {
-        return "Import System Requirements";
+        return "Import Systems Requirements";
     }
 
     private List<SystemRequirementExportRow> fromXml(InputStream inputStream) throws Exception {

@@ -216,22 +216,22 @@ public class SystemRequirementServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = buildDownloadFileName(webSession, "System Requirement", "csv");
+                fileName = buildDownloadFileName(webSession, "Systems Requirement", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = buildDownloadFileName(webSession, "System Requirement", "pdf");
+                fileName = buildDownloadFileName(webSession, "Systems Requirement", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = buildDownloadFileName(webSession, "System Requirement", "xml");
+                fileName = buildDownloadFileName(webSession, "Systems Requirement", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = buildDownloadFileName(webSession, "System Requirement", "xlsx");
+                fileName = buildDownloadFileName(webSession, "Systems Requirement", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }

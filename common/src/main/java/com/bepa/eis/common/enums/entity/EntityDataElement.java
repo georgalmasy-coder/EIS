@@ -45,7 +45,7 @@ public enum EntityDataElement {
     STAKEHOLDER(37, "Stakeholder", "Stakeholder", INTEGER),
 
     BASISREQCODE(40,"Stakeholder Requirement Code", "StakeholderReqCode", STRING),
-    SYSTEMREQCODE(41,"System Requirement Code", "SystemReqCode", STRING),
+    SYSTEMREQCODE(41,"Systems Requirement Code", "SystemReqCode", STRING),
 
     LOGICALCODE(50,"Logical Code", "LogicalCode", STRING),
     LOGICALNAME(51,"Logical Name", "LogicalName", STRING),

@@ -17,7 +17,7 @@ const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";
 
 const ENTITY_TYPE_LABELS = {
     stakeholder: "Stakeholder Requirement",
-    system: "System Requirement",
+    system: "Systems Requirement",
     systemsBreakdown: "Physical Structure"
 };
 
@@ -1097,7 +1097,7 @@ function openRequirementDialog(requirement) {
             ? "Stakeholder Requirement"
             : requirement.type === "systemsBreakdown"
                 ? "Physical Structure"
-                : "System Requirement",
+                : "Systems Requirement",
         ""
     );
     setText("dialogRequirementId", requirement.visibleId, "");
@@ -1160,7 +1160,7 @@ function getRequirementEditConfig(requirement) {
 
     if (requirement.type === "system") {
         return {
-            label: "System Requirement",
+            label: "Systems Requirement",
             page: "systemrequirement-edit"
         };
     }

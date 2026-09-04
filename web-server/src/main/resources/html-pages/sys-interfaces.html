@@ -13,10 +13,10 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/interfaces.css?rev=multi-structure-interface-1" />
+    <link rel="stylesheet" href="../css/interfaces.css?rev=multi-structure-interface-2" />
 </head>
 
-<body class="interfaces-document" data-interface-base-path="/pro/sys/interfacematrix" data-interface-structure-label="System Requirement" data-interface-edit-page="systemrequirement-edit">
+<body class="interfaces-document" data-interface-base-path="/pro/sys/interfacematrix" data-interface-structure-label="Systems Requirement" data-interface-edit-page="systemrequirement-edit">
 <button
         id="menuToggle"
         class="menu-toggle"
@@ -48,11 +48,16 @@
                     <div id="pageHeading" class="workspace-heading interfaces-workspace-heading"></div>
                     <div id="pageHelpText" class="workspace-helptext interfaces-workspace-helptext"></div>
                 </div>
+                <div class="interfaces-header-actions" role="group" aria-label="Interface management actions">
+                    <a class="interfaces-back-button" href="javascript:history.go(-1)" aria-label="Back" title="Back">
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.7 5.3a1 1 0 0 1 0 1.4L6.4 11H20a1 1 0 1 1 0 2H6.4l4.3 4.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z"></path></svg>
+                    </a>
+                </div>
             </div>
 
             <div class="interfaces-info-bar" aria-label="Interface matrix information">
                 <div class="interfaces-info-item">
-                    <span class="interfaces-info-label">Number of System Requirement:</span>
+                    <span class="interfaces-info-label">Number of Systems Requirement:</span>
                     <strong id="interfacesStructureCount">-</strong>
                 </div>
 
@@ -67,7 +72,7 @@
                 </div>
 
                 <div class="interfaces-system-label">
-                    <strong id="interfacesColumnGroupLabel">To System Requirement</strong>
+                    <strong id="interfacesColumnGroupLabel">To Systems Requirement</strong>
                 </div>
 
             </div>
@@ -103,12 +108,12 @@
 
         <div class="interfaces-dialog-content">
             <section class="interfaces-dialog-card" aria-labelledby="interfaceFromTitle">
-                <h4 id="interfaceFromTitle">From System Requirement</h4>
+                <h4 id="interfaceFromTitle">From Systems Requirement</h4>
                 <div class="interfaces-dialog-card-fields" id="interfaceFromFields"></div>
             </section>
 
             <section class="interfaces-dialog-card" aria-labelledby="interfaceToTitle">
-                <h4 id="interfaceToTitle">To System Requirement</h4>
+                <h4 id="interfaceToTitle">To Systems Requirement</h4>
                 <div class="interfaces-dialog-card-fields" id="interfaceToFields"></div>
             </section>
 
@@ -151,12 +156,12 @@
 
         <div class="interfaces-dialog-content">
             <section class="interfaces-dialog-card" aria-labelledby="interfaceRemoveFromTitle">
-                <h4 id="interfaceRemoveFromTitle">From System Requirement</h4>
+                <h4 id="interfaceRemoveFromTitle">From Systems Requirement</h4>
                 <div class="interfaces-dialog-card-fields" id="interfaceRemoveFromFields"></div>
             </section>
 
             <section class="interfaces-dialog-card" aria-labelledby="interfaceRemoveToTitle">
-                <h4 id="interfaceRemoveToTitle">To System Requirement</h4>
+                <h4 id="interfaceRemoveToTitle">To Systems Requirement</h4>
                 <div class="interfaces-dialog-card-fields" id="interfaceRemoveToFields"></div>
             </section>
 
@@ -198,5 +203,4 @@
 <script type="module" src="../js/pages/interfaces-page.js?rev=multi-structure-interface-1"></script>
 </body>
 </html>
-
 

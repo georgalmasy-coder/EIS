@@ -2,11 +2,11 @@
 
 The relation diagram shows item relationships across five views:
 
-1. Stakeholder Requirements -> System Requirements
-2. System Requirements -> Functional Structures
+1. Stakeholder Requirements -> Systems Requirements
+2. Systems Requirements -> Functional Structures
 3. Functional Structures -> Logical Structures
 4. Logical Structures -> Physical Structures
-5. Stakeholder Requirements -> System Requirements -> Functional Structures -> Logical Structures -> Physical Structures
+5. Stakeholder Requirements -> Systems Requirements -> Functional Structures -> Logical Structures -> Physical Structures
 
 Use the view buttons in the top-right corner to switch between these layouts.
 
@@ -31,5 +31,5 @@ Use the view buttons in the top-right corner to switch between these layouts.
 
 ## Notes
 
-- The default view is Stakeholder Requirements -> System Requirements -> Functional Structures -> Logical Structures -> Physical Structures.
+- The default view is Stakeholder Requirements -> Systems Requirements -> Functional Structures -> Logical Structures -> Physical Structures.
 - In the single-relation views, the unused columns are hidden together with their lines.

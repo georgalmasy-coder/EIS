@@ -25,7 +25,7 @@ const ENTITY_TYPES = {
         page: "stakeholderrequirement-edit"
     },
     system: {
-        label: "System Requirement",
+        label: "Systems Requirement",
         page: "systemrequirement-edit"
     },
     functional: {

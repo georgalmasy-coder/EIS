@@ -1,4 +1,4 @@
-# System Requirement Hierarchy Diagram V2
+# Systems Requirement Hierarchy Diagram V2
 
 This page shows system requirements as a hierarchical diagram.
 

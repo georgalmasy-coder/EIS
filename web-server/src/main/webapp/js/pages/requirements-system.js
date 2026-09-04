@@ -320,9 +320,9 @@ function initializeImportExportDialogs() {
     const exportDialog = createExportDialog({
         dialogId: "systemExportDialog",
         openButtonId: "systemBtnExport",
-        entityName: "System Requirement",
+        entityName: "Systems Requirement",
         exportUrl: "/basis/systemrequirement?cmd=export",
-        baseFileName: () => buildExportBaseFileName("System Requirement", state.topPanel?.projectName)
+        baseFileName: () => buildExportBaseFileName("Systems Requirement", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -2198,7 +2198,7 @@ function handleContextMenuAction(action) {
 
     if (action === "edit-requirement") {
         if (!requirement) {
-            window.alert("No System Requirement selected.");
+            window.alert("No Systems Requirement selected.");
             return;
         }
 
@@ -2208,7 +2208,7 @@ function handleContextMenuAction(action) {
 
     if (action === "create-sub-requirement") {
         if (!requirement) {
-            window.alert("No System Requirement selected.");
+            window.alert("No Systems Requirement selected.");
             return;
         }
 
@@ -2301,7 +2301,7 @@ function openEditRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("System Requirement has no entity id.");
+        window.alert("Systems Requirement has no entity id.");
         return;
     }
 
@@ -2309,7 +2309,7 @@ function openEditRequirement(requirement) {
         page: "systemrequirement-edit",
         mode: "edit",
         id,
-        title: "Edit System Requirement",
+        title: "Edit Systems Requirement",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2324,7 +2324,7 @@ function openCreateSubRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("System Requirement has no entity id.");
+        window.alert("Systems Requirement has no entity id.");
         return;
     }
 
@@ -2332,7 +2332,7 @@ function openCreateSubRequirement(requirement) {
         page: "systemrequirement-edit",
         mode: "create-child",
         id,
-        title: "Create Sub System Requirement",
+        title: "Create Sub Systems Requirement",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2347,7 +2347,7 @@ function openCreateRootRequirement() {
     openEditDialog({
         page: "systemrequirement-edit",
         mode: "create-root",
-        title: "Create Root System Requirement",
+        title: "Create Root Systems Requirement",
         onSaved: (payload) => {
             if (payload?.id) {
                 sessionStorage.setItem("basis.requirements.system.scrollToId", payload.id);

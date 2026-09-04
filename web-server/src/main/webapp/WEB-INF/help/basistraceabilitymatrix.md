@@ -1,9 +1,9 @@
 # Traceability Matrix Help
 
-The Traceability Matrix shows the relationship between **Stakeholder Requirements** and **System Requirements**.
+The Traceability Matrix shows the relationship between **Stakeholder Requirements** and **Systems Requirements**.
 
 Rows represent Stakeholder Requirements.  
-Columns represent System Requirements.
+Columns represent Systems Requirements.
 
 Each cell indicates whether there is a relation between the requirement in the row and the requirement in the column.
 
@@ -43,13 +43,13 @@ The available actions depend on the current status of the cell.
 
 ## Yellow Cells - Possible Relation
 
-A yellow cell means that the system has identified a possible relation between the Stakeholder Requirement and the System Requirement.
+A yellow cell means that the system has identified a possible relation between the Stakeholder Requirement and the Systems Requirement.
 
 Available actions:
 
 ### Confirm relation
 
-Creates a confirmed relation between the Stakeholder Requirement and the System Requirement.
+Creates a confirmed relation between the Stakeholder Requirement and the Systems Requirement.
 
 After confirmation, the cell changes to:
 
@@ -134,7 +134,7 @@ Double-click a matrix cell to open the Traceability Details dialog.
 The dialog shows information about:
 
 - The Stakeholder Requirement
-- The System Requirement
+- The Systems Requirement
 
 This is useful when you need to compare the requirement texts before deciding whether a relation should be confirmed or marked as not relevant.
 
@@ -144,9 +144,9 @@ This is useful when you need to compare the requirement texts before deciding wh
 
 You can double-click headers to open the corresponding requirement edit page.
 
-### System Requirement
+### Systems Requirement
 
-Double-click a column header to open the System Requirement edit page.
+Double-click a column header to open the Systems Requirement edit page.
 
 ### Stakeholder Requirement
 
@@ -166,7 +166,7 @@ Technical values such as internal cell value and style are not shown in the hove
 
 1. Review yellow cells first.
 2. Open the details dialog by double-clicking a cell.
-3. Compare the Stakeholder Requirement and System Requirement.
+3. Compare the Stakeholder Requirement and Systems Requirement.
 4. Choose one of the available context menu actions:
     - Confirm relation
     - Relation Not Relevant

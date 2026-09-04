@@ -52,7 +52,7 @@ public final class SystemRequirementExporters extends GenericExporters {
 
     @Override
     public String getWorksheetName() {
-        return "System Requirements";
+        return "Systems Requirements";
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class SystemRequirementExporters extends GenericExporters {
 
     @Override
     public String getPdfTitle() {
-        return "System Requirements Export";
+        return "Systems Requirements Export";
     }
 
     @Override

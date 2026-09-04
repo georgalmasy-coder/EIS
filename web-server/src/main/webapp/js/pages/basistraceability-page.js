@@ -132,7 +132,7 @@ function parseTraceabilityMatrixDocument(xmlDocument) {
 
     return {
         title: getChildText(metaElement, "title", "Traceability Matrix"),
-        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "System Requirement"),
+        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "Systems Requirement"),
         rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "Stakeholder requirement"),
         generatedAt: getChildText(metaElement, "generatedAt", ""),
         rowCount: declaredRowCount,
@@ -342,7 +342,7 @@ function renderLegend(styles) {
 function renderTraceabilityMatrix(matrix) {
     setText("traceabilityRowCount", String(matrix.rows.length || matrix.rowCount), "");
     setText("traceabilityColumnCount", String(matrix.columns.length || matrix.columnCount), "");
-    setText("traceabilityColumnGroupLabel", matrix.columnGroupLabel || "System Requirement", "");
+    setText("traceabilityColumnGroupLabel", matrix.columnGroupLabel || "Systems Requirement", "");
 
     const tableHead = document.getElementById("traceabilityTableHead");
     const tableBody = document.getElementById("traceabilityTableBody");
@@ -509,7 +509,7 @@ function openSystemRequirementEditPage(column) {
     const id = column?.id || "";
 
     if (!id) {
-        window.alert("System Requirement has no entity id.");
+        window.alert("Systems Requirement has no entity id.");
         return;
     }
 
@@ -517,7 +517,7 @@ function openSystemRequirementEditPage(column) {
         page: "systemrequirement-edit",
         mode: "edit",
         id,
-        title: "Edit System Requirement",
+        title: "Edit Systems Requirement",
         onSaved: () => window.location.reload()
     });
 }
@@ -840,7 +840,7 @@ function buildHeaderTooltip(columnGroupLabel, column) {
         column.name ? `Name: ${column.name}` : "",
         column.label ? `Label: ${column.label}` : "",
         column.id ? `Id: ${column.id}` : "",
-        "Double-click to edit System Requirement"
+        "Double-click to edit Systems Requirement"
     ].filter(Boolean).join("\n");
 }
 

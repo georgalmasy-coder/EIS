@@ -349,8 +349,8 @@ function applyModeUi() {
 function getModeLabel() {
     if (state.mode === MODES.edit) return "";
     if (state.mode === MODES.editVersion) return buildHistoricalVersionLabel();
-    if (state.mode === MODES.createChild) return "Create Sub System Requirement";
-    if (state.mode === MODES.createRoot) return "Create Root System Requirement";
+    if (state.mode === MODES.createChild) return "Create Sub Systems Requirement";
+    if (state.mode === MODES.createRoot) return "Create Root Systems Requirement";
     return "";
 }
 

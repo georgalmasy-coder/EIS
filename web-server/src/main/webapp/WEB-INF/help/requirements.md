@@ -1,6 +1,6 @@
 # Requirements
 
-This page provides a comprehensive overview of the project's **Stakeholder Requirements** and **System Requirements**.
+This page provides a comprehensive overview of the project's **Stakeholder Requirements** and **Systems Requirements**.
 
 You can switch between the two types of requirements using the tabs at the top of the page. Each tab shows the total number of requirements of that type.
 
@@ -22,7 +22,7 @@ Stakeholder requirements define what the stakeholders expect from the system.
 - **Grouping**: Drag column headers to the "Group by" zone to organize the list.
 - **Diagrams**: The boxes in the diagrams show ID, name, and description.
 
-## System Requirements
+## Systems Requirements
 
 System requirements define the technical specifications for the system.
 
