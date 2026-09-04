@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="refresh" content="30;url={{loginUrl}}" />
+    <title>Session expired</title>
+    <link rel="stylesheet" href="/css/common.css" />
+    <link rel="stylesheet" href="/css/app.css" />
+    <link rel="stylesheet" href="/css/menu.css" />
+    <link rel="stylesheet" href="/css/session-expired.css" />
+</head>
+<body class="{{themeClass}} session-expired-document" data-session-expired="true">
+<button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">›</button>
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu…</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu"></ul>
+</nav>
+
+<main class="app session-expired-app">
+    <section class="session-expired-card" aria-labelledby="sessionExpiredTitle">
+        <div class="session-expired-icon" aria-hidden="true">!</div>
+        <p class="session-expired-eyebrow">SESSION EXPIRED</p>
+        <h1 id="sessionExpiredTitle">Your session has expired</h1>
+        <p>You need to log in again to continue. You will automatically be redirected to the login page in 30 seconds.</p>
+        <a class="session-expired-login" href="{{loginUrl}}">Go to login</a>
+    </section>
+</main>
+
+<script type="module" src="/js/pages/session-expired-page.js"></script>
+</body>
+</html>

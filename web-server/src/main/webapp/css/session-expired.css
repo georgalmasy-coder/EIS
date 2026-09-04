@@ -1,0 +1,74 @@
+.session-expired-document {
+    min-height: 100vh;
+    background: var(--app-page-background);
+    color: var(--app-text-primary);
+}
+
+.session-expired-app {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+}
+
+.session-expired-card {
+    width: min(560px, 100%);
+    padding: 48px;
+    text-align: center;
+    background: var(--app-surface-background);
+    border: 1px solid var(--app-border-default);
+    border-radius: 18px;
+    box-shadow: var(--app-shadow);
+}
+
+.session-expired-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    color: var(--app-status-warning-text);
+    background: var(--app-status-warning-bg);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.session-expired-eyebrow {
+    margin: 0 0 8px;
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+.session-expired-card h1 {
+    margin: 0 0 14px;
+    font-size: clamp(28px, 5vw, 38px);
+}
+
+.session-expired-card p:not(.session-expired-eyebrow) {
+    margin: 0 auto 28px;
+    color: var(--app-text-secondary);
+}
+
+.session-expired-login {
+    display: inline-flex;
+    padding: 12px 22px;
+    border-radius: 8px;
+    color: var(--app-tab-active-foreground);
+    background: var(--app-accent-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.session-expired-login:hover,
+.session-expired-login:focus-visible {
+    color: var(--app-tab-active-foreground);
+    background: var(--app-accent-hover);
+}
+
+@media (max-width: 640px) {
+    .session-expired-app { padding: 18px; }
+    .session-expired-card { padding: 32px 22px; }
+}

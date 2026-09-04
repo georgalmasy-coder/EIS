@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.misc;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.server.api.generic.GenericServlet;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,8 +31,7 @@ public class ProjectSelectedServlet extends GenericServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sessionId = getSessionId(req);
-        WebSession webSession = new WebSession();
-        webSession.setSessionId(sessionId);
+        WebSession webSession;
 
         Integer customerId = stringToInteger(req.getParameter("customerId"));
         Integer projectId = stringToInteger(req.getParameter("projectId"));
@@ -49,13 +49,15 @@ public class ProjectSelectedServlet extends GenericServlet {
         }
 
         try {
+            SessionProvider sessionProvider = new SessionProvider(null);
+            webSession = sessionProvider.getBySessionId(sessionId);
             webSession.setCustomerId(customerId);
             webSession.setProjectId(projectId);
 
-            SessionProvider sessionProvider = new SessionProvider(null);
             boolean updated = sessionProvider.updateSessionInfo(webSession);
 
             if (updated) {
+                new UserPreferenceProvider(webSession).setSelectedProjectId(webSession.getUserId(), projectId);
                 logAuditEvent(
                         sessionId,
                         "USER_CONTEXT_CHANGED",

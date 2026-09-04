@@ -6,6 +6,7 @@ import com.bepa.eis.common.enums.menu.MenuItemType;
 import com.bepa.eis.common.enums.menu.MenuIcon;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.server.api.DTO.CustomerProject;
@@ -181,10 +182,11 @@ public class MenuServlet extends GenericServlet {
             HttpServletRequest req,
             HttpServletResponse resp
     ) throws IOException {
-        Integer projectId = intValue(req.getParameter("projectId"));
+        String projectIdParameter = req.getParameter("projectId");
+        Integer projectId = intValue(projectIdParameter);
         String sessionId = safeText(getSessionId(req));
 
-        if (projectId == null) {
+        if (projectIdParameter == null || (!projectIdParameter.isBlank() && projectId == null)) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -208,6 +210,10 @@ public class MenuServlet extends GenericServlet {
             webSession.setProjectId(projectId);
 
             boolean updated = sessionProvider.updateSessionInfo(webSession);
+
+            if (updated) {
+                new UserPreferenceProvider(webSession).setSelectedProjectId(webSession.getUserId(), projectId);
+            }
 
             if (!updated) {
                 log.warn(
@@ -366,6 +372,8 @@ public class MenuServlet extends GenericServlet {
 
         try {
             TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
+            appendElement(topPanelElement, "CustomerId", webSession.getCustomerId());
+            appendElement(topPanelElement, "ProjectId", webSession.getProjectId());
             appendElement(topPanelElement, "CustomerName", topPanelProvider.getCustomerName());
             appendElement(topPanelElement, "ProjectName", topPanelProvider.getProjectName());
             appendElement(topPanelElement, "UserName", topPanelProvider.getUserName());

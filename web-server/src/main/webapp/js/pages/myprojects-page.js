@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+import { initMenu, setStoredProjectId } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
@@ -415,6 +415,10 @@ function createProjectCard(project) {
             </a>
         </div>
     `;
+
+    card.querySelector(".work-with-project")?.addEventListener("click", () => {
+        setStoredProjectId(project.projectId);
+    });
 
     return card;
 }

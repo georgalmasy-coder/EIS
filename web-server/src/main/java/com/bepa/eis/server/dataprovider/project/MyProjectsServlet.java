@@ -3,6 +3,7 @@ package com.bepa.eis.server.dataprovider.project;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
@@ -97,6 +98,10 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
             webSession.setProjectId(projectId);
 
             boolean updated = sessionProvider.updateSessionInfo(webSession);
+
+            if (updated) {
+                new UserPreferenceProvider(webSession).setSelectedProjectId(webSession.getUserId(), projectId);
+            }
 
             if (!updated) {
                 log.warn(

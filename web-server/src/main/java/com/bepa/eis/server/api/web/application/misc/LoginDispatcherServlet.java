@@ -23,6 +23,9 @@ public class LoginDispatcherServlet extends GenericServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             WebSession webSession = getSession(request);
+            if (webSession != null && webSession.getCustomerId() != null) {
+                LoginServlet.restoreSelectedProject(webSession);
+            }
             response.sendRedirect(LoginServlet.getRedirectUrl(webSession));
         } catch (Exception e) {
             log.error("Error loading menu editor data: {}", e.getMessage(), e);

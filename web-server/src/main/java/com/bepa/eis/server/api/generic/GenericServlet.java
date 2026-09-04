@@ -46,9 +46,14 @@ public class GenericServlet extends HttpServlet {
                 SessionProvider sessionProvider = new SessionProvider(null);
                 ws = sessionProvider.getBySessionId(getSessionId(request));
 
+                HttpSession httpSession = request.getSession(false);
+                if (httpSession != null && ws != null && ws.getThemeId() != null) {
+                    httpSession.setAttribute("eis.theme.id", ws.getThemeId());
+                }
+
             } catch (SQLException e) {
 
-                log.error("Error getting session for page viewer: {}", e.getMessage(), e);
+                log.info("Error getting session for page viewer: {}", e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         }

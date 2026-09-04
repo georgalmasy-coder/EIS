@@ -14,6 +14,7 @@ const MENU_COLLAPSED_WIDTH = 72;
 const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
 const MENU_COLLAPSED_STORAGE_KEY = "eis.menu.collapsed";
 const MENU_SELECTED_PROJECT_STORAGE_KEY = "eis.menu.projectId";
+const SESSION_EXPIRED_PATH = "/session-expired.html";
 const COLLAPSE_ICON_SVG = `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M14.7 6.3a1 1 0 0 1 0 1.4L10.41 12l4.3 4.3a1 1 0 1 1-1.42 1.4l-5-5a1 1 0 0 1 0-1.4l5-5a1 1 0 0 1 1.4 0Z"></path>
@@ -56,6 +57,29 @@ let menuBrandLogo = null;
 let menuFooter = null;
 let initialStateApplied = false;
 let menuPreparingReleaseScheduled = false;
+
+function installSessionExpiredRedirect() {
+    if (window.__eisSessionRedirectInstalled) {
+        return;
+    }
+
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+
+        if (response.redirected) {
+            const target = new URL(response.url, window.location.origin);
+            if (target.pathname.endsWith(SESSION_EXPIRED_PATH)) {
+                window.location.assign(target.href);
+            }
+        }
+
+        return response;
+    };
+    window.__eisSessionRedirectInstalled = true;
+}
+
+installSessionExpiredRedirect();
 
 function getStorageFlag(key, fallback = false) {
     try {
@@ -695,9 +719,62 @@ async function applyProjectSelection(projectId, redirectToOverview = false, pers
         setStoredProjectId(nextProjectId);
     }
 
+    const selectedProject = state.projects.find((project) => project.projectId === nextProjectId);
+    state.topPanel.projectId = nextProjectId;
+    if (selectedProject) {
+        state.topPanel.projectName = selectedProject.projectName;
+    }
+
     if (redirectToOverview) {
         const separator = redirectUrl.includes("?") ? "&" : "?";
         window.location.replace(`${redirectUrl}${separator}_ts=${Date.now()}`);
+    }
+}
+
+async function clearProjectSelection() {
+    const body = new URLSearchParams();
+    body.set("cmd", MENU_SELECT_PROJECT_CMD);
+    body.set("projectId", "");
+
+    const response = await fetch(MENU_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Accept": "application/xml, text/xml"
+        },
+        credentials: "same-origin",
+        body
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} from ${MENU_URL}`);
+    }
+
+    state.topPanel.projectId = "";
+    state.topPanel.projectName = "-";
+    setStoredProjectId(null);
+}
+
+async function ensureProjectSelection() {
+    const currentProjectId = getCurrentProjectId();
+    const currentProjectExists = state.projects.some((project) => project.projectId === currentProjectId);
+
+    if (currentProjectExists) {
+        setStoredProjectId(currentProjectId);
+        return;
+    }
+
+    const storedProjectId = getStoredProjectId();
+    const storedProjectExists = state.projects.some((project) => project.projectId === storedProjectId);
+
+    if (storedProjectExists) {
+        await applyProjectSelection(storedProjectId, false);
+        return;
+    }
+
+    setStoredProjectId(null);
+    if (currentProjectId) {
+        await clearProjectSelection();
     }
 }
 
@@ -938,9 +1015,21 @@ export async function initMenu() {
     setText(statusElement, "Indl\u00e6ser menu...", "");
 
     try {
+        if (document.body?.dataset.sessionExpired === "true") {
+            try {
+                window.localStorage.removeItem("eis.menu.xml");
+            } catch {
+                // Storage may be unavailable; the menu remains empty regardless.
+            }
+            clear(rootElement);
+            setText(statusElement, "Log in again to view the menu.", "");
+            return;
+        }
+
         const doc = await fetchXml(MENU_URL);
         state.topPanel = readMenuTopPanel(doc);
         state.projects = readProjectsFromXml(doc);
+        await ensureProjectSelection();
         buildMenu(doc, statusElement, rootElement);
     } catch (error) {
         setText(statusElement, "Kunne ikke indl\u00e6se menu.", "");

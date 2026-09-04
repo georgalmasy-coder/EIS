@@ -3,9 +3,11 @@ package com.bepa.eis.server.api.security;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
+import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.UserProvider;
+import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.security.GeoIpService;
 import com.bepa.eis.common.providers.security.LoginActivityLogger;
@@ -15,6 +17,7 @@ import com.bepa.eis.common.providers.security.SessionManager;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -388,9 +391,7 @@ public class LoginServlet extends GenericServlet {
                 CustomerRecord customer = customers.get(0);
 
                 webSession.setCustomerId(customer.getCustomerId());
-
-                SessionProvider sessionProvider = new SessionProvider(webSession);
-                sessionProvider.updateSessionInfo(webSession);
+                restoreSelectedProject(webSession);
 
                 response.sendRedirect(getRedirectUrl(webSession));
                 return;
@@ -413,6 +414,37 @@ public class LoginServlet extends GenericServlet {
         UserRoles userRole = user.getUserRole();
 
         return userRole == UserRoles.BEPA_SYSTEM_ADMINISTRATOR ? "/web/view?page=admindashboard" : "/web/view?page=myprojects";
+    }
+
+    public static void restoreSelectedProject(WebSession webSession) throws SQLException {
+        if (webSession == null || webSession.getCustomerId() == null || webSession.getUserId() == null) {
+            return;
+        }
+
+        UserPreferenceProvider preferenceProvider = new UserPreferenceProvider(webSession);
+        Integer rememberedProjectId = preferenceProvider.getSelectedProjectId(webSession.getUserId());
+        Integer projectId = null;
+
+        if (rememberedProjectId != null) {
+            ProjectProvider projectProvider = new ProjectProvider(webSession);
+            List<ProjectRecord> projects = projectProvider.getLatestProjectsByCustomerAndUserId(
+                    webSession.getCustomerId(),
+                    webSession.getUserId()
+            );
+
+            boolean projectIsAvailable = projects.stream()
+                    .anyMatch(project -> rememberedProjectId.equals(project.getProjectId()));
+
+            if (projectIsAvailable) {
+                projectId = rememberedProjectId;
+            }
+        }
+
+        webSession.setProjectId(projectId);
+        new SessionProvider(webSession).updateSessionInfo(webSession);
+        if (rememberedProjectId != null && projectId == null) {
+            preferenceProvider.setSelectedProjectId(webSession.getUserId(), null);
+        }
     }
 
     private void startMfaFlow(
@@ -852,7 +884,7 @@ public class LoginServlet extends GenericServlet {
                 sessionId
         );
 
-        session.setMaxInactiveInterval(30 * 60);
+        session.setMaxInactiveInterval(GlobalConfiguration.getSessionTimeoutMinutes() * 60);
 
         SessionManager.getInstance().login(
                 sessionId,

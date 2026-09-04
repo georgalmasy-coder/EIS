@@ -33,6 +33,8 @@ public final class GlobalConfiguration {
     private static final boolean DEFAULT_UDV_MODE = false;
     private static final int DEFAULT_CUSTOMER_ID = 1;
     private static final int DEFAULT_PROJECT_ID = 1;
+    private static final String DEFAULT_LOGIN_PAGE = "index.html";
+    private static final int DEFAULT_SESSION_TIMEOUT_MINUTES = 30;
 
     private static final String DEFAULT_DATABASE_DATASOURCE_MODE = "jndi";
     private static final String DEFAULT_JNDI_NAME = "java:comp/env/jdbc/EISDatabase";
@@ -136,6 +138,14 @@ public final class GlobalConfiguration {
 
     public static int getThemeId() {
         return getInt("ui.theme.id", 1, 1, 3);
+    }
+
+    public static String getLoginPage() {
+        return getString("ui.login.page", DEFAULT_LOGIN_PAGE);
+    }
+
+    public static int getSessionTimeoutMinutes() {
+        return getInt("security.session.timeout.minutes", DEFAULT_SESSION_TIMEOUT_MINUTES, 1, 1440);
     }
 
     public static String getEisHome() {

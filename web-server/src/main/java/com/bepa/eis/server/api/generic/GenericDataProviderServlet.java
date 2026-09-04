@@ -64,7 +64,10 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         String module = request.getServletPath() +  "." + getCommandParameter(request);
         long startTime = System.currentTimeMillis();
 
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, response);
+        if (webSession == null) {
+            return;
+        }
         setWebSession(webSession);
 
         try {
@@ -124,7 +127,10 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, response);
+        if (webSession == null) {
+            return;
+        }
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
@@ -262,7 +268,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
     }
 
-    private WebSession getWebSession(String sessionId) {
+    private WebSession getWebSession(String sessionId) throws SQLException {
         WebSession ws;
         if (GlobalConfiguration.isUdvMode()) {
             ws = new WebSession();
@@ -273,20 +279,17 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             ws.setUserId(1);
             return ws;
         } else {
-            try {
-                SessionProvider sessionProvider = new SessionProvider(null);
-                ws = sessionProvider.getBySessionId(sessionId);
-            } catch (SQLException e) {
-
-                log.error("Error getting session for page viewer: {}", e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
+            SessionProvider sessionProvider = new SessionProvider(null);
+            ws = sessionProvider.getBySessionId(sessionId);
         }
         return ws;
     }
 
     public String getSessionIdFromRequest(HttpServletRequest request) {
-        HttpSession session = request.getSession(true);
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
         return (String) session.getAttribute("sessionID");
     }
 
@@ -601,15 +604,61 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
     }
 
     public WebSession getWebSessionFromRequest(HttpServletRequest request) {
-        WebSession webSession;
         try {
             String sessionId = getSessionIdFromRequest(request);
-            webSession = getWebSession(sessionId);
+            return getWebSession(sessionId);
         } catch (Exception e) {
             log.error("Error getting session for page viewer: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
-        return webSession;
+    }
+
+    private WebSession getWebSessionFromRequest(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException {
+        if (GlobalConfiguration.isUdvMode()) {
+            try {
+                return getWebSession(null);
+            } catch (SQLException impossible) {
+                throw new ServletException(impossible);
+            }
+        }
+
+        String sessionId = getSessionIdFromRequest(request);
+        if (sessionId == null || sessionId.isBlank()) {
+            redirectToSessionExpired(request, response);
+            return null;
+        }
+
+        try {
+            WebSession resolvedSession = getWebSession(sessionId);
+            if (resolvedSession == null) {
+                redirectToSessionExpired(request, response);
+                return null;
+            }
+
+            HttpSession httpSession = request.getSession(false);
+            if (httpSession != null && resolvedSession.getThemeId() != null) {
+                httpSession.setAttribute("eis.theme.id", resolvedSession.getThemeId());
+            }
+            return resolvedSession;
+        } catch (SQLException e) {
+            log.warn("Session could not be read; redirecting to session-expired page. sessionId={}", sessionId, e);
+            redirectToSessionExpired(request, response);
+            return null;
+        }
+    }
+
+    private void redirectToSessionExpired(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException {
+        try {
+            response.sendRedirect(request.getContextPath() + "/session-expired.html");
+        } catch (IOException e) {
+            throw new ServletException("Unable to redirect to the session-expired page", e);
+        }
     }
 
     public WebSession getWebSession() {

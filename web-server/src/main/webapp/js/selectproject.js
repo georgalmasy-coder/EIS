@@ -280,6 +280,7 @@
 
         try {
             await postProjectSelected(customerId, projectId);
+            window.localStorage.setItem("eis.menu.projectId", String(projectId));
             window.location.href = "/web/view?page=projectoverview";
         } catch (error) {
             setError("Failed to select project. Please try again.");
