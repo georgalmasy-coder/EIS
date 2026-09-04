@@ -29,34 +29,31 @@ public enum MenuIcon {
     CHART(
             5,
             "Chart",
-            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20V4h2v16H4Zm4 0v-9h2v9H8Zm4 0V8h2v12h-2Zm4 0v-6h2v6h-2Zm4 0v-11h2v11h-2ZM3 21h18v1H3v-1Z\"></path></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#d5e3df\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 21v-9M10 21V5M16 21v-6M22 21H2\"/></svg>"
     ),
 
     REQUIREMENT(
             6,
             "Requirement",
-            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">R</text></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#244c42\"/><text x=\"12\" y=\"16\" text-anchor=\"middle\" fill=\"#8ed1b4\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"800\">R</text></svg>"
     ),
 
     FUNCTIONAL(
             7,
             "Functional",
-//            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">F</text></svg>"
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><rect x=\"2\" y=\"2\" width=\"20\" height=\"20\" rx=\"6\" fill=\"#1f4b50\"/><text x=\"12\" y=\"15.4\" text-anchor=\"middle\" fill=\"#72c5da\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"700\"  fill=\"currentColor\">F</text></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#1f4b50\"/><text x=\"12\" y=\"16\" text-anchor=\"middle\" fill=\"#72c5da\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"800\">F</text></svg>"
     ),
-
-    //<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="#1f4b50"/><text x="12" y="15.4" text-anchor="middle" fill="#72c5da" font-family="Inter,Arial,sans-serif" font-size="10" font-weight="700">F</text></svg>
 
     LOGICAL(
             8,
             "Logical",
-            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">L</text></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#294652\"/><text x=\"12\" y=\"16\" text-anchor=\"middle\" fill=\"#8aa6d2\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"800\">L</text></svg>"
     ),
 
     PHYSICAL(
             9,
             "Physical",
-            "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\" ry=\"4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><text x=\"12\" y=\"15\" text-anchor=\"middle\" font-family=\"Arial, sans-serif\" font-size=\"8.5\" font-weight=\"700\" fill=\"currentColor\">P</text></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#4a4531\"/><text x=\"12\" y=\"16\" text-anchor=\"middle\" fill=\"#e1b66e\" font-family=\"Inter,Arial,sans-serif\" font-size=\"10\" font-weight=\"800\">P</text></svg>"
     ),
 
     LINK(
@@ -68,13 +65,13 @@ public enum MenuIcon {
     LIST(
             11,
             "List",
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01\"/></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#d5e3df\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6h13M9 12h13M9 18h13M4 6h.01M4 12h.01M4 18h.01\"/></svg>"
     ),
 
     GRID(
         12,
         "Grid",
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/></svg>"
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#d5e3df\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.1\"/></svg>"
     ),
 
     HELP(
@@ -98,7 +95,7 @@ public enum MenuIcon {
     RELATION(
             16,
             "Relation",
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1\"/></svg>"
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#d5e3df\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><g transform=\"translate(2 3)\"><path d=\"M8 12a4 4 0 0 0 5.7 0l2.2-2.2a4 4 0 1 0-5.7-5.7L9 5.3\"/><path d=\"M10 8a4 4 0 0 0-5.7 0L2.1 10.2a4 4 0 1 0 5.7 5.7L9 14.7\"/></g></svg>"
     ),
 
     SEARCH(
@@ -117,30 +114,7 @@ public enum MenuIcon {
             19,
             "N2",
             "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect width=\"24\" height=\"24\" rx=\"6\" fill=\"#1f4b50\"/><text x=\"12\" y=\"15.5\" text-anchor=\"middle\" fill=\"#ffffff\" font-family=\"Inter,Arial,sans-serif\" font-size=\"9.5\" font-weight=\"700\">N2</text></svg>"
-    )
-    /*,
-
-    EIS_APP(
-            19,
-            "EIS App",
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" role=\"img\" aria-labelledby=\"title\"><title id=\"title\">EiS</title><rect width=\"64\" height=\"64\" rx=\"13\" fill=\"#0b3f31\"/><text x=\"32\" y=\"41\" text-anchor=\"middle\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"25\" font-weight=\"700\" fill=\"#ffffff\">EiS</text></svg>"
-    ),
-
-    EIS_LOGO(
-            20,
-            "EiS Logo",
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 280 64\" role=\"img\" aria-labelledby=\"title\">\n" +
-                    "  <title id=\"title\">EiS — Engineering in Systems</title>\n" +
-                    "  <g fill=\"#0b3f31\">\n" +
-                    "    <text x=\"0\" y=\"43\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"42\" font-weight=\"700\" letter-spacing=\"-2\">EiS</text>\n" +
-                    "    <rect x=\"78\" y=\"12\" width=\"1\" height=\"40\" opacity=\".45\"/>\n" +
-                    "    <text x=\"96\" y=\"28\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"13\" font-weight=\"700\">ENGINEERING</text>\n" +
-                    "    <text x=\"96\" y=\"45\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"13\" font-weight=\"700\">IN SYSTEMS</text>\n" +
-                    "  </g>\n" +
-                    "</svg>\n"
-    )
-*/
-    ;
+    )    ;
 
     private final int id;
     private final String name;
