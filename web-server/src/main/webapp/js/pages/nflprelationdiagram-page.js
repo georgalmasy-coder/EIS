@@ -652,30 +652,13 @@ function applyFilters() {
 }
 
 function getFocusedVisibleIds(internalId) {
-    return getConnectedRequirementIds(internalId);
-}
+    const visibleIds = new Set([internalId]);
 
-function getConnectedRequirementIds(internalId) {
-    const visited = new Set();
-    const queue = [internalId];
-
-    while (queue.length > 0) {
-        const currentId = queue.shift();
-
-        if (!currentId || visited.has(currentId)) {
-            continue;
-        }
-
-        visited.add(currentId);
-
-        getRelatedRequirementIds(currentId).forEach((relatedId) => {
-            if (!visited.has(relatedId)) {
-                queue.push(relatedId);
-            }
-        });
+    for (const relatedId of getRelatedRequirementIds(internalId)) {
+        visibleIds.add(relatedId);
     }
 
-    return visited;
+    return visibleIds;
 }
 
 function setFocusedRequirement(internalId) {
@@ -1083,13 +1066,12 @@ function buildCurvePath(points) {
 function updateHighlight() {
     const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
     const relatedIds = activeInternalId ? getRelatedRequirementIds(activeInternalId) : new Set();
-    const highlightedIds = activeInternalId ? new Set([activeInternalId, ...relatedIds]) : new Set();
 
     document.querySelectorAll(".relationdiagram-requirement-card").forEach((card) => {
         const internalId = card.dataset.internalId;
         const isSelected = internalId === activeInternalId;
         const isRelated = relatedIds.has(internalId);
-        const shouldMute = Boolean(activeInternalId) && !highlightedIds.has(internalId);
+        const shouldMute = Boolean(activeInternalId) && !isSelected && !isRelated;
 
         card.classList.toggle("is-selected", isSelected);
         card.classList.toggle("is-related", isRelated);
@@ -1100,8 +1082,7 @@ function updateHighlight() {
         const from = line.dataset.from;
         const to = line.dataset.to;
         const isActive = Boolean(activeInternalId)
-            && highlightedIds.has(from)
-            && highlightedIds.has(to);
+            && (from === activeInternalId || to === activeInternalId);
 
         line.classList.toggle("is-active", isActive);
         line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);
@@ -1216,27 +1197,15 @@ function getEditDialogConfig(requirement) {
 
 function getRelatedRequirementIds(internalId) {
     const relatedIds = new Set();
-    const queue = [internalId];
 
-    while (queue.length) {
-        const currentInternalId = queue.shift();
+    for (const relation of state.relations) {
+        if (relation.from === internalId) {
+            relatedIds.add(relation.to);
+        }
 
-        state.relations.forEach((relation) => {
-            let relatedInternalId = null;
-
-            if (relation.from === currentInternalId) {
-                relatedInternalId = relation.to;
-            } else if (relation.to === currentInternalId) {
-                relatedInternalId = relation.from;
-            }
-
-            if (!relatedInternalId || relatedInternalId === internalId || relatedIds.has(relatedInternalId)) {
-                return;
-            }
-
-            relatedIds.add(relatedInternalId);
-            queue.push(relatedInternalId);
-        });
+        if (relation.to === internalId) {
+            relatedIds.add(relation.from);
+        }
     }
 
     return relatedIds;
