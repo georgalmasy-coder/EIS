@@ -428,9 +428,10 @@
     padding: 6px 8px 4px;
     color: var(--text);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 800;
-    text-transform: none;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
 }
 
 .menu-main-btn{
@@ -444,8 +445,8 @@
     background: transparent;
     color: var(--text);
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 650;
+    font-size: 14px;
+    font-weight: 600;
     text-align: left;
     cursor: pointer;
 }
@@ -478,9 +479,9 @@
     border-radius: 10px;
     color: var(--text);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     text-decoration: none;
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .menu-main-link:hover{
@@ -526,9 +527,9 @@
     border-radius: 10px;
     color: var(--text);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     text-decoration: none;
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .menu-main-btn::before,
@@ -572,8 +573,8 @@
 }
 
 .menu-item-icon{
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
@@ -581,8 +582,11 @@
 }
 
 .menu-item-icon svg{
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
+}
+
+.menu-item-icon svg:not([fill="none"]){
     fill: currentColor;
 }
 
@@ -623,11 +627,11 @@
 }
 
 .side-menu.is-collapsed .menu-item-icon{
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
 }
 
 .side-menu.is-collapsed .menu-item-icon svg{
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
 }
