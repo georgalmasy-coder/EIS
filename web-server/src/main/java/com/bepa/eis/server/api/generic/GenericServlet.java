@@ -90,7 +90,7 @@ public class GenericServlet extends HttpServlet {
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
 
         String xmlAsString = writer.toString();
-        log.info("Created XML : {}", xmlAsString);
+        log.debug("Created XML : {}", xmlAsString);
 
         return xmlAsString;
     }

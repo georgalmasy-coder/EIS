@@ -235,6 +235,13 @@ function getActiveRouteKey(path) {
     }
 }
 
+export function menuHasRoute(path, root = document) {
+    const routeKey = getActiveRouteKey(path);
+
+    return Array.from(root.querySelectorAll("#menuRoot a[data-url]"))
+        .some((link) => getActiveRouteKey(link.getAttribute("data-url")) === routeKey);
+}
+
 function setActiveLinks(root) {
     const currentKey = getActiveRouteKey(window.location.href);
 

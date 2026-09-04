@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+import { initMenu, menuHasRoute } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { StakeholderRequirementController } from "./requirements-stakeholder.js";
@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function init() {
-    initMenu(document);
+    const menuInitialization = initMenu(document);
+    menuInitialization.then(updateInterfaceManagementButtonVisibility);
     // Ensure topbar is mounted
     mountTopbar(document);
     
@@ -53,6 +54,20 @@ function init() {
     } else {
         switchTab("stakeholder");
     }
+}
+
+function updateInterfaceManagementButtonVisibility() {
+    const routesByButtonId = {
+        stakeholderBtnInterfaceManagement: "/web/view?page=stk-interfaces",
+        systemBtnInterfaceManagement: "/web/view?page=sys-interfaces"
+    };
+
+    Object.entries(routesByButtonId).forEach(([buttonId, route]) => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.hidden = !menuHasRoute(route);
+        }
+    });
 }
 
 function setupTabEvents() {

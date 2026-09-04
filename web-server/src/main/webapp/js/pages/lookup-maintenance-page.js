@@ -164,7 +164,7 @@ function initializeEvents() {
 
     previewChip?.addEventListener("input", () => {
         if (getValue("lookupTypeInput") !== "CLASSIFICATION") return;
-        const code = String(previewChip.textContent || "").replace(/[\r\n]/g, "").slice(0, 2);
+        const code = normalizeClassificationCode(previewChip.textContent);
         if (previewChip.textContent !== code) {
             previewChip.textContent = code;
             placeCaretAtEnd(previewChip);
@@ -848,6 +848,22 @@ function parseBoolean(value) {
 
 function normalizeText(value) {
     return String(value ?? "").trim();
+}
+
+function normalizeClassificationCode(value) {
+    const characters = String(value ?? "").toUpperCase().replace(/[\r\n]/g, "");
+    let code = "";
+
+    for (const character of characters) {
+        if (!code && /^[A-Z]$/.test(character)) {
+            code = character;
+        } else if (code.length === 1 && /^[A-Z0-9_]$/.test(character)) {
+            code += character;
+            break;
+        }
+    }
+
+    return code;
 }
 
 function normalizeColor(value) {

@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+import { initMenu, menuHasRoute } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
@@ -101,15 +101,21 @@ function start() {
     loadLogicalStructures();
 }
 
-function initializeShell() {
+async function initializeShell() {
     setText("customerName", "—", "");
     setText("projectName", "—", "");
     setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
-    initMenu(document);
+    const menuInitialization = initMenu(document);
     initHelpDialog();
     mountTopbar(document);
+
+    await menuInitialization;
+    const button = document.getElementById("btnInterfaceManagement");
+    if (button) {
+        button.hidden = !menuHasRoute("/web/view?page=lsys-interfaces");
+    }
 }
 
 function initializeStateFromStorage() {

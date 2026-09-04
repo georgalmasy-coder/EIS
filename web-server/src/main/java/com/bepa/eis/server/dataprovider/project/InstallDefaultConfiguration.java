@@ -57,8 +57,9 @@ public class InstallDefaultConfiguration extends GenericProvider {
                     "Code, " +
                     "Description, " +
                     "Example, " +
+                    "UsageExample, " +
                     "Active" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 
     public InstallDefaultConfiguration(WebSession webSession) {
@@ -146,7 +147,8 @@ public class InstallDefaultConfiguration extends GenericProvider {
                 ps.setString(4, classificationType.getCode());
                 ps.setString(5, classificationType.getCodeDescription());
                 ps.setString(6, classificationType.getCodeExample());
-                ps.setBoolean(7, classificationType.isActive());
+                ps.setString(7, classificationType.getCodeUsageExample());
+                ps.setBoolean(8, classificationType.isActive());
 
                 executeInsertIgnoringDuplicateKey(ps);
             }

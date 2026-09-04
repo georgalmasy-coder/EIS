@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LookupValueMaintenanceProvider extends GenericProvider {
 
@@ -264,7 +265,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             setInt(statement, customerId, 1);
             setInt(statement, projectId, 2);
-            setString(statement, safeText(row.code()), 3);
+            setString(statement, normalizeClassificationCode(row.code()), 3);
 
             if (row.classificationId() == null) {
                 statement.setNull(4, java.sql.Types.INTEGER);
@@ -276,7 +277,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next() && resultSet.getInt(1) > 0) {
-                    throw new IllegalArgumentException("A classification with code '" + safeText(row.code()) +
+                    throw new IllegalArgumentException("A classification with code '" + normalizeClassificationCode(row.code()) +
                             "' already exists for the current project.");
                 }
             }
@@ -298,7 +299,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                 : null;
 
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_CLASSIFICATION_SQL)) {
-            setString(statement, safeText(classificationRow.code()), 1);
+            setString(statement, normalizeClassificationCode(classificationRow.code()), 1);
             setString(statement, safeText(classificationRow.description()), 2);
             setString(statement, normalizeNullableText(classificationRow.example()), 3);
             setString(statement, usageExample, 4);
@@ -334,7 +335,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             setInt(statement, customerId, 1);
             setInt(statement, projectId, 2);
             setInt(statement, classId, 3);
-            setString(statement, safeText(row.code()), 4);
+            setString(statement, normalizeClassificationCode(row.code()), 4);
             setString(statement, safeText(row.description()), 5);
             setString(statement, normalizeNullableText(row.example()), 6);
             setString(statement, usageExample, 7);
@@ -386,7 +387,7 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
                 statement.setString(4, classificationType.getCode());
                 statement.setString(5, classificationType.getCodeDescription());
                 statement.setString(6, normalizeNullableText(classificationType.getCodeExample()));
-                statement.setNull(7, java.sql.Types.NVARCHAR);
+                statement.setString(7, normalizeNullableText(classificationType.getCodeUsageExample()));
                 statement.setBoolean(8, classificationType.isActive());
                 statement.executeUpdate();
             }
@@ -598,7 +599,9 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
     }
 
     private void validateClassificationRow(ClassificationRow classificationRow) {
-        if (safeText(classificationRow.code()).isBlank()) {
+        String code = normalizeClassificationCode(classificationRow.code());
+
+        if (code.isBlank()) {
             throw new IllegalArgumentException("Code is required.");
         }
 
@@ -606,8 +609,8 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
             throw new IllegalArgumentException("Description is required.");
         }
 
-        if (safeText(classificationRow.code()).length() > 2) {
-            throw new IllegalArgumentException("Code must be maximum 2 characters.");
+        if (!code.matches("[A-Z][A-Z0-9_]?$")) {
+            throw new IllegalArgumentException("Code must start with A-Z and may be followed by A-Z, 0-9 or _.");
         }
 
         if (safeText(classificationRow.description()).length() > 255) {
@@ -644,6 +647,10 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
     private String normalizeNullableText(String value) {
         String normalized = safeText(value);
         return normalized.isBlank() ? null : normalized;
+    }
+
+    private String normalizeClassificationCode(String value) {
+        return safeText(value).toUpperCase(Locale.ROOT);
     }
 
     private Integer resolveIrlOrder(String code) {

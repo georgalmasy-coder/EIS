@@ -324,7 +324,7 @@ public class MenuServlet extends GenericServlet {
 
         try {
             CustomerProjectProvider customerProjectProvider = new CustomerProjectProvider(webSession);
-            CustomerProject project = customerProjectProvider.getProjectsByUserId(webSession.getUserId());
+            CustomerProject project = customerProjectProvider.getProjectsByUserId(webSession.getCustomerId(), webSession.getUserId());
 
             if (project == null) {
                 return;

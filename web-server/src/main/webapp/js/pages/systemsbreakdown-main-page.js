@@ -1,4 +1,4 @@
-import { initMenu } from "../components/menu.js";
+import { initMenu, menuHasRoute } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
@@ -100,15 +100,28 @@ function start() {
     loadSystemsBreakdown();
 }
 
-function initializeShell() {
+async function initializeShell() {
     setText("customerName", "—", "");
     setText("projectName", "—", "");
     setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
-    initMenu(document);
+    const menuInitialization = initMenu(document);
     initHelpDialog();
     mountTopbar(document);
+
+    await menuInitialization;
+    updateInterfaceManagementButtonVisibility();
+}
+
+function updateInterfaceManagementButtonVisibility() {
+    const button = document.getElementById("btnInterfaceManagement");
+
+    if (!button) {
+        return;
+    }
+
+    button.hidden = !menuHasRoute("/web/view?page=psys-interfaces");
 }
 
 function initializeStateFromStorage() {

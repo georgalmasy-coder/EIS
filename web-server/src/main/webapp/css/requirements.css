@@ -143,6 +143,10 @@
     fill: currentColor;
 }
 
+.requirements-icon-button[hidden] {
+    display: none !important;
+}
+
 .requirements-pdf-svg {
     width: 21px;
     height: 21px;

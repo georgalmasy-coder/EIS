@@ -63,7 +63,7 @@ public enum PageType {
     STAKEHOLDER_EDIT_PAGE("stakeholder-edit","html-pages/stakeholder-edit.html", "Stakeholder Edit", true, "STAKEHOLDER MANAGEMENT", "Stakeholder Edit", "Edit stakeholder details in the workspace below."),
     DEPARTMENT_MAIN_PAGE("departments", "html-pages/department-main.html", "Department Administration", true, "DEPARTMENT MANAGEMENT", "Department Administration", "Use the workspace below to manage administration data."),
 
-    LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification Management", "Manage irl/trl/srl lookup values in the workspace below."),
+    LOOKUP_MAINTENANCE_PAGE("lookup-maintenance","html-pages/lookup-maintenance.html", "TRL / SRL / IRL / Classification", true, "ADMINISTRATION", "TRL / SRL / IRL / Classification Management", "Manage TRL, SRL, IRL and Classification  lookup values in the workspace below."),
 
     // BEPA admin
     ADMIN_DASHBOARD_PAGE("admindashboard","html-pages/admin/admindashboard.html", "Admin Dashboard | BEPA EIS", true, "TBD", "TBD", "TBD"),

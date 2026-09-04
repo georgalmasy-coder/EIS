@@ -1,5 +1,6 @@
 ﻿import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
+import { menuHasRoute } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import { openEditDialog } from "../components/edit-dialog.js";
@@ -101,15 +102,21 @@ function start() {
     loadFunctionalStructures();
 }
 
-function initializeShell() {
+async function initializeShell() {
     setText("customerName", "â€”", "");
     setText("projectName", "â€”", "");
     setText("userName", "â€”", "");
     setText("loadStatus", "Loading", "");
 
-    initMenu(document);
+    const menuInitialization = initMenu(document);
     initHelpDialog();
     mountTopbar(document);
+
+    await menuInitialization;
+    const button = document.getElementById("btnInterfaceManagement");
+    if (button) {
+        button.hidden = !menuHasRoute("/web/view?page=fsys-interfaces");
+    }
 }
 
 function initializeStateFromStorage() {

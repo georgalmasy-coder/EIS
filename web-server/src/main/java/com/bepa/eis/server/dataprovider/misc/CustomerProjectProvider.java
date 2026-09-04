@@ -51,7 +51,9 @@ public class CustomerProjectProvider extends GenericProvider {
                     "AND P.Latest = 1 " +
                     "AND P.ProjectStatus IN (" + ACTIVE_PROJECT_STATUS_IDS + ") " +
                     "AND P.CustomerId = C.CustomerId " +
-                    "AND C.Latest = 1 ";
+                    "AND C.Latest = 1 " +
+                    "AND C.CustomerId = ? " +
+            "ORDER BY P.ProjectName";
 
     private static final String CUSTOMER_ID_BY_PROJECT_ID_SQL =
             "SELECT C.CustomerId " +
@@ -104,14 +106,15 @@ public class CustomerProjectProvider extends GenericProvider {
         return customerProject;
     }
 
-    public CustomerProject getProjectsByUserId(Integer userId) {
+    public CustomerProject getProjectsByUserId(Integer currCustomerId, Integer currUserId) {
         CustomerProject customerProject = new CustomerProject();
 
         try {
             try (Connection con = getDataSource().getConnection();
                  PreparedStatement ps = con.prepareStatement(CUSTOMER_PROJECTS_BY_USERID_SQL)) {
 
-                setInt(ps, userId, 1);
+                setInt(ps, currUserId, 1);
+                setInt(ps, currCustomerId, 2);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {

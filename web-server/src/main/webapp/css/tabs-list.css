@@ -176,8 +176,8 @@
     background: var(--app-table-row-hover);
 }
 
-.data-table-cell-value.is-top-level-code,
-.data-table-cell-value.is-top-level-code strong{
+.data-table tbody tr:has(.data-table-cell-value.is-top-level-code) .data-table-cell-value,
+.data-table tbody tr:has(.data-table-cell-value.is-top-level-code) .data-table-cell-value strong{
     font-weight: 800;
 }
 
