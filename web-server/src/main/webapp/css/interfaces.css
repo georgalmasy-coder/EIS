@@ -331,6 +331,15 @@ body.theme-black .interfaces-info-bar {
     min-width: var(--interfaces-row-header-width);
     width: var(--interfaces-row-header-width);
     max-width: var(--interfaces-row-header-width);
+    padding: 0;
+    text-align: center;
+}
+
+.interfaces-n2-mark {
+    display: block;
+    width: 80px;
+    height: 80px;
+    margin: auto;
 }
 
 .interfaces-header-content {
