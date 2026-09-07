@@ -282,7 +282,7 @@ function renderHeader(tableHead, matrix) {
     rowHeaderCorner.title = matrix.rowGroupLabel;
     const n2Mark = document.createElement("img");
     n2Mark.className = "interfaces-n2-mark";
-    n2Mark.src = "../svg/n2-mark.svg";
+    n2Mark.src = "../svg/n2-mark.svg?rev=side-menu-colour-1";
     n2Mark.width = 80;
     n2Mark.height = 80;
     n2Mark.alt = "N2";

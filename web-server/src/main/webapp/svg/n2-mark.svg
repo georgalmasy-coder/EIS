@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100" role="img" aria-labelledby="title">
   <title id="title">N2</title>
-  <text x="7" y="70" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" fill="#000000">N</text>
-  <text x="66" y="91" font-family="Arial, Helvetica, sans-serif" font-size="47" font-weight="700" fill="#000000">2</text>
+  <defs>
+    <linearGradient id="side-menu-background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#073f34"/>
+      <stop offset="100%" stop-color="#052f27"/>
+    </linearGradient>
+  </defs>
+  <text x="7" y="70" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" fill="url(#side-menu-background)">N</text>
+  <text x="66" y="91" font-family="Arial, Helvetica, sans-serif" font-size="47" font-weight="700" fill="url(#side-menu-background)">2</text>
 </svg>
