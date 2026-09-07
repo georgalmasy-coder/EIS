@@ -517,17 +517,67 @@ public class MenuProvider extends GenericProvider {
                 return false;
             }
 
-            return hasUserRoleAccess(row);
+
+            return hasUserModuleAccess(row) && hasUserRoleAccess(row);
         }
 
         return false;
     }
 
-    boolean hasUserRoleAccess(MenuRow row) {
+    private boolean hasUserModuleAccess(MenuRow row) {
 
         UserRoles userRole = CustomerLookupCache.getUserRole(getWebSession());
 
-        if (userRole != UserRoles.INVASIVE_USER_ROLE && row != null) {
+        if (userRole != UserRoles.INVALID_USER_ROLE && row != null) {
+
+            if (userRole == UserRoles.BEPA_SYSTEM_ADMINISTRATOR) {
+                return true;
+            }
+        }
+
+        if (getWebSession() != null) {
+            switch (getWebSession().getSubscription()) {
+                case MASTER:
+                    return isMasterModule();
+                case PRO:
+                    return isProModule();
+                case BASIS:
+                    return isBasisModule();
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isMasterModule() {
+        if ( getWebSession() != null) {
+            return getWebSession().getSubscription() == Subscription.MASTER;
+        }
+        return false;
+    }
+
+    private boolean isProModule() {
+        if ( getWebSession() != null) {
+            return getWebSession().getSubscription() == Subscription.MASTER ||
+                    getWebSession().getSubscription() == Subscription.PRO;
+        }
+        return false;
+    }
+
+    private boolean isBasisModule() {
+        if ( getWebSession() != null) {
+            return getWebSession().getSubscription() == Subscription.MASTER ||
+                    getWebSession().getSubscription() == Subscription.PRO ||
+                    getWebSession().getSubscription() == Subscription.BASIS;
+        }
+        return false;
+    }
+
+    private boolean hasUserRoleAccess(MenuRow row) {
+
+        UserRoles userRole = CustomerLookupCache.getUserRole(getWebSession());
+
+        if (userRole != UserRoles.INVALID_USER_ROLE && row != null) {
 
             if (userRole == UserRoles.BEPA_SYSTEM_ADMINISTRATOR) {
                 return true;
@@ -634,7 +684,7 @@ public class MenuProvider extends GenericProvider {
                 int roleId = Integer.parseInt(normalizedToken);
                 UserRoles role = UserRoles.fromId(roleId);
 
-                if (role == null || role == UserRoles.INVASIVE_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
+                if (role == null || role == UserRoles.INVALID_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
                     continue;
                 }
 

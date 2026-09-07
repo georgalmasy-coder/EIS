@@ -69,7 +69,7 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         dashboardMetaData = new DashboardMetaData(getWebSession());
     }
 
-    private void loadPhysicalStructures() throws SQLException {
+    private void loadPhysicalStructures() {
         SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
         List<SystemBreakdownEntity> listOfPhysicalStructures = systemBreakdownProvider.getAllSystemBreakdown(false);
 
@@ -99,6 +99,7 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 record.setFromSystemDepartment(fromEntity.getSystemDepartment());
                 record.setFromIrlId(interfaceRecord.irlId());
                 record.setFromClassificationIds(interfaceRecord.classificationIds());
+                record.setNextIrlMeeting(interfaceRecord.nextIrlMeeting());
 
                 record.setToEntityId(fromEntity.getEntityId());
                 record.setToSbsCode(fromEntity.getSbsCode());
@@ -112,9 +113,6 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 record.setToSystemDepartment(toEntity.getSystemDepartment());
 
                 addInterfaceToList(record);
-//                record.setToIrlId(interfaceRecord.irlId());
-//                record.setToClassificationIds(interfaceRecord.classificationIds());
-//                listOfSystemsTeamworkRecords.add(record);
             }
         }
     }
@@ -187,6 +185,10 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 }
                 if (record.getToClassificationIds() != null && !record.getToClassificationIds().isEmpty()) {
                     addElement(interfaceElement, "toClassificationIds", record.getToClassificationIds());
+                }
+
+                if (record.getNextIrlMeeting() != null && !record.getNextIrlMeeting().isBlank()) {
+                    addElement(interfaceElement, "nextIrlMeeting", record.getNextIrlMeeting());
                 }
 
                 interfaceElements.appendChild(interfaceElement);

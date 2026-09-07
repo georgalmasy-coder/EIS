@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-@WebServlet(name = "DashboardSystemsTeamworkServlet", urlPatterns = {"/pro/systemsteamwork"})
+@WebServlet(name = "DashboardSystemsTeamworkServlet", urlPatterns = {"/master/systemsteamwork"})
 @MultipartConfig
 public class DashboardSystemsTeamworkServlet extends GenericDataProviderServlet {
 

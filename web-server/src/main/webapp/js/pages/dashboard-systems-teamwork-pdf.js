@@ -31,6 +31,7 @@ const COLUMN_DEFINITIONS = [
     { key: "fromSystemDepartmentId", label: "Department", source: "fromSystemDepartmentId", width: 80, maxChars: 18, lookup: "department" },
     { key: "interfaceClass", label: "Class", sublabel: "From -> To", dual: true, type: "classification", width: 120, maxChars: 18 },
     { key: "interfaceIrl", label: "IRL", sublabel: "From -> To", dual: true, type: "irl", width: 92, maxChars: 15 },
+    { key: "nextIrlMeeting", label: "Next IRL", sublabel: "Meeting", source: "nextIrlMeeting", width: 82, maxChars: 12 },
     { key: "toSbsCode", label: "SBS Code", source: "toSbsCode", width: 60, maxChars: 16 },
     { key: "toTrlId", label: "TRL", source: "toTrlId", width: 42, maxChars: 8, lookup: "trl", center: true },
     { key: "toSystemName", label: "System Name", source: "toSystemName", width: 190, maxChars: 30 },
@@ -312,8 +313,8 @@ function drawTableHeader(page, y) {
     const columns = getColumns();
     const groupWidths = [
         sum(columns, 0, 5),
-        sum(columns, 5, 7),
-        sum(columns, 7, 12)
+        sum(columns, 5, 8),
+        sum(columns, 8, 13)
     ];
     const groupLabels = ["From", "Interface", "To"];
 
@@ -476,6 +477,7 @@ function buildRowValues(row, lookup) {
             top: resolveLookupValue(lookup.irlById, row.fromIrlId),
             bottom: resolveLookupValue(lookup.irlById, row.toIrlId)
         },
+        resolveOptionalRawValue(formatDanishDate(row.nextIrlMeeting)),
         resolveRawValue(row.toSbsCode),
         resolveLookupValue(lookup.trlById, row.toTrlId),
         resolveRawValue(row.toSystemName),
@@ -485,7 +487,7 @@ function buildRowValues(row, lookup) {
 }
 
 function drawSingleCell(commands, value, x, y, width, maxChars, center) {
-    const text = String(value?.label || value || "--");
+    const text = String(value && Object.prototype.hasOwnProperty.call(value, "label") ? value.label : (value || "--"));
     const color = value?.color || "";
     const display = truncateText(text, maxChars);
     const textWidth = estimateTextWidth(display, FONT_SIZE);
@@ -663,6 +665,16 @@ function pushRoundedRectPath(commands, x, y, width, height, radius) {
 function resolveRawValue(value) {
     const text = String(value == null ? "" : value).trim();
     return text ? { label: text, title: text, color: "" } : { label: "--", title: "--", color: "" };
+}
+
+function resolveOptionalRawValue(value) {
+    const text = String(value == null ? "" : value).trim();
+    return { label: text, title: text, color: "" };
+}
+
+function formatDanishDate(value) {
+    const match = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}/${match[2]}-${match[1]}` : String(value || "").trim();
 }
 
 function resolveLookupValue(map, id) {

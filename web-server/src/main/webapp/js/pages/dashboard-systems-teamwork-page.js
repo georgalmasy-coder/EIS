@@ -7,12 +7,12 @@ import { setText } from "../core/dom.js";
 import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
 
-const DASHBOARD_ENDPOINT = "/pro/systemsteamwork?cmd=overview";
+const DASHBOARD_ENDPOINT = "/master/systemsteamwork?cmd=overview";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 const STORAGE_KEY = "basis.dashboard.systems.teamwork.tableColumnWidths";
 const FILTER_TYPES = ["trl", "owner", "department"];
 
-const DEFAULT_COLUMN_WIDTHS = [84, 62, 170, 120, 112, 150, 140, 84, 62, 170, 120, 112];
+const DEFAULT_COLUMN_WIDTHS = [84, 62, 170, 120, 112, 150, 140, 112, 84, 62, 170, 120, 112];
 const STICKY_COLUMN_COUNT = 5;
 const MIN_COLUMN_WIDTH = 60;
 
@@ -24,11 +24,12 @@ const COLUMN_DEFINITIONS = [
     { key: "fromSystemDepartmentId", label: "Department", source: "fromSystemDepartmentId", sticky: true, widthIndex: 4, lookup: "department", editable: true },
     { key: "interfaceClass", label: "Class", sublabel: "From -> To", widthIndex: 5, dual: true, type: "classification" },
     { key: "interfaceIrl", label: "IRL", sublabel: "From -> To", widthIndex: 6, dual: true, type: "irl" },
-    { key: "toSbsCode", label: "SBS Code", source: "toSbsCode", widthIndex: 7, editable: true },
-    { key: "toTrlId", label: "TRL", source: "toTrlId", widthIndex: 8, lookup: "trl", editable: true, colored: true, center: true },
-    { key: "toSystemName", label: "System Name", source: "toSystemName", widthIndex: 9, editable: true },
-    { key: "toSystemOwnerId", label: "System Owner", source: "toSystemOwnerId", widthIndex: 10, lookup: "user", editable: true },
-    { key: "toSystemDepartmentId", label: "Department", source: "toSystemDepartmentId", widthIndex: 11, lookup: "department", editable: true }
+    { key: "nextIrlMeeting", label: "Next IRL Meeting", source: "nextIrlMeeting", widthIndex: 7, formatter: formatDanishDate, emptyLabel: "" },
+    { key: "toSbsCode", label: "SBS Code", source: "toSbsCode", widthIndex: 8, editable: true },
+    { key: "toTrlId", label: "TRL", source: "toTrlId", widthIndex: 9, lookup: "trl", editable: true, colored: true, center: true },
+    { key: "toSystemName", label: "System Name", source: "toSystemName", widthIndex: 10, editable: true },
+    { key: "toSystemOwnerId", label: "System Owner", source: "toSystemOwnerId", widthIndex: 11, lookup: "user", editable: true },
+    { key: "toSystemDepartmentId", label: "Department", source: "toSystemDepartmentId", widthIndex: 12, lookup: "department", editable: true }
 ];
 
 const state = {
@@ -203,6 +204,7 @@ function parseInterfaces(dashboardElement) {
         toTrlId: getChildText(element, "toTrlId", ""),
         toSystemOwnerId: getChildText(element, "toSystemOwnerId", ""),
         toSystemDepartmentId: getChildText(element, "toSystemDepartmentId", ""),
+        nextIrlMeeting: getChildText(element, "nextIrlMeeting", ""),
         toIrlId: getChildText(element, "toIrlId", ""),
         toClassificationIds: getChildText(element, "toClassificationIds", "")
     }));
@@ -277,7 +279,7 @@ function renderHeader(header) {
     const groupRow = document.createElement("div");
     groupRow.className = "dashboard-systems-teamwork-group-row";
     groupRow.appendChild(createGroupHeaderCell("From", 5));
-    groupRow.appendChild(createGroupHeaderCell("Interface", 2));
+    groupRow.appendChild(createGroupHeaderCell("Interface", 3));
     groupRow.appendChild(createGroupHeaderCell("To", 5));
 
     const columnRow = document.createElement("div");
@@ -306,7 +308,7 @@ function renderHeader(header) {
 
     const groupRowCells = [
         createGroupHeaderCell("From", 5),
-        createGroupHeaderCell("Interface", 2),
+        createGroupHeaderCell("Interface", 3),
         createGroupHeaderCell("To", 5)
     ];
 
@@ -367,9 +369,11 @@ function buildSingleCell(record, column, lookup) {
     td.className = `dashboard-systems-teamwork-cell dashboard-systems-teamwork-cell--${column.key}`;
 
     const rawValue = getRecordValue(record, column.source);
+    const formattedValue = column.formatter ? column.formatter(rawValue) : rawValue;
+    const emptyLabel = column.emptyLabel ?? "--";
     const resolved = column.lookup
         ? resolveLookupValue(lookup[column.lookup === "department" ? "departmentById" : `${column.lookup}ById`], rawValue)
-        : { label: rawValue || "--", title: rawValue || "--", color: "" };
+        : { label: formattedValue || emptyLabel, title: formattedValue || emptyLabel, color: "" };
 
     if (column.center) {
         td.classList.add("dashboard-systems-teamwork-cell--center");
@@ -410,9 +414,9 @@ function buildSingleCell(record, column, lookup) {
 
     const text = document.createElement("span");
     text.className = "dashboard-systems-teamwork-cell-text";
-    text.textContent = resolved.label || "--";
+    text.textContent = resolved.label || emptyLabel;
     td.appendChild(text);
-    td.title = resolved.title || resolved.label || "--";
+    td.title = resolved.title || resolved.label || emptyLabel;
 
     return td;
 }
@@ -486,6 +490,11 @@ function buildArrow(direction = "right") {
 
 function getRecordValue(record, key) {
     return String(record?.[key] || "").trim();
+}
+
+function formatDanishDate(value) {
+    const match = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}/${match[2]}-${match[1]}` : String(value || "").trim();
 }
 
 function renderFilterBar() {

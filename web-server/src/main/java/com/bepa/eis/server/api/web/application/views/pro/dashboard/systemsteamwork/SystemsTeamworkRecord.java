@@ -27,6 +27,7 @@ public class SystemsTeamworkRecord {
 
     private String toIrlId;
     private String toClassificationIds;
+    private String nextIrlMeeting;
 
     public SystemsTeamworkRecord() {
     }
@@ -162,4 +163,13 @@ public class SystemsTeamworkRecord {
     public void setToClassificationIds(String toClassificationIds) {
         this.toClassificationIds = toClassificationIds;
     }
+
+    public String getNextIrlMeeting() {
+        return nextIrlMeeting;
+    }
+
+    public void setNextIrlMeeting(String nextIrlMeeting) {
+        this.nextIrlMeeting = nextIrlMeeting;
+    }
+
 }
