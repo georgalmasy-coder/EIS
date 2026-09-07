@@ -21,9 +21,6 @@ public class IntegrationDatabaseInstaller {
     private static final Logger log = LoggerFactory.getLogger(IntegrationDatabaseInstaller.class);
 
     private static final String[] INSTALLATION_SCRIPTS = {
-//            "com/bepa/eis/common/XX-create-mail-queue-table.sql",
-//            "com/bepa/eis/common/XX-create-customer-master-tables.sql",
-//            "com/bepa/eis/common/XX-create-customer-workflow-tables.sql"
     };
 
     public IntegrationDatabaseInstaller() {
