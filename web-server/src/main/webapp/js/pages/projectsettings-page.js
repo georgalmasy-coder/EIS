@@ -36,7 +36,6 @@ function renderSettings() {
         card.innerHTML = `
             <h3 class="settings-card-title">${title}</h3>
             <p class="settings-card-description">${description}</p>
-            <div class="settings-card-action">Open live workflow</div>
         `;
         
         grid.appendChild(card);
