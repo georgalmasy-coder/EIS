@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 @WebServlet(
         name = "LsysInterfaceMatrixServlet",
         urlPatterns = {
-                "/pro/lsys/interfacematrix",
-                "/pro/lsys/interfacematrix/*"
+                "/master/lsys/interfacematrix",
+                "/master/lsys/interfacematrix/*"
         }
 )
 @MultipartConfig

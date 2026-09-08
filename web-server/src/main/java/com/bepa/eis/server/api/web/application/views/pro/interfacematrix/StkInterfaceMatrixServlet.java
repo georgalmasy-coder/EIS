@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 @WebServlet(
         name = "StkInterfaceMatrixServlet",
         urlPatterns = {
-                "/pro/stk/interfacematrix",
-                "/pro/stk/interfacematrix/*"
+                "/master/stk/interfacematrix",
+                "/master/stk/interfacematrix/*"
         }
 )
 @MultipartConfig

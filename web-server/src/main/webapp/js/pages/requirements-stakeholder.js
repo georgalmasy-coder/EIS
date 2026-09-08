@@ -4,6 +4,7 @@ import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
+import { createEntityMoveSelection } from "../components/entity-move-selection.js";
 import { downloadStakeholderRequirementDiagramPdf } from "./stakeholderrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
 import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
@@ -87,6 +88,8 @@ const state = {
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
     columnsMenuOpen: false
 };
+
+let moveSelection;
 
 export class StakeholderRequirementController {
     init() {
@@ -302,6 +305,11 @@ function initializeEvents() {
         }
     });
 
+    moveSelection = createEntityMoveSelection({
+        menuId: "stakeholderRequirementContextMenu",
+        entityType: "stk",
+        scopeRoot: "#stakeholderSection"
+    });
     initializeContextMenuEvents();
 
     window.addEventListener("resize", debounce(() => {
@@ -2122,6 +2130,11 @@ function initializeContextMenuEvents() {
 function handleContextMenuAction(action) {
     const requirement = state.contextRequirement;
 
+    if (moveSelection?.handleContextAction(action, requirement)) {
+        closeContextMenu();
+        return;
+    }
+
     closeContextMenu();
 
     if (action === "edit-requirement") {
@@ -2161,6 +2174,7 @@ function openContextMenu(x, y, targetType, requirement) {
 
     state.contextTargetType = targetType;
     state.contextRequirement = requirement || null;
+    moveSelection?.prepareContextMenu(requirement);
 
     const isRequirement = targetType === "requirement";
     const isProject = targetType === "project";

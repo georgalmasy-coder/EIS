@@ -5,6 +5,7 @@ import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } 
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
+import { createEntityMoveSelection } from "../components/entity-move-selection.js";
 import { downloadLogicalStructureDiagramPdf } from "./logicalstructure-diagram-pdf.js";
 import { setText } from "../core/dom.js";
 import {
@@ -86,6 +87,8 @@ const state = {
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
     columnsMenuOpen: false
 };
+
+let moveSelection;
 
 document.addEventListener("DOMContentLoaded", () => {
     start();
@@ -262,6 +265,7 @@ function initializeEvents() {
         downloadCurrentDiagramPdf();
     });
 
+    moveSelection = createEntityMoveSelection({ menuId: "logicalStructureContextMenu", entityType: "lsys" });
     initializeContextMenuEvents();
 
     window.addEventListener("resize", debounce(() => {
@@ -2091,6 +2095,11 @@ function initializeContextMenuEvents() {
 function handleContextMenuAction(action) {
     const requirement = state.contextRequirement;
 
+    if (moveSelection?.handleContextAction(action, requirement)) {
+        closeContextMenu();
+        return;
+    }
+
     closeContextMenu();
 
     if (action === "edit-requirement") {
@@ -2130,6 +2139,7 @@ function openContextMenu(x, y, targetType, requirement) {
 
     state.contextTargetType = targetType;
     state.contextRequirement = requirement || null;
+    moveSelection?.prepareContextMenu(requirement);
 
     const isRequirement = targetType === "requirement";
     const isProject = targetType === "project";

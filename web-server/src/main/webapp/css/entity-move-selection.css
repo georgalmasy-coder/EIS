@@ -1,0 +1,46 @@
+.entity-move-selected { opacity: .62; }
+
+td.entity-move-checkmark-host { position: relative; }
+
+.entity-move-checkmark {
+    align-items: center;
+    background: #073f34;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    bottom: 5px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+    color: #fff;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 800;
+    height: 22px;
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+    right: 5px;
+    width: 22px;
+    z-index: 5;
+}
+
+tr.entity-move-selected .entity-move-checkmark { bottom: 50%; transform: translateY(50%); }
+
+.entity-move-dialog {
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, .28);
+    color: var(--app-text-primary, #16231d);
+    max-width: 520px;
+    padding: 0;
+    width: calc(100% - 32px);
+}
+
+.entity-move-dialog::backdrop { background: rgba(15, 23, 42, .48); }
+.entity-move-dialog form { padding: 24px; }
+.entity-move-dialog h3 { margin: 0 0 10px; }
+.entity-move-dialog p { color: var(--app-text-secondary, #5f6d67); margin: 0 0 20px; }
+.entity-move-dialog dl { display: grid; gap: 12px; grid-template-columns: 55px 1fr; margin: 0; }
+.entity-move-dialog dt { font-weight: 700; }
+.entity-move-dialog dd { margin: 0; overflow-wrap: anywhere; }
+.entity-move-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+.entity-move-dialog-actions button { border: 1px solid var(--app-border-strong, #c4d0c8); border-radius: 7px; cursor: pointer; padding: 9px 17px; }
+.entity-move-dialog-actions [data-move-confirm] { background: var(--app-accent-primary, #0b3f31); border-color: var(--app-accent-primary, #0b3f31); color: #fff; }

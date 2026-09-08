@@ -123,11 +123,11 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     protected EntityType resolveEntityType(HttpServletRequest request) {
         return switch (request.getServletPath()) {
-            case "/pro/psys/interfacematrix" -> EntityType.SYSTEMS_BREAKDOWN;
-            case "/pro/lsys/interfacematrix" -> EntityType.LOGICAL_STRUCTURE;
-            case "/pro/fsys/interfacematrix" -> EntityType.FUNCTIONAL_STRUCTURE;
-            case "/pro/stk/interfacematrix" -> EntityType.STAKEHOLDER_REQUIREMENT;
-            case "/pro/sys/interfacematrix" -> EntityType.SYSTEM_REQUIREMENT;
+            case "/master/psys/interfacematrix" -> EntityType.SYSTEMS_BREAKDOWN;
+            case "/master/lsys/interfacematrix" -> EntityType.LOGICAL_STRUCTURE;
+            case "/master/fsys/interfacematrix" -> EntityType.FUNCTIONAL_STRUCTURE;
+            case "/master/stk/interfacematrix" -> EntityType.STAKEHOLDER_REQUIREMENT;
+            case "/master/sys/interfacematrix" -> EntityType.SYSTEM_REQUIREMENT;
             default -> throw new IllegalArgumentException(
                     "No EntityType configured for interface matrix endpoint: " + request.getServletPath()
             );

@@ -16,7 +16,7 @@ import {
     serializeXml
 } from "../core/xml.js";
 
-const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/pro/psys/interfacematrix";
+const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/master/psys/interfacematrix";
 const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=overview`;
 const INTERFACE_SAVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=save`;
 const INTERFACE_REMOVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=remove`;

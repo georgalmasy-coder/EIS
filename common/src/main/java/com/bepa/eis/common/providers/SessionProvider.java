@@ -2,6 +2,7 @@ package com.bepa.eis.common.providers;
 
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.customer.Subscription;
 import java.sql.*;
 import java.util.Date;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class SessionProvider extends GenericProvider {
                 ProjectId,
                 U.UserId,
                 U.ThemeId,
+                COALESCE(CurrentSubscription.ModuleCode, LatestCustomerModule.ModuleCode) AS SubscriptionModuleCode,
                 S.Created,
                 LastAccessed,
                 IpAddress,
@@ -41,6 +43,21 @@ public class SessionProvider extends GenericProvider {
             FROM [dbo].[SESSION] S
             LEFT JOIN [dbo].[USERS] U
                 ON U.UserId = S.UserId
+            OUTER APPLY (
+                SELECT TOP (1) SP.ModuleCode
+                FROM [dbo].[CUSTOMER_SUBSCRIPTION] CS
+                INNER JOIN [dbo].[SUBSCRIPTION_PLAN] SP
+                    ON SP.SubscriptionPlanId = CS.SubscriptionPlanId
+                WHERE CS.CustomerId = S.CustomerId
+                ORDER BY CS.SubscriptionId DESC
+            ) CurrentSubscription
+            OUTER APPLY (
+                SELECT TOP (1) CM.ModuleCode
+                FROM [dbo].[CUSTOMER_MODULE] CM
+                WHERE CM.CustomerId = S.CustomerId
+                  AND CM.Latest = 1
+                ORDER BY CM.UpdatedAt DESC, CM.CustomerModuleId DESC
+            ) LatestCustomerModule
             WHERE S.SessionId = ?
             """;
 
@@ -280,6 +297,7 @@ public class SessionProvider extends GenericProvider {
         ws.setProjectId(getNullableInt(rs, "ProjectId"));
         ws.setUserId(rs.getInt("UserId"));
         ws.setThemeId(getNullableInt(rs, "ThemeId"));
+        ws.setSubscription(Subscription.fromModuleCode(rs.getString("SubscriptionModuleCode")));
         ws.setCreated(toDate(rs.getTimestamp("Created")));
         ws.setLastAccessed(toDate(rs.getTimestamp("LastAccessed")));
         ws.setIpAddress(rs.getString("IpAddress"));

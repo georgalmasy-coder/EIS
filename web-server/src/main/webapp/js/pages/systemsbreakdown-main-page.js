@@ -5,6 +5,7 @@ import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } 
 import { openEditDialog } from "../components/edit-dialog.js";
 import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
+import { createEntityMoveSelection } from "../components/entity-move-selection.js";
 import { downloadSystemsBreakdownDiagramPdf } from "./systemsbreakdown-diagram-pdf.js";
 import { setText } from "../core/dom.js";
 import {
@@ -85,6 +86,8 @@ const state = {
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
     columnsMenuOpen: false
 };
+
+let moveSelection;
 
 document.addEventListener("DOMContentLoaded", () => {
     start();
@@ -269,6 +272,7 @@ function initializeEvents() {
         downloadCurrentDiagramPdf();
     });
 
+    moveSelection = createEntityMoveSelection({ menuId: "systemsBreakdownContextMenu", entityType: "psys" });
     initializeContextMenuEvents();
 
     window.addEventListener("resize", debounce(() => {
@@ -2244,6 +2248,11 @@ function initializeContextMenuEvents() {
 function handleContextMenuAction(action) {
     const system = state.contextSystem;
 
+    if (moveSelection?.handleContextAction(action, system)) {
+        closeContextMenu();
+        return;
+    }
+
     closeContextMenu();
 
     if (action === "edit-system") {
@@ -2283,6 +2292,7 @@ function openContextMenu(x, y, targetType, system) {
 
     state.contextTargetType = targetType;
     state.contextSystem = system || null;
+    moveSelection?.prepareContextMenu(system);
 
     const isSystem = targetType === "system";
     const isProject = targetType === "project";

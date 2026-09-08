@@ -550,7 +550,7 @@ public class UserMainInfo extends GenericXmlDocument {
         @Override
         public List<LookupValue> getListOfActiveLookupValues() {
             return Arrays.stream(UserRoles.values())
-                    .filter(role -> role != UserRoles.INVASIVE_USER_ROLE)
+                    .filter(UserRoles::isActive)
                     .map(role -> new LookupValue(null, null, role.getId(), role.getLabel(), role.getDescription(), true))
                     .toList();
         }
