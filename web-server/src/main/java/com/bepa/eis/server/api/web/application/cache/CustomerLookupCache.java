@@ -147,11 +147,11 @@ public class CustomerLookupCache {
 
     public static UserRoles getUserRole(WebSession webSession) {
         if (webSession == null) {
-            return UserRoles.INVASIVE_USER_ROLE;
+            return UserRoles.INVALID_USER_ROLE;
         }
         User user = getLookupCache(webSession).getUser(webSession.getUserId());
         if (user == null) {
-            return UserRoles.INVASIVE_USER_ROLE;
+            return UserRoles.INVALID_USER_ROLE;
         }
         return user.getUserRole();
     }
@@ -217,7 +217,7 @@ public class CustomerLookupCache {
         List<LookupValue> roles = new ArrayList<>();
 
         for (UserRoles role : UserRoles.values()) {
-            if (isSystemAdmin || role.isExternalUserRole()) {
+            if (role.isActive() && (isSystemAdmin || role.isExternalUserRole())) {
                 roles.add(new LookupValue(null, null, role.getId(), role.getLabel(), role.getDescription(), true));
             }
         }

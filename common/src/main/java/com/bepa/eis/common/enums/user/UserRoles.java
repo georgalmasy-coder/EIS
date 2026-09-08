@@ -34,7 +34,7 @@ public enum UserRoles {
             false
     ),
 
-    INVASIVE_USER_ROLE(
+    INVALID_USER_ROLE(
             -1,
             "Invalid User Role",
             "No access to the system.",
@@ -106,7 +106,7 @@ public enum UserRoles {
             return status;
         }
 
-        return defaultStatus == null ? INVASIVE_USER_ROLE : defaultStatus;
+        return defaultStatus == null ? INVALID_USER_ROLE : defaultStatus;
     }
 
     public static UserRoles fromCode(String code) {
@@ -135,6 +135,6 @@ public enum UserRoles {
             return status;
         }
 
-        return defaultStatus == null ? INVASIVE_USER_ROLE : defaultStatus;
+        return defaultStatus == null ? INVALID_USER_ROLE : defaultStatus;
     }
 }

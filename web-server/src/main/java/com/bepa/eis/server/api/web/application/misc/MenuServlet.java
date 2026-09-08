@@ -390,7 +390,7 @@ public class MenuServlet extends GenericServlet {
         xml.append("<lookup name=\"userRoles\">");
 
         for (UserRoles role : UserRoles.values()) {
-            if (role == UserRoles.INVASIVE_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
+            if (role == UserRoles.INVALID_USER_ROLE || !role.isExternalUserRole() || !role.isActive()) {
                 continue;
             }
 

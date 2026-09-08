@@ -1,5 +1,7 @@
 package com.bepa.eis.common.dto;
 
+import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.enums.customer.Subscription;
 import java.util.Date;
 
 public class WebSession {
@@ -10,6 +12,7 @@ public class WebSession {
     private Integer projectId;
     private Integer userId;
     private Integer themeId;
+    private Subscription subscription;
     private Date created;
     private Date lastAccessed;
 
@@ -51,6 +54,10 @@ public class WebSession {
 
     public void setThemeId(Integer themeId) {
         this.themeId = themeId;
+    }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 
     public void setCreated(Date created) {
@@ -131,6 +138,15 @@ public class WebSession {
 
     public Integer getThemeId() {
         return themeId;
+    }
+
+    public Subscription getSubscription() {
+        if (GlobalConfiguration.isUdvMode()) {
+            return Subscription.MASTER;
+        }
+        return subscription;
+
+//        return Subscription.BASIS;
     }
 
     public Date getCreated() {
