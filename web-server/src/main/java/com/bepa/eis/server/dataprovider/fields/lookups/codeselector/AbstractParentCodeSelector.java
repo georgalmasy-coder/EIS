@@ -106,12 +106,11 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
 
         if (codeValueParentEntity == null) {
             parentCode = "";
-            functionCode = "";
+            functionCode = getEntityType().getIdPrefix();
             nextCodeLevel = 1;
-
         } else {
             parentCode = stripFunction(codeValueParentEntity);
-            functionCode = firstCharIsDigit(codeValueParentEntity) ? "" : codeValueParentEntity.substring(0, 1);
+            functionCode = getPrefixFromCode(codeValueParentEntity);
             nextCodeLevel = getCodeLevel(parentCode) + 1;
         }
 
@@ -120,13 +119,13 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
             int currCodeLevel = getCodeLevel(currCode);
 
             if (nextCodeLevel == currCodeLevel && currCode.startsWith(parentCode)) {
-                //log.debug("Fund codeValueParentEntity: {} {}",parentCode, currCode);
+                //log.debug("Found codeValueParentEntity: {} {}",parentCode, currCode);
                 nextAvailableCodeIndex++;
             }
 
         }
 
-        String newCodeValue = parentCode.isEmpty() ? "" + nextAvailableCodeIndex : functionCode + parentCode + "." + nextAvailableCodeIndex;
+        String newCodeValue = parentCode.isEmpty() ? functionCode + nextAvailableCodeIndex : functionCode + parentCode + "." + nextAvailableCodeIndex;
         log.debug("Next Code : {} for {}", newCodeValue, getEntityType().getDescription());
 
         return newCodeValue;
@@ -191,15 +190,6 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
         return null;
     }
 
-    private List<ParentLookupIdValue> sortListOfParentEntries() {
-        List<ParentLookupIdValue> sortedEntities = new ArrayList<>(entities.values());
-        sortedEntities.sort(Comparator.comparing(
-                ParentLookupIdValue::getCodeValue,
-                Comparator.nullsLast(String::compareToIgnoreCase)
-        ));
-        return sortedEntities;
-    }
-
     private static class ParentLookupIdValue {
         private final Integer entityId;
         private String codeValue;
@@ -218,7 +208,7 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
             this.codeValue = codeValue;
 
             if (codeValue != null) {
-                String codeWithoutFunction = firstCharIsDigit(codeValue) ? codeValue : codeValue.substring(1);
+                String codeWithoutFunction = getCodeWithoutPrefix(codeValue);
                 String[] elementArray = codeWithoutFunction.split("\\.");
                 sortableValue = 0;
                 long factor = 1000;
@@ -242,44 +232,38 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
             this.systemName = systemName;
         }
 
-        private String getSystemName() {
-            return systemName;
-        }
-    }
-
-    private static boolean firstCharIsDigit(String code) {
-        if (code == null) {
-            return false;
-        }
-
-        return !code.isEmpty() && Character.isDigit(code.charAt(0));
-    }
-
-    public String fetchTextValueFromXml(Element parent, String tagName) {
-        Element el = firstChild(parent, tagName);
-        String text;
-        if (el == null || el.getTextContent() == null) {
-            text =  "";
-        } else {
-            text = el.getTextContent().trim();
-        }
-        String[] lines = text.split("\n");
-        text = lines[0];
-        return text;
-    }
-
-    private Element firstChild(Element parent, String tagName) {
-        if (parent == null) return null;
-        for (int i = 0; i < parent.getChildNodes().getLength(); i++) {
-            if (parent.getChildNodes().item(i) instanceof Element el && tagName.equals(el.getTagName())) {
-                return el;
-            }
-        }
-        return null;
     }
 
     private String stripFunction(String codeValue) {
         if (codeValue == null) return "";
-        return firstCharIsDigit(codeValue) ? codeValue : codeValue.substring(1);
+        return getCodeWithoutPrefix(codeValue);
+    }
+
+    private static String getCodeWithoutPrefix(String codeValue) {
+        String codeWithoutPrefix = "";
+        if (codeValue != null) {
+            for (int pos = 0; pos < codeValue.length(); pos++) {
+                if (!codeValue.isEmpty() && Character.isDigit(codeValue.charAt(pos))) {
+                    codeWithoutPrefix = codeValue.substring(pos);
+                    break;
+                }
+            }
+
+        }
+        return codeWithoutPrefix;
+    }
+
+    private static String getPrefixFromCode(String codeValue) {
+        String prefix = "";
+        if (codeValue != null) {
+            for (int pos = 0; pos < codeValue.length(); pos++) {
+                if (!codeValue.isEmpty() && Character.isDigit(codeValue.charAt(pos))) {
+                    prefix = codeValue.substring(0, pos);
+                    break;
+                }
+            }
+
+        }
+        return prefix;
     }
 }

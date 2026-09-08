@@ -314,7 +314,7 @@ function initializeEvents() {
 
     moveSelection = createEntityMoveSelection({
         menuId: "systemRequirementContextMenu",
-        entityType: "sys",
+        entityType: "sys-req",
         scopeRoot: "#systemSection"
     });
     initializeContextMenuEvents();

@@ -1,6 +1,6 @@
-# Physical Structure Edit
+# Physical Architecture Edit
 
-This page is used to create, edit, and review a Physical Structure item.
+This page is used to create, edit, and review a Physical Architecture item.
 
 ## Modes
 

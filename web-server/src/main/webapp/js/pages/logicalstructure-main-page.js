@@ -277,9 +277,9 @@ function initializeImportExportDialogs() {
     const exportDialog = createExportDialog({
         dialogId: "exportDialog",
         openButtonId: "btnExport",
-        entityName: "Logical Structure",
+        entityName: "Logical Architecture",
         exportUrl: "/pro/logicalstructure?cmd=export",
-        baseFileName: () => buildExportBaseFileName("Logical Structure", state.topPanel?.projectName)
+        baseFileName: () => buildExportBaseFileName("Logical Architecture", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -2104,7 +2104,7 @@ function handleContextMenuAction(action) {
 
     if (action === "edit-requirement") {
         if (!requirement) {
-            window.alert("No Logical Structure selected.");
+            window.alert("No Logical Architecture selected.");
             return;
         }
 
@@ -2114,7 +2114,7 @@ function handleContextMenuAction(action) {
 
     if (action === "create-sub-requirement") {
         if (!requirement) {
-            window.alert("No Logical Structure selected.");
+            window.alert("No Logical Architecture selected.");
             return;
         }
 
@@ -2208,7 +2208,7 @@ function openEditRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("Logical Structure has no entity id.");
+        window.alert("Logical Architecture has no entity id.");
         return;
     }
 
@@ -2216,7 +2216,7 @@ function openEditRequirement(requirement) {
         page: "logicalstructure-edit",
         mode: "edit",
         id,
-        title: "Edit Logical Structure",
+        title: "Edit Logical Architecture",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2231,7 +2231,7 @@ function openCreateSubRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("Logical Structure has no entity id.");
+        window.alert("Logical Architecture has no entity id.");
         return;
     }
 
@@ -2239,7 +2239,7 @@ function openCreateSubRequirement(requirement) {
         page: "logicalstructure-edit",
         mode: "create-child",
         id,
-        title: "Create Sub Logical Structure",
+        title: "Create Sub Logical Architecture",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2254,7 +2254,7 @@ function openCreateRootRequirement() {
     openEditDialog({
         page: "logicalstructure-edit",
         mode: "create-root",
-        title: "Create Root Logical Structure",
+        title: "Create Root Logical Architecture",
         onSaved: (payload) => {
             if (payload?.id) {
                 sessionStorage.setItem("basis.logicalstructure.scrollToId", payload.id);

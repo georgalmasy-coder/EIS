@@ -34,12 +34,12 @@ public class LsysInterfaceMatrixServlet extends InterfaceMatrixServlet {
         } catch (Exception e) {
             try {
 
-                logIncidentError("L-SYS-InterfaceMatrixServlet", e);
+                logIncidentError("L-ELM-InterfaceMatrixServlet", e);
             } catch (Throwable throwable) {
                 // Ignore error
             }
 
-            log.error("Error getting l-sys interface management matrix document: {}", e.getMessage(), e);
+            log.error("Error getting l-elm interface management matrix document: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
 

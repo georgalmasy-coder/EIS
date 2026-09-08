@@ -35,17 +35,17 @@ public final class FunctionalStructureExporters extends GenericExporters {
 
     @Override
     public String getFileName() {
-        return "FunctionalStructure";
+        return "FunctionalArchitecture";
     }
 
     @Override
     public String getWorksheetName() {
-        return "Functional Structure";
+        return "Functional Architecture";
     }
 
     @Override
     public String getXmlRootNodeName() {
-        return "functionalStructureExport";
+        return "functionalArchitectureExport";
     }
 
     @Override
@@ -55,7 +55,7 @@ public final class FunctionalStructureExporters extends GenericExporters {
 
     @Override
     public String getPdfTitle() {
-        return "Functional Structure Export";
+        return "Functional Architecture Export";
     }
 
     @Override

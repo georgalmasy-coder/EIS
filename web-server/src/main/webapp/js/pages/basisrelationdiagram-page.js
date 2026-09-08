@@ -18,24 +18,24 @@ const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";
 const ENTITY_TYPE_LABELS = {
     stakeholder: "Stakeholder Requirement",
     system: "Systems Requirement",
-    systemsBreakdown: "Physical Structure"
+    systemsBreakdown: "Physical Architecture"
 };
 
 const RELATED_GROUPS = {
     stakeholder: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
-        { type: "systemsBreakdown", label: "Related physical structures" }
+        { type: "systemsBreakdown", label: "Related physical architecture" }
     ],
     system: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
-        { type: "systemsBreakdown", label: "Related physical structures" }
+        { type: "systemsBreakdown", label: "Related physical architectures" }
     ],
     systemsBreakdown: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
-        { type: "systemsBreakdown", label: "Related physical structures" }
+        { type: "systemsBreakdown", label: "Related physical architectures" }
     ]
 };
 
@@ -1096,7 +1096,7 @@ function openRequirementDialog(requirement) {
         requirement.type === "stakeholder"
             ? "Stakeholder Requirement"
             : requirement.type === "systemsBreakdown"
-                ? "Physical Structure"
+                ? "Physical Architecture"
                 : "Systems Requirement",
         ""
     );
@@ -1167,7 +1167,7 @@ function getRequirementEditConfig(requirement) {
 
     if (requirement.type === "systemsBreakdown") {
         return {
-            label: "Physical Structure",
+            label: "Physical Architecture",
             page: "systemsbreakdown-edit"
         };
     }

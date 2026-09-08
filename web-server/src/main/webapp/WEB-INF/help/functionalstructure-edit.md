@@ -1,12 +1,12 @@
-﻿# Functional Structure Edit
+﻿# Functional Architecture Edit
 
-This page is used to create, edit, or view a functional structure.
+This page is used to create, edit, or view a functional architecture.
 
-The page is organized into tabs containing functional structure information and related data.
+The page is organized into tabs containing functional architecture information and related data.
 
 ## Basis Info
 
-The **Basis Info** tab contains the main fields for the functional structure.
+The **Basis Info** tab contains the main fields for the functional architecture.
 
 Here you can typically edit:
 
@@ -22,7 +22,7 @@ Fields marked with `*` are required.
 
 ## History
 
-The **History** tab shows historical versions of the functional structure.
+The **History** tab shows historical versions of the functional architecture.
 
 You can double-click a historical version to open it.
 
@@ -44,7 +44,7 @@ Use **Cancel** to go back.
 
 ## Attachments
 
-The **Attachments** tab shows files attached to the functional structure.
+The **Attachments** tab shows files attached to the functional architecture.
 
 You can:
 
@@ -56,7 +56,7 @@ A description is required when uploading an attachment.
 
 ## Notes
 
-The **Notes** tab shows notes for the functional structure.
+The **Notes** tab shows notes for the functional architecture.
 
 You can:
 

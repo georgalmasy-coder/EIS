@@ -32,12 +32,12 @@ public class PsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
 
     @Override
     public String getColumnGroupLabel() {
-        return "To Physical Structure";
+        return "To Physical Architecture";
     }
 
     @Override
     public String getRowGroupLabel() {
-        return "From Physical Structure";
+        return "From Physical Architecture";
     }
 
 

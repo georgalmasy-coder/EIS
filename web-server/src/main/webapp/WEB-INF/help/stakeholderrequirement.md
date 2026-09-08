@@ -72,7 +72,7 @@ The edit dialog contains the following tabs:
 - **Attachments**
 - **Notes**
 - **Links**
-- **Linked To ...**
+- **Relations**
 
 ## Basis Info
 
@@ -135,9 +135,9 @@ The **Links** tab is reserved for links related to the stakeholder requirement.
 
 If the tab shows **Under Construction**, the functionality is not yet available.
 
-## Linked To ...
+## Relations
 
-The **Linked To ...** tab shows relations from the stakeholder requirement to other entities.
+The **Relations** tab shows relations from the stakeholder requirement to other entities.
 
 This can help show how a stakeholder requirement is connected to other parts of the project, such as system requirements.
 

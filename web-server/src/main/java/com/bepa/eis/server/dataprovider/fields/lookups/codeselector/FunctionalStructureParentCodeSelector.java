@@ -18,12 +18,12 @@ public class FunctionalStructureParentCodeSelector extends AbstractParentCodeSel
 
     @Override
     public String getFieldLabelName() {
-        return "Parent Functional Structure ID";
+        return "Parent Functional Architecture ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Parent Functional Structure ID";
+        return "Parent Functional Architecture ID";
     }
 
     @Override
@@ -33,6 +33,6 @@ public class FunctionalStructureParentCodeSelector extends AbstractParentCodeSel
 
     @Override
     public String getDropdownSelectText() {
-        return "Select Functional Structure ...";
+        return "Select Functional Architecture ...";
     }
 }

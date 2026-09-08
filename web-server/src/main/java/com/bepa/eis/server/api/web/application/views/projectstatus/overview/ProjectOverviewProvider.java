@@ -343,12 +343,12 @@ public class ProjectOverviewProvider extends GenericProvider {
 
         @Override
         public String getFieldLabelName() {
-            return "Count Logical Structure";
+            return "Count Logical Architecture";
         }
 
         @Override
         public String getFieldHeaderName() {
-            return "Count Logical Structure";
+            return "Count Logical Architecture";
         }
     }
 
@@ -379,12 +379,12 @@ public class ProjectOverviewProvider extends GenericProvider {
 
         @Override
         public String getFieldLabelName() {
-            return "Count Physical Structure";
+            return "Count Physical Architecture";
         }
 
         @Override
         public String getFieldHeaderName() {
-            return "Count Physical Structure";
+            return "Count Physical Architecture";
         }
     }
 }

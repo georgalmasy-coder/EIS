@@ -34,12 +34,12 @@ public class FsysInterfaceMatrixServlet extends InterfaceMatrixServlet {
         } catch (Exception e) {
             try {
 
-                logIncidentError("F-SYS-InterfaceMatrixServlet", e);
+                logIncidentError("F-ELM-InterfaceMatrixServlet", e);
             } catch (Throwable throwable) {
                 // Ignore error
             }
 
-            log.error("Error getting f-sys interface management matrix document: {}", e.getMessage(), e);
+            log.error("Error getting f-elm interface management matrix document: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
 

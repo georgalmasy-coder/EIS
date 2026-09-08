@@ -35,17 +35,17 @@ public final class LogicalStructureExporters extends GenericExporters {
 
     @Override
     public String getFileName() {
-        return "LogicalStructure";
+        return "LogicalArchitecture";
     }
 
     @Override
     public String getWorksheetName() {
-        return "Logical Structure";
+        return "Logical Architecture";
     }
 
     @Override
     public String getXmlRootNodeName() {
-        return "logicalStructureExport";
+        return "logicalArchitectureExport";
     }
 
     @Override
@@ -55,7 +55,7 @@ public final class LogicalStructureExporters extends GenericExporters {
 
     @Override
     public String getPdfTitle() {
-        return "Logical Structure Export";
+        return "Logical Architecture Export";
     }
 
     @Override

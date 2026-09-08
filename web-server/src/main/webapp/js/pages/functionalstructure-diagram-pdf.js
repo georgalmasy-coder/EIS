@@ -708,7 +708,7 @@ function drawPdfHeader(commands, options) {
 
     drawPdfText(
         commands,
-        `Functional Structure ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
+        `Functional Architecture ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
         margin,
         pageHeight - margin - 10,
         12,

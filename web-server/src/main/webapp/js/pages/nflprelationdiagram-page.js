@@ -29,15 +29,15 @@ const ENTITY_TYPES = {
         page: "systemrequirement-edit"
     },
     functional: {
-        label: "Functional Structure",
+        label: "Functional Architecture",
         page: "functionalstructure-edit"
     },
     logical: {
-        label: "Logical Structure",
+        label: "Logical Architecture",
         page: "logicalstructure-edit"
     },
     physical: {
-        label: "Physical Structure",
+        label: "Physical Architecture",
         page: "systemsbreakdown-edit"
     }
 };

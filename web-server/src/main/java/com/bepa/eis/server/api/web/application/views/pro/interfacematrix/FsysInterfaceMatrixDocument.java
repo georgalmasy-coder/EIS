@@ -34,12 +34,12 @@ public class FsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
 
     @Override
     public String getColumnGroupLabel() {
-        return "To Function";
+        return "To Functional Architecture";
     }
 
     @Override
     public String getRowGroupLabel() {
-        return "From Function";
+        return "From Functional Architecture";
     }
 
 

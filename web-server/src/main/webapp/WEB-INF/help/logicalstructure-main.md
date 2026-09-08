@@ -1,4 +1,4 @@
-# Logical Structure
+# Logical Architecture
 
 This page is used to get an overview of the project’s logical structures.
 
@@ -64,27 +64,27 @@ When you are in a diagram view, you can download the diagram as a PDF.
 
 The PDF shows the logical structure diagram for the current view and the current filters.
 
-## Create Logical Structure
+## Create Logical Architecture
 
-Use the plus button to create a new root logical structure.
+Use the plus button to create a new root logical architecture.
 
-You can also create a sub logical structure from the context menu on an existing logical structure.
+You can also create a sub logical architecture from the context menu on an existing logical architecture.
 
 ## Context Menu
 
-Right-click a logical structure to open the context menu.
+Right-click a logical architecture to open the context menu.
 
 From the context menu, you can:
 
-- edit the logical structure
-- create a sub logical structure
+- edit the logical architecture
+- create a sub logical architecture
 
-Right-click the project node in the diagram to create a root logical structure.
+Right-click the project node in the diagram to create a root logical architecture.
 
 ## Import and Export
 
-Import is used to load logical structures from a file.
+Import is used to load logical architectures from a file.
 
-Export is used to export logical structures to a file.
+Export is used to export logical architectures to a file.
 
-During export, you can choose the format and whether inactive logical structures should be included.
+During export, you can choose the format and whether inactive logical architectures should be included.

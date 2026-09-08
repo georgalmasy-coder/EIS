@@ -89,7 +89,7 @@ public class SystemBreakdownServlet extends GenericDataProviderServlet {
 
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse system breakdown XML", e);
+            throw new RuntimeException("Failed to parse p-sys XML", e);
         }
 
     }

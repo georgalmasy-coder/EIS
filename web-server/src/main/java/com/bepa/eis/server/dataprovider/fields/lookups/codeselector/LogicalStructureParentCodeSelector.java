@@ -18,12 +18,12 @@ public class LogicalStructureParentCodeSelector extends AbstractParentCodeSelect
 
     @Override
     public String getFieldLabelName() {
-        return "Parent Logical Structure ID";
+        return "Parent Logical Architecture ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Parent Logical Structure ID";
+        return "Parent Logical Architecture ID";
     }
 
     @Override
@@ -33,6 +33,6 @@ public class LogicalStructureParentCodeSelector extends AbstractParentCodeSelect
 
     @Override
     public String getDropdownSelectText() {
-        return "Select Logical Structure ...";
+        return "Select Logical Architecture ...";
     }
 }

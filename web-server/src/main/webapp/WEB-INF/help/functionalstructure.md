@@ -1,4 +1,4 @@
-﻿# Functional Structure
+﻿# Functional Architecture
 
 This page is used to view, create, edit, import and export functional structures for the selected project.
 
@@ -6,7 +6,7 @@ Functional structures describe needs, expectations, constraints or requests from
 
 ## What does this page show?
 
-The page shows a table of functional structures.
+The page shows a table of functional architectures.
 
 At the top of the page, you can see:
 
@@ -15,7 +15,7 @@ At the top of the page, you can see:
 - user name
 - data loading status
 
-The main table contains the functional structures available for the selected project.
+The main table contains the functional architectures available for the selected project.
 
 ![System Connections](/images/help/SystemConnections.jpg)
 
@@ -26,11 +26,11 @@ The page contains the following main actions:
 - **Import**
 - **Export**
 - **Help**
-- **Add Functional Structure**
+- **Add Functional architecture**
 
 ## Import
 
-Use **Import** to import functional structures from a file.
+Use **Import** to import functional architectures from a file.
 
 The import file may be one of the supported formats shown in the import dialog.
 
@@ -44,7 +44,7 @@ After selecting a file, the import dialog can be used to start the import.
 
 ## Export
 
-Use **Export** to export functional structures from the current project.
+Use **Export** to export functional architectures from the current project.
 
 The export dialog allows you to choose the export format.
 
@@ -55,13 +55,13 @@ Available export formats may include:
 - PDF
 - XML
 
-The export dialog may also include options such as whether inactive functional structures should be included.
+The export dialog may also include options such as whether inactive functional architectures should be included.
 
-## Add Functional Structure
+## Add Functional architecture
 
-Use **Add Functional Structure** to create a new functional structure.
+Use **Add Functional architecture** to create a new functional architecture.
 
-When adding or editing a functional structure, a dialog is opened with several tabs.
+When adding or editing a functional architecture, a dialog is opened with several tabs.
 
 ## Edit dialog
 
@@ -72,11 +72,11 @@ The edit dialog contains the following tabs:
 - **Attachments**
 - **Notes**
 - **Links**
-- **Linked To ...**
+- **Relations**
 
 ## Basis Info
 
-The **Basis Info** tab contains the main information about the functional structure.
+The **Basis Info** tab contains the main information about the functional architecture.
 
 Depending on the project configuration, the fields may include information such as:
 
@@ -95,7 +95,7 @@ Required fields may be marked with an asterisk.
 
 ## History
 
-The **History** tab shows previous changes to the functional structure.
+The **History** tab shows previous changes to the functional architecture.
 
 The history table may include:
 
@@ -103,11 +103,11 @@ The history table may include:
 - changed by
 - version
 
-This can be used to understand when the functional structure was updated and by whom.
+This can be used to understand when the functional architecture was updated and by whom.
 
 ## Attachments
 
-The **Attachments** tab shows files attached to the functional structure.
+The **Attachments** tab shows files attached to the functional architecture.
 
 Use **Add Attachment** to add a new file.
 
@@ -123,7 +123,7 @@ Attachments can be useful for supporting documentation such as:
 
 ## Notes
 
-The **Notes** tab shows notes related to the functional structure.
+The **Notes** tab shows notes related to the functional architecture.
 
 Use **Add Note** to create a new note.
 
@@ -131,15 +131,15 @@ Notes can be used for comments, clarification, review input or internal observat
 
 ## Links
 
-The **Links** tab is reserved for links related to the functional structure.
+The **Links** tab is reserved for links related to the functional architecture.
 
 If the tab shows **Under Construction**, the functionality is not yet available.
 
-## Linked To ...
+## Relations
 
-The **Linked To ...** tab shows relations from the functional structure to other entities.
+The **Relations** tab shows relations from the functional architecture to other entities.
 
-This can help show how a functional structure is connected to other parts of the project, such as system requirements.
+This can help show how a functional architecture is connected to other parts of the project, such as system requirements.
 
 ## Saving changes
 
@@ -149,10 +149,10 @@ Use **Cancel** to close the dialog without saving.
 
 ## If data is not shown
 
-If no functional structures are shown, it may be because:
+If no functional architectures are shown, it may be because:
 
 - data is still loading
-- no functional structures exist for the selected project
+- no functional architectures exist for the selected project
 - there was an error while loading data
 - the current user does not have access to the expected data
 
@@ -164,7 +164,7 @@ Check the **Data** field at the top of the page to see whether data has been loa
 - Write descriptions so they can be understood by both technical and non-technical stakeholders.
 - Add notes when clarification is needed.
 - Use attachments for supporting documentation.
-- Use relations to connect functional structures to relevant system requirements.
-- Export the list when functional structures need to be reviewed outside the system.
+- Use relations to connect functional architectures to relevant system requirements.
+- Export the list when functional architectures need to be reviewed outside the system.
 
 

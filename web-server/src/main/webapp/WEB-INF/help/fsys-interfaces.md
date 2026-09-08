@@ -2,8 +2,8 @@
 
 The Interface Management matrix shows interfaces between **Functions**.
 
-- Rows represent the **From Function**.
-- Columns represent the **To Function**.
+- Rows represent the **From Functional Architecture**.
+- Columns represent the **To Functional Architecture**.
 - Grey diagonal cells represent the same function and cannot contain an interface.
 
 ## Filtering the Matrix

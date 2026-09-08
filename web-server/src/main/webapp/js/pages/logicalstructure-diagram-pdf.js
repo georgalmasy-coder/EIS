@@ -708,7 +708,7 @@ function drawPdfHeader(commands, options) {
 
     drawPdfText(
         commands,
-        `Logical Structure ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
+        `Logical Architecture ${orientationLabel} Diagram - ${topPanel.projectName || "Project"}`,
         margin,
         pageHeight - margin - 10,
         12,
@@ -718,7 +718,7 @@ function drawPdfHeader(commands, options) {
 
     drawPdfText(
         commands,
-        `${topPanel.customerName || "Customer"} · Logical structures: ${requirementCount}`,
+        `${topPanel.customerName || "Customer"} · Logical architectures: ${requirementCount}`,
         margin,
         pageHeight - margin - 26,
         8,

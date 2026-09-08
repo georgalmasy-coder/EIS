@@ -32,12 +32,12 @@ public class LsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
 
     @Override
     public String getColumnGroupLabel() {
-        return "To Logical Design";
+        return "To Logical Architecture";
     }
 
     @Override
     public String getRowGroupLabel() {
-        return "From Logical Design";
+        return "From Logical Architecture";
     }
 
 

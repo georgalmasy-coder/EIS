@@ -20,7 +20,7 @@ const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/master/
 const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=overview`;
 const INTERFACE_SAVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=save`;
 const INTERFACE_REMOVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=remove`;
-const INTERFACE_STRUCTURE_LABEL = document.body.dataset.interfaceStructureLabel || "Physical Structure";
+const INTERFACE_STRUCTURE_LABEL = document.body.dataset.interfaceStructureLabel || "Physical Architecture";
 const INTERFACE_EDIT_PAGE = document.body.dataset.interfaceEditPage || "systemsbreakdown-edit";
 const FALLBACK_DATE = "";
 
@@ -116,8 +116,8 @@ function parseInterfaceMatrixDocument(xmlDocument) {
 
     return {
         title: getChildText(metaElement, "title", "Interface Management"),
-        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "To Physical Structure"),
-        rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "From Physical Structure"),
+        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "To Physical Architecture"),
+        rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "From Physical Architecture"),
         generatedAt: getChildText(metaElement, "generatedAt", ""),
         structures: parsePhysicalStructures(matrixElement, lookup),
         cellsByKey: parseCells(matrixElement, lookup),
@@ -233,7 +233,7 @@ function renderInterfaceMatrix(matrix) {
             : String(matrix.structures.length),
         ""
     );
-    setText("interfacesColumnGroupLabel", matrix.columnGroupLabel || "To Physical Structure", "");
+    setText("interfacesColumnGroupLabel", matrix.columnGroupLabel || "To Physical Architecture", "");
 
     const filterToggle = document.getElementById("interfacesOverdueOnlyToggle");
     if (filterToggle) {
@@ -324,7 +324,7 @@ function renderBody(tableBody, matrix) {
             axisLabel.className = "interfaces-axis-label";
 
             const axisText = document.createElement("span");
-            axisText.textContent = matrix.rowGroupLabel || "From Physical Structure";
+            axisText.textContent = matrix.rowGroupLabel || "From Physical Architecture";
 
             axisLabel.appendChild(axisText);
             axisCell.appendChild(axisLabel);

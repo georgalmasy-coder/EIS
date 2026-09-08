@@ -493,7 +493,6 @@
 .menu-main-link.is-active,
 .menu-sub a.is-active{
     position: relative;
-    padding-left: 18px;
 }
 
 .menu-main-link.is-active{

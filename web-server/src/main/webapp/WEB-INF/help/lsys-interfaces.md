@@ -1,10 +1,10 @@
 # Interface Management Help
 
-The Interface Management matrix shows interfaces between **Logical Designs**.
+The Interface Management matrix shows interfaces between **Logical Structures**.
 
-- Rows represent the **From Logical Design**.
-- Columns represent the **To Logical Design**.
-- Grey diagonal cells represent the same logical design and cannot contain an interface.
+- Rows represent the **From Logical Architecture**.
+- Columns represent the **To Logical Architecture**.
+- Grey diagonal cells represent the same logical structure and cannot contain an interface.
 
 ## Filtering the Matrix
 
@@ -29,7 +29,7 @@ Double-click a matrix cell to open its interface dialog. You can also right-clic
 - **Create Interface** when the cell does not contain an interface.
 - **Edit Interface** when an interface already exists.
 
-The dialog shows information about the From and To Logical Designs. Select an IRL, an optional next IRL meeting date, and zero or more classifications.
+The dialog shows information about the From and To Logical Structures. Select an IRL, an optional next IRL meeting date, and zero or more classifications.
 
 Classifications are sorted by code and divided into collapsed groups. Select a group to expand it and display its classifications. The group heading shows the codes currently selected in that group, for example `B_ Signals (B_, BA)`.
 
@@ -44,7 +44,7 @@ Right-click a cell containing an interface and select **Remove Interface**. Revi
 
 The remove option is unavailable for empty cells.
 
-## Editing a Logical Design
+## Editing a Logical Architecture
 
-Double-click a row or column header to open the corresponding Logical Design edit page.
+Double-click a row or column header to open the corresponding Logical Architecture edit page.
 

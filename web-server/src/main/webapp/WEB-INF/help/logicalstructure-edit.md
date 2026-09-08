@@ -1,12 +1,12 @@
-# Logical Structure Edit
+# Logical Architecture Edit
 
-This page is used to create, edit, or view a logical structure.
+This page is used to create, edit, or view a logical architecture.
 
-The page is organized into tabs containing logical structure information and related data.
+The page is organized into tabs containing logical architecture information and related data.
 
 ## Basis Info
 
-The **Basis Info** tab contains the main fields for the logical structure.
+The **Basis Info** tab contains the main fields for the logical architecture.
 
 Here you can typically edit:
 
@@ -22,7 +22,7 @@ Fields marked with `*` are required.
 
 ## History
 
-The **History** tab shows historical versions of the logical structure.
+The **History** tab shows historical versions of the logical architecture.
 
 You can double-click a historical version to open it.
 
@@ -44,7 +44,7 @@ Use **Cancel** to go back.
 
 ## Attachments
 
-The **Attachments** tab shows files attached to the logical structure.
+The **Attachments** tab shows files attached to the logical architecture.
 
 You can:
 
@@ -56,7 +56,7 @@ A description is required when uploading an attachment.
 
 ## Notes
 
-The **Notes** tab shows notes for the logical structure.
+The **Notes** tab shows notes for the logical architecture.
 
 You can:
 

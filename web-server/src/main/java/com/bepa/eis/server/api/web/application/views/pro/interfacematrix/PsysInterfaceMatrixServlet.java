@@ -34,12 +34,12 @@ public class PsysInterfaceMatrixServlet extends InterfaceMatrixServlet {
             return new PsysInterfaceMatrixDocument(webSession, entityType);
         } catch (Exception e) {
             try {
-                logIncidentError("P-SYS-InterfaceMatrixServlet", e);
+                logIncidentError("P-ARC-InterfaceMatrixServlet", e);
             } catch (Throwable throwable) {
                 // Ignore error
             }
 
-            log.error("Error getting p-sys interface management matrix document: {}", e.getMessage(), e);
+            log.error("Error getting p-arc interface management matrix document: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
 

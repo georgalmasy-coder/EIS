@@ -284,9 +284,9 @@ function initializeImportExportDialogs() {
     const exportDialog = createExportDialog({
         dialogId: "exportDialog",
         openButtonId: "btnExport",
-        entityName: "Physical Structure",
+        entityName: "Physical Architecture",
         exportUrl: "/project/systembreakdown",
-        baseFileName: () => buildExportBaseFileName("Physical Structure", state.topPanel?.projectName)
+        baseFileName: () => buildExportBaseFileName("Physical Architecture", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({

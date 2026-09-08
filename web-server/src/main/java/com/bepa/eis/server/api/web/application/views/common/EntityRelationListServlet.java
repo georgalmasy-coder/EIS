@@ -103,8 +103,8 @@ public class EntityRelationListServlet extends GenericServlet {
     private static final String LABEL_STAKEHOLDER_REQUIREMENT = "Stakeholder requirements";
     private static final String LABEL_SYSTEM_REQUIREMENT = "System requirement";
     private static final String LABEL_FUNCTIONAL_STRUCTURE = "Functions";
-    private static final String LABEL_LOGICAL_STRUCTURE = "Logical Design";
-    private static final String LABEL_SYSTEMS_BREAKDOWN = "Physical Structure";
+    private static final String LABEL_LOGICAL_STRUCTURE = "Logical Architecture";
+    private static final String LABEL_SYSTEMS_BREAKDOWN = "Physical Architecture";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {

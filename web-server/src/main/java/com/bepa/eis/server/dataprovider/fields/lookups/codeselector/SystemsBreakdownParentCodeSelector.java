@@ -18,12 +18,12 @@ public class SystemsBreakdownParentCodeSelector extends AbstractParentCodeSelect
 
     @Override
     public String getFieldLabelName() {
-        return "Parent Physical Structure ID";
+        return "Parent Physical Architecture ID";
     }
 
     @Override
     public String getFieldHeaderName() {
-        return "Parent Physical Structure ID";
+        return "Parent Physical Architecture ID";
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SystemsBreakdownParentCodeSelector extends AbstractParentCodeSelect
 
     @Override
     public String getDropdownSelectText() {
-        return "Select Physical Structure ...";
+        return "Select Physical Architecture ...";
     }
 
 }

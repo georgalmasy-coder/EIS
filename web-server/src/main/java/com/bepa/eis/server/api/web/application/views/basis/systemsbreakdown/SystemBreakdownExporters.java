@@ -48,7 +48,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
 
     @Override
     public String getWorksheetName() {
-        return "Physical Structure";
+        return "Physical Architecture";
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
 
     @Override
     public String getPdfTitle() {
-        return "Physical Structure Export";
+        return "Physical Architecture Export";
     }
 
     @Override

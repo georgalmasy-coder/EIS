@@ -17,9 +17,9 @@ This section presents the most critical tasks that should be performed now to en
 ### Systems Engineering Assets
 This area provides direct access to the project's core elements in the R-F-L-P model:
 - **Requirements (R)**: Number of and access to requirement specifications.
-- **Functions (F)**: Overview of the functional architecture.
-- **Logical Structure (L)**: The logical build-up of the system.
-- **Physical Structure (P)**: The physical realization and component structure.
+- **Functional Architecture (F)**: Overview of the functional architecture.
+- **Logical Architecture (L)**: The logical build-up of the system.
+- **Physical Architecture (P)**: The physical realization and component structure.
 
 Each card shows the current number of elements within the category, providing an indication of model maturity.
 

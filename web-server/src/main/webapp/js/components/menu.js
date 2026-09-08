@@ -574,21 +574,37 @@ function createSidebarFooter(doc) {
     const collapse = footer.querySelector(".menu-footer-collapse");
     collapse?.appendChild(createCollapseButton(doc));
 
+    const userCard = footer.querySelector(".menu-footer-card");
     const moreBtn = footer.querySelector(".menu-footer-more");
     const subMenu = footer.querySelector(".menu-footer-sub-menu");
+
+    const setSubMenuOpen = (shouldOpen) => {
+        if (!subMenu) {
+            return;
+        }
+
+        const isOpen = shouldOpen && subMenu.childElementCount > 0;
+        subMenu.hidden = !isOpen;
+        moreBtn?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    };
+
+    userCard?.addEventListener("mouseenter", () => {
+        setSubMenuOpen(true);
+    });
+
+    userCard?.addEventListener("mouseleave", () => {
+        setSubMenuOpen(false);
+    });
 
     moreBtn?.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        const isHidden = subMenu.hidden;
-        subMenu.hidden = !isHidden;
-        moreBtn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+        setSubMenuOpen(true);
     });
 
     document.addEventListener("click", (event) => {
         if (subMenu && !subMenu.hidden && !footer.contains(event.target)) {
-            subMenu.hidden = true;
-            moreBtn?.setAttribute("aria-expanded", "false");
+            setSubMenuOpen(false);
         }
     });
 

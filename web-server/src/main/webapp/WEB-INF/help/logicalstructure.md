@@ -1,4 +1,4 @@
-# Logical Structure
+# Logical Architecture
 
 This page is used to view, create, edit, import and export logical structures for the selected project.
 
@@ -26,7 +26,7 @@ The page contains the following main actions:
 - **Import**
 - **Export**
 - **Help**
-- **Add Logical Structure**
+- **Add Logical Architecture**
 
 ## Import
 
@@ -57,9 +57,9 @@ Available export formats may include:
 
 The export dialog may also include options such as whether inactive logical structures should be included.
 
-## Add Logical Structure
+## Add Logical Architecture
 
-Use **Add Logical Structure** to create a new logical structure.
+Use **Add Logical Architecture** to create a new logical structure.
 
 When adding or editing a logical structure, a dialog is opened with several tabs.
 
@@ -72,7 +72,7 @@ The edit dialog contains the following tabs:
 - **Attachments**
 - **Notes**
 - **Links**
-- **Linked To ...**
+- **Relations**
 
 ## Basis Info
 
@@ -135,9 +135,9 @@ The **Links** tab is reserved for links related to the logical structure.
 
 If the tab shows **Under Construction**, the functionality is not yet available.
 
-## Linked To ...
+## Relations
 
-The **Linked To ...** tab shows relations from the logical structure to other entities.
+The **Relations** tab shows relations from the logical structure to other entities.
 
 This can help show how a logical structure is connected to other parts of the project, such as system requirements.
 

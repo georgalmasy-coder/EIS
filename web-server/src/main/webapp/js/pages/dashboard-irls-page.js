@@ -668,7 +668,7 @@ function openPhysicalStructureEditPage(entityId) {
         page: editPage,
         mode: "edit",
         id: normalizedEntityId,
-        title: "Edit Physical Structure",
+        title: "Edit Physical Architecture",
         onSaved: () => window.location.reload()
     });
 }

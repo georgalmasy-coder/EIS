@@ -191,22 +191,22 @@ public class FunctionalStructureServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = buildDownloadFileName(webSession, "Functional Structure", "csv");
+                fileName = buildDownloadFileName(webSession, "Functional Architecture", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = buildDownloadFileName(webSession, "Functional Structure", "pdf");
+                fileName = buildDownloadFileName(webSession, "Functional Architecture", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = buildDownloadFileName(webSession, "Functional Structure", "xml");
+                fileName = buildDownloadFileName(webSession, "Functional Architecture", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = buildDownloadFileName(webSession, "Functional Structure", "xlsx");
+                fileName = buildDownloadFileName(webSession, "Functional Architecture", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }

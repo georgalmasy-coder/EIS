@@ -2,9 +2,9 @@
 
 The Interface Management matrix shows interfaces between **Physical Structures**.
 
-- Rows represent the **From Physical Structure**.
-- Columns represent the **To Physical Structure**.
-- Grey diagonal cells represent the same physical structure and cannot contain an interface.
+- Rows represent the **From Physical Architecture**.
+- Columns represent the **To Physical Architecture**.
+- Grey diagonal cells represent the same physical architecture and cannot contain an interface.
 
 ## Filtering the Matrix
 
@@ -44,6 +44,6 @@ Right-click a cell containing an interface and select **Remove Interface**. Revi
 
 The remove option is unavailable for empty cells.
 
-## Editing a Physical Structure
+## Editing a Physical Architecture
 
-Double-click a row or column header to open the corresponding Physical Structure edit page.
+Double-click a row or column header to open the corresponding Physical Architecture edit page.

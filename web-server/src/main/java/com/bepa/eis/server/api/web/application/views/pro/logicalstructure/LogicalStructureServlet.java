@@ -188,22 +188,22 @@ public class LogicalStructureServlet extends GenericDataProviderServlet {
             case "csv" -> {
                 content = genericExporters.toCsv(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getCsvContentType();
-                fileName = buildDownloadFileName(webSession, "Logical Structure", "csv");
+                fileName = buildDownloadFileName(webSession, "Logical Architecture", "csv");
             }
             case "pdf" -> {
                 content = genericExporters.toPdf(rows);
                 contentType = genericExporters.getPdfContentType();
-                fileName = buildDownloadFileName(webSession, "Logical Structure", "pdf");
+                fileName = buildDownloadFileName(webSession, "Logical Architecture", "pdf");
             }
             case "xml" -> {
                 content = genericExporters.toXml(rows).getBytes(StandardCharsets.UTF_8);
                 contentType = genericExporters.getXmlContentType();
-                fileName = buildDownloadFileName(webSession, "Logical Structure", "xml");
+                fileName = buildDownloadFileName(webSession, "Logical Architecture", "xml");
             }
             case "xlsx" -> {
                 content = genericExporters.toXlsx(rows);
                 contentType = genericExporters.getXlsxContentType();
-                fileName = buildDownloadFileName(webSession, "Logical Structure", "xlsx");
+                fileName = buildDownloadFileName(webSession, "Logical Architecture", "xlsx");
             }
             default -> throw new IllegalArgumentException("Unsupported export format: " + format);
         }

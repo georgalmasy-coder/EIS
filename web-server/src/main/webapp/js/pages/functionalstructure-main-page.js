@@ -278,9 +278,9 @@ function initializeImportExportDialogs() {
     const exportDialog = createExportDialog({
         dialogId: "exportDialog",
         openButtonId: "btnExport",
-        entityName: "Functional Structure",
+        entityName: "Functional Architecture",
         exportUrl: "/pro/functionalstructure?cmd=export",
-        baseFileName: () => buildExportBaseFileName("Functional Structure", state.topPanel?.projectName)
+        baseFileName: () => buildExportBaseFileName("Functional Architecture", state.topPanel?.projectName)
     });
 
     const importDialog = createImportDialog({
@@ -304,8 +304,8 @@ function buildExportBaseFileName(entityName, projectName) {
 
 async function loadFunctionalStructures() {
     showListEmptyState("Loading functional structuresâ€¦");
-    showDiagramEmptyState("horizontal", "Loading horizontal functional structure diagramâ€¦");
-    showDiagramEmptyState("vertical", "Loading vertical functional structure diagramâ€¦");
+    showDiagramEmptyState("horizontal", "Loading horizontal functional architecture diagramâ€¦");
+    showDiagramEmptyState("vertical", "Loading vertical functional architecture diagramâ€¦");
     setText("loadStatus", "Loading", "");
 
     try {
@@ -325,7 +325,7 @@ async function loadFunctionalStructures() {
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
-            throw new Error("The functional structure endpoint returned invalid XML.");
+            throw new Error("The functional architecture endpoint returned invalid XML.");
         }
 
         state.xmlDocument = xmlDocument;
@@ -357,7 +357,7 @@ async function loadFunctionalStructures() {
             }, 50);
         }
     } catch (error) {
-        console.error("Failed to load functional structures", error);
+        console.error("Failed to load functional Architectures", error);
         setText("loadStatus", "Error", "");
         showListEmptyState(`Could not load functional structures. ${error.message}`);
         showDiagramEmptyState("horizontal", `Could not load horizontal diagram. ${error.message}`);
@@ -2107,7 +2107,7 @@ function handleContextMenuAction(action) {
 
     if (action === "edit-requirement") {
         if (!requirement) {
-            window.alert("No Functional Structure selected.");
+            window.alert("No Functional Architecture selected.");
             return;
         }
 
@@ -2117,7 +2117,7 @@ function handleContextMenuAction(action) {
 
     if (action === "create-sub-requirement") {
         if (!requirement) {
-            window.alert("No Functional Structure selected.");
+            window.alert("No Functional Architecture selected.");
             return;
         }
 
@@ -2211,7 +2211,7 @@ function openEditRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("Functional Structure has no entity id.");
+        window.alert("Functional Architecture has no entity id.");
         return;
     }
 
@@ -2219,7 +2219,7 @@ function openEditRequirement(requirement) {
         page: "functionalstructure-edit",
         mode: "edit",
         id,
-        title: "Edit Functional Structure",
+        title: "Edit Functional Architecture",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2234,7 +2234,7 @@ function openCreateSubRequirement(requirement) {
     const id = getRequirementNavigationId(requirement);
 
     if (!id) {
-        window.alert("Functional Structure has no entity id.");
+        window.alert("Functional Architecture has no entity id.");
         return;
     }
 
@@ -2242,7 +2242,7 @@ function openCreateSubRequirement(requirement) {
         page: "functionalstructure-edit",
         mode: "create-child",
         id,
-        title: "Create Sub Functional Structure",
+        title: "Create Sub Functional Architecture",
         onSaved: (payload) => {
             const targetId = payload?.id || id;
             if (targetId) {
@@ -2257,7 +2257,7 @@ function openCreateRootRequirement() {
     openEditDialog({
         page: "functionalstructure-edit",
         mode: "create-root",
-        title: "Create Root Functional Structure",
+        title: "Create Root Functional Architecture",
         onSaved: (payload) => {
             if (payload?.id) {
                 sessionStorage.setItem("basis.functionalstructure.scrollToId", payload.id);

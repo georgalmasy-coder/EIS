@@ -17,7 +17,7 @@ public enum EntityType {
     ),
 
 
-    SYSTEMS_BREAKDOWN(2, "P-SYS", "Physical Structure", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
+    SYSTEMS_BREAKDOWN(2, "P-ARC", "Physical Architecture", "systemBreakdownDocument", "systembreakdowns", "systembreakdown",
             new EntityDataElement[]{
                     SBSCODE,
                     CODELEVEL,
@@ -58,7 +58,7 @@ public enum EntityType {
             REQNAME
     ),
 
-    SYSTEM_REQUIREMENT(6, "SYS", "System requirement", "systemRequirementDocument", "systemRequirements", "systemRequirement",
+    SYSTEM_REQUIREMENT(6, "SYS-REQ", "System requirement", "systemRequirementDocument", "systemRequirements", "systemRequirement",
             new EntityDataElement[]{
                     SYSTEMREQCODE,
                     CODELEVEL,
@@ -87,7 +87,7 @@ public enum EntityType {
            PROJECTNAME
     ),
 
-    LOGICAL_STRUCTURE(8, "L-SYS", "Logical Structure", "logicalStructure", "logicalStructures", "logicalDocument",
+    LOGICAL_STRUCTURE(8, "L-ELM", "Logical Architecture", "logicalStructure", "logicalStructures", "logicalDocument",
             new EntityDataElement[]{
                     LOGICALCODE,
                     CODELEVEL,
@@ -98,7 +98,7 @@ public enum EntityType {
             LOGICALNAME
     ),
 
-    FUNCTIONAL_STRUCTURE(9, "F-SYS", "Functional Structure", "functionStructure", "functionStructures", "functionalDocument",
+    FUNCTIONAL_STRUCTURE(9, "F-ELM", "Functional Architecture", "functionStructure", "functionStructures", "functionalDocument",
             new EntityDataElement[]{
                     FUNCTIONALCODE,
                     CODELEVEL,
