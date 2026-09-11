@@ -67,6 +67,11 @@ public class LogicalStructureInfo extends GenericXmlDocument {
         EntityRelations entityRelations = entityRelationProvider.getEntityRelationsByEntityId(entityType, entityId);
         rootElement.addElement(entityRelations.getEntityRelationElements());
 
+        if (type == EntityRequestType.EDIT_ENTITY) {
+            EditInterfaceElements editInterfaceElements = new EditInterfaceElements(webSession, entityType, entityId);
+            getRoot().appendChild(editInterfaceElements.getEditInterfaceElements(getDoc()));
+        }
+
     }
 
 }

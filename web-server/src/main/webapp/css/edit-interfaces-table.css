@@ -1,0 +1,112 @@
+#tabPanel7 {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+#tabPanel7 .table-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+}
+
+#tabPanel7 .table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.edit-interfaces-frame {
+    min-height: 240px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-interfaces-table {
+    min-width: 760px;
+}
+
+.edit-interfaces-table th,
+.edit-interfaces-cell {
+    vertical-align: middle;
+}
+
+.edit-interfaces-group-row th {
+    text-align: center;
+    font-weight: 700;
+}
+
+.edit-interfaces-header-content {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.1;
+}
+
+.edit-interfaces-header-sublabel {
+    color: var(--app-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.edit-interfaces-cell-text,
+.edit-interfaces-dual-text {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-interfaces-dual {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 100%;
+}
+
+.edit-interfaces-dual-line {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+}
+
+.edit-interfaces-dual-arrow {
+    color: var(--app-text-muted);
+    flex: 0 0 auto;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.edit-interfaces-dual-arrow--left {
+    order: 2;
+}
+
+.edit-interfaces-pill {
+    border: 1px solid var(--edit-interfaces-pill-color, var(--app-border-default));
+    background: color-mix(in srgb, var(--edit-interfaces-pill-color, var(--app-surface-background)) 22%, transparent);
+    border-radius: 999px;
+    color: var(--app-text-default);
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 3px 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-interfaces-footer {
+    color: var(--app-text-muted);
+    font-size: 12px;
+    padding: 8px 10px;
+}

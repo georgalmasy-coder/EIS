@@ -14,6 +14,7 @@ import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
 import { createLinksTable } from "../components/links-table.js";
 import { createEntityRelationsTable } from "../components/entity-relations-table.js";
+import { createEditInterfacesTable } from "../components/edit-interfaces-table.js";
 import { setText } from "../core/dom.js";
 import {
     getDirectChild,
@@ -47,7 +48,8 @@ const RESIZABLE_TABLES = [
     { tableSelector: ".history-table", storageKey: "history", defaultMinWidth: 520 },
     { tableSelector: ".attachments-table", storageKey: "attachments", defaultMinWidth: 760 },
     { tableSelector: ".notes-table", storageKey: "notes", defaultMinWidth: 640 },
-    { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 }
+    { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 },
+    { tableSelector: ".edit-interfaces-table", storageKey: "interfaces", defaultMinWidth: 760 }
 ];
 
 const SUMMARY_FIELDS = {
@@ -81,6 +83,7 @@ const linksTable = createLinksTable();
 const relationsTable = createEntityRelationsTable({
     onAfterRender: initializeResizableEditTables
 });
+const interfacesTable = createEditInterfacesTable();
 
 const state = {
     mode: MODES.edit,
@@ -138,7 +141,8 @@ function initializeTabs() {
         { btnId: "tabBtn3", panelId: "tabPanel3" },
         { btnId: "tabBtn4", panelId: "tabPanel4" },
         { btnId: "tabBtn5", panelId: "tabPanel5" },
-        { btnId: "tabBtn6", panelId: "tabPanel6" }
+        { btnId: "tabBtn6", panelId: "tabPanel6" },
+        { btnId: "tabBtn7", panelId: "tabPanel7" }
     ]);
 }
 
@@ -402,6 +406,7 @@ function renderAllFromDoc(doc) {
     attachmentsTable.loadFromDocument(doc);
     linksTable.loadFromDocument(doc);
     relationsTable.loadFromDocument(doc);
+    interfacesTable.loadFromDocument(doc);
 }
 
 function findDetailNode(root) {

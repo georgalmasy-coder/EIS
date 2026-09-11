@@ -82,6 +82,51 @@ public class InterfaceMatrixProvider extends GenericProvider {
             ORDER BY [InterfacePK]
             """;
 
+    private static final String SELECT_LATEST_INTERFACES_BY_FROM_SQL = """
+            SELECT
+                I.[InterfacePK], I.[CustomerId], I.[ProjectId], I.[EntityType], I.[Version], I.[Latest],
+                I.[ChangedByUserId], I.[ChangedDateTime], I.[FromEntityId], I.[ToEntityId], I.[IrlId],
+                I.[NextIrlMeeting], I.[ClassificationIds],
+                REVERSE_I.[IrlId] AS ReverseIrlId,
+                REVERSE_I.[ClassificationIds] AS ReverseClassificationIds,
+                CODE_EE.[StringValue] AS ToEntityCode,
+                NAME_EE.[StringValue] AS ToEntityName
+            FROM [dbo].[INTERFACES] I
+            LEFT JOIN [dbo].[INTERFACES] REVERSE_I
+              ON REVERSE_I.[CustomerId] = I.[CustomerId]
+             AND REVERSE_I.[ProjectId] = I.[ProjectId]
+             AND REVERSE_I.[EntityType] = I.[EntityType]
+             AND REVERSE_I.[FromEntityId] = I.[ToEntityId]
+             AND REVERSE_I.[ToEntityId] = I.[FromEntityId]
+             AND REVERSE_I.[Latest] = 1
+            LEFT JOIN [dbo].[ENTITY] E
+              ON E.[CustomerId] = I.[CustomerId]
+             AND E.[ProjectId] = I.[ProjectId]
+             AND E.[EntityType] = I.[EntityType]
+             AND E.[EntityId] = I.[ToEntityId]
+             AND E.[Latest] = 1
+            LEFT JOIN [dbo].[ENTITY_ELEMENT] CODE_EE
+              ON CODE_EE.[CustomerId] = E.[CustomerId]
+             AND CODE_EE.[ProjectId] = E.[ProjectId]
+             AND CODE_EE.[EntityType] = E.[EntityType]
+             AND CODE_EE.[EntityId] = E.[EntityId]
+             AND CODE_EE.[Version] = E.[Version]
+             AND CODE_EE.[EntityDataElementType] = ?
+            LEFT JOIN [dbo].[ENTITY_ELEMENT] NAME_EE
+              ON NAME_EE.[CustomerId] = E.[CustomerId]
+             AND NAME_EE.[ProjectId] = E.[ProjectId]
+             AND NAME_EE.[EntityType] = E.[EntityType]
+             AND NAME_EE.[EntityId] = E.[EntityId]
+             AND NAME_EE.[Version] = E.[Version]
+             AND NAME_EE.[EntityDataElementType] = ?
+            WHERE I.[CustomerId] = ?
+              AND I.[ProjectId] = ?
+              AND I.[EntityType] = ?
+              AND I.[FromEntityId] = ?
+              AND I.[Latest] = 1
+            ORDER BY I.[ToEntityId], I.[Version]
+            """;
+
     private static final String UPDATE_LATEST_FALSE_SQL = """
             UPDATE [dbo].[INTERFACES]
             SET [Latest] = 0
@@ -128,6 +173,45 @@ public class InterfaceMatrixProvider extends GenericProvider {
     public List<InterfaceRecord> getAllInterfaceRecords(EntityType entityType) throws SQLException {
         validateSession();
         return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
+    }
+
+    public List<EditInterfaceRecord> getLatestInterfaceRecordsByFrom(Integer fromEntityId, EntityType entityType) throws SQLException {
+        validateSession();
+
+        if (fromEntityId == null || entityType == null) {
+            throw new IllegalArgumentException("FromEntityId and EntityType are required.");
+        }
+
+        List<EditInterfaceRecord> records = new ArrayList<>();
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_BY_FROM_SQL)) {
+            setInt(ps, entityType.getEntityCodeColumn().getId(), 1);
+            setInt(ps, entityType.getEntityNameColumn().getId(), 2);
+            setInt(ps, getWebSession().getCustomerId(), 3);
+            setInt(ps, getWebSession().getProjectId(), 4);
+            setInt(ps, entityType.getId(), 5);
+            setInt(ps, fromEntityId, 6);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    InterfaceRecord interfaceRecord = mapRecord(rs);
+                    records.add(new EditInterfaceRecord(
+                            interfaceRecord.fromEntityId(),
+                            interfaceRecord.toEntityId(),
+                            rs.getString("ToEntityCode"),
+                            rs.getString("ToEntityName"),
+                            interfaceRecord.irlId(),
+                            getNullableInteger(rs, "ReverseIrlId"),
+                            interfaceRecord.nextIrlMeeting(),
+                            interfaceRecord.classificationIds(),
+                            rs.getString("ReverseClassificationIds")
+                    ));
+                }
+            }
+        }
+
+        return records;
     }
 
     public List<InterfaceRecord> getLatestInterfaceRecords(Integer customerId, Integer projectId, EntityType entityType) throws SQLException {
@@ -442,6 +526,24 @@ public class InterfaceMatrixProvider extends GenericProvider {
             Integer irlId,
             String nextIrlMeeting,
             String classificationIds
+    ) {
+    }
+
+    private Integer getNullableInteger(ResultSet rs, String columnName) throws SQLException {
+        int value = rs.getInt(columnName);
+        return rs.wasNull() ? null : value;
+    }
+
+    public record EditInterfaceRecord(
+            Integer fromEntityId,
+            Integer toEntityId,
+            String toEntityCode,
+            String toEntityName,
+            Integer irlId,
+            Integer reverseIrlId,
+            String nextIrlMeeting,
+            String classificationIds,
+            String reverseClassificationIds
     ) {
     }
 }
