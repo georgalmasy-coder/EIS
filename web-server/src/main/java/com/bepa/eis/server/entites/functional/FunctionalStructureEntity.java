@@ -10,6 +10,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.FunctionalStructureParentCodeSelector;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
+import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;
 

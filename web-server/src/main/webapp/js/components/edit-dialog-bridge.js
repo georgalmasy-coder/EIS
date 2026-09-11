@@ -58,6 +58,10 @@ export function requestEditDialogOpenHistory(payload = {}) {
     return postDialogMessage("open-history", payload);
 }
 
+export function requestEditDialogOpen(payload = {}) {
+    return postDialogMessage("navigate-edit", payload);
+}
+
 export function requestEditDialogStatus(payload = {}) {
     return postDialogMessage("status", payload);
 }

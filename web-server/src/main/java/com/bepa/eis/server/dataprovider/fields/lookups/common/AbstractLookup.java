@@ -75,7 +75,6 @@ abstract public class AbstractLookup extends AbstractInteger {
             return lookupValue.getLookupCode();
         }
         return "";
-//GFA        throw new IllegalStateException("Failed to lookupCode ");
     }
 
     public void setSortOptions(boolean sortOptions) {

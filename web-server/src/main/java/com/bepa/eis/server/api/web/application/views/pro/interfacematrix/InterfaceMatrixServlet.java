@@ -24,7 +24,7 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, response);
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);

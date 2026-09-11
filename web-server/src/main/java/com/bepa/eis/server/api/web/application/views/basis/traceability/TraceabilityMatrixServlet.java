@@ -2,24 +2,17 @@ package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.SeverityType;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.enums.entity.RelationType;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.common.providers.entityrelation.RelationProvider;
-import com.bepa.eis.common.providers.misc.IncidentProvider;
-import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
-import com.bepa.eis.server.api.web.application.views.common.EntityRelation;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
-import com.bepa.eis.server.api.web.application.views.common.EntityRelations;
-import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -63,7 +56,7 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         String pathInfo = normalizePathInfo(request.getPathInfo());
 
-        WebSession webSession = getWebSessionFromRequest(request);
+        WebSession webSession = getWebSessionFromRequest(request, response);
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
@@ -72,36 +65,31 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         try {
             if (REMOVE_CONFIRMED_RELATION_PATH.equals(pathInfo)) {
                 handleRemoveConfirmedRelationRequest(webSession, request, response);
-                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
-                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                getPerformanceProvider().logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             if (REMOVE_NOT_RELEVANT_RELATION_PATH.equals(pathInfo)) {
                 handleRemoveNotRelevantRelationRequest(webSession, request, response);
-                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
-                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                getPerformanceProvider().logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             if (CONFIRM_RELATION_PATH.equals(pathInfo)) {
                 handleConfirmRelationRequest(webSession, request, response);
-                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
-                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                getPerformanceProvider().logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             if (MARK_RELATION_NOT_RELEVANT_PATH.equals(pathInfo)) {
                 handleMarkRelationNotRelevantRequest(webSession, request, response);
-                PerformanceProvider performanceProvider = new PerformanceProvider(getWebSession());
-                performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
+                getPerformanceProvider().logPerformance(module, System.currentTimeMillis() - startTime);
                 return;
             }
 
             super.doPost(request, response);
         } catch (Throwable throwable) {
-            IncidentProvider incidentProvider = new IncidentProvider(webSession);
-            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
+            getIncidentProvider().createProviderServiceIncident(SeverityType.HIGH, module, throwable);
             log.error("Error processing traceability matrix action: {}", throwable.getMessage(), throwable);
             writeJsonError(response, throwable);
         }

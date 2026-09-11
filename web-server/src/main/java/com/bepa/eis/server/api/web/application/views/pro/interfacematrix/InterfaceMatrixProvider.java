@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class InterfaceMatrixProvider extends GenericProvider {
 
@@ -69,6 +70,18 @@ public class InterfaceMatrixProvider extends GenericProvider {
             ORDER BY [Version] DESC, [InterfacePK] DESC
             """;
 
+    private static final String SELECT_ALL_INTERFACES_SQL = """
+            SELECT
+                [InterfacePK], [CustomerId], [ProjectId], [EntityType], [Version], [Latest],
+                [ChangedByUserId], [ChangedDateTime], [FromEntityId], [ToEntityId], [IrlId],
+                [NextIrlMeeting], [ClassificationIds]
+            FROM [dbo].[INTERFACES]
+            WHERE [CustomerId] = ?
+              AND [ProjectId] = ?
+              AND [EntityType] = ?
+            ORDER BY [InterfacePK]
+            """;
+
     private static final String UPDATE_LATEST_FALSE_SQL = """
             UPDATE [dbo].[INTERFACES]
             SET [Latest] = 0
@@ -80,14 +93,8 @@ public class InterfaceMatrixProvider extends GenericProvider {
               AND [Latest] = 1
             """;
 
-    private static final String SELECT_NEXT_INTERFACE_PK_SQL = """
-            SELECT ISNULL(MAX([InterfacePK]), 0) + 1 AS NextInterfacePK
-            FROM [dbo].[INTERFACES] WITH (UPDLOCK, HOLDLOCK)
-            """;
-
     private static final String INSERT_INTERFACE_SQL = """
             INSERT INTO [dbo].[INTERFACES] (
-                [InterfacePK],
                 [CustomerId],
                 [ProjectId],
                 [EntityType],
@@ -100,7 +107,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
                 [IrlId],
                 [NextIrlMeeting],
                 [ClassificationIds]
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private final EntityType entityType;
@@ -190,7 +197,6 @@ public class InterfaceMatrixProvider extends GenericProvider {
 
             InterfaceRecord latest = getLatestInterfaceRecord(connection, saveRecord.fromEntityId(), saveRecord.toEntityId());
             int nextVersion = latest == null ? 1 : latest.version() + 1;
-            int interfacePk = getNextInterfacePk(connection);
             Timestamp changedDateTime = Timestamp.valueOf(LocalDateTime.now());
 
             if (latest != null) {
@@ -200,7 +206,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             insertInterfaceRecord(
                     connection,
                     new InterfaceRecord(
-                            interfacePk,
+                            null,
                             getWebSession().getCustomerId(),
                             getWebSession().getProjectId(),
                             entityType.getId(),
@@ -314,22 +320,10 @@ public class InterfaceMatrixProvider extends GenericProvider {
         }
     }
 
-    private int getNextInterfacePk(Connection connection) throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement(SELECT_NEXT_INTERFACE_PK_SQL);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("NextInterfacePK");
-            }
-        }
-
-        throw new SQLException("Could not determine next InterfacePK.");
-    }
-
     private void insertInterfaceRecord(Connection connection, InterfaceRecord record) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(INSERT_INTERFACE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             int index = 1;
 
-            setInt(ps, record.interfacePk(), index++);
             setInt(ps, record.customerId(), index++);
             setInt(ps, record.projectId(), index++);
             setInt(ps, record.entityType(), index++);
@@ -344,6 +338,48 @@ public class InterfaceMatrixProvider extends GenericProvider {
             setString(ps, record.classificationIds(), index);
 
             ps.executeUpdate();
+        }
+    }
+
+    public void copyInterfacesForMovedEntities(Connection connection,
+                                               Map<Integer, Integer> entityIdMapping) throws SQLException {
+        if (entityIdMapping == null || entityIdMapping.isEmpty()) {
+            return;
+        }
+
+        List<InterfaceRecord> recordsToCopy = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(SELECT_ALL_INTERFACES_SQL)) {
+            setInt(ps, getWebSession().getCustomerId(), 1);
+            setInt(ps, getWebSession().getProjectId(), 2);
+            setInt(ps, entityType.getId(), 3);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    InterfaceRecord record = mapRecord(rs);
+                    if (entityIdMapping.containsKey(record.fromEntityId())
+                            || entityIdMapping.containsKey(record.toEntityId())) {
+                        recordsToCopy.add(record);
+                    }
+                }
+            }
+        }
+
+        for (InterfaceRecord source : recordsToCopy) {
+            insertInterfaceRecord(connection, new InterfaceRecord(
+                    null,
+                    source.customerId(),
+                    source.projectId(),
+                    source.entityType(),
+                    source.version(),
+                    source.latest(),
+                    source.changedByUserId(),
+                    source.changedDateTime(),
+                    entityIdMapping.getOrDefault(source.fromEntityId(), source.fromEntityId()),
+                    entityIdMapping.getOrDefault(source.toEntityId(), source.toEntityId()),
+                    source.irlId(),
+                    source.nextIrlMeeting(),
+                    source.classificationIds()
+            ));
         }
     }
 

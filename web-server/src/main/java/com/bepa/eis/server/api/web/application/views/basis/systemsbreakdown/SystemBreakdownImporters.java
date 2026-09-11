@@ -202,7 +202,6 @@ public final class SystemBreakdownImporters extends GenericImporters {
         return isBlank(row.id())
                 && row.level() == null
                 && isBlank(row.name())
-//GFA                && isBlank(row.description())
                 && row.active() == null;
     }
 

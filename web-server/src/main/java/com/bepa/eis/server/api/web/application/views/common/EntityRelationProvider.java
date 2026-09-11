@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EntityRelationProvider extends GenericProvider {
 
@@ -26,33 +27,45 @@ public class EntityRelationProvider extends GenericProvider {
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_1 =
             "SELECT ER.EntityRelationPK, ER.RelationType, ER.EntityType, ER.EntityId,  ER.RelatedEntityType, ER.RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
-            "FROM ENTITY E, ENTITY_RELATIONS ER " +
+            "FROM ENTITY E, ENTITY_RELATIONS ER, ENTITY E2 " +
             "WHERE E.CustomerId = ER.CustomerId " +
             "AND E.ProjectId = ER.ProjectId " +
             "AND E.EntityType = ER.EntityType " +
             "AND E.EntityId = ER.EntityId " +
+            "AND E2.CustomerId = ER.CustomerId " +
+            "AND E2.ProjectId = ER.ProjectId " +
+            "AND E2.EntityType = ER.RelatedEntityType " +
+            "AND E2.EntityId = ER.RelatedEntityId " +
             "AND E.CustomerId = ? " +
             "AND E.ProjectId = ? " +
             "AND ER.EntityType =  ? " +
             "AND ER.EntityId = ? " +
             "AND ER.RelationType IN (1,2) " + // confirmed / not relevant
             "AND ER.Latest = 1 " +
-            "AND E.Latest = 1 ";
+            "AND E.Latest = 1 " +
+            "AND E2.Latest = 1 " +
+            "AND E2.Active = 1 ";
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_2 =
             "SELECT ER.EntityRelationPK, ER.RelationType, ER.EntityType AS RelatedEntityType, ER.EntityId AS RelatedEntityId, ER.RelatedEntityType AS EntityType, ER.RelatedEntityId AS EntityId, ER.CreatedById, ER.CreatedTime " +
-            "FROM ENTITY E, ENTITY_RELATIONS ER " +
+            "FROM ENTITY E, ENTITY_RELATIONS ER, ENTITY E2 " +
             "WHERE E.CustomerId = ER.CustomerId " +
             "AND E.ProjectId = ER.ProjectId " +
             "AND E.EntityType = ER.RelatedEntityType " +
             "AND E.EntityId = ER.RelatedEntityId " +
+            "AND E2.CustomerId = ER.CustomerId " +
+            "AND E2.ProjectId = ER.ProjectId " +
+            "AND E2.EntityType = ER.EntityType " +
+            "AND E2.EntityId = ER.EntityId " +
             "AND E.CustomerId = ? " +
             "AND E.ProjectId = ? " +
             "AND ER.RelatedEntityType =  ? " +
             "AND ER.RelatedEntityId = ? " +
             "AND ER.RelationType IN (1,2) " + // confirmed / not relevant
             "AND ER.Latest = 1 " +
-            "AND E.Latest = 1 ";
+            "AND E.Latest = 1 " +
+            "AND E2.Latest = 1 " +
+            "AND E2.Active = 1 ";
 
     private static final String GET_CONFIRMED_AND_NOT_RELEVANT_ENTITY_RELATIONS_BY_PROJECT_ID_SQL =
             "SELECT ER.EntityRelationPK, ER.RelationType, E1.EntityType, E1.EntityId,  E2.EntityType AS RelatedEntityType, E2.EntityId AS RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
@@ -73,10 +86,6 @@ public class EntityRelationProvider extends GenericProvider {
                     "AND E1.ProjectId = ? " +
 
                     "AND ((E1.EntityType =  ? AND E2.EntityType = ?) OR (E1.EntityType =  ? AND E2.EntityType = ?)) " +
-
-//                    "AND E1.EntityType =  ? " +
-//                    "AND E2.EntityType = ? " +
-
                     "AND E1.Active = 1 " +
                     "AND E2.Active = 1 " +
                     "AND ER.Latest = 1 " +
@@ -104,9 +113,6 @@ public class EntityRelationProvider extends GenericProvider {
 
                     "AND ((E1.EntityType =  ? AND E2.EntityType = ?) OR (E1.EntityType =  ? AND E2.EntityType = ?)) " +
 
-//                    "AND E1.EntityType =  ? " +
-//                    "AND E2.EntityType = ? " +
-
                     "AND E1.Active = 1 " +
                     "AND E2.Active = 1 " +
                     "AND ER.Latest = 1 " +
@@ -122,12 +128,26 @@ public class EntityRelationProvider extends GenericProvider {
         "AND E.EntityType = EE.EntityType " +
         "AND E.EntityId = EE.EntityId " +
         "AND E.Version = EE.Version " +
-
+        "AND E.Latest = 1 " +
         "AND E.CustomerId = ? " +
         "AND E.ProjectId = ? " +
         "AND E.EntityType = ? " +
         "AND E.EntityId = ? " +
         "and EE.EntityDataElementType = ?";
+
+    private static final String SELECT_RELATIONS_FOR_ENTITY_TYPE_SQL =
+            "SELECT CustomerId, ProjectId, EntityType, EntityId, RelatedEntityType, RelatedEntityId, " +
+                    "RelationType, Version, Latest, CreatedById, CreatedTime " +
+                    "FROM ENTITY_RELATIONS " +
+                    "WHERE CustomerId = ? AND ProjectId = ? " +
+                    "AND (EntityType = ? OR RelatedEntityType = ?) " +
+                    "ORDER BY EntityRelationPK";
+
+    private static final String COPY_ENTITY_RELATION_SQL =
+            "INSERT INTO ENTITY_RELATIONS (" +
+                    "CustomerId, ProjectId, EntityType, EntityId, RelatedEntityType, RelatedEntityId, " +
+                    "RelationType, Version, Latest, CreatedById, CreatedTime" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public EntityRelationProvider(WebSession webSession) {
         super(webSession);
@@ -314,6 +334,86 @@ public class EntityRelationProvider extends GenericProvider {
 
     private RelationProvider getRelationProvider() {
         return new RelationProvider(getWebSession());
+    }
+
+    public void copyRelationsForMovedEntities(Connection con, EntityType movedEntityType,
+                                              Map<Integer, Integer> entityIdMapping) throws SQLException {
+        if (entityIdMapping == null || entityIdMapping.isEmpty()) {
+            return;
+        }
+
+        List<RelationCopyRecord> recordsToCopy = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(SELECT_RELATIONS_FOR_ENTITY_TYPE_SQL)) {
+            ps.setInt(1, getWebSession().getCustomerId());
+            ps.setInt(2, getWebSession().getProjectId());
+            ps.setInt(3, movedEntityType.getId());
+            ps.setInt(4, movedEntityType.getId());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RelationCopyRecord record = new RelationCopyRecord(
+                            rs.getInt("CustomerId"),
+                            rs.getInt("ProjectId"),
+                            rs.getInt("EntityType"),
+                            rs.getInt("EntityId"),
+                            rs.getInt("RelatedEntityType"),
+                            rs.getInt("RelatedEntityId"),
+                            rs.getInt("RelationType"),
+                            rs.getInt("Version"),
+                            rs.getBoolean("Latest"),
+                            rs.getInt("CreatedById"),
+                            rs.getTimestamp("CreatedTime")
+                    );
+
+                    boolean entityMoved = record.entityType() == movedEntityType.getId()
+                            && entityIdMapping.containsKey(record.entityId());
+                    boolean relatedEntityMoved = record.relatedEntityType() == movedEntityType.getId()
+                            && entityIdMapping.containsKey(record.relatedEntityId());
+                    if (entityMoved || relatedEntityMoved) {
+                        recordsToCopy.add(record);
+                    }
+                }
+            }
+        }
+
+        for (RelationCopyRecord source : recordsToCopy) {
+            int newEntityId = source.entityType() == movedEntityType.getId()
+                    ? entityIdMapping.getOrDefault(source.entityId(), source.entityId())
+                    : source.entityId();
+            int newRelatedEntityId = source.relatedEntityType() == movedEntityType.getId()
+                    ? entityIdMapping.getOrDefault(source.relatedEntityId(), source.relatedEntityId())
+                    : source.relatedEntityId();
+
+            try (PreparedStatement ps = con.prepareStatement(COPY_ENTITY_RELATION_SQL)) {
+                ps.setInt(1, source.customerId());
+                ps.setInt(2, source.projectId());
+                ps.setInt(3, source.entityType());
+                ps.setInt(4, newEntityId);
+                ps.setInt(5, source.relatedEntityType());
+                ps.setInt(6, newRelatedEntityId);
+                ps.setInt(7, source.relationType());
+                ps.setInt(8, source.version());
+                ps.setBoolean(9, source.latest());
+                ps.setInt(10, source.createdById());
+                ps.setTimestamp(11, source.createdTime());
+                ps.executeUpdate();
+            }
+        }
+    }
+
+    private record RelationCopyRecord(
+            int customerId,
+            int projectId,
+            int entityType,
+            int entityId,
+            int relatedEntityType,
+            int relatedEntityId,
+            int relationType,
+            int version,
+            boolean latest,
+            int createdById,
+            Timestamp createdTime
+    ) {
     }
 
 }

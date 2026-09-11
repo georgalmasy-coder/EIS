@@ -5,8 +5,18 @@ import {
     textOf
 } from "../core/xml.js";
 import { escapeHtml } from "../core/html.js";
+import { openEditDialog } from "./edit-dialog.js";
+import { isEditDialogMode, requestEditDialogOpen } from "./edit-dialog-bridge.js";
 
 const ENTITY_RELATIONS_TABLE_VERSION = "relation-dialog-xml-request-2026-06-24";
+
+const RELATED_ENTITY_EDIT_PAGES = {
+    2: { page: "systemsbreakdown-edit", title: "Edit System" },
+    5: { page: "stakeholderrequirement-edit", title: "Edit Stakeholder Requirement" },
+    6: { page: "systemrequirement-edit", title: "Edit Systems Requirement" },
+    8: { page: "logicalstructure-edit", title: "Edit Logical Architecture" },
+    9: { page: "functionalstructure-edit", title: "Edit Functional Architecture" }
+};
 
 const DEFAULT_CONFIG = {
     bodyId: "relationsBody",
@@ -64,6 +74,7 @@ function normalizeRelation(relation = {}) {
             relatedEntityCode: relation.relatedEntityCode ?? "",
             relatedEntityName: relation.relatedEntityName ?? "",
             relationTypeName: relation.relationTypeName ?? "",
+            link: relation.link ?? "",
         isDeleted: normalizeBoolean(relation.isDeleted),
         isNew: normalizeBoolean(relation.isNew)
     };
@@ -164,6 +175,7 @@ function parseRelationsFromContainer(containerNode, relationElementName) {
             relatedEntityCode: textOf(node, "RelatedEntityCode"),
             relatedEntityName: textOf(node, "RelatedEntityName"),
             relationTypeName: textOf(node, "RelationTypeName"),
+            link: textOf(node, "Link"),
             isDeleted: textOf(node, "IsDeleted").trim() === "true",
             isNew: false
         });
@@ -231,6 +243,7 @@ function appendRelationXml(doc, container, relationElementName, relation) {
     appendTextElement(doc, entityRelation, "CreatedById", relation.createdById ?? "");
     appendTextElement(doc, entityRelation, "CreatedTime", relation.createdTime ?? "");
     appendTextElement(doc, entityRelation, "RelationTypeName", relation.relationTypeName ?? "");
+    appendTextElement(doc, entityRelation, "Link", relation.link ?? "");
     appendTextElement(doc, entityRelation, "IsDeleted", relation.isDeleted ? "true" : "false");
 
     container.appendChild(entityRelation);
@@ -282,14 +295,25 @@ function createRelationRowMarkup(relation, index, readOnly) {
 }
 
 function openRelationInBrowser(relation) {
-    const link = normalizeText(relation?.link).trim();
+    const editPage = RELATED_ENTITY_EDIT_PAGES[normalizeText(relation?.relatedEntityType).trim()];
+    const entityId = normalizeText(relation?.relatedEntityId).trim();
 
-    if (!link) {
+    if (!editPage || !entityId) {
         return false;
     }
 
-    window.open(link, "_blank", "noopener,noreferrer");
+    const options = {
+        page: editPage.page,
+        mode: "edit",
+        id: entityId,
+        title: editPage.title
+    };
 
+    if (isEditDialogMode()) {
+        return requestEditDialogOpen(options);
+    }
+
+    openEditDialog(options);
     return true;
 }
 

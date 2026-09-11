@@ -1,6 +1,13 @@
 const ACTION_SELECT = "select-entity-for-move";
 const ACTION_MOVE = "move-selected-entity";
 const ACTION_MOVE_ROOT = "move-selected-entity-to-root";
+const MOVE_ENDPOINTS = {
+    psys: "/basis/psys/move",
+    lsys: "/pro/lsys/move",
+    fsys: "/pro/fsys/move",
+    stk: "/basis/stk/move",
+    "sys-req": "/basis/sys/move"
+};
 
 export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
     let selectedEntity = null;
@@ -42,7 +49,7 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
             selectButton.toggleAttribute("hidden", !hasTarget);
         }
 
-        const canMove = Boolean(selectedEntity?.entityId && hasTarget && selectedEntity.entityId !== contextEntity.entityId);
+        const canMove = canMoveToTarget(selectedEntity, contextEntity);
         if (moveButton) {
             moveButton.textContent = canMove
                 ? `Move ${formatEntityLabel(selectedEntity)} To ${formatEntityLabel(contextEntity)}`
@@ -54,7 +61,7 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
             moveRootButton.textContent = selectedEntity
                 ? `Move ${formatEntityLabel(selectedEntity)} To Root`
                 : "Move To Root";
-            moveRootButton.toggleAttribute("hidden", !selectedEntity?.entityId);
+            moveRootButton.toggleAttribute("hidden", !canMoveToRoot(selectedEntity));
         }
     }
 
@@ -65,11 +72,11 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
             applySelectionMarker();
             return true;
         }
-        if (action === ACTION_MOVE && selectedEntity?.entityId && target?.entityId && selectedEntity.entityId !== target.entityId) {
+        if (action === ACTION_MOVE && canMoveToTarget(selectedEntity, target)) {
             openConfirmation(target);
             return true;
         }
-        if (action === ACTION_MOVE_ROOT && selectedEntity?.entityId) {
+        if (action === ACTION_MOVE_ROOT && canMoveToRoot(selectedEntity)) {
             openConfirmation(null);
             return true;
         }
@@ -151,14 +158,20 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
         const confirmButton = dialog.querySelector("[data-move-confirm]");
         confirmButton.disabled = true;
         try {
-            const response = await fetch(`/master/${entityType}/move`, {
+            const moveEndpoint = MOVE_ENDPOINTS[entityType];
+            if (!moveEndpoint) {
+                throw new Error(`No move endpoint is configured for ${entityType}.`);
+            }
+            const response = await fetch(moveEndpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "text/plain" },
                 body: JSON.stringify({
                     fromEntityId: selectedEntity.entityId,
                     fromCode: selectedEntity.code,
+                    fromName: selectedEntity.name,
                     toEntityId: pendingTarget?.entityId ?? null,
-                    toCode: pendingTarget?.code ?? null
+                    toCode: pendingTarget?.code ?? null,
+                    toName: pendingTarget?.name ?? null
                 })
             });
             const responseText = (await response.text()).trim();
@@ -190,6 +203,25 @@ function normalizeEntity(entity) {
 
 function formatEntityLabel(entity) {
     return [entity?.code, entity?.name].filter(Boolean).join(" ");
+}
+
+function canMoveToTarget(source, target) {
+    if (!source?.entityId || !target?.entityId || source.entityId === target.entityId) {
+        return false;
+    }
+
+    const currentParentCode = getParentCode(source.code);
+    return currentParentCode === null || currentParentCode.toLowerCase() !== target.code.toLowerCase();
+}
+
+function canMoveToRoot(source) {
+    return Boolean(source?.entityId && getParentCode(source.code) !== null);
+}
+
+function getParentCode(code) {
+    const normalizedCode = String(code ?? "").trim();
+    const lastSeparatorIndex = normalizedCode.lastIndexOf(".");
+    return lastSeparatorIndex < 0 ? null : normalizedCode.substring(0, lastSeparatorIndex);
 }
 
 function ensureStylesheet() {

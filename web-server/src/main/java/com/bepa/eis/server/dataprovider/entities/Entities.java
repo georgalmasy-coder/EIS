@@ -35,7 +35,7 @@ public class Entities  {
 
         ListOfElements list = new ListOfElements(getWebSession(), elementName);
 
-        for (Entity entity :listOfEntities) {
+        for (Entity entity : listOfEntities) {
             list.addElement(entity);
         }
 

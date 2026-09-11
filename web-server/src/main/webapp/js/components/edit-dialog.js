@@ -61,6 +61,28 @@ function handleDialogMessage(event) {
         return;
     }
 
+    if (data.type === "navigate-edit") {
+        const payload = data.payload || {};
+        const nextOptions = {
+            ...record.baseOptions,
+            page: payload.page || "",
+            mode: payload.mode || "edit",
+            id: payload.id || "",
+            version: "",
+            readOnly: false,
+            title: payload.title || "",
+            dialogId: record.dialogId
+        };
+
+        record.navigationStack.push({ ...record.baseOptions });
+        navigateDialogRecord(record, nextOptions);
+        return;
+    }
+
+    if ((data.type === "close" || data.type === "saved") && restorePreviousDialog(record)) {
+        return;
+    }
+
     const reason = data.payload?.reason || data.type;
 
     closeDialogRecord(record, reason, data.payload || {});
@@ -132,6 +154,27 @@ function buildDialogUrl(options, dialogId) {
     return url.toString();
 }
 
+function navigateDialogRecord(record, options) {
+    record.baseOptions = {
+        ...options,
+        dialogId: record.dialogId
+    };
+    record.dialog.setAttribute("aria-label", record.baseOptions.title || "Edit dialog");
+    record.iframe.title = record.baseOptions.title || "Edit dialog";
+    record.iframe.src = buildDialogUrl(record.baseOptions, record.dialogId);
+}
+
+function restorePreviousDialog(record) {
+    const previousOptions = record.navigationStack.pop();
+
+    if (!previousOptions) {
+        return false;
+    }
+
+    navigateDialogRecord(record, previousOptions);
+    return true;
+}
+
 function createDialogElement(options, dialogId) {
     const dialog = document.createElement("dialog");
     dialog.className = `eis-edit-dialog ${options.dialogClassName || ""}`.trim();
@@ -181,6 +224,7 @@ export function openEditDialog(options = {}) {
             ...options,
             dialogId
         },
+        navigationStack: [],
         onStatus: options.onStatus || null
     };
 
@@ -188,6 +232,9 @@ export function openEditDialog(options = {}) {
 
     dialog.addEventListener("cancel", (event) => {
         event.preventDefault();
+        if (restorePreviousDialog(record)) {
+            return;
+        }
         closeDialogRecord(record, "cancel");
     });
 

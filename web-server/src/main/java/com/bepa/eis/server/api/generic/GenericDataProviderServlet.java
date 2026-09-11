@@ -43,7 +43,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-abstract public class GenericDataProviderServlet extends HttpServlet {
+abstract public class GenericDataProviderServlet extends GenericServlet {
 
     private static final Logger log = LoggerFactory.getLogger(GenericDataProviderServlet.class);
 
@@ -179,17 +179,10 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             // They are just used to indicate that the request is invalid.
             // We don't want to log them as errors.
         } else {
-
-            IncidentProvider incidentProvider = new IncidentProvider(webSession);
-            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
+            getIncidentProvider().createProviderServiceIncident(SeverityType.HIGH, module, throwable);
 
             throw new ServletException("Error processing request", throwable);
         }
-    }
-
-    public String getCommandParameter(HttpServletRequest request) {
-        String command = request.getParameter("cmd");
-        return command != null ? command.trim().toLowerCase() : "";
     }
 
     protected String buildDownloadFileName(WebSession webSession, String entityLabel, String extension) throws Exception {
@@ -268,6 +261,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
 
     }
 
+/* GFA
     private WebSession getWebSession(String sessionId) throws SQLException {
         WebSession ws;
         if (GlobalConfiguration.isUdvMode()) {
@@ -284,7 +278,8 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         }
         return ws;
     }
-
+*/
+/* GFA
     public String getSessionIdFromRequest(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -292,6 +287,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         }
         return (String) session.getAttribute("sessionID");
     }
+*/
 
     /**
      * Convenience method that serializes into an XML string.
@@ -603,16 +599,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         return value == null || value.isBlank() ? fallback : value;
     }
 
-    public WebSession getWebSessionFromRequest(HttpServletRequest request) {
-        try {
-            String sessionId = getSessionIdFromRequest(request);
-            return getWebSession(sessionId);
-        } catch (Exception e) {
-            log.error("Error getting session for page viewer: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-    }
-
+/* GFA
     private WebSession getWebSessionFromRequest(
             HttpServletRequest request,
             HttpServletResponse response
@@ -649,6 +636,9 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
             return null;
         }
     }
+*/
+
+/* GFA
 
     private void redirectToSessionExpired(
             HttpServletRequest request,
@@ -669,6 +659,7 @@ abstract public class GenericDataProviderServlet extends HttpServlet {
         this.webSession = webSession;
     }
 
+*/
     public Integer toInteger(String value) {
         try {
             if (value == null || value.isBlank()) {

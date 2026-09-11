@@ -3,7 +3,10 @@ package com.bepa.eis.server.api.generic;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.misc.IncidentProvider;
+import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.web.application.enums.theme.Theme;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 
@@ -29,6 +33,8 @@ import java.sql.SQLException;
 public class GenericServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(GenericServlet.class);
+
+    private WebSession webSession;
 
     public WebSession getSession(HttpServletRequest request) {
         WebSession ws;
@@ -105,6 +111,104 @@ public class GenericServlet extends HttpServlet {
      */
     public String toXmlString(Document doc) throws ParserConfigurationException, TransformerException {
         return toXmlString(doc, true);
+    }
+
+    public WebSession getWebSessionFromRequest(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException {
+        if (GlobalConfiguration.isUdvMode()) {
+            try {
+                return getWebSession(null);
+            } catch (SQLException impossible) {
+                throw new ServletException(impossible);
+            }
+        }
+
+        String sessionId = getSessionIdFromRequest(request);
+        if (sessionId == null || sessionId.isBlank()) {
+            redirectToSessionExpired(request, response);
+            return null;
+        }
+
+        try {
+            WebSession resolvedSession = getWebSession(sessionId);
+            if (resolvedSession == null) {
+                redirectToSessionExpired(request, response);
+                return null;
+            }
+
+            HttpSession httpSession = request.getSession(false);
+            if (httpSession != null && resolvedSession.getThemeId() != null) {
+                httpSession.setAttribute("eis.theme.id", resolvedSession.getThemeId());
+            }
+            return resolvedSession;
+        } catch (SQLException e) {
+            log.warn("Session could not be read; redirecting to session-expired page. sessionId={}", sessionId, e);
+            redirectToSessionExpired(request, response);
+            return null;
+        }
+    }
+
+    public String getSessionIdFromRequest(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        return (String) session.getAttribute("sessionID");
+    }
+
+    private void redirectToSessionExpired(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ServletException {
+        try {
+            response.sendRedirect(request.getContextPath() + "/session-expired.html");
+        } catch (IOException e) {
+            throw new ServletException("Unable to redirect to the session-expired page", e);
+        }
+    }
+
+    public WebSession getWebSession() {
+        return webSession;
+    }
+
+    public void setWebSession(WebSession webSession) {
+        this.webSession = webSession;
+    }
+
+    public WebSession getWebSession(String sessionId) throws SQLException {
+        WebSession ws;
+        if (GlobalConfiguration.isUdvMode()) {
+            ws = new WebSession();
+            ws.setId(1);
+            ws.setSessionId("georg.almasy@mail.com");
+            ws.setCustomerId(GlobalConfiguration.getDefaultCustomerId());
+            ws.setProjectId(GlobalConfiguration.getDefaultProjectId());
+            ws.setUserId(1);
+            return ws;
+        } else {
+            SessionProvider sessionProvider = new SessionProvider(null);
+            ws = sessionProvider.getBySessionId(sessionId);
+        }
+        return ws;
+    }
+
+    public String getCommandParameter(HttpServletRequest request) {
+        String command = request.getParameter("cmd");
+        return command != null ? command.trim().toLowerCase() : "";
+    }
+
+    public String getModule(HttpServletRequest request) {
+        return request.getServletPath() +  "." + getCommandParameter(request);
+    }
+
+    public IncidentProvider getIncidentProvider() {
+        return new IncidentProvider(webSession);
+    }
+
+    public PerformanceProvider getPerformanceProvider () {
+        return new PerformanceProvider(getWebSession());
     }
 
 }

@@ -132,6 +132,17 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND EntityType = ? " +
                     "AND EntityId = ? ";
 
+
+    private static final String MAX_ROOT_ENTITY_ID_SQL =
+            "SELECT COUNT(1) AS NUMBER_OF_ROOT_ENTITIES " +
+                    "FROM ENTITY_ELEMENT " +
+                    "WHERE CustomerId = ? " +
+                    "AND ProjectId = ? " +
+                    "AND EntityType = ? " +
+                    "AND version = 1 " +
+                    "AND StringValue NOT LIKE '%.%' " +
+                    "AND EntityDataElementType = ? ";
+
     private static final String SELECT_ACTIVE_ENTITY_COUNT_SQL =
             "SELECT COUNT(EntityId) AS ACTIVE_ENTITY_COUNT " +
                     "FROM ENTITY " +
@@ -187,6 +198,93 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND EntityType = ? " +
                     "AND EntityId = ? ";
 
+    private static final String COPY_ENTITY_TO_NEW_VERSION_SQL =
+            "INSERT INTO [ENTITY] (" +
+                    "CustomerId, ProjectId, EntityId, Version, ChangedByUserId, ChangedDateTime, Latest, EntityType, Active" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, EntityId, ?, ?, CURRENT_TIMESTAMP, 1, EntityType, 0 " +
+                    "FROM [ENTITY] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ? AND Version = ?";
+
+    private static final String COPY_ENTITY_ELEMENTS_TO_NEW_VERSION_SQL =
+            "INSERT INTO [ENTITY_ELEMENT] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, EntityDataElementType, " +
+                    "IntegerValue, DoubleValue, CurrencyValue, StringValue, LocalDateValue, LocalDateTimeValue, BooleanValue" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, EntityId, ?, EntityType, EntityDataElementType, " +
+                    "IntegerValue, DoubleValue, CurrencyValue, StringValue, LocalDateValue, LocalDateTimeValue, BooleanValue " +
+                    "FROM [ENTITY_ELEMENT] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ? AND Version = ?";
+
+    private static final String COPY_ENTITY_TO_NEW_ENTITY_ID_SQL =
+            "INSERT INTO [ENTITY] (" +
+                    "CustomerId, ProjectId, EntityId, Version, ChangedByUserId, ChangedDateTime, Latest, EntityType, Active" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, ?, Version, ChangedByUserId, ChangedDateTime, Latest, EntityType, " +
+                    "CASE WHEN Version = (SELECT MAX(Version) FROM [ENTITY] E2 " +
+                    "WHERE E2.CustomerId = ? AND E2.ProjectId = ? AND E2.EntityType = ? AND E2.EntityId = ?) " +
+                    "THEN 1 ELSE Active END " +
+                    "FROM [ENTITY] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ?";
+
+    private static final String COPY_ENTITY_ELEMENTS_TO_NEW_ENTITY_ID_SQL =
+            "INSERT INTO [ENTITY_ELEMENT] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, EntityDataElementType, " +
+                    "IntegerValue, DoubleValue, CurrencyValue, StringValue, LocalDateValue, LocalDateTimeValue, BooleanValue" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, ?, Version, EntityType, EntityDataElementType, " +
+                    "IntegerValue, DoubleValue, CurrencyValue, StringValue, LocalDateValue, LocalDateTimeValue, BooleanValue " +
+                    "FROM [ENTITY_ELEMENT] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ?";
+
+    private static final String COPY_ENTITY_ATTACHMENTS_TO_NEW_VERSION_SQL =
+            "INSERT INTO [ENTITY_ATTACHMENTS] (" +
+                    "CustomerId, ProjectId, EntityId, EntityType, Version, CreatedById, CreatedTime, EntityAttachmentBlobPK" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, EntityId, EntityType, ?, CreatedById, CreatedTime, EntityAttachmentBlobPK " +
+                    "FROM [ENTITY_ATTACHMENTS] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ? AND Version = ?";
+
+    private static final String COPY_ENTITY_LINKS_TO_NEW_VERSION_SQL =
+            "INSERT INTO [ENTITY_LINKS] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, Description, LinkUrl, CreatedById, CreatedTime" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, EntityId, ?, EntityType, Description, LinkUrl, CreatedById, CreatedTime " +
+                    "FROM [ENTITY_LINKS] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ? AND Version = ?";
+
+    private static final String COPY_ENTITY_NOTES_TO_NEW_VERSION_SQL =
+            "INSERT INTO [ENTITY_NOTES] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, NoteText, CreatedById, CreatedTime" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, EntityId, ?, EntityType, NoteText, CreatedById, CreatedTime " +
+                    "FROM [ENTITY_NOTES] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ? AND Version = ?";
+
+    private static final String COPY_ENTITY_ATTACHMENTS_TO_NEW_ENTITY_ID_SQL =
+            "INSERT INTO [ENTITY_ATTACHMENTS] (" +
+                    "CustomerId, ProjectId, EntityId, EntityType, Version, CreatedById, CreatedTime, EntityAttachmentBlobPK" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, ?, EntityType, Version, CreatedById, CreatedTime, EntityAttachmentBlobPK " +
+                    "FROM [ENTITY_ATTACHMENTS] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ?";
+
+    private static final String COPY_ENTITY_LINKS_TO_NEW_ENTITY_ID_SQL =
+            "INSERT INTO [ENTITY_LINKS] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, Description, LinkUrl, CreatedById, CreatedTime" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, ?, Version, EntityType, Description, LinkUrl, CreatedById, CreatedTime " +
+                    "FROM [ENTITY_LINKS] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ?";
+
+    private static final String COPY_ENTITY_NOTES_TO_NEW_ENTITY_ID_SQL =
+            "INSERT INTO [ENTITY_NOTES] (" +
+                    "CustomerId, ProjectId, EntityId, Version, EntityType, NoteText, CreatedById, CreatedTime" +
+                    ") " +
+                    "SELECT CustomerId, ProjectId, ?, Version, EntityType, NoteText, CreatedById, CreatedTime " +
+                    "FROM [ENTITY_NOTES] " +
+                    "WHERE CustomerId = ? AND ProjectId = ? AND EntityType = ? AND EntityId = ?";
+
 
     private static final String SELECT_BASELINE_ENTITY_BY_PROJECT_ID_SQL =
             "SELECT E.CustomerId, E.ProjectId, E.EntityId, E.EntityType, E.Version, E.ChangedByUserId, E.ChangedDateTime, E.Latest, E.Active " +
@@ -212,6 +310,37 @@ abstract public class EntityProvider extends GenericProvider {
                     "AND E.EntityType = ? " +
                     "AND E.EntityId = ? " +
                     "AND EE.EntityDataElementType = ?";
+
+    private static final String SELECT_ACTIVE_ENTITY_CODES_SQL =
+            "SELECT EE.StringValue " +
+                    "FROM ENTITY E, ENTITY_ELEMENT EE " +
+                    "WHERE E.CustomerId = EE.CustomerId " +
+                    "AND E.ProjectId = EE.ProjectId " +
+                    "AND E.EntityType = EE.EntityType " +
+                    "AND E.EntityId = EE.EntityId " +
+                    "AND E.Version = EE.Version " +
+                    "AND E.Latest = 1 " +
+                    "AND E.Active = 1 " +
+                    "AND E.CustomerId = ? " +
+                    "AND E.ProjectId = ? " +
+                    "AND E.EntityType = ? " +
+                    "AND EE.EntityDataElementType = ?";
+
+    private static final String UPDATE_LATEST_ENTITY_ELEMENT_STRING_VALUE_SQL =
+            "UPDATE EE SET EE.StringValue = ? " +
+                    "FROM ENTITY_ELEMENT EE INNER JOIN ENTITY E " +
+                    "ON E.CustomerId = EE.CustomerId AND E.ProjectId = EE.ProjectId " +
+                    "AND E.EntityType = EE.EntityType AND E.EntityId = EE.EntityId AND E.Version = EE.Version " +
+                    "WHERE E.CustomerId = ? AND E.ProjectId = ? AND E.EntityType = ? " +
+                    "AND E.EntityId = ? AND E.Latest = 1 AND EE.EntityDataElementType = ?";
+
+    private static final String UPDATE_LATEST_ENTITY_ELEMENT_INTEGER_VALUE_SQL =
+            "UPDATE EE SET EE.IntegerValue = ? " +
+                    "FROM ENTITY_ELEMENT EE INNER JOIN ENTITY E " +
+                    "ON E.CustomerId = EE.CustomerId AND E.ProjectId = EE.ProjectId " +
+                    "AND E.EntityType = EE.EntityType AND E.EntityId = EE.EntityId AND E.Version = EE.Version " +
+                    "WHERE E.CustomerId = ? AND E.ProjectId = ? AND E.EntityType = ? " +
+                    "AND E.EntityId = ? AND E.Latest = 1 AND EE.EntityDataElementType = ?";
 
 
     public List<EntityRecord> getListOfEntityRecords(EntityType entityType, boolean includeInactive) throws SQLException {
@@ -646,10 +775,109 @@ abstract public class EntityProvider extends GenericProvider {
 
     }
 
+    public String getNextAvailableRootEntityCode(Connection con, AbstractEntity entity) throws SQLException {
+
+        Integer numberOfRootEntities = 0;
+
+        try (PreparedStatement ps = con.prepareStatement(MAX_ROOT_ENTITY_ID_SQL)) {
+
+            setInt(ps, entity.getCustomerId().getValue(), 1);
+            setInt(ps, entity.getProjectId().getValue(), 2);
+            setInt(ps, entity.getEntityType().getId(), 3);
+            setInt(ps, entity.getEntityType().getEntityCodeColumn().getId(), 4);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    numberOfRootEntities = rs.getInt("NUMBER_OF_ROOT_ENTITIES");
+                }
+            }
+        }
+
+        numberOfRootEntities++;
+
+        String nextRootEntityCode = entity.getEntityType().getIdPrefix() + numberOfRootEntities;
+
+        return nextRootEntityCode;
+    }
+
+    public String getNextAvailableChildEntityCode(Connection con, AbstractEntity entity,
+                                                  String parentCode) throws SQLException {
+        int highestChildNumber = 0;
+        String childPrefix = parentCode + ".";
+
+        try (PreparedStatement ps = con.prepareStatement(SELECT_ACTIVE_ENTITY_CODES_SQL)) {
+            ps.setInt(1, entity.getCustomerId().getValue());
+            ps.setInt(2, entity.getProjectId().getValue());
+            ps.setInt(3, entity.getEntityType().getId());
+            ps.setInt(4, entity.getEntityType().getEntityCodeColumn().getId());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("StringValue");
+                    if (code == null || !code.startsWith(childPrefix)) {
+                        continue;
+                    }
+
+                    String relativeCode = code.substring(childPrefix.length());
+                    if (relativeCode.isEmpty() || relativeCode.contains(".")) {
+                        continue;
+                    }
+
+                    try {
+                        highestChildNumber = Math.max(highestChildNumber, Integer.parseInt(relativeCode));
+                    } catch (NumberFormatException e) {
+                        log.warn("Ignoring invalid direct child code {} below {}", code, parentCode);
+                    }
+                }
+            }
+        }
+
+        return childPrefix + (highestChildNumber + 1);
+    }
+
+    public void updateCopiedEntityCode(Connection con, AbstractEntity entity, int newEntityId,
+                                       String newCode) throws SQLException {
+        int codeLevel = newCode.split("\\.").length;
+
+        try (PreparedStatement ps = con.prepareStatement(UPDATE_LATEST_ENTITY_ELEMENT_STRING_VALUE_SQL)) {
+            ps.setString(1, newCode);
+            setCopiedEntityElementKeyParameters(ps, entity, newEntityId,
+                    entity.getEntityType().getEntityCodeColumn().getId());
+            verifySingleUpdatedRow(ps.executeUpdate(), "code", newEntityId);
+        }
+
+        try (PreparedStatement ps = con.prepareStatement(UPDATE_LATEST_ENTITY_ELEMENT_INTEGER_VALUE_SQL)) {
+            ps.setInt(1, codeLevel);
+            setCopiedEntityElementKeyParameters(ps, entity, newEntityId, EntityDataElement.CODELEVEL.getId());
+            verifySingleUpdatedRow(ps.executeUpdate(), "code level", newEntityId);
+        }
+    }
+
+    private void setCopiedEntityElementKeyParameters(PreparedStatement ps, AbstractEntity entity,
+                                                      int entityId, int dataElementType) throws SQLException {
+        ps.setInt(2, entity.getCustomerId().getValue());
+        ps.setInt(3, entity.getProjectId().getValue());
+        ps.setInt(4, entity.getEntityType().getId());
+        ps.setInt(5, entityId);
+        ps.setInt(6, dataElementType);
+    }
+
+    private void verifySingleUpdatedRow(int updatedRows, String fieldName, int entityId) throws SQLException {
+        if (updatedRows != 1) {
+            throw new SQLException("Expected to update one " + fieldName + " record for entityId="
+                    + entityId + ", but updated " + updatedRows);
+        }
+    }
+
     private Integer findNextAvailableEntityId(AbstractEntity entity) throws SQLException {
+        try (Connection con = getDataSource().getConnection()) {
+            return findNextAvailableEntityId(con, entity);
+        }
+    }
+
+    private Integer findNextAvailableEntityId(Connection con, AbstractEntity entity) throws SQLException {
         int nextAvailableEntityId;
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(MAX_ENTITY_ID_SQL)) {
+        try (PreparedStatement ps = con.prepareStatement(MAX_ENTITY_ID_SQL)) {
 
             setInt(ps, entity.getCustomerId().getValue(), 1);
             setInt(ps, entity.getProjectId().getValue(), 2);
@@ -665,6 +893,78 @@ abstract public class EntityProvider extends GenericProvider {
             }
         }
         return nextAvailableEntityId;
+    }
+
+    /** Creates an inactive next version and copies its data elements. The caller owns the transaction. */
+    public Integer createInactiveEntityVersion(Connection con, AbstractEntity entity) throws SQLException {
+        int sourceVersion = entity.getVersion().getValue();
+        int newVersion = sourceVersion + 1;
+
+        clearLatestIndicatorOnEntity(con, entity);
+
+        try (PreparedStatement ps = con.prepareStatement(COPY_ENTITY_TO_NEW_VERSION_SQL)) {
+            ps.setInt(1, newVersion);
+            ps.setInt(2, getWebSession().getUserId());
+            setEntityKeyParameters(ps, entity, 3);
+            ps.setInt(7, sourceVersion);
+            if (ps.executeUpdate() != 1) {
+                throw new SQLException("Could not copy entity to version " + newVersion
+                        + " for entityId=" + entity.getEntityId().getValue());
+            }
+        }
+
+        copyRowsToNewVersion(con, COPY_ENTITY_ELEMENTS_TO_NEW_VERSION_SQL, entity, sourceVersion, newVersion);
+        copyRowsToNewVersion(con, COPY_ENTITY_ATTACHMENTS_TO_NEW_VERSION_SQL, entity, sourceVersion, newVersion);
+        copyRowsToNewVersion(con, COPY_ENTITY_LINKS_TO_NEW_VERSION_SQL, entity, sourceVersion, newVersion);
+        copyRowsToNewVersion(con, COPY_ENTITY_NOTES_TO_NEW_VERSION_SQL, entity, sourceVersion, newVersion);
+        return newVersion;
+    }
+
+    /** Copies the complete entity history to a new id. The caller owns the transaction. */
+    public Integer copyEntityToNewEntityId(Connection con, AbstractEntity entity) throws SQLException {
+        int newEntityId = findNextAvailableEntityId(con, entity);
+
+        try (PreparedStatement ps = con.prepareStatement(COPY_ENTITY_TO_NEW_ENTITY_ID_SQL)) {
+            ps.setInt(1, newEntityId);
+            setEntityKeyParameters(ps, entity, 2);
+            setEntityKeyParameters(ps, entity, 6);
+            if (ps.executeUpdate() == 0) {
+                throw new SQLException("Could not copy entity history for entityId="
+                        + entity.getEntityId().getValue());
+            }
+        }
+
+        copyRowsToNewEntityId(con, COPY_ENTITY_ELEMENTS_TO_NEW_ENTITY_ID_SQL, entity, newEntityId);
+        copyRowsToNewEntityId(con, COPY_ENTITY_ATTACHMENTS_TO_NEW_ENTITY_ID_SQL, entity, newEntityId);
+        copyRowsToNewEntityId(con, COPY_ENTITY_LINKS_TO_NEW_ENTITY_ID_SQL, entity, newEntityId);
+        copyRowsToNewEntityId(con, COPY_ENTITY_NOTES_TO_NEW_ENTITY_ID_SQL, entity, newEntityId);
+        return newEntityId;
+    }
+
+    private void copyRowsToNewVersion(Connection con, String sql, AbstractEntity entity,
+                                      int sourceVersion, int newVersion) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, newVersion);
+            setEntityKeyParameters(ps, entity, 2);
+            ps.setInt(6, sourceVersion);
+            ps.executeUpdate();
+        }
+    }
+
+    private void copyRowsToNewEntityId(Connection con, String sql, AbstractEntity entity,
+                                       int newEntityId) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, newEntityId);
+            setEntityKeyParameters(ps, entity, 2);
+            ps.executeUpdate();
+        }
+    }
+
+    private void setEntityKeyParameters(PreparedStatement ps, AbstractEntity entity, int startIndex) throws SQLException {
+        ps.setInt(startIndex, entity.getCustomerId().getValue());
+        ps.setInt(startIndex + 1, entity.getProjectId().getValue());
+        ps.setInt(startIndex + 2, entity.getEntityType().getId());
+        ps.setInt(startIndex + 3, entity.getEntityId().getValue());
     }
 
     private Boolean getPrevActiveStatus(AbstractEntity entity) throws SQLException {

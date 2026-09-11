@@ -57,10 +57,28 @@ public enum SBSCodeTypes {
                 }
             }
         } catch (Exception e) {
+            // Ignore
         }
 
 
         return FUNCTIONAL;
     }
 
+    public static SBSCodeTypes fromPrefix(String code) {
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            String prefix = code.trim().substring(0, 1);
+            for (SBSCodeTypes type : values()) {
+                if (type.getPrefix().equals(prefix)) {
+                    return type;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return null;
+    }
 }
