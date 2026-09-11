@@ -59,7 +59,9 @@ function init() {
 function updateInterfaceManagementButtonVisibility() {
     const routesByButtonId = {
         stakeholderBtnInterfaceManagement: "/web/view?page=stk-interfaces",
-        systemBtnInterfaceManagement: "/web/view?page=sys-interfaces"
+        stakeholderBtnTraceabilityMatrix: "/web/view?page=basistraceabilitymatrix",
+        systemBtnInterfaceManagement: "/web/view?page=sys-interfaces",
+        systemBtnTraceabilityMatrix: "/web/view?page=basistraceabilitymatrix"
     };
 
     Object.entries(routesByButtonId).forEach(([buttonId, route]) => {
