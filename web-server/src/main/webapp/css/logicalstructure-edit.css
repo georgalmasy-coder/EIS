@@ -62,6 +62,20 @@ body.logicalstructure-edit-document{
     line-height: 1.2;
 }
 
+.logicalstructure-edit-title-group .entity-summary{
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 8px 0 14px;
+    text-align: left;
+}
+
+.logicalstructure-edit-title-group .entity-summary-name{
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+}
+
 .logicalstructure-edit-mode-label{
     color: var(--muted);
     font-size: 13px;
@@ -523,7 +537,7 @@ body.logicalstructure-edit-document{
 
 .note-editor-label,
 .attachment-editor-label{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
 }
 
@@ -546,7 +560,7 @@ body.logicalstructure-edit-document{
 }
 
 .note-textarea:focus{
-    border-color: var(--app-input-focus-ring);
+    border-color: var(--app-input-border);
     box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
@@ -581,7 +595,7 @@ body.logicalstructure-edit-document{
 
 .attachment-input:focus,
 .attachment-textarea:focus{
-    border-color: var(--app-input-focus-ring);
+    border-color: var(--app-input-border);
     box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 

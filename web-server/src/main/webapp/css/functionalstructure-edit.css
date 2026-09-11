@@ -62,6 +62,20 @@ body.functionalstructure-edit-document{
     line-height: 1.2;
 }
 
+.functionalstructure-edit-title-group .entity-summary{
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 8px 0 14px;
+    text-align: left;
+}
+
+.functionalstructure-edit-title-group .entity-summary-name{
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+}
+
 .functionalstructure-edit-mode-label{
     color: var(--muted);
     font-size: 13px;
@@ -502,7 +516,7 @@ body.functionalstructure-edit-document{
 
 .note-editor-label,
 .attachment-editor-label{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
 }
 
@@ -513,9 +527,9 @@ body.functionalstructure-edit-document{
     min-height: 220px;
     resize: vertical;
     overflow: auto;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -525,8 +539,8 @@ body.functionalstructure-edit-document{
 }
 
 .note-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .attachment-editor{
@@ -543,9 +557,9 @@ body.functionalstructure-edit-document{
 .attachment-input,
 .attachment-textarea{
     width: 100%;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -560,8 +574,8 @@ body.functionalstructure-edit-document{
 
 .attachment-input:focus,
 .attachment-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 body.functionalstructure-edit-readonly .page-field input,

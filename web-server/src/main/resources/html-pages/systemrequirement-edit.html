@@ -50,6 +50,10 @@
             <div class="section-header systemrequirement-edit-section-header">
                 <div class="systemrequirement-edit-title-group">
                     <h2 id="pageTitle">Systems Requirement</h2>
+                    <div class="systemrequirement-edit-entity-summary entity-summary" aria-label="Current system requirement">
+                        <span class="entity-summary-code" id="entitySummaryCode">—</span>
+                        <span class="entity-summary-name" id="entitySummaryName">—</span>
+                    </div>
                     <div id="pageModeLabel" class="systemrequirement-edit-mode-label" hidden></div>
                 </div>
 
@@ -72,11 +76,6 @@
 
             <div id="readOnlyBanner" class="systemrequirement-readonly-banner" hidden>
                 Historical version is opened in read-only mode. Save and change actions are disabled.
-            </div>
-
-            <div class="systemrequirement-edit-status-row">
-                <div class="page-dialog-status" id="dlgStatus">Idle</div>
-                <div class="systemrequirement-edit-entity-meta" id="entityMeta">—</div>
             </div>
 
             <div class="page-tab-bar systemrequirement-edit-tab-bar" role="tablist" aria-label="System requirement tabs">

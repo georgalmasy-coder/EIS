@@ -813,3 +813,27 @@ body.theme-black .stakeholderrequirement-view-button.is-active {
     border-color: var(--app-accent-hover) !important;
     color: #ffffff !important;
 }
+
+.entity-summary{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    margin: 4px 0 10px;
+    color: var(--app-text-secondary);
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.entity-summary-code{
+    flex: 0 0 auto;
+    color: var(--app-text-primary);
+    font-weight: 700;
+}
+
+.entity-summary-name{
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

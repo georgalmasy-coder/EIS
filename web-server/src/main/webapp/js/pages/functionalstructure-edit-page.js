@@ -50,6 +50,11 @@ const RESIZABLE_TABLES = [
     { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 }
 ];
 
+const SUMMARY_FIELDS = {
+    code: ["FunctionalCode", "FunctionCode", "Code", "EntityId"],
+    name: ["FunctionalName", "FunctionName", "Name"]
+};
+
 const MODES = {
     edit: "edit",
     editVersion: "edit-version",
@@ -333,7 +338,7 @@ function applyModeUi() {
     }
 
     setText("pageModeLabel", getModeLabel(), "");
-    setText("entityMeta", getEntityMetaLabel(), "");
+    updateEntitySummary();
 
     if (state.readOnly) {
         setFormFieldsReadOnly();
@@ -445,10 +450,33 @@ function renderBasisInfoFromDoc(doc) {
     basisInfoFields.innerHTML = Array.from(detailNode.children || [])
         .map(renderBasisInfoFieldMarkup)
         .join("");
+    updateEntitySummary();
+    basisInfoFields.addEventListener("input", updateEntitySummary);
+    basisInfoFields.addEventListener("change", updateEntitySummary);
 
     if (state.readOnly) {
         setFormFieldsReadOnly();
     }
+}
+
+function updateEntitySummary() {
+    setText("entitySummaryCode", getSummaryFieldValue(SUMMARY_FIELDS.code) || "—");
+    setText("entitySummaryName", getSummaryFieldValue(SUMMARY_FIELDS.name) || "—");
+}
+
+function getSummaryFieldValue(fieldNames) {
+    for (const fieldName of fieldNames) {
+        const field = Array.from(document.querySelectorAll("#basisInfoFields [data-field]"))
+            .find((element) => element.getAttribute("data-field") === fieldName);
+        const value = field?.type === "checkbox"
+            ? (field.checked ? "Yes" : "No")
+            : (field?.value || "").trim();
+        if (value) {
+            return value;
+        }
+    }
+
+    return getFirstFieldRawValue(state.detailNode, fieldNames, "");
 }
 
 function renderBasisInfoFieldMarkup(field) {

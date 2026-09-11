@@ -53,7 +53,7 @@
 }
 
 .attachments-table-empty{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     padding: 16px;
     font-size: 13px;
 }
@@ -163,7 +163,7 @@
 }
 
 #attachmentDialog .page-dialog-status{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
     margin-bottom: 14px;
 }
@@ -187,7 +187,7 @@
 
 .attachment-editor-label{
     display: block;
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
     margin: 0 0 8px;
 }
@@ -198,9 +198,9 @@
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -208,8 +208,8 @@
 }
 
 .attachment-input:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 .attachment-textarea{
@@ -222,9 +222,9 @@
     max-height: 220px;
     resize: vertical;
     overflow: auto;
-    border: 1px solid var(--border);
-    background: rgba(15,23,42,.65);
-    color: var(--text);
+    border: 1px solid var(--app-input-border);
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
     padding: 8px 10px;
     border-radius: 10px;
     outline: none;
@@ -233,13 +233,13 @@
 }
 
 .attachment-textarea:focus{
-    border-color: rgba(96,165,250,.65);
-    box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+    border-color: var(--app-input-border);
+    box-shadow: 0 0 0 3px var(--app-input-focus-ring);
 }
 
 #attachmentFileInfo{
     margin: 0;
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -254,7 +254,7 @@
     gap: 10px;
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid rgba(35,52,84,.65);
+    border-top: 1px solid var(--app-border-default);
     overflow: visible;
 }
 

@@ -62,6 +62,20 @@ body.stakeholderrequirement-edit-document{
     line-height: 1.2;
 }
 
+.stakeholderrequirement-edit-title-group .entity-summary{
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 8px 0 14px;
+    text-align: left;
+}
+
+.stakeholderrequirement-edit-title-group .entity-summary-name{
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+}
+
 .stakeholderrequirement-edit-mode-label{
     color: var(--muted);
     font-size: 13px;

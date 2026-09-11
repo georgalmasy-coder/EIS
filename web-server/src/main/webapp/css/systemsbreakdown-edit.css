@@ -62,6 +62,20 @@ body.systemsbreakdown-edit-document{
     line-height: 1.2;
 }
 
+.systemsbreakdown-edit-title-group .entity-summary{
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 8px 0 14px;
+    text-align: left;
+}
+
+.systemsbreakdown-edit-title-group .entity-summary-name{
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+}
+
 .systemsbreakdown-edit-mode-label{
     color: var(--muted);
     font-size: 13px;
@@ -514,7 +528,7 @@ body.systemsbreakdown-edit-document{
 
 .note-editor-label,
 .attachment-editor-label{
-    color: var(--muted);
+    color: var(--app-text-secondary);
     font-size: 13px;
 }
 
