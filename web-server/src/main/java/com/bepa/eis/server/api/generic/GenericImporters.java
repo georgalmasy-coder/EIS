@@ -54,35 +54,46 @@ abstract public class GenericImporters {
     }
 
     public void previewImport(HttpServletResponse response) throws Exception {
-        ImportValidationResult validationResult = loadAndValidateImportRows();
-        JsonUtil.writeJson(response, HttpServletResponse.SC_OK, validationResult.toJson());
+        try {
+            ImportValidationResult validationResult = loadAndValidateImportRows();
+            JsonUtil.writeJson(response, HttpServletResponse.SC_OK, validationResult.toJson());
+        } catch (Exception e) {
+            logImportFailure("preview", e);
+            throw e;
+        }
     }
 
     public int importEntities() throws Exception {
-        ImportValidationResult validationResult = loadAndValidateImportRows();
+        try {
+            ImportValidationResult validationResult = loadAndValidateImportRows();
 
-        if (!validationResult.allValid()) {
-            throw new IllegalArgumentException("Import contains validation errors. Review the preview and fix the highlighted rows.");
+            if (!validationResult.allValid()) {
+                throw new IllegalArgumentException("Import contains validation errors. Review the preview and fix the highlighted rows.");
+            }
+
+            EntityProvider provider = getProvider();
+            List<AbstractEntity> entities = provider.toEntities(webSession, validationResult.importRows());
+
+            log.info("Converted file to import entities : {} {}", entities.size(), getEntityType().getDescription());
+
+            for (AbstractEntity entity : entities) {
+                entity.setChangedByUserId(webSession.getUserId());
+                entity.validateEntity(true);
+            }
+
+            log.info("Validated import entities : {} {}", entities.size(), getEntityType().getDescription());
+
+            for (AbstractEntity entity : entities) {
+                provider.persist(entity);
+            }
+
+            log.info("Persisted import entities : {} {}", entities.size(), getEntityType().getDescription());
+
+            return entities.size();
+        } catch (Exception e) {
+            logImportFailure("import", e);
+            throw e;
         }
-
-        EntityProvider provider = getProvider();
-        List<AbstractEntity> entities = provider.toEntities(webSession, validationResult.importRows());
-
-        log.info("Converted file to import entities : {} {}", entities.size(), getEntityType().getDescription());
-
-        for (AbstractEntity entity : entities) {
-            entity.validateEntity(true);
-        }
-
-        log.info("Validated import entities : {} {}", entities.size(), getEntityType().getDescription());
-
-        for (AbstractEntity entity : entities) {
-            provider.persist(entity);
-        }
-
-        log.info("Persisted import entities : {} {}", entities.size(), getEntityType().getDescription());
-
-        return entities.size();
     }
 
     protected String getImportDialogTitle() {
@@ -474,6 +485,36 @@ abstract public class GenericImporters {
         }
 
         return "";
+    }
+
+    private void logImportFailure(String phase, Exception e) {
+        String fileName = uploadedFileName();
+
+        log.error(
+                "Failed to {} {} import. fileName={}, extension={}, customerId={}, projectId={}, userId={}",
+                phase,
+                getEntityType() == null ? "unknown entity" : getEntityType().getDescription(),
+                fileName,
+                extensionOf(fileName),
+                webSession == null ? null : webSession.getCustomerId(),
+                webSession == null ? null : webSession.getProjectId(),
+                webSession == null ? null : webSession.getUserId(),
+                e
+        );
+    }
+
+    private String uploadedFileName() {
+        try {
+            Part filePart = request.getPart("file");
+
+            if (filePart == null) {
+                return "";
+            }
+
+            return submittedFileName(filePart);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private record LoadedImport(String fileName, String extension, List<Object> rows) {

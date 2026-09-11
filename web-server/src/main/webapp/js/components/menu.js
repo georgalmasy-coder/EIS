@@ -14,6 +14,7 @@ const MENU_COLLAPSED_WIDTH = 72;
 const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
 const MENU_COLLAPSED_STORAGE_KEY = "eis.menu.collapsed";
 const MENU_SELECTED_PROJECT_STORAGE_KEY = "eis.menu.projectId";
+const USER_MENU_CLOSE_DELAY_MS = 2000;
 const SESSION_EXPIRED_PATH = "/session-expired.html";
 const COLLAPSE_ICON_SVG = `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -577,10 +578,30 @@ function createSidebarFooter(doc) {
     const userCard = footer.querySelector(".menu-footer-card");
     const moreBtn = footer.querySelector(".menu-footer-more");
     const subMenu = footer.querySelector(".menu-footer-sub-menu");
+    let closeSubMenuTimer = null;
+
+    const cancelSubMenuClose = () => {
+        if (closeSubMenuTimer != null) {
+            window.clearTimeout(closeSubMenuTimer);
+            closeSubMenuTimer = null;
+        }
+    };
+
+    const closeSubMenuAfterDelay = () => {
+        cancelSubMenuClose();
+        closeSubMenuTimer = window.setTimeout(() => {
+            setSubMenuOpen(false);
+            closeSubMenuTimer = null;
+        }, USER_MENU_CLOSE_DELAY_MS);
+    };
 
     const setSubMenuOpen = (shouldOpen) => {
         if (!subMenu) {
             return;
+        }
+
+        if (shouldOpen) {
+            cancelSubMenuClose();
         }
 
         const isOpen = shouldOpen && subMenu.childElementCount > 0;
@@ -593,7 +614,15 @@ function createSidebarFooter(doc) {
     });
 
     userCard?.addEventListener("mouseleave", () => {
-        setSubMenuOpen(false);
+        closeSubMenuAfterDelay();
+    });
+
+    subMenu?.addEventListener("mouseenter", () => {
+        cancelSubMenuClose();
+    });
+
+    subMenu?.addEventListener("mouseleave", () => {
+        closeSubMenuAfterDelay();
     });
 
     moreBtn?.addEventListener("click", (event) => {
@@ -604,6 +633,7 @@ function createSidebarFooter(doc) {
 
     document.addEventListener("click", (event) => {
         if (subMenu && !subMenu.hidden && !footer.contains(event.target)) {
+            cancelSubMenuClose();
             setSubMenuOpen(false);
         }
     });

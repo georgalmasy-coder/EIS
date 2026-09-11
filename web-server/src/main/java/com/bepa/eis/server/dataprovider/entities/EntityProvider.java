@@ -1066,7 +1066,7 @@ abstract public class EntityProvider extends GenericProvider {
                 ps.setInt(4, entity.getEntityId().getValue());
                 int rows = ps.executeUpdate();
                 if (rows == 0) {
-                    log.warn("No entity found for clear latest on : {} by id {}", entity.getEntityType().getDescription(), entity.getEntityId());
+                    log.debug("No entity found for clear latest on : {} by id {}", entity.getEntityType().getDescription(), entity.getEntityId());
                 }
             }
         }
@@ -1179,6 +1179,16 @@ abstract public class EntityProvider extends GenericProvider {
         if (entity.hasActiveStatusChanged()) {
 
             EntityDataElement entityCodeColumn = entity.getEntityType().getEntityCodeColumn();
+            String entityCode = entity.getCode();
+
+            if (entityCodeColumn == null || entityCode == null || entityCode.isBlank()) {
+                log.debug(
+                        "Skipping child active status update for {} entityId={} because no entity code column/code is configured.",
+                        entity.getEntityType().getDescription(),
+                        entity.getEntityId().getValue()
+                );
+                return;
+            }
 
             try (PreparedStatement ps = con.prepareStatement(UPDATE_ENTITY_ACTIVE_STATUS_SQL)) {
 
@@ -1187,7 +1197,7 @@ abstract public class EntityProvider extends GenericProvider {
                 ps.setInt(3, entity.getProjectId().getValue());
                 ps.setInt(4, entity.getEntityType().getId());
                 ps.setInt(5, entityCodeColumn.getId());
-                ps.setString(6, entity.getCode()+".%");
+                ps.setString(6, entityCode + ".%");
 
                 int rows = ps.executeUpdate();
 

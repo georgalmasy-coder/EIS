@@ -167,7 +167,7 @@ abstract public class GenericDataProviderServlet extends GenericServlet {
             performanceProvider.logPerformance(module, System.currentTimeMillis() - startTime);
 
         } catch (Throwable throwable) {
-            setErrorResponse(response, throwable);
+            setErrorResponse(response, throwable, getCommandParameter(request));
             logIncidentError(module,
                     throwable);
         }
@@ -249,12 +249,16 @@ abstract public class GenericDataProviderServlet extends GenericServlet {
         response.getWriter().write(xmlDocument.toXmlString());
     }
 
-    private void setErrorResponse(HttpServletResponse response, Throwable throwable) {
+    private void setErrorResponse(HttpServletResponse response, Throwable throwable, String command) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         try {
-            response.getWriter().write("Error occurred : " + throwable.getMessage());
+            if ("import".equalsIgnoreCase(command)) {
+                response.getWriter().write("Error occurred during import. The error has been registered in the log. Please try again later.");
+            } else {
+                response.getWriter().write("Error occurred : " + throwable.getMessage());
+            }
         } catch (IOException e) {
             log.error("Unable to response client : {}", throwable.getMessage(), throwable);
         }
