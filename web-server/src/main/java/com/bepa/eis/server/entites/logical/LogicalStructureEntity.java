@@ -433,6 +433,10 @@ public class LogicalStructureEntity extends AbstractEntity {
         return logicalElementCategory.getValue();
     }
 
+    public LogicalElementCategory getLogicalElementCategory() {
+        return logicalElementCategory;
+    }
+
     public LogicalLevel getLogicalLevel() {
         return logicalLevel;
     }

@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.logicalstructure;
 
 import com.bepa.eis.server.api.generic.GenericExporters;
+import com.bepa.eis.server.dataprovider.fields.lookups.logical.*;
 import org.apache.poi.ss.usermodel.Row;
 
 public final class LogicalStructureExporters extends GenericExporters {
@@ -10,6 +11,48 @@ public final class LogicalStructureExporters extends GenericExporters {
             "Level",
             "Name",
             "Description",
+            new LogicalOwner().getFieldHeaderName(),
+            new LogicalVerificationStatus().getFieldHeaderName(),
+            new LogicalCriticality().getFieldHeaderName(),
+            new LogicalElementCategory().getFieldHeaderName(),
+            new LogicalLevel().getFieldHeaderName(),
+            new LogicalType().getFieldHeaderName(),
+            new LogicalResponsibleDomain().getFieldHeaderName(),
+            new LogicalLifecycleStatus().getFieldHeaderName(),
+            new LogicalMaturity().getFieldHeaderName(),
+            new LogicalAllocationStatus().getFieldHeaderName(),
+            new LogicalRealizationStatus().getFieldHeaderName(),
+            new LogicalSafetyClassification().getFieldHeaderName(),
+            new LogicalSecurityClassification().getFieldHeaderName(),
+            new LogicalRedundancyType().getFieldHeaderName(),
+            new LogicalConfigurationVariant().getFieldHeaderName(),
+            new LogicalApplicability().getFieldHeaderName(),
+            "ChangedBy",
+            "Changed",
+            "Active"
+    };
+
+    private static final String[] XML_TAGS = {
+            "ID",
+            "Level",
+            "Name",
+            "Description",
+            "Owner",
+            "VerificationStatus",
+            "Criticality",
+            "ElementCategory",
+            "LogicalLevel",
+            "Type",
+            "ResponsibleDomain",
+            "LifecycleStatus",
+            "Maturity",
+            "AllocationStatus",
+            "RealizationStatus",
+            "SafetyClassification",
+            "SecurityClassification",
+            "RedundancyType",
+            "ConfigurationVariant",
+            "Applicability",
             "ChangedBy",
             "Changed",
             "Active"
@@ -18,8 +61,24 @@ public final class LogicalStructureExporters extends GenericExporters {
     private static final float[] PDF_COL_WIDTH = {
             30f,   // ID
             28f,   // Level
-            105f,  // Name
-            165f,  // Description
+            65f,   // Name
+            90f,   // Description
+            35f,   // OwnerId
+            35f,   // VerificationStatusId
+            35f,   // CriticalityId
+            35f,   // ElementCategoryId
+            35f,   // LogicalLevelId
+            35f,   // TypeId
+            35f,   // ResponsibleDomainId
+            35f,   // LifecycleStatusId
+            35f,   // MaturityId
+            35f,   // AllocationStatusId
+            35f,   // RealizationStatusId
+            35f,   // SafetyClassificationId
+            35f,   // SecurityClassificationId
+            35f,   // RedundancyTypeId
+            35f,   // ConfigurationVariantId
+            35f,   // ApplicabilityId
             48f,   // ChangedBy
             55f,   // Changed
             32f    // Active
@@ -60,15 +119,15 @@ public final class LogicalStructureExporters extends GenericExporters {
 
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
-        LogicalStructureExportRow row = (LogicalStructureExportRow) rowData;
+        String[] values = rowStrings((LogicalStructureExportRow) rowData);
 
-        csv.append(csv(row.id())).append(",");
-        csv.append(csv(row.level())).append(",");
-        csv.append(csv(row.name())).append(",");
-        csv.append(csv(row.description())).append(",");
-        csv.append(csv(row.changedBy())).append(",");
-        csv.append(csv(row.changed())).append(",");
-        csv.append(csv(row.active())).append(NEW_LINE);
+        for (int i = 0; i < values.length; i++) {
+            if (i > 0) {
+                csv.append(",");
+            }
+            csv.append(csv(values[i]));
+        }
+        csv.append(NEW_LINE);
     }
 
     @Override
@@ -76,13 +135,10 @@ public final class LogicalStructureExporters extends GenericExporters {
         LogicalStructureExportRow row = (LogicalStructureExportRow) rowData;
 
         xml.append("  <logicalStructures>").append(NEW_LINE);
-        xml.append(tag(getHeaders()[0], row.id()));
-        xml.append(tag(getHeaders()[1], row.level()));
-        xml.append(tag(getHeaders()[2], row.name()));
-        xml.append(tag(getHeaders()[3], row.description()));
-        xml.append(tag(getHeaders()[4], row.changedBy()));
-        xml.append(tag(getHeaders()[5], row.changed()));
-        xml.append(tag(getHeaders()[6], row.active()));
+        String[] values = rowStrings(row);
+        for (int i = 0; i < values.length; i++) {
+            xml.append(tag(XML_TAGS[i], values[i]));
+        }
         xml.append("  </logicalStructures>").append(NEW_LINE);
     }
 
@@ -90,13 +146,10 @@ public final class LogicalStructureExporters extends GenericExporters {
     public void buildWorksheetRow(Row sheetRow, Object rowData) {
         LogicalStructureExportRow row = (LogicalStructureExportRow) rowData;
 
-        sheetRow.createCell(0).setCellValue(nvl(row.id()));
-        sheetRow.createCell(1).setCellValue(nvl(row.level()));
-        sheetRow.createCell(2).setCellValue(nvl(row.name()));
-        sheetRow.createCell(3).setCellValue(nvl(row.description()));
-        sheetRow.createCell(4).setCellValue(nvl(row.changedBy()));
-        sheetRow.createCell(5).setCellValue(nvl(row.changed()));
-        sheetRow.createCell(6).setCellValue(nvl(row.active()));
+        String[] values = rowStrings(row);
+        for (int i = 0; i < values.length; i++) {
+            sheetRow.createCell(i).setCellValue(values[i]);
+        }
     }
 
     @Override
@@ -110,6 +163,22 @@ public final class LogicalStructureExporters extends GenericExporters {
                 nvl(row.level()),
                 nvl(row.name()),
                 nvl(row.description()),
+                nvl(row.owner()),
+                nvl(row.verificationStatus()),
+                nvl(row.criticality()),
+                nvl(row.elementCategory()),
+                nvl(row.logicalLevel()),
+                nvl(row.type()),
+                nvl(row.responsibleDomain()),
+                nvl(row.lifecycleStatus()),
+                nvl(row.maturity()),
+                nvl(row.allocationStatus()),
+                nvl(row.realizationStatus()),
+                nvl(row.safetyClassification()),
+                nvl(row.securityClassification()),
+                nvl(row.redundancyType()),
+                nvl(row.configurationVariant()),
+                nvl(row.applicability()),
                 nvl(row.changedBy()),
                 nvl(row.changed()),
                 nvl(row.active())

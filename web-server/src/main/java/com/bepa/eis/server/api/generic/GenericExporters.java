@@ -191,6 +191,7 @@ abstract public class GenericExporters {
             final float bottomY = margin + 24f;
             final float minRowHeight = getPdfMinRowHeight();
             final float startX = margin;
+            final float[] pdfColWidth = fitPdfColWidth(getPdfColWidth(), pageWidth - (margin * 2));
 
             final String generatedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern(getPdfGeneratedAtPattern()));
 
@@ -214,11 +215,11 @@ abstract public class GenericExporters {
             y = drawMetaLine(content, textFont, startX, y, "Exported rows: " + list.size());
             y -= 8f;
 
-            y = drawTableHeader(getHeaders(), content, headerFont, startX, y, getPdfColWidth(), minRowHeight);
+            y = drawTableHeader(getHeaders(), content, headerFont, startX, y, pdfColWidth, minRowHeight);
             y -= minRowHeight;
 
             for (Object row : list) {
-                float rowHeight = estimatePdfRowHeight(row, getPdfColWidth(), textFont, getPdfFontSize(), minRowHeight);
+                float rowHeight = estimatePdfRowHeight(row, pdfColWidth, textFont, getPdfFontSize(), minRowHeight);
 
                 if (y < bottomY + rowHeight) {
                     drawPdfFooter(content, textFont, margin, footerY, pageNumber, generatedAt, pageWidth - margin);
@@ -237,11 +238,11 @@ abstract public class GenericExporters {
                     );
 
                     y = topY;
-                    y = drawTableHeader(getHeaders(), content, headerFont, startX, y, getPdfColWidth(), minRowHeight);
+                    y = drawTableHeader(getHeaders(), content, headerFont, startX, y, pdfColWidth, minRowHeight);
                     y -= minRowHeight;
                 }
 
-                drawPdfTableRow(content, textFont, startX, y, getPdfColWidth(), rowHeight, row, rowIndex);
+                drawPdfTableRow(content, textFont, startX, y, pdfColWidth, rowHeight, row, rowIndex);
                 y -= rowHeight;
                 rowIndex++;
             }
@@ -252,6 +253,23 @@ abstract public class GenericExporters {
             document.save(out);
             return out.toByteArray();
         }
+    }
+
+    private static float[] fitPdfColWidth(float[] widths, float maxWidth) {
+        float totalWidth = sum(widths);
+
+        if (totalWidth <= maxWidth || totalWidth <= 0f) {
+            return widths;
+        }
+
+        float scale = maxWidth / totalWidth;
+        float[] fittedWidths = new float[widths.length];
+
+        for (int i = 0; i < widths.length; i++) {
+            fittedWidths[i] = widths[i] * scale;
+        }
+
+        return fittedWidths;
     }
 
     private PDRectangle getPdfPageSize() {

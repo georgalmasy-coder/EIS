@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.functionalstructure;
 
 import com.bepa.eis.server.api.generic.GenericExporters;
+import com.bepa.eis.server.dataprovider.fields.lookups.functional.*;
 import org.apache.poi.ss.usermodel.Row;
 
 public final class FunctionalStructureExporters extends GenericExporters {
@@ -10,6 +11,38 @@ public final class FunctionalStructureExporters extends GenericExporters {
             "Level",
             "Name",
             "Description",
+            new FunctionOwner().getFieldHeaderName(),
+            new FunctionStatus().getFieldHeaderName(),
+            new FunctionBehaviorType().getFieldHeaderName(),
+            new FunctionCategory().getFieldHeaderName(),
+            new FunctionCriticality().getFieldHeaderName(),
+            new FunctionVerificationStatus().getFieldHeaderName(),
+            new FunctionLevel().getFieldHeaderName(),
+            new FunctionOperatingMode().getFieldHeaderName(),
+            new FunctionResponsibleDomain().getFieldHeaderName(),
+            new FunctionConfigurationVariant().getFieldHeaderName(),
+            new FunctionApplicability().getFieldHeaderName(),
+            "ChangedBy",
+            "Changed",
+            "Active"
+    };
+
+    private static final String[] XML_TAGS = {
+            "ID",
+            "Level",
+            "Name",
+            "Description",
+            "Owner",
+            "Status",
+            "BehaviorType",
+            "Category",
+            "Criticality",
+            "VerificationStatus",
+            "FunctionLevel",
+            "OperatingMode",
+            "ResponsibleDomain",
+            "ConfigurationVariant",
+            "Applicability",
             "ChangedBy",
             "Changed",
             "Active"
@@ -18,8 +51,19 @@ public final class FunctionalStructureExporters extends GenericExporters {
     private static final float[] PDF_COL_WIDTH = {
             30f,   // ID
             28f,   // Level
-            105f,  // Name
-            165f,  // Description
+            65f,   // Name
+            90f,   // Description
+            35f,   // OwnerId
+            35f,   // StatusId
+            35f,   // BehaviorTypeId
+            35f,   // CategoryId
+            35f,   // CriticalityId
+            35f,   // VerificationStatusId
+            35f,   // FunctionLevelId
+            35f,   // OperatingModeId
+            35f,   // ResponsibleDomainId
+            35f,   // ConfigurationVariantId
+            35f,   // ApplicabilityId
             48f,   // ChangedBy
             55f,   // Changed
             32f    // Active
@@ -60,15 +104,15 @@ public final class FunctionalStructureExporters extends GenericExporters {
 
     @Override
     public void buildCsvRow(StringBuilder csv, Object rowData) {
-        FunctionalStructureExportRow row = (FunctionalStructureExportRow) rowData;
+        String[] values = rowStrings((FunctionalStructureExportRow) rowData);
 
-        csv.append(csv(row.id())).append(",");
-        csv.append(csv(row.level())).append(",");
-        csv.append(csv(row.name())).append(",");
-        csv.append(csv(row.description())).append(",");
-        csv.append(csv(row.changedBy())).append(",");
-        csv.append(csv(row.changed())).append(",");
-        csv.append(csv(row.active())).append(NEW_LINE);
+        for (int i = 0; i < values.length; i++) {
+            if (i > 0) {
+                csv.append(",");
+            }
+            csv.append(csv(values[i]));
+        }
+        csv.append(NEW_LINE);
     }
 
     @Override
@@ -76,13 +120,10 @@ public final class FunctionalStructureExporters extends GenericExporters {
         FunctionalStructureExportRow row = (FunctionalStructureExportRow) rowData;
 
         xml.append("  <functionStructures>").append(NEW_LINE);
-        xml.append(tag(getHeaders()[0], row.id()));
-        xml.append(tag(getHeaders()[1], row.level()));
-        xml.append(tag(getHeaders()[2], row.name()));
-        xml.append(tag(getHeaders()[3], row.description()));
-        xml.append(tag(getHeaders()[4], row.changedBy()));
-        xml.append(tag(getHeaders()[5], row.changed()));
-        xml.append(tag(getHeaders()[6], row.active()));
+        String[] values = rowStrings(row);
+        for (int i = 0; i < values.length; i++) {
+            xml.append(tag(XML_TAGS[i], values[i]));
+        }
         xml.append("  </functionStructures>").append(NEW_LINE);
     }
 
@@ -90,13 +131,10 @@ public final class FunctionalStructureExporters extends GenericExporters {
     public void buildWorksheetRow(Row sheetRow, Object rowData) {
         FunctionalStructureExportRow row = (FunctionalStructureExportRow) rowData;
 
-        sheetRow.createCell(0).setCellValue(nvl(row.id()));
-        sheetRow.createCell(1).setCellValue(nvl(row.level()));
-        sheetRow.createCell(2).setCellValue(nvl(row.name()));
-        sheetRow.createCell(3).setCellValue(nvl(row.description()));
-        sheetRow.createCell(4).setCellValue(nvl(row.changedBy()));
-        sheetRow.createCell(5).setCellValue(nvl(row.changed()));
-        sheetRow.createCell(6).setCellValue(nvl(row.active()));
+        String[] values = rowStrings(row);
+        for (int i = 0; i < values.length; i++) {
+            sheetRow.createCell(i).setCellValue(values[i]);
+        }
     }
 
     @Override
@@ -110,6 +148,17 @@ public final class FunctionalStructureExporters extends GenericExporters {
                 nvl(row.level()),
                 nvl(row.name()),
                 nvl(row.description()),
+                nvl(row.owner()),
+                nvl(row.status()),
+                nvl(row.behaviorType()),
+                nvl(row.category()),
+                nvl(row.criticality()),
+                nvl(row.verificationStatus()),
+                nvl(row.functionLevel()),
+                nvl(row.operatingMode()),
+                nvl(row.responsibleDomain()),
+                nvl(row.configurationVariant()),
+                nvl(row.applicability()),
                 nvl(row.changedBy()),
                 nvl(row.changed()),
                 nvl(row.active())

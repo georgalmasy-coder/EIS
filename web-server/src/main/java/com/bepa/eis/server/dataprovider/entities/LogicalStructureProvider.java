@@ -94,6 +94,22 @@ public class LogicalStructureProvider extends EntityProvider {
         entity.setLogicalCodeLevel(level);
         entity.setLogicalName(row.name());
         entity.setLogicalDescription(row.description());
+        entity.setOwner(row.owner() != null ? row.owner().getValue() : null);
+        entity.setLogicalVerificationStatusId(row.verificationStatus() != null ? row.verificationStatus().getValue() : null);
+        entity.setLogicalCriticalityId(row.criticality() != null ? row.criticality().getValue() : null);
+        entity.setLogicalElementCategoryId(row.elementCategory() != null ? row.elementCategory().getValue() : null);
+        entity.setLogicalLevelId(row.logicalLevel() != null ? row.logicalLevel().getValue() : null);
+        entity.setLogicalTypeId(row.type() != null ? row.type().getValue() : null);
+        entity.setLogicalResponsibleDomainId(row.responsibleDomain() != null ? row.responsibleDomain().getValue() : null);
+        entity.setLogicalLifecycleStatusId(row.lifecycleStatus() != null ? row.lifecycleStatus().getValue() : null);
+        entity.setLogicalMaturityId(row.maturity() != null ? row.maturity().getValue() : null);
+        entity.setLogicalAllocationStatusId(row.allocationStatus() != null ? row.allocationStatus().getValue() : null);
+        entity.setLogicalRealizationStatusId(row.realizationStatus() != null ? row.realizationStatus().getValue() : null);
+        entity.setLogicalSafetyClassificationId(row.safetyClassification() != null ? row.safetyClassification().getValue() : null);
+        entity.setLogicalSecurityClassificationId(row.securityClassification() != null ? row.securityClassification().getValue() : null);
+        entity.setLogicalRedundancyTypeId(row.redundancyType() != null ? row.redundancyType().getValue() : null);
+        entity.setLogicalConfigurationVariantId(row.configurationVariant() != null ? row.configurationVariant().getValue() : null);
+        entity.setLogicalApplicabilityId(row.applicability() != null ? row.applicability().getValue() : null);
         entity.setActive(row.active() == null || row.active());
 
         entity.addAllDataElements();

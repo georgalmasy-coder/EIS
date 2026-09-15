@@ -94,6 +94,17 @@ public class FunctionalStructureProvider extends EntityProvider {
         entity.setFunctionalCodeLevel(level);
         entity.setFunctionalName(row.name());
         entity.setFunctionalDescription(row.description());
+        entity.setOwner(row.owner() != null ? row.owner().getValue() : null);
+        entity.setStatusId(row.status() != null ? row.status().getValue() : null);
+        entity.setBehaviorTypeId(row.behaviorType() != null ? row.behaviorType().getValue() : null);
+        entity.setFunctionCategoryId(row.category() != null ? row.category().getValue() : null);
+        entity.setFunctionCriticalityId(row.criticality() != null ? row.criticality().getValue() : null);
+        entity.setFunctionVerificationStatusId(row.verificationStatus() != null ? row.verificationStatus().getValue() : null);
+        entity.setFunctionLevelId(row.functionLevel() != null ? row.functionLevel().getValue() : null);
+        entity.setFunctionOperatingModeId(row.operatingMode() != null ? row.operatingMode().getValue() : null);
+        entity.setFunctionResponsibleDomainId(row.responsibleDomain() != null ? row.responsibleDomain().getValue() : null);
+        entity.setFunctionConfigurationVariantId(row.configurationVariant() != null ? row.configurationVariant().getValue() : null);
+        entity.setFunctionApplicabilityId(row.applicability() != null ? row.applicability().getValue() : null);
         entity.setActive(row.active() == null || row.active());
 
         entity.addAllDataElements();

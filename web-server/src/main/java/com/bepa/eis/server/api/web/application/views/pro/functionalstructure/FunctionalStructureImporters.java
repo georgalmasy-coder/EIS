@@ -5,6 +5,8 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.generic.GenericImporters;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
 import com.bepa.eis.server.dataprovider.entities.FunctionalStructureProvider;
+import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
+import com.bepa.eis.server.dataprovider.fields.lookups.functional.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -27,6 +29,17 @@ public final class FunctionalStructureImporters extends GenericImporters {
     private static final int COL_LEVEL = 1;
     private static final int COL_NAME = 2;
     private static final int COL_DESCRIPTION = 3;
+    private static final int COL_OWNER_ID = 4;
+    private static final int COL_STATUS_ID = 5;
+    private static final int COL_BEHAVIOR_TYPE_ID = 6;
+    private static final int COL_CATEGORY_ID = 7;
+    private static final int COL_CRITICALITY_ID = 8;
+    private static final int COL_VERIFICATION_STATUS_ID = 9;
+    private static final int COL_FUNCTION_LEVEL_ID = 10;
+    private static final int COL_OPERATING_MODE_ID = 11;
+    private static final int COL_RESPONSIBLE_DOMAIN_ID = 12;
+    private static final int COL_CONFIGURATION_VARIANT_ID = 13;
+    private static final int COL_APPLICABILITY_ID = 14;
 
     private static final EntityType entityType = EntityType.FUNCTIONAL_STRUCTURE;
 
@@ -102,6 +115,17 @@ public final class FunctionalStructureImporters extends GenericImporters {
                     intValue(text(element, "Level")),
                     text(element, "Name"),
                     text(element, "Description"),
+                    lookup(new FunctionOwner(getWebSession()), intValue(text(element, "OwnerId"))),
+                    lookup(new FunctionStatus(getWebSession()), intValue(text(element, "StatusId"))),
+                    lookup(new FunctionBehaviorType(getWebSession()), intValue(text(element, "BehaviorTypeId"))),
+                    lookup(new FunctionCategory(getWebSession()), intValue(text(element, "CategoryId"))),
+                    lookup(new FunctionCriticality(getWebSession()), intValue(text(element, "CriticalityId"))),
+                    lookup(new FunctionVerificationStatus(getWebSession()), intValue(text(element, "VerificationStatusId"))),
+                    lookup(new FunctionLevel(getWebSession()), intValue(text(element, "FunctionLevelId"))),
+                    lookup(new FunctionOperatingMode(getWebSession()), intValue(text(element, "OperatingModeId"))),
+                    lookup(new FunctionResponsibleDomain(getWebSession()), intValue(text(element, "ResponsibleDomainId"))),
+                    lookup(new FunctionConfigurationVariant(getWebSession()), intValue(text(element, "ConfigurationVariantId"))),
+                    lookup(new FunctionApplicability(getWebSession()), intValue(text(element, "ApplicabilityId"))),
                     null,
                     null,
                     Boolean.TRUE) // Active
@@ -152,7 +176,7 @@ public final class FunctionalStructureImporters extends GenericImporters {
 
                 List<String> values = new ArrayList<>();
 
-                for (int col = 0; col <= COL_DESCRIPTION; col++) {
+                for (int col = 0; col <= COL_APPLICABILITY_ID; col++) {
                     values.add(formatter.formatCellValue(sheetRow.getCell(col)));
                 }
 
@@ -173,6 +197,17 @@ public final class FunctionalStructureImporters extends GenericImporters {
                 intValue(valueAt(values, COL_LEVEL)),
                 valueAt(values, COL_NAME),
                 valueAt(values, COL_DESCRIPTION),
+                lookup(new FunctionOwner(getWebSession()), intValue(valueAt(values, COL_OWNER_ID))),
+                lookup(new FunctionStatus(getWebSession()), intValue(valueAt(values, COL_STATUS_ID))),
+                lookup(new FunctionBehaviorType(getWebSession()), intValue(valueAt(values, COL_BEHAVIOR_TYPE_ID))),
+                lookup(new FunctionCategory(getWebSession()), intValue(valueAt(values, COL_CATEGORY_ID))),
+                lookup(new FunctionCriticality(getWebSession()), intValue(valueAt(values, COL_CRITICALITY_ID))),
+                lookup(new FunctionVerificationStatus(getWebSession()), intValue(valueAt(values, COL_VERIFICATION_STATUS_ID))),
+                lookup(new FunctionLevel(getWebSession()), intValue(valueAt(values, COL_FUNCTION_LEVEL_ID))),
+                lookup(new FunctionOperatingMode(getWebSession()), intValue(valueAt(values, COL_OPERATING_MODE_ID))),
+                lookup(new FunctionResponsibleDomain(getWebSession()), intValue(valueAt(values, COL_RESPONSIBLE_DOMAIN_ID))),
+                lookup(new FunctionConfigurationVariant(getWebSession()), intValue(valueAt(values, COL_CONFIGURATION_VARIANT_ID))),
+                lookup(new FunctionApplicability(getWebSession()), intValue(valueAt(values, COL_APPLICABILITY_ID))),
                 null,
                 null,
                 Boolean.TRUE
@@ -182,6 +217,11 @@ public final class FunctionalStructureImporters extends GenericImporters {
         return "ID".equalsIgnoreCase(valueAt(values, COL_ID))
                 && "Level".equalsIgnoreCase(valueAt(values, COL_LEVEL))
                 && "Name".equalsIgnoreCase(valueAt(values, COL_NAME));
+    }
+
+    private static AbstractLookup lookup(AbstractLookup lookup, Integer value) {
+        lookup.setValue(value);
+        return lookup;
     }
 
 }
