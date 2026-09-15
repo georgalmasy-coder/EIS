@@ -168,8 +168,7 @@ abstract public class GenericDataProviderServlet extends GenericServlet {
 
         } catch (Throwable throwable) {
             setErrorResponse(response, throwable, getCommandParameter(request));
-            logIncidentError(module,
-                    throwable);
+            logIncidentError(module, throwable);
         }
     }
 

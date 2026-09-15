@@ -1,5 +1,7 @@
 import { initMenu } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
+import { createExportDialog } from "../components/export-dialog.js";
+import { createImportDialog } from "../components/import-dialog.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import { setText } from "../core/dom.js";
 import { fetchXml, postXml } from "../core/http.js";
@@ -11,6 +13,8 @@ const LIST_URL = "/basis/lookup?cmd=list";
 const EDIT_URL = "/basis/lookup?cmd=edit&id=";
 const CREATE_URL = "/basis/lookup?cmd=create&lookupTypeId=";
 const SAVE_URL = "/basis/lookup?cmd=save";
+const EXPORT_URL = "/basis/lookup?cmd=export";
+const IMPORT_URL = "/basis/lookup?cmd=import";
 const STORAGE_KEY = "lookup.main.selectedLookupTypeId";
 
 const STANDARD_COLORS = [
@@ -73,6 +77,22 @@ function initializeEvents() {
     const dialog = byId("lookupDialog");
     const presetSelect = byId("lookupColorPresetSelect");
     const picker = byId("lookupColorInput");
+
+    createExportDialog({
+        dialogId: "lookupExportDialog",
+        openButtonId: "btnExportLookup",
+        exportUrl: EXPORT_URL,
+        baseFileName: "Lookup Administration"
+    }).bind();
+
+    createImportDialog({
+        dialogId: "lookupImportDialog",
+        openButtonId: "btnImportLookup",
+        importUrl: IMPORT_URL,
+        onImportComplete: async () => {
+            await loadLookupData(state.selectedTypeId);
+        }
+    }).bind();
 
     typeSelect?.addEventListener("change", async () => {
         const nextTypeId = typeSelect.value.trim();

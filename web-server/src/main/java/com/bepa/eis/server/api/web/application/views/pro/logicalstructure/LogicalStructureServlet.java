@@ -11,6 +11,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.LogicalStructureParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.logical.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -147,6 +148,24 @@ public class LogicalStructureServlet extends GenericDataProviderServlet {
         Integer version = intValue(logicalStructureElement, Version.FIELD_NAME);
         String logicalName = textValue(logicalStructureElement, LogicalName.FIELD_NAME);
         String logicalDescription = textValue(logicalStructureElement, LogicalDescription.FIELD_NAME);
+        Integer verificationStatusId = intValue(logicalStructureElement, LogicalVerificationStatus.FIELD_NAME);
+        Integer ownerId = intValue(logicalStructureElement, LogicalOwner.FIELD_NAME);
+        Integer logicalCriticalityId = intValue(logicalStructureElement, LogicalCriticality.FIELD_NAME);
+
+        Integer logicalElementCategoryId = intValue(logicalStructureElement, LogicalElementCategory.FIELD_NAME);
+        Integer logicalLevelId = intValue(logicalStructureElement, LogicalLevel.FIELD_NAME);
+        Integer logicalTypeId = intValue(logicalStructureElement, LogicalType.FIELD_NAME);
+        Integer logicalResponsibleDomainId = intValue(logicalStructureElement, LogicalResponsibleDomain.FIELD_NAME);
+        Integer logicalLifecycleStatusId = intValue(logicalStructureElement, LogicalLifecycleStatus.FIELD_NAME);
+        Integer logicalMaturityId = intValue(logicalStructureElement, LogicalMaturity.FIELD_NAME);
+        Integer logicalAllocationStatusId = intValue(logicalStructureElement, LogicalAllocationStatus.FIELD_NAME);
+        Integer logicalRealizationStatusId = intValue(logicalStructureElement, LogicalRealizationStatus.FIELD_NAME);
+        Integer logicalSafetyClassificationId = intValue(logicalStructureElement, LogicalSafetyClassification.FIELD_NAME);
+        Integer logicalSecurityClassificationId = intValue(logicalStructureElement, LogicalSecurityClassification.FIELD_NAME);
+        Integer logicalRedundancyTypeId = intValue(logicalStructureElement, LogicalRedundancyType.FIELD_NAME);
+        Integer logicalConfigurationVariantId = intValue(logicalStructureElement, LogicalConfigurationVariant.FIELD_NAME);
+        Integer logicalApplicabilityId = intValue(logicalStructureElement, LogicalApplicability.FIELD_NAME);
+
         Boolean active = boolValue(logicalStructureElement, Active.FIELD_NAME);
 
         String logicalCode;
@@ -166,6 +185,23 @@ public class LogicalStructureServlet extends GenericDataProviderServlet {
         logicalStructureEntity.setLogicalCodeLevel(codeLevel);
         logicalStructureEntity.setLogicalName(logicalName);
         logicalStructureEntity.setLogicalDescription(logicalDescription);
+        logicalStructureEntity.setLogicalVerificationStatusId(verificationStatusId);
+        logicalStructureEntity.setOwner(ownerId);
+        logicalStructureEntity.setLogicalCriticalityId(logicalCriticalityId);
+        logicalStructureEntity.setLogicalElementCategoryId(logicalElementCategoryId);
+        logicalStructureEntity.setLogicalLevelId(logicalLevelId);
+        logicalStructureEntity.setLogicalTypeId(logicalTypeId);
+        logicalStructureEntity.setLogicalResponsibleDomainId(logicalResponsibleDomainId);
+        logicalStructureEntity.setLogicalLifecycleStatusId(logicalLifecycleStatusId);
+        logicalStructureEntity.setLogicalMaturityId(logicalMaturityId);
+        logicalStructureEntity.setLogicalAllocationStatusId(logicalAllocationStatusId);
+        logicalStructureEntity.setLogicalRealizationStatusId(logicalRealizationStatusId);
+        logicalStructureEntity.setLogicalSafetyClassificationId(logicalSafetyClassificationId);
+        logicalStructureEntity.setLogicalSecurityClassificationId(logicalSecurityClassificationId);
+        logicalStructureEntity.setLogicalRedundancyTypeId(logicalRedundancyTypeId);
+        logicalStructureEntity.setLogicalConfigurationVariantId(logicalConfigurationVariantId);
+        logicalStructureEntity.setLogicalApplicabilityId(logicalApplicabilityId);
+
         logicalStructureEntity.setActive(active);
 
         logicalStructureEntity.addAllDataElements();

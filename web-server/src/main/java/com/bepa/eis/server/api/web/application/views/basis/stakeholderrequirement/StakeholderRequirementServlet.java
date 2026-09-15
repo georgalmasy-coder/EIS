@@ -11,6 +11,8 @@ import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementOwner;
+import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementStatus;
 import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
 import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
 import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
@@ -148,6 +150,8 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
         String requirementName = textValue(requirmentElement, RequirementName.FIELD_NAME);
         String requirementDescription = textValue(requirmentElement, RequirementDescription.FIELD_NAME);
         Integer stakeholderId = intValue(requirmentElement, Stakeholder.FIELD_NAME);
+        Integer statusId = intValue(requirmentElement, RequirementStatus.FIELD_NAME);
+        Integer ownerId = intValue(requirmentElement, RequirementOwner.FIELD_NAME);
         Boolean active = boolValue(requirmentElement, Active.FIELD_NAME);
 
         String requirementCode;
@@ -168,6 +172,8 @@ public class StakeholderRequirementServlet extends GenericDataProviderServlet {
         requirementEntity.setRequirementName(requirementName);
         requirementEntity.setRequirementDescription(requirementDescription);
         requirementEntity.setStakeholderId(stakeholderId);
+        requirementEntity.setStatusId(statusId);
+        requirementEntity.setOwner(ownerId);
         requirementEntity.setActive(active);
 
         requirementEntity.addAllDataElements();

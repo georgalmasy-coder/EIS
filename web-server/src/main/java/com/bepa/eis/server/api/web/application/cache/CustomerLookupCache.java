@@ -53,6 +53,206 @@ public class CustomerLookupCache {
         return getLookupCache(webSession).getRequirementVerificationLookupValues();
     }
 
+    public static LookupValue getFunctionVerificationLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionVerificationLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionVerificationLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionVerificationLookupValues();
+    }
+
+    public static LookupValue getLogicalVerificationLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalVerificationLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalVerificationLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalVerificationLookupValues();
+    }
+
+    public static LookupValue getFunctionBehaviorTypeLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionBehaviorTypeLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionBehaviorTypeLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionBehaviorTypeLookupValues();
+    }
+
+    public static LookupValue getFunctionCategoryLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionCategoryLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionCategoryLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionCategoryLookupValues();
+    }
+
+    public static LookupValue getFunctionCriticalityLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionCriticalityLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionCriticalityLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionCriticalityLookupValues();
+    }
+
+    public static LookupValue getFunctionStatusLookupValue(WebSession webSession, Integer statusId) {
+        return getLookupCache(webSession).getFunctionStatusLookupValue(statusId);
+    }
+
+    public static List<LookupValue> getFunctionStatusLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionStatusLookupValues();
+    }
+
+    public static LookupValue getFunctionLevelLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionLevelLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionLevelLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionLevelLookupValues();
+    }
+
+    public static LookupValue getFunctionOperatingModeLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionOperatingModeLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionOperatingModeLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionOperatingModeLookupValues();
+    }
+
+    public static LookupValue getFunctionResponsibleDomainLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionResponsibleDomainLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionResponsibleDomainLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionResponsibleDomainLookupValues();
+    }
+
+    public static LookupValue getFunctionConfigurationVariantLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionConfigurationVariantLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionConfigurationVariantLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionConfigurationVariantLookupValues();
+    }
+
+    public static LookupValue getFunctionApplicabilityLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getFunctionApplicabilityLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getFunctionApplicabilityLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getFunctionApplicabilityLookupValues();
+    }
+
+    public static LookupValue getLogicalCriticalityLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalCriticalityLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalCriticalityLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalCriticalityLookupValues();
+    }
+
+    public static LookupValue getLogicalElementCategoryLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalElementCategoryLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalElementCategoryLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalElementCategoryLookupValues();
+    }
+
+    public static LookupValue getLogicalLevelLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalLevelLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalLevelLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalLevelLookupValues();
+    }
+
+    public static LookupValue getLogicalTypeLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalTypeLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalTypeLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalTypeLookupValues();
+    }
+
+    public static LookupValue getLogicalResponsibleDomainLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalResponsibleDomainLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalResponsibleDomainLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalResponsibleDomainLookupValues();
+    }
+
+    public static LookupValue getLogicalLifecycleStatusLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalLifecycleStatusLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalLifecycleStatusLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalLifecycleStatusLookupValues();
+    }
+
+    public static LookupValue getLogicalMaturityLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalMaturityLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalMaturityLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalMaturityLookupValues();
+    }
+
+    public static LookupValue getLogicalAllocationStatusLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalAllocationStatusLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalAllocationStatusLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalAllocationStatusLookupValues();
+    }
+
+    public static LookupValue getLogicalRealizationStatusLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalRealizationStatusLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalRealizationStatusLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalRealizationStatusLookupValues();
+    }
+
+    public static LookupValue getLogicalSafetyClassificationLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalSafetyClassificationLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalSafetyClassificationLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalSafetyClassificationLookupValues();
+    }
+
+    public static LookupValue getLogicalSecurityClassificationLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalSecurityClassificationLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalSecurityClassificationLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalSecurityClassificationLookupValues();
+    }
+
+    public static LookupValue getLogicalRedundancyTypeLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalRedundancyTypeLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalRedundancyTypeLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalRedundancyTypeLookupValues();
+    }
+
+    public static LookupValue getLogicalConfigurationVariantLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalConfigurationVariantLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalConfigurationVariantLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalConfigurationVariantLookupValues();
+    }
+
+    public static LookupValue getLogicalApplicabilityLookupValue(WebSession webSession, Integer lookupId) {
+        return getLookupCache(webSession).getLogicalApplicabilityLookupValue(lookupId);
+    }
+
+    public static List<LookupValue> getLogicalApplicabilityLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getLogicalApplicabilityLookupValues();
+    }
+
     public static LookupValue getTrlLookupValue(WebSession webSession, Integer lookupId) {
         return getIrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
     }

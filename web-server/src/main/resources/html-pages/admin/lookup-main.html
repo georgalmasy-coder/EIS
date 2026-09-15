@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="../../css/tabs-list.css" />
     <link rel="stylesheet" href="../../css/generel.css" />
     <link rel="stylesheet" href="../../css/topbar.css" />
+    <link rel="stylesheet" href="../../css/export-dialog.css" />
+    <link rel="stylesheet" href="../../css/import-dialog.css" />
     <link rel="stylesheet" href="../../css/lookup-main.css" />
 </head>
 
@@ -56,6 +58,32 @@
                 </label>
 
                 <div class="lookup-main-action-group" aria-label="Lookup actions">
+                    <button
+                            id="btnImportLookup"
+                            class="page-icon-button lookup-main-icon-button lookup-main-import-button"
+                            type="button"
+                            aria-label="Import lookups"
+                            title="Import lookups"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
+                            <path d="M5 5a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnExportLookup"
+                            class="page-icon-button lookup-main-icon-button lookup-main-export-button"
+                            type="button"
+                            aria-label="Export lookups"
+                            title="Export lookups"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
+                            <path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
                     <button
                             id="btnAddLookup"
                             class="page-icon-button lookup-main-icon-button lookup-main-add-button"
@@ -181,6 +209,74 @@
         <div class="dlg-footer lookup-main-dialog-footer">
             <button id="lookupSaveBtn" class="primary" type="button">Save</button>
             <button id="lookupCancelBtn" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="lookupExportDialog" class="export-dialog" aria-label="Export lookup dialog">
+    <form id="lookupExportForm" method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head">
+                <h3>Export Lookups</h3>
+            </div>
+
+            <p class="export-dialog-description">
+                Export LOOKUP_TYPE and LOOKUP_TABLE to an XML file.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="lookup-export-format-title">
+                <div class="export-dialog-section-title" id="lookup-export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="lookupExportFormat" data-export-format="xml" value="xml" checked>
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured database transfer format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+        </div>
+
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="lookupImportDialog" class="import-dialog" aria-label="Import lookup dialog">
+    <form id="lookupImportForm" method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head">
+                <h3>Import Lookups</h3>
+            </div>
+
+            <p class="import-dialog-description">
+                Select an XML file exported from Lookup Administration.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="lookup-import-file-title">
+                <div class="import-dialog-section-title" id="lookup-import-file-title">Import file</div>
+
+                <input id="lookupImportFileInput" class="import-file-native-input" type="file" accept=".xml" data-import-file>
+
+                <label class="import-file-picker" for="lookupImportFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">&#128196;</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
         </div>
     </form>
 </dialog>

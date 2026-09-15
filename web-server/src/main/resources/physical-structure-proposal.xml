@@ -1,0 +1,1529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PhysicalStructureExport>
+  <physicalStructures>
+    <SBS>=1</SBS>
+    <Name>Web Application</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1</SBS>
+    <Name>Page Rendering</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.1</SBS>
+    <Name>Page Loading</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.1.1</SBS>
+    <Name>PageViewer and HTML page loading</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.1.2</SBS>
+    <Name>HTML page resources</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.2</SBS>
+    <Name>Page Routing</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.2.1</SBS>
+    <Name>PageType routing</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.2.2</SBS>
+    <Name>Page metadata and titles</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.3</SBS>
+    <Name>Workspace Chrome</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.3.1</SBS>
+    <Name>Top panel XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.3.2</SBS>
+    <Name>Workspace headings and help text</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.4</SBS>
+    <Name>Help System</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.4.1</SBS>
+    <Name>Help servlet and help dialog</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.1.4.2</SBS>
+    <Name>Markdown help content</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2</SBS>
+    <Name>Frontend Shell</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.1</SBS>
+    <Name>Navigation</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.1.1</SBS>
+    <Name>Topbar component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.1.2</SBS>
+    <Name>Menu component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.2</SBS>
+    <Name>Shared UI Components</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.2.1</SBS>
+    <Name>Tabs component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.2.2</SBS>
+    <Name>Edit dialog and dialog bridge</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.2.3</SBS>
+    <Name>Import and export dialogs</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.2.4</SBS>
+    <Name>Tables for notes, links, attachments and relations</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.3</SBS>
+    <Name>Core JavaScript Services</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.3.1</SBS>
+    <Name>HTTP and XML utilities</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.3.2</SBS>
+    <Name>DOM and HTML utilities</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.3.3</SBS>
+    <Name>Validation and field display utilities</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.3.4</SBS>
+    <Name>Date, format, PDF and requirement code utilities</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.4</SBS>
+    <Name>Stylesheets</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.4.1</SBS>
+    <Name>Application and common CSS</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.4.2</SBS>
+    <Name>Page-specific CSS</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=1.2.4.3</SBS>
+    <Name>Component-specific CSS</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=2</SBS>
+    <Name>Physical Architecture</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1</SBS>
+    <Name>Systems Breakdown User Interface</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.1</SBS>
+    <Name>Main View</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.1.1</SBS>
+    <Name>Systems Breakdown main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.1.2</SBS>
+    <Name>Horizontal and vertical hierarchy views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.2</SBS>
+    <Name>Edit View</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.2.1</SBS>
+    <Name>Systems Breakdown edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.2.2</SBS>
+    <Name>Physical architecture edit fields</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.3</SBS>
+    <Name>Diagram Output</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.1.3.1</SBS>
+    <Name>Systems Breakdown diagram PDF</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2</SBS>
+    <Name>Systems Breakdown Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.1</SBS>
+    <Name>Request Handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.1.1</SBS>
+    <Name>SystemBreakdownServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.1.2</SBS>
+    <Name>SystemBreakdownList XML document</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.1.3</SBS>
+    <Name>SystemBreakdownInfo XML document</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.2</SBS>
+    <Name>Import and Export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.2.1</SBS>
+    <Name>SystemBreakdownImporters</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.2.2.2</SBS>
+    <Name>SystemBreakdownExporters and export rows</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3</SBS>
+    <Name>Physical Architecture Data Model</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.1</SBS>
+    <Name>Entity Definition</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.1.1</SBS>
+    <Name>SYSTEMS_BREAKDOWN entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.1.2</SBS>
+    <Name>SystemBreakdownEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.2</SBS>
+    <Name>Physical Architecture Fields</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.2.1</SBS>
+    <Name>SBS code and code level</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.2.2</SBS>
+    <Name>System name, owner and department</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=2.3.2.3</SBS>
+    <Name>TRL and deadline fields</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=3</SBS>
+    <Name>Requirements Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1</SBS>
+    <Name>Stakeholder Requirements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.1</SBS>
+    <Name>Stakeholder Requirement Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.1.1</SBS>
+    <Name>Stakeholder Requirement main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.1.2</SBS>
+    <Name>Stakeholder Requirement edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.1.3</SBS>
+    <Name>Horizontal and vertical requirement views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.2</SBS>
+    <Name>Stakeholder Requirement Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.2.1</SBS>
+    <Name>StakeholderRequirementServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.2.2</SBS>
+    <Name>StakeholderRequirementList and Info documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.2.3</SBS>
+    <Name>Stakeholder Requirement import and export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.3</SBS>
+    <Name>Stakeholder Requirement Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.3.1</SBS>
+    <Name>STAKEHOLDER_REQUIREMENT entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.3.2</SBS>
+    <Name>StakeholderRequirementEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.3.3</SBS>
+    <Name>STK code, requirement name and requirement description</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.1.3.4</SBS>
+    <Name>Stakeholder reference field</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2</SBS>
+    <Name>System Requirements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.1</SBS>
+    <Name>System Requirement Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.1.1</SBS>
+    <Name>System Requirement main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.1.2</SBS>
+    <Name>System Requirement edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.1.3</SBS>
+    <Name>Horizontal and vertical requirement views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.2</SBS>
+    <Name>System Requirement Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.2.1</SBS>
+    <Name>SystemRequirementServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.2.2</SBS>
+    <Name>SystemRequirementList and Info documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.2.3</SBS>
+    <Name>System Requirement import and export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.3</SBS>
+    <Name>System Requirement Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.3.1</SBS>
+    <Name>SYSTEM_REQUIREMENT entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.3.2</SBS>
+    <Name>SystemRequirementEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.3.3</SBS>
+    <Name>Requirement type, frequency, priority and status</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.2.3.4</SBS>
+    <Name>Verification, rationale, owner and capture date</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3</SBS>
+    <Name>Requirement Analysis</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.1</SBS>
+    <Name>Traceability</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.1.1</SBS>
+    <Name>Basis traceability matrix page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.1.2</SBS>
+    <Name>Traceability matrix document</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.1.3</SBS>
+    <Name>Matrix rows, columns, cells and styles</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.2</SBS>
+    <Name>Relation Analysis</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.2.1</SBS>
+    <Name>Basis relation diagram page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.2.2</SBS>
+    <Name>RelationDiagramDocument</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=3.3.2.3</SBS>
+    <Name>Requirement relation rules and result data</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=4</SBS>
+    <Name>R-F-L-P Architecture</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1</SBS>
+    <Name>Functional Architecture</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.1</SBS>
+    <Name>Functional Structure Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.1.1</SBS>
+    <Name>Functional Structure main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.1.2</SBS>
+    <Name>Functional Structure edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.1.3</SBS>
+    <Name>Horizontal and vertical functional views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.2</SBS>
+    <Name>Functional Structure Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.2.1</SBS>
+    <Name>FunctionalStructureServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.2.2</SBS>
+    <Name>FunctionalStructureList and Info documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.2.3</SBS>
+    <Name>Functional Structure import and export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.3</SBS>
+    <Name>Functional Structure Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.3.1</SBS>
+    <Name>FUNCTIONAL_STRUCTURE entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.3.2</SBS>
+    <Name>FunctionalStructureEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.3.3</SBS>
+    <Name>Functional code, name and description fields</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.1.3.4</SBS>
+    <Name>Functional parent code selection</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2</SBS>
+    <Name>Logical Architecture</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.1</SBS>
+    <Name>Logical Structure Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.1.1</SBS>
+    <Name>Logical Structure main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.1.2</SBS>
+    <Name>Logical Structure edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.1.3</SBS>
+    <Name>Horizontal and vertical logical views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.2</SBS>
+    <Name>Logical Structure Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.2.1</SBS>
+    <Name>LogicalStructureServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.2.2</SBS>
+    <Name>LogicalStructureList XML document</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.2.3</SBS>
+    <Name>LogicalStructureInfo XML document</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.2.4</SBS>
+    <Name>Logical Structure import and export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.3</SBS>
+    <Name>Logical Structure Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.3.1</SBS>
+    <Name>LOGICAL_STRUCTURE entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.3.2</SBS>
+    <Name>LogicalStructureEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.3.3</SBS>
+    <Name>Logical code, name and description fields</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.2.3.4</SBS>
+    <Name>Logical parent code selection</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3</SBS>
+    <Name>R-F-L-P Relations</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.1</SBS>
+    <Name>Relation Diagram</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.1.1</SBS>
+    <Name>RFLP relation diagram page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.1.2</SBS>
+    <Name>RflpRelationDiagramDocument</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.2</SBS>
+    <Name>Cross-Entity Relations</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.2.1</SBS>
+    <Name>Relations between requirements and architecture elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=4.3.2.2</SBS>
+    <Name>Entity relation creation and display</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=5</SBS>
+    <Name>Interface Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1</SBS>
+    <Name>Interface Matrix Framework</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.1</SBS>
+    <Name>Matrix Request Handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.1.1</SBS>
+    <Name>InterfaceMatrixServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.1.2</SBS>
+    <Name>Entity-type mapping from matrix endpoints</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.2</SBS>
+    <Name>Matrix Document Model</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.2.1</SBS>
+    <Name>InterfaceMatrixDocument base class</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.2.2</SBS>
+    <Name>Interface matrix metadata</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.2.3</SBS>
+    <Name>Interface matrix cell data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.3</SBS>
+    <Name>Interface Persistence</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.3.1</SBS>
+    <Name>InterfaceMatrixProvider</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.3.2</SBS>
+    <Name>Latest, historical and reverse interface lookup</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.1.3.3</SBS>
+    <Name>Interface insert and update handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2</SBS>
+    <Name>Domain-Specific Interface Matrices</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.1</SBS>
+    <Name>Architecture Matrices</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.1.1</SBS>
+    <Name>Physical Architecture N2 matrix</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.1.2</SBS>
+    <Name>Logical Architecture N2 matrix</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.1.3</SBS>
+    <Name>Functional Architecture N2 matrix</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.2</SBS>
+    <Name>Requirement Matrices</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.2.1</SBS>
+    <Name>Stakeholder Requirement N2 matrix</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=5.2.2.2</SBS>
+    <Name>System Requirement N2 matrix</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=6</SBS>
+    <Name>Project Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1</SBS>
+    <Name>Project Workspace</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.1</SBS>
+    <Name>Project Selection</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.1.1</SBS>
+    <Name>All Projects page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.1.2</SBS>
+    <Name>My Projects page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.1.3</SBS>
+    <Name>Select project page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.2</SBS>
+    <Name>Project Maintenance</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.2.1</SBS>
+    <Name>Project main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.2.2</SBS>
+    <Name>Project edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.2.3</SBS>
+    <Name>Project settings page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.3</SBS>
+    <Name>Project Context</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.3.1</SBS>
+    <Name>Selected project session context</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.1.3.2</SBS>
+    <Name>Project fields and project record DTO</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2</SBS>
+    <Name>Project Overview</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.1</SBS>
+    <Name>Overview Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.1.1</SBS>
+    <Name>Project overview page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.1.2</SBS>
+    <Name>Overview charts</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.1.3</SBS>
+    <Name>Overview project field display</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.2</SBS>
+    <Name>Status Indicators</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.2.1</SBS>
+    <Name>SRL status</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.2.2</SBS>
+    <Name>IRL status</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.2.3</SBS>
+    <Name>TRL status</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.3</SBS>
+    <Name>Project Notifications</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.3.1</SBS>
+    <Name>NotificationProvider</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=6.2.3.2</SBS>
+    <Name>Project notification display</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=7</SBS>
+    <Name>Baseline Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.1</SBS>
+    <Name>Baseline User Interface</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.1.1</SBS>
+    <Name>Baseline Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.1.1.1</SBS>
+    <Name>Baseline main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.1.1.2</SBS>
+    <Name>Baseline detail page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.1.1.3</SBS>
+    <Name>Baseline detail PDF page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2</SBS>
+    <Name>Baseline Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.1</SBS>
+    <Name>Baseline Request Handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.1.1</SBS>
+    <Name>BaselineServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.1.2</SBS>
+    <Name>Baseline XML document generation</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.2</SBS>
+    <Name>Baseline Data Access</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.2.1</SBS>
+    <Name>BaselineProvider</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.2.2</SBS>
+    <Name>Baseline records</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=7.2.2.3</SBS>
+    <Name>Baseline change rows and version comparison</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=8</SBS>
+    <Name>Stakeholder and Organisation Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1</SBS>
+    <Name>Stakeholder Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.1</SBS>
+    <Name>Stakeholder Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.1.1</SBS>
+    <Name>Stakeholder main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.1.2</SBS>
+    <Name>Stakeholder edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.2</SBS>
+    <Name>Stakeholder Backend</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.2.1</SBS>
+    <Name>StakeholderServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.2.2</SBS>
+    <Name>StakeholderList and Info documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.2.3</SBS>
+    <Name>Stakeholder import and export</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.3</SBS>
+    <Name>Stakeholder Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.3.1</SBS>
+    <Name>STAKEHOLDER entity type</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.3.2</SBS>
+    <Name>StakeholderEntity</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.1.3.3</SBS>
+    <Name>Stakeholder name, description and contact data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2</SBS>
+    <Name>Organisation Settings</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2.1</SBS>
+    <Name>Organisation Configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2.1.1</SBS>
+    <Name>Organisation settings page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2.1.2</SBS>
+    <Name>Department maintenance</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2.1.3</SBS>
+    <Name>Lookup maintenance</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=8.2.1.4</SBS>
+    <Name>Menu maintenance</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=9</SBS>
+    <Name>User and Security Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1</SBS>
+    <Name>Authentication</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.1</SBS>
+    <Name>Login and Logout</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.1.1</SBS>
+    <Name>Login page and LoginServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.1.2</SBS>
+    <Name>LogoutServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.1.3</SBS>
+    <Name>Session expired page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.2</SBS>
+    <Name>Password and MFA</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.2.1</SBS>
+    <Name>PasswordResetServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.2.2</SBS>
+    <Name>PasswordVerifier</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.1.2.3</SBS>
+    <Name>MfaTotpService and MFA configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2</SBS>
+    <Name>Authorization and Session Control</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.1</SBS>
+    <Name>Request Authorization</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.1.1</SBS>
+    <Name>AuthFilter</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.1.2</SBS>
+    <Name>User roles and access control</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.2</SBS>
+    <Name>Session Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.2.1</SBS>
+    <Name>SessionManager</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.2.2</SBS>
+    <Name>WebSession DTO</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.2.2.3</SBS>
+    <Name>Login activity logging</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3</SBS>
+    <Name>User Administration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.1</SBS>
+    <Name>User Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.1.1</SBS>
+    <Name>User main page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.1.2</SBS>
+    <Name>User edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.1.3</SBS>
+    <Name>My profile edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.2</SBS>
+    <Name>User Data Providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.2.1</SBS>
+    <Name>UserList and UserInfo</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.2.2</SBS>
+    <Name>UserMainList and UserMainInfo</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=9.3.2.3</SBS>
+    <Name>MyProfileServlet and MyProfileMainServlet</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=10</SBS>
+    <Name>Customer and Subscription Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1</SBS>
+    <Name>Customer Administration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.1</SBS>
+    <Name>Customer Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.1.1</SBS>
+    <Name>Customer administration page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.1.2</SBS>
+    <Name>Customer edit page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.1.3</SBS>
+    <Name>Customer registration page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.2</SBS>
+    <Name>Customer Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.2.1</SBS>
+    <Name>CustomerRecord and contact information</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.1.2.2</SBS>
+    <Name>Customer status and token data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2</SBS>
+    <Name>Subscription and Payment Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.1</SBS>
+    <Name>Subscription Handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.1.1</SBS>
+    <Name>Subscription editor page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.1.2</SBS>
+    <Name>Subscription plans and billing periods</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.1.3</SBS>
+    <Name>Customer modules and module access</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.2</SBS>
+    <Name>Payment Handling</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.2.1</SBS>
+    <Name>Customer payments</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.2.2</SBS>
+    <Name>Customer payment methods</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.2.2.3</SBS>
+    <Name>Payment callback servlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3</SBS>
+    <Name>Customer Workflow</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.1</SBS>
+    <Name>Workflow Endpoints</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.1.1</SBS>
+    <Name>Customer workflow start endpoint</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.1.2</SBS>
+    <Name>Customer workflow status endpoint</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.1.3</SBS>
+    <Name>Customer workflow action endpoints</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.2</SBS>
+    <Name>Workflow Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.2.1</SBS>
+    <Name>Customer workflow summary</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.2.2</SBS>
+    <Name>Customer workflow events</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=10.3.2.3</SBS>
+    <Name>Customer workflow state and status enums</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=11</SBS>
+    <Name>Administration Dashboard</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.1</SBS>
+    <Name>Dashboard Shell</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.1.1</SBS>
+    <Name>Dashboard Main Page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.1.1.1</SBS>
+    <Name>Admin dashboard page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.1.1.2</SBS>
+    <Name>Admin dashboard JavaScript and API client</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.1.1.3</SBS>
+    <Name>Admin dashboard charts</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2</SBS>
+    <Name>Dashboard Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.1</SBS>
+    <Name>Operational Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.1.1</SBS>
+    <Name>Overview and alerts views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.1.2</SBS>
+    <Name>System status and performance views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.1.3</SBS>
+    <Name>Integrations, modules and mail status views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.2</SBS>
+    <Name>Business Views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.2.1</SBS>
+    <Name>Customers and customer creation views</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.2.2</SBS>
+    <Name>Users view</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.2.3</SBS>
+    <Name>Subscriptions and payments view</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.2.2.4</SBS>
+    <Name>Audit and security view</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3</SBS>
+    <Name>Incident Management</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.1</SBS>
+    <Name>Incident Maintenance</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.1.1</SBS>
+    <Name>Incident maintenance page</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.1.2</SBS>
+    <Name>IncidentMaintenanceServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.1.3</SBS>
+    <Name>IncidentMaintenanceXmlDocument</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.2</SBS>
+    <Name>Incident Reporting</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.2.1</SBS>
+    <Name>Recent incidents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=11.3.2.2</SBS>
+    <Name>Incident trends and service counts</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=12</SBS>
+    <Name>Common Entity Platform</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1</SBS>
+    <Name>Entity Model</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.1</SBS>
+    <Name>Entity Type Definitions</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.1.1</SBS>
+    <Name>EntityType enum</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.1.2</SBS>
+    <Name>Entity code prefixes</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.1.3</SBS>
+    <Name>Entity XML root element metadata</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.2</SBS>
+    <Name>Entity Field Definitions</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.2.1</SBS>
+    <Name>EntityDataElement enum</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.2.2</SBS>
+    <Name>Entity element labels and XML names</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.2.3</SBS>
+    <Name>Entity data type mapping</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.3</SBS>
+    <Name>Data Element Wrappers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.3.1</SBS>
+    <Name>String data element</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.3.2</SBS>
+    <Name>Integer and Boolean data elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.1.3.3</SBS>
+    <Name>LocalDate and LocalDateTime data elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2</SBS>
+    <Name>Entity Collaboration Data</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.1</SBS>
+    <Name>Entity Notes and Links</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.1.1</SBS>
+    <Name>Entity notes provider and XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.1.2</SBS>
+    <Name>Entity links provider and XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.2</SBS>
+    <Name>Entity Attachments</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.2.1</SBS>
+    <Name>Entity attachments provider and XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.2.2</SBS>
+    <Name>Attachment table component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.3</SBS>
+    <Name>Entity Relations</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.3.1</SBS>
+    <Name>Entity relation provider and XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.3.2</SBS>
+    <Name>Entity relations table component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.2.3.3</SBS>
+    <Name>Relation creation dialog</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3</SBS>
+    <Name>Entity Lifecycle</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.1</SBS>
+    <Name>History and Versions</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.1.1</SBS>
+    <Name>Entity history provider and XML elements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.1.2</SBS>
+    <Name>History table component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.2</SBS>
+    <Name>Edit Interface Metadata</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.2.1</SBS>
+    <Name>EditInterfaceElements</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.2.2</SBS>
+    <Name>Edit interfaces table component</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.3</SBS>
+    <Name>Entity Movement</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.3.1</SBS>
+    <Name>EntityMoveServlet</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.3.2</SBS>
+    <Name>Move entities for system, stakeholder, functional and logical structures</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=12.3.3.3</SBS>
+    <Name>Parent-child hierarchy move handling</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=13</SBS>
+    <Name>XML Document Generation</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1</SBS>
+    <Name>Generic XML Infrastructure</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.1</SBS>
+    <Name>Document Base</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.1.1</SBS>
+    <Name>GenericXmlDocument base class</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.1.2</SBS>
+    <Name>Root document initialization</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.2</SBS>
+    <Name>Element Containers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.2.1</SBS>
+    <Name>ListOfElements XML container model</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.2.2</SBS>
+    <Name>Entities XML list model</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.3</SBS>
+    <Name>Common XML Providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.3.1</SBS>
+    <Name>TopPanelProvider</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.1.3.2</SBS>
+    <Name>Common entity XML providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2</SBS>
+    <Name>Entity XML Documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.1</SBS>
+    <Name>Main List Documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.1.1</SBS>
+    <Name>Entity main list XML documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.1.2</SBS>
+    <Name>Tree and hierarchy XML output</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.2</SBS>
+    <Name>Edit Documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.2.1</SBS>
+    <Name>Entity edit XML documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.2.2</SBS>
+    <Name>Entity notes, links, attachments and relations in edit documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.2.3</SBS>
+    <Name>Entity history in edit documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.3</SBS>
+    <Name>Analysis Documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.3.1</SBS>
+    <Name>Diagram XML documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.3.2</SBS>
+    <Name>Dashboard XML documents</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=13.2.3.3</SBS>
+    <Name>Matrix XML documents</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=14</SBS>
+    <Name>Data Access and Persistence</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1</SBS>
+    <Name>SQL Provider Layer</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.1</SBS>
+    <Name>Entity Providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.1.1</SBS>
+    <Name>EntityProvider factory and shared entity access</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.1.2</SBS>
+    <Name>Domain-specific entity providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.1.3</SBS>
+    <Name>Baseline entity selection</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.2</SBS>
+    <Name>Administration Providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.2.1</SBS>
+    <Name>User and security data providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.2.2</SBS>
+    <Name>Customer and subscription data providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.2.3</SBS>
+    <Name>Lookup, department and menu data providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.3</SBS>
+    <Name>Reporting Providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.3.1</SBS>
+    <Name>Project overview providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.3.2</SBS>
+    <Name>Dashboard providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.1.3.3</SBS>
+    <Name>Incident reporting providers</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2</SBS>
+    <Name>Database and Runtime Configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.1</SBS>
+    <Name>Database Scripts</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.1.1</SBS>
+    <Name>Database schema and recreation scripts</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.1.2</SBS>
+    <Name>Alter scripts and customer setup scripts</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.2</SBS>
+    <Name>Runtime Configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.2.1</SBS>
+    <Name>context.xml database configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.2.2</SBS>
+    <Name>ehcache.xml cache configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=14.2.2.3</SBS>
+    <Name>log4j2.xml logging configuration</Name>
+  </physicalStructures>
+
+  <physicalStructures>
+    <SBS>=15</SBS>
+    <Name>Integration Server</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1</SBS>
+    <Name>Integration Module</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1.1</SBS>
+    <Name>Module Build</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1.1.1</SBS>
+    <Name>integration-server Maven module</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1.1.2</SBS>
+    <Name>integration-server pom configuration</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1.2</SBS>
+    <Name>Integration Runtime</Name>
+  </physicalStructures>
+  <physicalStructures>
+    <SBS>=15.1.2.1</SBS>
+    <Name>Integration logging configuration</Name>
+  </physicalStructures>
+</PhysicalStructureExport>

@@ -11,6 +11,7 @@ import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ParentEntityId;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.FunctionalStructureParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.functional.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -150,6 +151,17 @@ public class FunctionalStructureServlet extends GenericDataProviderServlet {
         Integer version = intValue(functionalElement, Version.FIELD_NAME);
         String functionalName = textValue(functionalElement, FunctionalName.FIELD_NAME);
         String functionalDescription = textValue(functionalElement, FunctionalDescription.FIELD_NAME);
+        Integer statusId = intValue(functionalElement, FunctionStatus.FIELD_NAME);
+        Integer ownerId = intValue(functionalElement, FunctionOwner.FIELD_NAME);
+        Integer behaviorTypeId = intValue(functionalElement, FunctionBehaviorType.FIELD_NAME);
+        Integer functionCategoryId = intValue(functionalElement, FunctionCategory.FIELD_NAME);
+        Integer functionCriticalityId = intValue(functionalElement, FunctionCriticality.FIELD_NAME);
+        Integer functionVerificationStatusId = intValue(functionalElement, FunctionVerificationStatus.FIELD_NAME);
+        Integer functionLevelId = intValue(functionalElement, FunctionLevel.FIELD_NAME);
+        Integer functionOperatingModeId = intValue(functionalElement, FunctionOperatingMode.FIELD_NAME);
+        Integer functionResponsibleDomainId = intValue(functionalElement, FunctionResponsibleDomain.FIELD_NAME);
+        Integer functionConfigurationVariantId = intValue(functionalElement, FunctionConfigurationVariant.FIELD_NAME);
+        Integer functionApplicabilityId = intValue(functionalElement, FunctionApplicability.FIELD_NAME);
         Boolean active = boolValue(functionalElement, Active.FIELD_NAME);
 
         String functionalCode;
@@ -169,6 +181,18 @@ public class FunctionalStructureServlet extends GenericDataProviderServlet {
         functionalEntity.setFunctionalCodeLevel(codeLevel);
         functionalEntity.setFunctionalName(functionalName);
         functionalEntity.setFunctionalDescription(functionalDescription);
+        functionalEntity.setStatusId(statusId);
+        functionalEntity.setOwner(ownerId);
+        functionalEntity.setBehaviorTypeId(behaviorTypeId);
+        functionalEntity.setFunctionCategoryId(functionCategoryId);
+        functionalEntity.setFunctionCriticalityId(functionCriticalityId);
+        functionalEntity.setFunctionVerificationStatusId(functionVerificationStatusId);
+        functionalEntity.setFunctionLevelId(functionLevelId);
+        functionalEntity.setFunctionOperatingModeId(functionOperatingModeId);
+        functionalEntity.setFunctionResponsibleDomainId(functionResponsibleDomainId);
+        functionalEntity.setFunctionConfigurationVariantId(functionConfigurationVariantId);
+        functionalEntity.setFunctionApplicabilityId(functionApplicabilityId);
+
         functionalEntity.setActive(active);
 
         functionalEntity.addAllDataElements();

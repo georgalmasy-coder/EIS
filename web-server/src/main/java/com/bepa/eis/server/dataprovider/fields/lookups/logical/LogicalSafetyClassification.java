@@ -1,0 +1,65 @@
+package com.bepa.eis.server.dataprovider.fields.lookups.logical;
+
+import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.cache.LookupValue;
+import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
+
+public class LogicalSafetyClassification extends AbstractLookup {
+
+    private static final Logger log = LoggerFactory.getLogger(LogicalSafetyClassification.class);
+
+    public static String FIELD_NAME = "LogicalSafetyClassificationId";
+
+    public LogicalSafetyClassification() {
+    }
+
+    public LogicalSafetyClassification(WebSession webSession) {
+        super(webSession);
+    }
+
+    @Override
+    public String getLookupName() {
+        return "LogicalSafetyClassification";
+    }
+
+    @Override
+    public String getFieldName() {
+        return FIELD_NAME;
+    }
+
+    @Override
+    public String getFieldLabelName() {
+        return "Logical Safety Classification";
+    }
+
+    @Override
+    public String getFieldHeaderName() {
+        return "Safety Classification";
+    }
+
+    @Override
+    public String getDropdownSelectText() {
+        return "Select logical safety classification ...";
+    }
+
+    @Override
+    public List<LookupValue> getListOfActiveLookupValues() {
+        return CustomerLookupCache.getLogicalSafetyClassificationLookupValues(getWebSession());
+    }
+
+    @Override
+    public void setValue(Integer safetyClassificationId) {
+        LookupValue lookupValue = CustomerLookupCache.getLogicalSafetyClassificationLookupValue(getWebSession(), safetyClassificationId);
+        setLookupValue(lookupValue);
+    }
+
+    @Override
+    public String toString() {
+        return getLookupCode();
+    }
+
+}

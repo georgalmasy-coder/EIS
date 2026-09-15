@@ -1,6 +1,7 @@
 package com.bepa.eis.common.enums.entity;
 
 import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
+import static com.bepa.eis.common.enums.entity.EntityElementType.INTEGER;
 
 public enum EntityType {
 
@@ -53,7 +54,10 @@ public enum EntityType {
                     CODELEVEL,
                     REQNAME,
                     REQDESCRIPTION,
-                    EntityDataElement.STAKEHOLDER},
+                    EntityDataElement.STAKEHOLDER,
+                    REQOWNERID,
+                    REQSTATUSID
+            },
             BASISREQCODE,
             REQNAME
     ),
@@ -93,6 +97,22 @@ public enum EntityType {
                     CODELEVEL,
                     LOGICALNAME,
                     LOGICALDESCRIPTION,
+                    LOGICALOWNERID,
+                    LOGICALVERIFICATIONID,
+                    LOGICALCRITICALITYID,
+                    LOGICALELEMENTCATEGORYID,
+                    LOGICALLEVELID,
+                    LOGICALTYPEID,
+                    LOGICALRESPONSIBLEDOMAINID,
+                    LOGICALLIFECYCLESTATUSID,
+                    LOGICALMATURITYID,
+                    LOGICALALLOCATIONSTATUSID,
+                    LOGICALREALIZATIONSTATUSID,
+                    LOGICALSAFETYCLASSIFICATIONID,
+                    LOGICALSECURITYCLASSIFICATIONID,
+                    LOGICALREDUNDANCYTYPEID,
+                    LOGICALCONFIGURATIONVARIANTID,
+                    LOGICALAPPLICABILITYID,
             },
             LOGICALCODE,
             LOGICALNAME
@@ -100,12 +120,25 @@ public enum EntityType {
 
     FUNCTIONAL_STRUCTURE(9, "F-ELM", "Functional Architecture", "functionStructure", "functionStructures", "functionalDocument",
             new EntityDataElement[]{
-                    FUNCTIONALCODE,
+                    FUNCTIONCODE,
                     CODELEVEL,
-                    FUNCTIONALNAME,
-                    FUNCTIONALDESCRIPTION},
-            FUNCTIONALCODE,
-            FUNCTIONALDESCRIPTION
+                    FUNCTIONNAME,
+                    FUNCTIONDESCRIPTION,
+                    FUNCTIONOWNERID,
+                    FUNCTIONSTATUSID,
+                    FUNCTIONBEHAVIORTYPEID,
+                    FUNCTIONCATEGORYID,
+                    FUNCTIONCRITICALITYID,
+                    FUNCTIONVERIFICATIONID,
+                    FUNCTIONLEVELID,
+                    FUNCTIONOPERATINGMODEID,
+                    FUNCTIONRESPONSIBLEDOMAINID,
+                    FUNCTIONCONFIGURATIONVARIANTID,
+                    FUNCTIONAPPLICABILITYID
+
+            },
+            FUNCTIONCODE,
+            FUNCTIONDESCRIPTION
     );
 
 

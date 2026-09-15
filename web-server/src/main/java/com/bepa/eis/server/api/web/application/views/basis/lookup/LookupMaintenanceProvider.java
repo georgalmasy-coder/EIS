@@ -37,6 +37,11 @@ public class LookupMaintenanceProvider extends GenericProvider {
             "WHERE LookupType = ? " +
             "ORDER BY CASE WHEN DisplayOrder IS NULL THEN 1 ELSE 0 END, DisplayOrder, LookupCode, LookupId";
 
+    private static final String SELECT_ALL_LOOKUPS_SQL =
+            "SELECT LookupId, LookupType, LookupCode, LookupDescription, Color, DisplayOrder, Active " +
+            "FROM dbo.LOOKUP_TABLE " +
+            "ORDER BY LookupType, CASE WHEN DisplayOrder IS NULL THEN 1 ELSE 0 END, DisplayOrder, LookupCode, LookupId";
+
     private static final String SELECT_LOOKUP_BY_ID_SQL =
             "SELECT LookupId, LookupType, LookupCode, LookupDescription, Color, DisplayOrder, Active " +
             "FROM dbo.LOOKUP_TABLE " +
@@ -51,6 +56,19 @@ public class LookupMaintenanceProvider extends GenericProvider {
     private static final String INSERT_LOOKUP_SQL =
             "INSERT INTO dbo.LOOKUP_TABLE (LookupType, LookupCode, LookupDescription, Color, DisplayOrder, Active) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String INSERT_LOOKUP_WITH_ID_SQL =
+            "INSERT INTO dbo.LOOKUP_TABLE (LookupId, LookupType, LookupCode, LookupDescription, Color, DisplayOrder, Active) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String INSERT_LOOKUP_TYPE_WITH_ID_SQL =
+            "INSERT INTO dbo.LOOKUP_TYPE (LookupTypeId, LookupTypeDesc) " +
+            "VALUES (?, ?)";
+
+    private static final String UPDATE_LOOKUP_TYPE_SQL =
+            "UPDATE dbo.LOOKUP_TYPE " +
+            "SET LookupTypeDesc = ? " +
+            "WHERE LookupTypeId = ?";
 
     private static final String UPDATE_LOOKUP_SQL =
             "UPDATE dbo.LOOKUP_TABLE " +
@@ -127,6 +145,24 @@ public class LookupMaintenanceProvider extends GenericProvider {
         return rows;
     }
 
+    public List<LookupRow> getAllLookups() {
+        List<LookupRow> rows = new ArrayList<>();
+
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ALL_LOOKUPS_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                rows.add(mapLookup(resultSet));
+            }
+        } catch (SQLException e) {
+            log.error("Error getting all lookup rows", e);
+            throw new RuntimeException(e);
+        }
+
+        return rows;
+    }
+
     public LookupRow getLookupById(Integer lookupId) {
         if (lookupId == null) {
             return null;
@@ -196,6 +232,91 @@ public class LookupMaintenanceProvider extends GenericProvider {
         }
     }
 
+    public ImportResult importLookupData(List<LookupTypeRow> lookupTypes, List<LookupRow> lookups) {
+        if (lookupTypes == null || lookups == null) {
+            throw new IllegalArgumentException("Lookup import data is required.");
+        }
+
+        try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
+
+            int typeInserted = 0;
+            int typeUpdated = 0;
+            int lookupInserted = 0;
+            int lookupUpdated = 0;
+
+            try {
+                setIdentityInsert(connection, "dbo.LOOKUP_TYPE", true);
+                try {
+                    for (LookupTypeRow lookupType : lookupTypes) {
+                        if (lookupType.lookupTypeId() == null) {
+                            throw new IllegalArgumentException("LookupTypeId is required for import.");
+                        }
+                        if (getLookupTypeById(connection, lookupType.lookupTypeId()) == null) {
+                            insertLookupTypeWithId(connection, lookupType);
+                            typeInserted++;
+                        } else {
+                            updateLookupType(connection, lookupType);
+                            typeUpdated++;
+                        }
+                    }
+                } finally {
+                    setIdentityInsert(connection, "dbo.LOOKUP_TYPE", false);
+                }
+
+                setIdentityInsert(connection, "dbo.LOOKUP_TABLE", true);
+                try {
+                    for (LookupRow lookup : lookups) {
+                        validateLookupInput(lookup.lookupTypeId(), safeText(lookup.lookupCode()), safeText(lookup.lookupDescription()), normalizeColor(lookup.color()));
+                        if (lookup.lookupId() == null) {
+                            throw new IllegalArgumentException("LookupId is required for import.");
+                        }
+                        if (getLookupById(connection, lookup.lookupId()) == null) {
+                            insertLookupWithId(connection, lookup);
+                            lookupInserted++;
+                        } else {
+                            updateLookup(connection, lookup.lookupId(), lookup.lookupTypeId(), safeText(lookup.lookupCode()),
+                                    safeText(lookup.lookupDescription()), normalizeColor(lookup.color()), lookup.displayOrder(), lookup.active());
+                            lookupUpdated++;
+                        }
+                    }
+                } finally {
+                    setIdentityInsert(connection, "dbo.LOOKUP_TABLE", false);
+                }
+
+                connection.commit();
+                EhcacheProvider.clearCache(LOOKUP_CACHE_ALIAS, Integer.class, LookupCache.class);
+                return new ImportResult(typeInserted, typeUpdated, lookupInserted, lookupUpdated);
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error importing lookup data", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private LookupTypeRow getLookupTypeById(Connection connection, Integer lookupTypeId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LOOKUP_TYPE_BY_ID_SQL)) {
+            setInt(statement, lookupTypeId, 1);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? mapLookupType(resultSet) : null;
+            }
+        }
+    }
+
+    private LookupRow getLookupById(Connection connection, Integer lookupId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LOOKUP_BY_ID_SQL)) {
+            setInt(statement, lookupId, 1);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? mapLookup(resultSet) : null;
+            }
+        }
+    }
+
     private Integer insertLookup(
             Connection connection,
             Integer lookupTypeId,
@@ -226,6 +347,41 @@ public class LookupMaintenanceProvider extends GenericProvider {
         }
 
         throw new SQLException("Could not read generated lookup id.");
+    }
+
+    private void insertLookupTypeWithId(Connection connection, LookupTypeRow lookupType) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_LOOKUP_TYPE_WITH_ID_SQL)) {
+            setInt(statement, lookupType.lookupTypeId(), 1);
+            setString(statement, safeText(lookupType.lookupTypeDesc()), 2);
+            statement.executeUpdate();
+        }
+    }
+
+    private void updateLookupType(Connection connection, LookupTypeRow lookupType) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_LOOKUP_TYPE_SQL)) {
+            setString(statement, safeText(lookupType.lookupTypeDesc()), 1);
+            setInt(statement, lookupType.lookupTypeId(), 2);
+            statement.executeUpdate();
+        }
+    }
+
+    private void insertLookupWithId(Connection connection, LookupRow lookup) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_LOOKUP_WITH_ID_SQL)) {
+            setInt(statement, lookup.lookupId(), 1);
+            setInt(statement, lookup.lookupTypeId(), 2);
+            setString(statement, safeText(lookup.lookupCode()), 3);
+            setString(statement, safeText(lookup.lookupDescription()), 4);
+            setString(statement, normalizeColor(lookup.color()), 5);
+            setInt(statement, lookup.displayOrder(), 6);
+            setBoolean(statement, lookup.active(), 7);
+            statement.executeUpdate();
+        }
+    }
+
+    private void setIdentityInsert(Connection connection, String tableName, boolean enabled) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("SET IDENTITY_INSERT " + tableName + " " + (enabled ? "ON" : "OFF"));
+        }
     }
 
     private Integer updateLookup(
@@ -381,5 +537,11 @@ public class LookupMaintenanceProvider extends GenericProvider {
             Integer displayOrder,
             boolean active
     ) {
+    }
+
+    public record ImportResult(int lookupTypesInserted, int lookupTypesUpdated, int lookupsInserted, int lookupsUpdated) {
+        public int totalRows() {
+            return lookupTypesInserted + lookupTypesUpdated + lookupsInserted + lookupsUpdated;
+        }
     }
 }

@@ -7,23 +7,43 @@ import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Part;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "LookupServlet", urlPatterns = {"/basis/lookup"})
+@MultipartConfig
 public class LookupServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LookupServlet.class);
 
     @Override
-    public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) {
-        throw new UnsupportedOperationException("Lookup import is not supported.");
+    public void handleImport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        LookupImportData importData = parseLookupImportData(request);
+
+        if ("preview".equalsIgnoreCase(request.getParameter("phase"))) {
+            writeImportPreview(response, importData);
+            return;
+        }
+
+        LookupMaintenanceProvider provider = new LookupMaintenanceProvider(webSession);
+        LookupMaintenanceProvider.ImportResult result = provider.importLookupData(importData.lookupTypes(), importData.lookups());
+
+        if (result.totalRows() <= 0) {
+            throw new IllegalArgumentException("No lookup rows imported.");
+        }
     }
 
     @Override
@@ -92,8 +112,28 @@ public class LookupServlet extends GenericDataProviderServlet {
     }
 
     @Override
-    public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) {
-        throw new UnsupportedOperationException("Lookup export is not supported.");
+    public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
+        String format = valueOrDefault(request.getParameter("format"), "xml").toLowerCase();
+        if (!"xml".equals(format)) {
+            throw new IllegalArgumentException("Lookup export only supports XML.");
+        }
+
+        LookupMaintenanceProvider provider = new LookupMaintenanceProvider(webSession);
+        LookupMaintenanceXmlDocument xmlDocument = new LookupMaintenanceXmlDocument(webSession, "lookupExport");
+        Element root = xmlDocument.root();
+        appendLookupTypes(xmlDocument, root, provider.getLookupTypes());
+        appendLookups(xmlDocument, root, provider.getAllLookups());
+
+        byte[] content = xmlDocument.toXmlString().getBytes(StandardCharsets.UTF_8);
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + buildDownloadFileName(webSession, "Lookup Administration", "xml") + "\"");
+        response.setContentType("application/xml");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentLength(content.length);
+
+        try (OutputStream outputStream = response.getOutputStream()) {
+            outputStream.write(content);
+            outputStream.flush();
+        }
     }
 
     @Override
@@ -198,6 +238,95 @@ public class LookupServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(lookupElement, "Active", lookup.active());
     }
 
+    private LookupImportData parseLookupImportData(HttpServletRequest request) throws Exception {
+        Part filePart = request.getPart("file");
+        if (filePart == null || filePart.getSize() <= 0) {
+            throw new IllegalArgumentException("Import file is required.");
+        }
+
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(false);
+        documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+
+        Document document;
+        try (var inputStream = filePart.getInputStream()) {
+            document = documentBuilderFactory.newDocumentBuilder().parse(inputStream);
+        }
+
+        Element root = document.getDocumentElement();
+        if (root == null || !"lookupExport".equals(root.getTagName())) {
+            throw new IllegalArgumentException("Import file must be a lookup export XML file.");
+        }
+
+        List<LookupMaintenanceProvider.LookupTypeRow> lookupTypes = new ArrayList<>();
+        Element lookupTypesElement = firstChild(root, "lookupTypes");
+        for (Element lookupTypeElement : children(lookupTypesElement, "lookupType")) {
+            lookupTypes.add(new LookupMaintenanceProvider.LookupTypeRow(
+                    intValue(lookupTypeElement, "LookupTypeId"),
+                    textValue(lookupTypeElement, "LookupTypeDesc")
+            ));
+        }
+
+        List<LookupMaintenanceProvider.LookupRow> lookups = new ArrayList<>();
+        Element lookupsElement = firstChild(root, "lookups");
+        for (Element lookupElement : children(lookupsElement, "lookup")) {
+            Boolean activeValue = boolValue(lookupElement, "Active");
+            lookups.add(new LookupMaintenanceProvider.LookupRow(
+                    intValue(lookupElement, "LookupId"),
+                    intValue(lookupElement, "LookupType"),
+                    textValue(lookupElement, "LookupCode"),
+                    textValue(lookupElement, "LookupDescription"),
+                    textValue(lookupElement, "Color"),
+                    intValue(lookupElement, "DisplayOrder"),
+                    activeValue == null || activeValue
+            ));
+        }
+
+        return new LookupImportData(lookupTypes, lookups);
+    }
+
+    private void writeImportPreview(HttpServletResponse response, LookupImportData importData) throws Exception {
+        StringBuilder rows = new StringBuilder();
+
+        appendPreviewRow(rows, "LOOKUP_TYPE", "LookupTypeId", importData.lookupTypes().size(), true, "");
+        appendPreviewRow(rows, "LOOKUP_TABLE", "LookupId", importData.lookups().size(), true, "");
+
+        String json = """
+                {
+                  "title": "Import Lookup Administration",
+                  "rowCount": %d,
+                  "errorCount": 0,
+                  "allValid": true,
+                  "executeButtonText": "Import lookups",
+                  "columns": [
+                    {"key": "table", "label": "Table"},
+                    {"key": "primaryKey", "label": "Primary key"},
+                    {"key": "rows", "label": "Rows"}
+                  ],
+                  "rows": [%s]
+                }
+                """.formatted(importData.lookupTypes().size() + importData.lookups().size(), rows);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.getWriter().write(json);
+    }
+
+    private void appendPreviewRow(StringBuilder rows, String tableName, String primaryKey, int rowCount, boolean valid, String error) {
+        if (!rows.isEmpty()) {
+            rows.append(",");
+        }
+        rows.append("""
+                {"valid":%s,"error":"%s","values":["%s","%s","%d"]}
+                """.formatted(valid, escapeJson(error), escapeJson(tableName), escapeJson(primaryKey), rowCount));
+    }
+
+    private String escapeJson(String value) {
+        return String.valueOf(value == null ? "" : value)
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"");
+    }
+
     private Integer resolveLookupTypeId(HttpServletRequest request, LookupMaintenanceProvider provider) {
         Integer lookupTypeId = toInteger(request.getParameter("lookupTypeId"));
 
@@ -212,5 +341,8 @@ public class LookupServlet extends GenericDataProviderServlet {
 
         List<LookupMaintenanceProvider.LookupTypeRow> lookupTypes = provider.getLookupTypes();
         return lookupTypes.isEmpty() ? null : lookupTypes.get(0).lookupTypeId();
+    }
+
+    private record LookupImportData(List<LookupMaintenanceProvider.LookupTypeRow> lookupTypes, List<LookupMaintenanceProvider.LookupRow> lookups) {
     }
 }

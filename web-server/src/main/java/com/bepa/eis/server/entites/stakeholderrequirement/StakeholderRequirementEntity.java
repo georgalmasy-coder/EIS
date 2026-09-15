@@ -6,6 +6,8 @@ import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
+import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementOwner;
+import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementStatus;
 import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
@@ -23,6 +25,8 @@ public class StakeholderRequirementEntity extends AbstractEntity {
     private RequirementName requirementName;
     private RequirementDescription requirementDescription;
     private Stakeholder stakeholder;
+    private RequirementOwner requirementOwner;
+    private RequirementStatus requirementStatus;
 
     @Override
     public EntityType getEntityType() {
@@ -56,6 +60,8 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         requirementName = new RequirementName();
         requirementDescription = new RequirementDescription();
         stakeholder = new Stakeholder(getWebSession());
+        requirementOwner = new RequirementOwner(getWebSession());
+        requirementStatus = new RequirementStatus(getWebSession());
     }
 
     @Override
@@ -65,6 +71,8 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         entityElement.addElement(requirementName);
         entityElement.addElement(requirementDescription);
         entityElement.addElement(stakeholder);
+        entityElement.addElement(requirementOwner);
+        entityElement.addElement(requirementStatus);
     }
 
     @Override
@@ -85,6 +93,12 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         stakeholder.setFieldEditable();
         stakeholder.setFieldNotRequired();
         entityElement.addElement(stakeholder);
+
+        requirementOwner.setFieldEditable();
+        entityElement.addElement(requirementOwner);
+
+        requirementStatus.setFieldEditable();
+        entityElement.addElement(requirementStatus);
     }
 
     @Override
@@ -108,6 +122,14 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         stakeholder.setFieldEditable();
         stakeholder.setFieldNotRequired();
         entityElement.addElement(stakeholder);
+
+        requirementOwner.setFieldEditable();
+        requirementOwner.setFieldNotRequired();
+        entityElement.addElement(requirementOwner);
+
+        requirementStatus.setFieldEditable();
+        requirementStatus.setFieldNotRequired();
+        entityElement.addElement(requirementStatus);
     }
 
     public StakeholderRequirementEntity() {}
@@ -139,6 +161,12 @@ public class StakeholderRequirementEntity extends AbstractEntity {
                         break;
                     case STAKEHOLDER:
                         stakeholder.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQOWNERID:
+                        requirementOwner.setValue(elementRecord.getIntegerValue());
+                        break;
+                    case REQSTATUSID:
+                        requirementStatus.setValue(elementRecord.getIntegerValue());
                         break;
 
                 }
@@ -190,12 +218,37 @@ public class StakeholderRequirementEntity extends AbstractEntity {
         return stakeholder;
     }
 
+    public void setOwner(Integer ownerId) {
+        this.requirementOwner.setValue(ownerId);
+    }
+
+    public Integer getOwnerId() {
+        return requirementOwner.getValue();
+    }
+    public RequirementOwner getOwner() {
+        return requirementOwner;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.requirementStatus.setValue(statusId);
+    }
+
+    public Integer getStatusId() {
+        return requirementStatus.getValue();
+    }
+
+    public RequirementStatus getStatus() {
+        return requirementStatus;
+    }
+
     public void addAllDataElements() {
         addDataElement(new StringDataElement(StakeholderRequirementCode.FIELD_NAME, getRequirementCode().getValue()));
         addDataElement(new IntegerDataElement(CodeLevel.FIELD_NAME, getRequirementCodeLevel().getValue()));
         addDataElement(new StringDataElement(RequirementName.FIELD_NAME, getRequirementName().getValue()));
         addDataElement(new StringDataElement(RequirementDescription.FIELD_NAME, getRequirementDescription().getValue()));
         addDataElement(new IntegerDataElement(Stakeholder.FIELD_NAME, getStakeholder().getValue()));
+        addDataElement(new IntegerDataElement(RequirementOwner.FIELD_NAME, getOwnerId()));
+        addDataElement(new IntegerDataElement(RequirementStatus.FIELD_NAME, getStatusId()));
     }
 
 }

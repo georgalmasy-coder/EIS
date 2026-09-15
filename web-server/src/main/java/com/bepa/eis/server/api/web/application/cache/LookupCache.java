@@ -12,6 +12,35 @@ public class LookupCache {
     private final CustomerBasisInfo customerInfo;
     private final RequirementBusinessPriorityCache requirementBusinessPriorityCache;
     private final RequirementVerificationCache requirementVerificationCache;
+
+    private final FunctionVerificationCache functionVerificationCache;
+    private final FunctionBehaviorTypeCache functionBehaviorTypeCache;
+    private final FunctionCategoryCache functionCategoryCache;
+    private final FunctionCriticalityCache functionCriticalityCache;
+    private final FunctionStatusCache functionStatusCache;
+    private final FunctionLevelCache functionLevelCache;
+    private final FunctionOperatingModeCache functionOperatingModeCache;
+    private final FunctionResponsibleDomainCache functionResponsibleDomainCache;
+    private final FunctionConfigurationVariantCache functionConfigurationVariantCache;
+    private final FunctionApplicabilityCache functionApplicabilityCache;
+
+    private final LogicalVerificationCache logicalVerificationCache;
+    private final LogicalCriticalityCache logicalCriticalityCache;
+    private final LogicalElementCategoryCache logicalElementCategoryCache;
+    private final LogicalLevelCache logicalLevelCache;
+    private final LogicalTypeCache logicalTypeCache;
+    private final LogicalResponsibleDomainCache logicalResponsibleDomainCache;
+    private final LogicalLifecycleStatusCache logicalLifecycleStatusCache;
+    private final LogicalMaturityCache logicalMaturityCache;
+    private final LogicalAllocationStatusCache logicalAllocationStatusCache;
+    private final LogicalRealizationStatusCache logicalRealizationStatusCache;
+    private final LogicalSafetyClassificationCache logicalSafetyClassificationCache;
+    private final LogicalSecurityClassificationCache logicalSecurityClassificationCache;
+    private final LogicalRedundancyTypeCache logicalRedundancyTypeCache;
+    private final LogicalConfigurationVariantCache logicalConfigurationVariantCache;
+    private final LogicalApplicabilityCache logicalApplicabilityCache;
+
+
     private final ProjectCategoryCache projectCategoryCache;
     private final ProjectPriorityCache projectPriorityCache;
     private final RequirementStatusCache requirementStatusCache;
@@ -30,6 +59,34 @@ public class LookupCache {
         customerInfo = new CustomerInfoProvider().getCustomerInfo(customerId);
         requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(customerId, projectId);
         requirementVerificationCache = new RequirementVerificationCache(customerId, projectId);
+
+        functionVerificationCache = new FunctionVerificationCache(customerId, projectId);
+        functionBehaviorTypeCache = new FunctionBehaviorTypeCache(customerId, projectId);
+        functionCategoryCache = new FunctionCategoryCache(customerId, projectId);
+        functionCriticalityCache = new FunctionCriticalityCache(customerId, projectId);
+        functionStatusCache = new FunctionStatusCache(customerId, projectId);
+        functionLevelCache = new FunctionLevelCache(customerId, projectId);
+        functionOperatingModeCache = new FunctionOperatingModeCache(customerId, projectId);
+        functionResponsibleDomainCache = new FunctionResponsibleDomainCache(customerId, projectId);
+        functionConfigurationVariantCache = new FunctionConfigurationVariantCache(customerId, projectId);
+        functionApplicabilityCache = new FunctionApplicabilityCache(customerId, projectId);
+
+        logicalVerificationCache = new LogicalVerificationCache(customerId, projectId);
+        logicalCriticalityCache = new LogicalCriticalityCache(customerId, projectId);
+        logicalElementCategoryCache = new LogicalElementCategoryCache(customerId, projectId);
+        logicalLevelCache = new LogicalLevelCache(customerId, projectId);
+        logicalTypeCache = new LogicalTypeCache(customerId, projectId);
+        logicalResponsibleDomainCache = new LogicalResponsibleDomainCache(customerId, projectId);
+        logicalLifecycleStatusCache = new LogicalLifecycleStatusCache(customerId, projectId);
+        logicalMaturityCache = new LogicalMaturityCache(customerId, projectId);
+        logicalAllocationStatusCache = new LogicalAllocationStatusCache(customerId, projectId);
+        logicalRealizationStatusCache = new LogicalRealizationStatusCache(customerId, projectId);
+        logicalSafetyClassificationCache = new LogicalSafetyClassificationCache(customerId, projectId);
+        logicalSecurityClassificationCache = new LogicalSecurityClassificationCache(customerId, projectId);
+        logicalRedundancyTypeCache = new LogicalRedundancyTypeCache(customerId, projectId);
+        logicalConfigurationVariantCache = new LogicalConfigurationVariantCache(customerId, projectId);
+        logicalApplicabilityCache = new LogicalApplicabilityCache(customerId, projectId);
+
         projectCategoryCache = new ProjectCategoryCache(customerId, projectId);
         projectPriorityCache = new ProjectPriorityCache(customerId, projectId);
         requirementStatusCache = new RequirementStatusCache(customerId, projectId);
@@ -73,6 +130,206 @@ public class LookupCache {
 
     public List<LookupValue> getRequirementVerificationLookupValues() {
         return requirementVerificationCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionVerificationLookupValue(Integer lookupId) {
+        return lookupId != null ? functionVerificationCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionVerificationLookupValues() {
+        return functionVerificationCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalVerificationLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalVerificationCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalVerificationLookupValues() {
+        return logicalVerificationCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionBehaviorTypeLookupValue(Integer lookupId) {
+        return lookupId != null ? functionBehaviorTypeCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionBehaviorTypeLookupValues() {
+        return functionBehaviorTypeCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionCategoryLookupValue(Integer lookupId) {
+        return lookupId != null ? functionCategoryCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionCategoryLookupValues() {
+        return functionCategoryCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionCriticalityLookupValue(Integer lookupId) {
+        return lookupId != null ? functionCriticalityCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionCriticalityLookupValues() {
+        return functionCriticalityCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionStatusLookupValue(Integer lookupId) {
+        return lookupId != null ? functionStatusCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionStatusLookupValues() {
+        return functionStatusCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionLevelLookupValue(Integer lookupId) {
+        return lookupId != null ? functionLevelCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionLevelLookupValues() {
+        return functionLevelCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionOperatingModeLookupValue(Integer lookupId) {
+        return lookupId != null ? functionOperatingModeCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionOperatingModeLookupValues() {
+        return functionOperatingModeCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionResponsibleDomainLookupValue(Integer lookupId) {
+        return lookupId != null ? functionResponsibleDomainCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionResponsibleDomainLookupValues() {
+        return functionResponsibleDomainCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionConfigurationVariantLookupValue(Integer lookupId) {
+        return lookupId != null ? functionConfigurationVariantCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionConfigurationVariantLookupValues() {
+        return functionConfigurationVariantCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getFunctionApplicabilityLookupValue(Integer lookupId) {
+        return lookupId != null ? functionApplicabilityCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getFunctionApplicabilityLookupValues() {
+        return functionApplicabilityCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalCriticalityLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalCriticalityCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalCriticalityLookupValues() {
+        return logicalCriticalityCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalElementCategoryLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalElementCategoryCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalElementCategoryLookupValues() {
+        return logicalElementCategoryCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalLevelLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalLevelCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalLevelLookupValues() {
+        return logicalLevelCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalTypeLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalTypeCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalTypeLookupValues() {
+        return logicalTypeCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalResponsibleDomainLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalResponsibleDomainCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalResponsibleDomainLookupValues() {
+        return logicalResponsibleDomainCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalLifecycleStatusLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalLifecycleStatusCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalLifecycleStatusLookupValues() {
+        return logicalLifecycleStatusCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalMaturityLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalMaturityCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalMaturityLookupValues() {
+        return logicalMaturityCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalAllocationStatusLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalAllocationStatusCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalAllocationStatusLookupValues() {
+        return logicalAllocationStatusCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalRealizationStatusLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalRealizationStatusCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalRealizationStatusLookupValues() {
+        return logicalRealizationStatusCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalSafetyClassificationLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalSafetyClassificationCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalSafetyClassificationLookupValues() {
+        return logicalSafetyClassificationCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalSecurityClassificationLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalSecurityClassificationCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalSecurityClassificationLookupValues() {
+        return logicalSecurityClassificationCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalRedundancyTypeLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalRedundancyTypeCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalRedundancyTypeLookupValues() {
+        return logicalRedundancyTypeCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalConfigurationVariantLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalConfigurationVariantCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalConfigurationVariantLookupValues() {
+        return logicalConfigurationVariantCache.getListOfActiveLookupValues();
+    }
+
+    public LookupValue getLogicalApplicabilityLookupValue(Integer lookupId) {
+        return lookupId != null ? logicalApplicabilityCache.getLookupValueById(lookupId) : null;
+    }
+
+    public List<LookupValue> getLogicalApplicabilityLookupValues() {
+        return logicalApplicabilityCache.getListOfActiveLookupValues();
     }
 
     public LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {

@@ -51,9 +51,39 @@ public enum EntityDataElement {
     LOGICALNAME(51,"Logical Name", "LogicalName", STRING),
     LOGICALDESCRIPTION(52,"Logical Description", "LogicalDescription", STRING),
 
-    FUNCTIONALCODE(60,"Functional Code", "FunctionalCode", STRING),
-    FUNCTIONALNAME(61,"Functional Name", "FunctionalName", STRING),
-    FUNCTIONALDESCRIPTION(62,"Functional Description", "FunctionalDescription", STRING),
+    FUNCTIONCODE(60,"Functional Code", "FunctionalCode", STRING),
+    FUNCTIONNAME(61,"Functional Name", "FunctionalName", STRING),
+    FUNCTIONDESCRIPTION(62,"Functional Description", "FunctionalDescription", STRING),
+    FUNCTIONOWNERID(63, "Function Owner", "FunctionOwnerId", INTEGER),
+    FUNCTIONSTATUSID(64, "Function Status", "FunctionStatusId", INTEGER),
+    FUNCTIONBEHAVIORTYPEID(65, "Function Behavior Type", "FunctionBehaviorTypeId", INTEGER),
+    FUNCTIONCATEGORYID(66, "Function Category", "FunctionCategoryId", INTEGER),
+    FUNCTIONCRITICALITYID(67, "Function Criticality", "FunctionCriticalityId", INTEGER),
+    FUNCTIONVERIFICATIONID(68, "Function Verification Status", "FunctionVerificationStatusId", INTEGER),
+    FUNCTIONLEVELID(69, "Function Level", "FunctionLevelId", INTEGER),
+    FUNCTIONOPERATINGMODEID(70, "Function Operating Mode", "FunctionOperatingModeId", INTEGER),
+    FUNCTIONRESPONSIBLEDOMAINID(71, "Function Responsible Domain", "FunctionResponsibleDomainId", INTEGER),
+    FUNCTIONCONFIGURATIONVARIANTID(72, "Function Configuration Variant", "FunctionConfigurationVariantId", INTEGER),
+    FUNCTIONAPPLICABILITYID(73, "Function Applicability", "FunctionApplicabilityId", INTEGER),
+
+
+    LOGICALOWNERID(80, "Logical Owner", "LogicalOwnerId", INTEGER),
+    LOGICALVERIFICATIONID(81, "Logical Verification Status", "LogicalVerificationStatusId", INTEGER),
+    LOGICALCRITICALITYID(82, "Logical Criticality", "LogicalCriticalityId", INTEGER),
+    LOGICALELEMENTCATEGORYID(83, "Logical Element Category", "LogicalElementCategoryId", INTEGER),
+    LOGICALLEVELID(84, "Logical Level", "LogicalLevelId", INTEGER),
+    LOGICALTYPEID(85, "Logical Type", "LogicalTypeId", INTEGER),
+    LOGICALRESPONSIBLEDOMAINID(86, "Logical Responsible Domain", "LogicalResponsibleDomainId", INTEGER),
+    LOGICALLIFECYCLESTATUSID(87, "Logical Lifecycle Status", "LogicalLifecycleStatusId", INTEGER),
+    LOGICALMATURITYID(88, "Logical Maturity", "LogicalMaturityId", INTEGER),
+    LOGICALALLOCATIONSTATUSID(89, "Logical Allocation Status", "LogicalAllocationStatusId", INTEGER),
+    LOGICALREALIZATIONSTATUSID(90, "Logical Realization Status", "LogicalRealizationStatusId", INTEGER),
+    LOGICALSAFETYCLASSIFICATIONID(91, "Logical Safety Classification", "LogicalSafetyClassificationId", INTEGER),
+    LOGICALSECURITYCLASSIFICATIONID(92, "Logical Security Classification", "LogicalSecurityClassificationId", INTEGER),
+    LOGICALREDUNDANCYTYPEID(93, "Logical Redundancy Type", "LogicalRedundancyTypeId", INTEGER),
+    LOGICALCONFIGURATIONVARIANTID(94, "Logical Configuration Variant", "LogicalConfigurationVariantId", INTEGER),
+    LOGICALAPPLICABILITYID(95, "Logical Applicability", "LogicalApplicabilityId", INTEGER),
+
     ;
 
     private final int id;
