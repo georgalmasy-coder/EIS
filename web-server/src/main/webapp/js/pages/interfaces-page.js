@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
+import { initInterfaceEditDialog, openInterfaceEditDialog } from "../components/interface-edit-dialog.js";
 import {
     closeDialogElement,
     setInputValue,
@@ -557,21 +558,11 @@ function openStructureEditPage(structure) {
 }
 
 function initializeDialogEvents() {
-    const dialog = document.getElementById("interfaceDialog");
-    const cancelButton = document.getElementById("interfaceDialogCancelButton");
-    const saveButton = document.getElementById("interfaceDialogSaveButton");
-
-    cancelButton?.addEventListener("click", () => {
-        closeInterfaceDialog(dialog);
-    });
-
-    saveButton?.addEventListener("click", async () => {
-        await saveCurrentInterface();
-    });
-
-    dialog?.addEventListener("cancel", (event) => {
-        event.preventDefault();
-        closeInterfaceDialog(dialog);
+    initInterfaceEditDialog({
+        basePath: INTERFACE_BASE_PATH,
+        structureLabel: INTERFACE_STRUCTURE_LABEL,
+        lookup: state.matrix?.lookup,
+        onSaved: () => window.location.reload()
     });
 
     const removeDialog = document.getElementById("interfaceRemoveDialog");
@@ -592,7 +583,15 @@ function initializeContextMenuEvents() {
         const target = state.contextTarget;
         closeInterfaceContextMenu();
         if (target) {
-            openInterfaceDialog(target.fromStructure, target.toStructure, target.cell);
+            openInterfaceEditDialog({
+                basePath: INTERFACE_BASE_PATH,
+                structureLabel: INTERFACE_STRUCTURE_LABEL,
+                lookup: state.matrix?.lookup,
+                fromStructure: target.fromStructure,
+                toStructure: target.toStructure,
+                cell: target.cell,
+                onSaved: () => window.location.reload()
+            });
         }
     });
 
@@ -755,6 +754,17 @@ function renderIrlCheckboxList() {
 }
 
 function openInterfaceDialog(fromStructure, toStructure, cell) {
+    openInterfaceEditDialog({
+        basePath: INTERFACE_BASE_PATH,
+        structureLabel: INTERFACE_STRUCTURE_LABEL,
+        lookup: state.matrix?.lookup,
+        fromStructure,
+        toStructure,
+        cell,
+        onSaved: () => window.location.reload()
+    });
+    return;
+
     const dialog = document.getElementById("interfaceDialog");
 
     if (!dialog) {

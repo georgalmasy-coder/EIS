@@ -15,7 +15,7 @@ import { createNotesTable } from "../components/notes-table.js";
 import { createAttachmentsTable } from "../components/attachments-table.js";
 import { createLinksTable } from "../components/links-table.js";
 import { createEntityRelationsTable } from "../components/entity-relations-table.js";
-import { createEditInterfacesTable } from "../components/edit-interfaces-table.js";
+import { createEditInterfacesTable } from "../components/edit-interfaces-table.js?rev=interface-from-entity-1";
 import { setText } from "../core/dom.js";
 import {
     getDirectChild,

@@ -26,6 +26,9 @@ public class EditInterfaceElements {
         Element editInterfacesElement = doc.createElement("editInterfaces");
         editInterfacesElement.setAttribute("entityType", String.valueOf(entityType.getId()));
         editInterfacesElement.setAttribute("entityTypeName", entityType.getDescription());
+        if (entityId != null) {
+            editInterfacesElement.setAttribute("entityId", String.valueOf(entityId));
+        }
 
         DashboardMetaData dashboardMetaData = new DashboardMetaData(webSession);
         editInterfacesElement.appendChild(dashboardMetaData.getIrlElement(doc));

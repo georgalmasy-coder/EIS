@@ -254,7 +254,7 @@ public class CustomerLookupCache {
     }
 
     public static LookupValue getTrlLookupValue(WebSession webSession, Integer lookupId) {
-        return getIrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
+        return getTrlLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
     }
 
     public static LookupValue getTrlLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
