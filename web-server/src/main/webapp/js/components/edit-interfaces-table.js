@@ -2,12 +2,16 @@ import { getAttribute, getChildText } from "../core/xml.js";
 import { openInterfaceEditDialog, resolveInterfaceBasePath } from "./interface-edit-dialog.js";
 
 const COLUMN_DEFINITIONS = [
-    { key: "interfaceClass", label: "Class", sublabel: "From -> To", type: "classification", width: "30%" },
-    { key: "interfaceIrl", label: "IRL", sublabel: "From -> To", type: "irl", width: "18%" },
-    { key: "nextIrlMeeting", label: "Next IRL Meeting", source: "nextIrlMeeting", width: "18%", formatter: formatDanishDate },
-    { key: "toEntityCode", label: "ID", source: "toEntityCode", width: "14%" },
-    { key: "toEntityName", label: "Name", source: "toEntityName", width: "20%" }
+    { key: "fromTrl", label: "TRL", source: "fromTrlId", type: "trl", width: "11%", physicalOnly: true, group: "From" },
+    { key: "interfaceClass", label: "Class", source: "fromClassificationIds", type: "classification", width: "22%", group: "Interface" },
+    { key: "interfaceIrl", label: "IRL", source: "fromIrlId", type: "irl", width: "14%", group: "Interface" },
+    { key: "nextIrlMeeting", label: "Next IRL Meeting", source: "nextIrlMeeting", width: "19%", formatter: formatDanishDate, group: "Interface" },
+    { key: "toEntityCode", label: "ID", source: "toEntityCode", width: "12%", group: "To" },
+    { key: "toEntityName", label: "Name", source: "toEntityName", width: "16%", group: "To" },
+    { key: "toTrl", label: "TRL", source: "toTrlId", type: "trl", width: "6%", physicalOnly: true, group: "To" }
 ];
+
+const PHYSICAL_ARCHITECTURE_ENTITY_TYPE = "2";
 
 export function createEditInterfacesTable(options = {}) {
     const tableBodyId = options.tableBodyId || "interfacesBody";
@@ -46,7 +50,10 @@ export function createEditInterfacesTable(options = {}) {
         currentData = data;
         currentBasePath = basePath;
         currentStructureLabel = structureLabel;
+        const columns = getColumns(data);
         const fragment = document.createDocumentFragment();
+
+        renderTableStructure(tableBody.closest("table"), columns);
 
         data.interfaces.forEach((record, index) => {
             const row = document.createElement("tr");
@@ -60,8 +67,8 @@ export function createEditInterfacesTable(options = {}) {
                 openRecord(record, data, basePath, structureLabel);
             });
 
-            for (const column of COLUMN_DEFINITIONS) {
-                row.appendChild(column.type ? buildDualCell(record, column, data.lookup) : buildSingleCell(record, column));
+            for (const column of columns) {
+                row.appendChild(column.type ? buildLookupCell(record, column, data.lookup) : buildSingleCell(record, column));
             }
 
             fragment.appendChild(row);
@@ -117,6 +124,7 @@ function parseEditInterfaces(rootElement, xmlDocument) {
             fromEntityName: "",
             interfaces: [],
             lookup: {
+                trlById: new Map(),
                 irlById: new Map(),
                 classificationById: new Map()
             }
@@ -138,11 +146,14 @@ function parseEditInterfaces(rootElement, xmlDocument) {
             toIrlId: getChildText(element, "toIrlId", ""),
             toClassificationIds: getChildText(element, "toClassificationIds", ""),
             nextIrlMeeting: getChildText(element, "nextIrlMeeting", ""),
+            fromTrlId: getChildText(element, "fromTrlId", ""),
+            toTrlId: getChildText(element, "toTrlId", ""),
             toEntityId: getChildText(element, "toEntityId", ""),
             toEntityCode: getChildText(element, "toEntityCode", ""),
             toEntityName: getChildText(element, "toEntityName", "")
         })),
         lookup: {
+            trlById: parseLookupMap(rootElement, "trlMeta > trl", "trlId"),
             irlById: parseLookupMap(rootElement, "irlMeta > irl", "irlId"),
             classificationById: parseLookupMap(rootElement, "classificationMeta > classification", "classId")
         }
@@ -245,27 +256,100 @@ function buildSingleCell(record, column) {
     return cell;
 }
 
-function buildDualCell(record, column, lookup) {
+function buildLookupCell(record, column, lookup) {
     const cell = document.createElement("td");
-    cell.className = `edit-interfaces-cell edit-interfaces-cell--dual edit-interfaces-cell--${column.key}`;
+    cell.className = `edit-interfaces-cell edit-interfaces-cell--${column.key}`;
 
-    const topRaw = column.type === "classification" ? record.fromClassificationIds : record.fromIrlId;
-    const bottomRaw = column.type === "classification" ? record.toClassificationIds : record.toIrlId;
-    const topResolved = column.type === "classification"
-        ? resolveLookupList(lookup.classificationById, topRaw)
-        : resolveLookupValue(lookup.irlById, topRaw);
-    const bottomResolved = column.type === "classification"
-        ? resolveLookupList(lookup.classificationById, bottomRaw)
-        : resolveLookupValue(lookup.irlById, bottomRaw);
+    const map = column.type === "classification"
+        ? lookup.classificationById
+        : column.type === "trl"
+            ? lookup.trlById
+            : lookup.irlById;
+    const rawValue = record?.[column.source] || "";
+    const resolved = column.type === "classification"
+        ? resolveLookupList(map, rawValue)
+        : resolveLookupValue(map, rawValue);
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "edit-interfaces-dual";
-    wrapper.appendChild(buildDualLine(topResolved, "right"));
-    wrapper.appendChild(buildDualLine(bottomResolved, "left"));
-    cell.title = `${topResolved.title || topResolved.label || "--"}\n${bottomResolved.title || bottomResolved.label || "--"}`;
-    cell.appendChild(wrapper);
+    cell.title = resolved.title || resolved.label || "--";
+    cell.appendChild(resolved.color ? buildLookupPill(resolved) : buildSingleLookupText(resolved));
 
     return cell;
+}
+
+function getColumns(data) {
+    const includePhysicalColumns = String(data?.entityType || "") === PHYSICAL_ARCHITECTURE_ENTITY_TYPE;
+
+    return COLUMN_DEFINITIONS.filter((column) => !column.physicalOnly || includePhysicalColumns);
+}
+
+function renderTableStructure(table, columns) {
+    if (!table) {
+        return;
+    }
+
+    renderColGroup(table, columns);
+    renderHeader(table, columns);
+}
+
+function renderColGroup(table, columns) {
+    let colgroup = table.querySelector("colgroup");
+
+    if (!colgroup) {
+        colgroup = document.createElement("colgroup");
+        table.insertBefore(colgroup, table.firstChild);
+    }
+
+    colgroup.replaceChildren(...columns.map((column) => {
+        const col = document.createElement("col");
+        col.style.width = column.width || "";
+        return col;
+    }));
+}
+
+function renderHeader(table, columns) {
+    let thead = table.querySelector("thead");
+
+    if (!thead) {
+        thead = document.createElement("thead");
+        table.insertBefore(thead, table.querySelector("tbody"));
+    }
+
+    const groupRow = document.createElement("tr");
+    groupRow.className = "edit-interfaces-group-row";
+
+    getColumnGroups(columns).forEach((group) => {
+        const th = document.createElement("th");
+        th.colSpan = group.count;
+        th.textContent = group.name;
+        groupRow.appendChild(th);
+    });
+
+    const headerRow = document.createElement("tr");
+    columns.forEach((column) => {
+        const th = document.createElement("th");
+        th.appendChild(buildHeaderContent(column));
+        headerRow.appendChild(th);
+    });
+
+    thead.replaceChildren(groupRow, headerRow);
+}
+
+function getColumnGroups(columns) {
+    return columns.reduce((groups, column) => {
+        const lastGroup = groups[groups.length - 1];
+
+        if (lastGroup?.name === column.group) {
+            lastGroup.count += 1;
+        } else {
+            groups.push({ name: column.group || "", count: 1 });
+        }
+
+        return groups;
+    }, []);
+}
+
+function buildHeaderContent(column) {
+    return document.createTextNode(column.label);
 }
 
 function buildDualLine(resolved, direction) {
@@ -279,6 +363,13 @@ function buildDualLine(resolved, direction) {
 function buildDualText(resolved) {
     const text = document.createElement("span");
     text.className = "edit-interfaces-dual-text";
+    text.textContent = resolved.label || "--";
+    return text;
+}
+
+function buildSingleLookupText(resolved) {
+    const text = document.createElement("span");
+    text.className = "edit-interfaces-cell-text";
     text.textContent = resolved.label || "--";
     return text;
 }

@@ -2129,14 +2129,31 @@ function renderStatusBars(requirement) {
 }
 
 function buildRequirementTooltip(requirement) {
-    return [
-        `ID: ${requirement?.id || "—"}`,
-        `Name: ${requirement?.name || "—"}`,
-        requirement?.description ? `Description: ${requirement.description}` : "",
-        `Verification Status: ${requirement?.verificationStatus || "—"}`,
-        `Business Priority: ${requirement?.businessPriority || "—"}`,
-        `Requirement Status: ${requirement?.requirementStatus || "—"}`
-    ].filter(Boolean).join("\n");
+    return buildEntityFieldsTooltip(requirement?.fields);
+}
+
+function buildEntityFieldsTooltip(fields) {
+    const seenLabels = new Set();
+
+    return Array.from(fields || [])
+        .map((field) => {
+            const label = String(field?.label || field?.name || "").trim();
+            const value = String(field?.value || "").trim();
+            const labelKey = label.toLowerCase();
+
+            if (!label || seenLabels.has(labelKey) || isBlankTooltipValue(value)) {
+                return "";
+            }
+
+            seenLabels.add(labelKey);
+            return label + ": " + value;
+        })
+        .filter(Boolean)
+        .join("\n");
+}
+
+function isBlankTooltipValue(value) {
+    return !value || value === "--" || value === "\u2014";
 }
 
 function statusClass(value) {

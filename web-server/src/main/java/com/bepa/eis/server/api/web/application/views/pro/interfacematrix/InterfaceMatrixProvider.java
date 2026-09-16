@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +129,24 @@ public class InterfaceMatrixProvider extends GenericProvider {
             ORDER BY I.[ToEntityId], I.[Version]
             """;
 
+    private static final String SELECT_SYSTEM_TRL_BY_PROJECT_SQL = """
+            SELECT
+                E.[EntityId],
+                TRL_EE.[IntegerValue] AS TrlId
+            FROM [dbo].[ENTITY] E
+            LEFT JOIN [dbo].[ENTITY_ELEMENT] TRL_EE
+              ON TRL_EE.[CustomerId] = E.[CustomerId]
+             AND TRL_EE.[ProjectId] = E.[ProjectId]
+             AND TRL_EE.[EntityType] = E.[EntityType]
+             AND TRL_EE.[EntityId] = E.[EntityId]
+             AND TRL_EE.[Version] = E.[Version]
+             AND TRL_EE.[EntityDataElementType] = ?
+            WHERE E.[CustomerId] = ?
+              AND E.[ProjectId] = ?
+              AND E.[EntityType] = ?
+              AND E.[Latest] = 1
+            """;
+
     private static final String UPDATE_LATEST_FALSE_SQL = """
             UPDATE [dbo].[INTERFACES]
             SET [Latest] = 0
@@ -185,7 +205,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
         List<EditInterfaceRecord> records = new ArrayList<>();
 
         try (Connection connection = getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_BY_FROM_SQL)) {
+            PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_BY_FROM_SQL)) {
             setInt(ps, entityType.getEntityCodeColumn().getId(), 1);
             setInt(ps, entityType.getEntityNameColumn().getId(), 2);
             setInt(ps, getWebSession().getCustomerId(), 3);
@@ -205,13 +225,68 @@ public class InterfaceMatrixProvider extends GenericProvider {
                             getNullableInteger(rs, "ReverseIrlId"),
                             interfaceRecord.nextIrlMeeting(),
                             interfaceRecord.classificationIds(),
-                            rs.getString("ReverseClassificationIds")
+                            rs.getString("ReverseClassificationIds"),
+                            null,
+                            null
                     ));
                 }
+            }
+
+            if (entityType == EntityType.SYSTEMS_BREAKDOWN && !records.isEmpty()) {
+                records = enrichWithSystemTrlIds(connection, records);
             }
         }
 
         return records;
+    }
+
+    private List<EditInterfaceRecord> enrichWithSystemTrlIds(
+            Connection connection,
+            List<EditInterfaceRecord> records
+    ) throws SQLException {
+        Map<Integer, Integer> trlIdsByEntityId = getSystemTrlIdsByEntityId(connection);
+        List<EditInterfaceRecord> enrichedRecords = new ArrayList<>();
+
+        for (EditInterfaceRecord record : records) {
+            enrichedRecords.add(new EditInterfaceRecord(
+                    record.fromEntityId(),
+                    record.toEntityId(),
+                    record.toEntityCode(),
+                    record.toEntityName(),
+                    record.irlId(),
+                    record.reverseIrlId(),
+                    record.nextIrlMeeting(),
+                    record.classificationIds(),
+                    record.reverseClassificationIds(),
+                    trlIdsByEntityId.get(record.fromEntityId()),
+                    trlIdsByEntityId.get(record.toEntityId())
+            ));
+        }
+
+        return enrichedRecords;
+    }
+
+    private Map<Integer, Integer> getSystemTrlIdsByEntityId(Connection connection) throws SQLException {
+        Map<Integer, Integer> trlIdsByEntityId = new HashMap<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(SELECT_SYSTEM_TRL_BY_PROJECT_SQL)) {
+            setInt(ps, EntityDataElement.TRLID.getId(), 1);
+            setInt(ps, getWebSession().getCustomerId(), 2);
+            setInt(ps, getWebSession().getProjectId(), 3);
+            setInt(ps, EntityType.SYSTEMS_BREAKDOWN.getId(), 4);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Integer trlId = getNullableInteger(rs, "TrlId");
+
+                    if (trlId != null) {
+                        trlIdsByEntityId.put(rs.getInt("EntityId"), trlId);
+                    }
+                }
+            }
+        }
+
+        return trlIdsByEntityId;
     }
 
     public List<InterfaceRecord> getLatestInterfaceRecords(Integer customerId, Integer projectId, EntityType entityType) throws SQLException {
@@ -543,7 +618,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
             Integer reverseIrlId,
             String nextIrlMeeting,
             String classificationIds,
-            String reverseClassificationIds
+            String reverseClassificationIds,
+            Integer fromTrlId,
+            Integer toTrlId
     ) {
     }
 }

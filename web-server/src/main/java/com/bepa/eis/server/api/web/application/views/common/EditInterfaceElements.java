@@ -31,6 +31,7 @@ public class EditInterfaceElements {
         }
 
         DashboardMetaData dashboardMetaData = new DashboardMetaData(webSession);
+        editInterfacesElement.appendChild(dashboardMetaData.getTrlElement(doc));
         editInterfacesElement.appendChild(dashboardMetaData.getIrlElement(doc));
         editInterfacesElement.appendChild(dashboardMetaData.getClassificationElement(doc));
         editInterfacesElement.appendChild(getInterfaceRowsElement(doc));
@@ -55,6 +56,8 @@ public class EditInterfaceElements {
             addElement(doc, interfaceElement, "toEntityId", record.toEntityId());
             addElement(doc, interfaceElement, "toEntityCode", record.toEntityCode());
             addElement(doc, interfaceElement, "toEntityName", record.toEntityName());
+            addElement(doc, interfaceElement, "fromTrlId", record.fromTrlId());
+            addElement(doc, interfaceElement, "toTrlId", record.toTrlId());
             addElement(doc, interfaceElement, "fromIrlId", record.irlId());
             addElement(doc, interfaceElement, "fromClassificationIds", record.classificationIds());
             addElement(doc, interfaceElement, "toIrlId", record.reverseIrlId());
