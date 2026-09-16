@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
 import { clear, closeDialogElement, setText, showDialog } from "../core/dom.js";
@@ -899,7 +900,7 @@ function resolveSelectedMenuId() {
 
 function loadExpandedParentIds() {
     try {
-        const raw = localStorage.getItem(STORAGE_EXPANDED_KEY);
+        const raw = userPreferences.getItem(STORAGE_EXPANDED_KEY);
         const parsed = raw ? JSON.parse(raw) : [];
         return Array.isArray(parsed) ? parsed.filter((value) => Number.isFinite(Number(value))).map((value) => Number(value)) : [];
     } catch {
@@ -909,7 +910,7 @@ function loadExpandedParentIds() {
 
 function persistExpandedParentIds() {
     try {
-        localStorage.setItem(STORAGE_EXPANDED_KEY, JSON.stringify(state.expandedParentIds));
+        userPreferences.setItem(STORAGE_EXPANDED_KEY, JSON.stringify(state.expandedParentIds));
     } catch {
         // Ignore storage failures.
     }

@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
@@ -807,7 +808,7 @@ function widthToPixels(width, fallback) {
 
 function getStoredEditTableColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.tableColumnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.tableColumnWidths);
 
         if (!raw) {
             return {};
@@ -830,7 +831,7 @@ function persistEditTableColumnWidth(tableKey, columnIndex, widthPx) {
 
     widths[tableKey][String(columnIndex)] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEYS.tableColumnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.tableColumnWidths, JSON.stringify(widths));
 }
 
 function returnToPreviousPage() {

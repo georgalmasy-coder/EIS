@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
@@ -120,7 +121,7 @@ function initializeShell() {
 }
 
 function initializeStateFromStorage() {
-    const storedView = localStorage.getItem(STORAGE_KEYS.selectedView);
+    const storedView = userPreferences.getItem(STORAGE_KEYS.selectedView);
 
     if (state.fixedView) {
         state.selectedView = state.fixedView;
@@ -128,8 +129,8 @@ function initializeStateFromStorage() {
         state.selectedView = storedView;
     }
 
-    state.sortKey = localStorage.getItem(STORAGE_KEYS.sortKey) || "";
-    state.sortDirection = localStorage.getItem(STORAGE_KEYS.sortDirection) || "asc";
+    state.sortKey = userPreferences.getItem(STORAGE_KEYS.sortKey) || "";
+    state.sortDirection = userPreferences.getItem(STORAGE_KEYS.sortDirection) || "asc";
 
     const filterText = sessionStorage.getItem(STORAGE_KEYS.filterText) || "";
     const activeOnly = sessionStorage.getItem(STORAGE_KEYS.activeOnly);
@@ -153,7 +154,7 @@ function initializeEvents() {
             const targetUrl = VIEW_PAGE_URLS[viewType];
 
             if (Object.values(VIEW_TYPES).includes(viewType)) {
-                localStorage.setItem(STORAGE_KEYS.selectedView, viewType);
+                userPreferences.setItem(STORAGE_KEYS.selectedView, viewType);
             }
 
             if (targetUrl) {
@@ -787,7 +788,7 @@ function applyView(viewType, options = {}) {
     state.selectedView = safeViewType;
 
     if (options.persist) {
-        localStorage.setItem(STORAGE_KEYS.selectedView, safeViewType);
+        userPreferences.setItem(STORAGE_KEYS.selectedView, safeViewType);
     }
 
     document.querySelectorAll("[data-view-type]").forEach((button) => {
@@ -840,13 +841,13 @@ function persistFilters() {
 }
 
 function persistSorting() {
-    localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
-    localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+    userPreferences.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
+    userPreferences.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
 }
 
 function loadHiddenColumns() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.hiddenColumns);
+        const raw = userPreferences.getItem(STORAGE_KEYS.hiddenColumns);
         const parsed = raw ? JSON.parse(raw) : [];
 
         return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
@@ -856,7 +857,7 @@ function loadHiddenColumns() {
 }
 
 function persistHiddenColumns() {
-    localStorage.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
+    userPreferences.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
 }
 
 function sanitizeHiddenColumns() {
@@ -889,7 +890,7 @@ function getVisibleListColumnCount() {
 
 function loadGroupBy() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.groupBy);
+        const raw = userPreferences.getItem(STORAGE_KEYS.groupBy);
         const parsed = raw ? JSON.parse(raw) : [];
 
         return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
@@ -899,12 +900,12 @@ function loadGroupBy() {
 }
 
 function persistGroupBy() {
-    localStorage.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
+    userPreferences.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
 }
 
 function loadCollapsedGroupPaths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.groupCollapsed);
+        const raw = userPreferences.getItem(STORAGE_KEYS.groupCollapsed);
         const parsed = raw ? JSON.parse(raw) : [];
 
         return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
@@ -914,7 +915,7 @@ function loadCollapsedGroupPaths() {
 }
 
 function persistCollapsedGroupPaths() {
-    localStorage.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
+    userPreferences.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
 }
 
 function sanitizeGroupByKeys() {
@@ -1278,7 +1279,7 @@ function groupValueText(requirement, key) {
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
 
         if (!raw) {
             return {};
@@ -1297,7 +1298,7 @@ function persistColumnWidth(columnKey, widthPx) {
 
     widths[columnKey] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
 }
 
 function renderListView() {

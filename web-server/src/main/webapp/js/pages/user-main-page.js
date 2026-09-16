@@ -1,4 +1,5 @@
-ï»¿import { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
@@ -40,9 +41,9 @@ const DEFAULT_COLUMNS = [
 const state = {
     currentDoc: null,
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”",
+        customerName: "—",
+        projectName: "—",
+        userName: "—",
         workspaceEyebrow: "",
         workspaceHeading: "",
         workspaceHelpText: ""
@@ -50,8 +51,8 @@ const state = {
     users: [],
     filteredUsers: [],
     columns: DEFAULT_COLUMNS.map((column) => ({ ...column })),
-    sortKey: localStorage.getItem(STORAGE_KEYS.sortKey) || "name",
-    sortDirection: localStorage.getItem(STORAGE_KEYS.sortDirection) || "asc"
+    sortKey: userPreferences.getItem(STORAGE_KEYS.sortKey) || "name",
+    sortDirection: userPreferences.getItem(STORAGE_KEYS.sortDirection) || "asc"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -66,9 +67,9 @@ function start() {
 }
 
 function initializeShell() {
-    setText("customerName", "â€”", "");
-    setText("projectName", "â€”", "");
-    setText("userName", "â€”", "");
+    setText("customerName", "—", "");
+    setText("projectName", "—", "");
+    setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
     setText("userTableCount", "0 of 0", "");
 
@@ -86,7 +87,7 @@ function initializeStateFromStorage() {
     }));
 
     const filterInput = document.getElementById("filterUserText");
-    const filterText = localStorage.getItem(STORAGE_KEYS.filterText) || "";
+    const filterText = userPreferences.getItem(STORAGE_KEYS.filterText) || "";
 
     if (filterInput) {
         filterInput.value = filterText;
@@ -407,12 +408,12 @@ function updateColumnWidth(columnKey, widthPx, colGroup, table) {
 function persistColumnWidth(columnKey, widthPx) {
     const widths = getStoredColumnWidths();
     widths[columnKey] = `${Math.max(50, Math.round(widthPx))}px`;
-    localStorage.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
 }
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
 
         if (!raw) {
             return {};
@@ -428,7 +429,7 @@ function getStoredColumnWidths() {
 
 function persistFilterText() {
     const filterText = document.getElementById("filterUserText")?.value || "";
-    localStorage.setItem(STORAGE_KEYS.filterText, filterText);
+    userPreferences.setItem(STORAGE_KEYS.filterText, filterText);
 }
 
 function syncFilterClearButton(filterInput) {
@@ -442,8 +443,8 @@ function syncFilterClearButton(filterInput) {
 }
 
 function persistSorting() {
-    localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
-    localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+    userPreferences.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
+    userPreferences.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
 }
 
 function getSortedUsers(users) {

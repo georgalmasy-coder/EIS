@@ -1,4 +1,5 @@
-Ôªøimport { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
@@ -34,8 +35,8 @@ const state = {
     customers: [],
     filteredCustomers: [],
     selectedCustomerId: null,
-    sortKey: localStorage.getItem(STORAGE_SORT_KEY) || "customerName",
-    sortDirection: localStorage.getItem(STORAGE_SORT_DIRECTION) || "asc",
+    sortKey: userPreferences.getItem(STORAGE_SORT_KEY) || "customerName",
+    sortDirection: userPreferences.getItem(STORAGE_SORT_DIRECTION) || "asc",
     columnWidths: loadColumnWidths(),
     customerDetail: null,
     lookups: {},
@@ -55,7 +56,7 @@ function initialize() {
     initializeTabs();
 
     if (els.customerFilter) {
-        els.customerFilter.value = localStorage.getItem(STORAGE_FILTER) || "";
+        els.customerFilter.value = userPreferences.getItem(STORAGE_FILTER) || "";
         syncFilterClearButton(els.customerFilter);
     }
 
@@ -103,7 +104,7 @@ function collectElements() {
 function bindEvents() {
     if (els.customerFilter) {
         els.customerFilter.addEventListener("input", function () {
-            localStorage.setItem(STORAGE_FILTER, els.customerFilter.value || "");
+            userPreferences.setItem(STORAGE_FILTER, els.customerFilter.value || "");
             syncFilterClearButton(els.customerFilter);
             applyFilterSortAndRender();
         });
@@ -111,7 +112,7 @@ function bindEvents() {
         els.customerFilter.addEventListener("keydown", function (event) {
             if (event.key === "Escape") {
                 els.customerFilter.value = "";
-                localStorage.setItem(STORAGE_FILTER, "");
+                userPreferences.setItem(STORAGE_FILTER, "");
                 syncFilterClearButton(els.customerFilter);
                 applyFilterSortAndRender();
                 els.customerFilter.blur();
@@ -127,7 +128,7 @@ function bindEvents() {
                 els.customerFilter.focus();
             }
 
-            localStorage.setItem(STORAGE_FILTER, "");
+            userPreferences.setItem(STORAGE_FILTER, "");
             applyFilterSortAndRender();
         });
     }
@@ -563,8 +564,8 @@ function changeSort(key) {
         state.sortDirection = "asc";
     }
 
-    localStorage.setItem(STORAGE_SORT_KEY, state.sortKey);
-    localStorage.setItem(STORAGE_SORT_DIRECTION, state.sortDirection);
+    userPreferences.setItem(STORAGE_SORT_KEY, state.sortKey);
+    userPreferences.setItem(STORAGE_SORT_DIRECTION, state.sortDirection);
 
     applyFilterSortAndRender();
 }
@@ -631,12 +632,12 @@ function renderStatus(status, label) {
     const safeLabel = label || safeStatus;
     const statusClass = `status-${safeStatus.toLowerCase().replaceAll("_", "-")}`;
 
-    return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "√¢‚Ç¨‚Äù")}</span>`;
+    return `<span class="customer-status-pill ${escapeAttribute(statusClass)}" title="${escapeAttribute(safeStatus)}">${escapeHtml(safeLabel || "‚Äî")}</span>`;
 }
 
 function renderMfaPolicy(policy, label) {
     const safePolicy = policy || "";
-    const safeLabel = label || safePolicy || "√¢‚Ç¨‚Äù";
+    const safeLabel = label || safePolicy || "‚Äî";
     const policyClass = `mfa-${safePolicy.toLowerCase().replaceAll("_", "-")}`;
 
     return `<span class="customer-mfa-pill ${escapeAttribute(policyClass)}" title="${escapeAttribute(safePolicy)}">${escapeHtml(safeLabel)}</span>`;
@@ -672,7 +673,7 @@ function bindColumnResize() {
             }
 
             function onMouseUp() {
-                localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(state.columnWidths));
+                userPreferences.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(state.columnWidths));
                 document.removeEventListener("mousemove", onMouseMove);
                 document.removeEventListener("mouseup", onMouseUp);
             }
@@ -731,7 +732,7 @@ function applyColumnWidths() {
 
 function loadColumnWidths() {
     try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_COLUMN_WIDTHS) || "{}");
+        const parsed = JSON.parse(userPreferences.getItem(STORAGE_COLUMN_WIDTHS) || "{}");
         return {
             ...DEFAULT_COLUMN_WIDTHS,
             ...(parsed || {})
@@ -918,12 +919,12 @@ function renderWorkflowSummary(workflow, subscriptionSummary) {
         },
         {
             label: "Workflow status",
-            value: workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "‚Äî",
+            value: workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "ó",
             pill: true
         },
         {
             label: "Subscription source",
-            value: subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "‚Äî",
+            value: subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "ó",
             pill: false
         }
     ];
@@ -940,11 +941,11 @@ function buildSubscriptionSummaryItems(summary) {
         },
         {
             label: "Plan",
-            value: summary.subscriptionPlanName || summary.moduleName || summary.moduleCode || "‚Äî"
+            value: summary.subscriptionPlanName || summary.moduleName || summary.moduleCode || "ó"
         },
         {
             label: "Billing period",
-            value: summary.billingPeriodName || summary.billingPeriodCode || "‚Äî"
+            value: summary.billingPeriodName || summary.billingPeriodCode || "ó"
         },
         {
             label: "Price",
@@ -960,11 +961,11 @@ function buildSubscriptionSummaryItems(summary) {
         },
         {
             label: "Module",
-            value: summary.moduleName || summary.moduleCode || "‚Äî"
+            value: summary.moduleName || summary.moduleCode || "ó"
         },
         {
             label: "Billing months",
-            value: summary.billingPeriodMonths || "‚Äî"
+            value: summary.billingPeriodMonths || "ó"
         }
     ];
 }
@@ -975,7 +976,7 @@ function renderSummaryStrip(items) {
     }
 
     return items.map(function (item) {
-        const value = item?.value == null || item.value === "" ? "‚Äî" : String(item.value);
+        const value = item?.value == null || item.value === "" ? "ó" : String(item.value);
         const pillClass = item?.pill ? " is-pill" : "";
 
         return `
@@ -989,7 +990,7 @@ function renderSummaryStrip(items) {
 
 function buildDialogStatus(workflow, subscriptionSummary) {
     const workflowState = workflow?.currentState ? lookupLabel("workflowState", workflow.currentState) : "No workflow";
-    const workflowStatus = workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "‚Äî";
+    const workflowStatus = workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "ó";
     const source = subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "No subscription";
 
     return `Workflow: ${workflowState} | Status: ${workflowStatus} | Subscription source: ${source}`;
@@ -1014,7 +1015,7 @@ function formatDateOnly(value) {
     const textValue = String(value || "").trim();
 
     if (!textValue) {
-        return "‚Äî";
+        return "ó";
     }
 
     if (/^\d{4}-\d{2}-\d{2}/.test(textValue)) {
@@ -1029,11 +1030,11 @@ function formatAmountAndCurrency(amount, currency) {
     const safeCurrency = String(currency || "").trim().toUpperCase();
 
     if (!safeAmount && !safeCurrency) {
-        return "‚Äî";
+        return "ó";
     }
 
     if (!safeAmount) {
-        return safeCurrency || "‚Äî";
+        return safeCurrency || "ó";
     }
 
     if (!safeCurrency) {

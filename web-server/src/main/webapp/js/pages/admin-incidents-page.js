@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
 import { setText } from "../core/dom.js";
@@ -634,7 +635,7 @@ function persistColumnWidth(columnKey, widthPx) {
     widths[columnKey] = `${Math.max(MIN_COLUMN_WIDTH, Math.round(widthPx))}px`;
 
     try {
-        localStorage.setItem(STORAGE_KEY_COLUMN_WIDTHS, JSON.stringify(widths));
+        userPreferences.setItem(STORAGE_KEY_COLUMN_WIDTHS, JSON.stringify(widths));
     } catch {
         // Ignore storage failures.
     }
@@ -642,7 +643,7 @@ function persistColumnWidth(columnKey, widthPx) {
 
 function loadColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY_COLUMN_WIDTHS);
+        const raw = userPreferences.getItem(STORAGE_KEY_COLUMN_WIDTHS);
 
         if (!raw) {
             return { ...DEFAULT_COLUMN_WIDTHS };

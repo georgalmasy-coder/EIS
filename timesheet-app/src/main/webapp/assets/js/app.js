@@ -13,8 +13,6 @@ const state = {
     companyFooter: null
 };
 
-const storageKey = 'eis.selectedCustomerId';
-
 const api = {
     bootstrap: 'api/bootstrap',
     customers: 'api/customers',
@@ -86,10 +84,8 @@ async function reloadBootstrap() {
     state.customers = payload.customers ?? [];
     state.companyFooter = payload.companyFooter ?? null;
 
-    const storedId = Number(localStorage.getItem(storageKey) || 0) || null;
     const sessionId = payload.selectedCustomerId ?? null;
-    const candidate = state.customers.some((c) => c.id === storedId && !c.inactive) ? storedId
-        : state.customers.some((c) => c.id === sessionId && !c.inactive) ? sessionId
+    const candidate = state.customers.some((c) => c.id === sessionId && !c.inactive) ? sessionId
         : null;
 
     await populateCustomerSelect();
@@ -129,11 +125,6 @@ async function selectCustomer(customerId, persist) {
         : 'No customer selected';
 
     if (persist) {
-        if (customerId) {
-            localStorage.setItem(storageKey, String(customerId));
-        } else {
-            localStorage.removeItem(storageKey);
-        }
         await fetchJson(api.selection, {
             method: 'POST',
             body: { customerId }
@@ -685,7 +676,7 @@ async function customerDialog(customer = null) {
         await reloadBootstrap();
     } else {
         const created = await fetchJson(api.customers, { method: 'POST', body });
-        localStorage.setItem(storageKey, String(created.id));
+        await selectCustomer(created.id, true);
         showBanner('Customer created successfully.');
         await reloadBootstrap();
     }

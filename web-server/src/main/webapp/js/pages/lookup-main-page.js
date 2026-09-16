@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
 import { createExportDialog } from "../components/export-dialog.js";
@@ -706,7 +707,7 @@ function firstLookupTypeId() {
 }
 
 function loadStoredLookupTypeId() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = userPreferences.getItem(STORAGE_KEY);
     const value = Number(raw);
 
     return Number.isFinite(value) && value > 0 ? value : null;
@@ -714,11 +715,11 @@ function loadStoredLookupTypeId() {
 
 function persistSelectedLookupTypeId(value) {
     if (value === null || value === undefined || value === "") {
-        localStorage.removeItem(STORAGE_KEY);
+        userPreferences.removeItem(STORAGE_KEY);
         return;
     }
 
-    localStorage.setItem(STORAGE_KEY, String(value));
+    userPreferences.setItem(STORAGE_KEY, String(value));
 }
 
 function getValue(id) {

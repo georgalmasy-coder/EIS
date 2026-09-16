@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { applyTopPanelFromDocument } from "../core/page-header.js";
@@ -72,8 +73,8 @@ const state = {
     users: [],
     filteredUsers: [],
     selectedUserId: null,
-    sortKey: localStorage.getItem(STORAGE_SORT_KEY) || "name",
-    sortDirection: localStorage.getItem(STORAGE_SORT_DIRECTION) || "asc",
+    sortKey: userPreferences.getItem(STORAGE_SORT_KEY) || "name",
+    sortDirection: userPreferences.getItem(STORAGE_SORT_DIRECTION) || "asc",
     columnWidths: loadColumnWidths(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
@@ -101,7 +102,7 @@ function initialize() {
     renderGroupByZone();
 
     if (els.userFilter) {
-        els.userFilter.value = localStorage.getItem(STORAGE_FILTER) || "";
+        els.userFilter.value = userPreferences.getItem(STORAGE_FILTER) || "";
         syncFilterClearButton(els.userFilter);
     }
 
@@ -187,7 +188,7 @@ function ensureWorkspaceChrome() {
 function bindEvents() {
     if (els.userFilter) {
         els.userFilter.addEventListener("input", function () {
-            localStorage.setItem(STORAGE_FILTER, els.userFilter.value || "");
+            userPreferences.setItem(STORAGE_FILTER, els.userFilter.value || "");
             syncFilterClearButton(els.userFilter);
             applyFilterSortAndRender();
         });
@@ -195,7 +196,7 @@ function bindEvents() {
         els.userFilter.addEventListener("keydown", function (event) {
             if (event.key === "Escape") {
                 els.userFilter.value = "";
-                localStorage.setItem(STORAGE_FILTER, "");
+                userPreferences.setItem(STORAGE_FILTER, "");
                 syncFilterClearButton(els.userFilter);
                 applyFilterSortAndRender();
                 els.userFilter.blur();
@@ -211,7 +212,7 @@ function bindEvents() {
                 els.userFilter.focus();
             }
 
-            localStorage.setItem(STORAGE_FILTER, "");
+            userPreferences.setItem(STORAGE_FILTER, "");
             applyFilterSortAndRender();
         });
     }
@@ -1210,8 +1211,8 @@ function changeSort(key) {
         state.sortDirection = "asc";
     }
 
-    localStorage.setItem(STORAGE_SORT_KEY, state.sortKey);
-    localStorage.setItem(STORAGE_SORT_DIRECTION, state.sortDirection);
+    userPreferences.setItem(STORAGE_SORT_KEY, state.sortKey);
+    userPreferences.setItem(STORAGE_SORT_DIRECTION, state.sortDirection);
     applyFilterSortAndRender();
 }
 
@@ -1537,7 +1538,7 @@ function bindColumnResize() {
             }
 
             function onMouseUp() {
-                localStorage.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(state.columnWidths));
+                userPreferences.setItem(STORAGE_COLUMN_WIDTHS, JSON.stringify(state.columnWidths));
                 document.body.classList.remove("user-administration-column-resizing");
                 document.removeEventListener("mousemove", onMouseMove);
                 document.removeEventListener("mouseup", onMouseUp);
@@ -1564,7 +1565,7 @@ function applyColumnWidths() {
 
 function loadColumnWidths() {
     try {
-        const json = localStorage.getItem(STORAGE_COLUMN_WIDTHS);
+        const json = userPreferences.getItem(STORAGE_COLUMN_WIDTHS);
         const parsed = json ? JSON.parse(json) : {};
         return {
             ...DEFAULT_COLUMN_WIDTHS,
@@ -1577,7 +1578,7 @@ function loadColumnWidths() {
 
 function loadGroupBy() {
     try {
-        const json = localStorage.getItem(STORAGE_GROUP_BY);
+        const json = userPreferences.getItem(STORAGE_GROUP_BY);
         return Array.isArray(JSON.parse(json)) ? JSON.parse(json) : [];
     } catch {
         return [];
@@ -1585,12 +1586,12 @@ function loadGroupBy() {
 }
 
 function persistGroupBy() {
-    localStorage.setItem(STORAGE_GROUP_BY, JSON.stringify(state.groupBy));
+    userPreferences.setItem(STORAGE_GROUP_BY, JSON.stringify(state.groupBy));
 }
 
 function loadCollapsedGroupPaths() {
     try {
-        const json = localStorage.getItem(STORAGE_GROUP_COLLAPSED);
+        const json = userPreferences.getItem(STORAGE_GROUP_COLLAPSED);
         return Array.isArray(JSON.parse(json)) ? JSON.parse(json) : [];
     } catch {
         return [];
@@ -1598,7 +1599,7 @@ function loadCollapsedGroupPaths() {
 }
 
 function persistCollapsedGroupPaths() {
-    localStorage.setItem(STORAGE_GROUP_COLLAPSED, JSON.stringify(state.collapsedGroupPaths));
+    userPreferences.setItem(STORAGE_GROUP_COLLAPSED, JSON.stringify(state.collapsedGroupPaths));
 }
 
 function isGroupCollapsed(groupPath) {

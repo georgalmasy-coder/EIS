@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import {
     byId,
     clear,
@@ -13,7 +14,6 @@ const MENU_WIDTH = 272;
 const MENU_COLLAPSED_WIDTH = 72;
 const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
 const MENU_COLLAPSED_STORAGE_KEY = "eis.menu.collapsed";
-const MENU_SELECTED_PROJECT_STORAGE_KEY = "eis.menu.projectId";
 const USER_MENU_CLOSE_DELAY_MS = 2000;
 const SESSION_EXPIRED_PATH = "/session-expired.html";
 const COLLAPSE_ICON_SVG = `
@@ -84,7 +84,7 @@ installSessionExpiredRedirect();
 
 function getStorageFlag(key, fallback = false) {
     try {
-        const value = window.localStorage.getItem(key);
+        const value = userPreferences.getItem(key);
 
         if (value === null) {
             return fallback;
@@ -98,31 +98,9 @@ function getStorageFlag(key, fallback = false) {
 
 function setStorageFlag(key, value) {
     try {
-        window.localStorage.setItem(key, value ? "1" : "0");
+        userPreferences.setItem(key, value ? "1" : "0");
     } catch {
         // Ignore storage failures. The menu still works without persistence.
-    }
-}
-
-function getStoredProjectId() {
-    try {
-        const value = window.localStorage.getItem(MENU_SELECTED_PROJECT_STORAGE_KEY);
-
-        return value ? value.trim() : "";
-    } catch {
-        return "";
-    }
-}
-
-export function setStoredProjectId(projectId) {
-    try {
-        if (projectId) {
-            window.localStorage.setItem(MENU_SELECTED_PROJECT_STORAGE_KEY, String(projectId));
-        } else {
-            window.localStorage.removeItem(MENU_SELECTED_PROJECT_STORAGE_KEY);
-        }
-    } catch {
-        // Ignore storage failures.
     }
 }
 
@@ -647,8 +625,7 @@ function renderProjectPicker() {
     }
 
     const currentProjectId = getCurrentProjectId();
-    const storedProjectId = getStoredProjectId();
-    const selectedProjectId = currentProjectId || storedProjectId;
+    const selectedProjectId = currentProjectId;
     const selectedProject = state.projects.find((project) => project.projectId === selectedProjectId)
         || state.projects.find((project) => project.projectId === currentProjectId)
         || state.projects[0]
@@ -734,9 +711,6 @@ async function applyProjectSelection(projectId, redirectToOverview = false, pers
     }
 
     if (getCurrentProjectId() === nextProjectId) {
-        if (persistProjectId) {
-            setStoredProjectId(nextProjectId);
-        }
         return;
     }
 
@@ -760,10 +734,6 @@ async function applyProjectSelection(projectId, redirectToOverview = false, pers
 
     const xmlText = await response.text();
     const redirectUrl = readRedirectUrlFromXml(xmlText) || PROJECT_OVERVIEW_URL;
-
-    if (persistProjectId) {
-        setStoredProjectId(nextProjectId);
-    }
 
     const selectedProject = state.projects.find((project) => project.projectId === nextProjectId);
     state.topPanel.projectId = nextProjectId;
@@ -798,7 +768,6 @@ async function clearProjectSelection() {
 
     state.topPanel.projectId = "";
     state.topPanel.projectName = "-";
-    setStoredProjectId(null);
 }
 
 async function ensureProjectSelection() {
@@ -806,19 +775,9 @@ async function ensureProjectSelection() {
     const currentProjectExists = state.projects.some((project) => project.projectId === currentProjectId);
 
     if (currentProjectExists) {
-        setStoredProjectId(currentProjectId);
         return;
     }
 
-    const storedProjectId = getStoredProjectId();
-    const storedProjectExists = state.projects.some((project) => project.projectId === storedProjectId);
-
-    if (storedProjectExists) {
-        await applyProjectSelection(storedProjectId, false);
-        return;
-    }
-
-    setStoredProjectId(null);
     if (currentProjectId) {
         await clearProjectSelection();
     }
@@ -1063,7 +1022,7 @@ export async function initMenu() {
     try {
         if (document.body?.dataset.sessionExpired === "true") {
             try {
-                window.localStorage.removeItem("eis.menu.xml");
+                userPreferences.removeItem("eis.menu.xml");
             } catch {
                 // Storage may be unavailable; the menu remains empty regardless.
             }

@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 const STORAGE_KEY = "basis.systemrequirement.edit.tableColumnWidths";
 
 const RESIZABLE_TABLES = [
@@ -192,7 +193,7 @@ function widthToPixels(width, fallback) {
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = userPreferences.getItem(STORAGE_KEY);
 
         if (!raw) {
             return {};
@@ -215,5 +216,5 @@ function persistColumnWidth(tableKey, columnIndex, widthPx) {
 
     widths[tableKey][String(columnIndex)] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEY, JSON.stringify(widths));
 }

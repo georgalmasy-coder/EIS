@@ -1,4 +1,4 @@
-import { initMenu, setStoredProjectId } from "../components/menu.js";
+import { initMenu } from "../components/menu.js";
 import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
 import { initHelpDialog } from "../components/help-dialog.js";
@@ -191,7 +191,6 @@ function renderProjects() {
         `;
         
         card.querySelector(".btn-open-project").addEventListener("click", () => {
-            setStoredProjectId(project.id);
             window.location.href = SELECT_PROJECT_URL + project.id;
         });
         

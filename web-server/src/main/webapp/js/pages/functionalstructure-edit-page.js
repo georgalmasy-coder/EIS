@@ -1,4 +1,5 @@
-﻿import { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { initTabs } from "../components/tabs.js";
 import {
@@ -95,9 +96,9 @@ const state = {
     currentDoc: null,
     detailNode: null,
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”"
+        customerName: "—",
+        projectName: "—",
+        userName: "—"
     }
 };
 
@@ -118,9 +119,9 @@ function initializeShell() {
     const dialogContext = applyEditDialogShellMode(document);
     state.modal = dialogContext.modal;
 
-    setText("customerName", "â€”");
-    setText("projectName", "â€”");
-    setText("userName", "â€”");
+    setText("customerName", "—");
+    setText("projectName", "—");
+    setText("userName", "—");
     setText("loadStatus", "Loading");
 
     if (!state.modal) {
@@ -226,7 +227,7 @@ async function loadDetail() {
     }
 
     setText("loadStatus", "Loading");
-    setText("dlgStatus", "Loading functional structure detailsâ€¦");
+    setText("dlgStatus", "Loading functional structure details…");
 
     try {
         const response = await fetch(detailUrl, {
@@ -368,7 +369,7 @@ function getEntityMetaLabel() {
         const idPart = state.id ? `Entity ID: ${state.id}` : "";
         const versionPart = state.version ? `Version: ${state.version}` : "";
 
-        return [idPart, versionPart].filter(Boolean).join(" · ");
+        return [idPart, versionPart].filter(Boolean).join(" � ");
     }
     return state.id ? `Entity ID: ${state.id}` : "";
 }
@@ -402,16 +403,16 @@ function parseTopPanel(xmlDocument) {
 
     if (!topPanelElement) {
         return {
-            customerName: "â€”",
-            projectName: "â€”",
-            userName: "â€”"
+            customerName: "—",
+            projectName: "—",
+            userName: "—"
         };
     }
 
     return {
-        customerName: getChildText(topPanelElement, "CustomerName", "â€”"),
-        projectName: getChildText(topPanelElement, "ProjectName", "â€”"),
-        userName: getChildText(topPanelElement, "Name", "â€”")
+        customerName: getChildText(topPanelElement, "CustomerName", "—"),
+        projectName: getChildText(topPanelElement, "ProjectName", "—"),
+        userName: getChildText(topPanelElement, "Name", "—")
     };
 }
 
@@ -465,8 +466,8 @@ function renderBasisInfoFromDoc(doc) {
 }
 
 function updateEntitySummary() {
-    setText("entitySummaryCode", getSummaryFieldValue(SUMMARY_FIELDS.code) || "—");
-    setText("entitySummaryName", getSummaryFieldValue(SUMMARY_FIELDS.name) || "—");
+    setText("entitySummaryCode", getSummaryFieldValue(SUMMARY_FIELDS.code) || "�");
+    setText("entitySummaryName", getSummaryFieldValue(SUMMARY_FIELDS.name) || "�");
 }
 
 function getSummaryFieldValue(fieldNames) {
@@ -614,7 +615,7 @@ async function saveCurrentRequirement() {
     }
 
     try {
-        setText("dlgStatus", "Savingâ€¦");
+        setText("dlgStatus", "Saving…");
         setText("loadStatus", "Saving");
 
         const payload = buildSavePayload();
@@ -900,7 +901,7 @@ function widthToPixels(width, fallback) {
 
 function getStoredEditTableColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.tableColumnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.tableColumnWidths);
 
         if (!raw) {
             return {};
@@ -923,7 +924,7 @@ function persistEditTableColumnWidth(tableKey, columnIndex, widthPx) {
 
     widths[tableKey][String(columnIndex)] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEYS.tableColumnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.tableColumnWidths, JSON.stringify(widths));
 }
 
 function returnToPreviousPage() {

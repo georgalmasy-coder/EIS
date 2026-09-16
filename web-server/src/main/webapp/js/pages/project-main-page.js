@@ -1,4 +1,5 @@
-ï»¿import { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { applyTopbarMetadata } from "../components/topbar.js";
@@ -30,9 +31,9 @@ const STORAGE_KEYS = {
 const state = {
     currentDoc: null,
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”",
+        customerName: "—",
+        projectName: "—",
+        userName: "—",
         workspaceEyebrow: "",
         workspaceHeading: "",
         workspaceHelpText: ""
@@ -56,9 +57,9 @@ function start() {
 }
 
 function initializeShell() {
-    setText("customerName", "â€”", "");
-    setText("projectName", "â€”", "");
-    setText("userName", "â€”", "");
+    setText("customerName", "—", "");
+    setText("projectName", "—", "");
+    setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
     initMenu(document);
@@ -67,8 +68,8 @@ function initializeShell() {
 }
 
 function initializeStateFromStorage() {
-    state.sortKey = localStorage.getItem(STORAGE_KEYS.sortKey) || "";
-    state.sortDirection = localStorage.getItem(STORAGE_KEYS.sortDirection) || "asc";
+    state.sortKey = userPreferences.getItem(STORAGE_KEYS.sortKey) || "";
+    state.sortDirection = userPreferences.getItem(STORAGE_KEYS.sortDirection) || "asc";
 
     const filterInput = document.getElementById("filterProjectText");
     const filterText = sessionStorage.getItem(STORAGE_KEYS.filterText) || "";
@@ -464,12 +465,12 @@ function persistColumnWidth(columnKey, widthPx) {
 
     widths[columnKey] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
 }
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
 
         if (!raw) {
             return {};
@@ -500,8 +501,8 @@ function syncFilterClearButton(filterInput) {
 }
 
 function persistSorting() {
-    localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
-    localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+    userPreferences.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
+    userPreferences.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
 }
 
 function getSortedProjects(projects) {

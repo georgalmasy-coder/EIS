@@ -1,4 +1,5 @@
-ï»¿import { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
@@ -35,9 +36,9 @@ const COLUMN_DEFINITIONS = [
 const state = {
     document: null,
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”"
+        customerName: "—",
+        projectName: "—",
+        userName: "—"
     },
     dashboard: null,
     columnWidths: [...DEFAULT_COLUMN_WIDTHS],
@@ -137,16 +138,16 @@ function parseTopPanel(xmlDocument) {
 
     if (!topPanelElement) {
         return {
-            customerName: "â€”",
-            projectName: "â€”",
-            userName: "â€”"
+            customerName: "—",
+            projectName: "—",
+            userName: "—"
         };
     }
 
     return {
-        customerName: getChildText(topPanelElement, "CustomerName", "â€”"),
-        projectName: getChildText(topPanelElement, "ProjectName", "â€”"),
-        userName: getChildText(topPanelElement, "Name", "â€”"),
+        customerName: getChildText(topPanelElement, "CustomerName", "—"),
+        projectName: getChildText(topPanelElement, "ProjectName", "—"),
+        userName: getChildText(topPanelElement, "Name", "—"),
         workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
         workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
         workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")
@@ -928,7 +929,7 @@ function applyColumnWidths() {
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = userPreferences.getItem(STORAGE_KEY);
 
         if (!raw) {
             return null;
@@ -944,7 +945,7 @@ function getStoredColumnWidths() {
 
 function persistColumnWidths() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.columnWidths));
+        userPreferences.setItem(STORAGE_KEY, JSON.stringify(state.columnWidths));
     } catch {
         // Ignore persistence errors.
     }

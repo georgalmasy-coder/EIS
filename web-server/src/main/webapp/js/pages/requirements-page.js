@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu, menuHasRoute } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
@@ -47,8 +48,8 @@ function init() {
 
     setupTabEvents();
     
-    // Load initial tab from localStorage if exists
-    const savedTab = localStorage.getItem("basis.requirements.activeTab");
+    // Load initial tab from userPreferences if exists
+    const savedTab = userPreferences.getItem("basis.requirements.activeTab");
     if (savedTab === "system") {
         switchTab("system");
     } else {
@@ -79,7 +80,7 @@ function setupTabEvents() {
 
 function switchTab(tab) {
     state.activeTab = tab;
-    localStorage.setItem("basis.requirements.activeTab", tab);
+    userPreferences.setItem("basis.requirements.activeTab", tab);
 
     const stakeholderBtn = document.getElementById("tabStakeholder");
     const systemBtn = document.getElementById("tabSystem");

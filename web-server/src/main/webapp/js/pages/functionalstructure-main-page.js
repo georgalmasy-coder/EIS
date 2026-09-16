@@ -1,4 +1,5 @@
-﻿import { initMenu } from "../components/menu.js";
+import { userPreferences } from "../core/user-preferences.js";
+import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { menuHasRoute } from "../components/menu.js";
 import { mountTopbar } from "../components/topbar.js";
@@ -66,9 +67,9 @@ const REQUIREMENT_NODE_HEIGHT = 124;
 const state = {
     xmlDocument: null,
     topPanel: {
-        customerName: "â€”",
-        projectName: "â€”",
-        userName: "â€”",
+        customerName: "—",
+        projectName: "—",
+        userName: "—",
         helpFileName: "",
         workspaceEyebrow: "",
         workspaceHeading: "",
@@ -106,9 +107,9 @@ function start() {
 }
 
 async function initializeShell() {
-    setText("customerName", "â€”", "");
-    setText("projectName", "â€”", "");
-    setText("userName", "â€”", "");
+    setText("customerName", "—", "");
+    setText("projectName", "—", "");
+    setText("userName", "—", "");
     setText("loadStatus", "Loading", "");
 
     const menuInitialization = initMenu(document);
@@ -123,7 +124,7 @@ async function initializeShell() {
 }
 
 function initializeStateFromStorage() {
-    const storedView = localStorage.getItem(STORAGE_KEYS.selectedView);
+    const storedView = userPreferences.getItem(STORAGE_KEYS.selectedView);
 
     if (state.fixedView) {
         state.selectedView = state.fixedView;
@@ -131,8 +132,8 @@ function initializeStateFromStorage() {
         state.selectedView = storedView;
     }
 
-    state.sortKey = localStorage.getItem(STORAGE_KEYS.sortKey) || "";
-    state.sortDirection = localStorage.getItem(STORAGE_KEYS.sortDirection) || "asc";
+    state.sortKey = userPreferences.getItem(STORAGE_KEYS.sortKey) || "";
+    state.sortDirection = userPreferences.getItem(STORAGE_KEYS.sortDirection) || "asc";
 
     const filterText = sessionStorage.getItem(STORAGE_KEYS.filterText) || "";
     const activeOnly = sessionStorage.getItem(STORAGE_KEYS.activeOnly);
@@ -156,7 +157,7 @@ function initializeEvents() {
             const targetUrl = VIEW_PAGE_URLS[viewType];
 
             if (Object.values(VIEW_TYPES).includes(viewType)) {
-                localStorage.setItem(STORAGE_KEYS.selectedView, viewType);
+                userPreferences.setItem(STORAGE_KEYS.selectedView, viewType);
             }
 
             if (targetUrl) {
@@ -303,9 +304,9 @@ function buildExportBaseFileName(entityName, projectName) {
 }
 
 async function loadFunctionalStructures() {
-    showListEmptyState("Loading functional structuresâ€¦");
-    showDiagramEmptyState("horizontal", "Loading horizontal functional architecture diagramâ€¦");
-    showDiagramEmptyState("vertical", "Loading vertical functional architecture diagramâ€¦");
+    showListEmptyState("Loading functional structures…");
+    showDiagramEmptyState("horizontal", "Loading horizontal functional architecture diagram…");
+    showDiagramEmptyState("vertical", "Loading vertical functional architecture diagram…");
     setText("loadStatus", "Loading", "");
 
     try {
@@ -396,7 +397,7 @@ function parseFunctionalStructures(xmlDocument) {
 
         const name = getFirstFieldDisplayText(node, [
             "FunctionalName"
-        ], "â€”");
+        ], "—");
 
         const description = getFirstFieldDisplayText(node, [
             "FunctionalDescription",
@@ -736,7 +737,7 @@ function applyView(viewType, options = {}) {
     state.selectedView = safeViewType;
 
     if (options.persist) {
-        localStorage.setItem(STORAGE_KEYS.selectedView, safeViewType);
+        userPreferences.setItem(STORAGE_KEYS.selectedView, safeViewType);
     }
 
     document.querySelectorAll("[data-view-type]").forEach((button) => {
@@ -794,13 +795,13 @@ function persistFilters() {
 }
 
 function persistSorting() {
-    localStorage.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
-    localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
+    userPreferences.setItem(STORAGE_KEYS.sortKey, state.sortKey || "");
+    userPreferences.setItem(STORAGE_KEYS.sortDirection, state.sortDirection || "asc");
 }
 
 function loadGroupBy() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.groupBy);
+        const raw = userPreferences.getItem(STORAGE_KEYS.groupBy);
         const parsed = raw ? JSON.parse(raw) : [];
 
         return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
@@ -810,12 +811,12 @@ function loadGroupBy() {
 }
 
 function persistGroupBy() {
-    localStorage.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
+    userPreferences.setItem(STORAGE_KEYS.groupBy, JSON.stringify(state.groupBy));
 }
 
 function loadHiddenColumns() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.hiddenColumns);
+        const raw = userPreferences.getItem(STORAGE_KEYS.hiddenColumns);
 
         if (!raw) {
             return [];
@@ -830,7 +831,7 @@ function loadHiddenColumns() {
 }
 
 function persistHiddenColumns() {
-    localStorage.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
+    userPreferences.setItem(STORAGE_KEYS.hiddenColumns, JSON.stringify(state.hiddenColumns));
 }
 
 function applyStoredColumnVisibility() {
@@ -1000,7 +1001,7 @@ function setColumnVisibility(columnKey, visible) {
 
 function loadCollapsedGroupPaths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.groupCollapsed);
+        const raw = userPreferences.getItem(STORAGE_KEYS.groupCollapsed);
         const parsed = raw ? JSON.parse(raw) : [];
 
         return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string" && value) : [];
@@ -1010,7 +1011,7 @@ function loadCollapsedGroupPaths() {
 }
 
 function persistCollapsedGroupPaths() {
-    localStorage.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
+    userPreferences.setItem(STORAGE_KEYS.groupCollapsed, JSON.stringify(state.collapsedGroupPaths));
 }
 
 function sanitizeGroupByKeys() {
@@ -1044,7 +1045,7 @@ function collectGroupPaths(rows, depth, pathParts, validPaths) {
     const groups = new Map();
 
     rows.forEach((row) => {
-        const groupValue = groupValueText(row, groupKey) || "â€”";
+        const groupValue = groupValueText(row, groupKey) || "—";
 
         if (!groups.has(groupValue)) {
             groups.set(groupValue, []);
@@ -1238,7 +1239,7 @@ function groupValueText(requirement, key) {
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
 
         if (!raw) {
             return {};
@@ -1257,7 +1258,7 @@ function persistColumnWidth(columnKey, widthPx) {
 
     widths[columnKey] = `${Math.max(50, Math.round(widthPx))}px`;
 
-    localStorage.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
 }
 
 function renderListView() {
@@ -1386,7 +1387,7 @@ function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
     const groups = new Map();
 
     rows.forEach((row) => {
-        const groupValue = groupValueText(row, groupKey) || "â€”";
+        const groupValue = groupValueText(row, groupKey) || "—";
 
         if (!groups.has(groupValue)) {
             groups.set(groupValue, []);
@@ -1993,7 +1994,7 @@ function createDiagramNode(node) {
         element.innerHTML = `
             <div class="functionalstructure-diagram-node-code"></div>
             <div class="functionalstructure-diagram-node-name">${escapeHtml(node.name)}</div>
-            <div class="functionalstructure-diagram-node-footer">${escapeHtml(node.description || "Ã¢â‚¬â€")}</div>
+            <div class="functionalstructure-diagram-node-footer">${escapeHtml(node.description || "â€”")}</div>
         `;
     } else {
         element.title = buildRequirementTooltip(node.requirement);
@@ -2032,15 +2033,15 @@ function createDiagramNode(node) {
 
 function buildProjectTooltip(node) {
     return [
-        `Project: ${node?.name || "Ã¢â‚¬â€"}`,
+        `Project: ${node?.name || "â€”"}`,
         node?.description ? `Customer: ${node.description}` : ""
     ].filter(Boolean).join("\n");
 }
 
 function buildRequirementTooltip(requirement) {
     return [
-        `ID: ${requirement?.id || "Ã¢â‚¬â€"}`,
-        `Name: ${requirement?.name || "Ã¢â‚¬â€"}`,
+        `ID: ${requirement?.id || "â€”"}`,
+        `Name: ${requirement?.name || "â€”"}`,
         requirement?.description ? `Description: ${requirement.description}` : ""
     ].filter(Boolean).join("\n");
 }

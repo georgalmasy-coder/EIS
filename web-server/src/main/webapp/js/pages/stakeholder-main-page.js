@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
@@ -507,11 +508,11 @@ function isActiveFieldName(name) {
 }
 
 function initializeStateFromStorage() {
-    state.sortState.key = localStorage.getItem(STORAGE_KEYS.sortKey) || "";
-    state.sortState.dir = localStorage.getItem(STORAGE_KEYS.sortDirection) || "asc";
+    state.sortState.key = userPreferences.getItem(STORAGE_KEYS.sortKey) || "";
+    state.sortState.dir = userPreferences.getItem(STORAGE_KEYS.sortDirection) || "asc";
 
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
         state.storedWidths = raw ? JSON.parse(raw) : {};
     } catch {
         state.storedWidths = {};
@@ -519,13 +520,13 @@ function initializeStateFromStorage() {
 }
 
 function persistSorting() {
-    localStorage.setItem(STORAGE_KEYS.sortKey, state.sortState.key || "");
-    localStorage.setItem(STORAGE_KEYS.sortDirection, state.sortState.dir || "asc");
+    userPreferences.setItem(STORAGE_KEYS.sortKey, state.sortState.key || "");
+    userPreferences.setItem(STORAGE_KEYS.sortDirection, state.sortState.dir || "asc");
 }
 
 function getStoredColumnWidths() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.columnWidths);
+        const raw = userPreferences.getItem(STORAGE_KEYS.columnWidths);
         return raw ? JSON.parse(raw) : {};
     } catch {
         return {};
@@ -535,7 +536,7 @@ function getStoredColumnWidths() {
 function persistColumnWidth(columnKey, widthPx) {
     const widths = getStoredColumnWidths();
     widths[columnKey] = `${Math.max(50, Math.round(widthPx))}px`;
-    localStorage.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
+    userPreferences.setItem(STORAGE_KEYS.columnWidths, JSON.stringify(widths));
     state.storedWidths = widths;
 }
 

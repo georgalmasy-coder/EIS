@@ -1,3 +1,4 @@
+import { userPreferences } from "../core/user-preferences.js";
 import { nowIsoLocal, parseDateTime } from "../core/date.js";
 import {
     buildEntityLinksXml,
@@ -627,7 +628,7 @@ export function createLinksTable(config = {}) {
 
     function getStoredWidths() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = userPreferences.getItem(STORAGE_KEY);
             return raw ? JSON.parse(raw) || {} : {};
         } catch {
             return {};
@@ -636,7 +637,7 @@ export function createLinksTable(config = {}) {
 
     function persistWidths(widths) {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(widths));
+            userPreferences.setItem(STORAGE_KEY, JSON.stringify(widths));
         } catch {
             // ignore storage failures
         }
