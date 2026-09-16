@@ -27,4 +27,4 @@ The application is a single-page UI with:
 - material registration
 - monthly invoice summary with VAT
 
-Selected customer is persisted in `localStorage` and mirrored in the HTTP session.
+Selected customer is persisted in the HTTP session.
