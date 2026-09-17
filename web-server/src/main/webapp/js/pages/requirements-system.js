@@ -8,6 +8,14 @@ import { createImportDialog } from "../components/import-dialog.js";
 import { createEntityMoveSelection } from "../components/entity-move-selection.js";
 import { downloadSystemRequirementDiagramPdf } from "./systemrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
+import {
+    ensureDiagramStatusControl,
+    getStatusFieldOptions,
+    loadSelectedStatusFields,
+    persistSelectedStatusFields,
+    renderDiagramStatusBars,
+    renderDiagramStatusMenu
+} from "../core/diagram-status.js";
 import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import {
     getDirectChild,
@@ -46,7 +54,8 @@ const STORAGE_KEYS = {
     columnWidths: "basis.requirements.system.columnWidths",
     hiddenColumns: "basis.requirements.system.hiddenColumns",
     groupBy: "basis.requirements.system.groupBy",
-    groupCollapsed: "basis.requirements.system.groupCollapsed"
+    groupCollapsed: "basis.requirements.system.groupCollapsed",
+    statusFields: "basis.requirements.system.statusFields"
 };
 
 const VIEW_TYPES = {
@@ -94,7 +103,10 @@ const state = {
     contextTargetType: "",
     contextRequirement: null,
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
-    columnsMenuOpen: false
+    columnsMenuOpen: false,
+    statusFieldOptions: [],
+    selectedStatusFields: [],
+    statusMenuOpen: false
 };
 
 let moveSelection;
@@ -193,6 +205,7 @@ function initializeEvents() {
     const columnsMenuButton = document.getElementById("systemBtnColumns");
     const columnsCloseButton = document.getElementById("systemBtnCloseColumns");
     const systemColumnsList = document.getElementById("systemColumnsList");
+    ensureStatusControl();
     const addRootButton = document.getElementById("systemBtnAddRoot");
     const pdfButton = document.getElementById("systemBtnDownloadDiagramPdf");
 
@@ -389,6 +402,8 @@ async function loadSystemRequirements() {
             window.onSystemDataLoaded(state.requirements.length);
         }
         state.listColumns = buildListColumns(state.requirements);
+        initializeDiagramStatusFields();
+
         sanitizeHiddenColumns();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
@@ -874,9 +889,14 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("systemBtnExport", !isListView || !hasRequirements);
     setElementHidden("systemBtnAddRoot", !isListView);
     setElementHidden("systemBtnDownloadDiagramPdf", isListView);
+    setElementHidden("systemStatusControl", isListView || !state.statusFieldOptions.length);
     setElementHidden("systemBtnHelp", isListView);
     setElementHidden("systemGroupByBar", !isListView);
     setElementHidden("systemBtnColumns", !isListView);
+
+    if (isListView) {
+        closeStatusMenu();
+    }
 }
 
 function setElementHidden(id, hidden) {
@@ -1170,7 +1190,112 @@ function toggleColumnsMenu() {
     closeColumnsMenu();
 }
 
+
+function initializeDiagramStatusFields() {
+    state.statusFieldOptions = getStatusFieldOptions(state.requirements);
+    state.selectedStatusFields = loadSelectedStatusFields(STORAGE_KEYS.statusFields, state.statusFieldOptions);
+    renderStatusMenu();
+}
+
+function renderStatusMenu() {
+    renderDiagramStatusMenu({
+        buttonId: "systemBtnStatus",
+        listId: "systemStatusList",
+        options: state.statusFieldOptions,
+        selectedKeys: state.selectedStatusFields,
+        menuOpen: state.statusMenuOpen,
+        prefix: "systemrequirement"
+    });
+}
+
+function ensureStatusControl() {
+    ensureDiagramStatusControl({
+        controlId: "systemStatusControl",
+        buttonId: "systemBtnStatus",
+        popoverId: "systemStatusPopover",
+        listId: "systemStatusList",
+        closeButtonId: "systemBtnCloseStatus",
+        prefix: "systemrequirement",
+        containerSelector: ".systemrequirement-filter-group",
+        onToggle: toggleStatusMenu,
+        onClose: closeStatusMenu,
+        onChange: handleStatusMenuChange
+    });
+}
+
+function openStatusMenu() {
+    const popover = document.getElementById("systemStatusPopover");
+
+    if (!popover) {
+        state.statusMenuOpen = false;
+        renderStatusMenu();
+        return;
+    }
+
+    renderStatusMenu();
+    popover.hidden = false;
+    state.statusMenuOpen = true;
+    renderStatusMenu();
+}
+
+function closeStatusMenu() {
+    const popover = document.getElementById("systemStatusPopover");
+
+    if (popover) {
+        popover.hidden = true;
+    }
+
+    state.statusMenuOpen = false;
+    renderStatusMenu();
+}
+
+function toggleStatusMenu() {
+    const popover = document.getElementById("systemStatusPopover");
+
+    if (!popover || popover.hidden) {
+        openStatusMenu();
+        return;
+    }
+
+    closeStatusMenu();
+}
+
+function handleStatusMenuChange(event) {
+    const input = event.target?.closest?.("input[type='checkbox'][data-status-key]");
+    const key = input?.getAttribute("data-status-key");
+
+    if (!input || !key) {
+        return;
+    }
+
+    const selected = new Set(state.selectedStatusFields);
+
+    if (input.checked) {
+        if (selected.size >= 2) {
+            input.checked = false;
+            renderStatusMenu();
+            return;
+        }
+        selected.add(key);
+    } else {
+        selected.delete(key);
+    }
+
+    state.selectedStatusFields = Array.from(selected)
+        .filter((item) => state.statusFieldOptions.some((option) => option.key === item))
+        .slice(0, 2);
+    persistSelectedStatusFields(STORAGE_KEYS.statusFields, state.selectedStatusFields);
+    renderStatusMenu();
+    renderCurrentView();
+}
+
 function handleDocumentPointerDown(event) {
+    const statusControl = document.getElementById("systemStatusControl");
+
+    if (statusControl && state.statusMenuOpen && !statusControl.contains(event.target)) {
+        closeStatusMenu();
+    }
+
     const systemColumnsControl = document.getElementById("systemColumnsControl");
 
     if (!systemColumnsControl || !state.columnsMenuOpen) {
@@ -1187,6 +1312,10 @@ function handleDocumentPointerDown(event) {
 function handleDocumentKeyDown(event) {
     if (event.key === "Escape" && state.columnsMenuOpen) {
         closeColumnsMenu();
+    }
+
+    if (event.key === "Escape" && state.statusMenuOpen) {
+        closeStatusMenu();
     }
 }
 
@@ -2116,16 +2245,7 @@ function createDiagramNode(node) {
 }
 
 function renderStatusBars(requirement) {
-    return `
-        <div class="systemrequirement-diagram-status-bars">
-            <div class="systemrequirement-diagram-status-bar requirement-status ${statusClass(requirement.requirementStatus)}">
-                <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.requirementStatus || "—")}</span>
-            </div>
-            <div class="systemrequirement-diagram-status-bar verification-status ${verificationClass(requirement.verificationStatus)}">
-                <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.verificationStatus || "—")}</span>
-            </div>
-        </div>
-    `;
+    return renderDiagramStatusBars("systemrequirement", requirement, state.selectedStatusFields);
 }
 
 function buildRequirementTooltip(requirement) {
@@ -2421,6 +2541,7 @@ function downloadCurrentDiagramPdf() {
         layout,
         orientation,
         topPanel: state.topPanel,
+        statusFields: state.selectedStatusFields,
         requirementCount: state.filteredRequirements.length
     });
 }

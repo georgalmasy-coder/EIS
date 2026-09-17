@@ -197,6 +197,33 @@ body.theme-light .requirements-view-button[aria-pressed="true"] {
     flex: 0 0 auto;
 }
 
+#stakeholderStatusControl,
+#systemStatusControl {
+    margin-left: auto;
+}
+
+.stakeholderrequirement-status-limit-popup,
+.systemrequirement-status-limit-popup {
+    position: absolute;
+    right: 10px;
+    top: 42px;
+    z-index: 2;
+    max-width: calc(100% - 20px);
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #111827;
+    box-shadow: var(--app-shadow);
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.systemrequirement-diagram-node {
+    overflow: hidden;
+}
+
 /* Original toolbar overrides */
 .stakeholderrequirement-main-toolbar,
 .systemrequirement-main-toolbar {

@@ -7,6 +7,14 @@ import { createExportDialog } from "../components/export-dialog.js";
 import { createImportDialog } from "../components/import-dialog.js";
 import { downloadSystemRequirementDiagramPdf } from "./systemrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
+import {
+    ensureDiagramStatusControl,
+    getStatusFieldOptions,
+    loadSelectedStatusFields,
+    persistSelectedStatusFields,
+    renderDiagramStatusBars,
+    renderDiagramStatusMenu
+} from "../core/diagram-status.js";
 import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
 import {
     getDirectChild,
@@ -45,7 +53,8 @@ const STORAGE_KEYS = {
     columnWidths: "basis.systemrequirement.main.columnWidths",
     hiddenColumns: "basis.systemrequirement.main.hiddenColumns",
     groupBy: "basis.systemrequirement.main.groupBy",
-    groupCollapsed: "basis.systemrequirement.main.groupCollapsed"
+    groupCollapsed: "basis.systemrequirement.main.groupCollapsed",
+    statusFields: "basis.systemrequirement.main.statusFields"
 };
 
 const VIEW_TYPES = {
@@ -92,7 +101,10 @@ const state = {
     contextTargetType: "",
     contextRequirement: null,
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
-    columnsMenuOpen: false
+    columnsMenuOpen: false,
+    statusFieldOptions: [],
+    selectedStatusFields: [],
+    statusMenuOpen: false
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -174,6 +186,8 @@ function initializeEvents() {
     const columnsButton = document.getElementById("btnColumns");
     const columnsCloseButton = document.getElementById("btnCloseColumns");
     const columnsList = document.getElementById("columnsList");
+    ensureStatusControl();
+
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -331,6 +345,8 @@ async function loadSystemRequirements() {
         state.requirements = parseSystemRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         state.listColumns = buildListColumns(state.requirements);
+        initializeDiagramStatusFields();
+
         sanitizeHiddenColumns();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
@@ -817,6 +833,10 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
     setElementHidden("columnsControl", !isListView);
+    setElementHidden("statusControl", isListView || !state.statusFieldOptions.length);
+    if (isListView) {
+        closeStatusMenu();
+    }
 }
 
 function setElementHidden(id, hidden) {
@@ -1120,7 +1140,112 @@ function toggleColumnsMenu() {
     closeColumnsMenu();
 }
 
+
+function initializeDiagramStatusFields() {
+    state.statusFieldOptions = getStatusFieldOptions(state.requirements);
+    state.selectedStatusFields = loadSelectedStatusFields(STORAGE_KEYS.statusFields, state.statusFieldOptions);
+    renderStatusMenu();
+}
+
+function renderStatusMenu() {
+    renderDiagramStatusMenu({
+        buttonId: "btnStatus",
+        listId: "statusList",
+        options: state.statusFieldOptions,
+        selectedKeys: state.selectedStatusFields,
+        menuOpen: state.statusMenuOpen,
+        prefix: "systemrequirement"
+    });
+}
+
+function ensureStatusControl() {
+    ensureDiagramStatusControl({
+        controlId: "statusControl",
+        buttonId: "btnStatus",
+        popoverId: "statusPopover",
+        listId: "statusList",
+        closeButtonId: "btnCloseStatus",
+        prefix: "systemrequirement",
+        containerSelector: ".systemrequirement-filter-group",
+        onToggle: toggleStatusMenu,
+        onClose: closeStatusMenu,
+        onChange: handleStatusMenuChange
+    });
+}
+
+function openStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (!popover) {
+        state.statusMenuOpen = false;
+        renderStatusMenu();
+        return;
+    }
+
+    renderStatusMenu();
+    popover.hidden = false;
+    state.statusMenuOpen = true;
+    renderStatusMenu();
+}
+
+function closeStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (popover) {
+        popover.hidden = true;
+    }
+
+    state.statusMenuOpen = false;
+    renderStatusMenu();
+}
+
+function toggleStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (!popover || popover.hidden) {
+        openStatusMenu();
+        return;
+    }
+
+    closeStatusMenu();
+}
+
+function handleStatusMenuChange(event) {
+    const input = event.target?.closest?.("input[type='checkbox'][data-status-key]");
+    const key = input?.getAttribute("data-status-key");
+
+    if (!input || !key) {
+        return;
+    }
+
+    const selected = new Set(state.selectedStatusFields);
+
+    if (input.checked) {
+        if (selected.size >= 2) {
+            input.checked = false;
+            renderStatusMenu();
+            return;
+        }
+        selected.add(key);
+    } else {
+        selected.delete(key);
+    }
+
+    state.selectedStatusFields = Array.from(selected)
+        .filter((item) => state.statusFieldOptions.some((option) => option.key === item))
+        .slice(0, 2);
+    persistSelectedStatusFields(STORAGE_KEYS.statusFields, state.selectedStatusFields);
+    renderStatusMenu();
+    renderCurrentView();
+}
+
 function handleDocumentPointerDown(event) {
+    const statusControl = document.getElementById("statusControl");
+
+    if (statusControl && state.statusMenuOpen && !statusControl.contains(event.target)) {
+        closeStatusMenu();
+    }
+
     const columnsControl = document.getElementById("columnsControl");
 
     if (!columnsControl || !state.columnsMenuOpen) {
@@ -1137,6 +1262,10 @@ function handleDocumentPointerDown(event) {
 function handleDocumentKeyDown(event) {
     if (event.key === "Escape" && state.columnsMenuOpen) {
         closeColumnsMenu();
+    }
+
+    if (event.key === "Escape" && state.statusMenuOpen) {
+        closeStatusMenu();
     }
 }
 
@@ -2066,16 +2195,7 @@ function createDiagramNode(node) {
 }
 
 function renderStatusBars(requirement) {
-    return `
-        <div class="systemrequirement-diagram-status-bars">
-            <div class="systemrequirement-diagram-status-bar requirement-status ${statusClass(requirement.requirementStatus)}">
-                <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.requirementStatus || "—")}</span>
-            </div>
-            <div class="systemrequirement-diagram-status-bar verification-status ${verificationClass(requirement.verificationStatus)}">
-                <span class="systemrequirement-diagram-status-value">${escapeHtml(requirement.verificationStatus || "—")}</span>
-            </div>
-        </div>
-    `;
+    return renderDiagramStatusBars("systemrequirement", requirement, state.selectedStatusFields);
 }
 
 function buildRequirementTooltip(requirement) {
@@ -2348,6 +2468,7 @@ function downloadCurrentDiagramPdf() {
         layout,
         orientation,
         topPanel: state.topPanel,
+        statusFields: state.selectedStatusFields,
         requirementCount: state.filteredRequirements.length
     });
 }

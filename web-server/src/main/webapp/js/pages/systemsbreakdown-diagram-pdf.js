@@ -6,7 +6,7 @@ import {
     drawPdfBackground,
     drawPdfFilledRect,
     drawPdfMultilineText,
-    drawPdfRect,
+    drawPdfStrokeRect,
     drawPdfText,
     drawPdfTextCentered,
     formatGeneratedAt,
@@ -16,13 +16,15 @@ import {
     fitPdfTextLines
 } from "../core/pdf.js";
 import { clampNumber } from "../core/utils.js";
+import { getDiagramStatusLines } from "../core/diagram-status.js";
 
 export function downloadSystemsBreakdownDiagramPdf({
                                                        tree,
                                                        layout,
                                                        orientation,
                                                        topPanel,
-                                                       systemCount
+                                                       statusFields = [],
+                                                             systemCount
                                                    }) {
     if (!tree || !layout || !Array.isArray(layout.nodes)) {
         return;
@@ -41,6 +43,7 @@ export function downloadSystemsBreakdownDiagramPdf({
         layout: normalizedLayout,
         orientation: safeOrientation,
         topPanel: safeTopPanel,
+        statusFields,
         systemCount: safeSystemCount
     });
 
@@ -55,7 +58,7 @@ function buildDiagramPdfFileName(orientation, topPanel) {
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "") || "project";
 
-    return `physical-structure-${orientation}-diagram-${projectName}.pdf`;
+    return `Physical-Architecture-${orientation}-diagram-${projectName}.pdf`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -186,6 +189,7 @@ function createDiagramPdf({
                               layout,
                               orientation,
                               topPanel,
+                              statusFields,
                               systemCount
                           }) {
     /*
@@ -235,7 +239,8 @@ function createDiagramPdf({
             tile,
             pageNumber: index + 1,
             pageCount: tiles.length,
-            generatedAt
+            generatedAt,
+            statusFields
         });
     });
 
@@ -423,7 +428,8 @@ function createPageContent(options) {
         tile,
         pageNumber,
         pageCount,
-        generatedAt
+        generatedAt,
+        statusFields
     } = options;
 
     const commands = [];
@@ -467,7 +473,7 @@ function createPageContent(options) {
     };
 
     drawPdfConnections(commands, layout.edges, transformPoint, scale, tile, orientation);
-    drawPdfNodes(commands, layout.nodes, transformPoint, scale, isVisible, topPanel);
+    drawPdfNodes(commands, layout.nodes, transformPoint, scale, isVisible, topPanel, statusFields);
 
     endPdfClip(commands);
 
@@ -567,7 +573,7 @@ function drawPdfStraightConnection(commands, points, scale) {
     commands.push("Q");
 }
 
-function drawPdfNodes(commands, nodes, transformPoint, scale, isVisible, topPanel) {
+function drawPdfNodes(commands, nodes, transformPoint, scale, isVisible, topPanel, statusFields) {
     (nodes || []).forEach((node) => {
         if (!isVisible(node)) {
             return;
@@ -582,7 +588,7 @@ function drawPdfNodes(commands, nodes, transformPoint, scale, isVisible, topPane
         if (node.type === "project") {
             drawProjectNode(commands, node, topPanel, x, y, width, height, scale);
         } else {
-            drawSystemNode(commands, node, x, y, width, height, scale);
+            drawSystemNode(commands, node, x, y, width, height, scale, statusFields);
         }
     });
 }
@@ -590,7 +596,7 @@ function drawPdfNodes(commands, nodes, transformPoint, scale, isVisible, topPane
 function drawProjectNode(commands, node, topPanel, x, y, width, height, scale) {
     const footerHeight = Math.max(8, 18 * scale);
 
-    drawPdfRect(commands, x, y, width, height, "#ffffff", "#000000");
+    drawPdfFilledRect(commands, x, y, width, height, "#ffffff");
     drawPdfFilledRect(commands, x, y, width, footerHeight, "#ffffff");
 
     drawPdfTextCentered(
@@ -618,73 +624,112 @@ function drawProjectNode(commands, node, topPanel, x, y, width, height, scale) {
         [0, 0, 0],
         1
     );
+
+    drawPdfStrokeRect(commands, x, y, width, height, "#000000", 0.6);
 }
 
-function drawSystemNode(commands, node, x, y, width, height, scale) {
+function drawSystemNode(commands, node, x, y, width, height, scale, statusFields) {
     const system = node.system || {};
-    const code = system.id || node.code || "—";
-    const name = system.name || node.name || "—";
-    const trl = system.trl || "—";
-    const trlTone = getTrlTone(trl);
+    const code = system.id || node.code || "-";
+    const name = system.name || node.name || "-";
 
-    const statusBarHeight = Math.max(9, 19 * scale);
-    const headerHeight = Math.max(15, 28 * scale);
-    const trlFontSize = Math.max(3.8, 7.4 * scale) + 2;
-    const trlTextWidth = width - 8 * scale;
-    const trlTextHeight = Math.max(0, statusBarHeight - 4 * scale);
-    const trlText = fitPdfTextLines(
-        trl,
-        trlTextWidth,
-        trlFontSize,
-        trlTextHeight,
-        1
-    )[0];
+    const statusHeight = calculatePdfStatusHeight(system, statusFields, scale, 19);
+    const codeFontSize = Math.max(3.8, 7.4 * scale) + 2;
+    const titleFontSize = Math.max(3.8, 7.2 * scale) + 2;
+    const codeY = y + height - 20 * scale;
+    const nameTop = y + height - 26 * scale;
+    const nameBottom = y + statusHeight + 2 * scale;
+    const nameHeight = Math.max(1, nameTop - nameBottom);
 
-    drawPdfRect(commands, x, y, width, height, "#ffffff", "#000000");
-    drawPdfFilledRect(commands, x, y, width, statusBarHeight, getPdfTrlColor(trlTone));
+    drawPdfFilledRect(commands, x, y, width, height, "#ffffff");
+    drawPdfStatusLines(commands, system, statusFields, x, y, width, scale, 19);
 
-    drawPdfTextCentered(
-        commands,
-        trlText,
-        x + 4 * scale,
-        y,
-        trlTextWidth,
-        statusBarHeight,
-        trlFontSize,
-        "Helvetica-Bold",
-        [0, 0, 0],
-        1
-    );
+    if (statusHeight > 0) {
+        drawPdfLine(commands, x, y + statusHeight, x + width, y + statusHeight, 0.6);
+    }
 
     drawPdfText(
         commands,
         code,
         x + 9 * scale,
-        y + height - 20 * scale,
-        Math.max(3.8, 7.4 * scale) + 2,
+        codeY,
+        codeFontSize,
         "Helvetica-Bold",
         [0, 0, 0]
     );
 
-    const titleFontSize = Math.max(3.8, 7.2 * scale);
-    const titleLines = fitPdfTextLines(
-        name,
-        width - 18 * scale,
-        titleFontSize + 2,
-        Math.max((titleFontSize + 2) * 1.18 * 3, 14 * scale),
-        3
-    );
-
-    drawPdfMultilineText(
+    drawPdfTextCentered(
         commands,
-        titleLines,
+        fitPdfTextLines(name, width - 18 * scale, titleFontSize, nameHeight, 2)[0],
         x + 9 * scale,
-        y + height - headerHeight - 2 * scale,
-        titleFontSize + 2,
+        nameBottom,
+        width - 18 * scale,
+        nameHeight,
+        titleFontSize,
         "Helvetica-Bold",
         [0, 0, 0],
-        (titleFontSize + 2) * 1.18
+        1
     );
+
+    drawPdfStrokeRect(commands, x, y, width, height, "#000000", 0.6);
+}
+
+
+
+
+
+function calculatePdfStatusHeight(entity, statusFields, scale, baseBarHeight = 17) {
+    const lines = getDiagramStatusLines(entity, statusFields);
+
+    if (!lines.length) {
+        return 0;
+    }
+
+    return lines.length * Math.max(8, baseBarHeight * scale);
+}
+
+function drawPdfLine(commands, x1, y1, x2, y2, width = 0.6) {
+    commands.push("q");
+    commands.push("0 0 0 RG");
+    commands.push(formatPdfNumber(width) + " w");
+    commands.push(formatPdfNumber(x1) + " " + formatPdfNumber(y1) + " m");
+    commands.push(formatPdfNumber(x2) + " " + formatPdfNumber(y2) + " l");
+    commands.push("S");
+    commands.push("Q");
+}
+
+function drawPdfStatusLines(commands, entity, statusFields, x, y, width, scale, baseBarHeight = 17) {
+    const lines = getDiagramStatusLines(entity, statusFields);
+
+    if (!lines.length) {
+        return 0;
+    }
+
+    const barHeight = Math.max(8, baseBarHeight * scale);
+    const fontSize = Math.max(3.8, 7.4 * scale) + 2;
+    const textWidth = width - 8 * scale;
+
+    lines.forEach((line, index) => {
+        const lineY = y + (lines.length - 1 - index) * barHeight;
+        drawPdfFilledRect(commands, x, lineY, width, barHeight, line.color);
+        const text = fitPdfStatusText(line.value, textWidth, fontSize);
+
+        if (text) {
+            drawPdfTextCentered(commands, text, x + 4 * scale, lineY, textWidth, barHeight, fontSize, "Helvetica-Bold", [0, 0, 0], 1);
+        }
+    });
+
+    return lines.length * barHeight;
+}
+
+function fitPdfStatusText(value, maxWidth, fontSize) {
+    const text = String(value ?? "").trim();
+    const maxChars = Math.max(1, Math.floor(Math.max(1, maxWidth) / (Math.max(1, fontSize) * 0.52)));
+
+    if (text.length <= maxChars) return text;
+    if (maxChars <= 1) return "...";
+
+    return text.slice(0, Math.max(1, maxChars - 3)).trimEnd() + "...";
 }
 
 /* ------------------------------------------------------------------ */

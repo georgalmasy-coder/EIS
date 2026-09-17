@@ -98,7 +98,7 @@ export function drawPdfRect(commands, x, y, width, height, fillHex, strokeHex) {
     commands.push("q");
     commands.push(`${formatRgb(hexToRgb(fillHex))} rg`);
     commands.push(`${formatRgb(hexToRgb(strokeHex))} RG`);
-    commands.push("1 w");
+    commands.push("0.6 w");
     commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
     commands.push("B");
     commands.push("Q");
@@ -109,6 +109,15 @@ export function drawPdfFilledRect(commands, x, y, width, height, fillHex) {
     commands.push(`${formatRgb(hexToRgb(fillHex))} rg`);
     commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
     commands.push("f");
+    commands.push("Q");
+}
+
+export function drawPdfStrokeRect(commands, x, y, width, height, strokeHex, strokeWidth = 0.6) {
+    commands.push("q");
+    commands.push(`${formatRgb(hexToRgb(strokeHex))} RG`);
+    commands.push(`${formatPdfNumber(strokeWidth)} w`);
+    commands.push(`${formatPdfNumber(x)} ${formatPdfNumber(y)} ${formatPdfNumber(width)} ${formatPdfNumber(height)} re`);
+    commands.push("S");
     commands.push("Q");
 }
 
@@ -176,7 +185,7 @@ export function drawPdfMultilineText(
 }
 
 export function wrapPdfText(text, maxChars, maxLines) {
-    const words = String(text || "—").trim().split(/\s+/);
+    const words = String(text || "-").trim().split(/\s+/);
     const lines = [];
     let current = "";
 
@@ -204,7 +213,7 @@ export function wrapPdfText(text, maxChars, maxLines) {
     }
 
     if (!lines.length) {
-        lines.push("—");
+        lines.push("-");
     }
 
     return lines.slice(0, maxLines);
@@ -218,10 +227,10 @@ export function fitPdfTextLines(text, maxWidth, fontSize, maxHeight, maxLines) {
     const maxChars = Math.max(1, Math.floor(safeWidth / (safeFontSize * 0.52)));
     const maxLinesByHeight = Math.max(1, Math.floor(safeHeight / lineHeight));
     const limit = Math.max(1, Math.min(Number(maxLines) || maxLinesByHeight, maxLinesByHeight));
-    const words = String(text || "â€”").trim().split(/\s+/).filter(Boolean);
+    const words = String(text || "-").trim().split(/\s+/).filter(Boolean);
 
     if (!words.length) {
-        return ["â€”"];
+        return ["-"];
     }
 
     const lines = [];
@@ -269,17 +278,17 @@ export function fitPdfTextLines(text, maxWidth, fontSize, maxHeight, maxLines) {
 }
 
 export function ellipsizePdfText(value, maxChars) {
-    const text = String(value || "â€”").trim();
+    const text = String(value || "-").trim();
 
     if (text.length <= maxChars) {
         return text;
     }
 
-    if (maxChars <= 1) {
-        return "â€¦";
+    if (maxChars <= 3) {
+        return ".";
     }
 
-    return `${text.slice(0, Math.max(1, maxChars - 1)).trimEnd()}â€¦`;
+    return `${text.slice(0, Math.max(1, maxChars - 3)).trimEnd()}...`;
 }
 
 export function hexToRgb(hex) {

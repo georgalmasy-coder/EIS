@@ -8,6 +8,14 @@ import { createImportDialog } from "../components/import-dialog.js";
 import { createEntityMoveSelection } from "../components/entity-move-selection.js";
 import { downloadStakeholderRequirementDiagramPdf } from "./stakeholderrequirement-diagram-pdf.js";
 import { setText } from "../core/dom.js";
+import {
+    ensureDiagramStatusControl,
+    getStatusFieldOptions,
+    loadSelectedStatusFields,
+    persistSelectedStatusFields,
+    renderDiagramStatusBars,
+    renderDiagramStatusMenu
+} from "../core/diagram-status.js";
 import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
 import {
     getDirectChild,
@@ -35,7 +43,8 @@ const STORAGE_KEYS = {
     columnWidths: "basis.requirements.stakeholder.columnWidths",
     hiddenColumns: "basis.requirements.stakeholder.hiddenColumns",
     groupBy: "basis.requirements.stakeholder.groupBy",
-    groupCollapsed: "basis.requirements.stakeholder.groupCollapsed"
+    groupCollapsed: "basis.requirements.stakeholder.groupCollapsed",
+    statusFields: "basis.requirements.stakeholder.statusFields"
 };
 
 const VIEW_TYPES = {
@@ -87,7 +96,10 @@ const state = {
     contextTargetType: "",
     contextRequirement: null,
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
-    columnsMenuOpen: false
+    columnsMenuOpen: false,
+    statusFieldOptions: [],
+    selectedStatusFields: [],
+    statusMenuOpen: false
 };
 
 let moveSelection;
@@ -186,6 +198,7 @@ function initializeEvents() {
     const columnsMenuButton = document.getElementById("stakeholderBtnColumns");
     const columnsCloseButton = document.getElementById("stakeholderBtnCloseColumns");
     const stakeholderColumnsList = document.getElementById("stakeholderColumnsList");
+    ensureStatusControl();
     const addRootButton = document.getElementById("stakeholderBtnAddRoot");
     const pdfButton = document.getElementById("stakeholderBtnDownloadDiagramPdf");
 
@@ -382,6 +395,8 @@ async function loadStakeholderRequirements() {
             window.onStakeholderDataLoaded(state.requirements.length);
         }
         state.listColumns = buildListColumns(state.requirements);
+        initializeDiagramStatusFields();
+
         sanitizeHiddenColumns();
 
         if (state.sortKey && !state.listColumns.some((column) => column.key === state.sortKey)) {
@@ -817,11 +832,14 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("stakeholderBtnExport", !isListView || !hasRequirements);
     setElementHidden("stakeholderBtnAddRoot", !isListView);
     setElementHidden("stakeholderBtnDownloadDiagramPdf", isListView);
+    setElementHidden("stakeholderStatusControl", isListView || !state.statusFieldOptions.length);
     setElementHidden("stakeholderBtnHelp", isListView);
     setElementHidden("stakeholderGroupByBar", !isListView);
     setElementHidden("stakeholderBtnColumns", !isListView);
 
-    if (!isListView) {
+    if (isListView) {
+        closeStatusMenu();
+    } else {
         closeColumnsMenu();
     }
 }
@@ -1089,7 +1107,112 @@ function toggleColumnsMenu() {
     closeColumnsMenu();
 }
 
+
+function initializeDiagramStatusFields() {
+    state.statusFieldOptions = getStatusFieldOptions(state.requirements);
+    state.selectedStatusFields = loadSelectedStatusFields(STORAGE_KEYS.statusFields, state.statusFieldOptions);
+    renderStatusMenu();
+}
+
+function renderStatusMenu() {
+    renderDiagramStatusMenu({
+        buttonId: "stakeholderBtnStatus",
+        listId: "stakeholderStatusList",
+        options: state.statusFieldOptions,
+        selectedKeys: state.selectedStatusFields,
+        menuOpen: state.statusMenuOpen,
+        prefix: "stakeholderrequirement"
+    });
+}
+
+function ensureStatusControl() {
+    ensureDiagramStatusControl({
+        controlId: "stakeholderStatusControl",
+        buttonId: "stakeholderBtnStatus",
+        popoverId: "stakeholderStatusPopover",
+        listId: "stakeholderStatusList",
+        closeButtonId: "stakeholderBtnCloseStatus",
+        prefix: "stakeholderrequirement",
+        containerSelector: ".stakeholderrequirement-filter-group",
+        onToggle: toggleStatusMenu,
+        onClose: closeStatusMenu,
+        onChange: handleStatusMenuChange
+    });
+}
+
+function openStatusMenu() {
+    const popover = document.getElementById("stakeholderStatusPopover");
+
+    if (!popover) {
+        state.statusMenuOpen = false;
+        renderStatusMenu();
+        return;
+    }
+
+    renderStatusMenu();
+    popover.hidden = false;
+    state.statusMenuOpen = true;
+    renderStatusMenu();
+}
+
+function closeStatusMenu() {
+    const popover = document.getElementById("stakeholderStatusPopover");
+
+    if (popover) {
+        popover.hidden = true;
+    }
+
+    state.statusMenuOpen = false;
+    renderStatusMenu();
+}
+
+function toggleStatusMenu() {
+    const popover = document.getElementById("stakeholderStatusPopover");
+
+    if (!popover || popover.hidden) {
+        openStatusMenu();
+        return;
+    }
+
+    closeStatusMenu();
+}
+
+function handleStatusMenuChange(event) {
+    const input = event.target?.closest?.("input[type='checkbox'][data-status-key]");
+    const key = input?.getAttribute("data-status-key");
+
+    if (!input || !key) {
+        return;
+    }
+
+    const selected = new Set(state.selectedStatusFields);
+
+    if (input.checked) {
+        if (selected.size >= 2) {
+            input.checked = false;
+            renderStatusMenu();
+            return;
+        }
+        selected.add(key);
+    } else {
+        selected.delete(key);
+    }
+
+    state.selectedStatusFields = Array.from(selected)
+        .filter((item) => state.statusFieldOptions.some((option) => option.key === item))
+        .slice(0, 2);
+    persistSelectedStatusFields(STORAGE_KEYS.statusFields, state.selectedStatusFields);
+    renderStatusMenu();
+    renderCurrentView();
+}
+
 function handleDocumentPointerDown(event) {
+    const statusControl = document.getElementById("stakeholderStatusControl");
+
+    if (statusControl && state.statusMenuOpen && !statusControl.contains(event.target)) {
+        closeStatusMenu();
+    }
+
     const stakeholderColumnsControl = document.getElementById("stakeholderColumnsControl");
 
     if (!stakeholderColumnsControl || !state.columnsMenuOpen) {
@@ -1106,6 +1229,10 @@ function handleDocumentPointerDown(event) {
 function handleDocumentKeyDown(event) {
     if (event.key === "Escape" && state.columnsMenuOpen) {
         closeColumnsMenu();
+    }
+
+    if (event.key === "Escape" && state.statusMenuOpen) {
+        closeStatusMenu();
     }
 }
 
@@ -2033,7 +2160,7 @@ function createDiagramNode(node) {
         element.innerHTML = `
             <div class="stakeholderrequirement-diagram-node-code">${escapeHtml(node.code)}</div>
             <div class="stakeholderrequirement-diagram-node-name">${escapeHtml(node.name)}</div>
-            ${renderStatusBars()}
+            ${renderStatusBars(node.requirement)}
         `;
     }
 
@@ -2098,17 +2225,8 @@ function isBlankTooltipValue(value) {
     return !value || value === "--" || value === "\u2014";
 }
 
-function renderStatusBars() {
-    return `
-        <div class="stakeholderrequirement-diagram-status-bars">
-            <div class="stakeholderrequirement-diagram-status-bar">
-                <span class="stakeholderrequirement-diagram-status-value">&nbsp;</span>
-            </div>
-            <div class="stakeholderrequirement-diagram-status-bar">
-                <span class="stakeholderrequirement-diagram-status-value">&nbsp;</span>
-            </div>
-        </div>
-    `;
+function renderStatusBars(requirement) {
+    return renderDiagramStatusBars("stakeholderrequirement", requirement, state.selectedStatusFields);
 }
 
 function initializeContextMenuEvents() {
@@ -2348,6 +2466,7 @@ function downloadCurrentDiagramPdf() {
         layout,
         orientation,
         topPanel: state.topPanel,
+        statusFields: state.selectedStatusFields,
         requirementCount: state.filteredRequirements.length
     });
 }

@@ -10,6 +10,14 @@ import { createEntityMoveSelection } from "../components/entity-move-selection.j
 import { downloadLogicalStructureDiagramPdf } from "./logicalstructure-diagram-pdf.js";
 import { setText } from "../core/dom.js";
 import {
+    ensureDiagramStatusControl,
+    getStatusFieldOptions,
+    loadSelectedStatusFields,
+    persistSelectedStatusFields,
+    renderDiagramStatusBars,
+    renderDiagramStatusMenu
+} from "../core/diagram-status.js";
+import {
     getDirectChild,
     getDirectText,
     hasXmlParseError
@@ -35,7 +43,8 @@ const STORAGE_KEYS = {
     columnWidths: "pro.logicalstructure.main.columnWidths",
     hiddenColumns: "pro.logicalstructure.main.hiddenColumns",
     groupBy: "pro.logicalstructure.main.groupBy",
-    groupCollapsed: "pro.logicalstructure.main.groupCollapsed"
+    groupCollapsed: "pro.logicalstructure.main.groupCollapsed",
+    statusFields: "pro.logicalstructure.main.statusFields"
 };
 
 const VIEW_TYPES = {
@@ -86,7 +95,10 @@ const state = {
     contextTargetType: "",
     contextRequirement: null,
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
-    columnsMenuOpen: false
+    columnsMenuOpen: false,
+    statusFieldOptions: [],
+    selectedStatusFields: [],
+    statusMenuOpen: false
 };
 
 let moveSelection;
@@ -176,6 +188,8 @@ function initializeEvents() {
     const columnsButton = document.getElementById("btnColumns");
     const columnsCloseButton = document.getElementById("btnCloseColumns");
     const columnsList = document.getElementById("columnsList");
+    ensureStatusControl();
+
     const addRootButton = document.getElementById("btnAddRoot");
     const pdfButton = document.getElementById("btnDownloadDiagramPdf");
 
@@ -334,6 +348,8 @@ async function loadLogicalStructures() {
         state.requirements = parseLogicalStructures(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         state.listColumns = buildListColumns(state.requirements);
+        initializeDiagramStatusFields();
+
         applyStoredColumnVisibility();
         renderColumnsMenu();
 
@@ -765,6 +781,10 @@ function updateActionButtonsForView(viewType) {
     setElementHidden("btnDownloadDiagramPdf", isListView);
     setElementHidden("groupByBar", !isListView);
     setElementHidden("columnsControl", !isListView);
+    setElementHidden("statusControl", isListView || !state.statusFieldOptions.length);
+    if (isListView) {
+        closeStatusMenu();
+    }
     if (!isListView) {
         closeColumnsMenu();
     }
@@ -932,7 +952,112 @@ function toggleColumnsMenu() {
     closeColumnsMenu();
 }
 
+
+function initializeDiagramStatusFields() {
+    state.statusFieldOptions = getStatusFieldOptions(state.requirements);
+    state.selectedStatusFields = loadSelectedStatusFields(STORAGE_KEYS.statusFields, state.statusFieldOptions);
+    renderStatusMenu();
+}
+
+function renderStatusMenu() {
+    renderDiagramStatusMenu({
+        buttonId: "btnStatus",
+        listId: "statusList",
+        options: state.statusFieldOptions,
+        selectedKeys: state.selectedStatusFields,
+        menuOpen: state.statusMenuOpen,
+        prefix: "logicalstructure"
+    });
+}
+
+function ensureStatusControl() {
+    ensureDiagramStatusControl({
+        controlId: "statusControl",
+        buttonId: "btnStatus",
+        popoverId: "statusPopover",
+        listId: "statusList",
+        closeButtonId: "btnCloseStatus",
+        prefix: "logicalstructure",
+        containerSelector: ".logicalstructure-filter-group",
+        onToggle: toggleStatusMenu,
+        onClose: closeStatusMenu,
+        onChange: handleStatusMenuChange
+    });
+}
+
+function openStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (!popover) {
+        state.statusMenuOpen = false;
+        renderStatusMenu();
+        return;
+    }
+
+    renderStatusMenu();
+    popover.hidden = false;
+    state.statusMenuOpen = true;
+    renderStatusMenu();
+}
+
+function closeStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (popover) {
+        popover.hidden = true;
+    }
+
+    state.statusMenuOpen = false;
+    renderStatusMenu();
+}
+
+function toggleStatusMenu() {
+    const popover = document.getElementById("statusPopover");
+
+    if (!popover || popover.hidden) {
+        openStatusMenu();
+        return;
+    }
+
+    closeStatusMenu();
+}
+
+function handleStatusMenuChange(event) {
+    const input = event.target?.closest?.("input[type='checkbox'][data-status-key]");
+    const key = input?.getAttribute("data-status-key");
+
+    if (!input || !key) {
+        return;
+    }
+
+    const selected = new Set(state.selectedStatusFields);
+
+    if (input.checked) {
+        if (selected.size >= 2) {
+            input.checked = false;
+            renderStatusMenu();
+            return;
+        }
+        selected.add(key);
+    } else {
+        selected.delete(key);
+    }
+
+    state.selectedStatusFields = Array.from(selected)
+        .filter((item) => state.statusFieldOptions.some((option) => option.key === item))
+        .slice(0, 2);
+    persistSelectedStatusFields(STORAGE_KEYS.statusFields, state.selectedStatusFields);
+    renderStatusMenu();
+    renderCurrentView();
+}
+
 function handleDocumentPointerDown(event) {
+    const statusControl = document.getElementById("statusControl");
+
+    if (statusControl && state.statusMenuOpen && !statusControl.contains(event.target)) {
+        closeStatusMenu();
+    }
+
     const columnsControl = document.getElementById("columnsControl");
 
     if (!columnsControl || !state.columnsMenuOpen) {
@@ -949,6 +1074,10 @@ function handleDocumentPointerDown(event) {
 function handleDocumentKeyDown(event) {
     if (event.key === "Escape" && state.columnsMenuOpen) {
         closeColumnsMenu();
+    }
+
+    if (event.key === "Escape" && state.statusMenuOpen) {
+        closeStatusMenu();
     }
 }
 
@@ -1998,7 +2127,7 @@ function createDiagramNode(node) {
         element.innerHTML = `
             <div class="logicalstructure-diagram-node-code">${escapeHtml(node.code)}</div>
             <div class="logicalstructure-diagram-node-name">${escapeHtml(node.name)}</div>
-            ${renderStatusBars()}
+            ${renderStatusBars(node.requirement)}
         `;
     }
 
@@ -2063,17 +2192,8 @@ function isBlankTooltipValue(value) {
     return !value || value === "--" || value === "\u2014";
 }
 
-function renderStatusBars() {
-    return `
-        <div class="logicalstructure-diagram-status-bars">
-            <div class="logicalstructure-diagram-status-bar">
-                <span class="logicalstructure-diagram-status-value">&nbsp;</span>
-            </div>
-            <div class="logicalstructure-diagram-status-bar">
-                <span class="logicalstructure-diagram-status-value">&nbsp;</span>
-            </div>
-        </div>
-    `;
+function renderStatusBars(requirement) {
+    return renderDiagramStatusBars("logicalstructure", requirement, state.selectedStatusFields);
 }
 
 function initializeContextMenuEvents() {
@@ -2313,6 +2433,7 @@ function downloadCurrentDiagramPdf() {
         layout,
         orientation,
         topPanel: state.topPanel,
+        statusFields: state.selectedStatusFields,
         requirementCount: state.filteredRequirements.length
     });
 }
