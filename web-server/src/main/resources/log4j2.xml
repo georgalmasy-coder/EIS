@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" monitorInterval="60">
+<Configuration status="WARN" monitorInterval="60" packages="com.bepa.eis.common.logging">
     <Properties>
         <!-- Change these as needed -->
         <Property name="appName">EIS</Property>
@@ -33,29 +33,37 @@
             <DefaultRolloverStrategy max="14"/>
         </RollingFile>
 
+        <IncidentLog name="IncidentLog" ignoreExceptions="true">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </IncidentLog>
+
     </Appenders>
 
     <Loggers>
         <!-- Reduce noise from common libraries (adjust as desired) -->
-        <Logger name="org.apache" level="WARN" additivity="false">
+        <Logger name="org.apache" level="WARN" additivity="false" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="IncidentLog"/>
         </Logger>
 
-        <Logger name="com.microsoft.sqlserver" level="WARN" additivity="false">
+        <Logger name="com.microsoft.sqlserver" level="WARN" additivity="false" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="IncidentLog"/>
         </Logger>
 
         <!-- Your application packages (set to DEBUG when troubleshooting) -->
-        <Logger name="com.bepa.eis.server" level="DEBUG" additivity="false">
+        <Logger name="com.bepa.eis.server" level="DEBUG" additivity="false" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="IncidentLog"/>
         </Logger>
 
-        <Root level="${rootLevel}">
+        <Root level="${rootLevel}" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="IncidentLog"/>
         </Root>
     </Loggers>
 </Configuration>

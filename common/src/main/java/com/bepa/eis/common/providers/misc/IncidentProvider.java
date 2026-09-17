@@ -4,8 +4,6 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.ServiceType;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.GenericProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -17,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class IncidentProvider extends GenericProvider {
-
-    private static final Logger log = LoggerFactory.getLogger(IncidentProvider.class);
 
     private static final String INSERT_INCIDENT_SQL =
             "INSERT INTO INCIDENTS " +
@@ -385,8 +381,8 @@ public class IncidentProvider extends GenericProvider {
                     throw new SQLException("Insert incident failed : " + serviceType.getDescription() + " " + severityType.getDescription() + " " + getErrorMessage(throwable));
                 }
             }
-        } catch (Exception e) {
-            log.error("Failed to incident event", e);
+        } catch (Exception ignored) {
+            // Incident persistence must never trigger another log event or insert attempt.
         }
     }
 
