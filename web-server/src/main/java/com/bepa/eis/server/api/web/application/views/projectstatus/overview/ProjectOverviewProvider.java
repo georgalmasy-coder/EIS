@@ -2,9 +2,11 @@ package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.project.ProjectRecord;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.DTO.Project;
 import com.bepa.eis.server.api.DTO.TrlRecord;
+import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
 import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
 import com.bepa.eis.server.dataprovider.fields.integers.AbstractInteger;
@@ -158,7 +160,19 @@ public class ProjectOverviewProvider extends GenericProvider {
         changedDateTime.setFieldNotEditable();
         getProjectElement().addElement(changedDateTime);
 
+        LastUpdated lastUpdated = new LastUpdated();
+        lastUpdated.setValue(getLastUpdatedProject());
+        getProjectElement().addElement(lastUpdated);
+
         List<TrlRecord> trlRecords = getActiveTrlRecords(getWebSession().getCustomerId(), getWebSession().getProjectId());
+
+        DaysLeft daysLeft = new DaysLeft();
+        daysLeft.setValue(getDaysLeft(rs.getTimestamp(StartDate.FIELD_NAME), rs.getTimestamp(EndDate.FIELD_NAME)));
+        getProjectElement().addElement(daysLeft);
+
+        DateNextTrl dateNextTrl = new DateNextTrl();
+        dateNextTrl.setValue(getDateNextTrl(trlRecords));
+        getProjectElement().addElement(dateNextTrl);
 
         getNextTrlDeadLine(trlRecords);
 
@@ -169,6 +183,14 @@ public class ProjectOverviewProvider extends GenericProvider {
 
         int stakeholderRequirementCount = getActiveStakeholderRequirementCount();
         int systemRequirementCount = getActiveSystemRequirementCount();
+        CountStakeholderRequirement countStakeholderRequirement = new CountStakeholderRequirement();
+        countStakeholderRequirement.setValue(stakeholderRequirementCount);
+        getProjectElement().addElement(countStakeholderRequirement);
+
+        CountSystemRequirement countSystemRequirement = new CountSystemRequirement();
+        countSystemRequirement.setValue(systemRequirementCount);
+        getProjectElement().addElement(countSystemRequirement);
+
         CountRequirement countRequirement = new CountRequirement();
         countRequirement.setValue(stakeholderRequirementCount + systemRequirementCount);
         getProjectElement().addElement(countRequirement);
@@ -187,6 +209,12 @@ public class ProjectOverviewProvider extends GenericProvider {
         CountPhysicalStructure countPhysicalStructure = new CountPhysicalStructure();
         countPhysicalStructure.setValue(physicalStructureCount);
         getProjectElement().addElement(countPhysicalStructure);
+
+        addInterfaceCount("CountStakeholderRequirementInterfaces", EntityType.STAKEHOLDER_REQUIREMENT);
+        addInterfaceCount("CountSystemRequirementInterfaces", EntityType.SYSTEM_REQUIREMENT);
+        addInterfaceCount("CountFunctionalStructureInterfaces", EntityType.FUNCTIONAL_STRUCTURE);
+        addInterfaceCount("CountLogicalStructureInterfaces", EntityType.LOGICAL_STRUCTURE);
+        addInterfaceCount("CountPhysicalStructureInterfaces", EntityType.SYSTEMS_BREAKDOWN);
 
     }
 
@@ -262,6 +290,54 @@ public class ProjectOverviewProvider extends GenericProvider {
         return Timestamp.from(Instant.now());
     }
 
+    private String getDaysLeft(Timestamp startDate, Timestamp endDate) {
+        if (startDate == null || endDate == null || startDate.after(endDate)) {
+            return "Invalid";
+        }
+
+        LocalDate today = now().toLocalDateTime().toLocalDate();
+        LocalDate end = endDate.toLocalDateTime().toLocalDate();
+
+        if (end.isBefore(today)) {
+            return "End date exceeded";
+        }
+
+        return String.valueOf(ChronoUnit.DAYS.between(
+                startDate.toLocalDateTime().toLocalDate(),
+                end
+        ));
+    }
+
+    private String getDateNextTrl(List<TrlRecord> trlRecordList) {
+        Timestamp nextTrlDeadline = null;
+
+        if (trlRecordList != null) {
+            for (TrlRecord trlRecord : trlRecordList) {
+                Timestamp deadline = trlRecord.getNextTrlDeadline();
+
+                if (deadline == null || !deadline.after(now())) {
+                    continue;
+                }
+
+                if (nextTrlDeadline == null || deadline.before(nextTrlDeadline)) {
+                    nextTrlDeadline = deadline;
+                }
+            }
+        }
+
+        return nextTrlDeadline != null ? nextTrlDeadline.toString() : "";
+    }
+
+    private String getLastUpdatedProject() {
+        ProjectEntityProvider projectEntityProvider = new ProjectEntityProvider(getWebSession());
+        LocalDate lastUpdatedProject = projectEntityProvider.getLastUpdatedProject(
+                getWebSession().getCustomerId(),
+                getWebSession().getProjectId()
+        );
+
+        return lastUpdatedProject != null ? lastUpdatedProject.toString() : "";
+    }
+
     private void getTrlRecords() {
         List<TrlRecord> trlRecords = getActiveTrlRecords(
                 getWebSession().getCustomerId(),
@@ -298,6 +374,34 @@ public class ProjectOverviewProvider extends GenericProvider {
         );
     }
 
+    private void addInterfaceCount(String fieldName, EntityType entityType) {
+        CountInterfaces countInterfaces = new CountInterfaces(fieldName);
+        countInterfaces.setValue(getInterfaceCount(entityType));
+        getProjectElement().addElement(countInterfaces);
+    }
+
+    private int getInterfaceCount(EntityType entityType) {
+        try {
+            InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(getWebSession(), entityType);
+
+            return interfaceMatrixProvider.getLatestInterfaceRecordCount(
+                    getWebSession().getCustomerId(),
+                    getWebSession().getProjectId(),
+                    entityType
+            );
+        } catch (SQLException exception) {
+            log.error(
+                    "Error loading interface count. customerId={}, projectId={}, entityType={}",
+                    getWebSession().getCustomerId(),
+                    getWebSession().getProjectId(),
+                    entityType,
+                    exception
+            );
+
+            return 0;
+        }
+    }
+
     private static class NextTrlReview extends AbstractString {
 
         @Override
@@ -316,6 +420,60 @@ public class ProjectOverviewProvider extends GenericProvider {
         }
     }
 
+    private static class DaysLeft extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "DaysLeft";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Days Left on Project";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Days Left on Project";
+        }
+    }
+
+    private static class DateNextTrl extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "DateNextTrl";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Date Next TRL";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Date Next TRL";
+        }
+    }
+
+    private static class LastUpdated extends AbstractString {
+
+        @Override
+        public String getFieldName() {
+            return "LastUpdated";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Updated";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Updated";
+        }
+    }
+
     private static class CountRequirement extends AbstractInteger {
 
         @Override
@@ -331,6 +489,66 @@ public class ProjectOverviewProvider extends GenericProvider {
         @Override
         public String getFieldHeaderName() {
             return "CountRequirement";
+        }
+    }
+
+    private static class CountStakeholderRequirement extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountStakeholderRequirement";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Count Stakeholder Requirements";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Count Stakeholder Requirements";
+        }
+    }
+
+    private static class CountSystemRequirement extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountSystemRequirement";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Count Systems Requirements";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Count Systems Requirements";
+        }
+    }
+
+    private static class CountInterfaces extends AbstractInteger {
+
+        private final String fieldName;
+
+        private CountInterfaces(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        @Override
+        public String getFieldName() {
+            return fieldName;
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "# of interfaces";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "# of interfaces";
         }
     }
 

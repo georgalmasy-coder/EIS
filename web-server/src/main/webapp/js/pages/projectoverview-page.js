@@ -70,37 +70,40 @@ async function loadProjectOverview() {
         if (project) {
             state.projectId = getXmlValue(project, "ProjectId");
 
-            // Sidebar Status
+            updateElementText("statusProjectName", getXmlValue(project, "ProjectName"));
+            updateElementText("projectStatusValue", getXmlOptionText(project, "ProjectStatus"));
+            updateElementText("projectPriority", getXmlOptionText(project, "PriorityId"));
+            updateElementText("projectCategory", getXmlOptionText(project, "CategoryId"));
+            updateElementText("daysLeft", getXmlValue(project, "DaysLeft"));
+            updateElementText("dateNextTrl", formatDateTime(getXmlValue(project, "DateNextTrl")));
+
+            // Project Status
             updateElementText("projectOwner", getXmlOptionText(project, "OwnerId"));
-            updateElementText("activeBaseline", "Version " + getXmlValue(project, "Version"));
-            updateElementText("nextReview", "TRL review · " + getXmlValue(project, "NextTrlReview"));
-            updateElementText("lastUpdated", formatDateTime(getXmlValue(project, "ChangedDateTime")));
-            
-            const statusBadge = document.getElementById("projectStatusBadge");
-            if (statusBadge) {
-                const status = getXmlOptionText(project, "ProjectStatus");
-                statusBadge.textContent = status || "Unknown";
-                statusBadge.className = "status-badge-pill badge-" + (status || "unknown").toLowerCase().replace(/\s+/g, '-');
-            }
+            updateElementText("lastUpdated", formatDate(getXmlValue(project, "LastUpdated")));
 
             // Assets Counts
+            const stakeholderReqCount = getXmlValue(project, "CountStakeholderRequirement");
+            const systemReqCount = getXmlValue(project, "CountSystemRequirement");
             const reqCount = getXmlValue(project, "CountRequirement");
             const funcCount = getXmlValue(project, "CountFunctionalStructure");
             const logCount = getXmlValue(project, "CountLogicalStructure");
             const physCount = getXmlValue(project, "CountPhysicalStructure");
+            const stakeholderReqInterfaceCount = getXmlValue(project, "CountStakeholderRequirementInterfaces");
+            const systemReqInterfaceCount = getXmlValue(project, "CountSystemRequirementInterfaces");
+            const functionalStructureInterfaceCount = getXmlValue(project, "CountFunctionalStructureInterfaces");
+            const logicalStructureInterfaceCount = getXmlValue(project, "CountLogicalStructureInterfaces");
+            const physicalStructureInterfaceCount = getXmlValue(project, "CountPhysicalStructureInterfaces");
 
-            updateElementText("countR", reqCount);
+            updateElementText("countStakeholderRequirements", stakeholderReqCount || reqCount);
+            updateElementText("countSystemRequirements", systemReqCount);
             updateElementText("countF", funcCount);
             updateElementText("countL", logCount);
             updateElementText("countP", physCount);
-            
-            // Sub-cards in Recommended Step
-            updateElementText("physicalCountSub", physCount);
-            updateElementText("functionsCoverCount", funcCount);
-            updateElementText("requirementsCoverCount", reqCount);
-
-            // Recent Changes (Mocked for now as XML doesn't have a list, but using current project info)
-            updateElementText("baselineNameRecent", "Baseline v" + getXmlValue(project, "Version"));
+            updateElementText("countStakeholderRequirementInterfaces", stakeholderReqInterfaceCount);
+            updateElementText("countSystemRequirementInterfaces", systemReqInterfaceCount);
+            updateElementText("countFunctionalStructureInterfaces", functionalStructureInterfaceCount);
+            updateElementText("countLogicalStructureInterfaces", logicalStructureInterfaceCount);
+            updateElementText("countPhysicalStructureInterfaces", physicalStructureInterfaceCount);
         }
 
         // Baseline Info
@@ -136,18 +139,43 @@ function updateElementText(id, text) {
     }
 }
 
+function formatDate(value) {
+    const normalized = String(value || "").trim();
+
+    if (!normalized) return "—";
+
+    if (/^\d{8}$/.test(normalized)) {
+        const day = Number(normalized.substring(0, 2));
+        const month = Number(normalized.substring(2, 4)) - 1;
+        const year = Number(normalized.substring(4, 8));
+
+        return formatDateObject(new Date(year, month, day), normalized);
+    }
+
+    return formatDateTime(normalized);
+}
+
 function formatDateTime(dateTimeStr) {
     if (!dateTimeStr) return "—";
     try {
         const date = new Date(dateTimeStr);
-        const day = date.getDate();
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-        return `${day} ${month} ${year}`;
+        return formatDateObject(date, dateTimeStr);
     } catch (e) {
         return dateTimeStr;
     }
+}
+
+function formatDateObject(date, fallback) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+        return fallback;
+    }
+
+    const day = date.getDate();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
 }
 
 // Start initialization

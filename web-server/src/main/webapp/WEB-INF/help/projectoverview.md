@@ -11,9 +11,6 @@ This panel displays key information about the project:
 - **Budget**: Overview of allocated budget in both days and value.
 - **Project Details**: Click this button to edit basic project information.
 
-### Recommended Steps
-This section presents the most critical tasks that should be performed now to ensure project progress. This could be, for example, assigning owners to structures or completing specific models.
-
 ### Systems Engineering Assets
 This area provides direct access to the project's core elements in the R-F-L-P model:
 - **Requirements (R)**: Number of and access to requirement specifications.
@@ -24,4 +21,4 @@ This area provides direct access to the project's core elements in the R-F-L-P m
 Each card shows the current number of elements within the category, providing an indication of model maturity.
 
 ## Navigation
-You can always go directly to technical work by clicking **Continue engineering** at the top right, or dive into individual Systems Engineering areas via their respective cards.
+You can dive into individual Systems Engineering areas via their respective cards.

@@ -75,19 +75,10 @@
 
 /* Main Grid Layout */
 .overview-main-grid {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 24px;
-    align-items: start;
+    display: block;
 }
 
 .column-main {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.column-sidebar {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -232,7 +223,7 @@
 
 .assets-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
 }
 
@@ -285,11 +276,50 @@
 }
 
 /* Sidebar Cards */
-.status-sidebar-card h3, 
+.project-status-card h3,
 .changes-sidebar-card h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
+}
+
+.project-status-summary {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) repeat(6, minmax(120px, 1fr));
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 18px;
+}
+
+.project-status-title,
+.project-status-field {
+    min-width: 0;
+}
+
+.project-status-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.project-status-title,
+.project-status-field {
+    background-color: var(--app-page-background);
+    border: 2px solid var(--app-border-strong);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.project-status-name {
+    color: var(--app-text-primary);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.project-status-owner {
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    margin-top: 4px;
 }
 
 .status-badge-pill {
@@ -393,10 +423,14 @@
 }
 
 @media (max-width: 1024px) {
-    .overview-main-grid {
-        grid-template-columns: 1fr;
+    .project-status-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    
+
+    .project-status-title {
+        grid-column: 1 / -1;
+    }
+
     .assets-grid {
         grid-template-columns: 1fr 1fr;
     }

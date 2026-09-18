@@ -67,63 +67,32 @@
                 </div>
                 <div class="all-projects-actions">
                     <button class="btn-ghost" id="btnProjectDetails">Project details</button>
-                    <button class="btn-primary" id="btnContinueEngineering">Continue engineering &rarr;</button>
                 </div>
             </div>
 
             <div class="overview-main-grid">
                 <div class="column-main">
-                    <!-- Recommended Next Step -->
-                    <section class="card recommended-step-card">
-                        <div class="card-header-with-badge">
-                            <div class="header-content">
-                                <span class="card-label label-green">RECOMMENDED NEXT STEP</span>
-                                <h2>Review unlinked requirements</h2>
-                                <p>Resolve requirement gaps before the next baseline and TRL review.</p>
-                            </div>
-                            <div class="badge-container">
-                                <span class="badge badge-error" id="requirementGaps">12 gaps</span>
-                            </div>
-                        </div>
-
-                        <div class="card-actions">
-                            <button class="btn-primary-dark">Review requirements &rarr;</button>
-                        </div>
-
-                        <div class="sub-cards-row">
-                            <div class="sub-card">
-                                <div class="sub-card-icon icon-orange">P</div>
-                                <div class="sub-card-info">
-                                    <div class="sub-card-title">Assign structure owners</div>
-                                    <div class="sub-card-meta"><span id="physicalCountSub">12</span> physical structures</div>
-                                </div>
-                                <a href="#" class="sub-card-link">Open &rarr;</a>
-                            </div>
-                            <div class="sub-card">
-                                <div class="sub-card-icon icon-blue">F</div>
-                                <div class="sub-card-info">
-                                    <div class="sub-card-title">Complete functional model</div>
-                                    <div class="sub-card-meta"><span id="functionsCoverCount">3</span> functions cover <span id="requirementsCoverCount">196</span> requirements</div>
-                                </div>
-                                <a href="#" class="sub-card-link">Open &rarr;</a>
-                            </div>
-                        </div>
-                    </section>
-
                     <!-- Systems Engineering Assets -->
                     <section class="card systems-engineering-card">
                         <div class="card-header-row">
                             <h3>Systems Engineering</h3>
-                            <a href="#" class="link-action">Open model &rarr;</a>
                         </div>
                         <div class="assets-grid">
                             <div class="asset-box">
                                 <div class="asset-header">
                                     <span class="asset-letter color-green">R</span>
-                                    <span class="asset-label">Requirements</span>
-                                    <span class="asset-count" id="countR">196</span>
+                                    <span class="asset-label">Stakeholder Requirements</span>
+                                    <span class="asset-count" id="countStakeholderRequirements">0</span>
                                 </div>
-                                <div class="asset-status" id="statusR">12 gaps</div>
+                                <div class="asset-status"><span id="countStakeholderRequirementInterfaces">0</span> # of interfaces</div>
+                            </div>
+                            <div class="asset-box">
+                                <div class="asset-header">
+                                    <span class="asset-letter color-green">R</span>
+                                    <span class="asset-label">Systems Requirements</span>
+                                    <span class="asset-count" id="countSystemRequirements">0</span>
+                                </div>
+                                <div class="asset-status"><span id="countSystemRequirementInterfaces">0</span> # of interfaces</div>
                             </div>
                             <div class="asset-box">
                                 <div class="asset-header">
@@ -131,7 +100,7 @@
                                     <span class="asset-label">Functions</span>
                                     <span class="asset-count" id="countF">3</span>
                                 </div>
-                                <div class="asset-status" id="statusF">Needs work</div>
+                                <div class="asset-status"><span id="countFunctionalStructureInterfaces">0</span> # of interfaces</div>
                             </div>
                             <div class="asset-box">
                                 <div class="asset-header">
@@ -139,7 +108,7 @@
                                     <span class="asset-label">Logical</span>
                                     <span class="asset-count" id="countL">1</span>
                                 </div>
-                                <div class="asset-status" id="statusL">In progress</div>
+                                <div class="asset-status"><span id="countLogicalStructureInterfaces">0</span> # of interfaces</div>
                             </div>
                             <div class="asset-box">
                                 <div class="asset-header">
@@ -147,35 +116,42 @@
                                     <span class="asset-label">Physical</span>
                                     <span class="asset-count" id="countP">369</span>
                                 </div>
-                                <div class="asset-status" id="statusP">12 unassigned</div>
+                                <div class="asset-status"><span id="countPhysicalStructureInterfaces">0</span> # of interfaces</div>
                             </div>
                         </div>
                     </section>
-                </div>
 
-                <div class="column-sidebar">
                     <!-- Project Status -->
-                    <section class="card status-sidebar-card">
-                        <div class="card-header-row">
-                            <h3>Project status</h3>
-                            <span id="projectStatusBadge" class="status-badge-pill badge-planned">Planned</span>
-                        </div>
-                        <div class="status-list">
-                            <div class="status-item">
-                                <span class="status-label">Next review</span>
-                                <span class="status-value" id="nextReview">TRL review &middot; 58 days</span>
+                    <section class="card project-status-card">
+                        <h3>Project status</h3>
+                        <div class="project-status-summary">
+                            <div class="project-status-title">
+                                <div id="statusProjectName" class="project-status-name">Project name</div>
+                                <div class="project-status-owner">Owner &middot; <span id="projectOwner">Project owner</span></div>
                             </div>
-                            <div class="status-item">
-                                <span class="status-label">Active baseline</span>
-                                <span class="status-value" id="activeBaseline">Version 15</span>
+                            <div class="project-status-field">
+                                <span class="status-label">Status</span>
+                                <span class="status-value" id="projectStatusValue">Planned</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-label">Owner</span>
-                                <span class="status-value" id="projectOwner">Anders Knudsen</span>
+                            <div class="project-status-field">
+                                <span class="status-label">Priority</span>
+                                <span class="status-value" id="projectPriority">High</span>
                             </div>
-                            <div class="status-item">
-                                <span class="status-label">Last updated</span>
-                                <span class="status-value" id="lastUpdated">27 Jun 2026</span>
+                            <div class="project-status-field">
+                                <span class="status-label">Category</span>
+                                <span class="status-value" id="projectCategory">Markup</span>
+                            </div>
+                            <div class="project-status-field">
+                                <span class="status-label">Days Left on Project</span>
+                                <span class="status-value" id="daysLeft">0</span>
+                            </div>
+                            <div class="project-status-field">
+                                <span class="status-label">Date Next TRL</span>
+                                <span class="status-value" id="dateNextTrl">-</span>
+                            </div>
+                            <div class="project-status-field">
+                                <span class="status-label">Updated</span>
+                                <span class="status-value" id="lastUpdated">-</span>
                             </div>
                         </div>
                     </section>
@@ -184,16 +160,11 @@
                     <section class="card changes-sidebar-card">
                         <div class="card-header-row">
                             <h3>Recent changes</h3>
-                            <a href="#" class="link-action">View all</a>
                         </div>
                         <div class="changes-list">
                             <div class="change-item">
-                                <div class="change-title">Centralized Dashboard</div>
-                                <div class="change-meta">Requirement updated &middot; 15 Jul</div>
-                            </div>
-                            <div class="change-item">
-                                <div class="change-title" id="baselineNameRecent">Baseline v15</div>
-                                <div class="change-meta">Activated &middot; 27 Jun</div>
+                                <div class="change-title">Recent changes</div>
+                                <div class="change-meta">Content is not defined yet.</div>
                             </div>
                         </div>
                     </section>
