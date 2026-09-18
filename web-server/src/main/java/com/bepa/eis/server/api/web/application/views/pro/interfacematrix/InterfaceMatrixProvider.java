@@ -47,6 +47,15 @@ public class InterfaceMatrixProvider extends GenericProvider {
             ORDER BY [FromEntityId], [ToEntityId], [Version]
             """;
 
+    private static final String SELECT_LATEST_INTERFACE_COUNT_SQL = """
+            SELECT COUNT(*) AS InterfaceCount
+            FROM [dbo].[INTERFACES]
+            WHERE [CustomerId] = ?
+              AND [ProjectId] = ?
+              AND [EntityType] = ?
+              AND [Latest] = 1
+            """;
+
     private static final String SELECT_LATEST_INTERFACE_SQL = """
             SELECT TOP 1
                 [InterfacePK],
@@ -190,6 +199,11 @@ public class InterfaceMatrixProvider extends GenericProvider {
         return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
     }
 
+    public int getLatestInterfaceRecordCount(EntityType entityType) throws SQLException {
+        validateSession();
+        return getLatestInterfaceRecordCount(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
+    }
+
     public List<InterfaceRecord> getAllInterfaceRecords(EntityType entityType) throws SQLException {
         validateSession();
         return getLatestInterfaceRecords(getWebSession().getCustomerId(), getWebSession().getProjectId(), entityType);
@@ -310,6 +324,27 @@ public class InterfaceMatrixProvider extends GenericProvider {
         }
 
         return records;
+    }
+
+    public int getLatestInterfaceRecordCount(Integer customerId, Integer projectId, EntityType entityType) throws SQLException {
+        if (customerId == null || projectId == null || entityType == null) {
+            throw new IllegalArgumentException("CustomerId, ProjectId and EntityType are required.");
+        }
+
+        try (Connection connection = getDataSource().getConnection();
+            PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACE_COUNT_SQL)) {
+            setInt(ps, customerId, 1);
+            setInt(ps, projectId, 2);
+            setInt(ps, entityType.getId(), 3);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("InterfaceCount");
+                }
+            }
+        }
+
+        return 0;
     }
 
     public InterfaceRecord getLatestInterfaceRecord(Integer fromEntityId, Integer toEntityId, EntityType entityType) throws SQLException {

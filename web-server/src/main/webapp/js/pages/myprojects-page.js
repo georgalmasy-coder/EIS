@@ -134,6 +134,12 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+function renderValue(value) {
+    const normalized = String(value ?? "").trim();
+
+    return normalized === "" ? "&nbsp;" : escapeHtml(normalized);
+}
+
 function readProjects(root) {
     const projectsElement = getDirectChild(root, "projects");
 
@@ -145,13 +151,18 @@ function readProjects(root) {
             projectName: directTextOf(projectElement, "projectname"),
             projectOwner: directTextOf(projectElement, "OwnerId"),
             projectCategory: directTextOf(projectElement, "projectcategory"),
+            projectPriority: directTextOf(projectElement, "projectpriority"),
             projectStatus: directTextOf(projectElement, "projectstatus"),
+            daysLeft: directTextOf(projectElement, "daysleft"),
+            dateNextTrl: directTextOf(projectElement, "dateNextTrl"),
+            physicalSystemCount: directTextOf(projectElement, "physicalsystemcount"),
+            interfaceCount: directTextOf(projectElement, "interfacecount"),
             countNotifications: toNumber(directTextOf(projectElement, "countnotifications"), 0),
             countStakeholderRequirement: directTextOf(projectElement, "countstakeholderrequirement"),
             countSystemRequirement: directTextOf(projectElement, "countsystemrequirement"),
             countSystemBreakdown: directTextOf(projectElement, "countsystembreakdown"),
-            projectStartDate: directTextOf(projectElement, "StartDate"),
-            projectEndDate: directTextOf(projectElement, "EndDate"),
+            projectStartDate: directTextOf(projectElement, "startdate") || directTextOf(projectElement, "StartDate"),
+            projectEndDate: directTextOf(projectElement, "enddate") || directTextOf(projectElement, "EndDate"),
             nextTrlDeadline: directTextOf(projectElement, "nexttrldeadline"),
             trls: readTrls(trlsElement)
         };
@@ -227,6 +238,10 @@ function formatDate(value) {
         month: "2-digit",
         year: "numeric"
     }).format(date);
+}
+
+function formatOptionalDate(value) {
+    return String(value ?? "").trim() === "" ? "" : formatDate(value);
 }
 
 function daysBetween(start, end) {
@@ -341,19 +356,39 @@ function createProjectCard(project) {
         <div class="project-card-header">
             <div class="project-meta-block">
                 <div class="project-meta-label">Project Name</div>
-                <div class="project-meta-value">${escapeHtml(project.projectName)}</div>
+                <div class="project-meta-value">${renderValue(project.projectName)}</div>
             </div>
             <div class="project-meta-block">
                 <div class="project-meta-label">Project Owner</div>
-                <div class="project-meta-value">${escapeHtml(project.projectOwner)}</div>
+                <div class="project-meta-value">${renderValue(project.projectOwner)}</div>
             </div>
             <div class="project-meta-block">
                 <div class="project-meta-label">Category</div>
-                <div class="project-meta-value">${escapeHtml(project.projectCategory)}</div>
+                <div class="project-meta-value">${renderValue(project.projectCategory)}</div>
+            </div>
+            <div class="project-meta-block">
+                <div class="project-meta-label">Priority</div>
+                <div class="project-meta-value">${renderValue(project.projectPriority)}</div>
             </div>
             <div class="project-meta-block">
                 <div class="project-meta-label">Status</div>
-                <div class="project-meta-value">${escapeHtml(project.projectStatus)}</div>
+                <div class="project-meta-value">${renderValue(project.projectStatus)}</div>
+            </div>
+            <div class="project-meta-block">
+                <div class="project-meta-label">Days Left on Project</div>
+                <div class="project-meta-value">${renderValue(project.daysLeft)}</div>
+            </div>
+            <div class="project-meta-block">
+                <div class="project-meta-label">Date Next TRL</div>
+                <div class="project-meta-value">${renderValue(formatOptionalDate(project.dateNextTrl))}</div>
+            </div>
+            <div class="project-meta-block">
+                <div class="project-meta-label"># of Physical Systems</div>
+                <div class="project-meta-value">${renderValue(project.physicalSystemCount)}</div>
+            </div>
+            <div class="project-meta-block">
+                <div class="project-meta-label"># of Physical Interfaces</div>
+                <div class="project-meta-value">${renderValue(project.interfaceCount)}</div>
             </div>
         </div>
 

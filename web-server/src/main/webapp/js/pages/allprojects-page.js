@@ -88,9 +88,14 @@ async function loadProjects() {
                 pk: getXmlValue(node, "projectpk"),
                 name: getXmlValue(node, "projectname"),
                 owner: getXmlValue(node, "OwnerId"),
+                category: getXmlValue(node, "projectcategory"),
+                priority: getXmlValue(node, "projectpriority"),
                 status: getXmlValue(node, "projectstatus"),
                 statusCode: getXmlValue(node, "projectstatuscode"),
-                nextStep: getXmlValue(node, "nextStep"),
+                daysLeft: getXmlValue(node, "daysleft"),
+                dateNextTrl: formatDisplayDate(getXmlValue(node, "dateNextTrl")),
+                physicalSystemCount: getXmlValue(node, "physicalsystemcount"),
+                interfaceCount: getXmlValue(node, "interfacecount"),
                 lastUpdated: formatDisplayDate(getXmlValue(node, "lastUpdated")),
                 rawLastUpdated: getXmlValue(node, "lastUpdated"),
                 changedDateTime: getXmlValue(node, "changeddatetime")
@@ -112,6 +117,15 @@ function getXmlValue(parent, tagName) {
     return element ? element.textContent : "";
 }
 
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 function formatDisplayDate(dateStr) {
     if (!dateStr || dateStr.length !== 8) return dateStr;
     // Assuming DDMMYYYY format from XML_DATE_FORMAT = "ddMMyyyy"
@@ -125,12 +139,18 @@ function formatDisplayDate(dateStr) {
     return `${day} ${monthName} ${year}`;
 }
 
+function renderValue(value) {
+    const normalized = String(value ?? "").trim();
+
+    return normalized === "" ? "&nbsp;" : escapeHtml(normalized);
+}
+
 function updateCounts() {
     const activeCount = allProjects.filter(p => p.statusCode !== "ARCHIVED").length;
-    const attentionCount = allProjects.filter(p => p.statusCode === "NEEDS_ATTENTION").length;
+    const archivedCount = allProjects.filter(p => p.statusCode === "ARCHIVED").length;
     
     document.getElementById("countActive").textContent = activeCount;
-    document.getElementById("countNeedsAttention").textContent = attentionCount;
+    document.getElementById("countArchived").textContent = archivedCount;
     document.getElementById("projectCountText").textContent = `${activeCount} active projects`;
 }
 
@@ -144,8 +164,6 @@ function renderProjects() {
         let matchesFilter = true;
         if (currentFilter === "active") {
             matchesFilter = p.statusCode !== "ARCHIVED";
-        } else if (currentFilter === "needs-attention") {
-            matchesFilter = p.statusCode === "NEEDS_ATTENTION";
         } else if (currentFilter === "archived") {
             matchesFilter = p.statusCode === "ARCHIVED";
         }
@@ -163,24 +181,43 @@ function renderProjects() {
         const card = document.createElement("div");
         card.className = "project-card";
         
-        const statusClass = getStatusClass(project.statusCode);
-        
         card.innerHTML = `
             <div class="project-info">
-                <h3 class="project-name">${project.name}</h3>
-                <p class="project-owner">Owner · ${project.owner}</p>
-            </div>
-            <div class="project-status-badge ${statusClass}">
-                ${project.status}
+                <h3 class="project-name">${renderValue(project.name)}</h3>
+                <p class="project-owner">Owner · ${renderValue(project.owner)}</p>
             </div>
             <div class="project-details-group">
-                <div class="project-next-step">
-                    <span class="next-step-label">Next step</span>
-                    <span class="next-step-text">${project.nextStep}</span>
+                <div class="project-detail">
+                    <span class="project-detail-label">Status</span>
+                    <span class="project-detail-text">${renderValue(project.status)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label">Priority</span>
+                    <span class="project-detail-text">${renderValue(project.priority)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label">Category</span>
+                    <span class="project-detail-text">${renderValue(project.category)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label">Days Left on Project</span>
+                    <span class="project-detail-text">${renderValue(project.daysLeft)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label">Date Next TRL</span>
+                    <span class="project-detail-text">${renderValue(project.dateNextTrl)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label"># of Physical Systems</span>
+                    <span class="project-detail-text">${renderValue(project.physicalSystemCount)}</span>
+                </div>
+                <div class="project-detail">
+                    <span class="project-detail-label"># of Physical Interfaces</span>
+                    <span class="project-detail-text">${renderValue(project.interfaceCount)}</span>
                 </div>
                 <div class="project-updated">
-                    <span class="updated-label">Updated</span>
-                    <span class="updated-text">${project.lastUpdated}</span>
+                    <span class="project-detail-label">Updated</span>
+                    <span class="updated-text">${renderValue(project.lastUpdated)}</span>
                 </div>
             </div>
             <div class="project-actions">
@@ -196,16 +233,6 @@ function renderProjects() {
         
         projectsList.appendChild(card);
     });
-}
-
-function getStatusClass(code) {
-    if (!code) return "status-created";
-    switch(code.toUpperCase()) {
-        case "PLANNED": return "status-planned";
-        case "NEEDS_ATTENTION": return "status-needs-attention";
-        case "CREATED": return "status-created";
-        default: return "status-created";
-    }
 }
 
 document.addEventListener("DOMContentLoaded", init);

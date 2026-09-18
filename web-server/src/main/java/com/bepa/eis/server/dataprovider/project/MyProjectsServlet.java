@@ -13,8 +13,10 @@ import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
+import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.api.web.application.views.projectstatus.overview.NotificationProvider;
 import com.bepa.eis.server.dataprovider.entities.*;
+import com.bepa.eis.common.enums.entity.EntityType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -334,13 +336,15 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(projectElement, "projectcategory", value(getProjectCategory(project.getCategoryId())));
 
         xmlDocument.appendTextElement(projectElement, "projectpriorityid", value(project.getPriorityId()));
+        xmlDocument.appendTextElement(projectElement, "projectpriority", value(getProjectPriority(project.getPriorityId())));
 
         xmlDocument.appendTextElement(projectElement, "projectstatusid", value(project.getProjectStatusId()));
         xmlDocument.appendTextElement(projectElement, "projectstatuscode", value(project.getProjectStatusCode()));
         xmlDocument.appendTextElement(projectElement, "projectstatus", value(project.getProjectStatusLabel()));
 
-        xmlDocument.appendTextElement(projectElement, "StartDate", formatDate(project.getStartDate()));
-        xmlDocument.appendTextElement(projectElement, "EndDate", formatDate(project.getEndDate()));
+        xmlDocument.appendTextElement(projectElement, "startdate", formatDate(project.getStartDate()));
+        xmlDocument.appendTextElement(projectElement, "enddate", formatDate(project.getEndDate()));
+        xmlDocument.appendTextElement(projectElement, "daysleft", getDaysLeft(project));
 
         xmlDocument.appendTextElement(projectElement, "budgetindays", value(project.getBudgetInDays()));
         xmlDocument.appendTextElement(projectElement, "budgetinvalue", value(project.getBudgetInValue()));
@@ -350,7 +354,11 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         xmlDocument.appendTextElement(projectElement, "changedbyuserid", value(project.getChangedByUserId()));
         xmlDocument.appendTextElement(projectElement, "changeddatetime", formatDateTime(project.getChangedDateTime()));
 
-        xmlDocument.appendTextElement(projectElement, "nextStep", "Has to be reviewed");
+        xmlDocument.appendTextElement(projectElement, "dateNextTrl", formatDate(getDateNextTrl(trlRecordList)));
+        xmlDocument.appendTextElement(projectElement, "physicalsystemcount", getActiveSystemsBreakDownCount(project));
+        xmlDocument.appendTextElement(projectElement, "interfacecount", getInterfaceCount(project));
+
+//GFA        xmlDocument.appendTextElement(projectElement, "nextStep", "Has to be reviewed");
         xmlDocument.appendTextElement(projectElement, "lastUpdated", formatDate(getLastUpdatedProject(project)));
 
         appendProjectDashboardPlaceholders(
@@ -381,6 +389,15 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         LookupValue lookupValue = CustomerLookupCache.getProjectCategoryLookupValue(
                 getWebSession(),
                 categoryId
+        );
+
+        return lookupValue != null ? lookupValue.getLookupCode() : null;
+    }
+
+    private String getProjectPriority(Integer priorityId) {
+        LookupValue lookupValue = CustomerLookupCache.getProjectPriorityLookupValue(
+                getWebSession(),
+                priorityId
         );
 
         return lookupValue != null ? lookupValue.getLookupCode() : null;
@@ -474,6 +491,63 @@ public class MyProjectsServlet extends GenericDataProviderServlet {
         }
 
         return daysUntil(nextTrlDeadline) + " days";
+    }
+
+    private LocalDate getDateNextTrl(List<TrlRecord> trlRecordList) {
+        Timestamp nextTrlDeadline = null;
+
+        for (TrlRecord trlRecord : trlRecordList) {
+            Timestamp deadline = trlRecord.getNextTrlDeadline();
+
+            if (deadline == null || !deadline.after(now())) {
+                continue;
+            }
+
+            if (nextTrlDeadline == null || deadline.before(nextTrlDeadline)) {
+                nextTrlDeadline = deadline;
+            }
+        }
+
+        return nextTrlDeadline == null ? null : nextTrlDeadline.toLocalDateTime().toLocalDate();
+    }
+
+    private String getDaysLeft(ProjectRecord project) {
+        LocalDate startDate = project.getStartDate();
+        LocalDate endDate = project.getEndDate();
+
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return "Invalid";
+        }
+
+        if (endDate.isBefore(now().toLocalDateTime().toLocalDate())) {
+            return "End date exceeded";
+        }
+
+        return String.valueOf(ChronoUnit.DAYS.between(startDate, endDate));
+    }
+
+    private Integer getInterfaceCount(ProjectRecord project) {
+        try {
+            InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(
+                    getWebSession(),
+                    EntityType.SYSTEMS_BREAKDOWN
+            );
+
+            return interfaceMatrixProvider.getLatestInterfaceRecordCount(
+                    project.getCustomerId(),
+                    project.getProjectId(),
+                    EntityType.SYSTEMS_BREAKDOWN
+            );
+        } catch (SQLException exception) {
+            log.error(
+                    "Error loading interface count. customerId={}, projectId={}",
+                    project.getCustomerId(),
+                    project.getProjectId(),
+                    exception
+            );
+
+            return 0;
+        }
     }
 
     private Long daysUntil(Timestamp nextTrlDeadline) {

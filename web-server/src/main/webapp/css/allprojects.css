@@ -133,7 +133,7 @@
     border-radius: 12px;
     padding: 20px;
     display: grid;
-    grid-template-columns: 2fr 120px 3fr auto;
+    grid-template-columns: 2fr minmax(620px, 5fr) auto;
     align-items: center;
     gap: 20px;
     transition: all 0.2s ease;
@@ -177,58 +177,37 @@
     margin: 0;
 }
 
-.project-status-badge {
-    justify-self: center;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-planned { background-color: #eff6ff; color: #2563eb; }
-.status-needs-attention { background-color: #fff1f2; color: #e11d48; }
-.status-created { background-color: var(--app-surface-strong-background); color: var(--app-text-secondary); }
-
 .project-details-group {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(90px, 1fr));
     align-items: center;
-    gap: 40px;
+    gap: 14px;
 }
 
-.project-next-step {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 180px;
-}
-
-.next-step-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--app-text-tertiary);
-    letter-spacing: 0.05em;
-}
-
-.next-step-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--app-text-primary);
-    line-height: 1.4;
-}
-
+.project-detail,
 .project-updated {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
 }
 
-.updated-label {
+.project-detail-label {
     font-size: 10px;
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: none;
     color: var(--app-text-tertiary);
     letter-spacing: 0.05em;
+}
+
+.project-detail-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .updated-text {
