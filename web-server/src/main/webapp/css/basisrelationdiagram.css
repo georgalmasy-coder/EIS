@@ -153,6 +153,10 @@ body.relationdiagram-document {
     white-space: nowrap;
 }
 
+.relationdiagram-legend-item-normal {
+    display: none;
+}
+
 .relationdiagram-legend-swatch {
     display: inline-block;
     width: 1rem;
@@ -527,24 +531,27 @@ body.relationdiagram-document {
 .relationdiagram-line {
     stroke: var(--relationdiagram-line-normal);
     stroke-width: 1.8;
-    opacity: 0.9;
+    opacity: 0;
     fill: none;
     transition:
             stroke 120ms ease,
             stroke-width 120ms ease,
             opacity 120ms ease;
+    visibility: hidden;
 }
 
 .relationdiagram-line.is-muted {
     stroke: var(--relationdiagram-line-muted);
     stroke-width: 1;
-    opacity: 0.18;
+    opacity: 0;
+    visibility: hidden;
 }
 
 .relationdiagram-line.is-active {
     stroke: var(--relationdiagram-line-active);
     stroke-width: 3;
     opacity: 1;
+    visibility: visible;
 }
 
 .relationdiagram-empty {

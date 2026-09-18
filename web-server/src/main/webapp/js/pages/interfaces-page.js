@@ -9,6 +9,7 @@ import {
     setText,
     showDialog
 } from "../core/dom.js";
+import { formatNumber } from "../core/format.js";
 import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
 import {
     getAttribute,
@@ -226,14 +227,16 @@ function applyTopPanel(xmlDocument) {
 
 function renderInterfaceMatrix(matrix) {
     const view = buildVisibleMatrix(matrix, state.showOverdueOnly, state.selectedIrlIds);
+    const structureCount = matrix.structures.length;
 
     setText(
         "interfacesStructureCount",
         (state.showOverdueOnly || state.selectedIrlIds.length > 0)
             ? `${view.rowStructures.length} rows, ${view.columnStructures.length} cols`
-            : String(matrix.structures.length),
+            : String(structureCount),
         ""
     );
+    setText("interfacesPotentialCount", formatNumber((structureCount * structureCount) - structureCount, "da-DK", ""), "");
     setText("interfacesColumnGroupLabel", matrix.columnGroupLabel || "To Physical Architecture", "");
 
     const filterToggle = document.getElementById("interfacesOverdueOnlyToggle");

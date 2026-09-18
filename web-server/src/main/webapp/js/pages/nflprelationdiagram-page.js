@@ -460,7 +460,6 @@ function renderRelationDiagram() {
     setText("functionalStructureCount", String(state.functionalStructures.length));
     setText("logicalStructureCount", String(state.logicalStructures.length));
     setText("physicalStructureCount", String(state.physicalStructures.length));
-    setText("relationCount", String(state.relations.length));
 
     const lists = [
         ["stakeholderRequirementsList", state.stakeholderRequirements],

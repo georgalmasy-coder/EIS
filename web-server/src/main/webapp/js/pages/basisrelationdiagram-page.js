@@ -403,7 +403,6 @@ function renderRelationDiagram() {
     setText("stakeholderRequirementCount", String(state.stakeholderRequirements.length), "");
     setText("systemRequirementCount", String(state.systemRequirements.length), "");
     setText("systemsBreakdownCount", String(state.systemsBreakdowns.length), "");
-    setText("relationCount", String(state.relations.length), "");
 
     const stakeholderList = document.getElementById("stakeholderRequirementsList");
     const systemList = document.getElementById("systemRequirementsList");
@@ -1326,4 +1325,3 @@ function debounce(callback, delay) {
         }, delay);
     };
 }
-
