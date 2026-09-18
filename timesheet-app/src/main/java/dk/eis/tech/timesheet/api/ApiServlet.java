@@ -1,6 +1,7 @@
 package dk.eis.tech.timesheet.api;
 
 import dk.eis.tech.timesheet.data.ActivityRepository;
+import dk.eis.tech.timesheet.data.AccountingRepository;
 import dk.eis.tech.timesheet.config.CompanyFooterConfig;
 import dk.eis.tech.timesheet.data.CustomerRepository;
 import dk.eis.tech.timesheet.data.MaterialRepository;
@@ -32,6 +33,7 @@ public class ApiServlet extends HttpServlet {
     private final ActivityRepository activityRepository = new ActivityRepository();
     private final TimeEntryRepository timeEntryRepository = new TimeEntryRepository();
     private final MaterialRepository materialRepository = new MaterialRepository();
+    private final AccountingRepository accountingRepository = new AccountingRepository();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -96,6 +98,33 @@ public class ApiServlet extends HttpServlet {
             int year = requiredInt(request, "year");
             int month = requiredInt(request, "month");
             writeJson(response, buildInvoiceResponse(customerId, year, month));
+            return;
+        }
+        if (path.equals("/invoice/posting-preview")) {
+            long customerId = requiredLong(request, "customerId");
+            int year = requiredInt(request, "year");
+            int month = requiredInt(request, "month");
+            InvoiceResponse invoice = buildInvoiceResponse(customerId, year, month);
+            writeJson(response, accountingRepository.invoicePreview(invoiceNumber(customerId, year, month),
+                    invoiceDate(year, month), invoice.subtotal(), invoice.vatAmount(), invoice.total()));
+            return;
+        }
+        if (path.equals("/accounts")) {
+            boolean activeOnly = Boolean.parseBoolean(Optional.ofNullable(request.getParameter("activeOnly")).orElse("false"));
+            writeJson(response, Map.of("accounts", accountingRepository.findAccounts(activeOnly)));
+            return;
+        }
+        if (path.equals("/accounting/entries")) {
+            int year = requiredInt(request, "year");
+            Integer month = optionalInt(request, "month");
+            writeJson(response, Map.of("entries", accountingRepository.findEntries(year, month)));
+            return;
+        }
+        if (path.equals("/accounting/statement")) {
+            int year = requiredInt(request, "year");
+            Integer fromMonth = optionalInt(request, "fromMonth");
+            Integer toMonth = optionalInt(request, "toMonth");
+            writeJson(response, buildAccountingStatement(year, fromMonth, toMonth));
             return;
         }
         if (path.matches("/customers/\\d+")) {
@@ -175,6 +204,34 @@ public class ApiServlet extends HttpServlet {
             writeJson(response, Map.of("id", id));
             return;
         }
+        if (path.equals("/invoice/approve")) {
+            Map<?, ?> body = readJson(request, Map.class);
+            long customerId = ((Number) body.get("customerId")).longValue();
+            int year = ((Number) body.get("year")).intValue();
+            int month = ((Number) body.get("month")).intValue();
+            InvoiceResponse invoice = buildInvoiceResponse(customerId, year, month);
+            InvoiceApprovalRecord approval = accountingRepository.approveInvoice(customerId, year, month,
+                    invoiceNumber(customerId, year, month), invoiceDate(year, month),
+                    invoice.subtotal(), invoice.vatAmount(), invoice.total());
+            writeJson(response, approval);
+            return;
+        }
+        if (path.equals("/accounts")) {
+            AccountUpsertRequest body = readJson(request, AccountUpsertRequest.class);
+            writeJson(response, Map.of("id", accountingRepository.insertAccount(body)));
+            return;
+        }
+        if (path.equals("/accounting/entries")) {
+            AccountingEntryRequest body = readJson(request, AccountingEntryRequest.class);
+            writeJson(response, Map.of("id", accountingRepository.insertEntry(body)));
+            return;
+        }
+        if (path.matches("/accounting/entries/\\d+/corrections")) {
+            long entryId = idFromPath(path, "/accounting/entries/");
+            AccountingEntryRequest body = readJson(request, AccountingEntryRequest.class);
+            writeJson(response, Map.of("id", accountingRepository.correctEntry(entryId, body)));
+            return;
+        }
         sendNotFound(response);
     }
 
@@ -218,6 +275,13 @@ public class ApiServlet extends HttpServlet {
                     .orElseThrow(() -> new IllegalArgumentException("Material not found"));
             MaterialEntryUpsertRequest body = readJson(request, MaterialEntryUpsertRequest.class);
             materialRepository.update(id, normalizeMaterial(body, existing.customerId(), existing));
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        if (path.matches("/accounts/\\d+")) {
+            long id = idFromPath(path, "/accounts/");
+            AccountUpsertRequest body = readJson(request, AccountUpsertRequest.class);
+            accountingRepository.updateAccount(id, body);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
@@ -351,9 +415,62 @@ public class ApiServlet extends HttpServlet {
                 subtotal,
                 vatAmount,
                 total,
+                accountingRepository.findInvoiceApproval(customerId, year, month).orElse(null),
                 timeRows,
                 materialRows
         );
+    }
+
+    private Map<String, Object> buildAccountingStatement(int year, Integer fromMonth, Integer toMonth) throws Exception {
+        if (fromMonth != null && (fromMonth < 1 || fromMonth > 12)) {
+            throw new IllegalArgumentException("fromMonth must be between 1 and 12");
+        }
+        if (toMonth != null && (toMonth < 1 || toMonth > 12)) {
+            throw new IllegalArgumentException("toMonth must be between 1 and 12");
+        }
+        List<AccountRecord> accounts = accountingRepository.findAccounts(false);
+        List<AccountingEntryRecord> entries = accountingRepository.findEntries(year, fromMonth, toMonth);
+        Map<Long, BigDecimal> debitByAccount = new HashMap<>();
+        Map<Long, BigDecimal> creditByAccount = new HashMap<>();
+        for (AccountingEntryRecord entry : entries) {
+            for (AccountingLineRecord line : entry.lines()) {
+                debitByAccount.merge(line.accountId(), line.debitAmount(), BigDecimal::add);
+                creditByAccount.merge(line.accountId(), line.creditAmount(), BigDecimal::add);
+            }
+        }
+        List<Map<String, Object>> rows = accounts.stream().map(account -> {
+            BigDecimal debit = debitByAccount.getOrDefault(account.id(), BigDecimal.ZERO);
+            BigDecimal credit = creditByAccount.getOrDefault(account.id(), BigDecimal.ZERO);
+            BigDecimal balance = switch (account.accountType()) {
+                case "ASSET", "EXPENSE" -> debit.subtract(credit);
+                default -> credit.subtract(debit);
+            };
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("accountId", account.id());
+            row.put("accountNumber", account.accountNumber());
+            row.put("accountName", account.accountName());
+            row.put("accountType", account.accountType());
+            row.put("debit", moneyScale(debit));
+            row.put("credit", moneyScale(credit));
+            row.put("balance", moneyScale(balance));
+            return row;
+        }).filter(row -> ((BigDecimal) row.get("debit")).compareTo(BigDecimal.ZERO) != 0
+                || ((BigDecimal) row.get("credit")).compareTo(BigDecimal.ZERO) != 0
+                || ((BigDecimal) row.get("balance")).compareTo(BigDecimal.ZERO) != 0).toList();
+        Map<String, Object> statement = new LinkedHashMap<>();
+        statement.put("year", year);
+        statement.put("fromMonth", fromMonth);
+        statement.put("toMonth", toMonth);
+        statement.put("rows", rows);
+        return statement;
+    }
+
+    private String invoiceNumber(long customerId, int year, int month) {
+        return customerId + String.format("%04d%02d", year, month);
+    }
+
+    private LocalDate invoiceDate(int year, int month) {
+        return YearMonth.of(year, month).plusMonths(1).atDay(1);
     }
 
     private CustomerRecord normalizeCustomer(CustomerUpsertRequest body, CustomerRecord existing) {
@@ -511,6 +628,14 @@ public class ApiServlet extends HttpServlet {
         String value = request.getParameter(parameter);
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Parameter is required: " + parameter);
+        }
+        return Integer.parseInt(value);
+    }
+
+    private Integer optionalInt(HttpServletRequest request, String parameter) {
+        String value = request.getParameter(parameter);
+        if (value == null || value.isBlank()) {
+            return null;
         }
         return Integer.parseInt(value);
     }

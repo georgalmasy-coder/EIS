@@ -12,6 +12,7 @@ public record InvoiceResponse(
         BigDecimal subtotal,
         BigDecimal vatAmount,
         BigDecimal total,
+        InvoiceApprovalRecord approval,
         List<InvoiceTimeRow> timeRows,
         List<InvoiceMaterialRow> materialRows
 ) {

@@ -10,6 +10,9 @@ const state = {
     calendar: null,
     openDayDialogDate: null,
     invoice: null,
+    accounts: [],
+    statementPeriod: { mode: 'quarter', year: new Date().getFullYear(), index: Math.floor(new Date().getMonth() / 3) },
+    balancePeriod: { mode: 'quarter', year: new Date().getFullYear(), index: Math.floor(new Date().getMonth() / 3) },
     companyFooter: null
 };
 
@@ -19,6 +22,13 @@ const api = {
     selection: 'api/selection',
     calendar: 'api/calendar',
     invoice: 'api/invoice',
+    accounts: 'api/accounts',
+    accountingEntries: 'api/accounting/entries',
+    accountingStatement: 'api/accounting/statement'
+};
+
+const storageKeys = {
+    selectedCustomerId: 'eis.timesheet.selectedCustomerId'
 };
 
 document.addEventListener('DOMContentLoaded', init);
@@ -85,11 +95,13 @@ async function reloadBootstrap() {
     state.companyFooter = payload.companyFooter ?? null;
 
     const sessionId = payload.selectedCustomerId ?? null;
-    const candidate = state.customers.some((c) => c.id === sessionId && !c.inactive) ? sessionId
-        : null;
+    const storedId = readStoredCustomerId();
+    const candidate = validCustomerId(sessionId) ? sessionId
+        : validCustomerId(storedId) ? storedId
+            : null;
 
     await populateCustomerSelect();
-    await selectCustomer(candidate, false);
+    await selectCustomer(candidate, sessionId !== candidate);
 }
 
 async function populateCustomerSelect() {
@@ -130,6 +142,7 @@ async function selectCustomer(customerId, persist) {
             body: { customerId }
         });
     }
+    storeSelectedCustomerId(customerId);
 
     if (state.selectedCustomerId) {
         const payload = await fetchJson(`${api.customers}/${state.selectedCustomerId}/activities`);
@@ -150,7 +163,7 @@ async function setView(view) {
 
 async function reloadCurrentView() {
     const root = document.getElementById('viewRoot');
-    if (!state.selectedCustomer && state.view !== 'customers') {
+    if (!state.selectedCustomer && !['customers', 'bookkeeping'].includes(state.view)) {
         renderNoCustomer(root);
         return;
     }
@@ -160,6 +173,7 @@ async function reloadCurrentView() {
     if (state.view === 'time') return renderTimeView(root);
     if (state.view === 'materials') return renderMaterialsView(root);
     if (state.view === 'invoicing') return renderInvoiceView(root);
+    if (state.view === 'bookkeeping') return renderBookkeepingView(root);
     return renderDashboardView(root);
 }
 
@@ -177,7 +191,7 @@ function renderNoCustomer(root) {
 
 function setDisabledWorkTabs(disabled) {
     document.querySelectorAll('.nav-item').forEach((button) => {
-        if (!['customers', 'dashboard'].includes(button.dataset.view)) {
+        if (!['customers', 'dashboard', 'bookkeeping'].includes(button.dataset.view)) {
             button.disabled = disabled;
         }
     });
@@ -341,6 +355,9 @@ async function renderInvoiceView(root) {
                 <div class="page-meta">${monthName(state.year, state.month)} - ${state.selectedCustomer.companyName}</div>
             </div>
             <div class="toolbar">
+                <button type="button" class="icon-button icon-button-inline" data-action="approve-invoice" title="Approve invoice" aria-label="Approve invoice" ${state.invoice.approval ? 'disabled' : ''}>
+                    <span class="icon">${iconSvg('check')}</span>
+                </button>
                 <button type="button" class="icon-button icon-button-inline danger" data-action="invoice-pdf" title="Create PDF" aria-label="Create PDF">
                     <span class="icon">${iconSvg('pdf')}</span>
                 </button>
@@ -354,6 +371,7 @@ async function renderInvoiceView(root) {
             <div class="kpi"><div class="kpi-label">VAT</div><div class="kpi-value">${money(state.invoice.vatAmount)}</div></div>
             <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-value">${money(state.invoice.total)}</div></div>
         </div>
+        ${state.invoice.approval ? `<div class="banner">Approved as invoice ${escapeHtml(state.invoice.approval.invoiceNumber)} on ${state.invoice.approval.invoiceDate}.</div>` : ''}
         <div class="invoice-summary">
             <div class="section">
                 <div class="section-head"><h2 class="section-title">Time by activity</h2></div>
@@ -426,6 +444,79 @@ async function renderInvoiceView(root) {
     `;
     bindActions(root);
     bindIcons();
+}
+
+async function renderBookkeepingView(root) {
+    const [accountsPayload, entriesPayload] = await Promise.all([
+        fetchJson(`${api.accounts}?activeOnly=false`),
+        fetchJson(`${api.accountingEntries}?year=${state.year}&month=${state.month}`)
+    ]);
+    state.accounts = accountsPayload.accounts ?? [];
+    const entries = entriesPayload.entries ?? [];
+    root.innerHTML = `
+        <div class="page-head">
+            <div>
+                <h1 class="page-title">Book keeping</h1>
+                <div class="page-meta">${monthName(state.year, state.month)}</div>
+            </div>
+            <div class="toolbar">
+                <button class="btn-secondary" data-action="view-statement">View financial statement</button>
+                <button class="btn-secondary" data-action="view-balance">Balance</button>
+                <button class="btn-secondary" data-action="chart-of-accounts">Chart of accounts</button>
+                <button class="btn-secondary" data-action="prev-month">Previous month</button>
+                <button class="btn-secondary" data-action="next-month">Next month</button>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-head"><h2 class="section-title">Posting types</h2></div>
+            <div class="section-body"><div class="toolbar">
+                ${postingTypes().map((type) => `<button class="btn-secondary" data-action="posting-type" data-id="${type.id}">${escapeHtml(type.label)}</button>`).join('')}
+            </div></div>
+        </div>
+        <div class="section">
+            <div class="section-head"><h2 class="section-title">Postings</h2></div>
+            <div class="section-body" style="overflow:auto;">
+                <table class="table">
+                    <thead><tr><th>Date</th><th>Text</th><th>Type</th><th>Account</th><th class="money">Debit</th><th class="money">Credit</th><th>VAT</th><th></th></tr></thead>
+                    <tbody>${entries.flatMap(renderAccountingEntryRows).join('')}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    bindActions(root);
+    bindIcons();
+}
+
+function renderAccountingEntryRows(entry) {
+    return (entry.lines ?? []).map((line, index) => `
+        <tr>
+            <td>${index === 0 ? entry.entryDate : ''}</td>
+            <td>${index === 0 ? escapeHtml(entry.description) : escapeHtml(line.lineText)}</td>
+            <td>${index === 0 ? escapeHtml(entry.entryType) : ''}</td>
+            <td>${escapeHtml(line.accountNumber)} ${escapeHtml(line.accountName)}</td>
+            <td class="money">${money(line.debitAmount)}</td>
+            <td class="money">${money(line.creditAmount)}</td>
+            <td>${escapeHtml(line.vatCode ?? '')}</td>
+            <td class="action-cell">${index === 0 ? `<button type="button" class="icon-button icon-button-inline" data-action="correct-entry" data-id="${entry.id}" title="Correct entry" aria-label="Correct entry"><span class="icon">${iconSvg('edit')}</span></button>` : ''}</td>
+        </tr>
+    `);
+}
+
+function renderAccountRow(account) {
+    return `
+        <tr class="${account.active ? '' : 'inactive-row'}">
+            <td>${escapeHtml(account.accountNumber)}</td>
+            <td>${escapeHtml(account.accountName)}</td>
+            <td>${escapeHtml(account.accountType)}</td>
+            <td>${escapeHtml(account.systemKey ?? '')}</td>
+            <td>${account.active ? 'Active' : 'Inactive'}</td>
+            <td class="action-cell">
+                <button type="button" class="icon-button icon-button-inline" data-action="edit-account" data-id="${account.id}" title="Edit account" aria-label="Edit account">
+                    <span class="icon">${iconSvg('edit')}</span>
+                </button>
+            </td>
+        </tr>
+    `;
 }
 
 async function renderCalendarSection(root, kind) {
@@ -586,7 +677,8 @@ function bindActions(root) {
 
 async function handleAction(event) {
     const action = event.currentTarget.dataset.action;
-    const id = event.currentTarget.dataset.id ? Number(event.currentTarget.dataset.id) : null;
+    const rawId = event.currentTarget.dataset.id ?? null;
+    const id = rawId && !Number.isNaN(Number(rawId)) ? Number(rawId) : null;
     const date = event.currentTarget.dataset.date ?? null;
 
     switch (action) {
@@ -634,6 +726,30 @@ async function handleAction(event) {
             break;
         case 'invoice-pdf':
             await createInvoicePdf();
+            break;
+        case 'approve-invoice':
+            await approveInvoiceDialog();
+            break;
+        case 'posting-type':
+            await postingDialog(rawId);
+            break;
+        case 'view-statement':
+            await statementDialog();
+            break;
+        case 'view-balance':
+            await balanceDialog();
+            break;
+        case 'chart-of-accounts':
+            await chartOfAccountsDialog();
+            break;
+        case 'new-account':
+            await accountDialog();
+            break;
+        case 'edit-account':
+            await accountDialog(state.accounts.find((account) => account.id === id));
+            break;
+        case 'correct-entry':
+            await correctionDialog(id);
             break;
         case 'new-material':
             await materialDialog();
@@ -939,6 +1055,432 @@ async function materialDialog(entry = null) {
     await reloadCurrentView();
 }
 
+function validCustomerId(customerId) {
+    return state.customers.some((customer) => customer.id === customerId && !customer.inactive);
+}
+
+function readStoredCustomerId() {
+    try {
+        const value = localStorage.getItem(storageKeys.selectedCustomerId);
+        return value ? Number(value) : null;
+    } catch {
+        return null;
+    }
+}
+
+function storeSelectedCustomerId(customerId) {
+    try {
+        if (customerId) {
+            localStorage.setItem(storageKeys.selectedCustomerId, String(customerId));
+        } else {
+            localStorage.removeItem(storageKeys.selectedCustomerId);
+        }
+    } catch {
+        // localStorage can be unavailable in restricted browser contexts.
+    }
+}
+
+async function approveInvoiceDialog() {
+    const preview = await fetchJson(`api/invoice/posting-preview?customerId=${state.selectedCustomerId}&year=${state.year}&month=${state.month}`);
+    const confirmed = await confirmLinesDialog('Approve invoice', `Invoice ${preview.invoiceNumber}`, preview.lines ?? [], 'Confirm');
+    if (!confirmed) return;
+    await fetchJson('api/invoice/approve', { method: 'POST', body: { customerId: state.selectedCustomerId, year: state.year, month: state.month } });
+    showBanner('Invoice approved and posted.');
+    await reloadCurrentView();
+}
+
+async function postingDialog(typeId) {
+    const type = postingTypes().find((item) => item.id === typeId);
+    if (!type) return;
+    if (type.id === 'GENERAL') return generalPostingDialog();
+    if (type.id === 'CUSTOMER_PAYMENT') return customerPaymentDialog();
+    const result = await promptDialog(type.label, [
+        { name: 'entryDate', label: 'Date', type: 'date', value: todayIso(), required: true },
+        { name: 'amount', label: 'Amount incl. VAT where relevant', type: 'number', step: '0.01', value: '', required: true },
+        { name: 'description', label: 'Text', type: 'text', value: type.label, required: true },
+        { name: 'referenceId', label: 'Voucher/reference', type: 'text', value: '' }
+    ]);
+    if (!result) return;
+    const amount = Number(result.amount);
+    const lines = fixedPostingLines(type, amount, result.description);
+    await fetchJson(api.accountingEntries, { method: 'POST', body: entryBody(result, type.id, lines) });
+    showBanner('Posting saved.');
+    await reloadCurrentView();
+}
+
+async function customerPaymentDialog() {
+    const result = await promptDialog('Customer invoice payment', [
+        { name: 'entryDate', label: 'Payment date', type: 'date', value: todayIso(), required: true },
+        { name: 'amount', label: 'Paid amount', type: 'number', step: '0.01', value: '', required: true },
+        { name: 'description', label: 'Text', type: 'text', value: 'Customer invoice payment', required: true },
+        { name: 'referenceId', label: 'Invoice/reference', type: 'text', value: '' }
+    ]);
+    if (!result) return;
+    await fetchJson(api.accountingEntries, { method: 'POST', body: entryBody(result, 'CUSTOMER_PAYMENT', [
+        debitLine(systemAccount('BANK'), result.description, Number(result.amount)),
+        creditLine(systemAccount('ACCOUNTS_RECEIVABLE'), result.description, Number(result.amount))
+    ]) });
+    showBanner('Payment posted.');
+    await reloadCurrentView();
+}
+
+async function generalPostingDialog() {
+    const accountOptions = activeAccountOptions();
+    const result = await promptDialog('General journal entry', [
+        { name: 'entryDate', label: 'Date', type: 'date', value: todayIso(), required: true },
+        { name: 'description', label: 'Text', type: 'text', value: '', required: true },
+        { name: 'debitAccountId', label: 'Debit account', type: 'select', options: accountOptions, value: '', required: true },
+        { name: 'creditAccountId', label: 'Credit account', type: 'select', options: accountOptions, value: '', required: true },
+        { name: 'amount', label: 'Amount', type: 'number', step: '0.01', value: '', required: true },
+        { name: 'referenceId', label: 'Voucher/reference', type: 'text', value: '' }
+    ]);
+    if (!result) return;
+    await fetchJson(api.accountingEntries, { method: 'POST', body: entryBody(result, 'GENERAL', [
+        debitLine(Number(result.debitAccountId), result.description, Number(result.amount)),
+        creditLine(Number(result.creditAccountId), result.description, Number(result.amount))
+    ]) });
+    showBanner('Posting saved.');
+    await reloadCurrentView();
+}
+
+async function correctionDialog(entryId) {
+    const accountOptions = activeAccountOptions();
+    const result = await promptDialog('Correct entry', [
+        { name: 'entryDate', label: 'Correction date', type: 'date', value: todayIso(), required: true },
+        { name: 'description', label: 'Correct text', type: 'text', value: '', required: true },
+        { name: 'debitAccountId', label: 'Debit account', type: 'select', options: accountOptions, value: '', required: true },
+        { name: 'creditAccountId', label: 'Credit account', type: 'select', options: accountOptions, value: '', required: true },
+        { name: 'amount', label: 'Correct amount', type: 'number', step: '0.01', value: '', required: true },
+        { name: 'referenceId', label: 'Voucher/reference', type: 'text', value: '' }
+    ]);
+    if (!result) return;
+    await fetchJson(`api/accounting/entries/${entryId}/corrections`, { method: 'POST', body: entryBody(result, 'CORRECTION', [
+        debitLine(Number(result.debitAccountId), result.description, Number(result.amount)),
+        creditLine(Number(result.creditAccountId), result.description, Number(result.amount))
+    ]) });
+    showBanner('Correction posted.');
+    await reloadCurrentView();
+}
+
+async function accountDialog(account = null) {
+    const result = await promptDialog(account ? 'Edit account' : 'New account', [
+        { name: 'accountNumber', label: 'Account number', type: 'text', value: account?.accountNumber ?? '', required: true },
+        { name: 'accountName', label: 'Account name', type: 'text', value: account?.accountName ?? '', required: true },
+        { name: 'accountType', label: 'Type', type: 'select', options: accountTypeOptions(), value: account?.accountType ?? 'EXPENSE', required: true },
+        { name: 'active', label: 'Status', type: 'select', options: [{ value: 'true', label: 'Active' }, { value: 'false', label: 'Inactive' }], value: String(account?.active ?? true), required: true }
+    ]);
+    if (!result) return;
+    const body = { ...result, active: result.active === 'true' };
+    if (account) await fetchJson(`${api.accounts}/${account.id}`, { method: 'PUT', body });
+    else await fetchJson(api.accounts, { method: 'POST', body });
+    await refreshAccounts();
+    if (document.getElementById('promptDialog').open) {
+        renderChartOfAccountsDialogBody();
+    } else {
+        await reloadCurrentView();
+    }
+}
+
+async function chartOfAccountsDialog() {
+    await refreshAccounts();
+    const dialog = document.getElementById('promptDialog');
+    document.getElementById('promptTitle').textContent = 'Chart of accounts';
+    document.getElementById('promptSubtitle').textContent = 'Create and edit posting accounts';
+    renderChartOfAccountsDialogBody();
+    dialog.showModal();
+    document.getElementById('promptClose').onclick = () => dialog.close();
+}
+
+function renderChartOfAccountsDialogBody() {
+    document.getElementById('promptBody').innerHTML = `
+        <div class="dialog-section">
+            <div class="toolbar" style="margin-bottom:12px;">
+                <button type="button" class="btn" id="dialogNewAccount">New account</button>
+            </div>
+            <div class="dialog-scroll">
+                <table class="table">
+                    <thead><tr><th>No.</th><th>Name</th><th>Type</th><th>System purpose</th><th>Status</th><th></th></tr></thead>
+                    <tbody>${state.accounts.map(renderAccountRow).join('')}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    document.getElementById('dialogNewAccount').addEventListener('click', safeAsync(async () => {
+        await accountDialog();
+    }));
+    document.getElementById('promptBody').querySelectorAll('[data-action="edit-account"]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            await accountDialog(state.accounts.find((account) => account.id === Number(button.dataset.id)));
+        }));
+    });
+}
+
+async function refreshAccounts() {
+    const accountsPayload = await fetchJson(`${api.accounts}?activeOnly=false`);
+    state.accounts = accountsPayload.accounts ?? [];
+}
+
+async function statementDialog() {
+    const dialog = document.getElementById('promptDialog');
+    if (!state.statementPeriod) {
+        state.statementPeriod = { mode: 'quarter', year: state.year, index: Math.floor((state.month - 1) / 3) };
+    }
+    document.getElementById('promptTitle').textContent = 'Financial statement';
+    document.getElementById('promptSubtitle').textContent = '';
+    await renderStatementDialogBody();
+    dialog.showModal();
+    document.getElementById('promptClose').onclick = () => dialog.close();
+}
+
+async function renderStatementDialogBody() {
+    const period = accountingPeriodBounds(state.statementPeriod);
+    const statement = await fetchJson(`${api.accountingStatement}?year=${period.year}&fromMonth=${period.fromMonth}&toMonth=${period.toMonth}`);
+    document.getElementById('promptSubtitle').textContent = period.label;
+    document.getElementById('promptBody').innerHTML = `
+        <div class="dialog-section">
+            <div class="toolbar" style="margin-bottom:12px;">
+                <button type="button" class="btn-secondary ${state.statementPeriod.mode === 'quarter' ? 'active' : ''}" data-statement-mode="quarter">Quarter</button>
+                <button type="button" class="btn-secondary ${state.statementPeriod.mode === 'half' ? 'active' : ''}" data-statement-mode="half">Half year</button>
+                <button type="button" class="btn-secondary ${state.statementPeriod.mode === 'year' ? 'active' : ''}" data-statement-mode="year">Full year</button>
+                <button type="button" class="btn-secondary" data-statement-shift="-1">Previous</button>
+                <button type="button" class="btn-secondary" data-statement-shift="1">Next</button>
+            </div>
+            <div class="dialog-scroll">
+                <table class="table">
+                    <thead><tr><th>No.</th><th>Name</th><th>Type</th><th class="money">Debit</th><th class="money">Credit</th><th class="money">Balance</th></tr></thead>
+                    <tbody>${(statement.rows ?? []).map((row) => `
+                        <tr><td>${escapeHtml(row.accountNumber)}</td><td>${escapeHtml(row.accountName)}</td><td>${escapeHtml(row.accountType)}</td><td class="money">${money(row.debit)}</td><td class="money">${money(row.credit)}</td><td class="money">${money(row.balance)}</td></tr>
+                    `).join('')}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    bindStatementDialogActions();
+}
+
+function bindStatementDialogActions() {
+    document.getElementById('promptBody').querySelectorAll('[data-statement-mode]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            setAccountingPeriodMode(state.statementPeriod, button.dataset.statementMode);
+            await renderStatementDialogBody();
+        }));
+    });
+    document.getElementById('promptBody').querySelectorAll('[data-statement-shift]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            shiftAccountingPeriod(state.statementPeriod, Number(button.dataset.statementShift));
+            await renderStatementDialogBody();
+        }));
+    });
+}
+
+async function balanceDialog() {
+    const dialog = document.getElementById('promptDialog');
+    if (!state.balancePeriod) {
+        state.balancePeriod = { mode: 'quarter', year: state.year, index: Math.floor((state.month - 1) / 3) };
+    }
+    document.getElementById('promptTitle').textContent = 'Balance';
+    document.getElementById('promptSubtitle').textContent = '';
+    await renderBalanceDialogBody();
+    dialog.showModal();
+    document.getElementById('promptClose').onclick = () => dialog.close();
+}
+
+async function renderBalanceDialogBody() {
+    const period = accountingPeriodBounds(state.balancePeriod);
+    const statement = await fetchJson(`${api.accountingStatement}?year=${period.year}&fromMonth=${period.fromMonth}&toMonth=${period.toMonth}`);
+    const rows = statement.rows ?? [];
+    const assets = rows.filter((row) => row.accountType === 'ASSET');
+    const liabilities = rows.filter((row) => ['LIABILITY', 'EQUITY'].includes(row.accountType));
+    const assetTotal = rowsTotal(assets);
+    const liabilityTotal = rowsTotal(liabilities);
+    document.getElementById('promptSubtitle').textContent = period.label;
+    document.getElementById('promptBody').innerHTML = `
+        <div class="dialog-section">
+            <div class="toolbar" style="margin-bottom:12px;">
+                <button type="button" class="btn-secondary ${state.balancePeriod.mode === 'quarter' ? 'active' : ''}" data-balance-mode="quarter">Quarter</button>
+                <button type="button" class="btn-secondary ${state.balancePeriod.mode === 'half' ? 'active' : ''}" data-balance-mode="half">Half year</button>
+                <button type="button" class="btn-secondary ${state.balancePeriod.mode === 'year' ? 'active' : ''}" data-balance-mode="year">Full year</button>
+                <button type="button" class="btn-secondary" data-balance-shift="-1">Previous</button>
+                <button type="button" class="btn-secondary" data-balance-shift="1">Next</button>
+            </div>
+            <div class="balance-sheet">
+                <div class="balance-column">
+                    <h3>Assets</h3>
+                    ${renderBalanceRows(assets)}
+                    <div class="balance-total"><span>Assets total</span><span>${money(assetTotal)}</span></div>
+                </div>
+                <div class="balance-column">
+                    <h3>Liabilities and equity</h3>
+                    ${renderBalanceRows(liabilities)}
+                    <div class="balance-total"><span>Liabilities and equity total</span><span>${money(liabilityTotal)}</span></div>
+                </div>
+            </div>
+        </div>
+    `;
+    bindBalanceDialogActions();
+}
+
+function bindBalanceDialogActions() {
+    document.getElementById('promptBody').querySelectorAll('[data-balance-mode]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            setAccountingPeriodMode(state.balancePeriod, button.dataset.balanceMode);
+            await renderBalanceDialogBody();
+        }));
+    });
+    document.getElementById('promptBody').querySelectorAll('[data-balance-shift]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            shiftAccountingPeriod(state.balancePeriod, Number(button.dataset.balanceShift));
+            await renderBalanceDialogBody();
+        }));
+    });
+}
+
+function renderBalanceRows(rows) {
+    if (!rows.length) return '<div class="balance-empty">No postings</div>';
+    return rows.map((row) => `
+        <div class="balance-row">
+            <span>${escapeHtml(row.accountNumber)} ${escapeHtml(row.accountName)}</span>
+            <span>${money(row.balance)}</span>
+        </div>
+    `).join('');
+}
+
+function rowsTotal(rows) {
+    return rows.reduce((sum, row) => sum + Number(row.balance ?? 0), 0);
+}
+
+function setAccountingPeriodMode(period, mode) {
+    const currentMonth = period.mode === 'year' ? 1 : accountingPeriodBounds(period).fromMonth;
+    period.mode = mode;
+    if (mode === 'quarter') period.index = Math.floor((currentMonth - 1) / 3);
+    if (mode === 'half') period.index = Math.floor((currentMonth - 1) / 6);
+    if (mode === 'year') period.index = 0;
+}
+
+function shiftAccountingPeriod(period, delta) {
+    const periodCount = accountingPeriodCount(period.mode);
+    let index = period.index + delta;
+    while (index < 0) {
+        period.year -= 1;
+        index += periodCount;
+    }
+    while (index >= periodCount) {
+        period.year += 1;
+        index -= periodCount;
+    }
+    period.index = index;
+}
+
+function accountingPeriodBounds(period) {
+    const { mode, year, index } = period;
+    if (mode === 'quarter') {
+        const fromMonth = index * 3 + 1;
+        const quarter = index + 1;
+        return { year, fromMonth, toMonth: fromMonth + 2, label: `Q${quarter} ${year}` };
+    }
+    if (mode === 'half') {
+        const fromMonth = index * 6 + 1;
+        const label = index === 0 ? `H1 ${year}` : `H2 ${year}`;
+        return { year, fromMonth, toMonth: fromMonth + 5, label };
+    }
+    return { year, fromMonth: 1, toMonth: 12, label: `FY ${year}` };
+}
+
+function accountingPeriodCount(mode) {
+    if (mode === 'quarter') return 4;
+    if (mode === 'half') return 2;
+    return 1;
+}
+
+function confirmLinesDialog(title, subtitle, lines, confirmLabel = 'Confirm') {
+    const dialog = document.getElementById('promptDialog');
+    document.getElementById('promptTitle').textContent = title;
+    document.getElementById('promptSubtitle').textContent = subtitle;
+    document.getElementById('promptBody').innerHTML = `
+        <div class="dialog-section">
+            <div class="dialog-scroll">
+                <table class="table">
+                    <thead><tr><th>Account</th><th>Text</th><th class="money">Debit</th><th class="money">Credit</th><th>VAT</th></tr></thead>
+                    <tbody>${lines.map((line) => `<tr><td>${escapeHtml(line.accountNumber)} ${escapeHtml(line.accountName)}</td><td>${escapeHtml(line.lineText)}</td><td class="money">${money(line.debitAmount)}</td><td class="money">${money(line.creditAmount)}</td><td>${escapeHtml(line.vatCode ?? '')}</td></tr>`).join('')}</tbody>
+                </table>
+            </div>
+            <div class="toolbar"><button type="button" class="btn" id="confirmPrompt">${confirmLabel}</button><button type="button" class="btn-secondary" id="cancelPrompt">Cancel</button></div>
+        </div>
+    `;
+    dialog.showModal();
+    return new Promise((resolve) => {
+        document.getElementById('confirmPrompt').onclick = () => { dialog.close(); resolve(true); };
+        document.getElementById('cancelPrompt').onclick = () => { dialog.close(); resolve(false); };
+        document.getElementById('promptClose').onclick = () => { dialog.close(); resolve(false); };
+    });
+}
+
+function postingTypes() {
+    return [
+        { id: 'SALARY_PAYMENT', label: 'Salary payment', debit: 'SALARY_EXPENSE', credit: 'BANK' },
+        { id: 'EXPENSE_REIMBURSEMENT', label: 'Expense reimbursement', debit: 'EXPENSE_REIMBURSEMENT', credit: 'BANK' },
+        { id: 'BANK_INTEREST_INCOME', label: 'Bank interest income', debit: 'BANK', credit: 'INTEREST_INCOME' },
+        { id: 'BANK_INTEREST_EXPENSE', label: 'Bank interest expense', debit: 'INTEREST_EXPENSE', credit: 'BANK' },
+        { id: 'BANK_FEE', label: 'Other bank fee', debit: 'BANK_FEES', credit: 'BANK' },
+        { id: 'VAT_PAYMENT', label: 'VAT payment to tax authority', debit: 'OUTPUT_VAT', credit: 'BANK' },
+        { id: 'COMPUTER_EQUIPMENT', label: 'Computer equipment purchase', debit: 'COMPUTER_EQUIPMENT', credit: 'BANK', vat: true },
+        { id: 'DEVELOPMENT_LICENSES', label: 'Development license purchase', debit: 'DEVELOPMENT_LICENSES', credit: 'BANK', vat: true },
+        { id: 'CUSTOMER_PAYMENT', label: 'Customer invoice payment' },
+        { id: 'GENERAL', label: 'General journal entry' }
+    ];
+}
+
+function fixedPostingLines(type, amountInclVat, text) {
+    if (!type.vat) return [debitLine(systemAccount(type.debit), text, amountInclVat), creditLine(systemAccount(type.credit), text, amountInclVat)];
+    const net = roundMoney(amountInclVat / 1.25);
+    const vat = roundMoney(amountInclVat - net);
+    return [
+        debitLine(systemAccount(type.debit), text, net),
+        { ...debitLine(systemAccount('INPUT_VAT'), `${text} VAT`, vat), vatCode: 'INPUT_VAT' },
+        creditLine(systemAccount(type.credit), text, amountInclVat)
+    ];
+}
+
+function entryBody(result, entryType, lines) {
+    return {
+        entryDate: result.entryDate,
+        entryType,
+        description: result.description,
+        referenceType: result.referenceId ? 'VOUCHER' : null,
+        referenceId: result.referenceId || null,
+        lines
+    };
+}
+
+function debitLine(accountId, text, amount) {
+    return { accountId, lineText: text, debitAmount: roundMoney(amount), creditAmount: 0, vatCode: null };
+}
+
+function creditLine(accountId, text, amount) {
+    return { accountId, lineText: text, debitAmount: 0, creditAmount: roundMoney(amount), vatCode: null };
+}
+
+function systemAccount(systemKey) {
+    const account = state.accounts.find((item) => item.systemKey === systemKey);
+    if (!account) throw new Error(`Missing account: ${systemKey}`);
+    return account.id;
+}
+
+function activeAccountOptions() {
+    return state.accounts.filter((account) => account.active).map((account) => ({
+        value: account.id,
+        label: `${account.accountNumber} ${account.accountName}`
+    }));
+}
+
+function accountTypeOptions() {
+    return ['ASSET', 'LIABILITY', 'REVENUE', 'EXPENSE', 'EQUITY'].map((value) => ({ value, label: value }));
+}
+
+function roundMoney(value) {
+    return Math.round(Number(value ?? 0) * 100) / 100;
+}
+
 function promptDialog(title, fields) {
     const dialog = document.getElementById('promptDialog');
     document.getElementById('promptTitle').textContent = title;
@@ -1178,6 +1720,10 @@ function todayIso() {
     return new Date().toISOString().slice(0, 10);
 }
 
+function invoiceIssueDate(year, month) {
+    return new Date(year, month, 1);
+}
+
 function materialDateForCurrentView() {
     const today = todayIso();
     const [todayYear, todayMonth] = today.split('-').map(Number);
@@ -1203,6 +1749,7 @@ function iconSvg(name) {
         edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
         trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
         pdf: '<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v5h3"/><text x="12" y="16" text-anchor="middle" font-size="6" font-family="Arial, sans-serif" font-weight="700" fill="currentColor">PDF</text></svg>',
+        check: '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
         plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>'
     };
     return icons[name] || '';
@@ -1218,7 +1765,7 @@ async function createInvoicePdf() {
         showBanner('Generating PDF...');
 
         const invoiceNumber = `${state.selectedCustomerId}${String(state.year).padStart(4, '0')}${String(state.month).padStart(2, '0')}`;
-        const invoiceDate = new Date(state.year, state.month, 0);
+        const invoiceDate = invoiceIssueDate(state.year, state.month);
         const timeAmount = (state.invoice.timeRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
         const materialAmount = (state.invoice.materialRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
         const summary = {
