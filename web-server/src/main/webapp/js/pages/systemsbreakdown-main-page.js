@@ -2323,7 +2323,7 @@ function isBlankTooltipValue(value) {
     return !value || value === "--" || value === "\u2014";
 }
 
-function renderTrlBar(system) {
+function renderStatusBars(system) {
     return renderDiagramStatusBars("systemsbreakdown", system, state.selectedStatusFields);
 }
 
