@@ -1,9 +1,9 @@
 import { userPreferences } from "../core/user-preferences.js";
 import { initMenu, menuHasRoute } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
-import { StakeholderRequirementController } from "./requirements-stakeholder.js";
-import { SystemRequirementController } from "./requirements-system.js";
+import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js?rev=requirements-help-2026-10-02-2";
+import { StakeholderRequirementController } from "./requirements-stakeholder.js?rev=requirements-help-2026-10-02-2";
+import { SystemRequirementController } from "./requirements-system.js?rev=requirements-help-2026-10-02-2";
 
 const state = {
     activeTab: "stakeholder", // "stakeholder" or "system"
@@ -117,9 +117,9 @@ function switchTab(tab) {
 }
 
 function syncCommonUI(controller) {
-    // Update counts in tabs (total count)
-    document.getElementById("stakeholderCount").textContent = state.stakeholderController.getTotalCount();
-    document.getElementById("systemCount").textContent = state.systemController.getTotalCount();
+    // Update counts in tabs (active requirements only)
+    document.getElementById("stakeholderCount").textContent = state.stakeholderController.getActiveCount();
+    document.getElementById("systemCount").textContent = state.systemController.getActiveCount();
 }
 
 window.refreshActiveList = function(type) {

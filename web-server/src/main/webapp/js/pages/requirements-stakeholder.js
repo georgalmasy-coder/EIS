@@ -111,8 +111,8 @@ export class StakeholderRequirementController {
     refresh() {
         loadStakeholderRequirements();
     }
-    getTotalCount() {
-        return state.requirements.length;
+    getActiveCount() {
+        return state.requirements.filter((requirement) => requirement.active).length;
     }
     getFilterText() {
         return sessionStorage.getItem(STORAGE_KEYS.filterText) || "";
@@ -391,9 +391,6 @@ async function loadStakeholderRequirements() {
         state.requirements = parseStakeholderRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
         
-        if (window.onStakeholderDataLoaded) {
-            window.onStakeholderDataLoaded(state.requirements.length);
-        }
         state.listColumns = buildListColumns(state.requirements);
         initializeDiagramStatusFields();
 
@@ -411,6 +408,9 @@ async function loadStakeholderRequirements() {
 
         applyTopPanel();
         applyFiltersAndRender();
+        if (window.onStakeholderDataLoaded) {
+            window.onStakeholderDataLoaded(state.requirements.filter((requirement) => requirement.active).length);
+        }
         setText("loadStatus", "Loaded", "");
 
         const scrollToId = sessionStorage.getItem("basis.requirements.stakeholder.scrollToId");

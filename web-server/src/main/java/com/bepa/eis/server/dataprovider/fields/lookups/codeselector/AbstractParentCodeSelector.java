@@ -29,7 +29,6 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
             "AND E.EntityId = EE.EntityId " +
             "AND E.Version = EE.Version " +
             "AND E.LATEST = 1 " +
-            // "AND E.ACTIVE = 1 " +
             "AND E.CustomerId = ? " +
             "AND E.ProjectId = ? " +
             "AND E.EntityType = ? " +

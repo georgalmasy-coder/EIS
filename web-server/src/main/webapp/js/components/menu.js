@@ -70,7 +70,8 @@ function installSessionExpiredRedirect() {
 
         if (response.redirected) {
             const target = new URL(response.url, window.location.origin);
-            if (target.pathname.endsWith(SESSION_EXPIRED_PATH)) {
+            if (target.pathname.endsWith(SESSION_EXPIRED_PATH)
+                && !window.location.pathname.endsWith(SESSION_EXPIRED_PATH)) {
                 window.location.assign(target.href);
             }
         }
@@ -1021,11 +1022,6 @@ export async function initMenu() {
 
     try {
         if (document.body?.dataset.sessionExpired === "true") {
-            try {
-                userPreferences.removeItem("eis.menu.xml");
-            } catch {
-                // Storage may be unavailable; the menu remains empty regardless.
-            }
             clear(rootElement);
             setText(statusElement, "Log in again to view the menu.", "");
             return;

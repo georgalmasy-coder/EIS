@@ -118,8 +118,8 @@ export class SystemRequirementController {
     refresh() {
         loadSystemRequirements();
     }
-    getTotalCount() {
-        return state.requirements.length;
+    getActiveCount() {
+        return state.requirements.filter((requirement) => requirement.active).length;
     }
     getFilterText() {
         return sessionStorage.getItem(STORAGE_KEYS.filterText) || "";
@@ -398,9 +398,6 @@ async function loadSystemRequirements() {
         state.requirements = parseSystemRequirements(xmlDocument)
             .filter((requirement) => requirement.level <= MAX_REQUIREMENT_LEVEL);
 
-        if (window.onSystemDataLoaded) {
-            window.onSystemDataLoaded(state.requirements.length);
-        }
         state.listColumns = buildListColumns(state.requirements);
         initializeDiagramStatusFields();
 
@@ -418,6 +415,9 @@ async function loadSystemRequirements() {
 
         applyTopPanel();
         applyFiltersAndRender();
+        if (window.onSystemDataLoaded) {
+            window.onSystemDataLoaded(state.requirements.filter((requirement) => requirement.active).length);
+        }
         setText("loadStatus", "Loaded", "");
 
         const scrollToId = sessionStorage.getItem("basis.requirements.system.scrollToId");

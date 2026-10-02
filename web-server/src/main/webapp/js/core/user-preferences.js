@@ -7,7 +7,7 @@ const values = new Map();
 let loaded = false;
 
 function loadSync() {
-    if (loaded) {
+    if (loaded || document.body?.dataset.sessionExpired === "true") {
         return;
     }
 
@@ -32,6 +32,10 @@ function loadSync() {
 }
 
 async function persist(key, value, remove = false) {
+    if (document.body?.dataset.sessionExpired === "true") {
+        return;
+    }
+
     const body = new URLSearchParams();
     body.set("key", key);
     if (remove) {

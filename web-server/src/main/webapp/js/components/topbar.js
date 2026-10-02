@@ -391,7 +391,8 @@ function updateTopbarHelpButton(root, metadata) {
         return;
     }
 
-    const helpFileName = String(metadata?.helpFileName || "").trim();
+    const topbar = helpButton.closest(".topbar");
+    const helpFileName = String(topbar?.getAttribute("data-topbar-help-page") || metadata?.helpFileName || "").trim();
 
     if (!helpFileName) {
         helpButton.hidden = true;
@@ -427,6 +428,7 @@ async function handleTopbarHelpClick(event) {
     const helpButton = event.currentTarget;
     const topbar = helpButton?.closest?.(".topbar");
     const page = helpButton?.getAttribute("data-help-page")
+        || topbar?.getAttribute("data-topbar-help-page")
         || topbar?.getAttribute("data-help-page")
         || "";
     const title = helpButton?.getAttribute("data-help-title")
