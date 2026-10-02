@@ -26,7 +26,7 @@ public final class CompanyFooterConfig {
     public static final List<String> RIGHT_BANK_LINES = List.of(
             "Jyske Bank",
             "Silkeborg afd.",
-            "7170-2606477"
+            "5148-1788506"
     );
 
     private CompanyFooterConfig() {
