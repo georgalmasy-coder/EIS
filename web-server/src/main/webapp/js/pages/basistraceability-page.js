@@ -2,6 +2,7 @@ import { initMenu } from "../components/menu.js";
 import { initHelpDialog } from "../components/help-dialog.js";
 import { mountTopbar } from "../components/topbar.js";
 import { openEditDialog } from "../components/edit-dialog.js";
+import { highlightMatchingWords } from "../components/traceability-word-highlights.js";
 import {
     closeDialogElement,
     setInputValue,
@@ -22,6 +23,7 @@ import {
 } from "../core/css.js";
 
 const TRACEABILITY_ENDPOINT = "/basis/basistraceability?cmd=overview";
+let requirementDialogRequest = 0;
 
 const CONFIRM_RELATION_ENDPOINT = "/basis/basistraceability/confirmrelation";
 const REMOVE_CONFIRMED_RELATION_ENDPOINT = "/basis/basistraceability/removeconfirmedrelation";
@@ -558,25 +560,59 @@ function initializeRequirementDialogEvents() {
     });
 }
 
-function openTraceabilityRequirementDialog(row, column) {
+async function openTraceabilityRequirementDialog(row, column) {
     const dialog = document.getElementById("traceabilityRequirementDialog");
 
     if (!dialog) {
         return;
     }
 
+    const requestId = ++requirementDialogRequest;
+    const stakeholderName = row?.name || "";
+    const stakeholderDescription = row?.description || "";
+    const systemName = column?.name || "";
+    const systemDescription = column?.description || "";
+    const render = (matches = []) => {
+        const sourceWords = matches.map(match => match.source);
+        const targetWords = matches.map(match => match.target);
+        highlightMatchingWords(document.getElementById("traceabilityStakeholderName"), stakeholderName, sourceWords);
+        highlightMatchingWords(document.getElementById("traceabilityStakeholderDescription"), stakeholderDescription, sourceWords);
+        highlightMatchingWords(document.getElementById("traceabilitySystemName"), systemName, targetWords);
+        highlightMatchingWords(document.getElementById("traceabilitySystemDescription"), systemDescription, targetWords);
+    };
     setInputValue("traceabilityStakeholderId", row?.code || row?.id || "");
-    setInputValue("traceabilityStakeholderName", row?.name || row?.label || "");
-    setInputValue("traceabilityStakeholderDescription", row?.description || "");
-
     setInputValue("traceabilitySystemId", column?.code || column?.id || "");
-    setInputValue("traceabilitySystemName", column?.name || column?.label || "");
-    setInputValue("traceabilitySystemDescription", column?.description || "");
-
+    render();
+    setText("traceabilityMatchStatus", "Finding matching words…");
     showDialog(dialog);
+
+    try {
+        const response = await fetch("/basis/basistraceability/matchingwords", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: new URLSearchParams({ stakeholderName, stakeholderDescription, systemName, systemDescription }),
+            cache: "no-store",
+            credentials: "same-origin"
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const matches = await response.json();
+        if (requestId !== requirementDialogRequest) return;
+        render(matches);
+        setText("traceabilityMatchStatus", matches.length
+            ? `${matches.length} matching word pairs shown in bold`
+            : "No matching words");
+    } catch (error) {
+        if (requestId !== requirementDialogRequest) return;
+        console.error("Failed to retrieve matching words", error);
+        setText("traceabilityMatchStatus", "Matching words could not be loaded");
+    }
 }
 
 function closeRequirementDialog(dialog) {
+    ++requirementDialogRequest;
     closeDialogElement(dialog);
 }
 

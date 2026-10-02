@@ -8,6 +8,7 @@ import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -63,6 +64,11 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         long startTime = System.currentTimeMillis();
 
         try {
+            if ("/matchingwords".equals(pathInfo)) {
+                handleMatchingWordsRequest(request, response);
+                return;
+            }
+
             if (REMOVE_CONFIRMED_RELATION_PATH.equals(pathInfo)) {
                 handleRemoveConfirmedRelationRequest(webSession, request, response);
                 getPerformanceProvider().logPerformance(module, System.currentTimeMillis() - startTime);
@@ -139,6 +145,19 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
             log.error("Error getting traceability matrix of stakeholder/system requirements: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    private void handleMatchingWordsRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        RequirementTextMatcher matcher = new RequirementTextMatcher();
+        var matches = matcher.matchingWords(
+                RequirementTextMatcher.words(request.getParameter("stakeholderName"),
+                        request.getParameter("stakeholderDescription")),
+                RequirementTextMatcher.words(request.getParameter("systemName"),
+                        request.getParameter("systemDescription")));
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType("application/json; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-store");
+        new ObjectMapper().writeValue(response.getWriter(), matches);
     }
 
     private EntityRelationProvider getProvider(WebSession webSession) {

@@ -50,7 +50,8 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
     private static final Logger log = LoggerFactory.getLogger(TraceabilityMatrixDocument.class);
 
-    private static final int MINIMUM_TEXT_MATCH_COUNT = 3;
+    private final RequirementTextMatcher textMatcher = new RequirementTextMatcher();
+    private final Map<Object, Set<String>> requirementWords = new IdentityHashMap<>();
 
     protected static final String STYLE_NORMAL = "normal";
     protected static final String STYLE_RED = "red";
@@ -364,61 +365,13 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
             StakeholderRequirementWrapper stakeholderRequirementWrapper,
             SystemRequirementWrapper systemRequirementWrapper
     ) {
-        String stakeholderText = buildSearchText(
-                stakeholderRequirementWrapper.getRequirementCode(),
-                stakeholderRequirementWrapper.getRequirementName(),
-                stakeholderRequirementWrapper.getRequirementDescription()
-        );
-
-        String systemText = buildSearchText(
-                systemRequirementWrapper.getRequirementCode(),
-                systemRequirementWrapper.getRequirementName(),
-                systemRequirementWrapper.getRequirementDescription()
-        );
-
-        return countMatchingWords(stakeholderText, systemText);
-    }
-
-    private boolean countMatchingWords(String sourceText, String targetText) {
-        String[] words = sourceText.split("\\s+");
-        int matchCount = 0;
-
-        for (String word : words) {
-            if (!isBlank(word) && targetText.contains(word)) {
-                matchCount++;
-                if (matchCount >= MINIMUM_TEXT_MATCH_COUNT) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private String buildSearchText(
-            String requirementCode,
-            String requirementName,
-            String requirementDescription
-    ) {
-        return normalizeText(
-                trimToEmpty(requirementCode)
-                        + " "
-                        + trimToEmpty(requirementName)
-                        + " "
-                        + trimToEmpty(requirementDescription)
-        );
-    }
-
-    private String normalizeText(String value) {
-        return trimToEmpty(value).toLowerCase(Locale.ROOT);
-    }
-
-    private String trimToEmpty(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+        Set<String> stakeholderWords = requirementWords.computeIfAbsent(stakeholderRequirementWrapper,
+                ignored -> RequirementTextMatcher.words(stakeholderRequirementWrapper.getRequirementName(),
+                        stakeholderRequirementWrapper.getRequirementDescription()));
+        Set<String> systemWords = requirementWords.computeIfAbsent(systemRequirementWrapper,
+                ignored -> RequirementTextMatcher.words(systemRequirementWrapper.getRequirementName(),
+                        systemRequirementWrapper.getRequirementDescription()));
+        return textMatcher.matches(stakeholderWords, systemWords);
     }
 
     private Element buildMatrixElement() {

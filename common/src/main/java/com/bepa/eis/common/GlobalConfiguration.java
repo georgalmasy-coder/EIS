@@ -14,6 +14,10 @@ public final class GlobalConfiguration {
 
     private static final String CONFIG_FILE_NAME = "eis-global.properties";
 
+    private static final String DEFAULT_TRACEABILITY_STOPWORDS =
+            "og,i,jeg,det,at,en,den,til,er,som,på,de,med,han,af,for,der,var,mig,sig,men,et,har,om,vi,"
+                    + "the,and,a,an,of,to,in,is,it,that,for,on,with,as,was,are,be,by,this,from,or,at,have,has,they";
+
     private static final String CONFIG_FILE_SYSTEM_PROPERTY = "eis.config.file";
     private static final String CONFIG_FILE_ENVIRONMENT_VARIABLE = "EIS_CONFIG_FILE";
     private static final String CONFIG_DIR_SYSTEM_PROPERTY = "eis.config.dir";
@@ -411,6 +415,11 @@ public final class GlobalConfiguration {
         PROPERTIES.set(loadedProperties);
     }
 
+    public static String getTraceabilityMatchStopwords() {
+        // A present but empty value explicitly disables stopword filtering.
+        return getProperties().getProperty("traceability.match.stopwords", DEFAULT_TRACEABILITY_STOPWORDS).trim();
+    }
+
     public static String getString(String key, String defaultValue) {
         String value = getProperties().getProperty(key);
 
@@ -642,8 +651,27 @@ public final class GlobalConfiguration {
         appendCustomerWorkflowConfiguration(content, lineSeparator);
         appendViesConfiguration(content, lineSeparator);
         appendMfaConfiguration(content, lineSeparator);
+        appendTraceabilityConfiguration(content, lineSeparator);
 
         return content.toString();
+    }
+
+    private static void appendTraceabilityConfiguration(StringBuilder content, String lineSeparator) {
+        content.append(lineSeparator);
+        content.append("###############################################################################").append(lineSeparator);
+        content.append("# Traceability: distinct words from name and description only (never code)").append(lineSeparator);
+        content.append("# Short words require exact matches; edit limits use the shorter word length.").append(lineSeparator);
+        content.append("###############################################################################").append(lineSeparator);
+        content.append("traceability.match.fuzzy.enabled=true").append(lineSeparator);
+        content.append("traceability.match.minimum-matching-words=2").append(lineSeparator);
+        content.append("# Comma-separated Danish/English stopwords; empty disables filtering.").append(lineSeparator);
+        content.append("traceability.match.stopwords=")
+                .append(DEFAULT_TRACEABILITY_STOPWORDS.replace("å", "\\u00e5"))
+                .append(lineSeparator);
+        content.append("traceability.match.fuzzy.short-word-max-length=4").append(lineSeparator);
+        content.append("traceability.match.fuzzy.medium-word-max-length=8").append(lineSeparator);
+        content.append("traceability.match.fuzzy.medium-word-max-edits=1").append(lineSeparator);
+        content.append("traceability.match.fuzzy.long-word-max-edits=2").append(lineSeparator);
     }
 
     private static void appendGeneralConfiguration(StringBuilder content, String lineSeparator) {

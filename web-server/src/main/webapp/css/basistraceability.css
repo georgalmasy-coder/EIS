@@ -553,7 +553,8 @@ body.traceability-document {
 }
 
 .traceability-dialog-field input,
-.traceability-dialog-field textarea {
+.traceability-dialog-field textarea,
+.traceability-dialog-text {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #cbd5e1;
@@ -564,9 +565,23 @@ body.traceability-document {
     font: inherit;
 }
 
-.traceability-dialog-field textarea {
+.traceability-dialog-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.traceability-dialog-field textarea,
+.traceability-dialog-description {
     min-height: 14rem;
+    max-height: 28rem;
+    overflow: auto;
     resize: vertical;
+}
+
+#traceabilityMatchStatus {
+    margin-right: auto;
+    font-size: 0.82rem;
+    color: #64748b;
 }
 
 .traceability-requirement-dialog-footer {

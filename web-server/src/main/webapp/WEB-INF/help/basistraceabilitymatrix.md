@@ -45,6 +45,17 @@ The available actions depend on the current status of the cell.
 
 A yellow cell means that the system has identified a possible relation between the Stakeholder Requirement and the Systems Requirement.
 
+Suggestions compare words in the requirement names and descriptions. Requirement codes
+are excluded. By default, two different matching words are required; repeated words
+count only once. Matching ignores letter case and punctuation and can allow small
+spelling differences for longer words. These defaults can be adjusted by your administrator.
+Common Danish and English words such as "og", "at", "and" and "the" are excluded
+by default. Your administrator can configure the stopword list.
+
+In the Traceability Details dialog, matching words appear in **bold** in both
+requirement names and descriptions. The dialog also shows the number of different
+matching word pairs. Repeated occurrences are highlighted but count only once.
+
 Available actions:
 
 ### Confirm relation

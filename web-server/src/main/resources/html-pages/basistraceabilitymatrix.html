@@ -117,15 +117,15 @@
                     <input id="traceabilityStakeholderId" type="text" readonly>
                 </label>
 
-                <label class="traceability-dialog-field">
-                    <span>Name</span>
-                    <input id="traceabilityStakeholderName" type="text" readonly>
-                </label>
+                <div class="traceability-dialog-field">
+                    <span id="traceabilityStakeholderNameLabel">Name</span>
+                    <div id="traceabilityStakeholderName" class="traceability-dialog-text" role="textbox" aria-readonly="true" aria-labelledby="traceabilityStakeholderNameLabel" tabindex="0"></div>
+                </div>
 
-                <label class="traceability-dialog-field">
-                    <span>Description</span>
-                    <textarea id="traceabilityStakeholderDescription" readonly></textarea>
-                </label>
+                <div class="traceability-dialog-field">
+                    <span id="traceabilityStakeholderDescriptionLabel">Description</span>
+                    <div id="traceabilityStakeholderDescription" class="traceability-dialog-text traceability-dialog-description" role="textbox" aria-readonly="true" aria-multiline="true" aria-labelledby="traceabilityStakeholderDescriptionLabel" tabindex="0"></div>
+                </div>
             </section>
 
             <section class="traceability-requirement-dialog-section" aria-labelledby="traceabilitySystemTitle">
@@ -136,19 +136,20 @@
                     <input id="traceabilitySystemId" type="text" readonly>
                 </label>
 
-                <label class="traceability-dialog-field">
-                    <span>Name</span>
-                    <input id="traceabilitySystemName" type="text" readonly>
-                </label>
+                <div class="traceability-dialog-field">
+                    <span id="traceabilitySystemNameLabel">Name</span>
+                    <div id="traceabilitySystemName" class="traceability-dialog-text" role="textbox" aria-readonly="true" aria-labelledby="traceabilitySystemNameLabel" tabindex="0"></div>
+                </div>
 
-                <label class="traceability-dialog-field">
-                    <span>Description</span>
-                    <textarea id="traceabilitySystemDescription" readonly></textarea>
-                </label>
+                <div class="traceability-dialog-field">
+                    <span id="traceabilitySystemDescriptionLabel">Description</span>
+                    <div id="traceabilitySystemDescription" class="traceability-dialog-text traceability-dialog-description" role="textbox" aria-readonly="true" aria-multiline="true" aria-labelledby="traceabilitySystemDescriptionLabel" tabindex="0"></div>
+                </div>
             </section>
         </div>
 
         <div class="traceability-requirement-dialog-footer">
+            <span id="traceabilityMatchStatus" role="status" aria-live="polite"></span>
             <button id="traceabilityRequirementDialogOkButton" class="primary" type="button">Close</button>
         </div>
     </form>
