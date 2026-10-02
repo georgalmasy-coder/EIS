@@ -6,14 +6,11 @@ import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
 import com.bepa.eis.common.enums.entity.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +20,7 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
 
     abstract public EntityType getEntityType();
 
-    private static final String SELECT_COLUMN_FROM_ACTIVE_ENTITY_SQL =
+    private static final String SELECT_COLUMN_FROM_ENTITY_SQL =
             "SELECT E.EntityId, EE.StringValue AS StringValue " +
             "FROM ENTITY E, ENTITY_ELEMENT EE " +
             "WHERE E.CustomerId = EE.CustomerId " +
@@ -32,7 +29,7 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
             "AND E.EntityId = EE.EntityId " +
             "AND E.Version = EE.Version " +
             "AND E.LATEST = 1 " +
-            "AND E.ACTIVE = 1 " +
+            // "AND E.ACTIVE = 1 " +
             "AND E.CustomerId = ? " +
             "AND E.ProjectId = ? " +
             "AND E.EntityType = ? " +
@@ -134,7 +131,7 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
     private void loadAllEntities(WebSession webSession) {
         entities = new ConcurrentHashMap<>();
         try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ACTIVE_ENTITY_SQL)) {
+             PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ENTITY_SQL)) {
 
             ps.setInt(1, webSession.getCustomerId());
             ps.setInt(2, webSession.getProjectId());
@@ -157,7 +154,7 @@ abstract public class AbstractParentCodeSelector extends AbstractLookup {
         }
 
         try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ACTIVE_ENTITY_SQL)) {
+             PreparedStatement ps = con.prepareStatement(SELECT_COLUMN_FROM_ENTITY_SQL)) {
 
             ps.setInt(1, webSession.getCustomerId());
             ps.setInt(2, webSession.getProjectId());
