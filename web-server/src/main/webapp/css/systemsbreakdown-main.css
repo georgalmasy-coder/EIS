@@ -1037,6 +1037,7 @@ body.systemsbreakdown-column-resizing *{
     color: var(--app-diagram-node-foreground);
     text-align: center;
     box-shadow: none;
+    overflow: hidden;
     user-select: none;
 }
 
