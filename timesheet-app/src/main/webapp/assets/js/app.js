@@ -24,7 +24,9 @@ const api = {
     invoice: 'api/invoice',
     accounts: 'api/accounts',
     accountingEntries: 'api/accounting/entries',
-    accountingStatement: 'api/accounting/statement'
+    accountingStatement: 'api/accounting/statement',
+    accountingVat: 'api/accounting/vat',
+    accountingBank: 'api/accounting/bank'
 };
 
 const storageKeys = {
@@ -462,6 +464,8 @@ async function renderBookkeepingView(root) {
             <div class="toolbar">
                 <button class="btn-secondary" data-action="view-statement">View financial statement</button>
                 <button class="btn-secondary" data-action="view-balance">Balance</button>
+                <button class="btn-secondary" data-action="view-vat">VAT return</button>
+                <button class="btn-secondary" data-action="view-bank">Bank reconciliation</button>
                 <button class="btn-secondary" data-action="chart-of-accounts">Chart of accounts</button>
                 <button class="btn-secondary" data-action="prev-month">Previous month</button>
                 <button class="btn-secondary" data-action="next-month">Next month</button>
@@ -738,6 +742,12 @@ async function handleAction(event) {
             break;
         case 'view-balance':
             await balanceDialog();
+            break;
+        case 'view-vat':
+            await accountingReportDialog('vat');
+            break;
+        case 'view-bank':
+            await accountingReportDialog('bank');
             break;
         case 'chart-of-accounts':
             await chartOfAccountsDialog();
@@ -1273,6 +1283,58 @@ function bindStatementDialogActions() {
     });
 }
 
+async function accountingReportDialog(kind) {
+    const dialog = document.getElementById('promptDialog');
+    const yearKey = `${kind}ReportYear`;
+    state[yearKey] ??= state.year;
+    document.getElementById('promptTitle').textContent = kind === 'vat' ? 'VAT return' : 'Bank reconciliation';
+    await renderAccountingReportDialogBody(kind);
+    dialog.showModal();
+    document.getElementById('promptClose').onclick = () => dialog.close();
+}
+
+async function renderAccountingReportDialogBody(kind) {
+    const yearKey = `${kind}ReportYear`;
+    const year = state[yearKey];
+    const report = await fetchJson(`${kind === 'vat' ? api.accountingVat : api.accountingBank}?year=${year}`);
+    const isVat = kind === 'vat';
+    document.getElementById('promptSubtitle').textContent = String(year);
+    const rows = report.rows ?? [];
+    const totals = rows.reduce((sum, row) => ({
+        inputVat: sum.inputVat + Number(row.inputVat ?? 0),
+        outputVat: sum.outputVat + Number(row.outputVat ?? 0),
+        payableVat: sum.payableVat + Number(row.payableVat ?? 0)
+    }), { inputVat: 0, outputVat: 0, payableVat: 0 });
+    document.getElementById('promptBody').innerHTML = `
+        <div class="dialog-section">
+            <div class="toolbar" style="margin-bottom:12px;">
+                <button type="button" class="btn-secondary" data-report-shift="-1" ${year <= 1 ? 'disabled' : ''}>Previous year</button>
+                <button type="button" class="btn-secondary" data-report-shift="1" ${year >= 9998 ? 'disabled' : ''}>Next year</button>
+            </div>
+            <p>${isVat
+                ? 'Quarterly VAT postings excluding VAT payments. A positive net amount is payable; a negative amount is refundable.'
+                : `Book bank balance including postings from previous years. Opening balance for the year: ${money(report.openingBalance)}. Compare each month-end balance with your bank statement.`}</p>
+            <div class="dialog-scroll">
+                <table class="table">
+                    <thead>${isVat
+                        ? '<tr><th>Quarter</th><th class="money">Input VAT</th><th class="money">Output VAT</th><th class="money">Net VAT payable</th></tr>'
+                        : '<tr><th>Month</th><th>Month-end date</th><th class="money">Monthly movement</th><th class="money">Month-end balance</th></tr>'}</thead>
+                    <tbody>${rows.map((row) => isVat
+                        ? `<tr><td>Q${row.quarter} ${year}</td><td class="money">${money(row.inputVat)}</td><td class="money">${money(row.outputVat)}</td><td class="money">${money(row.payableVat)}</td></tr>`
+                        : `<tr><td>${monthName(year, row.month, 'en-GB')}</td><td>${escapeHtml(row.closingDate)}</td><td class="money">${money(row.movement)}</td><td class="money">${money(row.closingBalance)}</td></tr>`).join('')}</tbody>
+                    ${isVat ? `<tfoot><tr><th>Annual total</th><th class="money">${money(totals.inputVat)}</th><th class="money">${money(totals.outputVat)}</th><th class="money">${money(totals.payableVat)}</th></tr></tfoot>` : ''}
+                </table>
+            </div>
+        </div>
+    `;
+    document.getElementById('promptBody').querySelectorAll('[data-report-shift]').forEach((button) => {
+        button.addEventListener('click', safeAsync(async () => {
+            state[yearKey] += Number(button.dataset.reportShift);
+            await renderAccountingReportDialogBody(kind);
+        }));
+    });
+}
+
 async function balanceDialog() {
     const dialog = document.getElementById('promptDialog');
     if (!state.balancePeriod) {
@@ -1702,8 +1764,8 @@ function isoWeekNumber(date) {
     return 1 + Math.round((utcDate - firstThursday) / 604800000);
 }
 
-function monthName(year, month) {
-    return new Date(year, month - 1, 1).toLocaleDateString('da-DK', { month: 'long', year: 'numeric' });
+function monthName(year, month, locale = 'da-DK') {
+    return new Date(year, month - 1, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 function addDays(date, days) {

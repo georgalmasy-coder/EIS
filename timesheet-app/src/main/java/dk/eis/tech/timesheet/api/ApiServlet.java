@@ -120,6 +120,14 @@ public class ApiServlet extends HttpServlet {
             writeJson(response, Map.of("entries", accountingRepository.findEntries(year, month)));
             return;
         }
+        if (path.equals("/accounting/vat") || path.equals("/accounting/bank")) {
+            int year = requiredInt(request, "year");
+            if (year < 1 || year > 9998) throw new IllegalArgumentException("year must be between 1 and 9998");
+            writeJson(response, path.equals("/accounting/vat")
+                    ? Map.of("year", year, "rows", accountingRepository.vatReport(year))
+                    : accountingRepository.bankReport(year));
+            return;
+        }
         if (path.equals("/accounting/statement")) {
             int year = requiredInt(request, "year");
             Integer fromMonth = optionalInt(request, "fromMonth");

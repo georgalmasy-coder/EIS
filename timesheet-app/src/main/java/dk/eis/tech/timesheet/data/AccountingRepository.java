@@ -10,6 +10,84 @@ import java.util.*;
 
 public class AccountingRepository {
 
+    public List<Map<String, Object>> vatReport(int year) throws SQLException {
+        BigDecimal[] input = new BigDecimal[4];
+        BigDecimal[] output = new BigDecimal[4];
+        Arrays.fill(input, BigDecimal.ZERO);
+        Arrays.fill(output, BigDecimal.ZERO);
+        // Settlement entries and their reversals do not belong in a VAT return.
+        String sql = """
+                SELECT (e.accounting_month - 1) / 3 AS quarter_index, a.system_key,
+                       SUM(l.debit_amount - l.credit_amount) AS movement
+                FROM dbo.accounting_lines l
+                JOIN dbo.accounts a ON a.id = l.account_id
+                JOIN dbo.accounting_entries e ON e.id = l.entry_id
+                LEFT JOIN dbo.accounting_entries original ON original.id = e.correction_of_entry_id
+                WHERE e.accounting_year = ? AND a.system_key IN ('INPUT_VAT', 'OUTPUT_VAT')
+                  AND e.entry_type <> 'VAT_PAYMENT'
+                  AND NOT (e.entry_type = 'CORRECTION_REVERSAL'
+                           AND COALESCE(original.entry_type, '') = 'VAT_PAYMENT')
+                GROUP BY (e.accounting_month - 1) / 3, a.system_key
+                """;
+        try (Connection connection = Database.connection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, year);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    int quarter = rs.getInt("quarter_index");
+                    BigDecimal movement = rs.getBigDecimal("movement");
+                    if ("INPUT_VAT".equals(rs.getString("system_key"))) input[quarter] = movement;
+                    else output[quarter] = movement.negate();
+                }
+            }
+        }
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            rows.add(Map.of("quarter", i + 1, "inputVat", money(input[i]),
+                    "outputVat", money(output[i]), "payableVat", money(output[i].subtract(input[i]))));
+        }
+        return rows;
+    }
+
+    public Map<String, Object> bankReport(int year) throws SQLException {
+        LocalDate start = LocalDate.of(year, 1, 1);
+        BigDecimal opening = BigDecimal.ZERO;
+        BigDecimal[] movements = new BigDecimal[12];
+        Arrays.fill(movements, BigDecimal.ZERO);
+        String sql = """
+                SELECT month_index, SUM(movement) AS movement
+                FROM (
+                    SELECT CASE WHEN e.entry_date < ? THEN 0 ELSE e.accounting_month END AS month_index,
+                           l.debit_amount - l.credit_amount AS movement
+                    FROM dbo.accounting_lines l
+                    JOIN dbo.accounts a ON a.id = l.account_id
+                    JOIN dbo.accounting_entries e ON e.id = l.entry_id
+                    WHERE a.system_key = 'BANK' AND e.entry_date < ?
+                ) monthly_movements
+                GROUP BY month_index
+                """;
+        try (Connection connection = Database.connection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDate(1, java.sql.Date.valueOf(start));
+            statement.setDate(2, java.sql.Date.valueOf(start.plusYears(1)));
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    int month = rs.getInt("month_index");
+                    if (month == 0) opening = rs.getBigDecimal("movement");
+                    else movements[month - 1] = rs.getBigDecimal("movement");
+                }
+            }
+        }
+        BigDecimal balance = opening;
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            balance = balance.add(movements[i]);
+            rows.add(Map.of("month", i + 1, "closingDate", start.plusMonths(i + 1).minusDays(1),
+                    "movement", money(movements[i]), "closingBalance", money(balance)));
+        }
+        return Map.of("year", year, "openingBalance", money(opening), "rows", rows);
+    }
+
     public List<AccountRecord> findAccounts(boolean activeOnly) throws SQLException {
         String sql = """
                 SELECT id, account_number, account_name, account_type, system_key, is_active, created_at, updated_at

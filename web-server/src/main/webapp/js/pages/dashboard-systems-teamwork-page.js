@@ -773,7 +773,9 @@ function resolveLookupList(map, rawValue) {
 
     return {
         label: items.map((item) => item.label).join(", "),
-        title: items.map((item) => item.title).join(", "),
+        title: items.map((item) => item.title === item.label
+            ? item.label
+            : `${item.label}: ${item.title}`).join("\n"),
         color: ""
     };
 }
