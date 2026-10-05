@@ -53,21 +53,6 @@
             </div>
 
             <div class="relationdiagram-info-bar" aria-label="Relation diagram information">
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Stakeholder requirements:</span>
-                    <strong id="stakeholderRequirementCount">—</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">System requirements:</span>
-                    <strong id="systemRequirementCount">—</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Physical Structures:</span>
-                    <strong id="systemsBreakdownCount">—</strong>
-                </div>
-
                 <div class="relationdiagram-legend" aria-label="Relation diagram color legend">
                     <span class="relationdiagram-legend-item relationdiagram-legend-item-normal">
                         <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-normal"></span>
@@ -160,7 +145,8 @@
                 <div class="relationdiagram-frame" id="relationdiagramFrame" aria-label="Relation diagram frame">
                     <div class="relationdiagram-column relationdiagram-column-left" aria-label="Stakeholder requirements">
                         <div class="relationdiagram-column-header">
-                            Stakeholder Requirements
+                            <span>Stakeholder Requirements</span>
+                            <strong class="relationdiagram-column-count" id="stakeholderRequirementCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="stakeholderRequirementsList"></div>
                     </div>
@@ -171,7 +157,8 @@
 
                     <div class="relationdiagram-column relationdiagram-column-middle" aria-label="System requirements">
                         <div class="relationdiagram-column-header">
-                            Systems Requirements
+                            <span>Systems Requirements</span>
+                            <strong class="relationdiagram-column-count" id="systemRequirementCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
                     </div>
@@ -182,7 +169,8 @@
 
                     <div class="relationdiagram-column relationdiagram-column-right" aria-label="Systems breakdown">
                         <div class="relationdiagram-column-header">
-                            Physical Structures
+                            <span>Physical Structures</span>
+                            <strong class="relationdiagram-column-count" id="systemsBreakdownCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="systemsBreakdownsList"></div>
                     </div>

@@ -51,31 +51,6 @@
             </div>
 
             <div class="relationdiagram-info-bar" aria-label="Relation diagram information">
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Stakeholder requirements:</span>
-                    <strong id="stakeholderRequirementCount">-</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">System requirements:</span>
-                    <strong id="systemRequirementCount">-</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Functional structures:</span>
-                    <strong id="functionalStructureCount">-</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Logical structures:</span>
-                    <strong id="logicalStructureCount">-</strong>
-                </div>
-
-                <div class="relationdiagram-info-item">
-                    <span class="relationdiagram-info-label">Physical structures:</span>
-                    <strong id="physicalStructureCount">-</strong>
-                </div>
-
                 <div class="relationdiagram-legend" aria-label="Relation diagram color legend">
                     <span class="relationdiagram-legend-item relationdiagram-legend-item-normal">
                         <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-normal"></span>
@@ -176,35 +151,50 @@
             <div class="page-body relationdiagram-body">
                 <div class="relationdiagram-frame" id="relationdiagramFrame" aria-label="Relation diagram frame">
                     <div class="relationdiagram-column" data-entity-type="stakeholder" aria-label="Stakeholder requirements">
-                        <div class="relationdiagram-column-header">Stakeholder Requirements</div>
+                        <div class="relationdiagram-column-header">
+                            <span>Stakeholder Requirements</span>
+                            <strong class="relationdiagram-column-count" id="stakeholderRequirementCount">-</strong>
+                        </div>
                         <div class="relationdiagram-list" id="stakeholderRequirementsList"></div>
                     </div>
 
                     <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
                     <div class="relationdiagram-column" data-entity-type="system" aria-label="System requirements">
-                        <div class="relationdiagram-column-header">Systems Requirements</div>
+                        <div class="relationdiagram-column-header">
+                            <span>Systems Requirements</span>
+                            <strong class="relationdiagram-column-count" id="systemRequirementCount">-</strong>
+                        </div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
                     </div>
 
                     <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
                     <div class="relationdiagram-column" data-entity-type="functional" aria-label="Functional structures">
-                        <div class="relationdiagram-column-header">Functional Structures</div>
+                        <div class="relationdiagram-column-header">
+                            <span>Functional Structures</span>
+                            <strong class="relationdiagram-column-count" id="functionalStructureCount">-</strong>
+                        </div>
                         <div class="relationdiagram-list" id="functionalStructuresList"></div>
                     </div>
 
                     <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
                     <div class="relationdiagram-column" data-entity-type="logical" aria-label="Logical structures">
-                        <div class="relationdiagram-column-header">Logical Structures</div>
+                        <div class="relationdiagram-column-header">
+                            <span>Logical Structures</span>
+                            <strong class="relationdiagram-column-count" id="logicalStructureCount">-</strong>
+                        </div>
                         <div class="relationdiagram-list" id="logicalStructuresList"></div>
                     </div>
 
                     <div class="relationdiagram-canvas-wrap" aria-hidden="true"></div>
 
                     <div class="relationdiagram-column" data-entity-type="physical" aria-label="Physical structures">
-                        <div class="relationdiagram-column-header">Physical Structures</div>
+                        <div class="relationdiagram-column-header">
+                            <span>Physical Structures</span>
+                            <strong class="relationdiagram-column-count" id="physicalStructureCount">-</strong>
+                        </div>
                         <div class="relationdiagram-list" id="physicalStructuresList"></div>
                     </div>
 

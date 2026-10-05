@@ -314,6 +314,77 @@ body.theme-black{
     background: #000000;
 }
 
+/* Theme colors for badges and historical-version warnings. */
+:root,
+body.theme-light{
+    --app-count-badge-background: #16231d;
+    --app-count-badge-foreground: #ffffff;
+    --app-readonly-banner-background: #fff3cd;
+    --app-readonly-banner-border: #a16207;
+    --app-readonly-banner-foreground: #713f12;
+    --app-role-default-background: #303846;
+    --app-role-default-border: #303846;
+    --app-role-default-foreground: #ffffff;
+    --app-role-system-admin-background: #003b80;
+    --app-role-system-admin-border: #003b80;
+    --app-role-system-admin-foreground: #ffffff;
+    --app-role-customer-admin-background: #00552e;
+    --app-role-customer-admin-border: #00552e;
+    --app-role-customer-admin-foreground: #ffffff;
+    --app-role-member-background: #703f00;
+    --app-role-member-border: #703f00;
+    --app-role-member-foreground: #ffffff;
+    --app-role-invalid-background: #8f1023;
+    --app-role-invalid-border: #8f1023;
+    --app-role-invalid-foreground: #ffffff;
+}
+
+body.theme-blue{
+    --app-readonly-banner-background: rgba(251,191,36,.12);
+    --app-count-badge-background: #bcd7ff;
+    --app-count-badge-foreground: #071426;
+    --app-readonly-banner-border: rgba(251,191,36,.45);
+    --app-readonly-banner-foreground: #fde68a;
+    --app-role-default-background: #c5d3e3;
+    --app-role-default-border: #c5d3e3;
+    --app-role-default-foreground: #000000;
+    --app-role-system-admin-background: #80c7ff;
+    --app-role-system-admin-border: #80c7ff;
+    --app-role-system-admin-foreground: #000000;
+    --app-role-customer-admin-background: #65e6ad;
+    --app-role-customer-admin-border: #65e6ad;
+    --app-role-customer-admin-foreground: #000000;
+    --app-role-member-background: #ffce55;
+    --app-role-member-border: #ffce55;
+    --app-role-member-foreground: #000000;
+    --app-role-invalid-background: #ff9aaa;
+    --app-role-invalid-border: #ff9aaa;
+    --app-role-invalid-foreground: #000000;
+}
+
+body.theme-black{
+    --app-readonly-banner-background: rgba(251,191,36,.12);
+    --app-count-badge-background: #ffffff;
+    --app-count-badge-foreground: #000000;
+    --app-readonly-banner-border: rgba(251,191,36,.45);
+    --app-readonly-banner-foreground: #fde68a;
+    --app-role-default-background: #ededed;
+    --app-role-default-border: #ededed;
+    --app-role-default-foreground: #000000;
+    --app-role-system-admin-background: #42bfff;
+    --app-role-system-admin-border: #42bfff;
+    --app-role-system-admin-foreground: #000000;
+    --app-role-customer-admin-background: #38ed8b;
+    --app-role-customer-admin-border: #38ed8b;
+    --app-role-customer-admin-foreground: #000000;
+    --app-role-member-background: #ffe040;
+    --app-role-member-border: #ffe040;
+    --app-role-member-foreground: #000000;
+    --app-role-invalid-background: #ff7f94;
+    --app-role-invalid-border: #ff7f94;
+    --app-role-invalid-foreground: #000000;
+}
+
 *{
     box-sizing: border-box;
 }
