@@ -102,6 +102,7 @@ abstract public class AbstractMoveEntity {
     }
 
     private String calculateNewCode(String currentCode, String sourceParentCode, String newParentCode) {
+
         if (currentCode.equals(sourceParentCode)) {
             return newParentCode;
         }

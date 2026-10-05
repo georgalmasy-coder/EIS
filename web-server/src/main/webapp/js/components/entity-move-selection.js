@@ -156,6 +156,7 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
 
     async function confirmMove(dialog) {
         const confirmButton = dialog.querySelector("[data-move-confirm]");
+        let errorMessage = "The entity could not be moved. Please try again.";
         confirmButton.disabled = true;
         try {
             const moveEndpoint = MOVE_ENDPOINTS[entityType];
@@ -176,11 +177,16 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
             });
             const responseText = (await response.text()).trim();
             if (!response.ok || responseText !== "OK") {
-                throw new Error(responseText || `Move failed (${response.status}).`);
+                if (response.headers.get("Content-Type")?.toLowerCase().startsWith("text/plain")
+                    && responseText.startsWith("The entity could not be moved due to : ")) {
+                    errorMessage = responseText;
+                }
+                throw new Error(errorMessage);
             }
             window.location.reload();
         } catch (error) {
-            window.alert(error.message || "The entity could not be moved.");
+            console.error("Failed to move entity", error);
+            window.alert(errorMessage);
             confirmButton.disabled = false;
         }
     }

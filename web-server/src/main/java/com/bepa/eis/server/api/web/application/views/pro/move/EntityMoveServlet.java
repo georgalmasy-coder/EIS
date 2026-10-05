@@ -51,7 +51,11 @@ public class EntityMoveServlet extends GenericServlet {
 
         } catch (Throwable throwable) {
             getIncidentProvider().createProviderServiceIncident(SeverityType.HIGH, module, throwable);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, throwable.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/plain; charset=UTF-8");
+            response.setHeader("Cache-Control", "no-store");
+            response.getWriter().write("The entity could not be moved due to : " + throwable.getMessage());
             return;
         }
 
@@ -82,7 +86,7 @@ public class EntityMoveServlet extends GenericServlet {
             } catch (SQLException rollbackError) {
                 log.warn("Rollback failed while saving interface record", rollbackError);
             }
-            throw new RuntimeException(ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             try {
                 connection.setAutoCommit(originalAutoCommit);
