@@ -147,7 +147,7 @@ body.dashboard-systems-teamwork-document {
 
 .dashboard-systems-teamwork-filter-group {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
@@ -320,6 +320,35 @@ body.dashboard-systems-teamwork-document {
     text-align: left;
     font-size: 0.82rem;
     box-sizing: border-box;
+}
+
+.dashboard-systems-teamwork-sort-button {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0 10px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+}
+
+.dashboard-systems-teamwork-header-cell--center .dashboard-systems-teamwork-sort-button {
+    justify-content: center;
+}
+
+.dashboard-systems-teamwork-sort-button:hover {
+    background: var(--app-accent-soft);
+}
+
+.dashboard-systems-teamwork-sort-button:focus-visible {
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: -2px;
 }
 
 .dashboard-systems-teamwork-resizable-th {
@@ -508,6 +537,22 @@ body.dashboard-systems-teamwork-document {
     word-break: break-word;
     font-weight: 650;
     line-height: 1.08;
+}
+
+.dashboard-systems-teamwork-classification-code {
+    cursor: grab;
+    user-select: none;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.dashboard-systems-teamwork-classification-code:hover {
+    background: var(--app-accent-soft);
+    border-radius: 3px;
+}
+
+.dashboard-systems-teamwork-classification-code.is-dragging {
+    opacity: 0.7;
 }
 
 .dashboard-systems-teamwork-dual-arrow {

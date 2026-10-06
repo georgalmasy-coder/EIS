@@ -11,7 +11,7 @@ import {getAttribute, getChildText, hasXmlParseError} from "../core/xml.js";
 const DASHBOARD_ENDPOINT = "/master/systemsteamwork?cmd=overview";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 const STORAGE_KEY = "basis.dashboard.systems.teamwork.tableColumnWidths";
-const FILTER_TYPES = ["trl", "owner", "department"];
+const FILTER_TYPES = ["trl", "owner", "department", "classification", "irl"];
 
 const DEFAULT_COLUMN_WIDTHS = [84, 62, 170, 120, 112, 150, 140, 112, 84, 62, 170, 120, 112];
 const STICKY_COLUMN_COUNT = 5;
@@ -42,10 +42,13 @@ const state = {
     },
     dashboard: null,
     columnWidths: [...DEFAULT_COLUMN_WIDTHS],
+    sort: { key: "", direction: "asc" },
     filters: {
         trl: new Map(),
         owner: new Map(),
-        department: new Map()
+        department: new Map(),
+        classification: new Map(),
+        irl: new Map()
     }
 };
 
@@ -228,7 +231,7 @@ function renderDashboard(dashboard) {
     renderHeader(header);
     renderFilterBar();
 
-    const visibleRecords = filterInterfaces(dashboard.interfaces);
+    const visibleRecords = sortInterfaces(filterInterfaces(dashboard.interfaces), dashboard.lookup);
     renderBody(tableBody, dashboard, visibleRecords);
     updateTableFooter(visibleRecords.length, dashboard.interfaces.length);
     applyColumnWidths();
@@ -257,7 +260,7 @@ function handleDownloadPdf() {
         return;
     }
 
-    const visibleRecords = filterInterfaces(state.dashboard.interfaces);
+    const visibleRecords = sortInterfaces(filterInterfaces(state.dashboard.interfaces), state.dashboard.lookup);
     const hasFiltersApplied = hasActiveFilters();
 
     downloadDashboardSystemsTeamworkPdf({
@@ -294,11 +297,22 @@ function renderHeader(header) {
         cell.style.maxWidth = `${state.columnWidths[index]}px`;
         cell.classList.add("dashboard-systems-teamwork-resizable-th");
 
-        if (column.dual) {
-            cell.appendChild(buildHeaderContent(column.label, column.sublabel || ""));
-        } else {
-            cell.appendChild(buildHeaderContent(column.label, ""));
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dashboard-systems-teamwork-sort-button";
+        const active = state.sort.key === column.key;
+        const nextDirection = active && state.sort.direction === "asc" ? "descending" : "ascending";
+        const group = index < 5 ? "From " : index > 7 ? "To " : "";
+        button.setAttribute("aria-label", `Sort ${group}${column.label} ${nextDirection}`);
+        button.appendChild(buildHeaderContent(column.label, column.sublabel || ""));
+        if (active) {
+            const indicator = document.createElement("span");
+            indicator.textContent = state.sort.direction === "asc" ? "\u2191" : "\u2193";
+            indicator.setAttribute("aria-hidden", "true");
+            button.appendChild(indicator);
         }
+        button.addEventListener("click", () => toggleSort(column.key));
+        cell.appendChild(button);
 
         if (column.center) {
             cell.classList.add("dashboard-systems-teamwork-header-cell--center");
@@ -315,6 +329,56 @@ function renderHeader(header) {
 
     groupRow.replaceChildren(...groupRowCells);
     header.replaceChildren(groupRow, columnRow);
+}
+
+function toggleSort(key) {
+    state.sort = {
+        key,
+        direction: state.sort.key === key && state.sort.direction === "asc" ? "desc" : "asc"
+    };
+    if (state.dashboard) {
+        renderDashboard(state.dashboard);
+        document.querySelector(`.dashboard-systems-teamwork-header-cell--${key} button`)?.focus();
+    }
+}
+
+function sortInterfaces(records, lookup) {
+    const column = COLUMN_DEFINITIONS.find((item) => item.key === state.sort.key);
+    if (!column) return records;
+    const collator = new Intl.Collator("da", { numeric: true, sensitivity: "base" });
+    const multiplier = state.sort.direction === "desc" ? -1 : 1;
+    return [...records].sort((left, right) => {
+        const leftValues = getSortValues(left, column, lookup);
+        const rightValues = getSortValues(right, column, lookup);
+        for (let index = 0; index < leftValues.length; index++) {
+            const a = leftValues[index];
+            const b = rightValues[index];
+            // Missing values sort first ascending and last descending.
+            const comparison = !a || !b
+                ? (a ? 1 : b ? -1 : 0) * multiplier
+                : collator.compare(a, b) * multiplier;
+            if (comparison) return comparison;
+        }
+        return 0;
+    });
+}
+
+function getSortValues(record, column, lookup) {
+    if (column.dual) {
+        return (column.type === "classification"
+            ? ["fromClassificationIds", "toClassificationIds"]
+            : ["fromIrlId", "toIrlId"]).map((key) => {
+            const raw = getRecordValue(record, key);
+            if (!raw) return "";
+            return column.type === "classification"
+                ? resolveLookupList(lookup.classificationById, raw).label
+                : resolveLookupValue(lookup.irlById, raw).label;
+        });
+    }
+    const raw = getRecordValue(record, column.source);
+    return [raw && column.lookup
+        ? resolveLookupValue(lookup[`${column.lookup}ById`], raw).label
+        : raw];
 }
 
 function createGroupHeaderCell(label, colspan) {
@@ -437,8 +501,8 @@ function buildDualCell(record, column, lookup) {
         ? resolveLookupList(lookup.classificationById, bottomRaw)
         : resolveLookupValue(lookup.irlById, bottomRaw);
 
-    const topLine = buildDualLine(topResolved, "right");
-    const bottomLine = buildDualLine(bottomResolved, "left");
+    const topLine = buildDualLine(topResolved, "right", column.type === "irl" ? topRaw : "");
+    const bottomLine = buildDualLine(bottomResolved, "left", column.type === "irl" ? bottomRaw : "");
 
     const wrapper = document.createElement("div");
     wrapper.className = "dashboard-systems-teamwork-dual";
@@ -454,12 +518,51 @@ function buildDualCell(record, column, lookup) {
     return td;
 }
 
-function buildDualLine(resolved, direction) {
+function buildDualLine(resolved, direction, irlId = "") {
     const line = document.createElement("div");
     line.className = "dashboard-systems-teamwork-dual-line";
 
     line.appendChild(buildArrow(direction));
-    line.appendChild(resolved.color ? buildLookupPill(resolved) : buildDualText(resolved));
+    if (resolved.items?.length) {
+        const codes = document.createElement("span");
+        codes.className = "dashboard-systems-teamwork-dual-text";
+        resolved.items.forEach((item, index) => {
+            if (index > 0) {
+                codes.appendChild(document.createTextNode(", "));
+            }
+            const code = buildDualText(item);
+            code.classList.add("dashboard-systems-teamwork-classification-code");
+            code.draggable = true;
+            code.addEventListener("dragstart", (event) => {
+                code.classList.add("is-dragging");
+                event.dataTransfer.effectAllowed = "copy";
+                event.dataTransfer.setData("text/plain", JSON.stringify({
+                    filterType: "classification",
+                    ...item
+                }));
+            });
+            code.addEventListener("dragend", () => code.classList.remove("is-dragging"));
+            codes.appendChild(code);
+        });
+        line.appendChild(codes);
+    } else {
+        const value = resolved.color ? buildLookupPill(resolved) : buildDualText(resolved);
+        if (irlId) {
+            value.classList.add("dashboard-systems-teamwork-cell--draggable");
+            value.draggable = true;
+            value.addEventListener("dragstart", (event) => {
+                value.classList.add("is-dragging");
+                event.dataTransfer.effectAllowed = "copy";
+                event.dataTransfer.setData("text/plain", JSON.stringify({
+                    filterType: "irl",
+                    id: irlId,
+                    ...resolved
+                }));
+            });
+            value.addEventListener("dragend", () => value.classList.remove("is-dragging"));
+        }
+        line.appendChild(value);
+    }
     return line;
 }
 
@@ -514,6 +617,16 @@ function renderFilterBar() {
             key: "department",
             elementId: "dashboardSystemsTeamworkFilterDepartment",
             placeholder: "Drop Department here"
+        },
+        {
+            key: "classification",
+            elementId: "dashboardSystemsTeamworkFilterClassification",
+            placeholder: "Drop Class here"
+        },
+        {
+            key: "irl",
+            elementId: "dashboardSystemsTeamworkFilterIrl",
+            placeholder: "Drop IRL here"
         }
     ];
 
@@ -700,7 +813,9 @@ function filterInterfaces(records) {
     return records.filter((record) => {
         return matchesFilter(record, "trl", "fromTrlId", "toTrlId")
             && matchesFilter(record, "owner", "fromSystemOwnerId", "toSystemOwnerId")
-            && matchesFilter(record, "department", "fromSystemDepartmentId", "toSystemDepartmentId");
+            && matchesFilter(record, "department", "fromSystemDepartmentId", "toSystemDepartmentId")
+            && matchesClassificationFilter(record)
+            && matchesFilter(record, "irl", "fromIrlId", "toIrlId");
     });
 }
 
@@ -722,6 +837,13 @@ function matchesFilter(record, filterType, fromKey, toKey) {
     const toValue = getRecordValue(record, toKey);
 
     return Boolean(fromValue && selected.has(fromValue)) || Boolean(toValue && selected.has(toValue));
+}
+
+function matchesClassificationFilter(record) {
+    const selected = state.filters.classification;
+    return !selected.size || ["fromClassificationIds", "toClassificationIds"].some((key) =>
+        parseClassificationIds(getRecordValue(record, key)).some((id) => selected.has(id))
+    );
 }
 
 function getFilterTypeForColumn(column) {
@@ -759,19 +881,24 @@ function resolveLookupValue(map, id) {
     };
 }
 
-function resolveLookupList(map, rawValue) {
-    const ids = String(rawValue || "")
+function parseClassificationIds(rawValue) {
+    return String(rawValue || "")
         .split(",")
         .map((value) => value.trim())
         .filter(Boolean);
+}
+
+function resolveLookupList(map, rawValue) {
+    const ids = parseClassificationIds(rawValue);
 
     if (!ids.length) {
         return { label: "--", title: "--", color: "" };
     }
 
-    const items = ids.map((id) => resolveLookupValue(map, id));
+    const items = ids.map((id) => ({ id, ...resolveLookupValue(map, id) }));
 
     return {
+        items,
         label: items.map((item) => item.label).join(", "),
         title: items.map((item) => item.title === item.label
             ? item.label
