@@ -1,15 +1,8 @@
-import {
-    applySortIndicators,
-    compareSortableValues,
-    nextSortState
-} from "./sortable-table.js";
-import { parseDateTime } from "../core/date.js";
-import { escapeHtml } from "../core/html.js";
-import { isTruthy } from "../core/utils.js";
-import {
-    getDirectText,
-    textOf
-} from "../core/xml.js";
+import {applySortIndicators, compareSortableValues, nextSortState} from "./sortable-table.js";
+import {parseDateTime} from "../core/date.js";
+import {escapeHtml} from "../core/html.js";
+import {isTruthy} from "../core/utils.js";
+import {getDirectText, textOf} from "../core/xml.js";
 
 const DEFAULT_CONFIG = {
     bodyId: "historyBody",

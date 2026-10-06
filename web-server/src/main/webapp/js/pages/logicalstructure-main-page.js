@@ -1,14 +1,14 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu, menuHasRoute } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { createExportDialog } from "../components/export-dialog.js";
-import { createImportDialog } from "../components/import-dialog.js";
-import { createEntityMoveSelection } from "../components/entity-move-selection.js";
-import { downloadLogicalStructureDiagramPdf } from "./logicalstructure-diagram-pdf.js";
-import { setText } from "../core/dom.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu, menuHasRoute} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {createExportDialog} from "../components/export-dialog.js";
+import {createImportDialog} from "../components/import-dialog.js";
+import {createEntityMoveSelection} from "../components/entity-move-selection.js";
+import {downloadLogicalStructureDiagramPdf} from "./logicalstructure-diagram-pdf.js";
+import {setText} from "../core/dom.js";
 import {
     ensureDiagramStatusControl,
     getStatusFieldOptions,
@@ -17,19 +17,15 @@ import {
     renderDiagramStatusBars,
     renderDiagramStatusMenu
 } from "../core/diagram-status.js";
-import {
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError
-} from "../core/xml.js";
-import { buildColorChipStyle, sanitizeCssColor } from "../core/css.js";
+import {getDirectChild, getDirectText, hasXmlParseError} from "../core/xml.js";
+import {buildColorChipStyle, sanitizeCssColor} from "../core/css.js";
 import {
     calculateLevelFromRequirementCode,
     getParentRequirementCode,
     normalizeRequirementCode
 } from "../core/requirement-code.js";
-import { escapeHtml } from "../core/html.js";
-import { isFalsy, isTruthy } from "../core/utils.js";
+import {escapeHtml} from "../core/html.js";
+import {isFalsy, isTruthy} from "../core/utils.js";
 
 const LIST_URL = "/pro/logicalstructure?cmd=list";
 const EDIT_PAGE_URL = "/web/view?page=logicalstructure-edit";

@@ -1,7 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
-import com.bepa.eis.common.dto.customer.CustomerWorkflowEvent;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.customer.CustomerWorkflowEvent;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,12 +1,6 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
-import {
-    drawLineChart,
-    renderDonut,
-    renderLegend,
-    setBar,
-    setText
-} from "/js/admin-dashboard/dashboard-charts.js";
-import { escapeHtml } from "/js/core/html.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
+import {drawLineChart, renderDonut, renderLegend, setBar, setText} from "/js/admin-dashboard/dashboard-charts.js";
+import {escapeHtml} from "/js/core/html.js";
 
 const DATA_URL = "/admin/api/dashboard/integrations";
 const REFRESH_MS = 30000;

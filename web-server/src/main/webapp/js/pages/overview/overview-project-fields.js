@@ -1,20 +1,16 @@
 import {
+    fieldControl,
     fieldDisplayLength,
     fieldEditable,
     fieldLabel,
-    fieldRequired,
-    fieldVisible,
-    fieldControl,
     fieldMaxLength,
-    fieldMinLength
+    fieldMinLength,
+    fieldRequired,
+    fieldVisible
 } from "../../core/field-display.js";
-import {
-    toDateInputValue,
-    toDateTimeLocalValue,
-    toTimeInputValue
-} from "../../core/date.js";
-import { getDirectChild } from "../../core/xml.js";
-import { isTruthy } from "../../core/utils.js";
+import {toDateInputValue, toDateTimeLocalValue, toTimeInputValue} from "../../core/date.js";
+import {getDirectChild} from "../../core/xml.js";
+import {isTruthy} from "../../core/utils.js";
 
 function isVisibleField(node) {
     return fieldVisible(node) && fieldControl(node) !== "hidden";

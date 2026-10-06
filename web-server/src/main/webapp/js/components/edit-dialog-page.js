@@ -1,4 +1,10 @@
-import { getEditDialogContext, isEditDialogMode, requestEditDialogClose, requestEditDialogOpenHistory, requestEditDialogSaved } from "./edit-dialog-bridge.js";
+import {
+    getEditDialogContext,
+    isEditDialogMode,
+    requestEditDialogClose,
+    requestEditDialogOpenHistory,
+    requestEditDialogSaved
+} from "./edit-dialog-bridge.js";
 
 const COMMON_SHELL_SELECTORS = [
     ".topbar",

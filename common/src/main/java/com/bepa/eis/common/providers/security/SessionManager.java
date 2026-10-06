@@ -1,8 +1,8 @@
 package com.bepa.eis.common.providers.security;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

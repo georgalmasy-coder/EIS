@@ -1,7 +1,7 @@
-import { nowIsoLocal, parseDateTime } from "../core/date.js";
-import { buildEntityAttachmentsXml, parseEntityAttachmentsFromDoc } from "../core/entity-xml.js";
-import { formatFileSize } from "../core/format.js";
-import { escapeHtml } from "../core/html.js";
+import {nowIsoLocal, parseDateTime} from "../core/date.js";
+import {buildEntityAttachmentsXml, parseEntityAttachmentsFromDoc} from "../core/entity-xml.js";
+import {formatFileSize} from "../core/format.js";
+import {escapeHtml} from "../core/html.js";
 
 const DEFAULT_MAX_DESCRIPTION_LENGTH = 255;
 

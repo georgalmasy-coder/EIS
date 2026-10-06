@@ -4,12 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerToken;
 import com.bepa.eis.common.dto.customer.CustomerWorkflow;
 import com.bepa.eis.common.dto.customer.CustomerWorkflowEvent;
-import com.bepa.eis.common.enums.customer.CustomerStatus;
-import com.bepa.eis.common.enums.customer.CustomerTokenType;
-import com.bepa.eis.common.enums.customer.CustomerWorkflowEventType;
-import com.bepa.eis.common.enums.customer.CustomerWorkflowState;
-import com.bepa.eis.common.enums.customer.CustomerWorkflowStatus;
-import com.bepa.eis.common.providers.customer.CustomerWorkflowTimingProvider;
+import com.bepa.eis.common.enums.customer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

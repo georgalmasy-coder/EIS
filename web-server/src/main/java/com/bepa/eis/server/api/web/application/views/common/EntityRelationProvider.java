@@ -1,17 +1,18 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.EntityRelationType;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.RelatedEntityCode;
+import com.bepa.eis.server.dataprovider.fields.strings.RelatedEntityName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
-import com.bepa.eis.common.providers.GenericProvider;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

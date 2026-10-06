@@ -1,9 +1,9 @@
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { applyTopPanelFromDocument } from "../core/page-header.js";
-import { closeDialogElement, clearChildren, setText, showDialog } from "../core/dom.js";
-import { escapeXml, getAttribute, getDirectChild, getDirectChildren, getChildText, hasXmlParseError, parseXml } from "../core/xml.js";
-import { fetchXml, postXml } from "../core/http.js";
+import {initMenu} from "../components/menu.js";
+import {mountTopbar} from "../components/topbar.js";
+import {applyTopPanelFromDocument} from "../core/page-header.js";
+import {closeDialogElement, setText, showDialog} from "../core/dom.js";
+import {escapeXml, getAttribute, getChildText, getDirectChild, getDirectChildren} from "../core/xml.js";
+import {fetchXml, postXml} from "../core/http.js";
 
 const DATA_URL = "/api/admin/subscription-editor";
 const EUROPEAN_CURRENCIES = [

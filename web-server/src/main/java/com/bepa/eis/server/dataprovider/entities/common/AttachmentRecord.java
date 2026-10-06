@@ -1,5 +1,6 @@
 package com.bepa.eis.server.dataprovider.entities.common;
 
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
@@ -7,7 +8,6 @@ import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.time.LocalDateTime;
 import java.util.Base64;

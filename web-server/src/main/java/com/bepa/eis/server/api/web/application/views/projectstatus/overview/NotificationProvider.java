@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.NotificationId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.NotificationType;
@@ -9,11 +10,13 @@ import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
 import com.bepa.eis.server.dataprovider.fields.strings.NotificationText;
 import com.bepa.eis.server.dataprovider.fields.timestamp.AcknowledgeDateTime;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
-import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class NotificationProvider extends GenericProvider {
 

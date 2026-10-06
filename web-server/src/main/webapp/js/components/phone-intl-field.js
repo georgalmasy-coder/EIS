@@ -1,4 +1,4 @@
-import { escapeHtml } from "../core/html.js";
+import {escapeHtml} from "../core/html.js";
 
 const PHONE_COUNTRIES = ["dk", "se", "no", "de", "us", "gb", "fr", "nl", "be", "es", "it", "fi", "pl", "pt", "ch", "at", "ie", "is"];
 const PHONE_INSTANCE_KEY = "__eisIntlPhoneInstance";

@@ -1,9 +1,8 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu, menuHasRoute } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js?rev=requirements-help-2026-10-02-2";
-import { StakeholderRequirementController } from "./requirements-stakeholder.js?rev=requirements-help-2026-10-02-2";
-import { SystemRequirementController } from "./requirements-system.js?rev=requirements-help-2026-10-02-2";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu, menuHasRoute} from "../components/menu.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js?rev=requirements-help-2026-10-02-2";
+import {StakeholderRequirementController} from "./requirements-stakeholder.js?rev=requirements-help-2026-10-02-2";
+import {SystemRequirementController} from "./requirements-system.js?rev=requirements-help-2026-10-02-2";
 
 const state = {
     activeTab: "stakeholder", // "stakeholder" or "system"

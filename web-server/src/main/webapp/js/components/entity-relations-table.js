@@ -1,12 +1,8 @@
-import { nowIsoLocal, parseDateTime } from "../core/date.js";
-import {
-    appendTextElement,
-    getDirectChild,
-    textOf
-} from "../core/xml.js";
-import { escapeHtml } from "../core/html.js";
-import { openEditDialog } from "./edit-dialog.js";
-import { isEditDialogMode, requestEditDialogOpen } from "./edit-dialog-bridge.js";
+import {nowIsoLocal, parseDateTime} from "../core/date.js";
+import {appendTextElement, getDirectChild, textOf} from "../core/xml.js";
+import {escapeHtml} from "../core/html.js";
+import {openEditDialog} from "./edit-dialog.js";
+import {isEditDialogMode, requestEditDialogOpen} from "./edit-dialog-bridge.js";
 
 const ENTITY_RELATIONS_TABLE_VERSION = "relation-dialog-xml-request-2026-06-24";
 

@@ -1,7 +1,5 @@
 package com.bepa.eis.server.dataprovider.fields.strings.phone;
 
-import com.bepa.eis.server.dataprovider.fields.strings.email.AbstractEmail;
-
 public class UserPhone extends AbstractPhone {
 
     public static String FIELD_NAME = "UserPhone";

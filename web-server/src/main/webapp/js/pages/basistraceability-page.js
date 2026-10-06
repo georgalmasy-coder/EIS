@@ -1,26 +1,12 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { highlightMatchingWords } from "../components/traceability-word-highlights.js";
-import {
-    closeDialogElement,
-    setInputValue,
-    setText,
-    showDialog
-} from "../core/dom.js";
-import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
-import {
-    getAttribute,
-    getBooleanAttribute,
-    getChildText,
-    getNumberAttribute,
-    hasXmlParseError
-} from "../core/xml.js";
-import {
-    getDynamicStyleClass,
-    sanitizeCssColor
-} from "../core/css.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {highlightMatchingWords} from "../components/traceability-word-highlights.js";
+import {closeDialogElement, setInputValue, setText, showDialog} from "../core/dom.js";
+import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
+import {getAttribute, getBooleanAttribute, getChildText, getNumberAttribute, hasXmlParseError} from "../core/xml.js";
+import {getDynamicStyleClass, sanitizeCssColor} from "../core/css.js";
 
 const TRACEABILITY_ENDPOINT = "/basis/basistraceability?cmd=overview";
 let requirementDialogRequest = 0;

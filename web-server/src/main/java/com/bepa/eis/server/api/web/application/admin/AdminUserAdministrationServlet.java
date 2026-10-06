@@ -7,9 +7,10 @@ import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
 import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
 import com.bepa.eis.server.api.DTO.TopPanel;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.enums.theme.Theme;
-import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,11 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
-
-import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 
 @WebServlet(name = "AdminUserAdministrationServlet", urlPatterns = {
         "/api/admin/users"

@@ -1,6 +1,6 @@
-import { renderPieChart } from "../../components/pie-chart.js";
-import { setErrorState, setLoadingState } from "../../core/placeholders.js";
-import { getDirectChild, getDirectChildren } from "../../core/xml.js";
+import {renderPieChart} from "../../components/pie-chart.js";
+import {setErrorState, setLoadingState} from "../../core/placeholders.js";
+import {getDirectChild, getDirectChildren} from "../../core/xml.js";
 
 function normalizeColor(color) {
     const map = {

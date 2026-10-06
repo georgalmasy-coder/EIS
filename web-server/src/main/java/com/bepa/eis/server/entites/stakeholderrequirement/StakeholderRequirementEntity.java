@@ -1,6 +1,8 @@
 package com.bepa.eis.server.entites.stakeholderrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
@@ -9,10 +11,10 @@ import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderR
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.requirement.RequirementStatus;
 import com.bepa.eis.server.dataprovider.fields.lookups.stakeholder.Stakeholder;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
+import com.bepa.eis.server.dataprovider.fields.strings.RequirementName;
+import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;
 

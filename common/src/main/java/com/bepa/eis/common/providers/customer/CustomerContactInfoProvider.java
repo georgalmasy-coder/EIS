@@ -1,8 +1,8 @@
 package com.bepa.eis.common.providers.customer;
 
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerContactInfo;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

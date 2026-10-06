@@ -1,6 +1,6 @@
-import { cssEscape } from "../core/css.js";
-import { getDirectChild } from "../core/xml.js";
-import { initHelpDialog, openHelpDialogForPage } from "./help-dialog.js";
+import {cssEscape} from "../core/css.js";
+import {getDirectChild} from "../core/xml.js";
+import {initHelpDialog, openHelpDialogForPage} from "./help-dialog.js";
 
 let mountedTopbarSearch = null;
 

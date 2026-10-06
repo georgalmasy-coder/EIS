@@ -1,22 +1,12 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { initInterfaceEditDialog, openInterfaceEditDialog } from "../components/interface-edit-dialog.js";
-import {
-    closeDialogElement,
-    setInputValue,
-    setText,
-    showDialog
-} from "../core/dom.js";
-import { formatNumber } from "../core/format.js";
-import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
-import {
-    getAttribute,
-    getChildText,
-    hasXmlParseError,
-    serializeXml
-} from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {initInterfaceEditDialog, openInterfaceEditDialog} from "../components/interface-edit-dialog.js";
+import {closeDialogElement, setInputValue, setText, showDialog} from "../core/dom.js";
+import {formatNumber} from "../core/format.js";
+import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
+import {getAttribute, getChildText, hasXmlParseError, serializeXml} from "../core/xml.js";
 
 const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/master/psys/interfacematrix";
 const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=overview`;

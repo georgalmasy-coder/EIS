@@ -1,8 +1,8 @@
 package com.bepa.eis.common.providers.customer;
 
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerWorkflow;
 import com.bepa.eis.common.dto.customer.CustomerWorkflowEvent;
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowEventType;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowState;

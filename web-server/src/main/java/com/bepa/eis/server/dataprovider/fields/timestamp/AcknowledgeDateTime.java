@@ -1,7 +1,6 @@
 package com.bepa.eis.server.dataprovider.fields.timestamp;
 
 import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
 
 public class AcknowledgeDateTime extends AbstractDateTime {
 

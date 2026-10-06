@@ -1,14 +1,11 @@
 package com.bepa.eis.server.api.web.application.cache;
 
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.DTO.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 

@@ -1,7 +1,6 @@
 package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.DTO.Project;

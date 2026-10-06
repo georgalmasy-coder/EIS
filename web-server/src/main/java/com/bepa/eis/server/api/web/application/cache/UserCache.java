@@ -1,7 +1,5 @@
 package com.bepa.eis.server.api.web.application.cache;
 
-import com.bepa.eis.common.dto.WebSession;
-
 public class UserCache extends GenericLookup {
 
     private static final String LOOKUP_SQL =

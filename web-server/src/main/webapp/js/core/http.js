@@ -1,4 +1,4 @@
-import { parseXml } from "./xml.js";
+import {parseXml} from "./xml.js";
 
 async function requestText(url, options = {}) {
     const response = await fetch(url, options);

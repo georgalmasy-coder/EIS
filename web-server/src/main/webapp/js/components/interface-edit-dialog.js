@@ -1,5 +1,5 @@
-import { closeDialogElement, setInputValue, setText, showDialog } from "../core/dom.js";
-import { serializeXml } from "../core/xml.js";
+import {closeDialogElement, setInputValue, setText, showDialog} from "../core/dom.js";
+import {serializeXml} from "../core/xml.js";
 
 const ENTITY_TYPE_BASE_PATHS = new Map([
     ["2", "/master/psys/interfacematrix"],

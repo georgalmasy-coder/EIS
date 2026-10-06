@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.enums.entity.RelationType;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.*;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
@@ -8,7 +9,6 @@ import com.bepa.eis.server.dataprovider.fields.strings.RelatedEntityTypeName;
 import com.bepa.eis.server.dataprovider.fields.strings.RelationTypeName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
-import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.sql.Timestamp;
 

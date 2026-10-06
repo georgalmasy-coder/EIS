@@ -1,25 +1,20 @@
 package com.bepa.eis.server.api.generic;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.utilities.JsonUtil;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.Part;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 abstract public class GenericImporters {

@@ -1,7 +1,10 @@
 package com.bepa.eis.server.api.web.application.views.projectstatus.overview;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.DTO.*;
+import com.bepa.eis.server.api.DTO.BaselineElements;
+import com.bepa.eis.server.api.DTO.Project;
+import com.bepa.eis.server.api.DTO.TopPanel;
+import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.basis.baseline.Baseline;

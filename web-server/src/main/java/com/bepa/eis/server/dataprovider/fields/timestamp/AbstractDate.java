@@ -6,7 +6,6 @@ import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 

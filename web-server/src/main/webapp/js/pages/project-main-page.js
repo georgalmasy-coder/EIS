@@ -1,20 +1,13 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { setText } from "../core/dom.js";
-import { escapeHtml } from "../core/html.js";
-import { sanitizeCssColor } from "../core/css.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import {
-    getChildText,
-    getDirectChild,
-    getDirectChildren,
-    getDirectText,
-    hasXmlParseError
-} from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {setText} from "../core/dom.js";
+import {escapeHtml} from "../core/html.js";
+import {sanitizeCssColor} from "../core/css.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {getDirectChild, getDirectChildren, getDirectText, hasXmlParseError} from "../core/xml.js";
 
 const DATA_URL = "/project?cmd=list";
 const EDIT_PROJECT_URL = "/web/view?page=project-edit&mode=edit&id=";
@@ -31,9 +24,9 @@ const STORAGE_KEYS = {
 const state = {
     currentDoc: null,
     topPanel: {
-        customerName: "—",
-        projectName: "—",
-        userName: "—",
+        customerName: "ï¿½",
+        projectName: "ï¿½",
+        userName: "ï¿½",
         workspaceEyebrow: "",
         workspaceHeading: "",
         workspaceHelpText: ""
@@ -57,9 +50,9 @@ function start() {
 }
 
 function initializeShell() {
-    setText("customerName", "—", "");
-    setText("projectName", "—", "");
-    setText("userName", "—", "");
+    setText("customerName", "ï¿½", "");
+    setText("projectName", "ï¿½", "");
+    setText("userName", "ï¿½", "");
     setText("loadStatus", "Loading", "");
 
     initMenu(document);

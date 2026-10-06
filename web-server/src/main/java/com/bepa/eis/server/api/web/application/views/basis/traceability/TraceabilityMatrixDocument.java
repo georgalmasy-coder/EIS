@@ -1,20 +1,20 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
-import com.bepa.eis.common.enums.entity.RelationType;
-import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
-import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;

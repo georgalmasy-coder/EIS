@@ -1,10 +1,7 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { nowIsoLocal, parseDateTime } from "../core/date.js";
-import {
-    buildEntityLinksXml,
-    parseEntityLinksFromDoc
-} from "../core/entity-xml.js";
-import { escapeHtml } from "../core/html.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {nowIsoLocal, parseDateTime} from "../core/date.js";
+import {buildEntityLinksXml, parseEntityLinksFromDoc} from "../core/entity-xml.js";
+import {escapeHtml} from "../core/html.js";
 
 const STORAGE_KEY = "eis.links.tableColumnWidths";
 const DEFAULT_MAX_DESCRIPTION_LENGTH = 4000;

@@ -1,7 +1,7 @@
-import { initMenu, getMenuSection, getTopbarMetadata } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { textOf } from "../core/xml.js";
+import {getMenuSection, getTopbarMetadata, initMenu} from "../components/menu.js";
+import {applyTopbarMetadata} from "../components/topbar.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {textOf} from "../core/xml.js";
 
 async function init() {
     await initMenu();

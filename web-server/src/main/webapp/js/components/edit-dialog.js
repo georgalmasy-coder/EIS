@@ -1,5 +1,5 @@
-import { closeDialogElement } from "../core/dom.js";
-import { getEditDialogMessageSource } from "./edit-dialog-bridge.js";
+import {closeDialogElement} from "../core/dom.js";
+import {getEditDialogMessageSource} from "./edit-dialog-bridge.js";
 
 let dialogSequence = 0;
 const dialogRegistry = new Map();

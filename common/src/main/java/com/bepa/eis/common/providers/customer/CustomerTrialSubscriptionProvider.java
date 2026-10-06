@@ -1,14 +1,12 @@
 package com.bepa.eis.common.providers.customer;
 
-import com.bepa.eis.common.dto.customer.SubscriptionPlan;
-import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerModule;
 import com.bepa.eis.common.dto.customer.CustomerSubscription;
+import com.bepa.eis.common.dto.customer.SubscriptionPlan;
+import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
 import com.bepa.eis.common.enums.customer.CustomerModuleStatus;
 import com.bepa.eis.common.enums.customer.CustomerSubscriptionStatus;
-import com.bepa.eis.common.providers.customer.CustomerWorkflowTimingProvider;
-import com.bepa.eis.common.providers.customer.SubscriptionPlanProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

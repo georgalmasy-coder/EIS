@@ -1,12 +1,11 @@
 package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.DTO.TrlRecord;
 import com.bepa.eis.server.api.web.application.views.basis.systemsbreakdown.SystemBreakdownExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.lookups.system.*;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

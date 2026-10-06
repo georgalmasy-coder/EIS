@@ -1,4 +1,4 @@
-import { escapeHtml } from "../core/html.js";
+import {escapeHtml} from "../core/html.js";
 
 export const PHONE_RULES = [
     { country: "Denmark", code: "+45", min: 8, max: 8, example: "12 34 56 78" },

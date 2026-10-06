@@ -1,22 +1,20 @@
 import {
     buildPdfDocument,
-    downloadBlob,
     clipPdfRect,
-    endPdfClip,
+    downloadBlob,
     drawPdfBackground,
     drawPdfFilledRect,
-    drawPdfMultilineText,
     drawPdfStrokeRect,
     drawPdfText,
     drawPdfTextCentered,
+    endPdfClip,
+    fitPdfTextLines,
     formatGeneratedAt,
     formatPdfNumber,
-    formatRgb,
-    hexToRgb,
-    fitPdfTextLines
+    formatRgb
 } from "../core/pdf.js";
-import { clampNumber } from "../core/utils.js";
-import { getDiagramStatusLines } from "../core/diagram-status.js";
+import {clampNumber} from "../core/utils.js";
+import {getDiagramStatusLines} from "../core/diagram-status.js";
 
 export function downloadFunctionalStructureDiagramPdf({
                                                              tree,

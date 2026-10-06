@@ -2,12 +2,12 @@ package com.bepa.eis.server.api.web.application.misc;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.Subscription;
-import com.bepa.eis.common.enums.menu.MenuItemType;
 import com.bepa.eis.common.enums.menu.MenuIcon;
+import com.bepa.eis.common.enums.menu.MenuItemType;
 import com.bepa.eis.common.enums.user.UserRoles;
-import com.bepa.eis.common.providers.UserProvider;
-import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.UserPreferenceProvider;
+import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.server.api.DTO.CustomerProject;
 import com.bepa.eis.server.api.DTO.Menu;

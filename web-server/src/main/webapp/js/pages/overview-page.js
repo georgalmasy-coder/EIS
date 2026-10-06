@@ -1,23 +1,17 @@
-import { byId } from "../core/dom.js";
-import { fetchXml } from "../core/http.js";
-import { applyTopPanel, setLoadStatus } from "../core/page-header.js";
-import { setErrorState, setLoadingState } from "../core/placeholders.js";
-import { bootstrapPage } from "../core/bootstrap-page.js";
-import { getDirectChild } from "../core/xml.js";
-import { initMenu } from "../components/menu.js";
+import {byId} from "../core/dom.js";
+import {fetchXml} from "../core/http.js";
+import {applyTopPanel, setLoadStatus} from "../core/page-header.js";
+import {setErrorState, setLoadingState} from "../core/placeholders.js";
+import {bootstrapPage} from "../core/bootstrap-page.js";
+import {getDirectChild} from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
 import {
     renderOverviewNotifications,
     setOverviewNotificationsError,
     setOverviewNotificationsLoading
 } from "./overview/overview-notifications.js";
-import {
-    renderOverviewProjectFields
-} from "./overview/overview-project-fields.js";
-import {
-    renderOverviewSrlChart,
-    setOverviewSrlError,
-    setOverviewSrlLoading
-} from "./overview/overview-srl-chart.js";
+import {renderOverviewProjectFields} from "./overview/overview-project-fields.js";
+import {renderOverviewSrlChart, setOverviewSrlError, setOverviewSrlLoading} from "./overview/overview-srl-chart.js";
 
 const DATA_URL = "/project/overview?cmd=overview";
 

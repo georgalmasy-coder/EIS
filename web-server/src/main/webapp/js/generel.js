@@ -1,14 +1,9 @@
-import { byId } from "./core/dom.js";
-import { fetchXml, postXml } from "./core/http.js";
-import { applyTopPanel, setLoadStatus } from "./core/page-header.js";
-import { hideState, setEmptyState, setErrorState, setLoadingState } from "./core/placeholders.js";
-import { bootstrapPage } from "./core/bootstrap-page.js";
-import {
-    escapeXml,
-    getDirectChild,
-    textOf,
-    toBool
-} from "./core/xml.js";
+import {byId} from "./core/dom.js";
+import {fetchXml, postXml} from "./core/http.js";
+import {applyTopPanel, setLoadStatus} from "./core/page-header.js";
+import {hideState, setEmptyState, setErrorState, setLoadingState} from "./core/placeholders.js";
+import {bootstrapPage} from "./core/bootstrap-page.js";
+import {escapeXml, getDirectChild, textOf, toBool} from "./core/xml.js";
 import {
     fieldControl,
     fieldEditable,
@@ -25,18 +20,14 @@ import {
     isSelectField,
     isTextareaField
 } from "./core/field-display.js";
+import {parseDateTime, toDateInputValue, toDateTimeInputValue} from "./core/date.js";
 import {
-    parseDateTime,
-    toDateInputValue,
-    toDateTimeInputValue
-} from "./core/date.js";
-import {
+    applySortIndicators,
     bindSortableHeaders,
     compareSortableValues,
-    nextSortState,
-    applySortIndicators
+    nextSortState
 } from "./components/sortable-table.js";
-import { validateFieldsFromDetailNode } from "./core/validation.js";
+import {validateFieldsFromDetailNode} from "./core/validation.js";
 
 function fieldWidth(field) {
     return field.getAttribute("tableWidth") || "auto";

@@ -1,12 +1,7 @@
-import { fieldDisplayValue, fieldHeader } from "../../core/field-display.js";
-import { formatLocalDateTime, formatFallback } from "../../core/format.js";
-import {
-    hideState,
-    setEmptyState,
-    setErrorState,
-    setLoadingState
-} from "../../core/placeholders.js";
-import { getDirectChild, getDirectChildren, textOf } from "../../core/xml.js";
+import {fieldDisplayValue, fieldHeader} from "../../core/field-display.js";
+import {formatFallback, formatLocalDateTime} from "../../core/format.js";
+import {hideState, setEmptyState, setErrorState, setLoadingState} from "../../core/placeholders.js";
+import {getDirectChild, getDirectChildren, textOf} from "../../core/xml.js";
 import {
     applySortIndicators,
     bindSortableHeaders,

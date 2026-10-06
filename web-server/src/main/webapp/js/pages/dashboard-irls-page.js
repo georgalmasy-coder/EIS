@@ -1,11 +1,11 @@
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { downloadDashboardIrlPdf } from "./dashboard-irls-pdf.js";
-import { setText } from "../core/dom.js";
-import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
-import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
+import {mountTopbar} from "../components/topbar.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {downloadDashboardIrlPdf} from "./dashboard-irls-pdf.js";
+import {setText} from "../core/dom.js";
+import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
+import {getAttribute, getChildText, hasXmlParseError} from "../core/xml.js";
 
 const DASHBOARD_ENDPOINT = "/pro/dashboardirl?cmd=overview";
 const SYSTEMS_BREAKDOWN_EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";

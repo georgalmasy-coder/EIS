@@ -27,9 +27,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.bepa.eis.common.enums.entity.EntityDataElement.SYSTEMREQCODE;
 import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.CREATE_ENTITY;
 import static com.bepa.eis.server.api.web.application.enums.EntityRequestType.EDIT_ENTITY;
-import static com.bepa.eis.common.enums.entity.EntityDataElement.SYSTEMREQCODE;
 
 @WebServlet(name = "SystemRequirementServlet", urlPatterns = { "/basis/systemrequirement" })
 @MultipartConfig

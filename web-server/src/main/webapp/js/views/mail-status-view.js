@@ -1,12 +1,8 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
-import {
-    drawMultiLineChart,
-    setBar,
-    setText
-} from "/js/admin-dashboard/dashboard-charts.js";
-import { postForm } from "/js/core/http.js";
-import { formatDateTimeForDisplay } from "/js/core/format.js";
-import { escapeHtml } from "/js/core/html.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
+import {drawMultiLineChart, setBar, setText} from "/js/admin-dashboard/dashboard-charts.js";
+import {postForm} from "/js/core/http.js";
+import {formatDateTimeForDisplay} from "/js/core/format.js";
+import {escapeHtml} from "/js/core/html.js";
 
 const DATA_URL = "/admin/api/dashboard/mail-status";
 const RESEND_URL = "/admin/api/dashboard/mail-status-action";

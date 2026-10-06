@@ -1,7 +1,7 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { initTabs } from "../components/tabs.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {initTabs} from "../components/tabs.js";
 import {
     applyEditDialogShellMode,
     closeEditDialog,
@@ -9,31 +9,19 @@ import {
     notifyEditDialogSaved,
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
-import { createHistoryTable } from "../components/history-table.js";
-import { createNotesTable } from "../components/notes-table.js";
-import { createAttachmentsTable } from "../components/attachments-table.js";
-import { createLinksTable } from "../components/links-table.js";
-import { createEntityRelationsTable } from "../components/entity-relations-table.js";
-import { createEditInterfacesTable } from "../components/edit-interfaces-table.js?rev=interface-columns-2026-09-16";
-import { setText } from "../core/dom.js";
-import {
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError,
-    serializeXml
-} from "../core/xml.js";
-import {
-    fieldEditable,
-    fieldRequired,
-    fieldVisible
-} from "../core/field-display.js";
-import { escapeHtml } from "../core/html.js";
-import { isTruthy } from "../core/utils.js";
-import {
-    focusFirstInvalidField,
-    validateFieldsFromDetailNode
-} from "../core/validation.js";
+import {applyTopbarMetadata} from "../components/topbar.js";
+import {createHistoryTable} from "../components/history-table.js";
+import {createNotesTable} from "../components/notes-table.js";
+import {createAttachmentsTable} from "../components/attachments-table.js";
+import {createLinksTable} from "../components/links-table.js";
+import {createEntityRelationsTable} from "../components/entity-relations-table.js";
+import {createEditInterfacesTable} from "../components/edit-interfaces-table.js?rev=interface-columns-2026-09-16";
+import {setText} from "../core/dom.js";
+import {getDirectChild, getDirectText, hasXmlParseError, serializeXml} from "../core/xml.js";
+import {fieldEditable, fieldRequired, fieldVisible} from "../core/field-display.js";
+import {escapeHtml} from "../core/html.js";
+import {isTruthy} from "../core/utils.js";
+import {focusFirstInvalidField, validateFieldsFromDetailNode} from "../core/validation.js";
 
 const SAVE_URL = "/pro/functionalstructure?cmd=save";
 const EDIT_PAGE_URL = "/web/view?page=functionalstructure-edit";
@@ -369,7 +357,7 @@ function getEntityMetaLabel() {
         const idPart = state.id ? `Entity ID: ${state.id}` : "";
         const versionPart = state.version ? `Version: ${state.version}` : "";
 
-        return [idPart, versionPart].filter(Boolean).join(" · ");
+        return [idPart, versionPart].filter(Boolean).join(" ï¿½ ");
     }
     return state.id ? `Entity ID: ${state.id}` : "";
 }
@@ -466,8 +454,8 @@ function renderBasisInfoFromDoc(doc) {
 }
 
 function updateEntitySummary() {
-    setText("entitySummaryCode", getSummaryFieldValue(SUMMARY_FIELDS.code) || "—");
-    setText("entitySummaryName", getSummaryFieldValue(SUMMARY_FIELDS.name) || "—");
+    setText("entitySummaryCode", getSummaryFieldValue(SUMMARY_FIELDS.code) || "ï¿½");
+    setText("entitySummaryName", getSummaryFieldValue(SUMMARY_FIELDS.name) || "ï¿½");
 }
 
 function getSummaryFieldValue(fieldNames) {

@@ -1,14 +1,13 @@
 package com.bepa.eis.server.api.web.application.misc;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.UserPreferenceProvider;
+import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.server.api.generic.GenericServlet;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

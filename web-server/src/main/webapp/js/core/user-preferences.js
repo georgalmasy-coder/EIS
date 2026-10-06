@@ -1,4 +1,4 @@
-import { postForm } from "./http.js";
+import {postForm} from "./http.js";
 
 const PREFERENCES_URL = "/api/user-preferences";
 

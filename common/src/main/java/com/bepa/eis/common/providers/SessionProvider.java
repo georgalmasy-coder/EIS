@@ -3,10 +3,11 @@ package com.bepa.eis.common.providers;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.Subscription;
-import java.sql.*;
-import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.*;
+import java.util.Date;
 
 public class SessionProvider extends GenericProvider {
 

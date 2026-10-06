@@ -1,4 +1,4 @@
-import { byId } from "../core/dom.js";
+import {byId} from "../core/dom.js";
 
 export function initTabs(tabs, initialIndex = 0) {
     if (!Array.isArray(tabs) || !tabs.length) {

@@ -1,12 +1,12 @@
 package com.bepa.eis.server.api.web.application.views.admin.department;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.DTO.Department;
+import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
-import com.bepa.eis.server.api.DTO.TopPanel;
-import com.bepa.eis.server.api.DTO.Department;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

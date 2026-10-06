@@ -1,7 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
-import com.bepa.eis.common.dto.mail.MailRecipient;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.mail.MailRecipient;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowMailType;
 import com.bepa.eis.common.providers.mail.MailProvider;
 import org.slf4j.Logger;

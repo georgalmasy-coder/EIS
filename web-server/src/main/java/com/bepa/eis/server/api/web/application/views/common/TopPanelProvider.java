@@ -1,7 +1,8 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
-import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.providers.GenericProvider;
+import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.web.application.cache.CustomerBasisInfo;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
@@ -14,7 +15,6 @@ import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
 import com.bepa.eis.server.dataprovider.fields.strings.CustomerName;
 import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.strings.UserName;
-import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

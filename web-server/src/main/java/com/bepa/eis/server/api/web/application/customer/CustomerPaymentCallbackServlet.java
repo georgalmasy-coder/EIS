@@ -7,22 +7,17 @@ import com.bepa.eis.common.enums.customer.CustomerPaymentStatus;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowEventType;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowState;
 import com.bepa.eis.common.enums.customer.CustomerWorkflowStatus;
-import com.bepa.eis.common.providers.customer.CustomerWorkflowTimingProvider;
 import com.bepa.eis.common.providers.customer.CustomerPaymentProvider;
 import com.bepa.eis.common.providers.customer.CustomerSubscriptionActivationProvider;
 import com.bepa.eis.common.providers.customer.CustomerWorkflowProvider;
+import com.bepa.eis.common.providers.customer.CustomerWorkflowTimingProvider;
 import com.bepa.eis.common.utilities.JsonUtil;
-import com.bepa.eis.common.utilities.ValueUtil;
-import com.bepa.eis.common.utilities.HtmlUtil;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @WebServlet(name = "CustomerPaymentCallbackServlet", urlPatterns = {
         "/api/customer-payment/callback"

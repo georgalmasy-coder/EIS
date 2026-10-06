@@ -1,7 +1,6 @@
 package com.bepa.eis.server.api.DTO;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 
 public class TrlRecord {
     private Integer customerId;

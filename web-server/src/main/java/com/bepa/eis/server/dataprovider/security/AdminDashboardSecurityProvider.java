@@ -5,11 +5,7 @@ import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.api.web.application.admin.AdminDashboardServlet.ChartItem;
 import com.bepa.eis.server.api.web.application.admin.AdminDashboardServlet.SecurityStatusRow;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 

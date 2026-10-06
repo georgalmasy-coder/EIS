@@ -2,20 +2,15 @@ package com.bepa.eis.server.dataprovider.customer;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
-import com.bepa.eis.common.dto.project.ProjectRecord;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
-import com.bepa.eis.common.enums.project.ProjectStatus;
 import com.bepa.eis.common.providers.GenericProvider;
-import com.bepa.eis.server.dataprovider.entities.ProjectEntityProvider;
-import com.bepa.eis.server.dataprovider.project.InstallDefaultConfiguration;
-import com.bepa.eis.server.entites.project.ProjectEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class CustomerProvider extends GenericProvider {
 

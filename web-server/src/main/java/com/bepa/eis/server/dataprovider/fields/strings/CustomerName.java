@@ -1,7 +1,5 @@
 package com.bepa.eis.server.dataprovider.fields.strings;
 
-import java.math.BigDecimal;
-
 public class CustomerName extends AbstractString {
 
     public static String FIELD_NAME = "CustomerName";

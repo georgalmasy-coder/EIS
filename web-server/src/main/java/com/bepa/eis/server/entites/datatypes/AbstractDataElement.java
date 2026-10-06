@@ -1,8 +1,8 @@
 package com.bepa.eis.server.entites.datatypes;
 
-import com.bepa.eis.server.entites.configuration.EntityConfiguration;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityElementType;
+import com.bepa.eis.server.entites.configuration.EntityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

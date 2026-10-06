@@ -4,11 +4,7 @@ import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.mail.MailTemplate;
 import com.bepa.eis.common.enums.mail.MailTemplateType;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;

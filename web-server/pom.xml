@@ -19,7 +19,7 @@
     <properties>
         <!-- <maven.compiler.release>21</maven.compiler.release> -->
         <!-- Keep this at the latest Log4j 2.x release available in your repo -->
-        <log4j2.version>2.24.3</log4j2.version>
+        <log4j2.version>2.26.1</log4j2.version>
 
         <!-- JAXB 2.x = javax.* (passer til den dependency-kæde Ehcache trækker) -->
         <jaxb.api.version>2.3.1</jaxb.api.version>
@@ -43,10 +43,11 @@
         </dependency>
 
         <!-- Microsoft JDBC Driver for SQL Server -->
+        <!-- Source: https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.6.1.jre11</version>
+            <version>13.6.0.jre11</version>
         </dependency>
 
         <!-- Optional logging API (implementation depends on your setup) -->
@@ -105,7 +106,13 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.3.0</version>
+            <version>5.5.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- PDF export -->
@@ -115,24 +122,15 @@
             <version>3.0.2</version>
         </dependency>
 
-        <!-- Optional, but useful if you want to render HTML/CSS to PDF later -->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.18.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.angus</groupId>
-            <artifactId>angus-mail</artifactId>
-            <version>2.0.3</version>
-        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.2</version>
+            <version>2.22.3</version>
         </dependency>
+
+
+
     </dependencies>
 
     <build>

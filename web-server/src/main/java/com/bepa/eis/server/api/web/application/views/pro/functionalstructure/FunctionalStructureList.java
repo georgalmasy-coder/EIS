@@ -7,7 +7,6 @@ import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.Entities;
 import com.bepa.eis.server.dataprovider.entities.FunctionalStructureProvider;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 
 public class FunctionalStructureList extends GenericXmlDocument {

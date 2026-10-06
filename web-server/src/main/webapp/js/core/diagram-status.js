@@ -1,5 +1,5 @@
-import { userPreferences } from "./user-preferences.js";
-import { escapeHtml } from "./html.js";
+import {userPreferences} from "./user-preferences.js";
+import {escapeHtml} from "./html.js";
 
 export const DIAGRAM_STATUS_PALETTES = [
     [

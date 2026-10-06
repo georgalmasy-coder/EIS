@@ -1,5 +1,5 @@
-import { getAttribute, getChildText } from "../core/xml.js";
-import { openInterfaceEditDialog, resolveInterfaceBasePath } from "./interface-edit-dialog.js";
+import {getAttribute, getChildText} from "../core/xml.js";
+import {openInterfaceEditDialog, resolveInterfaceBasePath} from "./interface-edit-dialog.js";
 
 const COLUMN_DEFINITIONS = [
     { key: "fromTrl", label: "TRL", source: "fromTrlId", type: "trl", width: "11%", physicalOnly: true, group: "From" },

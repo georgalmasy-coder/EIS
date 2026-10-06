@@ -2,19 +2,15 @@ package com.bepa.eis.server.api.web.application.views.pro.move;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
-import com.bepa.eis.server.dataprovider.entities.*;
-import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
+import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
+import com.bepa.eis.server.dataprovider.entities.EntityProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 abstract public class AbstractMoveEntity {
 

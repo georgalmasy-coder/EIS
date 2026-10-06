@@ -1,7 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
-import com.bepa.eis.common.dto.customer.CustomerToken;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.customer.CustomerToken;
 import com.bepa.eis.common.enums.customer.CustomerTokenType;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
@@ -10,13 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.Base64;
 
 public class CustomerTokenProvider extends GenericProvider {

@@ -1,7 +1,5 @@
 package com.bepa.eis.common.enums.entity;
 
-import com.bepa.eis.common.enums.customer.CustomerModuleStatus;
-
 public enum SBSCodeTypes {
     FUNCTIONAL (1,  "Function", "=", true),
     LOCATION(2, "Location", "+", true),

@@ -1,8 +1,4 @@
-import {
-    appendTextElement,
-    getDirectChild,
-    textOf
-} from "./xml.js";
+import {appendTextElement, getDirectChild, textOf} from "./xml.js";
 
 export function parseCreatedBy(node) {
     const createdByNode = node?.getElementsByTagName("CreatedById")?.[0] || null;

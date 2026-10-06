@@ -1,9 +1,5 @@
-import {
-    closeDialogElement,
-    showDialog,
-    clearChildren
-} from "../core/dom.js";
-import { formatFileSize } from "../core/format.js";
+import {clearChildren, closeDialogElement, showDialog} from "../core/dom.js";
+import {formatFileSize} from "../core/format.js";
 
 const ALLOWED_EXTENSIONS = ["xml", "xlsx", "csv"];
 

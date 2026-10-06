@@ -1,7 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.functionalstructure;
 
-import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
+import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 
 import java.time.LocalDateTime;
 

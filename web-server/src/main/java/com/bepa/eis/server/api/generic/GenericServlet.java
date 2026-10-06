@@ -1,7 +1,7 @@
 package com.bepa.eis.server.api.generic;
 
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.SessionProvider;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
@@ -13,11 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,7 +22,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 public class GenericServlet extends HttpServlet {

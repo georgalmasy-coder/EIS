@@ -1,19 +1,8 @@
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import {
-    getAttribute,
-    getBooleanAttribute,
-    getChildText,
-    getNumberAttribute,
-    hasXmlParseError
-} from "../core/xml.js";
-import {
-    getDynamicStyleClass,
-    sanitizeClassPart,
-    sanitizeCssColor
-} from "../core/css.js";
+import {initMenu} from "../components/menu.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
+import {setText} from "../core/dom.js";
+import {getAttribute, getBooleanAttribute, getChildText, getNumberAttribute, hasXmlParseError} from "../core/xml.js";
+import {getDynamicStyleClass, sanitizeClassPart, sanitizeCssColor} from "../core/css.js";
 
 const N2_ENDPOINT = "/basis/basistraceability?cmd=overview";
 

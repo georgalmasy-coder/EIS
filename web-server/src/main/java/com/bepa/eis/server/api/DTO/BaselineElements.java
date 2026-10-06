@@ -2,21 +2,10 @@ package com.bepa.eis.server.api.DTO;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.web.application.views.basis.baseline.Baseline;
-import com.bepa.eis.server.dataprovider.fields.bigdecimals.BudgetInValue;
-import com.bepa.eis.server.dataprovider.fields.integers.BudgetInDays;
-import com.bepa.eis.server.dataprovider.fields.integers.Version;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.CustomerId;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
-import com.bepa.eis.server.dataprovider.fields.lookups.customer.CustomerDepartment;
-import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectCategory;
-import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectOwner;
-import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectPriority;
-import com.bepa.eis.server.dataprovider.fields.lookups.project.ProjectStatus;
 import com.bepa.eis.server.dataprovider.fields.strings.AbstractString;
-import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
-import com.bepa.eis.server.dataprovider.fields.timestamp.EndDate;
-import com.bepa.eis.server.dataprovider.fields.timestamp.StartDate;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 
 public class BaselineElements {

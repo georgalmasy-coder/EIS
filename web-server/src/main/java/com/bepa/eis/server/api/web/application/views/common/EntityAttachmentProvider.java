@@ -1,15 +1,17 @@
 package com.bepa.eis.server.api.web.application.views.common;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
 import com.bepa.eis.server.dataprovider.fields.binary.FileData;
 import com.bepa.eis.server.dataprovider.fields.integers.FileSize;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityAttachmentId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.CreatedBy;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.ContentType;
+import com.bepa.eis.server.dataprovider.fields.strings.FileDescription;
+import com.bepa.eis.server.dataprovider.fields.strings.FileName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.CreatedDateTime;
-import com.bepa.eis.common.providers.GenericProvider;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,6 @@
 package com.bepa.eis.common.enums.entity;
 
 import static com.bepa.eis.common.enums.entity.EntityDataElement.*;
-import static com.bepa.eis.common.enums.entity.EntityElementType.INTEGER;
 
 public enum EntityType {
 

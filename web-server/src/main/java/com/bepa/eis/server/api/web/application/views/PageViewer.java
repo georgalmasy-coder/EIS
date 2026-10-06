@@ -1,14 +1,14 @@
 package com.bepa.eis.server.api.web.application.views;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.BuildInfo;
+import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.enums.theme.Theme;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
-import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.generic.GenericServlet;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

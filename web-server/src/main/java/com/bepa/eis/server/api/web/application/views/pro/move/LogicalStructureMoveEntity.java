@@ -2,11 +2,7 @@ package com.bepa.eis.server.api.web.application.views.pro.move;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.entities.EntityProvider;
-import com.bepa.eis.server.dataprovider.entities.FunctionalStructureProvider;
 import com.bepa.eis.server.dataprovider.entities.LogicalStructureProvider;
-import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
-import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.server.entites.functional.FunctionalStructureEntity;
 import com.bepa.eis.server.entites.logical.LogicalStructureEntity;
 
 import java.util.List;

@@ -1,36 +1,20 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { initTabs } from "../components/tabs.js";
-import { mountTopbar } from "../components/topbar.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {initTabs} from "../components/tabs.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
 import {
     applyEditDialogShellMode,
     closeEditDialog,
     getEditDialogPageContext,
     notifyEditDialogSaved
 } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import { escapeHtml } from "../core/html.js";
-import { toDateTimeLocalValue } from "../core/date.js";
-import {
-    fieldControl,
-    fieldEditable,
-    fieldHeader,
-    fieldRequired,
-    fieldVisible
-} from "../core/field-display.js";
-import {
-    getChildText,
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError,
-    serializeXml
-} from "../core/xml.js";
-import {
-    focusFirstInvalidField,
-    validateFieldsFromDetailNode
-} from "../core/validation.js";
-import { isTruthy } from "../core/utils.js";
+import {setText} from "../core/dom.js";
+import {escapeHtml} from "../core/html.js";
+import {toDateTimeLocalValue} from "../core/date.js";
+import {fieldControl, fieldEditable, fieldHeader, fieldRequired, fieldVisible} from "../core/field-display.js";
+import {getChildText, getDirectChild, getDirectText, hasXmlParseError, serializeXml} from "../core/xml.js";
+import {focusFirstInvalidField, validateFieldsFromDetailNode} from "../core/validation.js";
+import {isTruthy} from "../core/utils.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
     formatCurrentPhoneValue as syncIntlPhoneFieldValue,

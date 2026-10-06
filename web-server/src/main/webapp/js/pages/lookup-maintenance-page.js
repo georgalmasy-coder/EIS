@@ -1,10 +1,10 @@
-import { initMenu } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import { fetchXml, postXml } from "../core/http.js";
-import { escapeHtml } from "../core/html.js";
-import { buildColorChipStyle, sanitizeCssColor } from "../core/css.js";
-import { escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
+import {setText} from "../core/dom.js";
+import {fetchXml, postXml} from "../core/http.js";
+import {escapeHtml} from "../core/html.js";
+import {buildColorChipStyle, sanitizeCssColor} from "../core/css.js";
+import {escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError} from "../core/xml.js";
 
 const LIST_URL = "/basis/lookup-maintenance?cmd=list";
 const SAVE_URL = "/basis/lookup-maintenance?cmd=save";

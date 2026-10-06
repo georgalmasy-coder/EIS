@@ -1,6 +1,8 @@
 package com.bepa.eis.server.entites.systembreakdown;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
@@ -11,12 +13,11 @@ import com.bepa.eis.server.dataprovider.fields.lookups.system.SBSCodeType;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemDepartment;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.SystemOwner;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
+import com.bepa.eis.server.dataprovider.fields.strings.SBSCode;
+import com.bepa.eis.server.dataprovider.fields.strings.SystemName;
 import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineFinalized;
 import com.bepa.eis.server.dataprovider.fields.timestamp.DeadlineNextTRL;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.LocalDateDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;

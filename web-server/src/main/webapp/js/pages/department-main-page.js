@@ -1,12 +1,12 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import { fetchXml, postXml } from "../core/http.js";
-import { escapeHtml } from "../core/html.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import { applySortIndicators, bindSortableHeaders, compareSortableValues } from "../components/sortable-table.js";
-import { escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
+import {setText} from "../core/dom.js";
+import {fetchXml, postXml} from "../core/http.js";
+import {escapeHtml} from "../core/html.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {applySortIndicators, bindSortableHeaders, compareSortableValues} from "../components/sortable-table.js";
+import {escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError} from "../core/xml.js";
 
 const LIST_URL = "/api/admin/departments?cmd=list";
 const EDIT_URL = "/api/admin/departments?cmd=edit&id=";

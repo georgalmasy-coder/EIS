@@ -5,7 +5,6 @@ import com.bepa.eis.common.providers.customer.CustomerWorkflowActionProvider.Cus
 import com.bepa.eis.common.utilities.HtmlUtil;
 import com.bepa.eis.common.utilities.ValueUtil;
 import com.bepa.eis.server.api.web.application.admin.AbstractAdminServlet;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

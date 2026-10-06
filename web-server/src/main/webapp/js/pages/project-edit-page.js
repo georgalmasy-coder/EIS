@@ -1,34 +1,22 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { initTabs } from "../components/tabs.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {initTabs} from "../components/tabs.js";
 import {
     applyEditDialogShellMode,
     closeEditDialog,
     getEditDialogPageContext,
     notifyEditDialogSaved
 } from "../components/edit-dialog-page.js";
-import { applyTopbarMetadata } from "../components/topbar.js";
-import { createNotesTable } from "../components/notes-table.js";
-import { createAttachmentsTable } from "../components/attachments-table.js";
-import { setText } from "../core/dom.js";
-import {
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError,
-    serializeXml
-} from "../core/xml.js";
-import {
-    fieldEditable,
-    fieldRequired,
-    fieldVisible
-} from "../core/field-display.js";
-import { escapeHtml } from "../core/html.js";
-import { isTruthy } from "../core/utils.js";
-import {
-    focusFirstInvalidField,
-    validateFieldsFromDetailNode
-} from "../core/validation.js";
+import {applyTopbarMetadata} from "../components/topbar.js";
+import {createNotesTable} from "../components/notes-table.js";
+import {createAttachmentsTable} from "../components/attachments-table.js";
+import {setText} from "../core/dom.js";
+import {getDirectChild, getDirectText, hasXmlParseError, serializeXml} from "../core/xml.js";
+import {fieldEditable, fieldRequired, fieldVisible} from "../core/field-display.js";
+import {escapeHtml} from "../core/html.js";
+import {isTruthy} from "../core/utils.js";
+import {focusFirstInvalidField, validateFieldsFromDetailNode} from "../core/validation.js";
 
 const SAVE_URL = "/project?cmd=save";
 const DEFAULT_RETURN_URL = "/web/view?page=myprojects";

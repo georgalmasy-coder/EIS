@@ -1,4 +1,4 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
 import {
     drawHourlyLoginActivityChart,
     drawLineChart,
@@ -8,9 +8,9 @@ import {
     setBar,
     setText
 } from "/js/admin-dashboard/dashboard-charts.js";
-import { formatDateTimeForDisplay } from "/js/core/format.js";
-import { escapeHtml } from "/js/core/html.js";
-import { toNumber } from "/js/core/utils.js";
+import {formatDateTimeForDisplay} from "/js/core/format.js";
+import {escapeHtml} from "/js/core/html.js";
+import {toNumber} from "/js/core/utils.js";
 
 const DATA_URL = "/admin/api/dashboard/audit-security";
 const REFRESH_MS = 45000;

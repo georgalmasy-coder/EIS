@@ -1,8 +1,5 @@
-import {
-    closeDialogElement,
-    showDialog
-} from "../core/dom.js";
-import { downloadBlob } from "../core/pdf.js";
+import {closeDialogElement, showDialog} from "../core/dom.js";
+import {downloadBlob} from "../core/pdf.js";
 
 function normalizeText(value) {
     return value == null ? "" : String(value);

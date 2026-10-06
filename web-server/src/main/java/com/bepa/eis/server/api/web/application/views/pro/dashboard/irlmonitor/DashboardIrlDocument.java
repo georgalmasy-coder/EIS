@@ -8,7 +8,7 @@ import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
-import com.bepa.eis.server.dataprovider.entities.*;
+import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;

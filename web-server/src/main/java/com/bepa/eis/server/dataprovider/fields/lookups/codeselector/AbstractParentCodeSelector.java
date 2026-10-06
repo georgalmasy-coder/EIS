@@ -1,9 +1,9 @@
 package com.bepa.eis.server.dataprovider.fields.lookups.codeselector;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
-import com.bepa.eis.common.enums.entity.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

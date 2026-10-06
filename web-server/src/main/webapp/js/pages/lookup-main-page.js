@@ -1,14 +1,14 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { createExportDialog } from "../components/export-dialog.js";
-import { createImportDialog } from "../components/import-dialog.js";
-import { applyTopPanelFromDocument } from "../core/page-header.js";
-import { setText } from "../core/dom.js";
-import { fetchXml, postXml } from "../core/http.js";
-import { escapeHtml } from "../core/html.js";
-import { buildColorChipStyle, sanitizeCssColor } from "../core/css.js";
-import { escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {mountTopbar} from "../components/topbar.js";
+import {createExportDialog} from "../components/export-dialog.js";
+import {createImportDialog} from "../components/import-dialog.js";
+import {applyTopPanelFromDocument} from "../core/page-header.js";
+import {setText} from "../core/dom.js";
+import {fetchXml, postXml} from "../core/http.js";
+import {escapeHtml} from "../core/html.js";
+import {buildColorChipStyle, sanitizeCssColor} from "../core/css.js";
+import {escapeXml, getChildText, getDirectChild, getDirectChildren, hasXmlParseError} from "../core/xml.js";
 
 const LIST_URL = "/basis/lookup?cmd=list";
 const EDIT_URL = "/basis/lookup?cmd=edit&id=";

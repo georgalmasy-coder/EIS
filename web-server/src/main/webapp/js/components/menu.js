@@ -1,11 +1,7 @@
-import { userPreferences } from "../core/user-preferences.js";
-import {
-    byId,
-    clear,
-    setText
-} from "../core/dom.js";
-import { fetchXml } from "../core/http.js";
-import { directTextOf, getDirectChild, textOf } from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {byId, clear, setText} from "../core/dom.js";
+import {fetchXml} from "../core/http.js";
+import {directTextOf, getDirectChild, textOf} from "../core/xml.js";
 
 const MENU_URL = "/Menu";
 const PROJECT_OVERVIEW_URL = "/web/view?page=projectoverview";

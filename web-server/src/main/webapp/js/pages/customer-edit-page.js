@@ -1,34 +1,20 @@
-﻿import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { initTabs } from "../components/tabs.js";
-import { mountTopbar } from "../components/topbar.js";
-import {
-    applyEditDialogShellMode,
-    closeEditDialog,
-    getEditDialogPageContext
-} from "../components/edit-dialog-page.js";
-import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
-import { setText } from "../core/dom.js";
-import {
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError
-} from "../core/xml.js";
-import {
-    fieldEditable,
-    fieldRequired,
-    fieldVisible
-} from "../core/field-display.js";
-import { escapeHtml } from "../core/html.js";
-import { isTruthy } from "../core/utils.js";
+﻿import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {initTabs} from "../components/tabs.js";
+import {mountTopbar} from "../components/topbar.js";
+import {applyEditDialogShellMode, closeEditDialog, getEditDialogPageContext} from "../components/edit-dialog-page.js";
+import {applyTopPanel as applyPageHeader} from "../core/page-header.js";
+import {setText} from "../core/dom.js";
+import {getDirectChild, getDirectText, hasXmlParseError} from "../core/xml.js";
+import {fieldEditable, fieldRequired, fieldVisible} from "../core/field-display.js";
+import {escapeHtml} from "../core/html.js";
+import {isTruthy} from "../core/utils.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
     formatCurrentPhoneValue as syncIntlPhoneFieldValue,
-    getFullPhoneNumber as getIntlPhoneNumber,
     initPhoneField,
     renderPhoneFieldMarkup,
-    updatePhoneHelp as updateIntlPhoneHelp,
-    validatePhoneNumber as validateIntlPhoneNumber
+    updatePhoneHelp as updateIntlPhoneHelp
 } from "../components/phone-intl-field.js";
 
 const DEFAULT_RETURN_URL = "/web/view?page=customer-admin";

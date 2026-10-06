@@ -1,11 +1,18 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { clear, closeDialogElement, setText, showDialog } from "../core/dom.js";
-import { applyTopPanel as applyPageHeader } from "../core/page-header.js";
-import { fetchXml, postXml } from "../core/http.js";
-import { escapeHtml } from "../core/html.js";
-import { escapeXml, getAttribute, getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {mountTopbar} from "../components/topbar.js";
+import {clear, closeDialogElement, setText, showDialog} from "../core/dom.js";
+import {applyTopPanel as applyPageHeader} from "../core/page-header.js";
+import {fetchXml, postXml} from "../core/http.js";
+import {escapeHtml} from "../core/html.js";
+import {
+    escapeXml,
+    getAttribute,
+    getChildText,
+    getDirectChild,
+    getDirectChildren,
+    hasXmlParseError
+} from "../core/xml.js";
 
 const API_URL = "/Menu";
 const STORAGE_EXPANDED_KEY = "menuEditor.expandedParentIds";

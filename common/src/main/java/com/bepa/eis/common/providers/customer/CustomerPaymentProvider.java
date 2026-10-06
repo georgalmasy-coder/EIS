@@ -1,19 +1,14 @@
 package com.bepa.eis.common.providers.customer;
 
-import com.bepa.eis.common.dto.customer.CustomerPayment;
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.dto.customer.CustomerPayment;
 import com.bepa.eis.common.enums.customer.CustomerPaymentStatus;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,7 +1,7 @@
-import { initMenu } from "../components/menu.js";
-import { mountTopbar, applyTopbarMetadata } from "../components/topbar.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { openEditDialog } from "../components/edit-dialog.js";
+import {initMenu} from "../components/menu.js";
+import {applyTopbarMetadata, mountTopbar} from "../components/topbar.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {openEditDialog} from "../components/edit-dialog.js";
 
 const DATA_URL = "/project/overview?cmd=overview";
 

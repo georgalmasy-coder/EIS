@@ -1,7 +1,7 @@
 package com.bepa.eis.server.api.web.application.misc;
 
-import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.api.DTO.CustomerProject;
+import com.bepa.eis.server.api.generic.GenericServlet;
 import com.bepa.eis.server.dataprovider.misc.CustomerProjectProvider;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

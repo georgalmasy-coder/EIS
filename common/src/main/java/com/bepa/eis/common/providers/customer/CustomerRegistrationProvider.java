@@ -1,11 +1,7 @@
 package com.bepa.eis.common.providers.customer;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.dto.customer.CustomerModule;
-import com.bepa.eis.common.dto.customer.CustomerPaymentMethod;
-import com.bepa.eis.common.dto.customer.CustomerRecord;
-import com.bepa.eis.common.dto.customer.SubscriptionPlanBillingPeriod;
-import com.bepa.eis.common.dto.customer.SubscriptionPlan;
+import com.bepa.eis.common.dto.customer.*;
 import com.bepa.eis.common.enums.customer.BillingPeriod;
 import com.bepa.eis.common.enums.customer.CustomerModuleStatus;
 import com.bepa.eis.common.enums.customer.CustomerPaymentMethodStatus;

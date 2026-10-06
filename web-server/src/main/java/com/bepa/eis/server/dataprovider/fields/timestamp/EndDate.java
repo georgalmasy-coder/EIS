@@ -2,7 +2,6 @@ package com.bepa.eis.server.dataprovider.fields.timestamp;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class EndDate extends AbstractDate {
 

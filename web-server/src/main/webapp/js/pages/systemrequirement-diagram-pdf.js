@@ -1,23 +1,20 @@
 import {
     buildPdfDocument,
-    downloadBlob,
     clipPdfRect,
-    endPdfClip,
+    downloadBlob,
     drawPdfBackground,
     drawPdfFilledRect,
-    drawPdfMultilineText,
     drawPdfStrokeRect,
     drawPdfText,
     drawPdfTextCentered,
-    escapePdfText,
+    endPdfClip,
+    fitPdfTextLines,
     formatGeneratedAt,
     formatPdfNumber,
-    formatRgb,
-    hexToRgb,
-    fitPdfTextLines
+    formatRgb
 } from "../core/pdf.js";
-import { clampNumber } from "../core/utils.js";
-import { getDiagramStatusLines } from "../core/diagram-status.js";
+import {clampNumber} from "../core/utils.js";
+import {getDiagramStatusLines} from "../core/diagram-status.js";
 
 const EDGE_TERMINAL_INSET = 1.5;
 

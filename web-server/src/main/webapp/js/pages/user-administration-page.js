@@ -1,8 +1,8 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { applyTopPanelFromDocument } from "../core/page-header.js";
-import { toDateTimeLocalValue } from "../core/date.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {applyTopPanelFromDocument} from "../core/page-header.js";
+import {toDateTimeLocalValue} from "../core/date.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
     formatCurrentPhoneValue as syncIntlPhoneFieldValue,

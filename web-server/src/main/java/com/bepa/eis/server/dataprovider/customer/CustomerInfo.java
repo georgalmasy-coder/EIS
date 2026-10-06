@@ -1,16 +1,8 @@
 package com.bepa.eis.server.dataprovider.customer;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.dto.customer.CustomerPayment;
-import com.bepa.eis.common.dto.customer.CustomerPaymentMethod;
-import com.bepa.eis.common.dto.customer.CustomerRecord;
-import com.bepa.eis.common.dto.customer.CustomerSubscription;
-import com.bepa.eis.common.dto.customer.SubscriptionPlan;
-import com.bepa.eis.common.providers.customer.CustomerPaymentMethodProvider;
-import com.bepa.eis.common.providers.customer.CustomerPaymentProvider;
-import com.bepa.eis.common.providers.customer.CustomerRecordProvider;
-import com.bepa.eis.common.providers.customer.CustomerSubscriptionProvider;
-import com.bepa.eis.common.providers.customer.SubscriptionPlanProvider;
+import com.bepa.eis.common.dto.customer.*;
+import com.bepa.eis.common.providers.customer.*;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
@@ -25,7 +17,6 @@ import com.bepa.eis.server.dataprovider.fields.strings.phone.ContactPhone;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 

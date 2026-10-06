@@ -1,8 +1,8 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.util.List;
 

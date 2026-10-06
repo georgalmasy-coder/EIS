@@ -7,7 +7,7 @@ import {
     isHiddenField
 } from "./field-display.js";
 
-import { cssEscape } from "./css.js";
+import {cssEscape} from "./css.js";
 
 export function getUiFieldValidationValue(uiField) {
     if (!uiField) {

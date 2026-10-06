@@ -1,12 +1,8 @@
 package com.bepa.eis.server.entites.supplier;
 
-import com.bepa.eis.server.dataprovider.entities.Entity;
-import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
-import com.bepa.eis.server.dataprovider.fields.strings.RequirementDescription;
-import com.bepa.eis.server.dataprovider.fields.strings.RequirementName;
-import com.bepa.eis.server.dataprovider.fields.strings.StakeholderRequirementCode;
-import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.server.dataprovider.entities.Entity;
+import com.bepa.eis.server.entites.AbstractEntity;
 
 import static com.bepa.eis.common.enums.entity.EntityType.SUPPLIER;
 

@@ -1,14 +1,14 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu, menuHasRoute } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { createExportDialog } from "../components/export-dialog.js";
-import { createImportDialog } from "../components/import-dialog.js";
-import { createEntityMoveSelection } from "../components/entity-move-selection.js";
-import { downloadSystemsBreakdownDiagramPdf } from "./systemsbreakdown-diagram-pdf.js";
-import { setText } from "../core/dom.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu, menuHasRoute} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {createExportDialog} from "../components/export-dialog.js";
+import {createImportDialog} from "../components/import-dialog.js";
+import {createEntityMoveSelection} from "../components/entity-move-selection.js";
+import {downloadSystemsBreakdownDiagramPdf} from "./systemsbreakdown-diagram-pdf.js";
+import {setText} from "../core/dom.js";
 import {
     ensureDiagramStatusControl,
     getStatusFieldOptions,
@@ -17,17 +17,9 @@ import {
     renderDiagramStatusBars,
     renderDiagramStatusMenu
 } from "../core/diagram-status.js";
-import {
-    getDirectChild,
-    getDirectText,
-    hasXmlParseError
-} from "../core/xml.js";
-import { sanitizeClassPart } from "../core/css.js";
-import { buildColorChipStyle, sanitizeCssColor } from "../core/css.js";
-import {
-    isFalsy,
-    isTruthy
-} from "../core/utils.js";
+import {getDirectChild, getDirectText, hasXmlParseError} from "../core/xml.js";
+import {buildColorChipStyle, sanitizeClassPart, sanitizeCssColor} from "../core/css.js";
+import {isFalsy, isTruthy} from "../core/utils.js";
 
 const LIST_URL = "/project/systembreakdown?cmd=list";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";

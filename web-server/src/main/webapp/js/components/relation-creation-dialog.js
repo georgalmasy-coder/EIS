@@ -1,4 +1,4 @@
-import { hasXmlParseError } from "../core/xml.js";
+import {hasXmlParseError} from "../core/xml.js";
 
 function normalizeText(value) {
     return value == null ? "" : String(value).trim();

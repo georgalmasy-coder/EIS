@@ -1,6 +1,5 @@
 package com.bepa.eis.server.api.web.application.cache;
 
-import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.project.ProjectStatus;
 
 public class ProjectStatusCache extends GenericLookup {

@@ -1,6 +1,6 @@
-import { nowIsoLocal, parseDateTime } from "../core/date.js";
-import { buildEntityNotesXml, parseEntityNotesFromDoc } from "../core/entity-xml.js";
-import { escapeHtml } from "../core/html.js";
+import {nowIsoLocal, parseDateTime} from "../core/date.js";
+import {buildEntityNotesXml, parseEntityNotesFromDoc} from "../core/entity-xml.js";
+import {escapeHtml} from "../core/html.js";
 
 const DEFAULT_MAX_NOTE_LENGTH = 4000;
 

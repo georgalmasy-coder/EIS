@@ -15,11 +15,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 
 @Plugin(
         name = "IncidentLog",

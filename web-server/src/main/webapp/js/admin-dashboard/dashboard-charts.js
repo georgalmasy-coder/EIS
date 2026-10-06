@@ -1,5 +1,5 @@
-import { escapeHtml } from "../core/html.js";
-import { clampNumber, toNumber } from "../core/utils.js";
+import {escapeHtml} from "../core/html.js";
+import {clampNumber, toNumber} from "../core/utils.js";
 
 export function numberOrZero(value) {
     return toNumber(value, 0);

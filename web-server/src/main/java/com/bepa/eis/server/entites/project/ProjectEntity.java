@@ -7,17 +7,12 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
-import com.bepa.eis.server.dataprovider.fields.integers.CodeLevel;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
-import com.bepa.eis.server.dataprovider.fields.strings.email.ContactEmail;
-import com.bepa.eis.server.dataprovider.fields.strings.phone.ContactPhone;
+import com.bepa.eis.server.dataprovider.fields.strings.ProjectName;
 import com.bepa.eis.server.dataprovider.project.ProjectProvider;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;
 
 import static com.bepa.eis.common.enums.entity.EntityType.PROJECT;
-import static com.bepa.eis.common.enums.entity.EntityType.STAKEHOLDER_REQUIREMENT;
 
 public class ProjectEntity extends AbstractEntity {
 

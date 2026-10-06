@@ -1,15 +1,15 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { setText } from "../core/dom.js";
-import { escapeHtml } from "../core/html.js";
-import { fieldDisplayValue, fieldHeader, fieldVisible, fieldControl, fieldValue } from "../core/field-display.js";
-import { compareSortableValues, applySortIndicators } from "../components/sortable-table.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import { getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
-import { isTruthy } from "../core/utils.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {setText} from "../core/dom.js";
+import {escapeHtml} from "../core/html.js";
+import {fieldControl, fieldDisplayValue, fieldHeader, fieldValue, fieldVisible} from "../core/field-display.js";
+import {applySortIndicators, compareSortableValues} from "../components/sortable-table.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {getDirectChild, getDirectChildren, hasXmlParseError} from "../core/xml.js";
+import {isTruthy} from "../core/utils.js";
 
 const LIST_URL = "/basis/stakeholder?cmd=list";
 const ROW_TAGS = ["stakeholder", "Stakeholder"];

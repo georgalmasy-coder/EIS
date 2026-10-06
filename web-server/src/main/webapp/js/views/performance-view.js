@@ -1,11 +1,8 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
-import {
-    setBar,
-    setText
-} from "/js/admin-dashboard/dashboard-charts.js";
-import { formatNumber as formatNumberValue } from "/js/core/format.js";
-import { escapeHtml } from "/js/core/html.js";
-import { toNumber } from "/js/core/utils.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
+import {setBar, setText} from "/js/admin-dashboard/dashboard-charts.js";
+import {formatNumber as formatNumberValue} from "/js/core/format.js";
+import {escapeHtml} from "/js/core/html.js";
+import {toNumber} from "/js/core/utils.js";
 
 const DATA_URL = "/admin/api/dashboard/performance";
 const REFRESH_MS = 60000;

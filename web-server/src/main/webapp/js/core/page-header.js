@@ -1,6 +1,6 @@
-import { setText } from "./dom.js";
-import { getChildText } from "./xml.js";
-import { applyTopbarMetadata, readTopbarMetadata } from "../components/topbar.js";
+import {setText} from "./dom.js";
+import {getChildText} from "./xml.js";
+import {applyTopbarMetadata, readTopbarMetadata} from "../components/topbar.js";
 
 export function parseTopPanel(xmlDocument, options = {}) {
     const topPanelSelector = options.topPanelSelector || "TopPanel";

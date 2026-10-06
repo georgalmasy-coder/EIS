@@ -1,11 +1,11 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { mountTopbar } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import { fetchXml } from "../core/http.js";
-import { escapeHtml } from "../core/html.js";
-import { applyTopPanelFromDocument } from "../core/page-header.js";
-import { getChildText, getDirectChild, getDirectChildren, hasXmlParseError } from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {mountTopbar} from "../components/topbar.js";
+import {setText} from "../core/dom.js";
+import {fetchXml} from "../core/http.js";
+import {escapeHtml} from "../core/html.js";
+import {applyTopPanelFromDocument} from "../core/page-header.js";
+import {getChildText, getDirectChild, getDirectChildren, hasXmlParseError} from "../core/xml.js";
 
 const API_URL = "/api/admin/incidents";
 const DEFAULT_LIMIT = 100;

@@ -1,16 +1,12 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { createRelationCreationDialogController } from "../components/relation-creation-dialog.js";
-import { setText } from "../core/dom.js";
-import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
-import {
-    getChildText,
-    directTextOf,
-    hasXmlParseError
-} from "../core/xml.js";
-import { cssEscape } from "../core/css.js";
-import { naturalCompare } from "../components/sortable-table.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {createRelationCreationDialogController} from "../components/relation-creation-dialog.js";
+import {setText} from "../core/dom.js";
+import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
+import {directTextOf, hasXmlParseError} from "../core/xml.js";
+import {cssEscape} from "../core/css.js";
+import {naturalCompare} from "../components/sortable-table.js";
 
 const RELATION_DIAGRAM_ENDPOINT = "/pro/nflprelationdiagram?cmd=overview";
 const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";

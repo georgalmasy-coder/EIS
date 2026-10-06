@@ -1,12 +1,12 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { openEditDialog } from "../components/edit-dialog.js";
-import { downloadDashboardSystemsTeamworkPdf } from "./dashboard-systems-teamwork-pdf.js";
-import { setText } from "../core/dom.js";
-import { applyTopPanelFromDocument as applyPageHeaderFromDocument } from "../core/page-header.js";
-import { getAttribute, getChildText, hasXmlParseError } from "../core/xml.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {openEditDialog} from "../components/edit-dialog.js";
+import {downloadDashboardSystemsTeamworkPdf} from "./dashboard-systems-teamwork-pdf.js";
+import {setText} from "../core/dom.js";
+import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
+import {getAttribute, getChildText, hasXmlParseError} from "../core/xml.js";
 
 const DASHBOARD_ENDPOINT = "/master/systemsteamwork?cmd=overview";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
@@ -36,9 +36,9 @@ const COLUMN_DEFINITIONS = [
 const state = {
     document: null,
     topPanel: {
-        customerName: "—",
-        projectName: "—",
-        userName: "—"
+        customerName: "ï¿½",
+        projectName: "ï¿½",
+        userName: "ï¿½"
     },
     dashboard: null,
     columnWidths: [...DEFAULT_COLUMN_WIDTHS],
@@ -138,16 +138,16 @@ function parseTopPanel(xmlDocument) {
 
     if (!topPanelElement) {
         return {
-            customerName: "—",
-            projectName: "—",
-            userName: "—"
+            customerName: "ï¿½",
+            projectName: "ï¿½",
+            userName: "ï¿½"
         };
     }
 
     return {
-        customerName: getChildText(topPanelElement, "CustomerName", "—"),
-        projectName: getChildText(topPanelElement, "ProjectName", "—"),
-        userName: getChildText(topPanelElement, "Name", "—"),
+        customerName: getChildText(topPanelElement, "CustomerName", "ï¿½"),
+        projectName: getChildText(topPanelElement, "ProjectName", "ï¿½"),
+        userName: getChildText(topPanelElement, "Name", "ï¿½"),
         workspaceEyebrow: getChildText(topPanelElement, "WorkspaceEyebrow", ""),
         workspaceHeading: getChildText(topPanelElement, "WorkspaceHeading", ""),
         workspaceHelpText: getChildText(topPanelElement, "WorkspaceHelpText", "")

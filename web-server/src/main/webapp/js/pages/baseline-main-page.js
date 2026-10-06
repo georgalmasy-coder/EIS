@@ -1,9 +1,9 @@
-import { initMenu } from "../components/menu.js";
-import { initHelpDialog } from "../components/help-dialog.js";
-import { mountTopbar } from "../components/topbar.js";
-import { setText } from "../core/dom.js";
-import { applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel } from "../core/page-header.js";
-import { hasXmlParseError } from "../core/xml.js";
+import {initMenu} from "../components/menu.js";
+import {initHelpDialog} from "../components/help-dialog.js";
+import {mountTopbar} from "../components/topbar.js";
+import {setText} from "../core/dom.js";
+import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
+import {hasXmlParseError} from "../core/xml.js";
 
 const API_URL = "/basis/baseline";
 const DETAIL_PAGE_URL = "/web/view?page=baseline-detail";

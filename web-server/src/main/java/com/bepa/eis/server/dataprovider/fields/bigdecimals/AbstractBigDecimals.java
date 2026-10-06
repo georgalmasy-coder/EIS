@@ -1,7 +1,6 @@
 package com.bepa.eis.server.dataprovider.fields.bigdecimals;
 
 import com.bepa.eis.server.api.web.application.enums.FieldControl;
-import com.bepa.eis.server.api.web.application.enums.FieldRequired;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 
 import java.math.BigDecimal;

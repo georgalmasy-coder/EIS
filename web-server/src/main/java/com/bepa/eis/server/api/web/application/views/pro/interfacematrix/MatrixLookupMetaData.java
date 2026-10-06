@@ -1,9 +1,9 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.web.application.cache.ClassLookupValue;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;
-import com.bepa.eis.server.api.web.application.cache.ClassLookupValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

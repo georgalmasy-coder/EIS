@@ -1,7 +1,6 @@
 package com.bepa.eis.server.api.web.application.views.pro.dashboard.common;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.server.api.DTO.User;
 import com.bepa.eis.server.api.web.application.cache.ClassLookupValue;
 import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
 import com.bepa.eis.server.api.web.application.cache.LookupValue;

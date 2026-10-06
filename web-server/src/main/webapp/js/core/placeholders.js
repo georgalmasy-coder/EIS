@@ -1,4 +1,4 @@
-import { hide, show } from "./dom.js";
+import {hide, show} from "./dom.js";
 
 function resetDisplay(element) {
     if (!element) {

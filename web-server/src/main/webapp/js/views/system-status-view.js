@@ -1,4 +1,4 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
 import {
     drawCpuLoadChart,
     drawMultiLineChart,

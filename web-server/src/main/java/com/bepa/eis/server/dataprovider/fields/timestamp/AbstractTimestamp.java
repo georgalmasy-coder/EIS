@@ -5,7 +5,6 @@ import com.bepa.eis.server.dataprovider.fields.AbstractField;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 abstract public class AbstractTimestamp extends AbstractField {
     private LocalDateTime value;

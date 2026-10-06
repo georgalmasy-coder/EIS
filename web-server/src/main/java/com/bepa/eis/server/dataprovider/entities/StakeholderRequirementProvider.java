@@ -1,13 +1,12 @@
 package com.bepa.eis.server.dataprovider.entities;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.web.application.views.basis.stakeholderrequirement.StakeholderRequirementExportRow;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.fields.lookups.codeselector.StakeholderRequirementParentCodeSelector;
-import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
-import com.bepa.eis.common.enums.entity.EntityType;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

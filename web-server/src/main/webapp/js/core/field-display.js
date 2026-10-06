@@ -1,9 +1,4 @@
-import {
-    getDirectChild,
-    getDirectText,
-    textOf,
-    toBool
-} from "./xml.js";
+import {getDirectChild, getDirectText, textOf, toBool} from "./xml.js";
 
 export function fieldDisplayValue(node) {
     if (!node) {

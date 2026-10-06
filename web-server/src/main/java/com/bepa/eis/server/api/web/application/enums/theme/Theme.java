@@ -1,7 +1,5 @@
 package com.bepa.eis.server.api.web.application.enums.theme;
 
-import com.bepa.eis.server.api.web.application.enums.PageType;
-
 import java.util.Locale;
 
 public enum Theme {

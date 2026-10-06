@@ -1,6 +1,8 @@
 package com.bepa.eis.server.entites.systemrequirement;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.EntityElementRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
@@ -10,8 +12,6 @@ import com.bepa.eis.server.dataprovider.fields.lookups.requirement.*;
 import com.bepa.eis.server.dataprovider.fields.strings.*;
 import com.bepa.eis.server.dataprovider.fields.timestamp.RequirementCaptureDate;
 import com.bepa.eis.server.entites.AbstractEntity;
-import com.bepa.eis.common.enums.entity.EntityDataElement;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.IntegerDataElement;
 import com.bepa.eis.server.entites.datatypes.LocalDateDataElement;
 import com.bepa.eis.server.entites.datatypes.StringDataElement;
@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 
 import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
 

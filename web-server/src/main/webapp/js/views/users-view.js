@@ -1,13 +1,7 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
-import {
-    drawLineChart,
-    renderDonut,
-    renderLegend,
-    setBar,
-    setText
-} from "/js/admin-dashboard/dashboard-charts.js";
-import { formatDateForDisplay } from "/js/core/format.js";
-import { escapeHtml } from "/js/core/html.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
+import {drawLineChart, renderDonut, renderLegend, setBar, setText} from "/js/admin-dashboard/dashboard-charts.js";
+import {formatDateForDisplay} from "/js/core/format.js";
+import {escapeHtml} from "/js/core/html.js";
 
 const DATA_URL = "/admin/api/dashboard/users";
 const REFRESH_MS = 60000;

@@ -1,6 +1,6 @@
-import { userPreferences } from "../core/user-preferences.js";
-import { initMenu } from "../components/menu.js";
-import { applyTopPanelFromDocument } from "../core/page-header.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {initMenu} from "../components/menu.js";
+import {applyTopPanelFromDocument} from "../core/page-header.js";
 import {
     applyPhoneConstraints as applyIntlPhoneConstraints,
     formatCurrentPhoneValue as syncIntlPhoneFieldValue,
@@ -8,8 +8,7 @@ import {
     initPhoneField,
     phonePatternForRule as phonePatternForIntlRule,
     phoneTitleForRule as phoneTitleForIntlRule,
-    updatePhoneHelp as updateIntlPhoneHelp,
-    validatePhoneNumber as validateIntlPhoneNumber
+    updatePhoneHelp as updateIntlPhoneHelp
 } from "../components/phone-intl-field.js";
 
 const API_URL = "/api/admin/customers";
@@ -919,12 +918,12 @@ function renderWorkflowSummary(workflow, subscriptionSummary) {
         },
         {
             label: "Workflow status",
-            value: workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "—",
+            value: workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "ï¿½",
             pill: true
         },
         {
             label: "Subscription source",
-            value: subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "—",
+            value: subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "ï¿½",
             pill: false
         }
     ];
@@ -941,11 +940,11 @@ function buildSubscriptionSummaryItems(summary) {
         },
         {
             label: "Plan",
-            value: summary.subscriptionPlanName || summary.moduleName || summary.moduleCode || "—"
+            value: summary.subscriptionPlanName || summary.moduleName || summary.moduleCode || "ï¿½"
         },
         {
             label: "Billing period",
-            value: summary.billingPeriodName || summary.billingPeriodCode || "—"
+            value: summary.billingPeriodName || summary.billingPeriodCode || "ï¿½"
         },
         {
             label: "Price",
@@ -961,11 +960,11 @@ function buildSubscriptionSummaryItems(summary) {
         },
         {
             label: "Module",
-            value: summary.moduleName || summary.moduleCode || "—"
+            value: summary.moduleName || summary.moduleCode || "ï¿½"
         },
         {
             label: "Billing months",
-            value: summary.billingPeriodMonths || "—"
+            value: summary.billingPeriodMonths || "ï¿½"
         }
     ];
 }
@@ -976,7 +975,7 @@ function renderSummaryStrip(items) {
     }
 
     return items.map(function (item) {
-        const value = item?.value == null || item.value === "" ? "—" : String(item.value);
+        const value = item?.value == null || item.value === "" ? "ï¿½" : String(item.value);
         const pillClass = item?.pill ? " is-pill" : "";
 
         return `
@@ -990,7 +989,7 @@ function renderSummaryStrip(items) {
 
 function buildDialogStatus(workflow, subscriptionSummary) {
     const workflowState = workflow?.currentState ? lookupLabel("workflowState", workflow.currentState) : "No workflow";
-    const workflowStatus = workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "—";
+    const workflowStatus = workflow?.workflowStatus ? lookupLabel("workflowStatus", workflow.workflowStatus) : "ï¿½";
     const source = subscriptionSummary?.source ? humanizeSummaryValue(subscriptionSummary.source) : "No subscription";
 
     return `Workflow: ${workflowState} | Status: ${workflowStatus} | Subscription source: ${source}`;
@@ -1015,7 +1014,7 @@ function formatDateOnly(value) {
     const textValue = String(value || "").trim();
 
     if (!textValue) {
-        return "—";
+        return "ï¿½";
     }
 
     if (/^\d{4}-\d{2}-\d{2}/.test(textValue)) {
@@ -1030,11 +1029,11 @@ function formatAmountAndCurrency(amount, currency) {
     const safeCurrency = String(currency || "").trim().toUpperCase();
 
     if (!safeAmount && !safeCurrency) {
-        return "—";
+        return "ï¿½";
     }
 
     if (!safeAmount) {
-        return safeCurrency || "—";
+        return safeCurrency || "ï¿½";
     }
 
     if (!safeCurrency) {

@@ -1,4 +1,4 @@
-import { createAutoRefreshController, fetchJson } from "/js/admin-dashboard/dashboard-api.js";
+import {createAutoRefreshController, fetchJson} from "/js/admin-dashboard/dashboard-api.js";
 import {
     drawLineChart,
     formatMetric,
@@ -7,7 +7,7 @@ import {
     setBar,
     setText
 } from "/js/admin-dashboard/dashboard-charts.js";
-import { escapeHtml } from "/js/core/html.js";
+import {escapeHtml} from "/js/core/html.js";
 
 const DATA_URL = "/admin/api/dashboard/customer-creation";
 const REFRESH_MS = 30000;

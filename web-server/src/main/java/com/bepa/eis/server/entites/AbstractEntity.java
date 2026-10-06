@@ -1,9 +1,10 @@
 package com.bepa.eis.server.entites;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.enums.entity.EntityType;
+import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.entities.Entity;
 import com.bepa.eis.server.dataprovider.entities.common.AttachmentRecord;
-import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
 import com.bepa.eis.server.dataprovider.entities.common.LinkRecord;
 import com.bepa.eis.server.dataprovider.entities.common.NoteRecord;
@@ -16,16 +17,15 @@ import com.bepa.eis.server.dataprovider.fields.integers.ids.ProjectId;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.ChangedBy;
 import com.bepa.eis.server.dataprovider.fields.timestamp.ChangedDateTime;
 import com.bepa.eis.server.entites.configuration.EntityConfiguration;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.entites.datatypes.AbstractDataElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.Timestamp;
 import java.util.Objects;
 
 abstract public class AbstractEntity {

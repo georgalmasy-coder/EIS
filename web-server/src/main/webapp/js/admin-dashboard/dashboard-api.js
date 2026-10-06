@@ -1,4 +1,4 @@
-import { fetchJson as fetchJsonFromCore } from "../core/http.js";
+import {fetchJson as fetchJsonFromCore} from "../core/http.js";
 
 export async function fetchJson(url) {
     return await fetchJsonFromCore(url, {

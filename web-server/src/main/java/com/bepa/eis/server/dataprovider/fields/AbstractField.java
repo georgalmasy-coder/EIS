@@ -9,8 +9,6 @@ import com.bepa.eis.server.dataprovider.generic.Attribute;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bepa.eis.server.api.web.application.enums.FieldControl.HIDDEN;
-import static com.bepa.eis.server.api.web.application.enums.FieldControl.NONE;
 import static com.bepa.eis.server.api.web.application.enums.FieldVisible.FIELD_VISIBLE;
 
 abstract public class AbstractField implements Cloneable {

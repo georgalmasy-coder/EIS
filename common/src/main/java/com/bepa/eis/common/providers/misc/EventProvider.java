@@ -1,17 +1,13 @@
 package com.bepa.eis.common.providers.misc;
 
 import com.bepa.eis.common.dto.WebSession;
-import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.enums.EventType;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
