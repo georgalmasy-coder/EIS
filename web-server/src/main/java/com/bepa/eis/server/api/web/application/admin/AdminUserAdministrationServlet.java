@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.web.application.admin;
 
+import com.bepa.eis.server.api.security.RequestBaseUrl;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.dto.customer.CustomerRecord;
 import com.bepa.eis.common.enums.user.UserRoles;
@@ -194,7 +195,10 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
             List<UserProjectAccessRow> projectAccessRows = parseProjectAccessRows(root);
 
             UserProvider userProvider = new UserProvider(webSession);
-            boolean saved = userProvider.saveUserAdministration(user, customerId, projectAccessRows);
+            String baseUrl = user != null && user.userId() == null ? RequestBaseUrl.from(request) : null;
+            UserProvider.UserAdministrationSaveResult result = userProvider.saveUserAdministrationWithInvitation(
+                    user, customerId, projectAccessRows, baseUrl);
+            boolean saved = result.saved();
 
             if (saved) {
                 clearCustomerCacheEntry(webSession, customerId);
@@ -202,8 +206,12 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
             return buildSaveResultXml(
                     saved,
-                    user == null ? null : user.userId(),
-                    saved ? "User saved." : "User could not be saved."
+                    result.userId(),
+                    !saved ? "User could not be saved."
+                            : result.created() ? (result.invitationQueued()
+                                    ? "User created. Welcome email with password setup link queued."
+                                    : "User created, but the welcome email could not be queued. Use Send reset link to retry.")
+                            : "User saved."
             );
         } catch (Exception e) {
             log.error("Error saving user: {}", e.getMessage());
@@ -228,9 +236,7 @@ public class AdminUserAdministrationServlet extends AbstractAdminServlet {
 
         switch (action.toLowerCase()) {
             case "sendpasswordresetlink" -> {
-                String baseUrl = request.getScheme() + "://" + request.getServerName()
-                        + (request.getServerPort() > 0 ? ":" + request.getServerPort() : "")
-                        + request.getContextPath();
+                String baseUrl = RequestBaseUrl.from(request);
                 success = userProvider.sendPasswordResetLink(userId, webSession == null ? null : webSession.getUserId(), baseUrl);
                 message = success ? "Password reset link queued." : "Password reset link could not be queued.";
             }

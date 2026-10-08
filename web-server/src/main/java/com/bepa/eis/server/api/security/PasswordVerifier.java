@@ -1,17 +1,12 @@
 package com.bepa.eis.server.api.security;
 
+import com.bepa.eis.common.providers.security.PasswordHasher;
+
 public final class PasswordVerifier {
     private PasswordVerifier() {}
 
-    /**
-     * Placeholder: implementér efter jeres faktiske format.
-     * Eksempel: PBKDF2: algo:iterations:saltBase64:hashBase64
-     */
+    /** Verifies the shared, versioned PBKDF2 password format. */
     public static boolean verifyPbkdf2Like(String storedHash, String password) {
-        if (storedHash == null || storedHash.isBlank()) return false;
-
-        // TODO: implementér korrekt verifikation (PBKDF2/BCrypt/Argon2)
-        // Returnér ALDRIG true her i produktion uden rigtig verifikation.
-        return false;
+        return PasswordHasher.verify(storedHash, password);
     }
 }

@@ -1,5 +1,7 @@
 package com.bepa.eis.common.providers;
 
+import com.bepa.eis.common.providers.security.PasswordHasher;
+
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.Subscription;
@@ -277,9 +279,7 @@ public class SessionProvider extends GenericProvider {
                 if (rs != null && rs.next()) {
                     String passwordFromDb = rs.getString("Password");
 
-                    if (passwordFromDb != null) {
-                        return passwordFromDb.equals(passwordInput);
-                    }
+                    return PasswordHasher.verify(passwordFromDb, passwordInput);
                 }
             }
         } catch (Exception e) {

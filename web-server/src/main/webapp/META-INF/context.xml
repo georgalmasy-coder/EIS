@@ -38,7 +38,7 @@
             validationQuery="SELECT 1"
             validationInterval="30000"
             removeAbandoned="true"
-            removeAbandonedTimeout="60"
+            removeAbandonedTimeout="120"
             logAbandoned="false"
 
             HttpOnly="true"

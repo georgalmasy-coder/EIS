@@ -98,6 +98,14 @@
 
         <resources>
             <resource>
+                <directory>src/eis</directory>
+                <includes>
+                    <include>mail-templates/password-reset.mail</include>
+                    <include>mail-templates/user-created.mail</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>

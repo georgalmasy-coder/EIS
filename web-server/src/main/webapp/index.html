@@ -804,7 +804,6 @@
         const mfaSetupBackButton = document.getElementById("eisMfaSetupBack");
 
         const errorEl = document.getElementById("eisLoginError");
-        const forgotPasswordLink = document.getElementById("eisForgotPasswordLink");
 
         const mfaQr = document.getElementById("eisMfaQr");
         const mfaManualKey = document.getElementById("eisMfaManualKey");
@@ -1140,10 +1139,9 @@
         openLink.addEventListener("click", openLoginModal);
         closeButton.addEventListener("click", closeLoginModal);
 
-        forgotPasswordLink.addEventListener("click", function (event) {
-            event.preventDefault();
-            alert("You seem to have a short memory");
-        });
+        if (window.location.hash === "#login") {
+            openLoginModal();
+        }
 
         modal.addEventListener("click", function (event) {
             if (event.target === modal) {

@@ -4,6 +4,7 @@ import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.UserProvider.UserProjectAccessRow;
+import com.bepa.eis.server.api.security.RequestBaseUrl;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.EntityRequestType;
@@ -45,9 +46,11 @@ public class UserMainServlet extends GenericDataProviderServlet {
             customerId = webSession.getCustomerId();
         }
 
-        boolean saved = userProvider.saveUserAdministration(user, customerId, projectAccessRows);
+        String baseUrl = user.userId() == null ? RequestBaseUrl.from(request) : null;
+        UserProvider.UserAdministrationSaveResult result = userProvider.saveUserAdministrationWithInvitation(
+                user, customerId, projectAccessRows, baseUrl);
 
-        if (!saved) {
+        if (!result.saved()) {
             throw new IllegalStateException("User could not be saved.");
         }
 

@@ -41,11 +41,24 @@ public class MailTemplateRenderer {
 
         File templateFile = resolveTemplateFile(safeTemplateType);
 
-        if (!templateFile.isFile()) {
+        String fileContent;
+        String sourceFileName;
+        if (templateFile.isFile()) {
+            fileContent = readFile(templateFile);
+            sourceFileName = templateFile.getAbsolutePath();
+        } else if (safeTemplateType == MailTemplateType.PASSWORD_RESET || safeTemplateType == MailTemplateType.USER_CREATED) {
+            // Ship a working default while allowing the existing external template override.
+            String resource = "/mail-templates/" + safeTemplateType.getFileName();
+            sourceFileName = "classpath:" + resource;
+            try (InputStream stream = MailTemplateRenderer.class.getResourceAsStream(resource)) {
+                if (stream == null) {
+                    throw new IOException("Bundled mail template not found: " + safeTemplateType.getFileName());
+                }
+                fileContent = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        } else {
             throw new IOException("Mail template file not found: " + templateFile.getAbsolutePath());
         }
-
-        String fileContent = readFile(templateFile);
         ParsedTemplate parsedTemplate = parseTemplate(fileContent);
 
         return new MailTemplate(
@@ -53,7 +66,7 @@ public class MailTemplateRenderer {
                 parsedTemplate.subject,
                 parsedTemplate.body,
                 parsedTemplate.contentType,
-                templateFile.getAbsolutePath()
+                sourceFileName
         );
     }
 

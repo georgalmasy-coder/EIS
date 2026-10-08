@@ -92,7 +92,7 @@ public class CustomerRegistrationUserProvider extends GenericProvider {
              * User is created without a usable password.
              * The onboarding / confirmation workflow must handle password setup.
              */
-            statement.setString(8, "");
+            statement.setNull(8, Types.VARCHAR);
 
             int rows = statement.executeUpdate();
 

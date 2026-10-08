@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.nio.charset.StandardCharsets;
         "/api/security/password-reset"
 })
 public class PasswordResetServlet extends HttpServlet {
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetServlet.class);
 
     @Override
     protected void doGet(
@@ -24,7 +27,7 @@ public class PasswordResetServlet extends HttpServlet {
             HttpServletResponse response
     ) throws ServletException, IOException {
         String token = safeText(request.getParameter("token"));
-        UserProvider userProvider = new UserProvider(null);
+        UserProvider userProvider = createUserProvider();
         boolean valid = userProvider.validatePasswordResetToken(token);
 
         writeXml(response, HttpServletResponse.SC_OK, buildValidationXml(valid));
@@ -46,11 +49,16 @@ public class PasswordResetServlet extends HttpServlet {
 
             Element root = document.getDocumentElement();
             String token = text(root, "token");
-            String newPassword = text(root, "newPassword");
-            String confirmPassword = text(root, "confirmPassword");
+            String newPassword = passwordText(root, "newPassword");
+            String confirmPassword = passwordText(root, "confirmPassword");
 
-            if (newPassword == null || newPassword.length() < 8) {
+            if (newPassword == null || newPassword.isBlank() || newPassword.length() < 8) {
                 writeXml(response, HttpServletResponse.SC_BAD_REQUEST, buildResultXml(false, "Password must be at least 8 characters."));
+                return;
+            }
+
+            if (newPassword.length() > 128) {
+                writeXml(response, HttpServletResponse.SC_BAD_REQUEST, buildResultXml(false, "Password must be no more than 128 characters."));
                 return;
             }
 
@@ -59,7 +67,7 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
-            UserProvider userProvider = new UserProvider(null);
+            UserProvider userProvider = createUserProvider();
             boolean success = userProvider.completePasswordReset(token, newPassword);
 
             writeXml(
@@ -68,7 +76,8 @@ public class PasswordResetServlet extends HttpServlet {
                     buildResultXml(success, success ? "Password updated." : "Password reset failed.")
             );
         } catch (Exception e) {
-            writeXml(response, HttpServletResponse.SC_BAD_REQUEST, buildResultXml(false, "Password reset failed: " + e.getMessage()));
+            log.warn("Password reset request failed.", e);
+            writeXml(response, HttpServletResponse.SC_BAD_REQUEST, buildResultXml(false, "Password reset failed. Please request a new link or try again."));
         }
     }
 
@@ -94,6 +103,16 @@ public class PasswordResetServlet extends HttpServlet {
         }
 
         return child.getTextContent() == null ? "" : child.getTextContent().trim();
+    }
+
+    protected UserProvider createUserProvider() {
+        return new UserProvider(null);
+    }
+
+    // Passwords must retain leading/trailing spaces, just as in login.
+    private String passwordText(Element parent, String tagName) {
+        Element child = (Element) parent.getElementsByTagName(tagName).item(0);
+        return child == null || child.getTextContent() == null ? "" : child.getTextContent();
     }
 
     private String safeText(String value) {

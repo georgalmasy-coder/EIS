@@ -11,6 +11,7 @@ import com.bepa.eis.common.providers.customer.CustomerTokenProvider;
 import com.bepa.eis.common.providers.mail.MailProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import com.bepa.eis.common.providers.security.MfaConfig;
+import com.bepa.eis.common.providers.security.PasswordHasher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -454,16 +455,11 @@ public class UserProvider extends GenericProvider {
             """;
 
     private static final String UPDATE_PASSWORD_BY_RESET_TOKEN_SQL = """
-            UPDATE U
+            UPDATE [dbo].[USERS]
             SET
-                U.Password = ?,
-                U.LockedUntil = NULL
-            FROM [dbo].[USERS] U
-            INNER JOIN [dbo].[USER_PASSWORD_RESET_TOKEN] T
-                ON T.UserId = U.UserId
-            WHERE T.TokenHash = ?
-              AND T.UsedAt IS NULL
-              AND T.ExpiresAt > SYSUTCDATETIME()
+                Password = ?,
+                LockedUntil = NULL
+            WHERE UserId = ? AND Active = 1
             """;
 
     private static final String ACTIVE_PROJECT_STATUS_IDS =
@@ -560,7 +556,7 @@ public class UserProvider extends GenericProvider {
                     return LoginValidationResult.failed(userId, "Account is locked");
                 }
 
-                if (passwordFromDb == null || !passwordFromDb.equals(passwordInput)) {
+                if (!PasswordHasher.verify(passwordFromDb, passwordInput)) {
                     return LoginValidationResult.failed(userId, "Invalid password");
                 }
 
@@ -1263,8 +1259,44 @@ public class UserProvider extends GenericProvider {
             Integer customerId,
             List<UserProjectAccessRow> projectAccessRows
     ) {
+        return persistUserAdministration(user, customerId, projectAccessRows) != null;
+    }
+
+    /** Save first, then invite only a newly created user. Mail failure never reports a saved user as unsaved. */
+    public UserAdministrationSaveResult saveUserAdministrationWithInvitation(
+            UserAdministrationRow user,
+            Integer customerId,
+            List<UserProjectAccessRow> projectAccessRows,
+            String baseUrl
+    ) {
+        Integer persistedUserId = persistUserAdministration(user, customerId, projectAccessRows);
+        if (persistedUserId == null) {
+            return new UserAdministrationSaveResult(false, null, false, false);
+        }
+        boolean created = user.userId() == null;
+        boolean invitationQueued = false;
+        if (created) {
+            try {
+                WebSession session = getWebSession();
+                invitationQueued = sendUserCreatedLink(persistedUserId,
+                        session == null ? null : session.getUserId(), baseUrl);
+            } catch (RuntimeException e) {
+                log.error("User was created, but the welcome email could not be queued. userId={}", persistedUserId, e);
+            }
+            if (!invitationQueued) {
+                log.error("Welcome email was not queued for the new user. userId={}", persistedUserId);
+            }
+        }
+        return new UserAdministrationSaveResult(true, persistedUserId, created, invitationQueued);
+    }
+
+    protected Integer persistUserAdministration(
+            UserAdministrationRow user,
+            Integer customerId,
+            List<UserProjectAccessRow> projectAccessRows
+    ) {
         if (user == null) {
-            return false;
+            return null;
         }
 
         if (safeText(user.name(), "").isBlank()) {
@@ -1294,14 +1326,14 @@ public class UserProvider extends GenericProvider {
 
                     if (persistedUserId == null) {
                         connection.rollback();
-                        return false;
+                        return null;
                     }
 
                     linkUserToCustomer(connection, persistedUserId, resolvedCustomerId);
                 } else {
                     if (!updateUserAdministration(connection, user)) {
                         connection.rollback();
-                        return false;
+                        return null;
                     }
 
                     persistedUserId = user.userId();
@@ -1318,7 +1350,7 @@ public class UserProvider extends GenericProvider {
                         "OK"
                 );
 
-                return true;
+                return persistedUserId;
             } catch (SQLException | RuntimeException e) {
                 connection.rollback();
                 throw e;
@@ -1333,7 +1365,7 @@ public class UserProvider extends GenericProvider {
                     "User administration data could not be saved",
                     "Warning"
             );
-            return false;
+            return null;
         }
     }
 
@@ -1420,7 +1452,7 @@ public class UserProvider extends GenericProvider {
             statement.setBoolean(11, false);
             statement.setBoolean(12, false);
             statement.setString(13, normalizeUserMfaPolicy(user.userMfaPolicy()));
-            statement.setString(14, "");
+            statement.setNull(14, Types.VARCHAR);
 
             if (user.lockedUntil() == null) {
                 statement.setNull(15, Types.TIMESTAMP);
@@ -1540,7 +1572,7 @@ public class UserProvider extends GenericProvider {
         try (Connection connection = getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_USER_PASSWORD_SQL)) {
 
-            statement.setString(1, newPassword);
+            statement.setString(1, PasswordHasher.hash(newPassword));
             statement.setInt(2, userId);
 
             return statement.executeUpdate() > 0;
@@ -1596,7 +1628,7 @@ public class UserProvider extends GenericProvider {
             }
 
             String resetBaseUrl = safeText(baseUrl, "").replaceAll("/+$", "");
-            String resetLink = resetBaseUrl + "/forgot-password.html?token=" + urlEncode(rawToken);
+            String resetLink = resetBaseUrl + "/enter-new-password.html?token=" + urlEncode(rawToken);
 
             return new PasswordResetTokenResult(
                     tokenId,
@@ -1620,6 +1652,16 @@ public class UserProvider extends GenericProvider {
             Integer createdByUserId,
             String baseUrl
     ) {
+        return sendPasswordSetupLink(userId, createdByUserId, baseUrl, MailTemplateType.PASSWORD_RESET);
+    }
+
+    public boolean sendUserCreatedLink(Integer userId, Integer createdByUserId, String baseUrl) {
+        return sendPasswordSetupLink(userId, createdByUserId, baseUrl, MailTemplateType.USER_CREATED);
+    }
+
+    private boolean sendPasswordSetupLink(
+            Integer userId, Integer createdByUserId, String baseUrl, MailTemplateType templateType
+    ) {
         UserAdministrationRow user = getUserAdministrationRow(userId);
 
         if (user == null || user.email() == null || user.email().isBlank()) {
@@ -1632,10 +1674,10 @@ public class UserProvider extends GenericProvider {
             return false;
         }
 
-        MailProvider mailProvider = new MailProvider(getWebSession());
+        MailProvider mailProvider = createPasswordMailProvider();
         boolean queued = mailProvider.createMail(
                 MailRecipient.of(user.name(), user.email()),
-                MailTemplateType.PASSWORD_RESET,
+                templateType,
                 java.util.Map.of(
                         "userName", safeText(user.name(), user.email()),
                         "email", safeText(user.email(), ""),
@@ -1643,18 +1685,26 @@ public class UserProvider extends GenericProvider {
                 )
         ) != null;
 
+        boolean welcome = templateType == MailTemplateType.USER_CREATED;
         logUserAdministrationEvent(
-                queued ? "PASSWORD_RESET_LINK_QUEUED" : "PASSWORD_RESET_LINK_FAILED",
+                welcome ? (queued ? "USER_WELCOME_LINK_QUEUED" : "USER_WELCOME_LINK_FAILED")
+                        : (queued ? "PASSWORD_RESET_LINK_QUEUED" : "PASSWORD_RESET_LINK_FAILED"),
                 user.email(),
-                queued ? "Password reset link queued" : "Password reset link could not be queued",
+                welcome ? (queued ? "Welcome email queued" : "Welcome email could not be queued")
+                        : (queued ? "Password reset link queued" : "Password reset link could not be queued"),
                 queued ? "OK" : "Warning"
         );
 
         return queued;
     }
 
+    protected MailProvider createPasswordMailProvider() {
+        return new MailProvider(getWebSession());
+    }
+
     public boolean validatePasswordResetToken(String rawToken) {
-        return getPasswordResetToken(rawToken) != null;
+        PasswordResetTokenResult token = getPasswordResetToken(rawToken);
+        return token != null && !token.isUsed() && !token.isExpired();
     }
 
     public boolean completePasswordReset(
@@ -1675,12 +1725,13 @@ public class UserProvider extends GenericProvider {
             connection.setAutoCommit(false);
 
             try {
-                if (!updatePasswordByResetToken(connection, token.tokenHash(), newPassword)) {
+                // Claim the token first: concurrent requests cannot both reset the password.
+                if (!markPasswordResetTokenUsed(connection, token.tokenId())
+                        || !updatePasswordByResetToken(connection, token.userId(), newPassword)) {
                     connection.rollback();
                     return false;
                 }
 
-                markPasswordResetTokenUsed(connection, token.tokenId());
                 connection.commit();
 
                 logUserAdministrationEvent(
@@ -1974,17 +2025,17 @@ public class UserProvider extends GenericProvider {
 
     private boolean updatePasswordByResetToken(
             Connection connection,
-            String tokenHash,
+            Integer userId,
             String newPassword
     ) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD_BY_RESET_TOKEN_SQL)) {
-            statement.setString(1, newPassword);
-            statement.setString(2, tokenHash);
+            statement.setString(1, PasswordHasher.hash(newPassword));
+            statement.setInt(2, userId);
             return statement.executeUpdate() > 0;
         }
     }
 
-    private void logUserAdministrationEvent(
+    protected void logUserAdministrationEvent(
             String eventType,
             String targetUserEmail,
             String description,
@@ -2340,6 +2391,8 @@ public class UserProvider extends GenericProvider {
             return builder.toString();
         }
     }
+
+    public record UserAdministrationSaveResult(boolean saved, Integer userId, boolean created, boolean invitationQueued) {}
 
     public record PasswordResetTokenResult(
             Integer tokenId,

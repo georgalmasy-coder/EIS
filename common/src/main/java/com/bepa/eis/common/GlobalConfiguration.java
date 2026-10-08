@@ -50,7 +50,7 @@ public final class GlobalConfiguration {
 
     private static final boolean DEFAULT_CUSTOMER_WORKFLOW_JOB_ENABLED = true;
     private static final int DEFAULT_CUSTOMER_WORKFLOW_JOB_INTERVAL_SECONDS = 600;
-    private static final String DEFAULT_CUSTOMER_WORKFLOW_PORTAL_BASE_URL = "http://localhost:8080";
+    private static final String DEFAULT_CUSTOMER_WORKFLOW_PORTAL_BASE_URL = "https://localhost";
     private static final int DEFAULT_CUSTOMER_WORKFLOW_TRIAL_DAYS = 14;
     private static final int DEFAULT_CUSTOMER_WORKFLOW_TRIAL_REMINDER_DAYS_BEFORE_EXPIRY = 2;
     private static final int DEFAULT_CUSTOMER_WORKFLOW_PAYMENT_GRACE_PERIOD_DAYS = 14;
@@ -774,7 +774,7 @@ public final class GlobalConfiguration {
         content.append(lineSeparator);
         content.append("customer.workflow.job.enabled=true").append(lineSeparator);
         content.append("customer.workflow.job.interval.seconds=600").append(lineSeparator);
-        content.append("customer.workflow.portal.base.url=http://localhost:8080").append(lineSeparator);
+        content.append("customer.workflow.portal.base.url=https://localhost").append(lineSeparator);
         content.append("customer.workflow.trial.days=14").append(lineSeparator);
         content.append("customer.workflow.trial.reminder.days.before.expiry=2").append(lineSeparator);
         content.append("customer.workflow.payment.grace.period.days=14").append(lineSeparator);
