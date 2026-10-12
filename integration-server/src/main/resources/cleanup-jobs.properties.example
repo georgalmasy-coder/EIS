@@ -1,0 +1,35 @@
+# Add to the shared eis-global.properties (used by both servers).
+# Standard five-field cron: minute hour day-of-month month day-of-week.
+# Daily 02:00 = 0 2 * * *; Sundays 03:30 = 30 3 * * 0.
+# All jobs use the same cron scheduler; old *.interval.seconds keys are ignored.
+mail.queue.job.enabled=true
+mail.queue.job.cron=* * * * *
+mail.queue.job.timezone=Europe/Copenhagen
+customer.workflow.job.enabled=true
+customer.workflow.job.cron=*/10 * * * *
+customer.workflow.job.timezone=Europe/Copenhagen
+
+cleanup.session.job.enabled=true
+cleanup.session.job.cron=0 2 * * *
+cleanup.session.job.timezone=Europe/Copenhagen
+cleanup.session.job.retention.days=1
+
+cleanup.incidents.job.enabled=true
+cleanup.incidents.job.cron=0 2 * * *
+cleanup.incidents.job.timezone=Europe/Copenhagen
+cleanup.incidents.job.retention.days=120
+
+cleanup.performance.job.enabled=true
+cleanup.performance.job.cron=0 2 * * *
+cleanup.performance.job.timezone=Europe/Copenhagen
+cleanup.performance.job.retention.days=120
+
+# Archived .gz logs from both servers; age uses last-modified time.
+# Only files directly in these directories are processed (no recursion).
+cleanup.logs.job.enabled=true
+cleanup.logs.job.cron=0 2 * * *
+cleanup.logs.job.timezone=Europe/Copenhagen
+cleanup.logs.job.retention.days=30
+# Empty directory settings use eis.logs.dir/web-server and eis.logs.dir/integration-server.
+cleanup.logs.job.web-server.directory=
+cleanup.logs.job.integration-server.directory=

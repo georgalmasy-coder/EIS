@@ -274,6 +274,7 @@ public class CustomerWorkflowProvider extends GenericProvider {
             }
         } catch (SQLException e) {
             log.error("Error loading due customer workflows.", e);
+            throw new IllegalStateException("Could not load due customer workflows", e);
         }
 
         return workflows;

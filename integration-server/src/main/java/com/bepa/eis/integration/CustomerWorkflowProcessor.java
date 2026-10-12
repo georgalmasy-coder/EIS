@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 public class CustomerWorkflowProcessor {
+    private boolean lastRunHadErrors;
+
+    public boolean lastRunHadErrors() {
+        return lastRunHadErrors;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(CustomerWorkflowProcessor.class);
 
@@ -101,6 +106,7 @@ public class CustomerWorkflowProcessor {
     }
 
     public int processDueWorkflows() {
+        lastRunHadErrors = false;
         List<CustomerWorkflow> dueWorkflows = workflowProvider.getDueWorkflows(batchSize);
 
         if (dueWorkflows.isEmpty()) {
@@ -148,6 +154,7 @@ public class CustomerWorkflowProcessor {
             processWorkflow(lockedWorkflow);
             return true;
         } catch (Exception e) {
+            lastRunHadErrors = true;
             log.error("Error processing customer workflow. workflowId={}", workflowId, e);
 
             workflowProvider.markWorkflowError(

@@ -31,6 +31,7 @@ public class EventProvider extends GenericProvider {
             LEFT JOIN PROJECT P
                 ON E.ProjectId = P.ProjectId
                AND E.CustomerId = P.CustomerId
+               AND P.Latest = 1
             ORDER BY E.EventCreated DESC
             """;
 
@@ -62,7 +63,7 @@ public class EventProvider extends GenericProvider {
                         eventType != null ? eventType.getDescription() : "Unknown",
                         eventDescription,
                         projectName != null ? projectName : "",
-                        eventProcessed != null ? "Ok" : "Awating"
+                        toIsoString(eventProcessed)
                 ));
             }
         }
@@ -112,7 +113,7 @@ public class EventProvider extends GenericProvider {
             String type,
             String description,
             String project,
-            String status
+            String processedAt
     ) {
     }
 }

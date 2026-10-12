@@ -523,6 +523,7 @@ public class MailProvider extends GenericProvider {
             }
         } catch (SQLException e) {
             log.error("Error loading pending mails", e);
+            throw new IllegalStateException("Could not load pending mails", e);
         }
 
         return mails;
@@ -648,7 +649,7 @@ public class MailProvider extends GenericProvider {
             return statement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error releasing stuck sending mails", e);
-            return 0;
+            throw new IllegalStateException("Could not release stuck sending mails", e);
         }
     }
 

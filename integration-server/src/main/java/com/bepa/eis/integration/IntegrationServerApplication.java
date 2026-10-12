@@ -1,11 +1,15 @@
 package com.bepa.eis.integration;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.providers.misc.ComponentHealthProvider;
+import com.bepa.eis.common.scheduling.CronJobSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.List;
+import com.bepa.eis.common.scheduling.CleanupJobSettings.Type;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,10 +26,22 @@ public class IntegrationServerApplication {
     private final MailQueueJob mailQueueJob = new MailQueueJob();
     private final CustomerWorkflowJob customerWorkflowJob = new CustomerWorkflowJob();
     private final IntegrationDatabaseInstaller databaseInstaller = new IntegrationDatabaseInstaller();
+    private final LogArchiveCleanupJob logArchiveCleanupJob = new LogArchiveCleanupJob();
+    private final List<DataCleanupJob> cleanupJobs = List.of(
+            new DataCleanupJob(Type.SESSION), new DataCleanupJob(Type.INCIDENTS), new DataCleanupJob(Type.PERFORMANCE));
 
-    private Instant nextMailQueueRunAt = Instant.EPOCH;
-    private Instant nextCustomerWorkflowRunAt = Instant.EPOCH;
-
+    private final ScheduledCronJob<CronJobSettings> scheduledMail = new ScheduledCronJob<>(
+            ComponentHealthProvider.MAIL_JOB, "Mail queue job",
+            GlobalConfiguration::getMailQueueJobSchedule, settings -> settings, settings -> {
+                mailQueueJob.runOnce();
+                return "OK";
+            });
+    private final ScheduledCronJob<CronJobSettings> scheduledWorkflow = new ScheduledCronJob<>(
+            ComponentHealthProvider.WORKFLOW_JOB, "Customer workflow job",
+            GlobalConfiguration::getCustomerWorkflowJobSchedule, settings -> settings, settings -> {
+                customerWorkflowJob.runOnce();
+                return customerWorkflowJob.getLastRunHealthStatus();
+            });
     public static void main(String[] args) {
         IntegrationServerApplication application = new IntegrationServerApplication();
 
@@ -65,40 +81,11 @@ public class IntegrationServerApplication {
     }
 
     private void runScheduledJobs() {
-        Instant now = Instant.now();
-
-        runMailQueueJobIfDue(now);
-        runCustomerWorkflowJobIfDue(now);
+        scheduledMail.runIfDue(Instant.now());
+        scheduledWorkflow.runIfDue(Instant.now());
+        for (DataCleanupJob job : cleanupJobs) job.runIfDue(Instant.now());
+        logArchiveCleanupJob.runIfDue(Instant.now());
     }
-
-    private void runMailQueueJobIfDue(Instant now) {
-        if (now.isBefore(nextMailQueueRunAt)) {
-            return;
-        }
-
-        try {
-            mailQueueJob.runOnce();
-        } catch (RuntimeException e) {
-            log.error("Unhandled error while running mail queue job.", e);
-        } finally {
-            nextMailQueueRunAt = Instant.now().plusSeconds(GlobalConfiguration.getMailQueueJobIntervalSeconds());
-        }
-    }
-
-    private void runCustomerWorkflowJobIfDue(Instant now) {
-        if (now.isBefore(nextCustomerWorkflowRunAt)) {
-            return;
-        }
-
-        try {
-            customerWorkflowJob.runOnce();
-        } catch (RuntimeException e) {
-            log.error("Unhandled error while running customer workflow job.", e);
-        } finally {
-            nextCustomerWorkflowRunAt = Instant.now().plusSeconds(GlobalConfiguration.getCustomerWorkflowJobIntervalSeconds());
-        }
-    }
-
     private void sleepUntilNextSchedulerTick() throws InterruptedException {
         TimeUnit.SECONDS.sleep(SCHEDULER_SLEEP_SECONDS);
     }
@@ -112,12 +99,12 @@ public class IntegrationServerApplication {
 
         log.info("Mail queue worker id: {}", mailQueueJob.getWorkerId());
         log.info("Mail queue job enabled: {}", GlobalConfiguration.isMailQueueJobEnabled());
-        log.info("Mail queue job interval: {} seconds", GlobalConfiguration.getMailQueueJobIntervalSeconds());
+
         log.info("Mail queue batch size: {}", GlobalConfiguration.getMailQueueBatchSize());
 
         log.info("Customer workflow worker id: {}", customerWorkflowJob.getWorkerId());
         log.info("Customer workflow job enabled: {}", GlobalConfiguration.isCustomerWorkflowJobEnabled());
-        log.info("Customer workflow job interval: {} seconds", GlobalConfiguration.getCustomerWorkflowJobIntervalSeconds());
+
         log.info("Customer workflow portal base URL: {}", GlobalConfiguration.getCustomerWorkflowPortalBaseUrl());
     }
 

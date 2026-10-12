@@ -42,14 +42,12 @@ public final class GlobalConfiguration {
     private static final String DEFAULT_DATABASE_JDBC_PASSWORD = "";
 
     private static final boolean DEFAULT_MAIL_QUEUE_JOB_ENABLED = true;
-    private static final int DEFAULT_MAIL_QUEUE_JOB_INTERVAL_SECONDS = 60;
     private static final int DEFAULT_MAIL_QUEUE_BATCH_SIZE = 25;
     private static final int DEFAULT_MAIL_QUEUE_RETRY_DELAY_MINUTES = 60;
     private static final int DEFAULT_MAIL_QUEUE_MAX_ATTEMPTS = 5;
     private static final int DEFAULT_MAIL_QUEUE_STUCK_SENDING_TIMEOUT_MINUTES = 15;
 
     private static final boolean DEFAULT_CUSTOMER_WORKFLOW_JOB_ENABLED = true;
-    private static final int DEFAULT_CUSTOMER_WORKFLOW_JOB_INTERVAL_SECONDS = 600;
     private static final String DEFAULT_CUSTOMER_WORKFLOW_PORTAL_BASE_URL = "https://localhost";
     private static final int DEFAULT_CUSTOMER_WORKFLOW_TRIAL_DAYS = 14;
     private static final int DEFAULT_CUSTOMER_WORKFLOW_TRIAL_REMINDER_DAYS_BEFORE_EXPIRY = 2;
@@ -230,8 +228,8 @@ public final class GlobalConfiguration {
         return getBoolean("mail.queue.job.enabled", DEFAULT_MAIL_QUEUE_JOB_ENABLED);
     }
 
-    public static int getMailQueueJobIntervalSeconds() {
-        return getInt("mail.queue.job.interval.seconds", DEFAULT_MAIL_QUEUE_JOB_INTERVAL_SECONDS, 10, 86400);
+    public static com.bepa.eis.common.scheduling.CronJobSettings getMailQueueJobSchedule() {
+        return com.bepa.eis.common.scheduling.CronJobSettings.load("mail.queue.job", "* * * * *");
     }
 
     public static int getMailQueueBatchSize() {
@@ -254,8 +252,8 @@ public final class GlobalConfiguration {
         return getBoolean("customer.workflow.job.enabled", DEFAULT_CUSTOMER_WORKFLOW_JOB_ENABLED);
     }
 
-    public static int getCustomerWorkflowJobIntervalSeconds() {
-        return getInt("customer.workflow.job.interval.seconds", DEFAULT_CUSTOMER_WORKFLOW_JOB_INTERVAL_SECONDS, 60, 86400);
+    public static com.bepa.eis.common.scheduling.CronJobSettings getCustomerWorkflowJobSchedule() {
+        return com.bepa.eis.common.scheduling.CronJobSettings.load("customer.workflow.job", "*/10 * * * *");
     }
 
     public static String getCustomerWorkflowPortalBaseUrl() {
@@ -395,11 +393,20 @@ public final class GlobalConfiguration {
             InputStream inputStream = null;
 
             try {
-                inputStream = new FileInputStream(CONFIG_FILE);
-                loadedProperties.load(inputStream);
+                loadedProperties = ConfigurationFileDefaults.loadAndAppend(
+                        CONFIG_FILE.toPath(), getDefaultConfigurationFileContent());
                 lastKnownModified = CONFIG_FILE.lastModified();
-            } catch (IOException ignored) {
-                loadedProperties = new Properties();
+            } catch (IOException e) {
+                System.getLogger(GlobalConfiguration.class.getName()).log(System.Logger.Level.WARNING,
+                        "Could not add missing configuration defaults to " + CONFIG_FILE, e);
+                // Read-only files still supply their existing settings.
+                try {
+                    inputStream = new FileInputStream(CONFIG_FILE);
+                    loadedProperties.load(inputStream);
+                    lastKnownModified = CONFIG_FILE.lastModified();
+                } catch (IOException readError) {
+                    loadedProperties = new Properties();
+                }
             } finally {
                 closeQuietly(inputStream);
             }
@@ -730,7 +737,8 @@ public final class GlobalConfiguration {
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
         content.append("mail.queue.job.enabled=true").append(lineSeparator);
-        content.append("mail.queue.job.interval.seconds=60").append(lineSeparator);
+        content.append("mail.queue.job.cron=* * * * *").append(lineSeparator);
+        content.append("mail.queue.job.timezone=Europe/Copenhagen").append(lineSeparator);
         content.append("mail.queue.batch.size=25").append(lineSeparator);
         content.append("mail.queue.retry.delay.minutes=60").append(lineSeparator);
         content.append("mail.queue.max.attempts=5").append(lineSeparator);
@@ -768,12 +776,14 @@ public final class GlobalConfiguration {
     }
 
     private static void appendCustomerWorkflowConfiguration(StringBuilder content, String lineSeparator) {
+        appendCleanupJobConfiguration(content, lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append("# Customer workflow configuration").append(lineSeparator);
         content.append("###############################################################################").append(lineSeparator);
         content.append(lineSeparator);
         content.append("customer.workflow.job.enabled=true").append(lineSeparator);
-        content.append("customer.workflow.job.interval.seconds=600").append(lineSeparator);
+        content.append("customer.workflow.job.cron=*/10 * * * *").append(lineSeparator);
+        content.append("customer.workflow.job.timezone=Europe/Copenhagen").append(lineSeparator);
         content.append("customer.workflow.portal.base.url=https://localhost").append(lineSeparator);
         content.append("customer.workflow.trial.days=14").append(lineSeparator);
         content.append("customer.workflow.trial.reminder.days.before.expiry=2").append(lineSeparator);
@@ -782,6 +792,26 @@ public final class GlobalConfiguration {
         content.append("customer.workflow.payment.token.valid.days=14").append(lineSeparator);
         content.append("customer.workflow.reactivation.token.valid.days=14").append(lineSeparator);
         content.append("customer.workflow.subscription.renewal.reminder.days.before.expiry=14").append(lineSeparator);
+        content.append(lineSeparator);
+    }
+
+    private static void appendCleanupJobConfiguration(StringBuilder content, String lineSeparator) {
+        content.append("# Archived gzip logs (blank directories use eis.logs.dir/server-name)").append(lineSeparator);
+        content.append("cleanup.logs.job.enabled=true").append(lineSeparator);
+        content.append("cleanup.logs.job.cron=0 2 * * *").append(lineSeparator);
+        content.append("cleanup.logs.job.timezone=Europe/Copenhagen").append(lineSeparator);
+        content.append("cleanup.logs.job.retention.days=30").append(lineSeparator);
+        content.append("cleanup.logs.job.web-server.directory=").append(lineSeparator);
+        content.append("cleanup.logs.job.integration-server.directory=").append(lineSeparator);
+        content.append("# Cleanup jobs: five-field cron (minute hour day month weekday)").append(lineSeparator);
+        content.append("# Each job defaults to daily at 02:00, Europe/Copenhagen.").append(lineSeparator);
+        for (com.bepa.eis.common.scheduling.CleanupJobSettings.Type type : com.bepa.eis.common.scheduling.CleanupJobSettings.Type.values()) {
+            String prefix = "cleanup." + type.key + ".job.";
+            content.append(prefix).append("enabled=true").append(lineSeparator);
+            content.append(prefix).append("cron=0 2 * * *").append(lineSeparator);
+            content.append(prefix).append("timezone=Europe/Copenhagen").append(lineSeparator);
+            content.append(prefix).append("retention.days=").append(type.defaultDays).append(lineSeparator);
+        }
         content.append(lineSeparator);
     }
 

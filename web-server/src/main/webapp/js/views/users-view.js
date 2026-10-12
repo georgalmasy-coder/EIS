@@ -9,56 +9,6 @@ const REFRESH_MS = 60000;
 export function createViewController(context) {
     const root = context.root;
 
-    function fallbackData() {
-        return {
-            activeUsers: 3842,
-            loginsToday: 312,
-            failedLogins: 18,
-            lockedAccounts: 3,
-            newUsers: 86,
-            loginActivity: [44, 58, 73, 91, 120, 144, 168, 201, 244, 312],
-            usersByRole: [
-                { label: "Admin", value: 42, color: "#ef4444" },
-                { label: "Editor", value: 620, color: "#f7c948" },
-                { label: "User", value: 3180, color: "#84d64b" }
-            ],
-            loginHealth: [
-                { label: "Successful", value: 312, color: "#84d64b" },
-                { label: "Failed", value: 18, color: "#ef4444" }
-            ],
-            usersByCustomer: [
-                { customer: "Nordic Systems A/S", users: 420 },
-                { customer: "ACME GmbH", users: 315 },
-                { customer: "Global Engineering Ltd.", users: 280 },
-                { customer: "Energy Platform ApS", users: 170 },
-                { customer: "Industrial Systems AB", users: 145 }
-            ],
-            inactiveUsers: [
-                {
-                    user: "anna@example.com",
-                    customer: "Nordic Systems A/S",
-                    role: "User",
-                    lastLogin: "2026-04-02",
-                    status: "Warning"
-                },
-                {
-                    user: "peter@example.com",
-                    customer: "ACME GmbH",
-                    role: "Editor",
-                    lastLogin: "2026-03-18",
-                    status: "Warning"
-                },
-                {
-                    user: "old-admin@example.com",
-                    customer: "Global Engineering Ltd.",
-                    role: "Admin",
-                    lastLogin: "2026-02-12",
-                    status: "Critical"
-                }
-            ]
-        };
-    }
-
     function renderUsersByCustomer(rows) {
         const list = root.querySelector('[data-list="usersByCustomer"]');
 
@@ -67,6 +17,11 @@ export function createViewController(context) {
         }
 
         const safeRows = Array.isArray(rows) ? rows : [];
+
+        if (safeRows.length === 0) {
+            list.textContent = "No users linked to customer accounts.";
+            return;
+        }
 
         list.innerHTML = safeRows.map(function (row) {
             return `
@@ -87,6 +42,11 @@ export function createViewController(context) {
 
         const safeRows = Array.isArray(rows) ? rows : [];
 
+        if (safeRows.length === 0) {
+            body.innerHTML = '<tr><td colspan="5">No users requiring review.</td></tr>';
+            return;
+        }
+
         body.innerHTML = safeRows.map(function (row) {
             const status = row.status || "Unknown";
             const statusClass = status === "OK"
@@ -100,7 +60,7 @@ export function createViewController(context) {
                     <td>${escapeHtml(row.user || "—")}</td>
                     <td>${escapeHtml(row.customer || "—")}</td>
                     <td>${escapeHtml(row.role || "—")}</td>
-                    <td>${escapeHtml(formatDateForDisplay(row.lastLogin, "da-DK", row.lastLogin || "—"))}</td>
+                    <td>${escapeHtml(row.lastLogin ? formatDateForDisplay(row.lastLogin, "da-DK", row.lastLogin) : "Never")}</td>
                     <td><span class="dashboard-pill ${statusClass}">${escapeHtml(status)}</span></td>
                 </tr>
             `;
@@ -131,7 +91,7 @@ export function createViewController(context) {
         renderDonut(
             root.querySelector('[data-chart="usersByRole"]'),
             usersByRole,
-            String(data.activeUsers ?? "—")
+            String(usersByRole.reduce((total, role) => total + Number(role.value || 0), 0))
         );
 
         renderLegend(
@@ -142,7 +102,7 @@ export function createViewController(context) {
         renderDonut(
             root.querySelector('[data-chart="loginHealth"]'),
             loginHealth,
-            String(data.loginsToday ?? "—")
+            String(loginHealth.reduce((total, item) => total + Number(item.value || 0), 0))
         );
 
         renderLegend(
@@ -161,18 +121,9 @@ export function createViewController(context) {
     }
 
     async function load() {
-        let data;
-
-        try {
-            data = await fetchJson(DATA_URL);
-        } catch (error) {
-            console.warn("Using fallback users dashboard data.", error);
-            data = fallbackData();
-        }
-
+        const data = await fetchJson(DATA_URL);
         render(data);
     }
-
     return createAutoRefreshController({
         refreshMs: REFRESH_MS,
         load,

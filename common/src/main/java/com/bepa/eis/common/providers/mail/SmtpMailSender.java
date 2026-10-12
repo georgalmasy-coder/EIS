@@ -1,6 +1,7 @@
 package com.bepa.eis.common.providers.mail;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.providers.misc.ComponentHealthProvider;
 import com.bepa.eis.common.dto.mail.MailQueueItem;
 import com.bepa.eis.common.dto.mail.MailSendResult;
 import jakarta.mail.*;
@@ -38,6 +39,7 @@ public class SmtpMailSender implements MailSender {
             MimeMessage message = createMessage(session, mail);
 
             Transport.send(message);
+            ComponentHealthProvider.record(ComponentHealthProvider.SMTP, true);
 
             String smtpMessageId = getMessageId(message);
 
@@ -63,6 +65,7 @@ public class SmtpMailSender implements MailSender {
                     e
             );
         } catch (MessagingException e) {
+            ComponentHealthProvider.record(ComponentHealthProvider.SMTP, false);
             log.warn(
                     "SMTP error while sending mail. mailId={}, to={}, subject={}",
                     mail.getMailId(),

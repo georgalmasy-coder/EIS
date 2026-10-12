@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.external.virk.cvr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bepa.eis.common.providers.misc.ComponentHealthProvider;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,6 +38,18 @@ public class CvrapiDkLookupService implements CvrLookupService {
 
     @Override
     public Optional<CvrCompanyDto> findCompanyByCvrNumber(String cvrNumber) {
+        String normalized = normalizeAndValidateCvrNumber(cvrNumber);
+        try {
+            Optional<CvrCompanyDto> result = lookupCompany(normalized);
+            ComponentHealthProvider.record(ComponentHealthProvider.CVR, true);
+            return result;
+        } catch (CvrApiException e) {
+            ComponentHealthProvider.record(ComponentHealthProvider.CVR, false);
+            throw e;
+        }
+    }
+
+    private Optional<CvrCompanyDto> lookupCompany(String cvrNumber) {
         String normalizedCvrNumber = normalizeAndValidateCvrNumber(cvrNumber);
         URI requestUri = buildRequestUri(normalizedCvrNumber);
 
@@ -61,6 +74,15 @@ public class CvrapiDkLookupService implements CvrLookupService {
         }
 
         CvrApiResponseDto apiResponse = readApiResponse(response.body());
+
+        if (apiResponse == null) {
+            throw new CvrApiException("CVR API returned no response data");
+        }
+        String apiStatus = apiResponse.getStatus();
+        if (apiStatus != null && !apiStatus.isBlank()
+                && !"200".equals(apiStatus) && !"OK".equalsIgnoreCase(apiStatus) && !"404".equals(apiStatus)) {
+            throw new CvrApiException("CVR API returned error status " + apiStatus);
+        }
 
         if (isNotFoundOrError(apiResponse)) {
             return Optional.empty();

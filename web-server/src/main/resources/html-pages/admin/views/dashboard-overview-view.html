@@ -12,9 +12,9 @@
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon">●</div>
             <div class="dashboard-kpi-label">System Health</div>
-            <div class="dashboard-kpi-help">Overall operational score</div>
+            <div class="dashboard-kpi-help" data-field="healthCoverage">No observations yet</div>
             <div class="dashboard-kpi-value">
-                <span data-field="systemHealth">—</span><span class="dashboard-kpi-unit">%</span>
+                <span data-field="systemHealth">—</span><span class="dashboard-kpi-unit" data-field="healthUnit"></span>
             </div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="systemHealth"></div>
@@ -44,7 +44,7 @@
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon">⚠</div>
             <div class="dashboard-kpi-label">Critical Alerts</div>
-            <div class="dashboard-kpi-help">Open critical incidents</div>
+            <div class="dashboard-kpi-help">Critical incidents today</div>
             <div class="dashboard-kpi-value" data-field="criticalAlerts">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="criticalAlerts"></div>
@@ -54,7 +54,7 @@
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon"></div>
             <div class="dashboard-kpi-label">Payment Errors</div>
-            <div class="dashboard-kpi-help">Payments requiring action</div>
+            <div class="dashboard-kpi-help">Failed payments in the last 30 days</div>
             <div class="dashboard-kpi-value" data-field="paymentErrors">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="paymentErrors"></div>
@@ -66,7 +66,7 @@
         <article class="dashboard-card dashboard-card-pad">
             <div class="dashboard-card-header">
                 <h2 class="dashboard-card-title">System Health</h2>
-                <span class="dashboard-card-subtitle">Live score</span>
+                <span class="dashboard-card-subtitle">Jobs and integrations · latest observations</span>
             </div>
 
             <div class="dashboard-donut-wrap">
@@ -118,7 +118,7 @@
         <article class="dashboard-card dashboard-card-pad">
             <div class="dashboard-card-header">
                 <h2 class="dashboard-card-title">Activity Trend</h2>
-                <span class="dashboard-card-subtitle">Last samples</span>
+                <span class="dashboard-card-subtitle">Events per day · last 10 days</span>
             </div>
 
             <div class="dashboard-chart-wrap">
@@ -145,7 +145,7 @@
                     <th>Type</th>
                     <th>Description</th>
                     <th>Project</th>
-                    <th>Status</th>
+                    <th>Processed at</th>
                 </tr>
                 </thead>
                 <tbody data-table="latestEvents"></tbody>
@@ -155,10 +155,21 @@
         <article class="dashboard-card dashboard-card-pad">
             <div class="dashboard-card-header">
                 <h2 class="dashboard-card-title">Service Status</h2>
-                <span class="dashboard-card-subtitle">Core dependencies</span>
+                <span class="dashboard-card-subtitle">Jobs and integrations</span>
             </div>
 
-            <div class="dashboard-status-list" data-list="serviceStatus"></div>
+            <table class="dashboard-table">
+                <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Status</th>
+                    <th>Last observation</th>
+                    <th>Details</th>
+                </tr>
+                </thead>
+                <tbody data-table="serviceStatus"></tbody>
+            </table>
         </article>
     </section>
+
 </section>

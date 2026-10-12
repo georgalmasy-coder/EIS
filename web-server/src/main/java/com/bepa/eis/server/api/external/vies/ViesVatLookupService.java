@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.external.vies;
 
 import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.providers.misc.ComponentHealthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -43,6 +44,17 @@ public class ViesVatLookupService {
     }
 
     public ViesVatValidationResult validateVat(String countryCode, String vatNumber) {
+        try {
+            ViesVatValidationResult result = executeValidation(countryCode, vatNumber);
+            ComponentHealthProvider.record(ComponentHealthProvider.VIES, true);
+            return result;
+        } catch (ViesVatLookupException e) {
+            ComponentHealthProvider.record(ComponentHealthProvider.VIES, false);
+            throw e;
+        }
+    }
+
+    private ViesVatValidationResult executeValidation(String countryCode, String vatNumber) {
         String normalizedCountryCode = normalizeCountryCode(countryCode);
         String normalizedVatNumber = normalizeVatNumber(vatNumber);
 

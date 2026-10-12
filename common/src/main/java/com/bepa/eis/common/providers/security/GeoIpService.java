@@ -1,5 +1,7 @@
 package com.bepa.eis.common.providers.security;
 
+import com.bepa.eis.common.providers.misc.ComponentHealthProvider;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -88,14 +90,19 @@ public class GeoIpService {
             );
 
             if (response.statusCode() != 200) {
+                ComponentHealthProvider.record(ComponentHealthProvider.GEO_IP, false);
                 return GeoIpResult.unknown();
             }
 
-            return parseIpWhoIsResponse(response.body());
+            GeoIpResult result = parseIpWhoIsResponse(response.body());
+            ComponentHealthProvider.record(ComponentHealthProvider.GEO_IP, result.countryCode() != null);
+            return result;
         } catch (InterruptedException e) {
+            ComponentHealthProvider.record(ComponentHealthProvider.GEO_IP, false);
             Thread.currentThread().interrupt();
             return GeoIpResult.unknown();
         } catch (IOException | RuntimeException e) {
+            ComponentHealthProvider.record(ComponentHealthProvider.GEO_IP, false);
             return GeoIpResult.unknown();
         }
     }

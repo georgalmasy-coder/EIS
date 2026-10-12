@@ -6,7 +6,6 @@ import com.bepa.eis.common.dto.mail.MailQueueStatistics;
 import com.bepa.eis.common.enums.mail.MailStatus;
 import com.bepa.eis.common.enums.mail.MailTemplateType;
 import com.bepa.eis.common.providers.mail.MailProvider;
-import com.bepa.eis.common.providers.misc.EventProvider;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.common.providers.misc.PerformanceProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
@@ -64,117 +63,47 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
         long requestStartedNanos = System.nanoTime();
         String path = request.getServletPath();
 
-        Object body = switch (path) {
-            case "/admin/api/dashboard/overview" -> buildOverviewResponse();
-            case "/admin/api/dashboard/system-status" -> buildSystemStatusResponse(requestStartedNanos);
-            case "/admin/api/dashboard/customers" -> buildCustomersResponse();
-            case "/admin/api/dashboard/users" -> buildUsersResponse();
-            case "/admin/api/dashboard/customer-creation" -> buildCustomerCreationResponse();
-            case "/admin/api/dashboard/subscriptions-payments" -> buildSubscriptionsPaymentsResponse();
-            case "/admin/api/dashboard/mail-status" -> buildMailStatusResponse();
-            case "/admin/api/dashboard/alerts" -> buildAlertsResponse();
-            case "/admin/api/dashboard/integrations" -> buildIntegrationsResponse();
-            case "/admin/api/dashboard/modules" -> buildModulesResponse();
-            case "/admin/api/dashboard/performance" -> buildPerformanceResponse();
-            case "/admin/api/dashboard/audit-security" -> buildAuditSecurityResponse();
-            default -> null;
-        };
-
         try {
+            Object body = switch (path) {
+                case "/admin/api/dashboard/overview" -> buildOverviewResponse();
+                case "/admin/api/dashboard/system-status" -> buildSystemStatusResponse(requestStartedNanos);
+                case "/admin/api/dashboard/customers" -> buildCustomersResponse();
+                case "/admin/api/dashboard/users" -> buildUsersResponse();
+                case "/admin/api/dashboard/customer-creation" -> buildCustomerCreationResponse();
+                case "/admin/api/dashboard/subscriptions-payments" -> buildSubscriptionsPaymentsResponse();
+                case "/admin/api/dashboard/mail-status" -> buildMailStatusResponse();
+                case "/admin/api/dashboard/alerts" -> buildAlertsResponse();
+                case "/admin/api/dashboard/integrations" -> buildIntegrationsResponse();
+                case "/admin/api/dashboard/modules" -> buildModulesResponse();
+                case "/admin/api/dashboard/performance" -> buildPerformanceResponse();
+                case "/admin/api/dashboard/audit-security" -> buildAuditSecurityResponse();
+                default -> null;
+            };
+
             if (body == null) {
                 sendJsonError(response, HttpServletResponse.SC_NOT_FOUND, "Dashboard endpoint was not found.");
                 return;
             }
 
             sendJson(response, HttpServletResponse.SC_OK, body);
+        } catch (SQLException | RuntimeException e) {
+            log.error("Could not load dashboard data from database.", e);
+            try {
+                sendJsonError(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Dashboard data is unavailable.");
+            } catch (IOException writeError) {
+                log.error("Failed to write dashboard error response.", writeError);
+            }
         } catch (IOException e) {
             log.error("Failed to process dashboard request: {}", e.getMessage());
         }
     }
 
-    private OverviewResponse buildOverviewResponse() {
-        List<EventRow> latestEvents = loadLatestEvents();
-        MailOverviewCounts mailOverviewCounts = loadMailOverviewCounts();
-
-        return new OverviewResponse(
-                98,
-                128,
-                3842,
-                1,
-                3,
-                5,
-                mailOverviewCounts.retryingEmails(),
-                mailOverviewCounts.undeliveredEmails(),
-                0,
-                3,
-                List.of(40, 44, 48, 52, 49, 55, 62, 68, 65, 72, 78, 83),
-                List.of(
-                        new ChartItem("Healthy", 92, "#84d64b"),
-                        new ChartItem("Warning", 6, "#f7c948"),
-                        new ChartItem("Critical", 2, "#ef4444")
-                ),
-                latestEvents,
-                List.of(
-                        new StatusRow("API", "OK"),
-                        new StatusRow("Database", "OK"),
-                        new StatusRow("Queue", "OK"),
-                        new StatusRow("Email", mailOverviewCounts.emailStatus())
-                )
-        );
-    }
-
-    private MailOverviewCounts loadMailOverviewCounts() {
-        try {
-            MailProvider mailProvider = new MailProvider(null);
-            MailQueueStatistics statistics = mailProvider.getMailQueueStatistics();
-
-            int retryingEmails = safeInt(statistics.getFailedCount());
-            int undeliveredEmails = safeInt(statistics.getUndeliveredCount());
-
-            String emailStatus = undeliveredEmails > 0
-                    ? "Critical"
-                    : retryingEmails > 0
-                      ? "Warning"
-                      : "OK";
-
-            return new MailOverviewCounts(
-                    retryingEmails,
-                    undeliveredEmails,
-                    emailStatus
-            );
-        } catch (RuntimeException e) {
-            log.warn("Could not load mail queue statistics from database. Using empty mail overview counts.", e);
-
-            return new MailOverviewCounts(
-                    0,
-                    0,
-                    "Unknown"
-            );
-        }
+    private OverviewResponse buildOverviewResponse() throws SQLException {
+        return new AdminDashboardOverviewProvider().loadOverview();
     }
 
     private int safeInt(Integer value) {
         return value == null ? 0 : value;
-    }
-
-    private List<EventRow> loadLatestEvents() {
-        try {
-            EventProvider eventProvider = new EventProvider(null);
-
-            return eventProvider.getRecentEvent()
-                    .stream()
-                    .map(event -> new EventRow(
-                            event.time(),
-                            event.type(),
-                            event.description(),
-                            event.project(),
-                            event.status()
-                    ))
-                    .toList();
-        } catch (SQLException e) {
-            log.warn("Could not load latest events from database. Using empty latest events list.", e);
-            return List.of();
-        }
     }
 
     private SystemStatusResponse buildSystemStatusResponse(long requestStartedNanos) {
@@ -228,38 +157,9 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
         }
     }
 
-    private UsersResponse buildUsersResponse() {
-        return new UsersResponse(
-                3842,
-                312,
-                18,
-                3,
-                86,
-                List.of(44, 58, 73, 91, 120, 144, 168, 201, 244, 312),
-                List.of(
-                        new ChartItem("Admin", 42, "#ef4444"),
-                        new ChartItem("Editor", 620, "#f7c948"),
-                        new ChartItem("User", 3180, "#84d64b")
-                ),
-                List.of(
-                        new ChartItem("Successful", 312, "#84d64b"),
-                        new ChartItem("Failed", 18, "#ef4444")
-                ),
-                List.of(
-                        new CustomerUsersRow("Nordic Systems A/S", 420),
-                        new CustomerUsersRow("ACME GmbH", 315),
-                        new CustomerUsersRow("Global Engineering Ltd.", 280),
-                        new CustomerUsersRow("Energy Platform ApS", 170),
-                        new CustomerUsersRow("Industrial Systems AB", 145)
-                ),
-                List.of(
-                        new InactiveUserRow("anna@example.com", "Nordic Systems A/S", "User", "2026-04-02", "Warning"),
-                        new InactiveUserRow("peter@example.com", "ACME GmbH", "Editor", "2026-03-18", "Warning"),
-                        new InactiveUserRow("old-admin@example.com", "Global Engineering Ltd.", "Admin", "2026-02-12", "Critical")
-                )
-        );
+    private UsersResponse buildUsersResponse() throws SQLException {
+        return new AdminDashboardUserProvider(null).loadUsersDashboardData();
     }
-
     private CustomerCreationResponse buildCustomerCreationResponse() {
         try {
             AdminDashboardCustomerProvider provider = new AdminDashboardCustomerProvider(null);
@@ -847,13 +747,6 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
     private record ErrorResponse(String message) {
     }
 
-    private record MailOverviewCounts(
-            int retryingEmails,
-            int undeliveredEmails,
-            String emailStatus
-    ) {
-    }
-
     private record MemoryMetrics(
             double memoryPercent,
             double committedGb,
@@ -883,8 +776,10 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
     public record StatusRow(
             String label,
-            String status
+            String status,
+            String lastObservedAt
     ) {
+        public StatusRow(String label, String status) { this(label, status, null); }
     }
 
     public record EventRow(
@@ -892,12 +787,12 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             String type,
             String description,
             String project,
-            String status
+            String processedAt
     ) {
     }
 
     public record OverviewResponse(
-            int systemHealth,
+            Integer systemHealth,
             int activeCustomers,
             int activeUsers,
             int criticalAlerts,
@@ -905,12 +800,13 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             int pendingCustomerConfirmations,
             int retryingEmails,
             int undeliveredEmails,
-            int failedIntegrations,
+            Integer failedIntegrations,
             int lockedUsers,
             List<Integer> activityTrend,
             List<ChartItem> healthDistribution,
             List<EventRow> latestEvents,
-            List<StatusRow> serviceStatus
+            List<StatusRow> serviceStatus,
+            List<com.bepa.eis.common.providers.misc.ComponentHealthProvider.Component> healthComponents
     ) {
     }
 

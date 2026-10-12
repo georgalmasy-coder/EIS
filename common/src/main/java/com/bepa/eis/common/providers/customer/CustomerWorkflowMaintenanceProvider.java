@@ -134,7 +134,7 @@ public class CustomerWorkflowMaintenanceProvider extends GenericProvider {
             return statement.executeUpdate();
         } catch (SQLException e) {
             log.error("Could not {}.", operationDescription, e);
-            return 0;
+            throw new IllegalStateException("Could not " + operationDescription, e);
         }
     }
 
@@ -148,7 +148,7 @@ public class CustomerWorkflowMaintenanceProvider extends GenericProvider {
             return statement.executeUpdate();
         } catch (SQLException e) {
             log.error("Could not {}.", operationDescription, e);
-            return 0;
+            throw new IllegalStateException("Could not " + operationDescription, e);
         }
     }
 

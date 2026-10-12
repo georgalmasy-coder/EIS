@@ -115,6 +115,10 @@ public class CustomerWorkflowJob implements Runnable {
         return running.get();
     }
 
+    public String getLastRunHealthStatus() {
+        return customerWorkflowProcessor.lastRunHadErrors() ? "Warning" : "OK";
+    }
+
     public String getWorkerId() {
         return workerId;
     }

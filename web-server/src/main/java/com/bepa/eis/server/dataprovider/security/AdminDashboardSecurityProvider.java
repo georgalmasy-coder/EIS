@@ -359,6 +359,7 @@ public class AdminDashboardSecurityProvider extends GenericProvider {
                         Description,
                         Status
                     FROM [dbo].[AUDIT_EVENT]
+                    WHERE EventType <> 'COMPONENT_HEALTH'
 
                     UNION ALL
 
