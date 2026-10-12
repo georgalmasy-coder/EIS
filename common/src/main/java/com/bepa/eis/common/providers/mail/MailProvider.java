@@ -457,6 +457,18 @@ public class MailProvider extends GenericProvider {
         );
     }
 
+    /** Queues an explicitly requested test of an unsaved catalogue draft. */
+    public Integer createTemplateTestMail(MailRecipient to, MailTemplate draft) {
+        if (to == null || !to.isValid() || draft == null || !draft.hasSubject() || !draft.hasBody()) return null;
+        try {
+            return insertMail(normalizeSender(null), to, draft.getTemplateType(), draft,
+                    Map.of("templateTest", true, "sourceTemplate", draft.getSourceFileName()));
+        } catch (SQLException e) {
+            log.error("Could not queue mail template test", e);
+            return null;
+        }
+    }
+
     public List<Integer> createMails(
             MailRecipient from,
             List<MailRecipient> recipients,

@@ -27,6 +27,8 @@ public class IntegrationDatabaseInstaller {
     }
 
     public void installIfAvailable() {
+        try { new com.bepa.eis.common.providers.mail.MailTemplateCatalogProvider(null).install(); }
+        catch (Exception e) { throw new IllegalStateException("Could not install database mail templates", e); }
         DataSource dataSource = getDataSource();
 
         for (String script : INSTALLATION_SCRIPTS) {

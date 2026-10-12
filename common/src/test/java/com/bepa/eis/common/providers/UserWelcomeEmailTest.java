@@ -60,10 +60,18 @@ public final class UserWelcomeEmailTest {
         check(users.sendPasswordResetLink(57, 17, baseUrl), "Existing reset path still works");
         check(users.template == MailTemplateType.PASSWORD_RESET, "Reset retains its separate template");
 
-        MailTemplateRenderer renderer = new MailTemplateRenderer();
+        MailTemplateRenderer renderer = new MailTemplateRenderer() {
+            @Override protected com.bepa.eis.common.providers.mail.MailTemplateCatalogProvider createCatalogProvider() {
+                return new com.bepa.eis.common.providers.mail.MailTemplateCatalogProvider(null) {
+                    @Override public Template get(String key) {
+                        return new Template(key, "User Created", "Database welcome", "<body>Your administrator has created an EIS account for you. <a href=\"{{resetLink}}\">Set your password</a></body>", "text/html; charset=UTF-8", "user-created.mail", "[\"resetLink\"]", 1, "2026-10-12T00:00:00Z");
+                    }
+                };
+            }
+        };
         var welcome = renderer.render(MailTemplateType.USER_CREATED, Map.of("resetLink", users.link));
-        check(welcome.getSourceFileName().equals("classpath:/mail-templates/user-created.mail"),
-                "Welcome template ships inside the application");
+        check(welcome.getSourceFileName().equals("database:MAIL_TEMPLATE/USER_CREATED"),
+                "Welcome template is loaded from the database");
         check(welcome.getBody().contains("Your administrator has created an EIS account for you."),
                 "Welcome email explains who created the account");
         check(welcome.getBody().contains("Set your password") && welcome.getBody().contains(users.link),
@@ -72,7 +80,7 @@ public final class UserWelcomeEmailTest {
         Files.writeString(directory.resolve("user-created.mail"),
                 "Subject: External welcome\nContent-Type: text/plain; charset=UTF-8\n\nSet password: {{resetLink}}\n");
         welcome = renderer.render(MailTemplateType.USER_CREATED, Map.of("resetLink", users.link));
-        check("External welcome".equals(welcome.getSubject()), "External welcome template remains supported");
+        check("Database welcome".equals(welcome.getSubject()), "External files no longer override the database template");
         Files.delete(directory.resolve("user-created.mail"));
         Files.delete(config);
         Files.delete(directory);

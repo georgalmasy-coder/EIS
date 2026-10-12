@@ -163,7 +163,7 @@ public class SmtpMailSender implements MailSender {
         message.setSentDate(new Date());
 
         if (mail.hasHtmlBody()) {
-            message.setContent(mail.getBodyHtml(), "text/html; charset=UTF-8");
+            MailTemplateLogo.setHtmlContent(message, mail.getBodyHtml());
         } else {
             message.setText(mail.getBodyText(), "UTF-8");
         }

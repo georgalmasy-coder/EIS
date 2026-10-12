@@ -21,6 +21,7 @@ import java.sql.SQLException;
                 "/app/*",
                 "/api/customersprojects/*",
                 "/api/secure/*",
+                "/api/admin/mail-templates",
                 "/admin/*",
                 "/admin/api/*",
                 "/temp/index.html"

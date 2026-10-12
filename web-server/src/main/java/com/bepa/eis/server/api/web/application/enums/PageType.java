@@ -84,6 +84,7 @@ public enum PageType {
     ADMIN_USER_ADMINISTRATION_PAGE("user-admin","html-pages/admin/user-administration.html", "User Administration | BEPA EIS", true, "BEPA ADMINISTRATION", "User Administration", "Use the workspace below to manage administration data."),
 
     LOOKUP_MAIN_PAGE("lookup-main","html-pages/admin/lookup-main.html", "Lookup Administration", true, "BEPA ADMINISTRATION", "Lookup Administration", "Use the workspace below to manage administration data."),
+    ADMIN_MAIL_TEMPLATE_PAGE("mail-templates","html-pages/admin/mail-templates.html", "Mail templates | BEPA EIS", true, "ADMINISTRATION", "Mail templates", "Edit and preview mail templates."),
     ADMIN_MENU_EDITOR_PAGE("menu-editor","html-pages/admin/menu-editor.html", "Menu Editor | BEPA EIS", true, "ADMINISTRATION", "Menu Editor", "Use the workspace below to manage administration data."),
     SUBSCRIPTION_EDITOR_PAGE("subscription-editor","html-pages/admin/subscription-editor.html", "Subscription Editor | BEPA EIS", true, "ADMINISTRATION", "Subscription Editor", "Use the workspace below to manage administration data."),
 

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mail templates | BEPA EIS</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../css/app.css">
+    <link rel="stylesheet" href="../../css/menu.css">
+    <link rel="stylesheet" href="../../css/generel.css">
+    <link rel="stylesheet" href="../../css/topbar.css">
+    <link rel="stylesheet" href="../../css/mail-templates.css">
+</head>
+<body>
+<button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">&#8250;</button>
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+<nav id="sideMenu" class="side-menu" aria-label="Menu"><h2>Menu</h2><div id="menuStatus" class="menu-status">Loading menu...</div><ul id="menuRoot" class="menu-root"></ul></nav>
+<main class="app"><div class="content template-content">
+    <header class="topbar"></header>
+    <section class="page-layout">
+        <div class="workspace-header"><div class="workspace-eyebrow">ADMINISTRATION</div><h1 class="workspace-heading">Mail templates</h1><p class="workspace-helptext">Double-click a template to edit it.</p></div>
+        <div class="template-list-tools"><label for="templateSearch">Search <input id="templateSearch" type="search" placeholder="Name or subject"></label><div><button id="exportTemplates" type="button">Export</button><button id="importTemplates" type="button">Import</button><button id="refreshTemplates" type="button">Refresh</button></div></div>
+        <input id="templateImportFile" type="file" accept=".json,application/json" hidden>
+        <p id="listMessage" role="status" aria-live="polite"></p>
+        <div class="template-table-wrap"><table class="data-table page-table template-table"><thead><tr><th>Template</th><th>Subject</th><th>Last updated</th><th>Version</th><th><span class="sr-only">Action</span></th></tr></thead><tbody id="templateRows"></tbody></table></div>
+        <div id="templateCount" class="template-count"></div>
+    </section>
+</div></main>
+<dialog id="templateDialog" class="template-dialog" aria-labelledby="dialogTitle">
+    <div class="template-dialog-head"><h2 id="dialogTitle">Edit template</h2><button id="closeTemplate" type="button" aria-label="Close">&#10005;</button></div>
+    <div class="template-dialog-body">
+        <label class="template-subject">Subject<input id="templateSubject" type="text" maxlength="500" autocomplete="off"></label>
+        <div class="template-toolbar" role="toolbar" aria-label="Text formatting">
+            <button type="button" data-command="undo" title="Undo">↶</button><button type="button" data-command="redo" title="Redo">↷</button>
+            <button type="button" data-command="bold" title="Bold"><b>B</b></button><button type="button" data-command="italic" title="Italic"><i>I</i></button><button type="button" data-command="underline" title="Underline"><u>U</u></button>
+            <button type="button" data-command="insertUnorderedList" title="Bullet list">Bullet list</button><button type="button" data-command="insertOrderedList" title="Numbered list">Numbered list</button>
+            <button type="button" data-command="justifyLeft">Left</button><button type="button" data-command="justifyCenter">Center</button><button type="button" data-command="justifyRight">Right</button>
+            <label>Format <select id="textFormat"><option value="p">Normal text</option><option value="h1">Heading</option><option value="h2">Subheading</option></select></label>
+            <button id="editLink" type="button">Link</button>
+            <label>Insert field <select id="templatePlaceholder"><option value="">Choose field...</option></select></label>
+        </div>
+        <iframe id="templateEditor" class="template-editor" title="Edit email content" sandbox="allow-same-origin"></iframe>
+        <p id="editMessage" role="status" aria-live="polite"></p>
+    </div>
+    <div class="template-dialog-footer"><button id="showTemplate" type="button">Preview</button><button id="testTemplate" type="button">Send test email</button><button id="saveTemplate" class="primary" type="button">Save</button><button id="cancelTemplate" type="button">Cancel</button></div>
+</dialog>
+<dialog id="previewDialog" class="template-dialog preview-dialog" aria-labelledby="previewTitle">
+    <div class="template-dialog-head"><h2 id="previewTitle">Preview</h2><button id="closePreview" type="button" aria-label="Close preview">&#10005;</button></div>
+    <div class="template-dialog-body"><p>Shows your current changes using sample data.</p><p><strong>Subject:</strong> <span id="previewSubject"></span></p><p id="previewMessage" role="status" aria-live="polite"></p><iframe id="templatePreview" class="template-editor" title="Email preview" sandbox="allow-same-origin"></iframe></div>
+    <div class="template-dialog-footer"><button id="testPreview" type="button">Send test email</button><button id="backToTemplate" type="button">Back to editing</button></div>
+</dialog>
+<dialog id="testDialog" class="template-link-dialog" aria-labelledby="testTitle">
+    <form id="testForm"><h2 id="testTitle">Send test email</h2>
+        <p>Send your current changes using sample data. This does not save the template.</p>
+        <label>Recipient email address<input id="testRecipient" type="email" required maxlength="254" autocomplete="off" placeholder="name@example.com"></label>
+        <p id="testMessage" role="status" aria-live="polite"></p>
+        <div class="template-dialog-footer"><button id="sendTest" type="submit">Send test email</button><button id="cancelTest" type="button">Close</button></div>
+    </form>
+</dialog>
+<dialog id="linkDialog" class="template-link-dialog" aria-labelledby="linkTitle"><h2 id="linkTitle">Edit link</h2><label>Address or link field<input id="linkUrl" type="text" placeholder="https://... or {{resetLink}}"></label><p id="linkMessage" role="status"></p><div class="template-dialog-footer"><button id="applyLink" type="button">Apply</button><button id="cancelLink" type="button">Cancel</button></div></dialog>
+<dialog id="importDialog" class="template-link-dialog" aria-labelledby="importTitle">
+    <h2 id="importTitle">Import mail templates</h2><p id="importSummary"></p>
+    <p>Matching templates in this environment will be replaced. Templates not included in the file will be kept.</p>
+    <p id="importMessage" role="status" aria-live="polite"></p>
+    <div class="template-dialog-footer"><button id="applyImport" type="button">Import templates</button><button id="cancelImport" type="button">Cancel</button></div>
+</dialog>
+<script type="module" src="../../js/pages/mail-templates-page.js"></script>
+</body>
+</html>

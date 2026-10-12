@@ -107,7 +107,13 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+                <excludes><exclude>mail-assets/**</exclude></excludes>
                 <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes><include>mail-assets/**</include></includes>
+                <filtering>false</filtering>
             </resource>
         </resources>
     </build>
