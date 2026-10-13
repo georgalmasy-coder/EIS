@@ -48,10 +48,7 @@ automatisk ind.
   men læses ikke længere af Forgot password eller Send reset link i brugeradministrationen.
 - Den eksisterende mailkø, SMTP-konfiguration og integration-serverens mailjob skal
   være aktive, ligesom ved New Customer.
-- `password-reset.mail` følger med common-JAR'en som standard. En eksisterende fil
-  i `mail.template.folder` har fortsat forrang; den skal indeholde `{{resetLink}}`.
-- Det samme gælder velkomstskabelonen `user-created.mail`, som også følger med
-  common-JAR'en. Eksisterende eksterne skabeloner skal indeholde `{{resetLink}}`.
+- Password reset og velkomst bruger templates fra dbo.MAIL_TEMPLATE. Begge skal indeholde {{resetLink}}. Filbaserede templates anvendes ikke.
 - Hvis `dbo.USER_PASSWORD_RESET_TOKEN` endnu ikke findes, oprettes den med
   `create-user-password-reset-token.sql`. Scriptet ændrer ikke en eksisterende tabel.
 

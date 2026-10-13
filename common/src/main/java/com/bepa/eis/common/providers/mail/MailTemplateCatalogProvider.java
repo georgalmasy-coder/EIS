@@ -2,8 +2,6 @@ package com.bepa.eis.common.providers.mail;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.GenericProvider;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,44 +12,6 @@ public class MailTemplateCatalogProvider extends GenericProvider {
                            String sourceFileName, String placeholdersJson, int revision, String updatedAt) {}
 
     public MailTemplateCatalogProvider(WebSession session) { super(session); }
-
-    public void install() throws SQLException, IOException {
-        try (var input = getClass().getResourceAsStream("/db/mail-templates.sql")) {
-            if (input == null) throw new IOException("Missing mail template installation resource");
-            String sql = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-            try (Connection connection = getDataSource().getConnection(); Statement statement = connection.createStatement()) {
-                try {
-                    statement.execute(sql);
-                    upgradeLayouts(connection);
-                } catch (SQLException e) {
-                    // The script owns its transaction; release it even if installation failed.
-                    try (Statement rollback = connection.createStatement()) { rollback.execute("IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION"); }
-                    catch (SQLException rollbackError) { e.addSuppressed(rollbackError); }
-                    throw e;
-                }
-            }
-        }
-    }
-
-    private void upgradeLayouts(Connection connection) throws SQLException {
-        connection.setAutoCommit(false);
-        try {
-            List<Template> templates = new ArrayList<>();
-            try (var query = connection.prepareStatement("SELECT * FROM dbo.MAIL_TEMPLATE WITH (UPDLOCK)"); var rows = query.executeQuery()) {
-                while (rows.next()) templates.add(read(rows, true));
-            }
-            try (var update = connection.prepareStatement("UPDATE dbo.MAIL_TEMPLATE SET BodyHtml=?, Revision=Revision+1, UpdatedAt=SYSUTCDATETIME() WHERE TemplateKey=? AND Revision=?")) {
-                for (Template template : templates) {
-                    String html = MailTemplateLayout.upgrade(template.bodyHtml());
-                    if (html.equals(template.bodyHtml())) continue;
-                    update.setString(1, html); update.setString(2, template.key()); update.setInt(3, template.revision());
-                    if (update.executeUpdate() != 1) throw new SQLException("Mail template changed during layout migration");
-                }
-            }
-            connection.commit();
-        } catch (SQLException e) { connection.rollback(); throw e; }
-        finally { connection.setAutoCommit(true); }
-    }
 
     public List<Template> list() throws SQLException {
         try (Connection connection = getDataSource().getConnection(); PreparedStatement query = connection.prepareStatement(

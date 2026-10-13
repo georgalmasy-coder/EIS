@@ -457,6 +457,11 @@ body.theme-black .interfaces-info-bar {
     cursor: default;
 }
 
+.interfaces-cell-self .interfaces-header-id,
+.interfaces-cell-self .interfaces-header-name {
+    color: #111827;
+}
+
 .interfaces-cell-content {
     display: grid;
     gap: 0.2rem;

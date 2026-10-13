@@ -285,7 +285,7 @@
 
 .project-status-summary {
     display: grid;
-    grid-template-columns: minmax(220px, 1.5fr) repeat(6, minmax(120px, 1fr));
+    grid-template-columns: minmax(220px, 1.5fr) repeat(7, minmax(120px, 1fr));
     gap: 12px;
     align-items: stretch;
     margin-top: 18px;

@@ -510,7 +510,6 @@ function renderRequirementCards(container, requirements) {
         card.dataset.entityType = requirement.type;
         card.dataset.entityTypeId = requirement.entityTypeId ? String(requirement.entityTypeId) : "";
         card.draggable = true;
-        card.title = buildRequirementTooltip(requirement);
 
         const code = document.createElement("span");
         code.className = "relationdiagram-requirement-code";
@@ -1327,14 +1326,6 @@ function updateGridLayout() {
             }
         }
     });
-}
-
-function buildRequirementTooltip(requirement) {
-    return [
-        `ID: ${requirement.visibleId}`,
-        `Name: ${requirement.name}`,
-        requirement.description ? `Description: ${requirement.description}` : ""
-    ].filter(Boolean).join("\n");
 }
 
 function parseRequirementIdFromInternalId(internalId) {

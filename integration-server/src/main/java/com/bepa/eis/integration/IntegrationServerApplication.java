@@ -95,7 +95,6 @@ public class IntegrationServerApplication {
 
         log.info("EIS Integration Server started.");
         log.info("Global configuration file: {}", configurationFile.getAbsolutePath());
-        log.info("Mail template directory: {}", GlobalConfiguration.getMailTemplateDirectory().getAbsolutePath());
 
         log.info("Mail queue worker id: {}", mailQueueJob.getWorkerId());
         log.info("Mail queue job enabled: {}", GlobalConfiguration.isMailQueueJobEnabled());

@@ -18,7 +18,7 @@ public final class UserWelcomeEmailTest {
     public static void main(String[] args) throws Exception {
         Path directory = Files.createTempDirectory("eis-welcome-test-");
         Path config = directory.resolve("eis-global.properties");
-        Files.writeString(config, "mail.template.folder=" + directory.toString().replace('\\', '/') + "\n");
+        Files.writeString(config, "");
         System.setProperty("eis.config.file", config.toString());
 
         WebSession administrator = new WebSession();

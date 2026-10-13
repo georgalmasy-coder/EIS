@@ -1,4 +1,5 @@
 const ACTION_SELECT = "select-entity-for-move";
+const ACTION_UNSELECT = "unselect-entity-for-move";
 const ACTION_MOVE = "move-selected-entity";
 const ACTION_MOVE_ROOT = "move-selected-entity-to-root";
 const MOVE_ENDPOINTS = {
@@ -24,6 +25,7 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
         if (!menu.querySelector(`[data-context-action="${ACTION_SELECT}"]`)) {
             menu.insertAdjacentHTML("beforeend", `
                 <button type="button" data-context-action="${ACTION_SELECT}"></button>
+                <button type="button" data-context-action="${ACTION_UNSELECT}" hidden></button>
                 <button type="button" data-context-action="${ACTION_MOVE}" hidden></button>
                 <button type="button" data-context-action="${ACTION_MOVE_ROOT}" hidden></button>
             `);
@@ -40,6 +42,7 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
         contextEntity = normalizeEntity(entity);
         const menu = document.getElementById(menuId);
         const selectButton = menu?.querySelector(`[data-context-action="${ACTION_SELECT}"]`);
+        const unselectButton = menu?.querySelector(`[data-context-action="${ACTION_UNSELECT}"]`);
         const moveButton = menu?.querySelector(`[data-context-action="${ACTION_MOVE}"]`);
         const moveRootButton = menu?.querySelector(`[data-context-action="${ACTION_MOVE_ROOT}"]`);
         const hasTarget = Boolean(contextEntity?.entityId);
@@ -47,6 +50,13 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
         if (selectButton) {
             selectButton.textContent = hasTarget ? `Select ${formatEntityLabel(contextEntity)}` : "Select";
             selectButton.toggleAttribute("hidden", !hasTarget);
+        }
+
+        if (unselectButton) {
+            unselectButton.textContent = selectedEntity
+                ? `Unselect ${formatEntityLabel(selectedEntity)}`
+                : "Unselect";
+            unselectButton.toggleAttribute("hidden", !selectedEntity);
         }
 
         const canMove = canMoveToTarget(selectedEntity, contextEntity);
@@ -70,6 +80,12 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
         if (action === ACTION_SELECT && target?.entityId) {
             selectedEntity = target;
             applySelectionMarker();
+            return true;
+        }
+        if (action === ACTION_UNSELECT) {
+            selectedEntity = null;
+            applySelectionMarker();
+            prepareContextMenu(entity);
             return true;
         }
         if (action === ACTION_MOVE && canMoveToTarget(selectedEntity, target)) {

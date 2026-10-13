@@ -76,6 +76,7 @@ async function loadProjectOverview() {
             updateElementText("projectCategory", getXmlOptionText(project, "CategoryId"));
             updateElementText("daysLeft", getXmlValue(project, "DaysLeft"));
             updateElementText("dateNextTrl", formatDateTime(getXmlValue(project, "DateNextTrl")));
+            updateElementText("countOverduePhysicalStructure", getXmlValue(project, "CountOverduePhysicalStructure"));
 
             // Project Status
             updateElementText("projectOwner", getXmlOptionText(project, "OwnerId"));

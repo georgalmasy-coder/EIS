@@ -6,7 +6,7 @@ body {
     --dashboard-irls-cell-bg: transparent;
     --dashboard-irls-cell-alt-bg: var(--app-table-row-alt);
     --dashboard-irls-sticky-bg: var(--app-table-header-background);
-    --dashboard-irls-pill-red-bg: rgba(239, 68, 68, 0.16);
+    --dashboard-irls-pill-red-bg: var(--dashboard-irls-pill-red-border);
     --dashboard-irls-pill-red-border: #ef4444;
 }
 
@@ -477,7 +477,7 @@ body.dashboard-irls-document {
 
 .dashboard-irls-pill--error {
     background: var(--dashboard-irls-pill-red-bg);
-    color: #fecaca;
+    color: #ffffff;
     border-color: var(--dashboard-irls-pill-red-border);
 }
 

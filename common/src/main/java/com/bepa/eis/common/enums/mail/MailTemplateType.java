@@ -1,9 +1,5 @@
 package com.bepa.eis.common.enums.mail;
 
-/*
-/opt/eis/conf/eis/mail-templates/password-reset.mail
-mail.template.folder=eis/mail-templates
- */
 public enum MailTemplateType {
 
     PASSWORD_RESET("password-reset.mail", "Password Reset"),

@@ -20,16 +20,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-@WebServlet(name = "AdminMailTemplateServlet", urlPatterns = "/api/admin/mail-templates", loadOnStartup = 1)
+@WebServlet(name = "AdminMailTemplateServlet", urlPatterns = "/api/admin/mail-templates")
 public class AdminMailTemplateServlet extends AbstractAdminServlet {
     private final ObjectMapper json = new ObjectMapper();
     private static final String CSRF = "mailTemplateCsrf";
     public record Edit(String key, String subject, String bodyHtml, int revision, String action, String recipientEmail) {}
-
-    @Override public void init() throws ServletException {
-        try { new MailTemplateCatalogProvider(null).install(); }
-        catch (Exception e) { throw new ServletException("Could not install mail template catalogue", e); }
-    }
 
     @Override public void processGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         WebSession session = authorize(request, response);

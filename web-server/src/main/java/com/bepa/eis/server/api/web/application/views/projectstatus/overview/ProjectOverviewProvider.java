@@ -173,6 +173,10 @@ public class ProjectOverviewProvider extends GenericProvider {
         dateNextTrl.setValue(getDateNextTrl(trlRecords));
         getProjectElement().addElement(dateNextTrl);
 
+        CountOverduePhysicalStructure countOverduePhysicalStructure = new CountOverduePhysicalStructure();
+        countOverduePhysicalStructure.setValue(countOverduePhysicalStructures(trlRecords, now().toLocalDateTime().toLocalDate()));
+        getProjectElement().addElement(countOverduePhysicalStructure);
+
         getNextTrlDeadLine(trlRecords);
 
         NextTrlReview nextTrlReview = new NextTrlReview();
@@ -241,6 +245,19 @@ public class ProjectOverviewProvider extends GenericProvider {
                 customerId,
                 projectId
         );
+    }
+
+    static int countOverduePhysicalStructures(List<TrlRecord> trlRecords, LocalDate today) {
+        if (trlRecords == null) {
+            return 0;
+        }
+
+        return (int) trlRecords.stream()
+                .filter(record -> record.getNextTrlDeadline() != null)
+                .filter(record -> record.getNextTrlDeadline().toLocalDateTime().toLocalDate().isBefore(today))
+                .map(TrlRecord::getEntityId)
+                .distinct()
+                .count();
     }
 
     private String getNextTrlDeadLine(List<TrlRecord> trlRecordList) {
@@ -452,6 +469,24 @@ public class ProjectOverviewProvider extends GenericProvider {
         @Override
         public String getFieldHeaderName() {
             return "Date Next TRL";
+        }
+    }
+
+    private static class CountOverduePhysicalStructure extends AbstractInteger {
+
+        @Override
+        public String getFieldName() {
+            return "CountOverduePhysicalStructure";
+        }
+
+        @Override
+        public String getFieldLabelName() {
+            return "Number Overdue TRL";
+        }
+
+        @Override
+        public String getFieldHeaderName() {
+            return "Number Overdue TRL";
         }
     }
 

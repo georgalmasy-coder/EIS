@@ -8,28 +8,32 @@ const root = process.cwd();
 const output = path.join(root, 'web-server/target/mail-template-browser-test');
 fs.mkdirSync(output, {recursive:true});
 
-function seedRows() {
-    const sql = fs.readFileSync('common/src/main/resources/db/mail-templates.sql','utf8');
-    const rows = [];
-    for (const block of sql.split('INSERT INTO dbo.MAIL_TEMPLATE').slice(1)) {
-        const text = block.slice(block.indexOf('VALUES (') + 8);
-        const expressions = []; let start=0, quoted=false, depth=0;
-        for (let i=0;i<text.length;i++) {
-            const ch=text[i];
-            if (ch === "'") { if (quoted && text[i+1] === "'") { i++; continue; } quoted=!quoted; }
-            if (quoted) continue;
-            if(ch==='(') depth++;
-            if(ch===')') { if(depth===0) { expressions.push(text.slice(start,i)); break; } depth--; }
-            if(ch===',' && depth===0) { expressions.push(text.slice(start,i)); start=i+1; }
-        }
-        const values = expressions.map(expr => [...expr.matchAll(/N'((?:[^']|'')*)'/g)].map(match=>match[1].replace(/''/g,"'")).join(''));
-        const [key,name,subject,bodyHtml,contentType,sourceFileName,placeholdersJson]=values;
-        assert.equal(values.length,7);
-        rows.push({key,name,subject,bodyHtml,contentType,sourceFileName,placeholdersJson,revision:1,updatedAt:'2026-10-12T09:00:00Z'});
-    }
-    assert.equal(rows.length,13); return rows;
+function fixtureRows() {
+    const logo = 'data:image/png;base64,' + fs.readFileSync('common/src/main/resources/mail-assets/eis-logo-light.png').toString('base64');
+    const definitions = [
+        ['CUSTOMER_CONFIRMATION', 'Customer Confirmation'],
+        ['CUSTOMER_REACTIVATED', 'Customer Reactivated'],
+        ['CUSTOMER_SUSPENDED', 'Customer Suspended'],
+        ['PASSWORD_RESET', 'Password Reset'],
+        ['PAYMENT_FAILED', 'Payment Failed'],
+        ['PAYMENT_OVERDUE', 'Payment Overdue'],
+        ['PAYMENT_REQUESTED', 'Payment Requested'],
+        ['SUBSCRIPTION_CONTINUATION_CONFIRMATION', 'Subscription Continuation Confirmation'],
+        ['SUBSCRIPTION_EXPIRING', 'Subscription Expiring'],
+        ['SUBSCRIPTION_RENEWAL_CONFIRMATION', 'Subscription Renewal Confirmation'],
+        ['SYSTEM_NOTIFICATION', 'System Notification'],
+        ['TRIAL_EXPIRING', 'Trial Expiring'],
+        ['USER_CREATED', 'User Created']
+    ];
+    return definitions.map(([key, name]) => ({
+        key, name, subject: key === 'SYSTEM_NOTIFICATION' ? '' : name,
+        bodyHtml: `<html><body><table data-eis-banner="true" style="width:100%;background:#073f34;"><tr><td style="width:120px;padding:18px 12px;"><img src="${logo}" width="110" height="26"></td><td style="padding:18px 8px;text-align:center;color:#ffffff;font-size:18px;font-weight:bold;white-space:nowrap;">${name}</td><td style="width:120px;padding:18px 12px;"></td></tr></table><p>Hello {{customerName}}, this is an example template for ${name}.</p><a href="{{resetLink}}">Continue</a></body></html>`,
+        contentType: 'text/html; charset=UTF-8',
+        sourceFileName: key.toLowerCase().replaceAll('_', '-') + '.mail',
+        placeholdersJson: '["customerName","resetLink"]', revision: 1, updatedAt: '2026-10-12T09:00:00Z'
+    }));
 }
-const rows=seedRows(); let saved=null, conflict=false, testMail=null, importedCount=0;
+const rows=fixtureRows(); let saved=null, conflict=false, testMail=null, importedCount=0;
 const bundle = () => ({format:'eis-mail-templates',version:1,templates:rows.map(({key,name,subject,bodyHtml,contentType,placeholdersJson})=>({key,name,subject,bodyHtml,contentType,placeholders:JSON.parse(placeholdersJson)}))});
 function example(text) { return text.replace(/\{\{(\w+)\}\}/g, (_, token) => token.endsWith('Link') ? 'https://example.invalid/demo' : token==='customerName' ? 'Example Ltd' : `[Example: ${token}]`); }
 const server=http.createServer(async(req,res)=>{

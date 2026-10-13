@@ -74,7 +74,6 @@ public final class GlobalConfiguration {
 
     private static final String DEFAULT_MAIL_FROM_EMAIL = "no-reply@example.com";
     private static final String DEFAULT_MAIL_FROM_NAME = "BEPA EIS";
-    private static final String DEFAULT_MAIL_TEMPLATE_FOLDER = "C:/EIS/conf/mail-templates";
     private static final String DEFAULT_MAIL_CONTENT_TYPE = "text/html; charset=UTF-8";
 
     private static final long FILE_LISTENER_INTERVAL_MILLIS = 5000L;
@@ -342,14 +341,6 @@ public final class GlobalConfiguration {
 
     public static String getMailDefaultFromName() {
         return getString("mail.default.from.name", DEFAULT_MAIL_FROM_NAME);
-    }
-
-    public static String getMailTemplateFolder() {
-        return getString("mail.template.folder", DEFAULT_MAIL_TEMPLATE_FOLDER);
-    }
-
-    public static File getMailTemplateDirectory() {
-        return resolveConfigurationRelativeFile(getMailTemplateFolder());
     }
 
     public static String getMailDefaultContentType() {
@@ -761,7 +752,6 @@ public final class GlobalConfiguration {
         content.append(lineSeparator);
         content.append("mail.default.from.email=no-reply@example.com").append(lineSeparator);
         content.append("mail.default.from.name=BEPA EIS").append(lineSeparator);
-        content.append("mail.template.folder=C:/EIS/conf/mail-templates").append(lineSeparator);
         content.append("mail.default.content.type=text/html; charset=UTF-8").append(lineSeparator);
         content.append(lineSeparator);
     }

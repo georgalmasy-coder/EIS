@@ -4,6 +4,7 @@ import com.bepa.eis.common.enums.mail.MailTemplateType;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.mail.MailTemplateRenderer;
+import com.bepa.eis.common.providers.mail.MailTemplateCatalogProvider;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +24,7 @@ public final class PasswordResetFlowTest {
     public static void main(String[] args) throws Exception {
         Path directory = Files.createTempDirectory("eis-password-reset-test-");
         Path config = directory.resolve("eis-global.properties");
-        Files.writeString(config, "customer.workflow.portal.base.url=https://unused-config.example.test\n"
-                + "mail.template.folder=" + directory.toString().replace('\\', '/') + "\n");
+        Files.writeString(config, "customer.workflow.portal.base.url=https://unused-config.example.test\n");
         System.setProperty("eis.config.file", config.toString());
 
         FakeUsers users = new FakeUsers();
@@ -77,16 +77,25 @@ public final class PasswordResetFlowTest {
         check(used.status == 400 && used.body.toString().contains("<success>false</success>"),
                 "Expired or already-used tokens cannot produce a success response");
 
-        MailTemplateRenderer renderer = new MailTemplateRenderer();
+        MailTemplateRenderer renderer = new MailTemplateRenderer() {
+            @Override protected MailTemplateCatalogProvider createCatalogProvider() {
+                return new MailTemplateCatalogProvider(null) {
+                    @Override public Template get(String key) {
+                        return new Template(key, "Password Reset", "Database reset", "<a href=\"{{resetLink}}\">Reset password</a>",
+                                "text/html; charset=UTF-8", "password-reset.mail", "[\"resetLink\"]", 1, "2026-10-13T00:00:00Z");
+                    }
+                };
+            }
+        };
         String link = "https://portal.example.test/eis/enter-new-password.html?token=test-token";
         var template = renderer.render(MailTemplateType.PASSWORD_RESET, Map.of("resetLink", link));
-        check(template.getSourceFileName().startsWith("classpath:"), "WAR includes a default mail template");
+        check(template.getSourceFileName().equals("database:MAIL_TEMPLATE/PASSWORD_RESET"), "Reset template is read from the database");
         check(template.getBody().contains(link) && !template.getBody().contains("{{resetLink}}"),
-                "Default mail contains the reset link");
+                "Database mail contains the reset link");
         Files.writeString(directory.resolve("password-reset.mail"),
                 "Subject: Custom reset\nContent-Type: text/plain; charset=UTF-8\n\nOpen {{resetLink}}\n");
         template = renderer.render(MailTemplateType.PASSWORD_RESET, Map.of("resetLink", link));
-        check("Custom reset".equals(template.getSubject()), "Existing external template overrides the default");
+        check("Database reset".equals(template.getSubject()), "External files do not override the database template");
         Files.delete(directory.resolve("password-reset.mail"));
         Files.delete(config);
         Files.delete(directory);

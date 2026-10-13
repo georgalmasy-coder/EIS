@@ -2,7 +2,7 @@ import {userPreferences} from "../core/user-preferences.js";
 import {openEditDialog} from "../components/edit-dialog.js";
 import {createExportDialog} from "../components/export-dialog.js";
 import {createImportDialog} from "../components/import-dialog.js";
-import {createEntityMoveSelection} from "../components/entity-move-selection.js";
+import {createEntityMoveSelection} from "../components/entity-move-selection.js?rev=unselect-1";
 import {downloadStakeholderRequirementDiagramPdf} from "./stakeholderrequirement-diagram-pdf.js";
 import {setText} from "../core/dom.js";
 import {

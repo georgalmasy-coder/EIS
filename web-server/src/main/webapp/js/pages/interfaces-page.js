@@ -108,8 +108,8 @@ function parseInterfaceMatrixDocument(xmlDocument) {
 
     return {
         title: getChildText(metaElement, "title", "Interface Management"),
-        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "To Physical Architecture"),
-        rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "From Physical Architecture"),
+        columnGroupLabel: getChildText(metaElement, "columnGroupLabel", "Physical Architecture").replace(/^To\s+/i, ""),
+        rowGroupLabel: getChildText(metaElement, "rowGroupLabel", "Physical Architecture").replace(/^From\s+/i, ""),
         generatedAt: getChildText(metaElement, "generatedAt", ""),
         structures: parsePhysicalStructures(matrixElement, lookup),
         cellsByKey: parseCells(matrixElement, lookup),
@@ -227,7 +227,7 @@ function renderInterfaceMatrix(matrix) {
         ""
     );
     setText("interfacesPotentialCount", formatNumber((structureCount * structureCount) - structureCount, "da-DK", ""), "");
-    setText("interfacesColumnGroupLabel", matrix.columnGroupLabel || "To Physical Architecture", "");
+    setText("interfacesColumnGroupLabel", matrix.columnGroupLabel || "Physical Architecture", "");
 
     const filterToggle = document.getElementById("interfacesOverdueOnlyToggle");
     if (filterToggle) {
@@ -276,7 +276,7 @@ function renderHeader(tableHead, matrix) {
     rowHeaderCorner.title = matrix.rowGroupLabel;
     const n2Mark = document.createElement("img");
     n2Mark.className = "interfaces-n2-mark";
-    n2Mark.src = "../svg/n2-mark.svg?rev=side-menu-colour-1";
+    n2Mark.src = "../svg/n2-mark.svg?rev=superscript-2-1";
     n2Mark.width = 80;
     n2Mark.height = 80;
     n2Mark.alt = "N2";
@@ -318,7 +318,7 @@ function renderBody(tableBody, matrix) {
             axisLabel.className = "interfaces-axis-label";
 
             const axisText = document.createElement("span");
-            axisText.textContent = matrix.rowGroupLabel || "From Physical Architecture";
+            axisText.textContent = matrix.rowGroupLabel || "Physical Architecture";
 
             axisLabel.appendChild(axisText);
             axisCell.appendChild(axisLabel);
@@ -364,7 +364,9 @@ function renderBody(tableBody, matrix) {
                 applyBackgroundColor(td, "");
             }
 
-            if (cell) {
+            if (isSelfReference) {
+                td.appendChild(buildStructureHeaderContent(fromStructure));
+            } else if (cell) {
                 renderCellValue(td, cell);
             }
 
