@@ -338,7 +338,7 @@ function renderBody(tableBody, matrix) {
 
         tr.appendChild(rowHeader);
 
-        for (const toStructure of (matrix.columnStructures || matrix.structures)) {
+        for (const [columnIndex, toStructure] of (matrix.columnStructures || matrix.structures).entries()) {
             const td = document.createElement("td");
             const cell = matrix.cellsByKey.get(buildCellKey(fromStructure.entityId, toStructure.entityId)) || null;
             const isSelfReference = fromStructure.entityId === toStructure.entityId;
@@ -346,7 +346,7 @@ function renderBody(tableBody, matrix) {
             td.className = isSelfReference ? "interfaces-cell interfaces-cell-self" : "interfaces-cell";
             td.dataset.fromEntityId = fromStructure.entityId || "";
             td.dataset.toEntityId = toStructure.entityId || "";
-            td.title = buildCellTooltip(fromStructure, toStructure, cell, matrix.lookup, isSelfReference);
+            td.title = buildCellTooltip(fromStructure, toStructure, cell, matrix.lookup, isSelfReference, columnIndex > rowIndex);
 
             if (!isSelfReference) {
                 applyBackgroundColor(td, cell?.irlColor || "");
@@ -386,8 +386,7 @@ function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
         return matrix;
     }
 
-    const visibleRowEntityIds = new Set();
-    const visibleColumnEntityIds = new Set();
+    const visibleEntityIds = new Set();
     const visibleCells = new Map();
 
     for (const cell of matrix.cellsByKey.values()) {
@@ -400,23 +399,23 @@ function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
         }
 
         if (cell.fromEntityId) {
-            visibleRowEntityIds.add(cell.fromEntityId);
+            visibleEntityIds.add(cell.fromEntityId);
         }
 
         if (cell.toEntityId) {
-            visibleColumnEntityIds.add(cell.toEntityId);
+            visibleEntityIds.add(cell.toEntityId);
         }
 
         visibleCells.set(buildCellKey(cell.fromEntityId, cell.toEntityId), cell);
     }
 
-    const rowStructures = matrix.structures.filter((structure) => visibleRowEntityIds.has(structure.entityId));
-    const columnStructures = matrix.structures.filter((structure) => visibleColumnEntityIds.has(structure.entityId));
+    // Keep both endpoints on both axes so their self-reference cells preserve the diagonal.
+    const visibleStructures = matrix.structures.filter((structure) => visibleEntityIds.has(structure.entityId));
 
     return {
         ...matrix,
-        rowStructures,
-        columnStructures,
+        rowStructures: visibleStructures,
+        columnStructures: visibleStructures,
         cellsByKey: visibleCells
     };
 }
@@ -503,14 +502,16 @@ function isCellOverdue(cell) {
     return Boolean(nextIrlMeetingDate) && nextIrlMeetingDate < startOfToday();
 }
 
-function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfReference) {
+function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfReference, isAboveDiagonal = false) {
     if (isSelfReference) {
         return "Same physical structure";
     }
 
+    const tooltipFrom = isAboveDiagonal ? toStructure : fromStructure;
+    const tooltipTo = isAboveDiagonal ? fromStructure : toStructure;
     const lines = [
-        `From: ${buildStructureLabel(fromStructure.id, fromStructure.name)}`,
-        `To: ${buildStructureLabel(toStructure.id, toStructure.name)}`
+        `From: ${buildStructureLabel(tooltipFrom.id, tooltipFrom.name)}`,
+        `To: ${buildStructureLabel(tooltipTo.id, tooltipTo.name)}`
     ];
 
     if (!cell) {
