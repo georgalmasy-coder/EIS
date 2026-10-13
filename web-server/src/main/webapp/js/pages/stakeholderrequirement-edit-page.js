@@ -15,7 +15,7 @@ import {createNotesTable} from "../components/notes-table.js";
 import {createAttachmentsTable} from "../components/attachments-table.js";
 import {createLinksTable} from "../components/links-table.js";
 import {createEntityRelationsTable} from "../components/entity-relations-table.js";
-import {createEditInterfacesTable} from "../components/edit-interfaces-table.js?rev=interface-columns-2026-09-16";
+import {createEditInterfacesTable} from "../components/edit-interfaces-table.js?rev=interface-matrix-sides-2026-10-13";
 import {setText} from "../core/dom.js";
 import {getDirectChild, getDirectText, hasXmlParseError, serializeXml} from "../core/xml.js";
 import {fieldEditable, fieldRequired, fieldVisible} from "../core/field-display.js";
@@ -38,7 +38,8 @@ const RESIZABLE_TABLES = [
     { tableSelector: ".attachments-table", storageKey: "attachments", defaultMinWidth: 760 },
     { tableSelector: ".notes-table", storageKey: "notes", defaultMinWidth: 640 },
     { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 },
-    { tableSelector: ".edit-interfaces-table", storageKey: "interfaces", defaultMinWidth: 760 }
+    { tableSelector: ".edit-interfaces-table--left", storageKey: "interfaces", defaultMinWidth: 760 },
+    { tableSelector: ".edit-interfaces-table--right", storageKey: "rightInterfaces", defaultMinWidth: 760 }
 ];
 
 const SUMMARY_FIELDS = {

@@ -226,7 +226,7 @@
                 <section class="tab-panel" id="tabPanel7" role="tabpanel" aria-labelledby="tabBtn7">
                     <div class="table-frame edit-interfaces-frame">
                         <div class="table-scroll">
-                            <table class="data-table edit-interfaces-table" aria-label="Physical architecture interfaces">
+                            <table class="data-table edit-interfaces-table edit-interfaces-table--left" aria-label="Physical architecture interfaces">
                                 <colgroup><col style="width: 30%;"><col style="width: 18%;"><col style="width: 18%;"><col style="width: 14%;"><col style="width: 20%;"></colgroup>
                                 <thead>
                                 <tr class="edit-interfaces-group-row"><th colspan="3">Interface</th><th colspan="2">To</th></tr>
@@ -238,9 +238,19 @@
                                 </thead>
                                 <tbody id="interfacesBody"></tbody>
                             </table>
-                            <div class="empty edit-interfaces-empty" id="interfacesEmpty">No interface rows.</div>
+                            <div class="empty edit-interfaces-empty" id="interfacesEmpty">No interfaces to the left of the diagonal.</div>
                         </div>
                         <div class="edit-interfaces-footer"><span id="interfacesCount">0</span> interfaces</div>
+                    </div>
+                    <div class="table-frame edit-interfaces-frame">
+                        <div class="table-scroll">
+                            <table class="data-table edit-interfaces-table edit-interfaces-table--right" aria-label="Interfaces to the right of the matrix diagonal">
+                                <thead></thead>
+                                <tbody id="rightInterfacesBody"></tbody>
+                            </table>
+                            <div class="empty edit-interfaces-empty" id="rightInterfacesEmpty">No interfaces to the right of the diagonal.</div>
+                        </div>
+                        <div class="edit-interfaces-footer"><span id="rightInterfacesCount">0</span> interfaces</div>
                     </div>
                 </section>
             </div>
@@ -340,7 +350,7 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/systemsbreakdown-edit-page.js?rev=interface-edit-dialog-1"></script>
+<script type="module" src="../js/pages/systemsbreakdown-edit-page.js"></script>
 </body>
 </html>
 

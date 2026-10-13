@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.List;
 
 abstract class InterfaceMatrixDocument extends GenericXmlDocument {
@@ -76,12 +75,7 @@ abstract class InterfaceMatrixDocument extends GenericXmlDocument {
     }
 
     public  <T extends AbstractEntity> void sortBySortKey(List<T> entities) {
-        entities.sort(
-                Comparator.comparing(
-                        AbstractEntity::getSortKey,
-                        Comparator.nullsLast(String::compareToIgnoreCase)
-                )
-        );
+        InterfaceMatrixEntityOrder.sort(entities);
     }
 
     private InterfaceMatrixMetaData createInterfaceMatrixMetaData() {

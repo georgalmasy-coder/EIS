@@ -12,30 +12,29 @@ const COLUMN_DEFINITIONS = [
 ];
 
 const PHYSICAL_ARCHITECTURE_ENTITY_TYPE = "2";
+const RIGHT_COLUMN_DEFINITIONS = [
+    { ...COLUMN_DEFINITIONS[4], width: "12%" },
+    { ...COLUMN_DEFINITIONS[5], width: "21%" },
+    { ...COLUMN_DEFINITIONS[6], width: "6%" },
+    ...COLUMN_DEFINITIONS.filter((column) => column.group === "Interface"),
+    { ...COLUMN_DEFINITIONS[0], width: "6%" }
+];
 
 export function createEditInterfacesTable(options = {}) {
-    const tableBodyId = options.tableBodyId || "interfacesBody";
-    const emptyId = options.emptyId || "interfacesEmpty";
-    const countId = options.countId || "interfacesCount";
-    let currentData = null;
-    let currentBasePath = "";
-    let currentStructureLabel = "";
-
-    document.addEventListener("dblclick", (event) => {
-        const row = event.target?.closest?.(`#${tableBodyId} .edit-interfaces-row`);
-        if (!row || !currentData) {
-            return;
-        }
-
-        const index = Number(row.dataset.interfaceIndex);
-        const record = Number.isInteger(index) ? currentData.interfaces[index] : null;
-        if (record) {
-            openRecord(record, currentData, currentBasePath, currentStructureLabel);
-        }
-    });
-
     function loadFromDocument(xmlDocument) {
         const rootElement = xmlDocument?.querySelector("editInterfaces");
+        const data = parseEditInterfaces(rootElement, xmlDocument);
+        const basePath = options.basePath || resolveInterfaceBasePath(data.entityType);
+        const structureLabel = options.structureLabel || data.entityTypeName || "Physical Architecture";
+        renderTable(data, basePath, structureLabel, false);
+        renderTable(data, basePath, structureLabel, true);
+    }
+
+    function renderTable(data, basePath, structureLabel, right) {
+        const records = right ? data.rightInterfaces : data.leftInterfaces;
+        const tableBodyId = right ? (options.rightTableBodyId || "rightInterfacesBody") : (options.tableBodyId || "interfacesBody");
+        const emptyId = right ? (options.rightEmptyId || "rightInterfacesEmpty") : (options.emptyId || "interfacesEmpty");
+        const countId = right ? (options.rightCountId || "rightInterfacesCount") : (options.countId || "interfacesCount");
         const tableBody = document.getElementById(tableBodyId);
         const emptyState = document.getElementById(emptyId);
         const countElement = document.getElementById(countId);
@@ -44,18 +43,12 @@ export function createEditInterfacesTable(options = {}) {
             return;
         }
 
-        const data = parseEditInterfaces(rootElement, xmlDocument);
-        const basePath = options.basePath || resolveInterfaceBasePath(data.entityType);
-        const structureLabel = options.structureLabel || data.entityTypeName || "Physical Architecture";
-        currentData = data;
-        currentBasePath = basePath;
-        currentStructureLabel = structureLabel;
-        const columns = getColumns(data);
+        const columns = getColumns(data, right);
         const fragment = document.createDocumentFragment();
 
         renderTableStructure(tableBody.closest("table"), columns);
 
-        data.interfaces.forEach((record, index) => {
+        records.forEach((record, index) => {
             const row = document.createElement("tr");
             row.className = "edit-interfaces-row";
             row.dataset.interfaceIndex = String(index);
@@ -77,11 +70,11 @@ export function createEditInterfacesTable(options = {}) {
         tableBody.replaceChildren(fragment);
 
         if (emptyState) {
-            emptyState.hidden = data.interfaces.length > 0;
+            emptyState.hidden = records.length > 0;
         }
 
         if (countElement) {
-            countElement.textContent = `${data.interfaces.length}`;
+            countElement.textContent = `${records.length}`;
         }
     }
 
@@ -95,8 +88,8 @@ export function createEditInterfacesTable(options = {}) {
             structureLabel,
             lookup: data.lookup,
             fromStructure: {
-                entityId: data.entityId || record.fromEntityId,
-                id: data.fromEntityCode || data.entityId || record.fromEntityId,
+                entityId: record.fromEntityId || data.entityId,
+                id: data.fromEntityCode || data.entityId,
                 name: data.fromEntityName || ""
             },
             toStructure: {
@@ -122,7 +115,8 @@ function parseEditInterfaces(rootElement, xmlDocument) {
             entityTypeName: "",
             fromEntityCode: "",
             fromEntityName: "",
-            interfaces: [],
+            leftInterfaces: [],
+            rightInterfaces: [],
             lookup: {
                 trlById: new Map(),
                 irlById: new Map(),
@@ -140,24 +134,30 @@ function parseEditInterfaces(rootElement, xmlDocument) {
         entityTypeName: getAttribute(rootElement, "entityTypeName", ""),
         fromEntityCode: currentEntity.code,
         fromEntityName: currentEntity.name,
-        interfaces: Array.from(rootElement.querySelectorAll(":scope > interfaces > interface")).map((element) => ({
-            fromIrlId: getChildText(element, "fromIrlId", ""),
-            fromClassificationIds: getChildText(element, "fromClassificationIds", ""),
-            toIrlId: getChildText(element, "toIrlId", ""),
-            toClassificationIds: getChildText(element, "toClassificationIds", ""),
-            nextIrlMeeting: getChildText(element, "nextIrlMeeting", ""),
-            fromTrlId: getChildText(element, "fromTrlId", ""),
-            toTrlId: getChildText(element, "toTrlId", ""),
-            toEntityId: getChildText(element, "toEntityId", ""),
-            toEntityCode: getChildText(element, "toEntityCode", ""),
-            toEntityName: getChildText(element, "toEntityName", "")
-        })),
+        leftInterfaces: parseInterfaceRecords(rootElement, "leftInterfaces"),
+        rightInterfaces: parseInterfaceRecords(rootElement, "rightInterfaces"),
         lookup: {
             trlById: parseLookupMap(rootElement, "trlMeta > trl", "trlId"),
             irlById: parseLookupMap(rootElement, "irlMeta > irl", "irlId"),
             classificationById: parseLookupMap(rootElement, "classificationMeta > classification", "classId")
         }
     };
+}
+
+function parseInterfaceRecords(rootElement, container) {
+    return Array.from(rootElement.querySelectorAll(`:scope > ${container} > interface`)).map((element) => ({
+        fromEntityId: getChildText(element, "fromEntityId", ""),
+        fromIrlId: getChildText(element, "fromIrlId", ""),
+        fromClassificationIds: getChildText(element, "fromClassificationIds", ""),
+        toIrlId: getChildText(element, "toIrlId", ""),
+        toClassificationIds: getChildText(element, "toClassificationIds", ""),
+        nextIrlMeeting: getChildText(element, "nextIrlMeeting", ""),
+        fromTrlId: getChildText(element, "fromTrlId", ""),
+        toTrlId: getChildText(element, "toTrlId", ""),
+        toEntityId: getChildText(element, "toEntityId", ""),
+        toEntityCode: getChildText(element, "toEntityCode", ""),
+        toEntityName: getChildText(element, "toEntityName", "")
+    }));
 }
 
 function parseCurrentEntity(xmlDocument, entityType) {
@@ -276,10 +276,11 @@ function buildLookupCell(record, column, lookup) {
     return cell;
 }
 
-function getColumns(data) {
+function getColumns(data, right = false) {
     const includePhysicalColumns = String(data?.entityType || "") === PHYSICAL_ARCHITECTURE_ENTITY_TYPE;
 
-    return COLUMN_DEFINITIONS.filter((column) => !column.physicalOnly || includePhysicalColumns);
+    return (right ? RIGHT_COLUMN_DEFINITIONS : COLUMN_DEFINITIONS)
+        .filter((column) => !column.physicalOnly || includePhysicalColumns);
 }
 
 function renderTableStructure(table, columns) {
