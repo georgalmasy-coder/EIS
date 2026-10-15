@@ -570,22 +570,22 @@ function getColumns() {
         },
         {
             label: "Id",
-            width: 42,
-            maxChars: 12
+            width: 90,
+            maxChars: 20
         },
         {
             label: "Name",
-            width: 205,
-            maxChars: 48
+            width: 220,
+            maxChars: 50
         },
         {
             label: "Last modified by",
-            width: 150,
-            maxChars: 30
+            width: 100,
+            maxChars: 23
         },
         {
             label: "Last modified",
-            width: 94,
+            width: 81,
             maxChars: 19
         }
     ];

@@ -10,6 +10,7 @@ import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.common.EntityRecord;
+import com.bepa.eis.server.dataprovider.entities.common.EntityComparators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -343,6 +344,7 @@ public class BaselineProvider extends GenericProvider {
 
         }
 
+        listOfChanges.sort(EntityComparators.bySortKey(BaselineChangeRow::getId));
         return listOfChanges;
     }
 
