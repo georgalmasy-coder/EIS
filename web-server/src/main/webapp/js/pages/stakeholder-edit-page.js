@@ -9,7 +9,7 @@ import {
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
 import {applyTopPanel as applyPageHeader} from "../core/page-header.js";
-import {createHistoryTable} from "../components/history-table.js";
+import {createHistoryTable} from "../components/history-table.js?rev=history-compare-2026-10-15-3";
 import {createNotesTable} from "../components/notes-table.js";
 import {createAttachmentsTable} from "../components/attachments-table.js";
 import {setText} from "../core/dom.js";
@@ -35,6 +35,8 @@ const EDIT_PAGE_URL = "/web/view?page=stakeholder-edit";
 const DEFAULT_RETURN_URL = "/web/view?page=stakeholder-main";
 
 const historyTable = createHistoryTable({
+    buildVersionUrl: ({id, version}) => `/basis/stakeholder?cmd=edit&id=${encodeURIComponent(id)}&version=${encodeURIComponent(version)}`,
+    findDetailNode,
     editPageUrl: EDIT_PAGE_URL,
     defaultReturnUrl: DEFAULT_RETURN_URL
 });

@@ -20,6 +20,7 @@
 *.rar
 *.mjs
 !web-server/src/test/js/edit-interfaces-table.test.mjs
+!web-server/src/test/js/history-comparison.test.mjs
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

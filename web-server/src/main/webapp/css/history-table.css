@@ -34,3 +34,44 @@
     padding: 16px;
     font-size: 13px;
 }
+
+.history-table .history-select-cell { width: 70px; text-align: center; }
+.history-select-cell input { cursor: pointer; }
+.history-context-menu {
+    position: fixed;
+    z-index: 10000;
+    padding: 4px;
+    background: var(--app-surface-background, #fff);
+    border: 1px solid var(--app-border-default, #ccc);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px #0003;
+}
+.history-context-menu button { display: block; padding: 8px 12px; cursor: pointer; }
+.history-context-menu button:disabled { opacity: 0.5; cursor: default; }
+.history-diff-dialog {
+    box-sizing: border-box;
+    width: min(1100px, 94vw, var(--edit-dialog-width, 90vw));
+    max-width: min(94vw, var(--edit-dialog-width, 90vw));
+    max-height: 90vh;
+    padding: 20px;
+    border: 1px solid var(--app-border-default, #ccc);
+    border-radius: 8px;
+    background: var(--app-surface-background, #fff);
+    color: var(--app-text-primary, #222);
+    overflow: auto;
+}
+.history-diff-dialog::backdrop { background: #0007; }
+.history-diff-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.history-diff-toolbar h2 { margin: 0; }
+.history-diff-legend { font-size: 13px; }
+.history-diff-headings, .history-diff-row { display: grid; grid-template-columns: repeat(var(--history-diff-columns, 2), minmax(0, 1fr)); }
+.history-diff-headings { position: sticky; top: -20px; background: var(--app-surface-background, #fff); z-index: 1; }
+.history-diff-heading { display: flex; align-items: baseline; gap: 10px; min-width: 0; padding: 10px; border-bottom: 2px solid var(--app-border-default, #ccc); font-size: 12px; font-weight: normal; line-height: 1.5; }
+.history-diff-heading > span:first-child { flex-shrink: 0; }
+.history-diff-heading > span { min-width: 0; overflow-wrap: anywhere; }
+.history-diff-field { padding: 12px; border-bottom: 1px solid var(--app-border-default, #ccc); min-width: 0; }
+.history-diff-field + .history-diff-field { border-left: 1px solid var(--app-border-default, #ccc); }
+.history-diff-label { font-weight: 600; margin-bottom: 6px; }
+.history-diff-value { white-space: pre-wrap; overflow-wrap: anywhere; }
+.history-diff-row.is-changed { background: #fff0bb; color: #302600; }
+.history-diff-marker { font-size: 12px; font-weight: normal; }

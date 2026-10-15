@@ -10,7 +10,7 @@ import {
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
 import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
-import {createHistoryTable} from "../components/history-table.js";
+import {createHistoryTable} from "../components/history-table.js?rev=history-compare-2026-10-15-3";
 import {createNotesTable} from "../components/notes-table.js";
 import {createAttachmentsTable} from "../components/attachments-table.js";
 import {createLinksTable} from "../components/links-table.js";
@@ -34,7 +34,7 @@ const STORAGE_KEYS = {
 };
 
 const RESIZABLE_TABLES = [
-    { tableSelector: ".history-table", storageKey: "history", defaultMinWidth: 520 },
+    { tableSelector: ".history-table", storageKey: "history-select", defaultMinWidth: 520 },
     { tableSelector: ".attachments-table", storageKey: "attachments", defaultMinWidth: 760 },
     { tableSelector: ".notes-table", storageKey: "notes", defaultMinWidth: 640 },
     { tableSelector: ".relations-table", storageKey: "relations", defaultMinWidth: 760 },
@@ -55,6 +55,8 @@ const MODES = {
 };
 
 const historyTable = createHistoryTable({
+    buildVersionUrl: ({id, version}) => `/project/systembreakdown?cmd=edit&id=${encodeURIComponent(id)}&version=${encodeURIComponent(version)}`,
+    findDetailNode,
     editPageUrl: EDIT_PAGE_URL,
     defaultReturnUrl: DEFAULT_RETURN_URL,
     onAfterRender: initializeResizableEditTables

@@ -3,6 +3,7 @@ import {parseDateTime} from "../core/date.js";
 import {escapeHtml} from "../core/html.js";
 import {isTruthy} from "../core/utils.js";
 import {getDirectText, textOf} from "../core/xml.js";
+import {openHistoryDiff} from "./history-diff-dialog.js?rev=three-versions-2026-10-15";
 
 const DEFAULT_CONFIG = {
     bodyId: "historyBody",
@@ -110,12 +111,13 @@ function getRowSortValue(row, key) {
     return row[key];
 }
 
-function createHistoryRowMarkup(row) {
+function createHistoryRowMarkup(row, selectedVersions) {
     return `
         <tr
                 data-version="${escapeHtml(row.version)}"
                 data-latest="${row.latest ? "true" : "false"}"
                 title="${row.latest ? "Latest version" : "Double-click to open this historical version"}">
+            <td class="history-select-cell"><input type="checkbox" data-history-select aria-label="Select version ${escapeHtml(row.version)}" ${selectedVersions.has(row.version) ? "checked" : ""}></td>
             <td>${escapeHtml(row.changedDateTime ?? "")}</td>
             <td>${escapeHtml(row.changedByUserId ?? "")}</td>
             <td>${escapeHtml(row.version ?? "")}</td>
@@ -159,6 +161,7 @@ export function createHistoryTable(config = {}) {
         rows: [],
         bound: false,
         sourceDoc: null,
+        selectedVersions: new Set(),
         config: {
             ...DEFAULT_CONFIG,
             ...config
@@ -180,6 +183,7 @@ export function createHistoryTable(config = {}) {
     }
 
     function setContext(context = {}, options = {}) {
+        if (context.id !== undefined && context.id !== state.config.id) state.selectedVersions.clear();
         state.config = {
             ...state.config,
             ...context
@@ -199,6 +203,7 @@ export function createHistoryTable(config = {}) {
     }
 
     function setEntityId(id, options = {}) {
+        if (normalizeText(id).trim() !== state.config.id) state.selectedVersions.clear();
         state.config.id = normalizeText(id).trim();
 
         if (options.render !== false) {
@@ -226,6 +231,7 @@ export function createHistoryTable(config = {}) {
         const historyNode = findHistoryContainer(doc, state.config.historyContainerSelector);
 
         state.rows = parseHistoryRows(historyNode, state.config.entrySelector);
+        state.selectedVersions.clear();
 
         if (options.render !== false) {
             render();
@@ -257,7 +263,8 @@ export function createHistoryTable(config = {}) {
             return sortDir === "asc" ? result : -result;
         });
 
-        renderElements.body.innerHTML = rows.map(createHistoryRowMarkup).join("");
+        closeContextMenu();
+        renderElements.body.innerHTML = rows.map(row => createHistoryRowMarkup(row, state.selectedVersions)).join("");
 
         setEmptyVisible(renderElements.empty, rows.length === 0);
         applySortIndicators(state.config.sortKeys, state.sortState, state.config.indicatorPrefix);
@@ -306,6 +313,7 @@ export function createHistoryTable(config = {}) {
     }
 
     function handleTableDoubleClick(event) {
+        if (event.target.closest("[data-history-select]")) return;
         if (state.config.readOnly) {
             return;
         }
@@ -343,6 +351,64 @@ export function createHistoryTable(config = {}) {
         sortBy(key);
     }
 
+    let contextMenu = null;
+
+    function closeContextMenu() {
+        contextMenu?.remove();
+        contextMenu = null;
+    }
+
+    function handleSelection(event) {
+        if (!event.target.matches("[data-history-select]")) return;
+        const version = event.target.closest("tr[data-version]").dataset.version;
+        if (event.target.checked) state.selectedVersions.add(version);
+        else state.selectedVersions.delete(version);
+        closeContextMenu();
+    }
+
+    function handleContextMenu(event) {
+        closeContextMenu();
+        event.preventDefault();
+        const validCount = state.selectedVersions.size === 2 || state.selectedVersions.size === 3;
+        const canCompare = validCount && !!state.config.buildVersionUrl && !!state.config.findDetailNode;
+        const versions = [...state.selectedVersions].sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
+        contextMenu = document.createElement("div");
+        contextMenu.className = "history-context-menu";
+        contextMenu.setAttribute("role", "menu");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("role", "menuitem");
+        button.textContent = validCount
+            ? `Compare Version ${versions.slice(0, -1).join(", version ")} and version ${versions.at(-1)}`
+            : "Compare versions (select two or three versions)";
+        button.disabled = !canCompare;
+        button.setAttribute("aria-disabled", String(!canCompare));
+        button.addEventListener("click", () => {
+            if (!canCompare) return;
+            closeContextMenu();
+            openHistoryDiff({versions, historyRows: versions.map(getRowByVersion).filter(Boolean), id: state.config.id, buildVersionUrl: state.config.buildVersionUrl, findDetailNode: state.config.findDetailNode});
+        });
+        contextMenu.appendChild(button);
+        document.body.appendChild(contextMenu);
+        const rect = contextMenu.getBoundingClientRect();
+        contextMenu.style.left = `${Math.max(0, Math.min(event.clientX, window.innerWidth - rect.width))}px`;
+        contextMenu.style.top = `${Math.max(0, Math.min(event.clientY, window.innerHeight - rect.height))}px`;
+        contextMenu.tabIndex = -1;
+        if (canCompare) button.focus();
+        else contextMenu.focus();
+    }
+
+    function handleOutsidePointer(event) {
+        if (!contextMenu?.contains(event.target)) closeContextMenu();
+    }
+
+    function handleEscape(event) {
+        if (event.key === "Escape" && contextMenu) {
+            closeContextMenu();
+            getElements().body?.querySelector("[data-history-select]:checked")?.focus();
+        }
+    }
+
     function bind(customConfig = {}) {
         state.config = {
             ...state.config,
@@ -356,9 +422,14 @@ export function createHistoryTable(config = {}) {
         const elements = getElements();
 
         elements.body?.addEventListener("dblclick", handleTableDoubleClick);
+        elements.body?.addEventListener("change", handleSelection);
 
         const table = elements.body?.closest("table");
         const tableHead = table?.querySelector("thead");
+        table?.addEventListener("contextmenu", handleContextMenu);
+        document.addEventListener("pointerdown", handleOutsidePointer);
+        document.addEventListener("keydown", handleEscape);
+        window.addEventListener("resize", closeContextMenu);
 
         tableHead?.addEventListener("click", handleHeaderClick);
 
@@ -366,6 +437,16 @@ export function createHistoryTable(config = {}) {
     }
 
     function destroy() {
+        const body = getElements().body;
+        body?.removeEventListener("dblclick", handleTableDoubleClick);
+        body?.removeEventListener("change", handleSelection);
+        const table = body?.closest("table");
+        table?.removeEventListener("contextmenu", handleContextMenu);
+        table?.querySelector("thead")?.removeEventListener("click", handleHeaderClick);
+        document.removeEventListener("pointerdown", handleOutsidePointer);
+        document.removeEventListener("keydown", handleEscape);
+        window.removeEventListener("resize", closeContextMenu);
+        closeContextMenu();
         state.bound = false;
     }
 

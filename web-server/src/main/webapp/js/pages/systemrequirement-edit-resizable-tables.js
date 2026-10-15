@@ -5,7 +5,7 @@ const STORAGE_KEY = "basis.systemrequirement.edit.tableColumnWidths";
 const RESIZABLE_TABLES = [
     {
         tableSelector: ".history-table",
-        storageKey: "history",
+        storageKey: "history-select",
         defaultMinWidth: 520
     },
     {
