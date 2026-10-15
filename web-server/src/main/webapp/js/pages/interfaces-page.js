@@ -338,7 +338,7 @@ function renderBody(tableBody, matrix) {
 
         tr.appendChild(rowHeader);
 
-        for (const [columnIndex, toStructure] of (matrix.columnStructures || matrix.structures).entries()) {
+        for (const toStructure of (matrix.columnStructures || matrix.structures)) {
             const td = document.createElement("td");
             const cell = matrix.cellsByKey.get(buildCellKey(fromStructure.entityId, toStructure.entityId)) || null;
             const isSelfReference = fromStructure.entityId === toStructure.entityId;
@@ -346,7 +346,7 @@ function renderBody(tableBody, matrix) {
             td.className = isSelfReference ? "interfaces-cell interfaces-cell-self" : "interfaces-cell";
             td.dataset.fromEntityId = fromStructure.entityId || "";
             td.dataset.toEntityId = toStructure.entityId || "";
-            td.title = buildCellTooltip(fromStructure, toStructure, cell, matrix.lookup, isSelfReference, columnIndex > rowIndex);
+            td.title = buildCellTooltip(fromStructure, toStructure, cell, matrix.lookup, isSelfReference);
 
             if (!isSelfReference) {
                 applyBackgroundColor(td, cell?.irlColor || "");
@@ -502,16 +502,14 @@ function isCellOverdue(cell) {
     return Boolean(nextIrlMeetingDate) && nextIrlMeetingDate < startOfToday();
 }
 
-function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfReference, isAboveDiagonal = false) {
+function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfReference) {
     if (isSelfReference) {
         return "Same physical structure";
     }
 
-    const tooltipFrom = isAboveDiagonal ? toStructure : fromStructure;
-    const tooltipTo = isAboveDiagonal ? fromStructure : toStructure;
     const lines = [
-        `From: ${buildStructureLabel(tooltipFrom.id, tooltipFrom.name)}`,
-        `To: ${buildStructureLabel(tooltipTo.id, tooltipTo.name)}`
+        `From: ${buildStructureLabel(fromStructure.id, fromStructure.name)}`,
+        `To: ${buildStructureLabel(toStructure.id, toStructure.name)}`
     ];
 
     if (!cell) {
