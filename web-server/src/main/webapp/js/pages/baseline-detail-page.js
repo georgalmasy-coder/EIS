@@ -12,6 +12,8 @@ const LIST_PAGE_URL = "/web/view?page=baseline-main";
 
 const STAKEHOLDER_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=stakeholderrequirement-edit";
 const SYSTEM_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=systemrequirement-edit";
+const FUNCTIONAL_STRUCTURE_EDIT_PAGE_URL = "/web/view?page=functionalstructure-edit";
+const LOGICAL_STRUCTURE_EDIT_PAGE_URL = "/web/view?page=logicalstructure-edit";
 const SYSTEMS_BREAKDOWN_EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 
 const state = {
@@ -223,7 +225,7 @@ async function loadBaselineDetail(baselinePK) {
             els.functionalStructuresBody,
             els.functionalStructuresEmpty,
             els.functionalStructuresCount,
-            SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+            FUNCTIONAL_STRUCTURE_EDIT_PAGE_URL
         );
 
         renderChanges(
@@ -232,7 +234,7 @@ async function loadBaselineDetail(baselinePK) {
             els.logicalStructuresBody,
             els.logicalStructuresEmpty,
             els.logicalStructuresCount,
-            SYSTEMS_BREAKDOWN_EDIT_PAGE_URL
+            LOGICAL_STRUCTURE_EDIT_PAGE_URL
         );
 
         renderChanges(

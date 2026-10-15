@@ -783,22 +783,23 @@ body.baseline-document {
     font-weight: 650;
 }
 
+/* Opaque foreground/background pairs preserve contrast in every theme. */
 .baseline-activity-created {
-    border-color: rgba(74, 222, 128, .55);
-    background: rgba(22, 101, 52, .28);
-    color: #bbf7d0;
+    border-color: #15803d;
+    background: #dcfce7;
+    color: #14532d;
 }
 
 .baseline-activity-modified {
-    border-color: rgba(250, 204, 21, .55);
-    background: rgba(113, 63, 18, .32);
-    color: #fef3c7;
+    border-color: #a16207;
+    background: #fef3c7;
+    color: #713f12;
 }
 
 .baseline-activity-inactivated {
-    border-color: rgba(248, 113, 113, .55);
-    background: rgba(127, 29, 29, .30);
-    color: #fecaca;
+    border-color: #b91c1c;
+    background: #fee2e2;
+    color: #7f1d1d;
 }
 
 @media (max-width: 1100px) {
