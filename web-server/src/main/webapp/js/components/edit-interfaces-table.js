@@ -144,6 +144,24 @@ function parseEditInterfaces(rootElement, xmlDocument) {
     };
 }
 
+export function getInterfaceComparisonTables(xmlDocument) {
+    const data = parseEditInterfaces(xmlDocument.querySelector("editInterfaces"), xmlDocument);
+    return [false, true].map(right => {
+        const columns = getColumns(data, right);
+        return {
+            title: right ? "Interfaces to the right of the matrix diagonal" : "Interfaces to the left of the matrix diagonal",
+            columns: columns.map(column => ({label: column.label, group: column.group})),
+            rows: (right ? data.rightInterfaces : data.leftInterfaces).map(record => ({
+                key: `${record.fromEntityId}:${record.toEntityId}`,
+                cells: columns.map(column => {
+                    const cell = column.type ? buildLookupCell(record, column, data.lookup) : buildSingleCell(record, column);
+                    return {value: `${record[column.source] || ""}|${cell.textContent}`, html: cell.innerHTML};
+                })
+            }))
+        };
+    });
+}
+
 function parseInterfaceRecords(rootElement, container) {
     return Array.from(rootElement.querySelectorAll(`:scope > ${container} > interface`)).map((element) => ({
         fromEntityId: getChildText(element, "fromEntityId", ""),

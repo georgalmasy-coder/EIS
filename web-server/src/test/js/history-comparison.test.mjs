@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
 import vm from "node:vm";
-import {getComparisonFields, renderComparison, renderVersionHeadings} from "../../main/webapp/js/components/history-diff-dialog.js";
+import {getComparisonFields, renderComparison, renderVersionHeadings, renderComparisonTabs, bindComparisonTabs} from "../../main/webapp/js/components/history-diff-dialog.js";
+import {getComparisonSections, renderTableComparison, alignComparisonRows} from "../../main/webapp/js/components/history-diff-sections.js";
 
 globalThis.Node = {TEXT_NODE: 3};
 function field(name, value, attributes = {}, children = []) {
@@ -41,6 +42,94 @@ assert.match(headings, /Changed: 2026-10-15 12:00/);
 assert.match(headings, /Changed By: User &lt;name&gt;/);
 assert.equal((headings.match(/<span>/g) || []).length, 3);
 assert.ok(!headings.includes("<br>"), "heading values are adjacent, not stacked");
+
+// Each version gets fresh row PKs; provenance and related entity identities survive saves.
+function xmlNode(tag, text = "", attrs = {}, children = []) {
+    const node = field(tag, text, attrs, children);
+    node.getElementsByTagName = name => children.flatMap(child => [
+        ...(child.tagName === name ? [child] : []), ...child.getElementsByTagName(name)
+    ]);
+    return node;
+}
+function notesDoc(pk, text) {
+    const root = xmlNode("Info", "", {}, [xmlNode("EntityNotes", "", {}, [xmlNode("EntityNote", "", {}, [
+        xmlNode("EntityNotePK", pk), xmlNode("NoteText", text), xmlNode("CreatedTime", "2026-10-16T09:00:00"),
+        xmlNode("CreatedById", "", {}, [xmlNode("Value", "12"), xmlNode("Option", "User", {selected: "true"})])
+    ])])]);
+    return {documentElement: root};
+}
+const oldNotes = getComparisonSections(notesDoc("101", "Old <note>\nFull text"), ["Notes"]);
+const newNotes = getComparisonSections(notesDoc("202", "Updated note"), ["Notes"]);
+assert.equal(oldNotes[0].rows[0].key, newNotes[0].rows[0].key, "copied notes align despite different PKs");
+const noteComparison = renderTableComparison([oldNotes[0], newNotes[0]], 0);
+assert.equal((noteComparison.match(/class="is-changed"/g) || []).length, 2, "only the changed cell is highlighted in both versions");
+assert.ok(noteComparison.includes("Old &lt;note&gt;\nFull text"));
+assert.ok(!noteComparison.includes("Not present"));
+const emptyNotes = {...oldNotes[0], rows: []};
+const addedDeleted = renderTableComparison([oldNotes[0], emptyNotes, newNotes[0]], 0);
+assert.equal((addedDeleted.match(/Not present/g) || []).length, 1);
+assert.equal((addedDeleted.match(/<table /g) || []).length, 3);
+const reordered = {...oldNotes[0], rows: [
+    {key: "second", cells: oldNotes[0].rows[0].cells}, oldNotes[0].rows[0]
+]};
+assert.ok(!renderTableComparison([reordered, {...reordered, rows: [...reordered.rows].reverse()}], 1).includes('class="is-changed"'), "row order alone does not count as a change");
+assert.deepEqual(getComparisonSections(notesDoc("1", "text"), []), [], "only existing editor tabs are included");
+const rowHeights = [20, 65, 30].map(height => ({dataset: {diffRow: "same"}, style: {}, getBoundingClientRect: () => ({height})}));
+alignComparisonRows({querySelectorAll: () => rowHeights});
+assert.deepEqual(rowHeights.map(row => row.style.height), ["65px", "65px", "65px"], "corresponding rows align across three versions");
+const allDoc = notesDoc("1", "Note");
+allDoc.querySelector = () => null;
+function collection(container, name, entries) {
+    allDoc.documentElement.children.push(xmlNode(container, "", {}, [xmlNode(name, "", {}, Object.entries(entries).map(([key, value]) => xmlNode(key, value)))]));
+}
+collection("EntityAttachments", "EntityAttachment", {EntityAttachmentPK: "7", FileName: "File.pdf", Description: "Attachment", FileSize: "2048"});
+collection("EntityLinks", "EntityLink", {EntityLinkPK: "8", Description: "Link", LinkUrl: "https://example.com", CreatedTime: "2026-10-16T09:00:00"});
+collection("EntityRelations", "EntityRelation", {EntityRelationPK: "9", RelatedEntityType: "6", RelatedEntityId: "10", RelatedEntityTypeName: "Requirement", RelatedEntityCode: "REQ-10", RelatedEntityName: "Related requirement", RelationTypeName: "Confirmed"});
+const allSections = getComparisonSections(allDoc, ["Attachments", "Notes", "Links", "Relations", "Interfaces"]);
+assert.equal(allSections.length, 6, "includes both interface tables");
+assert.deepEqual(allSections.slice(0, 4).map(section => section.title), ["Attachments", "Notes", "Links", "Relations"]);
+assert.deepEqual(allSections.slice(0, 4).map(section => section.columns.length), [5, 3, 4, 6]);
+assert.ok(allSections[0].rows[0].cells[2].value.includes("KB"), "attachment file size uses the tab's formatter");
+assert.equal(allSections[2].rows[0].cells[1].value, "https://example.com");
+assert.equal(allSections[3].rows[0].cells[3].value, "Confirmed");
+assert.ok(renderTableComparison([allSections[4], allSections[4]], 4).includes("No rows."));
+const tabsMarkup = renderComparisonTabs([{fields: left, sections: allSections}, {fields: right, sections: allSections}, {fields: third, sections: allSections}]);
+assert.equal((tabsMarkup.match(/role="tablist"/g) || []).length, 3, "each version has its own tabs");
+assert.equal((tabsMarkup.match(/role="tab" /g) || []).length, 18, "six tabs per version, grouping both interface lists in one tab");
+assert.equal((tabsMarkup.match(/role="tabpanel"/g) || []).length, 18);
+assert.equal((tabsMarkup.match(/class="history-diff-tab-marker"/g) || []).length, 3, "only Basis Info is marked when lists are identical");
+assert.ok(tabsMarkup.includes('aria-label="Basis Info — contains changes"'));
+const unchangedTabs = renderComparisonTabs([{fields: left, sections: allSections}, {fields: left, sections: allSections}]);
+assert.ok(!unchangedTabs.includes('class="history-diff-tab-marker"'), "unchanged tabs have no marker");
+const changedNotesTabs = renderComparisonTabs([
+    {fields: left, sections: oldNotes}, {fields: left, sections: oldNotes}, {fields: left, sections: newNotes}
+]);
+assert.equal((changedNotesTabs.match(/aria-label="Notes — contains changes"/g) || []).length, 3, "changes only in the third version mark Notes in all columns");
+assert.equal((changedNotesTabs.match(/class="history-diff-tab-marker"/g) || []).length, 3);
+const deletedNotesTabs = renderComparisonTabs([{fields: left, sections: oldNotes}, {fields: left, sections: [emptyNotes]}]);
+assert.equal((deletedNotesTabs.match(/aria-label="Notes — contains changes"/g) || []).length, 2, "missing rows mark the affected tab");
+const reorderedTabs = renderComparisonTabs([{fields: left, sections: [reordered]}, {fields: left, sections: [{...reordered, rows: [...reordered.rows].reverse()}]}]);
+assert.ok(!reorderedTabs.includes('class="history-diff-tab-marker"'), "reordering alone does not mark a tab");
+assert.ok(!deletedNotesTabs.includes("Ikke til stede"));
+assert.ok(deletedNotesTabs.includes("Not present"));
+const changedInterfaces = allSections.map((section, index) => index === 5 ? {...section, rows: [{key: "new-interface", cells: section.columns.map(() => ({value: "New", html: "New"}))}]} : section);
+const interfaceTabs = renderComparisonTabs([{fields: left, sections: allSections}, {fields: left, sections: changedInterfaces}]);
+assert.equal((interfaceTabs.match(/aria-label="Interfaces — contains changes"/g) || []).length, 2, "a change in either interface list marks their shared tab");
+assert.equal((tabsMarkup.match(/data-diff-panel="4"[^>]*hidden/g) || []).length, 3, "Relations starts hidden in all version columns");
+const tabsEvents = {};
+const tabButtons = Array.from({length: 3}, () => Array.from({length: 6}, (_, index) => ({
+    dataset: {diffTab: String(index)}, attributes: {},
+    setAttribute(name, value) { this.attributes[name] = value; }
+}))).flat();
+const tabPanels = tabButtons.map(tab => ({dataset: {diffPanel: tab.dataset.diffTab}}));
+bindComparisonTabs({
+    addEventListener(type, fn) { tabsEvents[type] = fn; },
+    querySelectorAll(selector) { return selector === "[data-diff-tab]" ? tabButtons : selector === "[data-diff-panel]" ? tabPanels : []; }
+});
+tabsEvents.click({target: {closest: () => tabButtons[4]}});
+assert.equal(tabButtons.filter(tab => tab.attributes["aria-selected"] === "true").length, 3);
+assert.ok(tabButtons.filter(tab => tab.attributes["aria-selected"] === "true").every(tab => tab.dataset.diffTab === "4"));
+assert.equal(tabPanels.filter(panel => !panel.hidden).length, 3, "Relations is shown side by side; other lists stay hidden");
 
 class Element {
     constructor() { this.events = {}; this.children = []; this.style = {}; }
@@ -125,7 +214,7 @@ for (const name of ["stakeholder", "stakeholderrequirement", "systemrequirement"
     const page = await readFile(new URL(`../../main/webapp/js/pages/${name}-edit-page.js`, import.meta.url), "utf8");
     const html = await readFile(new URL(`../../main/resources/html-pages/${name}-edit.html`, import.meta.url), "utf8");
     assert.ok(page.includes("buildVersionUrl: ({id, version})"), `${name}: version API configured`);
-    assert.ok(page.includes('history-table.js?rev=history-compare-2026-10-15-3"'), `${name}: updated history component bypasses cached imports`);
+    assert.ok(page.includes('history-table.js?rev=diff-fixed-height-2026-10-16"'), `${name}: updated history component bypasses cached imports`);
     assert.ok(page.includes("    findDetailNode,"), `${name}: uses Basis Info detail node`);
     assert.ok(html.includes('scope="col">Select</th>'), `${name}: Select header`);
 }

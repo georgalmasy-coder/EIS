@@ -58,15 +58,15 @@ public class SystemRequirementInfo extends GenericXmlDocument {
         rootElement.addElement(entityLinks.getEntityLinkElements());
 
         EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
-        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId);
+        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId, version);
         rootElement.addElement(entityAttachments.getEntityAttachmentElements());
 
-        EntityRelationProvider entityRelationProvider = new EntityRelationProvider(webSession);
+        EntityRelationProvider entityRelationProvider = new EntityRelationProvider(webSession, entityType, entityId, version);
         EntityRelations entityRelations = entityRelationProvider.getEntityRelationsByEntityId(entityType, entityId);
         rootElement.addElement(entityRelations.getEntityRelationElements());
 
         if (type == EntityRequestType.EDIT_ENTITY) {
-            EditInterfaceElements editInterfaceElements = new EditInterfaceElements(webSession, entityType, entityId);
+            EditInterfaceElements editInterfaceElements = new EditInterfaceElements(webSession, entityType, entityId, version);
             getRoot().appendChild(editInterfaceElements.getEditInterfaceElements(getDoc()));
         }
 

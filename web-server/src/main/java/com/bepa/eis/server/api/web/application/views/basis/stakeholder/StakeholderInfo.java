@@ -56,7 +56,7 @@ public class StakeholderInfo extends GenericXmlDocument {
         rootElement.addElement(entityNotes.getEntityNoteElements());
 
         EntityAttachmentProvider entityAttachmentProvider = new EntityAttachmentProvider(webSession);
-        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId);
+        EntityAttachments entityAttachments = entityAttachmentProvider.getEntityAttachmentsByEntityId(entityType, entityId, version);
         rootElement.addElement(entityAttachments.getEntityAttachmentElements());
 
     }

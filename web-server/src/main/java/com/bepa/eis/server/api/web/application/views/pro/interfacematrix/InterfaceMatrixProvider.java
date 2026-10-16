@@ -1,5 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.pro.interfacematrix;
 
+import com.bepa.eis.server.api.web.application.views.common.EntityHistorySnapshot;
+
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityDataElement;
 import com.bepa.eis.common.enums.entity.EntityType;
@@ -205,6 +207,10 @@ public class InterfaceMatrixProvider extends GenericProvider {
     }
 
     public List<EditInterfaceRecord> getLatestInterfaceRecordsByFrom(Integer fromEntityId, EntityType entityType) throws SQLException {
+        return getInterfaceRecordsByFrom(fromEntityId, entityType, null);
+    }
+
+    public List<EditInterfaceRecord> getInterfaceRecordsByFrom(Integer fromEntityId, EntityType entityType, Integer version) throws SQLException {
         validateSession();
 
         if (fromEntityId == null || entityType == null) {
@@ -212,9 +218,16 @@ public class InterfaceMatrixProvider extends GenericProvider {
         }
 
         List<EditInterfaceRecord> records = new ArrayList<>();
+        var snapshot = version == null ? null : new EntityHistorySnapshot(entityType, fromEntityId, version);
+        String sql = SELECT_LATEST_INTERFACES_BY_FROM_SQL;
+        if (snapshot != null) {
+            sql = sql.replace("REVERSE_I.[Latest] = 1", snapshot.predicate("INTERFACES", "REVERSE_I", "ChangedDateTime", "EntityType", "FromEntityId", "ToEntityId"))
+                    .replace("I.[Latest] = 1", snapshot.predicate("INTERFACES", "I", "ChangedDateTime", "EntityType", "FromEntityId", "ToEntityId"))
+                    .replace("E.[Latest] = 1", snapshot.entityPredicate("E"));
+        }
 
         try (Connection connection = getDataSource().getConnection();
-            PreparedStatement ps = connection.prepareStatement(SELECT_LATEST_INTERFACES_BY_FROM_SQL)) {
+            PreparedStatement ps = connection.prepareStatement(sql)) {
             setInt(ps, entityType.getEntityCodeColumn().getId(), 1);
             setInt(ps, entityType.getEntityNameColumn().getId(), 2);
             setInt(ps, getWebSession().getCustomerId(), 3);
@@ -242,7 +255,7 @@ public class InterfaceMatrixProvider extends GenericProvider {
             }
 
             if (entityType == EntityType.SYSTEMS_BREAKDOWN && !records.isEmpty()) {
-                records = enrichWithSystemTrlIds(connection, records);
+                records = enrichWithSystemTrlIds(connection, records, snapshot);
             }
         }
 
@@ -251,9 +264,10 @@ public class InterfaceMatrixProvider extends GenericProvider {
 
     private List<EditInterfaceRecord> enrichWithSystemTrlIds(
             Connection connection,
-            List<EditInterfaceRecord> records
+            List<EditInterfaceRecord> records,
+            EntityHistorySnapshot snapshot
     ) throws SQLException {
-        Map<Integer, Integer> trlIdsByEntityId = getSystemTrlIdsByEntityId(connection);
+        Map<Integer, Integer> trlIdsByEntityId = getSystemTrlIdsByEntityId(connection, snapshot);
         List<EditInterfaceRecord> enrichedRecords = new ArrayList<>();
 
         for (EditInterfaceRecord record : records) {
@@ -275,10 +289,11 @@ public class InterfaceMatrixProvider extends GenericProvider {
         return enrichedRecords;
     }
 
-    private Map<Integer, Integer> getSystemTrlIdsByEntityId(Connection connection) throws SQLException {
+    private Map<Integer, Integer> getSystemTrlIdsByEntityId(Connection connection, EntityHistorySnapshot snapshot) throws SQLException {
         Map<Integer, Integer> trlIdsByEntityId = new HashMap<>();
 
-        try (PreparedStatement ps = connection.prepareStatement(SELECT_SYSTEM_TRL_BY_PROJECT_SQL)) {
+        try (PreparedStatement ps = connection.prepareStatement(snapshot == null ? SELECT_SYSTEM_TRL_BY_PROJECT_SQL
+                : SELECT_SYSTEM_TRL_BY_PROJECT_SQL.replace("E.[Latest] = 1", snapshot.entityPredicate("E")))) {
             setInt(ps, EntityDataElement.TRLID.getId(), 1);
             setInt(ps, getWebSession().getCustomerId(), 2);
             setInt(ps, getWebSession().getProjectId(), 3);

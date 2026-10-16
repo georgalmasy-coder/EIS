@@ -61,13 +61,18 @@ public class EntityAttachmentProvider extends GenericProvider {
     }
 
     public EntityAttachments getEntityAttachmentsByEntityId(EntityType entityType, Integer entityId) throws SQLException {
+        return getEntityAttachmentsByEntityId(entityType, entityId, null);
+    }
+
+    public EntityAttachments getEntityAttachmentsByEntityId(EntityType entityType, Integer entityId, Integer version) throws SQLException {
 
         EntityAttachments entityAttachments = new EntityAttachments(getWebSession());
 
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
 
             try (Connection con = getDataSource().getConnection();
-                 PreparedStatement ps = con.prepareStatement(GET_ENTITY_ATTACHMENTS_BY_ENTITY_ID_SQL)) {
+                 PreparedStatement ps = con.prepareStatement(GET_ENTITY_ATTACHMENTS_BY_ENTITY_ID_SQL
+                         .replace("AND E.Latest = 1", version == null ? "AND E.Latest = 1" : "AND E.Version = " + version))) {
 
                 setInt(ps, getWebSession().getCustomerId(), 1);
                 setInt(ps, getWebSession().getProjectId(), 2);

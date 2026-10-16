@@ -75,3 +75,20 @@
 .history-diff-value { white-space: pre-wrap; overflow-wrap: anywhere; }
 .history-diff-row.is-changed { background: #fff0bb; color: #302600; }
 .history-diff-marker { font-size: 12px; font-weight: normal; }
+.history-diff-version-columns { display: grid; grid-template-columns: repeat(var(--history-diff-columns, 2), minmax(0, 1fr)); }
+.history-diff-version-column { --history-diff-columns: 1; min-width: 0; border-right: 1px solid var(--app-border-default, #ccc); }
+.history-diff-version-column [role="tabpanel"][hidden] { display: none; }
+.history-diff-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 6px; min-height: 76px; align-content: flex-start; }
+.history-diff-tabs button { padding: 6px 8px; border: 1px solid var(--app-border-default, #ccc); border-radius: 6px; background: var(--app-surface-subtle-background, #f0f4ef); color: var(--app-text-primary, #222); font: inherit; font-size: 12px; cursor: pointer; }
+.history-diff-tabs button[aria-selected="true"] { background: var(--app-accent-primary, #0b3f31); color: #fff; }
+.history-diff-tabs button:focus-visible { outline: 2px solid var(--app-accent-primary, #0b3f31); outline-offset: 2px; }
+.history-diff-version-column .history-diff-section { margin-top: 0; }
+.history-diff-section { margin-top: 20px; }
+.history-diff-section > h3 { margin: 0; padding: 10px; font-size: 15px; background: var(--app-surface-subtle-background, #f0f4ef); border-bottom: 1px solid var(--app-border-default, #ccc); }
+.history-diff-tables { display: grid; grid-template-columns: repeat(var(--history-diff-columns, 2), minmax(0, 1fr)); }
+.history-diff-table-panel { min-width: 0; border-right: 1px solid var(--app-border-default, #ccc); overflow-x: auto; }
+.history-diff-table { width: 100%; min-width: 560px; table-layout: fixed; border-collapse: collapse; font-size: 12px; }
+.history-diff-table th, .history-diff-table td { padding: 8px 6px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--app-border-default, #ccc); overflow-wrap: anywhere; white-space: pre-wrap; }
+.history-diff-table th { background: var(--app-table-header-background, #f8fafc); }
+.history-diff-table .is-changed { background: #fff0bb; color: #302600; }
+.history-diff-table .edit-interfaces-pill { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--edit-interfaces-pill-color, var(--app-border-default)); background: color-mix(in srgb, var(--edit-interfaces-pill-color, var(--app-surface-background)) 22%, transparent); font-weight: 700; line-height: 1.2; }

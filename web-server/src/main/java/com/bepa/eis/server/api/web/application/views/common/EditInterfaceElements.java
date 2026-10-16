@@ -18,11 +18,17 @@ public class EditInterfaceElements {
     private final WebSession webSession;
     private final EntityType entityType;
     private final Integer entityId;
+    private final Integer version;
 
     public EditInterfaceElements(WebSession webSession, EntityType entityType, Integer entityId) {
+        this(webSession, entityType, entityId, null);
+    }
+
+    public EditInterfaceElements(WebSession webSession, EntityType entityType, Integer entityId, Integer version) {
         this.webSession = webSession;
         this.entityType = entityType;
         this.entityId = entityId;
+        this.version = version;
     }
 
     public Element getEditInterfaceElements(Document doc) throws SQLException {
@@ -53,11 +59,16 @@ public class EditInterfaceElements {
 
         InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
         List<InterfaceMatrixProvider.EditInterfaceRecord> records =
-                interfaceMatrixProvider.getLatestInterfaceRecordsByFrom(entityId, entityType);
+                interfaceMatrixProvider.getInterfaceRecordsByFrom(entityId, entityType, version);
         if (records.isEmpty()) {
             return;
         }
         Map<Integer, Integer> positions = InterfaceMatrixEntityOrder.getPositions(webSession, entityType);
+        if (version != null) {
+            // Keep historical interfaces even when a target is no longer in the current matrix.
+            positions.putIfAbsent(entityId, positions.size());
+            for (var record : records) positions.putIfAbsent(record.toEntityId(), positions.size());
+        }
         appendInterfaceRows(doc, leftInterfaces, rightInterfaces, entityId, records, positions);
     }
 

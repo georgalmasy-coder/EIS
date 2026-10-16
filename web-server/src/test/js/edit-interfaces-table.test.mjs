@@ -4,7 +4,7 @@ import vm from "node:vm";
 
 const source = (await readFile(new URL("../../main/webapp/js/components/edit-interfaces-table.js", import.meta.url), "utf8"))
     .replace(/^import[^\n]+;\r?\n/gm, "")
-    .replace("export function", "function");
+    .replaceAll("export function", "function");
 
 // The entry module must receive PageViewer's build version too. A fixed ?rev on
 // the entry module otherwise keeps importing the old component URL from cache.
@@ -93,7 +93,9 @@ function load(type, leftRows = [left], rightRows = [right]) {
             FunctionalCode: "A", FunctionalName: "Current"},
         querySelector: () => true
     };
-    component.loadFromDocument({querySelector: selector => selector === "editInterfaces" ? root : detail});
+    const doc = {querySelector: selector => selector === "editInterfaces" ? root : detail};
+    component.loadFromDocument(doc);
+    return doc;
 }
 
 function doubleClick(row) {
@@ -101,7 +103,13 @@ function doubleClick(row) {
 }
 
 for (const type of ["2", "5", "6", "8", "9"]) {
-    load(type);
+    const doc = load(type);
+    const comparison = sandbox.getInterfaceComparisonTables(doc);
+    assert.equal(comparison.length, 2);
+    assert.equal(comparison[0].columns.length, type === "2" ? 7 : 5);
+    assert.equal(comparison[1].columns[0].label, "ID");
+    assert.equal(comparison[1].rows[0].key, "10:30");
+    assert.equal(comparison[0].rows[0].key, "10:20");
     const leftBody = nodes.get("interfacesBody");
     const rightBody = nodes.get("rightInterfacesBody");
     assert.equal(leftBody.children.length, 1);

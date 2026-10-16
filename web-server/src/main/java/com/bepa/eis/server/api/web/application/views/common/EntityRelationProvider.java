@@ -151,7 +151,22 @@ public class EntityRelationProvider extends GenericProvider {
                     ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public EntityRelationProvider(WebSession webSession) {
+        this(webSession, null, null, null);
+    }
+
+    private final EntityHistorySnapshot snapshot;
+
+    public EntityRelationProvider(WebSession webSession, EntityType entityType, Integer entityId, Integer version) {
         super(webSession);
+        snapshot = version != null && entityId != null ? new EntityHistorySnapshot(entityType, entityId, version) : null;
+    }
+
+    private String historicalSql(String sql) {
+        if (snapshot == null) return sql;
+        return sql.replace("ER.Latest = 1", snapshot.predicate("ENTITY_RELATIONS", "ER", "CreatedTime",
+                        "EntityType", "EntityId", "RelatedEntityType", "RelatedEntityId"))
+                .replace("E.Latest = 1", snapshot.entityPredicate("E"))
+                .replace("E2.Latest = 1", snapshot.entityPredicate("E2"));
     }
 
     public EntityRelations getEntityRelationsByEntityId(EntityType currEntityType, Integer currEntityId) throws SQLException {
@@ -193,7 +208,7 @@ public class EntityRelationProvider extends GenericProvider {
 
     private void findRelationsToOtherEntities(String sql, EntityRelations entityRelations, EntityType entityType, Integer currEntityId) throws SQLException {
         try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(historicalSql(sql))) {
 
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
@@ -286,7 +301,7 @@ public class EntityRelationProvider extends GenericProvider {
     private String getEntityInfo(EntityType relatedEntityType,  RelatedEntityId relatedEntityId, EntityDataElement dataElement) throws SQLException {
         String value = "";
         try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(GET_ENTITY_INFO_BY_ENTITY_ID_SQL)) {
+             PreparedStatement ps = con.prepareStatement(historicalSql(GET_ENTITY_INFO_BY_ENTITY_ID_SQL))) {
 
             setInt(ps, getWebSession().getCustomerId(), 1);
             setInt(ps, getWebSession().getProjectId(), 2);
