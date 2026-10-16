@@ -1,5 +1,6 @@
 import {closeDialogElement} from "../core/dom.js";
 import {getEditDialogMessageSource} from "./edit-dialog-bridge.js";
+import {dialogGeometryExcluded, enableEditDialogGeometry} from "./dialog-geometry.js";
 
 let dialogSequence = 0;
 const dialogRegistry = new Map();
@@ -102,6 +103,7 @@ function closeDialogRecord(record, reason, payload = {}) {
     }
 
     record.closing = true;
+    record.cleanupGeometry?.();
     dialogRegistry.delete(record.dialogId);
 
     if (record.dialog?.open) {
@@ -155,6 +157,8 @@ function buildDialogUrl(options, dialogId) {
 }
 
 function navigateDialogRecord(record, options) {
+    record.cleanupGeometry?.();
+    record.cleanupGeometry = null;
     record.baseOptions = {
         ...options,
         dialogId: record.dialogId
@@ -229,6 +233,15 @@ export function openEditDialog(options = {}) {
     };
 
     dialogRegistry.set(dialogId, record);
+
+    iframe.addEventListener("load", () => {
+        if (record.closing) return;
+        record.cleanupGeometry?.();
+        record.cleanupGeometry = null;
+        if (!dialogGeometryExcluded(dialog) && !dialogGeometryExcluded(iframe.contentDocument.documentElement)) {
+            record.cleanupGeometry = enableEditDialogGeometry(dialog, iframe);
+        }
+    });
 
     dialog.addEventListener("cancel", (event) => {
         event.preventDefault();

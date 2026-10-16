@@ -1,6 +1,33 @@
 import {fieldDisplayValue, fieldHeader, fieldVisible, isHiddenField} from "../core/field-display.js";
 import {escapeHtml} from "../core/html.js";
 import {hasXmlParseError} from "../core/xml.js";
+import {enableDialogGeometry} from "./dialog-geometry.js";
+
+function getDiffHostDocument() {
+    let view = window;
+    // A native dialog cannot escape its iframe, even with position: fixed.
+    while (view.frameElement?.matches(".eis-edit-dialog-frame")) {
+        view = view.parent;
+    }
+    return view.document;
+}
+
+function ensureDiffStyles(host) {
+    const href = new URL("../../css/history-table.css", import.meta.url).href;
+    const existing = [...host.querySelectorAll('link[rel="stylesheet"]')]
+        .find(link => new URL(link.href).pathname === new URL(href).pathname);
+    if (existing?.sheet) return Promise.resolve();
+    const link = existing || host.createElement("link");
+    return new Promise((resolve, reject) => {
+        link.addEventListener("load", resolve, {once: true});
+        link.addEventListener("error", () => reject(new Error("Could not load comparison styles.")), {once: true});
+        if (!existing) {
+            link.rel = "stylesheet";
+            link.href = href;
+            host.head.appendChild(link);
+        }
+    });
+}
 
 export function getComparisonFields(detail) {
     if (!detail) throw new Error("No entity details returned.");
@@ -35,9 +62,14 @@ export function renderVersionHeadings(versions, historyRows = []) {
     }).join("");
 }
 
-export function openHistoryDiff({versions, historyRows, id, buildVersionUrl, findDetailNode}) {
-    const dialog = document.createElement("dialog");
+export async function openHistoryDiff({versions, historyRows, id, buildVersionUrl, findDetailNode}) {
+    const host = getDiffHostDocument();
+    if (host !== document) await ensureDiffStyles(host);
+    // The editor may have closed or navigated while the stylesheet was loading.
+    if (!window.frameElement?.isConnected && host !== document) return;
+    const dialog = host.createElement("dialog");
     dialog.className = "history-diff-dialog";
+    dialog.setAttribute("data-dialog-geometry", "manual");
     dialog.style.setProperty("--history-diff-columns", String(versions.length));
     dialog.setAttribute("aria-label", "Diff");
     dialog.innerHTML = `
@@ -46,13 +78,39 @@ export function openHistoryDiff({versions, historyRows, id, buildVersionUrl, fin
         <div class="history-diff-headings">${renderVersionHeadings(versions, historyRows)}</div>
         <div class="history-diff-content" aria-busy="true"><p role="status">Loading versions...</p></div>`;
     const controller = new AbortController();
-    dialog.querySelector("button").addEventListener("click", () => dialog.close());
-    dialog.addEventListener("close", () => {
+    const editor = window.frameElement?.closest("dialog");
+    let cleanupGeometry;
+    let disposed = false;
+    const dispose = () => {
+        if (disposed) return;
+        disposed = true;
         controller.abort();
+        cleanupGeometry?.();
+        window.removeEventListener("pagehide", dismiss);
+        editor?.removeEventListener("close", dismiss);
         dialog.remove();
-    }, {once: true});
-    document.body.appendChild(dialog);
+    };
+    const dismiss = () => {
+        if (dialog.open) dialog.close();
+        // Remove synchronously: the source iframe's event loop may be going away.
+        dispose();
+    };
+    dialog.querySelector("button").addEventListener("click", dismiss);
+    dialog.addEventListener("close", dispose, {once: true});
+    if (host !== document) {
+        // Preserve the editor's original opening width and height limit.
+        const measure = dialog.cloneNode(true);
+        Object.assign(measure.style, {display: "block", visibility: "hidden", position: "fixed"});
+        document.body.appendChild(measure);
+        dialog.style.width = `${measure.getBoundingClientRect().width}px`;
+        dialog.style.maxHeight = window.getComputedStyle(measure).maxHeight;
+        measure.remove();
+        window.addEventListener("pagehide", dismiss);
+        editor?.addEventListener("close", dismiss);
+    }
+    host.body.appendChild(dialog);
     dialog.showModal();
+    cleanupGeometry = enableDialogGeometry(dialog);
     const content = dialog.querySelector(".history-diff-content");
     Promise.all(versions.map(async version => {
         const url = buildVersionUrl({id, version});
@@ -72,4 +130,5 @@ export function openHistoryDiff({versions, historyRows, id, buildVersionUrl, fin
         if (controller.signal.aborted) return;
         content.innerHTML = `<p role="alert">Could not load versions. ${escapeHtml(error.message)}</p>`;
     }).finally(() => content.setAttribute("aria-busy", "false"));
+    return dialog;
 }

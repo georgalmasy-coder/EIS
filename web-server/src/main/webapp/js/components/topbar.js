@@ -1,6 +1,7 @@
 import {cssEscape} from "../core/css.js";
 import {getDirectChild} from "../core/xml.js";
 import {initHelpDialog, openHelpDialogForPage} from "./help-dialog.js";
+import {installDialogGeometry} from "./dialog-geometry.js";
 
 let mountedTopbarSearch = null;
 
@@ -11,6 +12,7 @@ const TOPBAR_FIELDS = [
 ];
 
 export function mountTopbar(root = document) {
+    installDialogGeometry();
     ensureTopbarSearchMarkup(root);
     ensureHelpDialogMarkup(root);
     initHelpDialog();

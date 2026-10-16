@@ -3,7 +3,7 @@ import {parseDateTime} from "../core/date.js";
 import {escapeHtml} from "../core/html.js";
 import {isTruthy} from "../core/utils.js";
 import {getDirectText, textOf} from "../core/xml.js";
-import {openHistoryDiff} from "./history-diff-dialog.js?rev=three-versions-2026-10-15";
+import {openHistoryDiff} from "./history-diff-dialog.js?rev=viewport-dialog-2026-10-16";
 
 const DEFAULT_CONFIG = {
     bodyId: "historyBody",
@@ -13,7 +13,7 @@ const DEFAULT_CONFIG = {
     sortKeys: ["changedDateTime", "changedByUserId", "version"],
     indicatorPrefix: "si-h-",
     defaultSortKey: "changedDateTime",
-    defaultSortDir: "asc",
+    defaultSortDir: "desc",
     editPageUrl: "",
     defaultReturnUrl: "",
     readOnlyMode: "edit-version",

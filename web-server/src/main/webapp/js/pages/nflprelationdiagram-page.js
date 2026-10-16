@@ -123,6 +123,7 @@ const state = {
     logicalStructures: [],
     physicalStructures: [],
     relations: [],
+    relationNeighbors: new Map(),
     requirementsByInternalId: new Map(),
     columnVisibility: {
         stakeholder: true,
@@ -432,6 +433,13 @@ function setRelationDiagramState(diagram) {
     state.logicalStructures = diagram.logicalStructures;
     state.physicalStructures = diagram.physicalStructures;
     state.relations = diagram.relations;
+    state.relationNeighbors = new Map();
+    for (const {from, to} of state.relations) {
+        if (!state.relationNeighbors.has(from)) state.relationNeighbors.set(from, new Set());
+        if (!state.relationNeighbors.has(to)) state.relationNeighbors.set(to, new Set());
+        state.relationNeighbors.get(from).add(to);
+        state.relationNeighbors.get(to).add(from);
+    }
     state.focusedInternalId = null;
     state.selectedInternalId = null;
     state.hoverInternalId = null;
@@ -645,11 +653,18 @@ function applyFilters() {
     });
 }
 
+// Traverse the complete graph regardless of relation direction or architecture group.
+// Hover and persistent focus deliberately use this same selection.
 function getFocusedVisibleIds(internalId) {
     const visibleIds = new Set([internalId]);
+    const pending = [internalId];
 
-    for (const relatedId of getRelatedRequirementIds(internalId)) {
-        visibleIds.add(relatedId);
+    for (let index = 0; index < pending.length; index++) {
+        for (const relatedId of state.relationNeighbors.get(pending[index]) || []) {
+            if (visibleIds.has(relatedId)) continue;
+            visibleIds.add(relatedId);
+            pending.push(relatedId);
+        }
     }
 
     return visibleIds;
@@ -1059,12 +1074,12 @@ function buildCurvePath(points) {
 
 function updateHighlight() {
     const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
-    const relatedIds = activeInternalId ? getRelatedRequirementIds(activeInternalId) : new Set();
+    const relatedIds = activeInternalId ? getFocusedVisibleIds(activeInternalId) : new Set();
 
     document.querySelectorAll(".relationdiagram-requirement-card").forEach((card) => {
         const internalId = card.dataset.internalId;
         const isSelected = internalId === activeInternalId;
-        const isRelated = relatedIds.has(internalId);
+        const isRelated = !isSelected && relatedIds.has(internalId);
         const shouldMute = Boolean(activeInternalId) && !isSelected && !isRelated;
 
         card.classList.toggle("is-selected", isSelected);
@@ -1076,7 +1091,7 @@ function updateHighlight() {
         const from = line.dataset.from;
         const to = line.dataset.to;
         const isActive = Boolean(activeInternalId)
-            && (from === activeInternalId || to === activeInternalId);
+            && relatedIds.has(from) && relatedIds.has(to);
 
         line.classList.toggle("is-active", isActive);
         line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);
@@ -1216,7 +1231,7 @@ function getRelatedRequirements(internalId, predicate = () => true) {
 }
 
 function hasAnyRelation(internalId) {
-    return state.relations.some((relation) => relation.from === internalId || relation.to === internalId);
+    return state.relationNeighbors.has(internalId);
 }
 
 function requirementMatchesSearch(requirement, searchText) {

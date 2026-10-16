@@ -507,6 +507,25 @@ body.baseline-document {
     line-height: 1.4;
 }
 
+/* Let the description absorb extra height while the footer stays at the bottom. */
+.baseline-dialog[data-dialog-resized] .baseline-form {
+    margin: 0;
+}
+
+.baseline-dialog[data-dialog-resized] .baseline-field-grid {
+    flex: 1 1 auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+}
+
+.baseline-dialog[data-dialog-resized] .baseline-field-grid label:has(textarea) {
+    grid-template-rows: auto minmax(150px, 1fr);
+}
+
+.baseline-dialog[data-dialog-resized] .baseline-field-grid textarea {
+    height: 100%;
+}
+
 .baseline-field-grid input::placeholder,
 .baseline-field-grid textarea::placeholder {
     color: var(--app-text-secondary);

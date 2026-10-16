@@ -2,6 +2,9 @@ import {initMenu} from "../components/menu.js";
 import {setText} from "../core/dom.js";
 import {formatDateTimeForDisplay} from "../core/format.js";
 import {fetchText} from "../core/http.js";
+import {installDialogGeometry} from "../components/dialog-geometry.js";
+
+installDialogGeometry();
 
 const viewHost = document.getElementById("dashboardView");
 const activeViewTitle = document.getElementById("activeViewTitle");

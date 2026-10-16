@@ -594,7 +594,7 @@ body.relationdiagram-document {
 
 .relationdiagram-dialog {
     width: min(720px, calc(100vw - 2rem));
-    border: 1px solid var(--relationdiagram-border-color);
+    border: 1px solid var(--app-border-default);
     border-radius: 0.6rem;
     padding: 0;
     color: var(--app-text-primary);
@@ -610,14 +610,14 @@ body.relationdiagram-document {
     flex-direction: column;
     max-height: min(760px, calc(100vh - 2rem));
     margin: 0;
-    background: #ffffff;
+    background: var(--app-surface-background);
 }
 
 .relationdiagram-dialog-head {
     flex: 0 0 auto;
     padding: 0.9rem 1rem;
-    border-bottom: 1px solid var(--relationdiagram-border-color);
-    background: var(--relationdiagram-header-bg);
+    border-bottom: 1px solid var(--app-border-default);
+    background: var(--app-table-header-background);
 }
 
 .relationdiagram-dialog-head h3 {
@@ -638,7 +638,7 @@ body.relationdiagram-document {
 
 .relationdiagram-dialog-label {
     margin-bottom: 0.25rem;
-    color: var(--relationdiagram-muted-text);
+    color: var(--app-text-secondary);
     font-size: 0.82rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -653,9 +653,9 @@ body.relationdiagram-document {
 
 .relationdiagram-dialog-description {
     padding: 0.65rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--app-border-default);
     border-radius: 0.4rem;
-    background: #f8fafc;
+    background: var(--app-surface-subtle-background);
 }
 
 .relationdiagram-dialog-line {
@@ -676,7 +676,7 @@ body.relationdiagram-document {
 
 .relationdiagram-dialog-line-label {
     font-weight: 700;
-    color: #526273;
+    color: var(--app-text-primary);
 }
 
 .relationdiagram-dialog-line-value {
@@ -699,8 +699,8 @@ body.relationdiagram-document {
     gap: 0.5rem;
     flex: 0 0 auto;
     padding: 0.75rem 1rem;
-    border-top: 1px solid var(--relationdiagram-border-color);
-    background: #f8fafc;
+    border-top: 1px solid var(--app-border-default);
+    background: var(--app-table-header-background);
 }
 
 .relationdiagram-dialog-actions {
