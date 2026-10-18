@@ -1,4 +1,5 @@
 import {initMenu} from "../components/menu.js";
+import {installInterfaceFlowArrows} from "../components/interface-flow-arrows.js?rev=2";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -45,6 +46,7 @@ function initializePageShell() {
 }
 
 function initializeEvents() {
+    installInterfaceFlowArrows(document.getElementById("interfacesTableBody"));
     initializeDialogEvents();
     initializeContextMenuEvents();
     initializeFilterEvents();
