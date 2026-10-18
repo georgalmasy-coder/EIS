@@ -1,3 +1,4 @@
+import {createEditDirtyState} from "../components/edit-dirty-state.js";
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
@@ -37,10 +38,12 @@ const MODES = {
 };
 
 const notesTable = createNotesTable({
+    onChange: () => dirtyState.update(),
     onAfterRender: initializeResizableEditTables
 });
 
 const attachmentsTable = createAttachmentsTable({
+    onChange: () => dirtyState.update(),
     onAfterRender: initializeResizableEditTables
 });
 
@@ -59,6 +62,12 @@ const state = {
         userName: "—"
     }
 };
+
+const dirtyState = createEditDirtyState({
+    buildPayload: buildSavePayload,
+    isReadOnly: () => state.readOnly,
+    isNew: () => state.mode === MODES.create
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     start();
@@ -137,6 +146,8 @@ function initializeRouteState() {
 }
 
 function initializeEvents() {
+    dirtyState.bind();
+
     document.getElementById("btnCancel")?.addEventListener("click", () => {
         returnToPreviousPage();
     });
@@ -192,6 +203,7 @@ async function loadDetail() {
 
         applyTopPanel();
         renderAllFromDoc(xmlDocument);
+        dirtyState.reset();
         applyModeUi();
         initializeResizableEditTables();
 
@@ -233,7 +245,7 @@ function applyModeUi() {
 
     if (saveButton) {
         saveButton.hidden = state.modal && state.readOnly;
-        saveButton.disabled = state.readOnly;
+        dirtyState.update();
         saveButton.title = state.readOnly ? "Save is disabled for historical versions." : "";
     }
 
@@ -498,7 +510,7 @@ function normalizeDateTimeForInput(value) {
 }
 
 async function saveCurrentProject() {
-    if (state.readOnly) {
+    if (!dirtyState.canSave()) {
         return;
     }
 
@@ -511,6 +523,8 @@ async function saveCurrentProject() {
         focusFirstInvalidField(document.getElementById("basisInfoFields") || document);
         return;
     }
+
+    dirtyState.setSaving(true);
 
     try {
         setText("dlgStatus", "Saving…");
@@ -548,6 +562,8 @@ async function saveCurrentProject() {
         console.error("Failed to save project", error);
         setText("dlgStatus", `Save failed. ${error.message}`);
         setText("loadStatus", "Error");
+    } finally {
+        dirtyState.setSaving(false);
     }
 }
 

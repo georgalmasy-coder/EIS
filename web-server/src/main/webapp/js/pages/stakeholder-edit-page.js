@@ -1,3 +1,4 @@
+import {createEditDirtyState} from "../components/edit-dirty-state.js";
 import {initMenu} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {initTabs} from "../components/tabs.js";
@@ -41,8 +42,12 @@ const historyTable = createHistoryTable({
     defaultReturnUrl: DEFAULT_RETURN_URL
 });
 
-const notesTable = createNotesTable();
-const attachmentsTable = createAttachmentsTable();
+const notesTable = createNotesTable({
+    onChange: () => dirtyState.update()
+});
+const attachmentsTable = createAttachmentsTable({
+    onChange: () => dirtyState.update()
+});
 
 const MODES = {
     edit: "edit",
@@ -92,6 +97,12 @@ const state = {
         userName: "-"
     }
 };
+
+const dirtyState = createEditDirtyState({
+    buildPayload: buildSavePayload,
+    isReadOnly: () => state.readOnly,
+    isNew: () => state.mode === MODES.create
+});
 
 document.addEventListener("DOMContentLoaded", start);
 
@@ -152,6 +163,8 @@ function initializeRouteState() {
 }
 
 function initializeEvents() {
+    dirtyState.bind();
+
     document.getElementById("btnCancel")?.addEventListener("click", returnToPreviousPage);
     document.getElementById("btnSave")?.addEventListener("click", saveCurrentStakeholder);
 
@@ -250,6 +263,7 @@ async function loadDetail() {
         applyTopPanel();
         renderAllFromDoc(xmlDocument);
         applyStakeholderPhoneToForm();
+        dirtyState.reset();
         applyModeUi();
 
         setText("loadStatus", "Loaded", "-");
@@ -319,7 +333,7 @@ function applyModeUi() {
 
     if (saveButton) {
         saveButton.hidden = state.readOnly;
-        saveButton.disabled = state.readOnly;
+        dirtyState.update();
         saveButton.title = state.readOnly ? "Save is disabled for historical versions." : "";
     }
 
@@ -606,7 +620,7 @@ function renderPhoneField(field, value, escapedName, escapedLabel, requiredStar,
 }
 
 async function saveCurrentStakeholder() {
-    if (state.readOnly) {
+    if (!dirtyState.canSave()) {
         return;
     }
 
@@ -619,6 +633,8 @@ async function saveCurrentStakeholder() {
         focusFirstInvalidField(document.getElementById("basisInfoFields") || document);
         return;
     }
+
+    dirtyState.setSaving(true);
 
     try {
         setText("dlgStatus", "Saving...");
@@ -656,6 +672,8 @@ async function saveCurrentStakeholder() {
         console.error("Failed to save stakeholder", error);
         setText("dlgStatus", `Save failed. ${error.message}`);
         setText("loadStatus", "Error");
+    } finally {
+        dirtyState.setSaving(false);
     }
 }
 
@@ -809,7 +827,10 @@ function applyStakeholderPhoneToForm() {
         }
 
         initPhoneField(input, {
-            onCountryChange: () => updatePhoneHelp(container),
+            onCountryChange: () => {
+                updatePhoneHelp(container);
+                dirtyState.update();
+            },
             onInput: () => updatePhoneHelp(container)
         });
         updatePhoneHelp(container);

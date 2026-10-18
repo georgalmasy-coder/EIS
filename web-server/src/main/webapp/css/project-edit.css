@@ -293,7 +293,8 @@
     flex: 0 0 auto;
 }
 
-.project-edit-readonly #btnSave {
+.project-edit-readonly #btnSave,
+.project-edit-footer button:disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }

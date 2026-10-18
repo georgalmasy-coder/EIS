@@ -318,6 +318,11 @@ body.stakeholder-edit-document{
     box-shadow: 0 0 0 3px rgba(96,165,250,.18);
 }
 
+.stakeholder-edit-footer button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
 .page-field input[readonly],
 .page-field textarea[readonly],
 .page-field select:disabled,
