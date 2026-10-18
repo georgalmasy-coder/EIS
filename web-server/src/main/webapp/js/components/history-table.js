@@ -3,7 +3,7 @@ import {parseDateTime} from "../core/date.js";
 import {escapeHtml} from "../core/html.js";
 import {isTruthy} from "../core/utils.js";
 import {getDirectText, textOf} from "../core/xml.js";
-import {openHistoryDiff} from "./history-diff-dialog.js?rev=diff-fixed-height-2026-10-16";
+import {openHistoryDiff} from "./history-diff-dialog.js?rev=diff-interface-text-2026-10-16";
 
 const DEFAULT_CONFIG = {
     bodyId: "historyBody",

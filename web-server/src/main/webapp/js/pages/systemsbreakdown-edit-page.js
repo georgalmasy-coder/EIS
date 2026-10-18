@@ -10,7 +10,7 @@ import {
     requestHistoricalEditDialog
 } from "../components/edit-dialog-page.js";
 import {applyTopPanel as applyPageHeader, parseTopPanel as parsePageTopPanel} from "../core/page-header.js";
-import {createHistoryTable} from "../components/history-table.js?rev=diff-fixed-height-2026-10-16";
+import {createHistoryTable} from "../components/history-table.js?rev=diff-interface-text-2026-10-16";
 import {createNotesTable} from "../components/notes-table.js";
 import {createAttachmentsTable} from "../components/attachments-table.js";
 import {createLinksTable} from "../components/links-table.js";

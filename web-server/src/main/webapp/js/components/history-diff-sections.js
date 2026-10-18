@@ -34,9 +34,7 @@ export function getComparisonSections(doc, enabledSections) {
         ["Type", "ID", "Name", "Relation", "Created By", "Created"],
         parseEntityRelationsFromDoc(doc).filter(row => !row.isDeleted), row => `${row.relatedEntityType}:${row.relatedEntityId}`,
         row => [row.relatedEntityTypeName, row.relatedEntityCode, row.relatedEntityName, row.relationTypeName, createdBy(row), createdTime(row)]));
-    if (enabledSections.includes("Interfaces")) sections.push(...getInterfaceComparisonTables(doc).map(section => ({
-        ...section, notice: "Historical interface removals cannot always be dated because existing data does not store removal times."
-    })));
+    if (enabledSections.includes("Interfaces")) sections.push(...getInterfaceComparisonTables(doc));
     return sections;
 }
 
@@ -65,7 +63,6 @@ export function renderTableComparison(tables, sectionIndex, selectedVersion = nu
             return groups;
         }, []).map(group => `<th colspan="${group.count}">${escapeHtml(group.label)}</th>`).join("")}</tr>` : "";
     return `<section class="history-diff-section"><h3>${escapeHtml(tables[0].title)}</h3>
-        ${tables[0].notice ? `<p class="history-diff-legend">${escapeHtml(tables[0].notice)}</p>` : ""}
         <div class="history-diff-tables">${tables.map((table, versionIndex) => selectedVersion !== null && versionIndex !== selectedVersion ? "" : `
         <div class="history-diff-table-panel"><table class="history-diff-table" aria-label="${escapeHtml(table.title)} — version column ${versionIndex + 1}">
         <thead>${groupHeaders}<tr data-diff-row="${sectionIndex}-header">${columns.map(column => `<th scope="col">${escapeHtml(column.label)}</th>`).join("")}</tr></thead>

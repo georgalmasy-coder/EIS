@@ -214,7 +214,7 @@ for (const name of ["stakeholder", "stakeholderrequirement", "systemrequirement"
     const page = await readFile(new URL(`../../main/webapp/js/pages/${name}-edit-page.js`, import.meta.url), "utf8");
     const html = await readFile(new URL(`../../main/resources/html-pages/${name}-edit.html`, import.meta.url), "utf8");
     assert.ok(page.includes("buildVersionUrl: ({id, version})"), `${name}: version API configured`);
-    assert.ok(page.includes('history-table.js?rev=diff-fixed-height-2026-10-16"'), `${name}: updated history component bypasses cached imports`);
+    assert.ok(page.includes('history-table.js?rev=diff-interface-text-2026-10-16"'), `${name}: updated history component bypasses cached imports`);
     assert.ok(page.includes("    findDetailNode,"), `${name}: uses Basis Info detail node`);
     assert.ok(html.includes('scope="col">Select</th>'), `${name}: Select header`);
 }

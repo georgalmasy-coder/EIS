@@ -2,7 +2,7 @@ import {fieldDisplayValue, fieldHeader, fieldVisible, isHiddenField} from "../co
 import {escapeHtml} from "../core/html.js";
 import {hasXmlParseError} from "../core/xml.js";
 import {enableDialogGeometry} from "./dialog-geometry.js";
-import {getComparisonSections, renderTableComparison, alignComparisonRows, hasTableChanges} from "./history-diff-sections.js?rev=diff-tab-changes-2026-10-16";
+import {getComparisonSections, renderTableComparison, alignComparisonRows, hasTableChanges} from "./history-diff-sections.js?rev=diff-interface-text-2026-10-16";
 
 function getDiffHostDocument() {
     let view = window;
