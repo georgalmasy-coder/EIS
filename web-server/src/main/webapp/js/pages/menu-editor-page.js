@@ -1,3 +1,5 @@
+import {createExportDialog} from "../components/export-dialog.js";
+import {createImportDialog} from "../components/import-dialog.js";
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu} from "../components/menu.js";
 import {mountTopbar} from "../components/topbar.js";
@@ -63,6 +65,18 @@ function collectElements() {
 }
 
 function bindEvents() {
+    createExportDialog({
+        dialogId: "menuExportDialog",
+        openButtonId: "btnExportMenu",
+        exportUrl: API_URL + "?cmd=export",
+        baseFileName: "Menu Editor"
+    }).bind();
+    createImportDialog({
+        dialogId: "menuImportDialog",
+        openButtonId: "btnImportMenu",
+        importUrl: API_URL + "?cmd=import",
+        onImportComplete: () => loadMenuData(true)
+    }).bind();
     els.btnRefreshMenu?.addEventListener("click", () => loadMenuData(true));
     els.btnAddParentMenuItem?.addEventListener("click", () => openMenuDialog("create", null, null));
     els.btnSaveMenu?.addEventListener("click", saveMenuItem);

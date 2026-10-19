@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="../../css/topbar.css" />
     <link rel="stylesheet" href="../../css/help-dialog.css" />
     <link rel="stylesheet" href="../../css/menu-editor.css" />
+    <link rel="stylesheet" href="../../css/export-dialog.css" />
+    <link rel="stylesheet" href="../../css/import-dialog.css" />
 </head>
 
 <body class="menu-editor-document">
@@ -49,6 +51,32 @@
                 </div>
 
                 <div class="menu-editor-header-actions" role="group" aria-label="Menu actions">
+                    <button
+                            id="btnImportMenu"
+                            class="menu-editor-icon-button"
+                            type="button"
+                            aria-label="Import menus"
+                            title="Import menus"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21a1 1 0 0 1-1-1v-9.59l-2.3 2.3a1 1 0 1 1-1.4-1.42l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 1 1-1.4 1.42l-2.3-2.3V20a1 1 0 0 1-1 1z"></path>
+                            <path d="M5 5a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                            id="btnExportMenu"
+                            class="menu-editor-icon-button"
+                            type="button"
+                            aria-label="Export menus"
+                            title="Export menus"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1z"></path>
+                            <path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"></path>
+                        </svg>
+                    </button>
+
                     <button
                             id="btnRefreshMenu"
                             class="menu-editor-icon-button"
@@ -200,6 +228,74 @@
         <div class="dlg-footer menu-editor-dialog-footer">
             <button id="btnSaveMenu" class="primary" type="button">Save</button>
             <button id="btnCancelMenu" type="button">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="menuExportDialog" class="export-dialog" aria-label="Export menu dialog">
+    <form id="menuExportForm" method="dialog">
+        <div class="export-dialog-shell">
+            <div class="export-dialog-head">
+                <h3>Export Menus</h3>
+            </div>
+
+            <p class="export-dialog-description">
+                Export all menu items and their hierarchy to an XML file.
+            </p>
+
+            <section class="export-dialog-section" aria-labelledby="menu-export-format-title">
+                <div class="export-dialog-section-title" id="menu-export-format-title">Format</div>
+
+                <div class="export-format-grid">
+                    <label class="export-format-option">
+                        <input type="radio" name="menuExportFormat" data-export-format="xml" value="xml" checked>
+                        <span class="export-format-label">
+                            <strong>XML</strong>
+                            <span>Structured database transfer format</span>
+                        </span>
+                    </label>
+                </div>
+            </section>
+        </div>
+
+        <div class="export-dialog-footer">
+            <button type="button" class="export-primary-btn" data-export-action="export">Export</button>
+            <button type="button" class="export-secondary-btn" data-export-action="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="menuImportDialog" class="import-dialog" aria-label="Import menu dialog">
+    <form id="menuImportForm" method="dialog" enctype="multipart/form-data">
+        <div class="import-dialog-shell">
+            <div class="import-dialog-head">
+                <h3>Import Menus</h3>
+            </div>
+
+            <p class="import-dialog-description">
+                Select an XML file exported from Menu Editor. Matching MenuIds are updated; missing IDs are created. Other menu items are kept.
+            </p>
+
+            <section class="import-dialog-section" aria-labelledby="menu-import-file-title">
+                <div class="import-dialog-section-title" id="menu-import-file-title">Import file</div>
+
+                <input id="menuImportFileInput" class="import-file-native-input" type="file" accept=".xml" data-import-file>
+
+                <label class="import-file-picker" for="menuImportFileInput">
+                    <span class="import-file-picker-icon" aria-hidden="true">&#128196;</span>
+                    <span class="import-file-picker-text">
+                        <strong>Choose file</strong>
+                        <span>XML</span>
+                    </span>
+                </label>
+
+                <div class="import-selected-file" data-import-file-info>No file selected.</div>
+            </section>
+        </div>
+
+        <div class="import-dialog-footer">
+            <button type="button" class="import-primary-btn" data-import-action="import" disabled>Import</button>
+            <button type="button" class="import-secondary-btn" data-import-action="cancel">Cancel</button>
         </div>
     </form>
 </dialog>

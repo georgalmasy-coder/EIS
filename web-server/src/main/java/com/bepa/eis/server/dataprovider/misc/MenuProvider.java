@@ -211,6 +211,103 @@ public class MenuProvider extends GenericProvider {
         }
     }
 
+    /** Validate the resulting tree, including target rows not present in the file. */
+    public void validateMenuImport(List<MenuRow> rows, List<MenuRow> existing) {
+        if (rows == null || rows.isEmpty()) {
+            throw new IllegalArgumentException("No menu rows found in import file.");
+        }
+        Map<Integer, MenuRow> merged = new HashMap<>();
+        existing.forEach(row -> merged.put(row.menuId(), row));
+        Set<Integer> ids = new HashSet<>();
+        for (MenuRow row : rows) {
+            if (row.menuId() == null || row.menuId() <= 0 || !ids.add(row.menuId())) {
+                throw new IllegalArgumentException("Import requires unique, positive MenuIds.");
+            }
+            MenuItemType type = MenuItemType.fromId(row.menuItemType());
+            if (type == null) {
+                throw new IllegalArgumentException("Invalid MenuItemType for MenuId " + row.menuId());
+            }
+            if (!safeText(row.subscriptionCode()).isEmpty() && normalizeSubscriptionCode(row.subscriptionCode()) == null) {
+                throw new IllegalArgumentException("Invalid SubscriptionCode for MenuId " + row.menuId());
+            }
+            validateMenuRow(safeText(row.menuItemText()), row.menuItemUrl(), row.userRoles(), row.iconId(), type, row.subscriptionCode());
+            merged.put(row.menuId(), row);
+        }
+        for (MenuRow row : merged.values()) {
+            if (row.parentMenuId() == null) continue;
+            MenuRow parent = merged.get(row.parentMenuId());
+            if (parent == null || parent.parentMenuId() != null || Objects.equals(row.menuId(), row.parentMenuId())
+                    || normalizeMenuItemType(row.menuItemType()).isHeader()) {
+                throw new IllegalArgumentException("Invalid parent hierarchy for MenuId " + row.menuId());
+            }
+        }
+    }
+
+    public void importMenuRows(List<MenuRow> rows) {
+        try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                List<MenuRow> existing = new ArrayList<>();
+                try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_MENU_ROWS_SQL + " WITH (UPDLOCK, HOLDLOCK)");
+                     ResultSet result = statement.executeQuery()) {
+                    while (result.next()) existing.add(mapMenuRow(result));
+                }
+                validateMenuImport(rows, existing);
+                // Detach imported items first so changed parent relationships can be applied safely.
+                try (PreparedStatement statement = connection.prepareStatement("UPDATE dbo.MENU SET ParentMenuId = NULL WHERE MenuId = ?")) {
+                    for (MenuRow row : rows) {
+                        setInt(statement, row.menuId(), 1);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+                try (Statement identity = connection.createStatement()) {
+                    identity.execute("SET IDENTITY_INSERT dbo.MENU ON");
+                    try {
+                        List<MenuRow> ordered = new ArrayList<>(rows);
+                        ordered.sort(Comparator.comparing(row -> row.parentMenuId() != null));
+                        for (MenuRow row : ordered) {
+                            if (getMenuRow(connection, row.menuId()) != null) {
+                                updateMenuRow(connection, row.menuId(), row.menuItemText(), row.menuItemUrl(), row.parentMenuId(),
+                                        MenuItemType.fromId(row.menuItemType()), normalizeSubscriptionCode(row.subscriptionCode()), row.iconId(),
+                                        row.displayOrder(), toBoolean(row.customerIdRequired()), toBoolean(row.projectIdRequired()),
+                                        row.userRoles(), row.active() == null || row.active(), row.description());
+                            } else {
+                                String sql = "INSERT INTO dbo.MENU (MenuId, MenuItemText, MenuItemUrl, ParentMenuId, MenuItemType, SubscriptionCode, IconId, DisplayOrder, CustomerIdRequired, ProjectIdRequired, UserRoles, Active, Description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                                    setInt(statement, row.menuId(), 1);
+                                    setString(statement, row.menuItemText(), 2);
+                                    setString(statement, row.menuItemUrl(), 3);
+                                    setInt(statement, row.parentMenuId(), 4);
+                                    setInt(statement, row.menuItemType(), 5);
+                                    setString(statement, normalizeSubscriptionCode(row.subscriptionCode()), 6);
+                                    setInt(statement, row.iconId(), 7);
+                                    setInt(statement, row.displayOrder(), 8);
+                                    setBoolean(statement, toBoolean(row.customerIdRequired()), 9);
+                                    setBoolean(statement, toBoolean(row.projectIdRequired()), 10);
+                                    setString(statement, row.userRoles(), 11);
+                                    setBoolean(statement, row.active() == null || row.active(), 12);
+                                    setString(statement, row.description(), 13);
+                                    statement.executeUpdate();
+                                }
+                            }
+                        }
+                    } finally {
+                        identity.execute("SET IDENTITY_INSERT dbo.MENU OFF");
+                    }
+                }
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Could not import menu items.", e);
+        }
+    }
+
     public boolean moveMenuRow(
             Integer menuId,
             boolean moveUp

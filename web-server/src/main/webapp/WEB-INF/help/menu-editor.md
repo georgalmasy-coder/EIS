@@ -26,3 +26,7 @@ Use the dialog to edit menu item text, URL, icon, roles, required customer or pr
 ## Help button
 
 The help button opens this page.
+
+## Transfer menus between databases
+
+Use Export to download all menu items as XML. On the target database, use Import, select the XML file, review the preview and confirm. Matching MenuIds are updated and missing IDs are created; other menu items are kept. The hierarchy, display order, icons, roles and other settings are preserved. Only system administrators can export or import menus. Invalid imports are rejected, and database errors roll back the entire import.

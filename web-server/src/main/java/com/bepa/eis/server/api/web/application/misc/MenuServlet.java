@@ -19,9 +19,12 @@ import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.misc.CustomerProjectProvider;
 import com.bepa.eis.server.dataprovider.misc.MenuProvider;
 import com.bepa.eis.server.dataprovider.misc.MenuProvider.MenuRow;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -34,13 +37,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Endpoint: GET /Menu
  * Returns XML with variable number of menu items and admin menu-editor data.
  */
 @WebServlet(name = "MenuServlet", urlPatterns = "/Menu")
+@MultipartConfig
 public class MenuServlet extends GenericServlet {
 
     private static final Logger log = LoggerFactory.getLogger(MenuServlet.class);
@@ -131,6 +137,19 @@ public class MenuServlet extends GenericServlet {
         MenuProvider menuProvider = new MenuProvider(webSession);
 
         switch (command) {
+            case "export" -> {
+                String format = safeText(req.getParameter("format"));
+                if (!format.isEmpty() && !"xml".equalsIgnoreCase(format)) {
+                    throw new IllegalArgumentException("Menu export only supports XML.");
+                }
+                StringBuilder xml = new StringBuilder();
+                appendXmlHeader(xml);
+                xml.append("<menuExport>");
+                appendMenuItems(xml, menuProvider.getAllMenuRows());
+                xml.append("</menuExport>");
+                resp.setHeader("Content-Disposition", "attachment; filename=\"Menu Editor.xml\"");
+                writeXml(resp, HttpServletResponse.SC_OK, xml.toString());
+            }
             case "list" -> writeXml(resp, HttpServletResponse.SC_OK, buildListXml(webSession, menuProvider));
             case "edit" -> {
                 Integer menuId = intValue(req.getParameter("id"));
@@ -160,6 +179,37 @@ public class MenuServlet extends GenericServlet {
         MenuProvider menuProvider = new MenuProvider(webSession);
 
         switch (command) {
+            case "import" -> {
+                Part file = req.getPart("file");
+                if (file == null || file.getSize() == 0) {
+                    throw new IllegalArgumentException("Import file is required.");
+                }
+                List<MenuRow> rows;
+                try (InputStream input = file.getInputStream()) {
+                    rows = parseMenuImport(input);
+                }
+                menuProvider.validateMenuImport(rows, menuProvider.getAllMenuRows());
+                String phase = safeText(req.getParameter("phase"));
+                if ("preview".equalsIgnoreCase(phase)) {
+                    resp.setContentType("application/json; charset=UTF-8");
+                    resp.setHeader("Cache-Control", "no-store");
+                    new ObjectMapper().writeValue(resp.getWriter(), Map.of(
+                            "title", "Import Menu Editor (matching IDs are updated)",
+                            "rowCount", rows.size(), "errorCount", 0, "allValid", true,
+                            "executeButtonText", "Import menus",
+                            "columns", List.of(Map.of("key", "id", "label", "MenuId"),
+                                    Map.of("key", "text", "label", "Menu item"),
+                                    Map.of("key", "parent", "label", "ParentMenuId")),
+                            "rows", rows.stream().map(row -> Map.of("valid", true, "error", "", "values",
+                                    List.of(row.menuId().toString(), row.menuItemText(),
+                                            row.parentMenuId() == null ? "" : row.parentMenuId().toString()))).toList()));
+                } else if ("execute".equalsIgnoreCase(phase)) {
+                    menuProvider.importMenuRows(rows);
+                    writeXml(resp, HttpServletResponse.SC_OK, buildSaveResultXml(true, null, "Menu items imported."));
+                } else {
+                    throw new IllegalArgumentException("Import phase must be preview or execute.");
+                }
+            }
             case "save" -> {
                 MenuRow menuRow = parseMenuRow(req.getInputStream());
                 MenuRow savedRow = menuProvider.saveMenuRow(menuRow);
@@ -520,6 +570,10 @@ public class MenuServlet extends GenericServlet {
             throw new IllegalArgumentException("Menu item data is required.");
         }
 
+        return parseMenuElement(menuElement);
+    }
+
+    private MenuRow parseMenuElement(Element menuElement) {
         return new MenuRow(
                 intValue(text(menuElement, "MenuId")),
                 text(menuElement, "MenuItemText"),
@@ -535,6 +589,36 @@ public class MenuServlet extends GenericServlet {
                 boolValue(text(menuElement, "Active"), true),
                 text(menuElement, "Description")
         );
+    }
+
+    List<MenuRow> parseMenuImport(InputStream input) throws Exception {
+        Element root = parseDocument(input).getDocumentElement();
+        if (root == null || !"menuExport".equals(root.getTagName())) {
+            throw new IllegalArgumentException("Import file must be a menu export XML file.");
+        }
+        List<MenuRow> rows = new ArrayList<>();
+        Element items = firstElement(root, "menuItems");
+        if (items != null) {
+            for (var node = items.getFirstChild(); node != null; node = node.getNextSibling()) {
+                if (node instanceof Element element && "menuItem".equals(element.getTagName())) {
+                    // Reject malformed integers rather than silently dropping a parent or setting defaults.
+                    for (String field : List.of("MenuId", "ParentMenuId", "MenuItemType", "IconId", "DisplayOrder")) {
+                        String value = text(element, field);
+                        if (!value.isEmpty() && intValue(value) == null) {
+                            throw new IllegalArgumentException("Invalid integer in " + field);
+                        }
+                    }
+                    for (String field : List.of("CustomerIdRequired", "ProjectIdRequired", "Active")) {
+                        String value = text(element, field);
+                        if (!value.isEmpty() && !"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
+                            throw new IllegalArgumentException("Invalid boolean in " + field);
+                        }
+                    }
+                    rows.add(parseMenuElement(element));
+                }
+            }
+        }
+        return rows;
     }
 
     private MenuRow buildBlankMenuRow(Integer parentMenuId) {
