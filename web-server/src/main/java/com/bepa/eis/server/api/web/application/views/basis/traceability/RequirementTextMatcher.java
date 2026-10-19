@@ -1,6 +1,8 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
-import com.bepa.eis.common.GlobalConfiguration;
+import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.web.application.cache.CustomerLookupCache;
+import com.bepa.eis.server.api.web.application.settings.CustomerSettings;
 
 import java.text.Normalizer;
 import java.util.*;
@@ -18,14 +20,13 @@ final class RequirementTextMatcher {
     private final int longWordMaxEdits;
     private final Set<String> stopwords;
 
-    RequirementTextMatcher() {
-        this(GlobalConfiguration.getBoolean("traceability.match.fuzzy.enabled", true),
-                GlobalConfiguration.getInt("traceability.match.minimum-matching-words", 2, 1, 1000),
-                GlobalConfiguration.getInt("traceability.match.fuzzy.short-word-max-length", 4, 1, 100),
-                GlobalConfiguration.getInt("traceability.match.fuzzy.medium-word-max-length", 8, 1, 100),
-                GlobalConfiguration.getInt("traceability.match.fuzzy.medium-word-max-edits", 1, 0, 5),
-                GlobalConfiguration.getInt("traceability.match.fuzzy.long-word-max-edits", 2, 0, 5),
-                GlobalConfiguration.getTraceabilityMatchStopwords());
+    RequirementTextMatcher(WebSession session) {
+        this(CustomerLookupCache.getSettings(session).getTraceabilityMatching(session.getCustomerId(), session.getProjectId()));
+    }
+
+    RequirementTextMatcher(CustomerSettings.TraceabilityMatching settings) {
+        this(settings.fuzzyEnabled(), settings.minimumMatchingWords(), settings.shortWordMaxLength(),
+                settings.mediumWordMaxLength(), settings.mediumWordMaxEdits(), settings.longWordMaxEdits(), settings.stopwords());
     }
 
     RequirementTextMatcher(boolean fuzzyEnabled, int minimumMatches, int shortWordMaxLength,

@@ -58,6 +58,7 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         String pathInfo = normalizePathInfo(request.getPathInfo());
 
         WebSession webSession = getWebSessionFromRequest(request, response);
+        if (webSession == null) return;
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
@@ -65,7 +66,7 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
 
         try {
             if ("/matchingwords".equals(pathInfo)) {
-                handleMatchingWordsRequest(request, response);
+                handleMatchingWordsRequest(webSession, request, response);
                 return;
             }
 
@@ -147,8 +148,8 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         }
     }
 
-    private void handleMatchingWordsRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        RequirementTextMatcher matcher = new RequirementTextMatcher();
+    private void handleMatchingWordsRequest(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        RequirementTextMatcher matcher = new RequirementTextMatcher(webSession);
         var matches = matcher.matchingWords(
                 RequirementTextMatcher.words(request.getParameter("stakeholderName"),
                         request.getParameter("stakeholderDescription")),

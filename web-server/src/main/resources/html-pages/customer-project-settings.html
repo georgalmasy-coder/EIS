@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/customer-project-settings.css" />
+</head>
+<body>
+<button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">&#8250;</button>
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2><div id="menuStatus" class="menu-status">Loading menu...</div><ul id="menuRoot" class="menu-root"></ul>
+</nav>
+<main class="app"><div class="content">
+    <header class="topbar"></header>
+    <section class="settings-workspace" aria-label="Settings">
+        <header class="workspace-header">
+            <div id="pageEyebrow" class="workspace-eyebrow">SETTINGS</div>
+            <h1 id="pageHeading" class="workspace-heading">Customer and project settings</h1>
+            <div id="pageHelpText" class="workspace-helptext">Edit settings for your customer and the selected project.</div>
+            <p id="settingsContext"></p>
+        </header>
+        <div class="settings-layout">
+            <nav class="settings-navigation" aria-label="Settings categories">
+                <label for="settingsSearch">Search settings</label>
+                <input id="settingsSearch" type="search" placeholder="Find a setting..." />
+                <details><summary>Customer</summary><button type="button" data-category="security" aria-current="page">Security</button></details>
+                <details><summary>Project</summary><button type="button" data-category="traceabilityMatching">Traceability matching</button></details>
+            </nav>
+            <form id="settingsForm" class="settings-editor">
+                <fieldset id="settingsFields" disabled>
+                    <section data-panel="security"><h2>Customer › Security</h2><div id="securityFields"></div></section>
+                    <section data-panel="traceabilityMatching" hidden><h2>Project › Traceability matching</h2><p id="projectRequired" hidden>Select a project from the main menu to edit its settings.</p><div id="traceabilityMatchingFields"></div></section>
+                    <p id="noSettingsMatch" hidden>No settings match your search.</p>
+                </fieldset>
+                <div class="settings-actions">
+                    <button id="restoreDefaults" type="button" disabled>Restore defaults</button>
+                    <span id="unsavedChanges" hidden>Unsaved changes</span>
+                    <button id="saveSettings" class="primary" type="submit" disabled>Save</button>
+                </div>
+            </form>
+        </div>
+        <p id="settingsStatus" role="status" aria-live="polite">Loading settings...</p>
+        <button id="retrySettings" type="button" hidden>Reload settings</button>
+    </section>
+</div></main>
+<script type="module" src="../js/pages/customer-project-settings-page.js"></script>
+</body>
+</html>

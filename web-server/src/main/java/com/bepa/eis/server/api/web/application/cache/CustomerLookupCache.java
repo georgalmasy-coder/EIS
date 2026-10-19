@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.cache;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.user.UserRoles;
 import com.bepa.eis.server.api.DTO.User;
+import com.bepa.eis.server.api.web.application.settings.CustomerSettings;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
@@ -16,6 +17,16 @@ import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class CustomerLookupCache {
+
+    public static CustomerSettings getSettings(WebSession webSession) {
+        return getLookupCache(webSession).getSettings();
+    }
+
+    /** Customer settings are needed during login, before a project/session is selected. */
+    public static CustomerSettings getCustomerSettings(Integer customerId) {
+        if (customerId == null) throw new IllegalArgumentException("Customer is required");
+        return getLookupCache(customerId, null).getSettings();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(CustomerLookupCache.class);
 

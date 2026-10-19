@@ -1,8 +1,7 @@
 package com.bepa.eis.server.api.web.application.views.basis.traceability;
 
-import com.bepa.eis.common.GlobalConfiguration;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.bepa.eis.server.api.web.application.settings.CustomerSettings;
+import java.util.Map;
 
 /** Standalone regression suite; run its main method without a test framework. */
 public final class RequirementTextMatcherTest {
@@ -43,47 +42,42 @@ public final class RequirementTextMatcherTest {
                 RequirementTextMatcher.words("chocolate", "sytem"))) {
             throw new AssertionError("Name and description must be combined");
         }
-        Path configuration = Files.createTempFile(Path.of("web-server/target"), "traceability-test-", ".properties");
-        try {
-            System.setProperty("eis.config.file", configuration.toAbsolutePath().toString());
-            check(new RequirementTextMatcher(), "system chocolate", "sytem chocolate", true);
-            check(new RequirementTextMatcher(), "system", "system", false);
-            check(new RequirementTextMatcher(), "the and og at på", "THE AND OG AT PÅ", false);
-            check(new RequirementTextMatcher(), "the cooling and chocolate", "cooling og chocolate", true);
-            var stopwordHighlights = new RequirementTextMatcher().matchingWords(
-                    RequirementTextMatcher.words("Solar and cooling", null),
-                    RequirementTextMatcher.words("Solar and cooling", null));
-            if (stopwordHighlights.size() != 2 || stopwordHighlights.stream()
-                    .anyMatch(pair -> pair.source().equals("and") || pair.target().equals("and"))) {
-                throw new AssertionError("Stopwords must not be highlighted");
-            }
-            Files.writeString(configuration, "traceability.match.fuzzy.enabled=false\n"
-                    + "traceability.match.minimum-matching-words=1\n");
-            GlobalConfiguration.reload();
-            check(new RequirementTextMatcher(), "system", "system", true);
-            check(new RequirementTextMatcher(), "system", "sytem", false);
-            Files.writeString(configuration, "traceability.match.stopwords= AND , solar , solar\n");
-            GlobalConfiguration.reload();
-            check(new RequirementTextMatcher(), "solar and cooling", "solar and cooling", false);
-            check(new RequirementTextMatcher(), "the cooling", "the cooling", true);
-            Files.writeString(configuration, "traceability.match.stopwords=\n");
-            GlobalConfiguration.reload();
-            check(new RequirementTextMatcher(), "and the", "and the", true);
-            Files.writeString(configuration, "traceability.match.stopwords=p\\u00e5,and\n");
-            GlobalConfiguration.reload();
-            check(new RequirementTextMatcher(), "på and cooling", "PÅ AND cooling", false);
-            RequirementTextMatcher filtered = new RequirementTextMatcher(true, 1, 4, 8, 1, 2, "their");
-            check(filtered, "their", "theirs", false);
-            check(filtered, "theirs", "their", false);
-            Files.writeString(configuration, "traceability.match.minimum-matching-words=invalid\n"
-                    + "traceability.match.fuzzy.medium-word-max-edits=999\n");
-            GlobalConfiguration.reload();
-            check(new RequirementTextMatcher(), "system chocolate", "sytem chocolate", true);
-            check(new RequirementTextMatcher(), "system", "system", false);
-        } finally {
-            Files.deleteIfExists(configuration);
+        CustomerSettings settings = new CustomerSettings(null);
+        check(matcher(settings, 1), "system chocolate", "sytem chocolate", true);
+        check(matcher(settings, 1), "system", "system", false);
+        check(matcher(settings, 1), "the and og at på", "THE AND OG AT PÅ", false);
+        check(matcher(settings.update(1, 1, Map.of("mediumWordMaxEdits", "0")), 1),
+                "system chocolate", "sytem chocolate", false);
+        check(matcher(settings.update(1, 1, Map.of("longWordMaxEdits", "0")), 1),
+                "system chocolate", "system chocolatte", false);
+        check(matcher(settings.update(1, 1, Map.of("shortWordMaxLength", "6")), 1),
+                "system chocolate", "sytem chocolate", false);
+        check(matcher(settings.update(1, 1, Map.of("mediumWordMaxLength", "5", "mediumWordMaxEdits", "0")), 1),
+                "system chocolate", "systen chocolate", true);
+        settings = settings.update(1, 2, Map.of("fuzzyEnabled", "false", "minimumMatchingWords", "1"));
+        check(matcher(settings, 2), "system", "system", true);
+        check(matcher(settings, 2), "system", "sytem", false);
+        check(matcher(settings, 1), "system chocolate", "sytem chocolate", true);
+        settings = settings.update(1, 2, Map.of("minimumMatchingWords", "2", "stopwords", "AND,solar,solar"));
+        check(matcher(settings, 2), "solar and cooling", "solar and cooling", false);
+        check(matcher(settings, 2), "the cooling", "the cooling", true);
+        var highlights = matcher(settings, 2).matchingWords(RequirementTextMatcher.words("and solar cooling", null),
+                RequirementTextMatcher.words("and solar cooling", null));
+        if (highlights.size() != 1 || !highlights.get(0).source().equals("cooling")) {
+            throw new AssertionError("XML stopwords must also apply to highlighted words");
         }
+        settings = settings.update(1, 2, Map.of("stopwords", ""));
+        check(matcher(settings, 2), "and the", "and the", true);
+        settings = settings.update(1, 2, Map.of("stopwords", "på,and"));
+        check(matcher(settings, 2), "på and cooling", "PÅ AND cooling", false);
+        RequirementTextMatcher filtered = new RequirementTextMatcher(true, 1, 4, 8, 1, 2, "their");
+        check(filtered, "their", "theirs", false);
+        check(filtered, "theirs", "their", false);
         System.out.println("RequirementTextMatcher regression checks passed");
+    }
+
+    private static RequirementTextMatcher matcher(CustomerSettings settings, int projectId) {
+        return new RequirementTextMatcher(settings.getTraceabilityMatching(1, projectId));
     }
 
     private static void check(RequirementTextMatcher matcher, String left, String right, boolean expected) {

@@ -90,6 +90,7 @@ public enum PageType {
 
     INCIDENT_MAIN_PAGE("admin-incidents","html-pages/admin/incidents-main.html", "Incidents", true, "ADMINISTRATION", "Incidents", "Use the workspace below to manage administration data."),
     
+    CUSTOMER_PROJECT_SETTINGS_PAGE("customer-project-settings", "html-pages/customer-project-settings.html", "Settings", true, "SETTINGS", "Customer and project settings", "Edit settings for your customer and the selected project."),
     PROJECT_SETTINGS_PAGE("projectsettings","html-pages/projectsettings.html", "Project Settings", true, "SETTINGS", "Project settings", "Manage project details, fields, departments and project access."),
     ORGANISATION_SETTINGS_PAGE("organisationsettings","html-pages/organisationsettings.html", "Organisation Settings", true, "SETTINGS", "Organisation settings", "Manage organisation details, users, and global settings."),
 

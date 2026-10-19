@@ -4,7 +4,6 @@ import {fetchXml} from "../core/http.js";
 import {directTextOf, getDirectChild, textOf} from "../core/xml.js";
 
 const MENU_URL = "/Menu";
-const PROJECT_OVERVIEW_URL = "/web/view?page=projectoverview";
 const MENU_SELECT_PROJECT_CMD = "selectproject";
 const MENU_WIDTH = 272;
 const MENU_COLLAPSED_WIDTH = 72;
@@ -656,7 +655,7 @@ function renderProjectPicker() {
 
             closeProjectPickerPanel();
             try {
-                await applyProjectSelection(project.projectId, true);
+                await applyProjectSelection(project.projectId);
             } catch (error) {
                 console.error(error);
             }
@@ -700,7 +699,7 @@ function toggleProjectPickerPanel() {
     }
 }
 
-async function applyProjectSelection(projectId, redirectToOverview = false, persistProjectId = true) {
+async function applyProjectSelection(projectId) {
     const nextProjectId = normalizeId(projectId);
 
     if (!nextProjectId) {
@@ -729,19 +728,13 @@ async function applyProjectSelection(projectId, redirectToOverview = false, pers
         throw new Error(`HTTP ${response.status} from ${MENU_URL}`);
     }
 
-    const xmlText = await response.text();
-    const redirectUrl = readRedirectUrlFromXml(xmlText) || PROJECT_OVERVIEW_URL;
-
     const selectedProject = state.projects.find((project) => project.projectId === nextProjectId);
     state.topPanel.projectId = nextProjectId;
     if (selectedProject) {
         state.topPanel.projectName = selectedProject.projectName;
     }
 
-    if (redirectToOverview) {
-        const separator = redirectUrl.includes("?") ? "&" : "?";
-        window.location.replace(`${redirectUrl}${separator}_ts=${Date.now()}`);
-    }
+    window.location.reload();
 }
 
 async function clearProjectSelection() {
@@ -778,23 +771,6 @@ async function ensureProjectSelection() {
     if (currentProjectId) {
         await clearProjectSelection();
     }
-}
-
-function readRedirectUrlFromXml(xmlText) {
-    if (!xmlText) {
-        return "";
-    }
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlText, "application/xml");
-
-    if (doc.getElementsByTagName("parsererror").length) {
-        return "";
-    }
-
-    const element = doc.querySelector("redirectUrl");
-
-    return element?.textContent?.trim() || "";
 }
 
 function refreshSidebarChrome() {

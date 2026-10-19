@@ -336,42 +336,8 @@ public class LoginServlet extends GenericServlet {
     }
 
     private MfaConfig.CustomerMfaPolicy resolveCustomerMfaPolicy(List<CustomerRecord> customers) {
-        if (customers == null || customers.isEmpty()) {
-            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
-        }
-
-        boolean hasOptional = false;
-        boolean hasDisabled = false;
-
-        for (CustomerRecord customer : customers) {
-            if (customer == null) {
-                continue;
-            }
-
-            MfaConfig.CustomerMfaPolicy customerMfaPolicy = MfaConfig.parseCustomerMfaPolicy(customer.getCustomerMfaPolicy());
-
-            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.REQUIRED) {
-                return MfaConfig.CustomerMfaPolicy.REQUIRED;
-            }
-
-            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.OPTIONAL) {
-                hasOptional = true;
-            }
-
-            if (customerMfaPolicy == MfaConfig.CustomerMfaPolicy.DISABLED) {
-                hasDisabled = true;
-            }
-        }
-
-        if (hasOptional) {
-            return MfaConfig.CustomerMfaPolicy.OPTIONAL;
-        }
-
-        if (hasDisabled) {
-            return MfaConfig.CustomerMfaPolicy.DISABLED;
-        }
-
-        return MfaConfig.CustomerMfaPolicy.OPTIONAL;
+        return CustomerMfaPolicyResolver.resolve(customers, customerId ->
+                CustomerLookupCache.getCustomerSettings(customerId).getCustomerMfaPolicy(customerId));
     }
 
     private void redirectToPage(

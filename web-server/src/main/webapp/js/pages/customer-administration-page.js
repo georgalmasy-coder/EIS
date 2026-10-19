@@ -365,7 +365,6 @@ function parseLookups(doc) {
 
 function fillAllLookupSelects() {
     fillSelectFromLookup("fieldCustomerStatus", "customerStatus");
-    fillSelectFromLookup("fieldCustomerMfaPolicy", "customerMfaPolicy");
     fillSelectFromLookup("fieldSubscriptionStatus", "subscriptionStatus");
     fillSelectFromLookup("fieldPaymentStatus", "paymentStatus");
     fillSelectFromLookup("fieldPaymentMethodStatus", "paymentMethodStatus");
@@ -790,7 +789,6 @@ function fillDialog(detail) {
     setValue("fieldContactName", customer.contactName);
     setValue("fieldContactEmail", customer.contactEmail);
     setValue("fieldCustomerStatus", customer.customerStatus);
-    setValue("fieldCustomerMfaPolicy", customer.customerMfaPolicy || "OPTIONAL");
     setValue("fieldCreatedDateTime", formatDanishDateTime(customer.createdDateTime));
     setValue("fieldChangedDateTime", formatDanishDateTime(customer.changedDateTime));
     setValue("fieldChangedByUserId", customer.changedBy || "");
@@ -1158,7 +1156,6 @@ function appendCustomerXml(xml) {
     appendXmlElement(xml, "contactName", value("fieldContactName"));
     appendXmlElement(xml, "contactEmail", value("fieldContactEmail"));
     appendXmlElement(xml, "customerStatus", value("fieldCustomerStatus"));
-    appendXmlElement(xml, "customerMfaPolicy", value("fieldCustomerMfaPolicy") || "OPTIONAL");
 
     xml.push("</customer>");
 }

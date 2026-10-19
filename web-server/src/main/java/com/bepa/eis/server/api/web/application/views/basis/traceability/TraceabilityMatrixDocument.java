@@ -50,7 +50,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
     private static final Logger log = LoggerFactory.getLogger(TraceabilityMatrixDocument.class);
 
-    private final RequirementTextMatcher textMatcher = new RequirementTextMatcher();
+    private final RequirementTextMatcher textMatcher;
     private final Map<Object, Set<String>> requirementWords = new IdentityHashMap<>();
 
     protected static final String STYLE_NORMAL = "normal";
@@ -84,6 +84,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
     protected TraceabilityMatrixDocument(WebSession webSession) throws Exception {
         super(webSession);
+        textMatcher = new RequirementTextMatcher(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 

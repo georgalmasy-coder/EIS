@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.web.application.misc;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.customer.Subscription;
 import com.bepa.eis.common.enums.menu.MenuIcon;
@@ -191,6 +192,12 @@ public class MenuServlet extends GenericServlet {
             return;
         }
 
+        if (GlobalConfiguration.isUdvMode()) {
+            getSession(req).setProjectId(projectId);
+            writeXml(resp, HttpServletResponse.SC_OK, buildSelectProjectResultXml(PROJECT_OVERVIEW_URL));
+            return;
+        }
+
         if (sessionId.isBlank()) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -222,6 +229,8 @@ public class MenuServlet extends GenericServlet {
                         webSession.getCustomerId(),
                         projectId
                 );
+                writeXml(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorXml("Project selection could not be saved."));
+                return;
             }
 
             resp.setHeader("Cache-Control", "no-store");

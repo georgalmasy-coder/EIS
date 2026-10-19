@@ -1,13 +1,20 @@
 package com.bepa.eis.server.api.web.application.cache;
 
 import com.bepa.eis.server.api.DTO.User;
+import com.bepa.eis.server.api.web.application.settings.CustomerSettings;
+import com.bepa.eis.server.api.web.application.settings.CustomerSettingsProvider;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class LookupCache {
+
+    private final CustomerSettings settings;
+
+    public CustomerSettings getSettings() { return settings; }
 
     private final CustomerBasisInfo customerInfo;
     private final RequirementBusinessPriorityCache requirementBusinessPriorityCache;
@@ -56,6 +63,11 @@ public class LookupCache {
     private final Map<Integer, LookupProjectCache> lookupProjectCacheMap;
 
     public LookupCache(Integer customerId, Integer projectId) {
+        try {
+            settings = new CustomerSettingsProvider(null).load(customerId);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not load customer settings", e);
+        }
         customerInfo = new CustomerInfoProvider().getCustomerInfo(customerId);
         requirementBusinessPriorityCache = new RequirementBusinessPriorityCache(customerId, projectId);
         requirementVerificationCache = new RequirementVerificationCache(customerId, projectId);

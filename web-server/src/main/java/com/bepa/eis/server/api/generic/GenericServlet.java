@@ -29,6 +29,8 @@ import java.sql.SQLException;
 
 public class GenericServlet extends HttpServlet {
 
+    private static final String DEVELOPMENT_SESSION_ATTRIBUTE = "eis.development.session";
+
     private static final Logger log = LoggerFactory.getLogger(GenericServlet.class);
 
     private WebSession webSession;
@@ -36,12 +38,16 @@ public class GenericServlet extends HttpServlet {
     public WebSession getSession(HttpServletRequest request) {
         WebSession ws;
         if (GlobalConfiguration.isUdvMode()) {
-            ws = new WebSession();
-            ws.setId(1);
-            ws.setSessionId("georg.almasy@gmail.com");
-            ws.setCustomerId(1);
-            ws.setProjectId(1);
-            ws.setUserId(1);
+            HttpSession httpSession = request.getSession(true);
+            ws = (WebSession) httpSession.getAttribute(DEVELOPMENT_SESSION_ATTRIBUTE);
+            if (ws == null) {
+                try {
+                    ws = getWebSession(null);
+                } catch (SQLException e) {
+                    throw new IllegalStateException("Unable to create development session", e);
+                }
+                httpSession.setAttribute(DEVELOPMENT_SESSION_ATTRIBUTE, ws);
+            }
             ws.setThemeId(Theme.fromId(String.valueOf(GlobalConfiguration.getThemeId())).getCssId());
             return ws;
         } else {
@@ -115,11 +121,7 @@ public class GenericServlet extends HttpServlet {
             HttpServletResponse response
     ) throws ServletException {
         if (GlobalConfiguration.isUdvMode()) {
-            try {
-                return getWebSession(null);
-            } catch (SQLException impossible) {
-                throw new ServletException(impossible);
-            }
+            return getSession(request);
         }
 
         String sessionId = getSessionIdFromRequest(request);
