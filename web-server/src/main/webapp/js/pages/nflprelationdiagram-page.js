@@ -653,21 +653,40 @@ function applyFilters() {
     });
 }
 
-// Traverse the complete graph regardless of relation direction or architecture group.
+// Follow upstream and downstream separately, never reversing architecture direction.
 // Hover and persistent focus deliberately use this same selection.
 function getFocusedVisibleIds(internalId) {
-    const visibleIds = new Set([internalId]);
-    const pending = [internalId];
+    return getFocusedTrace(internalId).visibleIds;
+}
 
-    for (let index = 0; index < pending.length; index++) {
-        for (const relatedId of state.relationNeighbors.get(pending[index]) || []) {
-            if (visibleIds.has(relatedId)) continue;
-            visibleIds.add(relatedId);
-            pending.push(relatedId);
+function getFocusedTrace(internalId) {
+    const visibleIds = new Set([internalId]);
+    const relationKeys = new Set();
+    for (const direction of [-1, 1]) {
+        // A node reached upstream must still be traversable in the downstream pass.
+        const visited = new Set([internalId]);
+        const pending = [internalId];
+
+        for (let index = 0; index < pending.length; index++) {
+            const currentId = pending[index];
+            const currentOrder = TYPE_ORDER[state.requirementsByInternalId.get(currentId)?.type];
+            for (const relatedId of state.relationNeighbors.get(currentId) || []) {
+                const relatedOrder = TYPE_ORDER[state.requirementsByInternalId.get(relatedId)?.type];
+                if (currentOrder == null || relatedOrder == null) continue;
+                // Equal groups are allowed; jumps may only continue in this pass's direction.
+                if ((relatedOrder - currentOrder) * direction < 0) continue;
+                // Keep the actual permitted edges, rather than all edges between found nodes.
+                relationKeys.add(JSON.stringify([currentId, relatedId]));
+                relationKeys.add(JSON.stringify([relatedId, currentId]));
+                if (visited.has(relatedId)) continue;
+                visited.add(relatedId);
+                visibleIds.add(relatedId);
+                pending.push(relatedId);
+            }
         }
     }
 
-    return visibleIds;
+    return {visibleIds, relationKeys};
 }
 
 function setFocusedRequirement(internalId) {
@@ -992,7 +1011,9 @@ function drawRelations() {
     svg.setAttribute("width", String(frameRect.width));
     svg.setAttribute("height", String(frameRect.height));
 
+    const focusTrace = state.focusedInternalId ? getFocusedTrace(state.focusedInternalId) : null;
     state.relations.forEach((relation) => {
+        if (focusTrace && !focusTrace.relationKeys.has(JSON.stringify([relation.from, relation.to]))) return;
         const fromCard = findVisibleRequirementCard(relation.from);
         const toCard = findVisibleRequirementCard(relation.to);
 
@@ -1074,7 +1095,8 @@ function buildCurvePath(points) {
 
 function updateHighlight() {
     const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
-    const relatedIds = activeInternalId ? getFocusedVisibleIds(activeInternalId) : new Set();
+    const trace = activeInternalId ? getFocusedTrace(activeInternalId) : null;
+    const relatedIds = trace ? trace.visibleIds : new Set();
 
     document.querySelectorAll(".relationdiagram-requirement-card").forEach((card) => {
         const internalId = card.dataset.internalId;
@@ -1091,7 +1113,7 @@ function updateHighlight() {
         const from = line.dataset.from;
         const to = line.dataset.to;
         const isActive = Boolean(activeInternalId)
-            && relatedIds.has(from) && relatedIds.has(to);
+            && trace.relationKeys.has(JSON.stringify([from, to]));
 
         line.classList.toggle("is-active", isActive);
         line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);

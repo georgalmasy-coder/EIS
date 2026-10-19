@@ -47,6 +47,7 @@ const state = {
     systemsBreakdowns: [],
     requirementsByInternalId: new Map(),
     relations: [],
+    relationNeighbors: new Map(),
     columnVisibility: {
         stakeholder: true,
         system: true,
@@ -375,6 +376,13 @@ function setRelationDiagramState(diagram) {
     state.systemRequirements = diagram.systemRequirements;
     state.systemsBreakdowns = diagram.systemsBreakdowns;
     state.relations = diagram.relations;
+    state.relationNeighbors = new Map();
+    for (const {from, to} of state.relations) {
+        if (!state.relationNeighbors.has(from)) state.relationNeighbors.set(from, new Set());
+        if (!state.relationNeighbors.has(to)) state.relationNeighbors.set(to, new Set());
+        state.relationNeighbors.get(from).add(to);
+        state.relationNeighbors.get(to).add(from);
+    }
     state.focusedInternalId = null;
     state.selectedInternalId = null;
     state.hoverInternalId = null;
@@ -568,14 +576,40 @@ function applyFilters() {
     }
 }
 
+// Follow upstream and downstream separately, never reversing architecture direction.
+// Hover and persistent focus deliberately use this same selection.
 function getFocusedVisibleIds(internalId) {
-    const visibleIds = new Set([internalId]);
+    return getFocusedTrace(internalId).visibleIds;
+}
 
-    for (const relatedId of getRelatedRequirementIds(internalId)) {
-        visibleIds.add(relatedId);
+function getFocusedTrace(internalId) {
+    const visibleIds = new Set([internalId]);
+    const relationKeys = new Set();
+    for (const direction of [-1, 1]) {
+        // A node reached upstream must still be traversable in the downstream pass.
+        const visited = new Set([internalId]);
+        const pending = [internalId];
+
+        for (let index = 0; index < pending.length; index++) {
+            const currentId = pending[index];
+            const currentOrder = TYPE_ORDER[state.requirementsByInternalId.get(currentId)?.type];
+            for (const relatedId of state.relationNeighbors.get(currentId) || []) {
+                const relatedOrder = TYPE_ORDER[state.requirementsByInternalId.get(relatedId)?.type];
+                if (currentOrder == null || relatedOrder == null) continue;
+                // Equal groups are allowed; jumps may only continue in this pass's direction.
+                if ((relatedOrder - currentOrder) * direction < 0) continue;
+                // Keep the actual permitted edges, rather than all edges between found nodes.
+                relationKeys.add(JSON.stringify([currentId, relatedId]));
+                relationKeys.add(JSON.stringify([relatedId, currentId]));
+                if (visited.has(relatedId)) continue;
+                visited.add(relatedId);
+                visibleIds.add(relatedId);
+                pending.push(relatedId);
+            }
+        }
     }
 
-    return visibleIds;
+    return {visibleIds, relationKeys};
 }
 
 function setFocusedRequirement(internalId) {
@@ -883,8 +917,10 @@ function drawGlobalRelations(svgId) {
     svg.setAttribute("height", String(frameRect.height));
 
     const { stakeholder, system, systemsBreakdown } = state.columnVisibility;
+    const focusTrace = state.focusedInternalId ? getFocusedTrace(state.focusedInternalId) : null;
 
     for (const relation of state.relations) {
+        if (focusTrace && !focusTrace.relationKeys.has(JSON.stringify([relation.from, relation.to]))) continue;
         const fromRequirement = state.requirementsByInternalId.get(relation.from);
         const toRequirement = state.requirementsByInternalId.get(relation.to);
 
@@ -996,14 +1032,15 @@ function buildCurvePath(points) {
 
 function updateHighlight() {
     const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
-    const relatedIds = activeInternalId ? getRelatedRequirementIds(activeInternalId) : new Set();
+    const trace = activeInternalId ? getFocusedTrace(activeInternalId) : null;
+    const relatedIds = trace ? trace.visibleIds : new Set();
 
     const cards = document.querySelectorAll(".relationdiagram-requirement-card");
 
     for (const card of cards) {
         const internalId = card.dataset.internalId;
         const isSelected = internalId === activeInternalId;
-        const isRelated = relatedIds.has(internalId);
+        const isRelated = !isSelected && relatedIds.has(internalId);
         const shouldMute = Boolean(activeInternalId) && !isSelected && !isRelated;
 
         card.classList.toggle("is-selected", isSelected);
@@ -1016,7 +1053,7 @@ function updateHighlight() {
     for (const line of lines) {
         const from = line.dataset.from;
         const to = line.dataset.to;
-        const isActive = Boolean(activeInternalId) && (from === activeInternalId || to === activeInternalId);
+        const isActive = Boolean(activeInternalId) && trace.relationKeys.has(JSON.stringify([from, to]));
 
         line.classList.toggle("is-active", isActive);
         line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);
@@ -1188,7 +1225,7 @@ function getRelatedRequirements(internalId, predicate = () => true) {
 }
 
 function hasAnyRelation(internalId) {
-    return state.relations.some((relation) => relation.from === internalId || relation.to === internalId);
+    return state.relationNeighbors.has(internalId);
 }
 
 function findVisibleRequirementCard(internalId) {
