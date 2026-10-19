@@ -403,7 +403,7 @@ function createProjectCard(project) {
             </div>
             <div class="project-count">
                 <strong>${escapeHtml(project.countSystemBreakdown)}</strong>
-                <span>Physical structures</span>
+                <span>Physical architecture</span>
             </div>
         </div>
 

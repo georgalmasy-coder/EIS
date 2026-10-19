@@ -76,35 +76,35 @@ const RELATED_GROUPS = {
         { type: "system", label: "Related system requirements" },
         { type: "functional", label: "Related functional structures" },
         { type: "logical", label: "Related logical structures" },
-        { type: "physical", label: "Related physical structures" }
+        { type: "physical", label: "Related physical architecture" }
     ],
     system: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
         { type: "functional", label: "Related functional structures" },
         { type: "logical", label: "Related logical structures" },
-        { type: "physical", label: "Related physical structures" }
+        { type: "physical", label: "Related physical architecture" }
     ],
     functional: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
         { type: "functional", label: "Related functional structures" },
         { type: "logical", label: "Related logical structures" },
-        { type: "physical", label: "Related physical structures" }
+        { type: "physical", label: "Related physical architecture" }
     ],
     logical: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
         { type: "functional", label: "Related functional structures" },
         { type: "logical", label: "Related logical structures" },
-        { type: "physical", label: "Related physical structures" }
+        { type: "physical", label: "Related physical architecture" }
     ],
     physical: [
         { type: "stakeholder", label: "Related stakeholder requirements" },
         { type: "system", label: "Related system requirements" },
         { type: "functional", label: "Related functional structures" },
         { type: "logical", label: "Related logical structures" },
-        { type: "physical", label: "Related physical structures" }
+        { type: "physical", label: "Related physical architecture" }
     ]
 };
 

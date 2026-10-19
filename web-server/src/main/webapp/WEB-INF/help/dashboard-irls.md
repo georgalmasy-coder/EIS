@@ -1,6 +1,6 @@
 # Dashboard IRL
 
-This page shows physical structures with their TRL, days to next TRL, interface counts, and one column per IRL.
+This page shows physical architecture with their TRL, days to next TRL, interface counts, and one column per IRL.
 
 ## Filters
 
@@ -12,7 +12,7 @@ Use the TRL filter list and the overdue toggles to reduce the visible rows.
 
 ## Editing
 
-Double-click a row to open the edit page for the selected physical structure.
+Double-click a row to open the edit page for the selected physical architecture.
 
 ## PDF
 

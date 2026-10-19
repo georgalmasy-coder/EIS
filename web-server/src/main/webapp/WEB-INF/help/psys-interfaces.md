@@ -1,6 +1,6 @@
 # Interface Management Help
 
-The Interface Management matrix shows interfaces between **Physical Structures**.
+The Interface Management matrix shows interfaces between **Physical Architecture**.
 
 - Rows represent the **From Physical Architecture**.
 - Columns represent the **To Physical Architecture**.
@@ -29,7 +29,7 @@ Double-click a matrix cell to open its interface dialog. You can also right-clic
 - **Create Interface** when the cell does not contain an interface.
 - **Edit Interface** when an interface already exists.
 
-The dialog shows information about the From and To Physical Structures. Select an IRL, an optional next IRL meeting date, and zero or more classifications.
+The dialog shows information about the From and To Physical Architecture. Select an IRL, an optional next IRL meeting date, and zero or more classifications.
 
 Classifications are sorted by code and divided into collapsed groups. Select a group to expand it and display its classifications. The group heading shows the codes currently selected in that group, for example `B_ Signals (B_, BA)`.
 

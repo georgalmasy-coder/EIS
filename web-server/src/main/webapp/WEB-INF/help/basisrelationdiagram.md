@@ -10,7 +10,7 @@ Use the view buttons in the top-right corner to switch between these layouts.
 
 ## How to read the diagram
 
-- Each box represents a requirement or physical structure item.
+- Each box represents a requirement or physical architecture item.
 - The leftmost label is the internal code shown in the XML data.
 - The title text in each box is the name of the item.
 - Lines connect related items.

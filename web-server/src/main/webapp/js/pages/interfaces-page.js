@@ -525,7 +525,7 @@ function isCellOverdue(cell) {
 
 function buildCellTooltip(fromStructure, toStructure, cell, lookup, isSelfReference) {
     if (isSelfReference) {
-        return "Same physical structure";
+        return "Same physical architecture";
     }
 
     const lines = [

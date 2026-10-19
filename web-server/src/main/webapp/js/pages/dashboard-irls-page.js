@@ -254,7 +254,7 @@ function renderDashboard(dashboard) {
 
     if (!dashboard.structures.length) {
         updateTableFooter(0, 0);
-        showEmptyState("No physical structures returned from endpoint.");
+        showEmptyState("No physical architecture returned from endpoint.");
         return;
     }
 
@@ -332,7 +332,7 @@ function renderBody(tableBody, dashboard, rows) {
         tr.className = isOverdue(structure) ? "dashboard-irls-row dashboard-irls-row--overdue" : "dashboard-irls-row";
         tr.dataset.entityId = structure.entityId || "";
         if (structure.entityId) {
-            tr.title = "Double-click to edit physical structure";
+            tr.title = "Double-click to edit physical architecture";
             tr.addEventListener("dblclick", () => {
                 openPhysicalStructureEditPage(structure.entityId);
             });

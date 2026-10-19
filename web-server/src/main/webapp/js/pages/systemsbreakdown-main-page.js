@@ -24,7 +24,7 @@ import {isFalsy, isTruthy} from "../core/utils.js";
 const LIST_URL = "/project/systembreakdown?cmd=list";
 const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 
-const EMPTY_FILTER_MESSAGE = "No physical structure match the current filters.";
+const EMPTY_FILTER_MESSAGE = "No physical architecture match the current filters.";
 
 const STORAGE_KEYS = {
     selectedView: "basis.systemsbreakdown.main.selectedView",
@@ -316,9 +316,9 @@ function buildExportBaseFileName(entityName, projectName) {
 }
 
 async function loadSystemsBreakdown() {
-    showListEmptyState("Loading physical structure…");
-    showDiagramEmptyState("horizontal", "Loading horizontal physical structure diagram…");
-    showDiagramEmptyState("vertical", "Loading vertical physical structure diagram…");
+    showListEmptyState("Loading physical architecture…");
+    showDiagramEmptyState("horizontal", "Loading horizontal physical architecture diagram…");
+    showDiagramEmptyState("vertical", "Loading vertical physical architecture diagram…");
     setText("loadStatus", "Loading", "");
 
     try {
@@ -338,7 +338,7 @@ async function loadSystemsBreakdown() {
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
-            throw new Error("The physical structure endpoint returned invalid XML.");
+            throw new Error("The physical architecture endpoint returned invalid XML.");
         }
 
         state.xmlDocument = xmlDocument;
@@ -372,9 +372,9 @@ async function loadSystemsBreakdown() {
             }, 50);
         }
     } catch (error) {
-        console.error("Failed to load physical structure", error);
+        console.error("Failed to load physical architecture", error);
         setText("loadStatus", "Error", "");
-        showListEmptyState(`Could not load physical structure. ${error.message}`);
+        showListEmptyState(`Could not load physical architecture. ${error.message}`);
         showDiagramEmptyState("horizontal", `Could not load horizontal diagram. ${error.message}`);
         showDiagramEmptyState("vertical", `Could not load vertical diagram. ${error.message}`);
     }

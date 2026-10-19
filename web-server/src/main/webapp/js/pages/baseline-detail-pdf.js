@@ -107,7 +107,7 @@ function createBaselineDetailPdf(options) {
         context,
         options,
         y,
-        "Physical structures",
+        "Physical architecture",
         options?.physicalStructures ?? options?.systemsBreakdown,
         generatedAt
     );

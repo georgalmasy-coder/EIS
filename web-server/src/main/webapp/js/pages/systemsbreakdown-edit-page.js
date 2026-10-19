@@ -236,7 +236,7 @@ async function loadDetail() {
     }
 
     setText("loadStatus", "Loading");
-    setText("dlgStatus", "Loading physical structure details…");
+    setText("dlgStatus", "Loading physical architecture details…");
 
     try {
         const response = await fetch(detailUrl, {
@@ -255,7 +255,7 @@ async function loadDetail() {
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
-            throw new Error("The physical structure endpoint returned invalid XML.");
+            throw new Error("The physical architecture endpoint returned invalid XML.");
         }
 
         state.currentDoc = xmlDocument;
@@ -286,9 +286,9 @@ async function loadDetail() {
         setText("loadStatus", "Loaded");
         setText("dlgStatus", "Loaded.");
     } catch (error) {
-        console.error("Failed to load physical structure detail", error);
+        console.error("Failed to load physical architecture detail", error);
         setText("loadStatus", "Error");
-        setText("dlgStatus", `Could not load physical structure detail. ${error.message}`);
+        setText("dlgStatus", `Could not load physical architecture detail. ${error.message}`);
     }
 }
 
@@ -629,7 +629,7 @@ async function saveCurrentSystem() {
 
         returnToPreviousPage();
     } catch (error) {
-        console.error("Failed to save physical structure", error);
+        console.error("Failed to save physical architecture", error);
         setText("dlgStatus", `Save failed. ${error.message}`);
         setText("loadStatus", "Error");
     } finally {
