@@ -12,6 +12,7 @@
     --interfaces-row-header-bg: var(--app-table-header-background);
     --interfaces-axis-bg: var(--app-table-header-background);
     --interfaces-self-bg: #e5e7eb;
+    --interfaces-header-group-gray-bg: #d1d5db;
 
     --interfaces-white: var(--app-surface-background);
     --interfaces-panel-bg: var(--app-surface-background);
@@ -424,6 +425,12 @@ body.theme-black .interfaces-info-bar {
 
 .interfaces-row-header:hover {
     filter: brightness(0.97);
+}
+
+.interfaces-column-header.interfaces-header-group-gray,
+.interfaces-row-header.interfaces-header-group-gray {
+    --app-table-header-foreground: #111827;
+    background: var(--interfaces-header-group-gray-bg);
 }
 
 .interfaces-cell {

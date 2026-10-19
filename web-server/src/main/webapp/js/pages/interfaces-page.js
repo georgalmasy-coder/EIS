@@ -259,11 +259,28 @@ function renderInterfaceMatrix(matrix) {
     }
 
     hideEmptyState();
-    renderHeader(tableHead, view);
-    renderBody(tableBody, view);
+    const headerGroups = buildHeaderGroups(view.columnStructures || view.structures);
+    renderHeader(tableHead, view, headerGroups);
+    renderBody(tableBody, view, headerGroups);
 }
 
-function renderHeader(tableHead, matrix) {
+function buildHeaderGroups(structures) {
+    const groups = new Map();
+    const headerGroups = new Map();
+
+    for (const structure of structures) {
+        // Descendants such as F-ELM-1.2 belong to F-ELM-1, not F-ELM-10.
+        const rootId = (structure.id || structure.entityId).trim().split(".")[0];
+        if (!groups.has(rootId)) {
+            groups.set(rootId, groups.size % 2 === 1);
+        }
+        headerGroups.set(structure.entityId, groups.get(rootId));
+    }
+
+    return headerGroups;
+}
+
+function renderHeader(tableHead, matrix, headerGroups) {
     const headerRow = document.createElement("tr");
 
     const axisCorner = document.createElement("th");
@@ -288,6 +305,7 @@ function renderHeader(tableHead, matrix) {
     for (const column of matrix.columnStructures || matrix.structures) {
         const th = document.createElement("th");
         th.className = "interfaces-column-header";
+        th.classList.toggle("interfaces-header-group-gray", headerGroups.get(column.entityId) === true);
         th.scope = "col";
         th.title = `${buildStructureLabel(column.id, column.name)}\nDouble-click to edit ${INTERFACE_STRUCTURE_LABEL}`;
         th.dataset.entityId = column.entityId || "";
@@ -303,7 +321,7 @@ function renderHeader(tableHead, matrix) {
     tableHead.replaceChildren(headerRow);
 }
 
-function renderBody(tableBody, matrix) {
+function renderBody(tableBody, matrix, headerGroups) {
     const fragment = document.createDocumentFragment();
 
     (matrix.rowStructures || matrix.structures).forEach((fromStructure, rowIndex) => {
@@ -329,6 +347,7 @@ function renderBody(tableBody, matrix) {
 
         const rowHeader = document.createElement("th");
         rowHeader.className = "interfaces-row-header";
+        rowHeader.classList.toggle("interfaces-header-group-gray", headerGroups.get(fromStructure.entityId) === true);
         rowHeader.scope = "row";
         rowHeader.title = `${buildStructureLabel(fromStructure.id, fromStructure.name)}\nDouble-click to edit ${INTERFACE_STRUCTURE_LABEL}`;
         rowHeader.dataset.entityId = fromStructure.entityId || "";
