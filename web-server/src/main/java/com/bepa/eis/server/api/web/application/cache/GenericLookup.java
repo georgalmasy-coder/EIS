@@ -34,8 +34,8 @@ public class GenericLookup {
         lookupSql = sql != null ? sql.toUpperCase() : null;
 
         if (GlobalConfiguration.isUdvMode()) {
-            customerId = GlobalConfiguration.isUdvMode() ? 1 : customerId;
-            projectId = GlobalConfiguration.isUdvMode() ? 1 : projectId;
+            customerId = GlobalConfiguration.isUdvMode() ? GlobalConfiguration.getDefaultCustomerId() : customerId;
+            projectId = GlobalConfiguration.isUdvMode() ? GlobalConfiguration.getDefaultProjectId() : projectId;
 
             lookupSql = lookupSql.replace("CUSTOMERID=?", "CUSTOMERID=" +customerId);
             lookupSql = lookupSql.replace("PROJECTID=?", "PROJECTID=" + projectId);

@@ -1,4 +1,6 @@
 :root{
+    --app-menu-background: #073f34;
+    --app-readiness-current-level: #008a65;
     --bg: #0f172a;
     --panel: rgba(17,28,51,.75);
     --panel2: rgba(11,18,36,.6);

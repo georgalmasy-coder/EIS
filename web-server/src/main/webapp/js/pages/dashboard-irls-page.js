@@ -1,8 +1,8 @@
-import {initMenu} from "../components/menu.js";
+import {initMenu, menuHasRoute} from "../components/menu.js";
 import {mountTopbar} from "../components/topbar.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {openEditDialog} from "../components/edit-dialog.js";
-import {downloadDashboardIrlPdf} from "./dashboard-irls-pdf.js";
+import {downloadDashboardIrlPdf} from "./dashboard-irls-pdf.js?v=20261021-srl-colors";
 import {setText} from "../core/dom.js";
 import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
 import {getAttribute, getChildText, hasXmlParseError} from "../core/xml.js";
@@ -36,7 +36,9 @@ function initializePageShell() {
     setText("userName", "-", "");
     setText("loadStatus", "Loading", "");
 
-    initMenu();
+    initMenu().then(() => {
+        document.getElementById("btnInterfaceManagement").hidden = !menuHasRoute("/web/view?page=psys-interfaces");
+    });
     initHelpDialog();
 
     const pdfButton = document.getElementById("btnDownloadPdf");
@@ -340,6 +342,7 @@ function renderBody(tableBody, dashboard, rows) {
 
         const idCell = buildTextCell("dashboard-irls-cell dashboard-irls-cell--id", structure.id, structure.description);
         const dots = (String(structure.id || "").match(/\./g) || []).length;
+        tr.classList.toggle("dashboard-irls-row--level-one", Boolean(structure.id) && dots === 0);
         if (dots > 0) {
             idCell.style.paddingLeft = `${dots * 15}px`;
         }

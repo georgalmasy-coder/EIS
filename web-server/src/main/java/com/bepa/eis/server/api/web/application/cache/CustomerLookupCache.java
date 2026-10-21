@@ -288,6 +288,10 @@ public class CustomerLookupCache {
         return getLookupCache(webSession).getIrlLookupValues(webSession.getCustomerId(), webSession.getProjectId());
     }
 
+    public static List<LookupValue> getSrlLookupValues(WebSession webSession) {
+        return getLookupCache(webSession).getSrlLookupValues(webSession.getCustomerId(), webSession.getProjectId());
+    }
+
     public static LookupValue getClassificationLookupValue(WebSession webSession, Integer lookupId) {
         return getClassificationLookupValue(webSession.getCustomerId(), webSession.getProjectId(), lookupId);
     }

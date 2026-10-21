@@ -16,9 +16,9 @@ const COLORS = {
     text: [31, 41, 55],
     muted: [100, 116, 139],
     border: [226, 232, 240],
-    headerBackground: [241, 245, 249],
-    sectionBackground: [248, 250, 252],
-    bandBackground: [236, 244, 255]
+    headerBackground: [244, 247, 243],
+    sectionBackground: [244, 247, 243],
+    bandBackground: [244, 247, 243]
 };
 
 const BASE_COLUMNS = [
@@ -109,7 +109,7 @@ function createDashboardIrlPdf(options) {
         return buildPdf(context);
     }
 
-    rows.forEach((row) => {
+    rows.forEach((row, rowIndex) => {
         y = ensureSpace(context, options, y, ROW_HEIGHT + 4, generatedAt, sectionTitle);
 
         if (y === getContentStartY()) {
@@ -131,7 +131,8 @@ function createDashboardIrlPdf(options) {
             row,
             y,
             options?.dashboard?.lookup || {},
-            options?.dashboard || {}
+            options?.dashboard || {},
+            rowIndex
         );
     });
 
@@ -354,11 +355,13 @@ function drawTableHeader(page, dashboard, y) {
     return y - COLUMN_HEADER_HEIGHT;
 }
 
-function drawTableRow(page, row, y, lookup, dashboard) {
+function drawTableRow(page, row, y, lookup, dashboard, rowIndex) {
     const columns = getColumns(dashboard);
     const values = buildRowValues(row, lookup, dashboard);
     const rowTop = y;
     const rowBottom = y - ROW_HEIGHT + 4;
+    const levelOne = Boolean(row?.id) && !String(row.id).includes(".");
+    const background = rowIndex % 2 === 0 || levelOne ? COLORS.bandBackground : [255, 255, 255];
     let x = MARGIN;
 
     columns.forEach((column, index) => {
@@ -368,7 +371,7 @@ function drawTableRow(page, row, y, lookup, dashboard) {
             rowBottom,
             column.width,
             ROW_HEIGHT,
-            [255, 255, 255]
+            background
         );
 
         const value = values[index];
@@ -703,17 +706,18 @@ function finalizeOpenPages(context, generatedAt, options) {
     });
 }
 
-function buildPdf(context) {
+export function buildPdf(context, fontEncoding = null) {
     const objects = [];
+    const encoding = fontEncoding === "WinAnsiEncoding" ? " /Encoding /WinAnsiEncoding" : "";
 
     const fontHelvetica = addObject(
         objects,
-        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+        `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica${encoding} >>`
     );
 
     const fontHelveticaBold = addObject(
         objects,
-        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>"
+        `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold${encoding} >>`
     );
 
     const pageObjects = [];

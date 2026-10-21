@@ -382,6 +382,13 @@ public class LookupCache {
         return new ArrayList<>();
     }
 
+    public List<LookupValue> getSrlLookupValues(Integer customerId, Integer projectId) {
+        if (customerId != null && projectId != null) {
+            return getLookupProjectCache(customerId, projectId).getSrlLookupValues();
+        }
+        return new ArrayList<>();
+    }
+
     public LookupValue getClassificationLookupValue(Integer customerId, Integer projectId, Integer lookupId) {
 
         if (customerId != null && projectId != null && lookupId != null) {

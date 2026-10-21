@@ -6,7 +6,7 @@
     height: 100vh;
     padding: 14px 14px 12px;
     overflow: hidden;
-    background: linear-gradient(180deg, #073f34 0%, #052f27 100%);
+    background: linear-gradient(180deg, var(--app-menu-background) 0%, #052f27 100%);
     border-right: 1px solid rgba(101, 163, 13, 0.16);
     box-shadow: 8px 0 30px rgba(0, 0, 0, 0.22);
     transform: none;

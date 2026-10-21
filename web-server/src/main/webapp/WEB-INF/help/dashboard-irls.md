@@ -18,3 +18,5 @@ Double-click a row to open the edit page for the selected physical architecture.
 
 Use the PDF button to download the current view as `dashboard-irls-<projectName>.pdf`.
 
+The N2 button beside PDF opens Interface Management for Physical Architecture. It is available when that page is included in your menu.
+

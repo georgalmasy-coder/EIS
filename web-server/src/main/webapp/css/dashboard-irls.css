@@ -394,7 +394,7 @@ body.dashboard-irls-document {
     min-width: 110px;
     width: 110px;
     max-width: 110px;
-    font-weight: 800;
+    font-weight: 400;
 }
 
 .dashboard-irls-cell--name {
@@ -404,7 +404,15 @@ body.dashboard-irls-document {
     min-width: 190px;
     width: 190px;
     max-width: 190px;
-    font-weight: 600;
+    font-weight: 400;
+}
+
+.dashboard-irls-icon-button[hidden] { display: none; }
+a.dashboard-irls-icon-button { text-decoration: none; }
+
+.dashboard-irls-row--level-one .dashboard-irls-cell--id,
+.dashboard-irls-row--level-one .dashboard-irls-cell--name {
+    font-weight: 800;
 }
 
 .dashboard-irls-cell--trl {

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/menu.css" />
+    <link rel="stylesheet" href="../css/tabs-list.css" />
+    <link rel="stylesheet" href="../css/generel.css" />
+    <link rel="stylesheet" href="../css/topbar.css" />
+    <link rel="stylesheet" href="../css/help-dialog.css" />
+    <link rel="stylesheet" href="../css/dashboard-srls.css?v=20261021-columns" />
+</head>
+<body class="dashboard-srls-document">
+<button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">&gt;</button>
+<div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
+<nav id="sideMenu" class="side-menu" aria-label="Side menu">
+    <h2>Menu</h2>
+    <div id="menuStatus" class="menu-status">Loading menu...</div>
+    <ul id="menuRoot" class="menu-root" aria-label="Menu root"></ul>
+</nav>
+<main class="app dashboard-srls-app">
+    <div class="content dashboard-srls-content">
+        <header class="topbar"></header>
+        <section class="page-layout dashboard-srls-layout" aria-label="System readiness dashboard">
+            <div class="dashboard-srls-header">
+                <div class="workspace-header">
+                    <div id="pageEyebrow" class="workspace-eyebrow">PROJECT MANAGEMENT</div>
+                    <div id="pageHeading" class="workspace-heading">Monitor progress and control SRLs</div>
+                    <div id="pageHelpText" class="workspace-helptext">Review project readiness and the SRL of each physical system.</div>
+                </div>
+                <div class="dashboard-srls-actions" aria-label="Page actions">
+                <a id="btnInterfaceManagement" class="dashboard-srls-n2-button" href="/web/view?page=psys-interfaces" hidden aria-label="Interface Management - Physical Architecture" title="Interface Management - Physical Architecture">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor">N2</text></svg>
+                </a>
+                <button id="btnDownloadPdf" class="dashboard-srls-pdf-button" type="button" aria-label="Download dashboard as PDF" title="Download dashboard as PDF" disabled>
+                    <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                        <path d="M8 3.5h11.5L25 9v19.5H8V3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                        <path d="M19.5 3.5V9H25" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                        <rect x="6" y="15" width="20" height="9" rx="1.6" fill="currentColor"></rect>
+                        <text x="16" y="21.7" text-anchor="middle" font-size="6.4" font-weight="800">PDF</text>
+                    </svg>
+                </button>
+                </div>
+            </div>
+            <div id="srlStatus" class="dashboard-srls-status" role="status" aria-live="polite">Loading SRL calculations...</div>
+            <div id="srlWorkspace" class="dashboard-srls-workspace" hidden>
+                <div class="table-frame page-frame dashboard-srls-frame">
+                    <div class="table-scroll dashboard-srls-scroll">
+                        <table class="data-table page-table dashboard-srls-table" aria-label="SRL by system">
+                            <colgroup><col class="dashboard-srls-code-column" /><col class="dashboard-srls-name-column" /><col class="dashboard-srls-count-column" /><col /></colgroup>
+                            <thead>
+                            <tr class="dashboard-srls-summary"><td colspan="3"><h2>Project PRL</h2></td><td><div id="srlProjectSummary" class="dashboard-srls-summary-track" aria-label="Project PRL"></div></td></tr>
+                            <tr><th scope="col" data-resize-column="code">SBS Code</th><th scope="col" data-resize-column="name"><span>System Name</span></th><th scope="col" data-resize-column="count" class="dashboard-srls-count-heading"># Subsystems</th><th scope="col"><div id="srlScale" class="dashboard-srls-scale" aria-label="Active SRL levels"></div></th></tr>
+                            </thead>
+                            <tbody id="srlSystems"></tbody>
+                        </table>
+                    </div>
+                    <div class="data-table-footer"><span id="srlSystemCount" class="data-table-footer-count"></span></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+<script type="module" src="../js/pages/dashboard-srls-page.js?v=20261021-columns"></script>
+<script src="../js/tabs-list.js"></script>
+</body>
+</html>

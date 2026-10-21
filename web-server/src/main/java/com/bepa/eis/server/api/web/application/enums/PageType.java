@@ -7,7 +7,8 @@ public enum PageType {
     PROJECT_OVERVIEW_PAGE("projectoverview","html-pages/projectoverview.html", "Project Overview", true, "PROJECT MANAGEMENT", "Project Overview", "Review the current project status and key information."),
     MY_PROJECTS_PAGE("myprojects", "html-pages/allProjects.html", "All Projects", true, "PORTFOLIO", "Projects", "Choose a project or continue the work that needs attention."),
 
-    DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT MANAGEMENT", "Dashboard", "Monitor the current status and key metrics."),
+    DASHBOARD_IRLS_PAGE("dashboard-irls","html-pages/dashboard-irls.html", "Dashboard IRL", true, "PROJECT MANAGEMENT", "Monitor progress and control TRL's & IRL's", "Monitor the current status and key metrics."),
+    DASHBOARD_SRLS_PAGE("dashboard-srls", "html-pages/dashboard-srls.html", "Dashboard SRL", true, "PROJECT MANAGEMENT", "Monitor progress and control SRL's", "Review project readiness and the SRL of each physical system."),
     DASHBOARD_SYSTEMS_TEAMWORK_PAGE("dashboard-systems-teamwork","html-pages/dashboard-systems-teamwork.html", "Physical Interface Teamwork", true, "PROJECT DASHBOARD", "Physical Interface Teamwork", "Monitor the current status and key metrics."),
 
     STAKEHOLDER_REQUIREMENT_MAIN_PAGE("stakeholderrequirement-main","html-pages/stakeholderrequirement-main.html", "Stakeholder Requirement", true, "R-F-L-P MODEL - REQUIREMENTS", "Stakeholder Requirement", "Work with stakeholder requirements in the workspace below."),

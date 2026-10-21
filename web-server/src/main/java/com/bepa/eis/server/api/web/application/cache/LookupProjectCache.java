@@ -42,6 +42,10 @@ public class LookupProjectCache {
         return irlCache.getListOfActiveLookupValues();
     }
 
+    public List<LookupValue> getSrlLookupValues() {
+        return srlCache.getListOfActiveLookupValues();
+    }
+
     public LookupValue getClassificationLookupValue(Integer lookupId) {
         return lookupId != null ? classificationCache.getLookupValueById(lookupId) : null;
     }
