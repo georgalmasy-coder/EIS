@@ -1,4 +1,5 @@
 import {initMenu} from "../components/menu.js";
+import {downloadInterfaceXlsx} from "../components/interface-xlsx-export.js";
 import {installInterfaceFlowArrows} from "../components/interface-flow-arrows.js?rev=2";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
@@ -46,6 +47,21 @@ function initializePageShell() {
 }
 
 function initializeEvents() {
+    document.getElementById("interfacesExcelButton")?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const table = document.querySelector(".interfaces-table");
+        if (!table?.tBodies[0]?.rows.length) return;
+        button.disabled = true;
+        try {
+            await downloadInterfaceXlsx({table, endpoint: INTERFACE_BASE_PATH,
+                title: `N² - ${INTERFACE_STRUCTURE_LABEL}`,
+                project: document.getElementById("projectName")?.textContent || ""});
+        } catch (error) {
+            window.alert(error.message);
+        } finally {
+            button.disabled = !table.tBodies[0]?.rows.length;
+        }
+    });
     installInterfaceFlowArrows(document.getElementById("interfacesTableBody"));
     initializeDialogEvents();
     initializeContextMenuEvents();
@@ -54,6 +70,8 @@ function initializeEvents() {
 }
 
 async function loadInterfaceMatrix() {
+    const excelButton = document.getElementById("interfacesExcelButton");
+    if (excelButton) excelButton.disabled = true;
     showEmptyState("Loading interface matrix...");
     setText("loadStatus", "Loading", "");
 
@@ -219,6 +237,11 @@ function applyTopPanel(xmlDocument) {
 
 function renderInterfaceMatrix(matrix) {
     const view = buildVisibleMatrix(matrix, state.showOverdueOnly, state.selectedIrlIds);
+    const excelButton = document.getElementById("interfacesExcelButton");
+    if (excelButton) {
+        excelButton.disabled = !(view.rowStructures || view.structures).length
+            || !(view.columnStructures || view.structures).length;
+    }
     const structureCount = matrix.structures.length;
 
     setText(

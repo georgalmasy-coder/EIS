@@ -6,6 +6,7 @@ import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
+import com.bepa.eis.server.api.web.application.views.common.MatrixXlsxExporter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,11 +26,14 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException {
         WebSession webSession = getWebSessionFromRequest(request, response);
+        if (webSession == null) return;
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
         try {
-            if ("remove".equals(getCommandParameter(request))) {
+            if ("export".equals(getCommandParameter(request))) {
+                handleExport(webSession, request, response);
+            } else if ("remove".equals(getCommandParameter(request))) {
                 handleRemove(webSession, request, response);
             } else {
                 super.doPost(request, response);
@@ -118,7 +122,14 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     @Override
     public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        throw new RuntimeException("Invalid export request");
+        var snapshot = new com.fasterxml.jackson.databind.ObjectMapper()
+                .readValue(request.getInputStream(), MatrixXlsxExporter.Snapshot.class);
+        byte[] data = MatrixXlsxExporter.create(snapshot);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"N2-diagram.xlsx\"");
+        response.setHeader("Cache-Control", "no-store");
+        response.setContentLength(data.length);
+        response.getOutputStream().write(data);
     }
 
     protected EntityType resolveEntityType(HttpServletRequest request) {

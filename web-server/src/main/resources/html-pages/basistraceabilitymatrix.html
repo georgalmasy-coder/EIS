@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/basisstakeholderrequirement.css" />
-    <link rel="stylesheet" href="../css/basistraceability.css" />
+    <link rel="stylesheet" href="../css/basistraceability.css?rev=status-icons-1" />
 </head>
 
 <body class="traceability-document">
@@ -53,6 +53,9 @@
                     <a class="traceability-back-button" href="javascript:history.go(-1)" aria-label="Back" title="Back">
                         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.7 5.3a1 1 0 0 1 0 1.4L6.4 11H20a1 1 0 1 1 0 2H6.4l4.3 4.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z"></path></svg>
                     </a>
+                    <button id="traceabilityExcelButton" class="traceability-back-button traceability-excel-button" type="button" title="Export Traceability Matrix to Excel" aria-label="Export Traceability Matrix to Excel" disabled>
+                        <img src="../svg/excel-export.svg" width="22" height="22" alt="" />
+                    </button>
                 </div>
             </div>
 
@@ -72,6 +75,10 @@
                 </div>
 
                 <div class="traceability-legend" id="traceabilityLegend" aria-label="Traceability color legend"></div>
+                <button id="traceabilityViewToggle" class="traceability-view-toggle" type="button" aria-label="Use icon view" aria-pressed="true">
+                    <span class="traceability-view-switch" aria-hidden="true"></span>
+                    <span class="traceability-view-label">Icons</span>
+                </button>
             </div>
 
             <div class="page-body traceability-body">
@@ -174,7 +181,7 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/basistraceability-page.js"></script>
+<script type="module" src="../js/pages/basistraceability-page.js?rev=center-icons-1"></script>
 </body>
 </html>
 

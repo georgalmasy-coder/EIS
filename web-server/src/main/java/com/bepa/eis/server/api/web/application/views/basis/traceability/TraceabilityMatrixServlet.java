@@ -8,6 +8,7 @@ import com.bepa.eis.common.providers.entityrelation.RelationProvider;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider;
+import com.bepa.eis.server.api.web.application.views.common.MatrixXlsxExporter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -65,6 +66,10 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
         long startTime = System.currentTimeMillis();
 
         try {
+            if ("export".equals(getCommandParameter(request)) && (pathInfo.isEmpty() || "/".equals(pathInfo))) {
+                handleExport(webSession, request, response);
+                return;
+            }
             if ("/matchingwords".equals(pathInfo)) {
                 handleMatchingWordsRequest(webSession, request, response);
                 return;
@@ -136,7 +141,13 @@ public class TraceabilityMatrixServlet extends GenericDataProviderServlet {
 
     @Override
     public void handleExport(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        throw new RuntimeException("Invalid export request");
+        var snapshot = new ObjectMapper().readValue(request.getInputStream(), MatrixXlsxExporter.Snapshot.class);
+        byte[] data = MatrixXlsxExporter.create(snapshot);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"Traceability-matrix.xlsx\"");
+        response.setHeader("Cache-Control", "no-store");
+        response.setContentLength(data.length);
+        response.getOutputStream().write(data);
     }
 
     private GenericXmlDocument buildTraceabilityMatrix(WebSession webSession) {

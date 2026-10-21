@@ -1,4 +1,6 @@
 import {initMenu} from "../components/menu.js";
+import {userPreferences} from "../core/user-preferences.js";
+import {downloadInterfaceXlsx} from "../components/interface-xlsx-export.js?rev=center-icons-1";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -21,6 +23,12 @@ const STAKEHOLDER_REQUIREMENT_EDIT_PAGE_URL = "/web/view?page=stakeholderrequire
 const RETURN_URL = "/web/view?page=basistraceabilitymatrix";
 
 const FALLBACK_STYLE_ID = "normal";
+const VIEW_MODE_KEY = "traceability.matrix.viewMode";
+const STATUS_ICONS = {
+    green: {label: "Confirmed relations", symbol: "✓", color: "#287A45", path: "m9 12 2 2 4-4"},
+    yellow: {label: "Possible relations", symbol: "?", color: "#996600", path: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"},
+    grayitalic: {label: "Not relevant", symbol: "⊘", color: "#62666B", path: "m4.9 4.9 14.2 14.2"}
+};
 
 const CELL_ACTIONS = {
     confirmRelation: "confirmRelation",
@@ -30,6 +38,8 @@ const CELL_ACTIONS = {
 };
 
 const state = {
+    matrix: null,
+    viewMode: userPreferences.getItem(VIEW_MODE_KEY) === "colors" ? "colors" : "icons",
     contextCell: null,
     contextRow: null,
     contextColumn: null,
@@ -55,11 +65,40 @@ function initializePageShell() {
 }
 
 function initializeEvents() {
+    updateViewModeControl();
+    document.getElementById("traceabilityViewToggle")?.addEventListener("click", () => {
+        state.viewMode = state.viewMode === "icons" ? "colors" : "icons";
+        userPreferences.setItem(VIEW_MODE_KEY, state.viewMode);
+        updateViewModeControl();
+        closeTraceabilityContextMenu();
+        clearContextState();
+        if (state.matrix) {
+            renderLegend(state.matrix.styles);
+            renderTraceabilityMatrix(state.matrix);
+        }
+    });
+    document.getElementById("traceabilityExcelButton")?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const table = document.querySelector(".traceability-table");
+        if (!table?.tBodies[0]?.rows.length) return;
+        button.disabled = true;
+        try {
+            await downloadInterfaceXlsx({table, endpoint: "/basis/basistraceability",
+                title: "Traceability Matrix",
+                project: document.getElementById("projectName")?.textContent || ""});
+        } catch (error) {
+            window.alert(error.message);
+        } finally {
+            button.disabled = !table.tBodies[0]?.rows.length;
+        }
+    });
     initializeContextMenuEvents();
     initializeRequirementDialogEvents();
 }
 
 async function loadTraceabilityMatrix() {
+    const excelButton = document.getElementById("traceabilityExcelButton");
+    if (excelButton) excelButton.disabled = true;
     showEmptyState("Loading traceability matrix…");
     setText("loadStatus", "Loading", "");
 
@@ -84,6 +123,7 @@ async function loadTraceabilityMatrix() {
         }
 
         const matrix = parseTraceabilityMatrixDocument(xmlDocument);
+        state.matrix = matrix;
 
         applyTopPanel(xmlDocument);
         injectTraceabilityStyles(matrix.styles);
@@ -317,7 +357,13 @@ function renderLegend(styles) {
         item.title = style.id;
 
         const swatch = document.createElement("span");
-        swatch.className = `traceability-legend-swatch ${getDynamicStyleClass(style.id, "traceability-xml-style")}`;
+        const icon = state.viewMode === "icons" ? createStatusIcon(style.id) : null;
+        if (icon) {
+            swatch.className = "traceability-legend-icon";
+            swatch.appendChild(icon);
+        } else {
+            swatch.className = `traceability-legend-swatch ${getDynamicStyleClass(style.id, "traceability-xml-style")}`;
+        }
 
         const label = document.createElement("span");
         label.textContent = style.name || style.id;
@@ -327,7 +373,46 @@ function renderLegend(styles) {
     }
 }
 
+function updateViewModeControl() {
+    const icons = state.viewMode === "icons";
+    document.body.classList.toggle("traceability-icon-view", icons);
+    const toggle = document.getElementById("traceabilityViewToggle");
+    if (toggle) {
+        toggle.setAttribute("aria-pressed", String(icons));
+        toggle.title = icons ? "Switch to Color" : "Switch to Icons";
+        toggle.querySelector(".traceability-view-label").textContent = icons ? "Icons" : "Color";
+    }
+}
+
+function createStatusIcon(styleId) {
+    const definition = STATUS_ICONS[String(styleId || "").toLowerCase()];
+    if (!definition) return null;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("traceability-status-icon");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", definition.label);
+    svg.dataset.exportSymbol = definition.symbol;
+    svg.style.color = definition.color;
+    const circle = document.createElementNS(svg.namespaceURI, "circle");
+    circle.setAttribute("cx", "12");
+    circle.setAttribute("cy", "12");
+    circle.setAttribute("r", "10");
+    const path = document.createElementNS(svg.namespaceURI, "path");
+    path.setAttribute("d", definition.path);
+    svg.append(circle, path);
+    return svg;
+}
+
 function renderTraceabilityMatrix(matrix) {
+    updateViewModeControl();
+    const excelButton = document.getElementById("traceabilityExcelButton");
+    if (excelButton) excelButton.disabled = !matrix.rows.length || !matrix.columns.length;
     setText("traceabilityRowCount", String(matrix.rows.length || matrix.rowCount), "");
     setText("traceabilityColumnCount", String(matrix.columns.length || matrix.columnCount), "");
     setText("traceabilityColumnGroupLabel", matrix.columnGroupLabel || "Systems Requirement", "");
@@ -460,6 +545,13 @@ function renderBody(tableBody, matrix) {
             td.setAttribute("data-column-index", String(columnIndex));
             td.setAttribute("data-cell-style", cell.style || FALLBACK_STYLE_ID);
             td.setAttribute("data-cell-value", cell.value || "");
+            if (state.viewMode === "icons") {
+                const icon = createStatusIcon(cell.style);
+                if (icon) {
+                    td.appendChild(icon);
+                    td.title += `\n${icon.getAttribute("aria-label")}`;
+                }
+            }
 
             td.addEventListener("dblclick", (event) => {
                 event.preventDefault();
@@ -473,24 +565,11 @@ function renderBody(tableBody, matrix) {
                 openTraceabilityContextMenu(event.clientX, event.clientY, row, column, cell, td);
             });
 
-            renderCellValue(td, cell.value);
-
             tr.appendChild(td);
         }
 
         tableBody.appendChild(tr);
     });
-}
-
-function renderCellValue(cellElement, value) {
-    cellElement.innerHTML = "";
-
-    if (value) {
-        const valueSpan = document.createElement("span");
-        valueSpan.className = "traceability-cell-value";
-        valueSpan.textContent = value;
-        cellElement.appendChild(valueSpan);
-    }
 }
 
 function openSystemRequirementEditPage(column) {
