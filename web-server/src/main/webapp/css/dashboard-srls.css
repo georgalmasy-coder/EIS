@@ -21,9 +21,10 @@ html, body.dashboard-srls-document { height: 100%; overflow: hidden; }
 .dashboard-srls-summary h2 { margin: 0; color: var(--app-text-primary); font-size: 1.25rem; white-space: nowrap; }
 .dashboard-srls-summary-track { position: relative; margin: 0 56px; height: 60px; }
 .dashboard-srls-summary-line { position: absolute; left: 0; right: 0; top: 12px; height: 3px; background: var(--app-text-primary); transform: translateY(-50%); }
-.dashboard-srls-summary-item { position: absolute; top: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; transform: translateX(-50%); font-size: 0.8rem; color: var(--app-text-secondary); text-align: center; white-space: nowrap; }
+.dashboard-srls-summary-item { position: absolute; top: 0; width: 24px; display: flex; flex-direction: column; align-items: center; gap: 5px; transform: translateX(-50%); font-size: 0.8rem; color: var(--app-text-secondary); text-align: center; white-space: nowrap; }
 .dashboard-srls-project-marker { flex-shrink: 0; width: 24px; height: 24px; border: 2px solid var(--app-text-primary); border-radius: 50%; background: var(--app-text-primary); }
 .dashboard-srls-summary-item--average .dashboard-srls-project-marker { background: var(--app-readiness-current-level); border-color: var(--app-readiness-current-level); }
+.dashboard-srls-summary-item--combined .dashboard-srls-project-marker { background: linear-gradient(to right, var(--app-readiness-current-level) 50%, var(--app-text-primary) 50%); border-color: var(--app-text-primary); }
 .dashboard-srls-frame { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; border-radius: 10px; }
 .dashboard-srls-scroll { flex: 1; min-height: 0; overflow: auto; }
 .dashboard-srls-table { --srl-code-width: 160px; --srl-name-width: 280px; --srl-count-width: 140px; width: 100%; min-width: 950px; table-layout: fixed; border-collapse: collapse; }
@@ -53,8 +54,10 @@ html, body.dashboard-srls-document { height: 100%; overflow: hidden; }
 .dashboard-srls-group-toggle:focus-visible { outline: 2px solid var(--app-accent-primary); outline-offset: 3px; }
 .dashboard-srls-scale, .dashboard-srls-system-track { position: relative; margin: 0 56px; height: 24px; }
 .dashboard-srls-scale span { position: absolute; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; font: inherit; }
-.dashboard-srls-progress { position: absolute; left: 0; top: 50%; height: 2px; background: var(--app-text-primary); transform: translateY(-50%); }
-.dashboard-srls-system-marker { position: absolute; top: 50%; width: 10px; height: 10px; border: 1px solid var(--app-surface-background); border-radius: 50%; background: var(--app-status-error-text); transform: translate(-50%, -50%); }
+.dashboard-srls-progress { position: absolute; left: 0; top: 50%; height: 3px; background: var(--app-text-primary); transform: translateY(-50%); }
+.dashboard-srls-system-marker { position: absolute; top: 50%; width: 20px; height: 20px; border: 1px solid var(--app-surface-background); border-radius: 50%; background: var(--app-status-error-text); transform: translate(-50%, -50%); }
+.dashboard-srls-system-marker--average { background: var(--app-readiness-current-level); }
+.dashboard-srls-system-marker--combined { background: linear-gradient(to right, var(--app-readiness-current-level) 50%, var(--app-status-error-text) 50%); }
 .dashboard-srls-unavailable { font-size: 0.8rem; color: var(--app-text-secondary); }
 @media (max-width: 700px) {
     .dashboard-srls-summary h2 { font-size: 1rem; }

@@ -3,11 +3,11 @@ import {initMenu, menuHasRoute} from "../components/menu.js";
 import {mountTopbar} from "../components/topbar.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {openEditDialog} from "../components/edit-dialog.js";
-import {downloadDashboardSrlPdf} from "./dashboard-srls-pdf.js?v=20261021-pdf";
+import {downloadDashboardSrlPdf} from "./dashboard-srls-pdf.js?v=20261022-prl-overlap";
 import {setText} from "../core/dom.js";
 import {applyTopPanelFromDocument} from "../core/page-header.js";
 import {hasXmlParseError} from "../core/xml.js";
-import {parseSrlDashboard, srlPosition} from "./dashboard-srls-model.js?v=20261020-tooltips";
+import {parseSrlDashboard, srlPosition, buildPrlMarkers} from "./dashboard-srls-model.js?v=20261022-all-level-tooltips";
 
 const ENDPOINT = "/master/srlcalculation?cmd=overview";
 let loadedDashboard = null;
@@ -96,12 +96,12 @@ function renderDashboard(dashboard) {
         const name = element("span", "dashboard-srls-group-name");
         name.append(element("strong", "dashboard-srls-name", group.system.name));
         name.title = group.system.name;
-        const track = renderSystemTrack(group.summary ? Math.round(group.summary.average) : null,
-            dashboard.levels, group.summary ? dashboard.levelCodes.get(Math.round(group.summary.average)) || "" : "");
+        const track = renderSystemTrack(group.system, dashboard.levels, dashboard.levelCodes);
         toggle.append(label, name, count, track);
         bindSystemEditor(header, group.system.entityId);
         heading.append(toggle);
         header.append(heading);
+        applyCalculationTooltip(header, track, group.system);
         fragment.append(header);
         const children = [];
         for (const system of group.children) {
@@ -117,8 +117,8 @@ function renderDashboard(dashboard) {
             row.append(code, element("td", "dashboard-srls-name", system.name), document.createElement("td"));
             row.querySelector(".dashboard-srls-name").title = system.name;
             const valueCell = document.createElement("td");
-            const description = dashboard.levelCodes.get(system.level) || "";
-            const track = renderSystemTrack(system.level, dashboard.levels, description);
+            const track = renderSystemTrack(system, dashboard.levels, dashboard.levelCodes);
+            applyCalculationTooltip(row, track, system);
             valueCell.append(track);
             row.append(valueCell);
             fragment.append(row);
@@ -135,21 +135,53 @@ function renderDashboard(dashboard) {
     setText("srlSystemCount", `${dashboard.rows.length} systems · ${dashboard.measuredCount} calculated`);
 }
 
-function renderSystemTrack(level, levels, description) {
+function applyCalculationTooltip(row, track, system) {
+    if (!system.calculationTooltip) return;
+    const tooltip = [track.title, system.calculationTooltip].filter(Boolean).join("\n\n");
+    row.title = tooltip;
+    track.title = tooltip;
+    const ownMarker = track.querySelector(".dashboard-srls-system-marker:not(.dashboard-srls-system-marker--average)");
+    if (ownMarker) ownMarker.title += `\n\n${system.calculationTooltip}`;
+    const name = row.querySelector(".dashboard-srls-name");
+    if (name) name.title = `${system.name}\n\n${tooltip}`;
+    const groupName = row.querySelector(".dashboard-srls-group-name");
+    if (groupName) groupName.title = `${system.name}\n\n${tooltip}`;
+}
+
+function renderSystemTrack(system, levels, levelCodes) {
     const track = element("div", "dashboard-srls-system-track");
-    if (level === null) {
+    const markers = [];
+    const descriptions = [];
+    if (system.level !== null) {
+        markers.push({level: system.level, className: "", description: `Own SRL: ${system.level}${levelCodes.get(system.level) ? ` — ${levelCodes.get(system.level)}` : ""}`});
+    }
+    if (system.descendantAverage !== null) {
+        markers.push({level: system.descendantAverage, className: " dashboard-srls-system-marker--average",
+            description: `Descendant average SRL: ${system.descendantAverage} (level 1: ${system.averageSourceCode}; ${system.measuredDescendantCount} calculated systems)`});
+    }
+    if (!markers.length) {
         track.append(element("span", "dashboard-srls-unavailable", "Not calculated"));
         return track;
     }
-    const position = `${srlPosition(level, levels)}%`;
+    if (markers.length === 2 && markers[0].level === markers[1].level) {
+        markers[0].className = " dashboard-srls-system-marker--combined";
+        markers[0].description += `\n${markers[1].description}`;
+        markers.pop();
+    }
     const line = element("span", "dashboard-srls-progress");
-    line.style.width = position;
-    const marker = element("span", "dashboard-srls-system-marker");
-    marker.style.left = position;
-    track.append(line, marker);
+    line.style.width = `${Math.max(...markers.map(marker => srlPosition(marker.level, levels)))}%`;
+    track.append(line);
+    for (const {level, className, description} of markers) {
+        const marker = element("span", `dashboard-srls-system-marker${className}`);
+        marker.style.left = `${srlPosition(level, levels)}%`;
+        marker.title = description;
+        track.append(marker);
+        descriptions.push(description);
+    }
+    if (system.level === null) descriptions.unshift("Own SRL: Not calculated");
     track.setAttribute("role", "img");
-    track.setAttribute("aria-label", description);
-    track.title = description;
+    track.setAttribute("aria-label", descriptions.join("\n"));
+    track.title = descriptions.join("\n");
     return track;
 }
 
@@ -172,14 +204,16 @@ function renderSummary(summary, levels, levelCodes, container = document.getElem
         return;
     }
     container.append(element("span", "dashboard-srls-summary-line"));
-    for (const [key, label] of [["lowest", "Low"], ["average", "Current Level"], ["highest", "High"]]) {
-        const level = Math.round(summary[key]);
-        const item = element("div", `dashboard-srls-summary-item dashboard-srls-summary-item--${key}`);
+    for (const {level, keys, label} of buildPrlMarkers(summary)) {
+        const classes = keys.map(key => `dashboard-srls-summary-item--${key}`).join(" ");
+        const item = element("div", `dashboard-srls-summary-item ${classes}${keys.length > 1 ? " dashboard-srls-summary-item--combined" : ""}`);
         item.style.left = `${srlPosition(level, levels)}%`;
         item.setAttribute("aria-label", `${label}: SRL ${level}`);
         item.title = levelCodes.get(level) || "";
-        item.append(element("span", "dashboard-srls-project-marker"),
-            element("span", "", label));
+        const labelElement = element("span", "", label);
+        if (level === levels[0]) labelElement.style.alignSelf = "flex-start";
+        if (level === levels.at(-1)) labelElement.style.alignSelf = "flex-end";
+        item.append(element("span", "dashboard-srls-project-marker"), labelElement);
         container.append(item);
     }
 }

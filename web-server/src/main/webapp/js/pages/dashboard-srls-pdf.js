@@ -1,5 +1,5 @@
 import {buildPdf} from "./dashboard-irls-pdf.js?v=20261021-pdf-encoding";
-import {srlPosition} from "./dashboard-srls-model.js?v=20261020-tooltips";
+import {srlPosition, buildPrlMarkers} from "./dashboard-srls-model.js?v=20261022-prl-overlap";
 
 const WIDTH = 841.89, HEIGHT = 595.28, MARGIN = 28;
 const CODE_X = 32, NAME_X = 194, COUNT_X = 398, CHART_LEFT = 464, CHART_RIGHT = WIDTH - 48;
@@ -66,10 +66,16 @@ export function createDashboardSrlPdf({dashboard, topPanel = {}, generatedAt = n
         text(commands, 'Project PRL', MARGIN, HEIGHT - 91, true, 11);
         if (dashboard.summary && dashboard.levels.length) {
             line(commands, CHART_LEFT, HEIGHT - 82, CHART_RIGHT);
-            for (const [key, label] of [['lowest', 'Low'], ['average', 'Current Level'], ['highest', 'High']]) {
-                const x = chartX(Math.round(dashboard.summary[key]), dashboard.levels);
-                dot(commands, x, HEIGHT - 82, 4.5, key === 'average' ? GREEN : TEXT);
-                text(commands, label, x - label.length * 1.7, HEIGHT - 98, false, 7, MUTED);
+            for (const {level, keys, label} of buildPrlMarkers(dashboard.summary)) {
+                const x = chartX(level, dashboard.levels);
+                dot(commands, x, HEIGHT - 82, 4.5, keys.length === 1 && keys[0] === 'average' ? GREEN : TEXT);
+                if (keys.length > 1) {
+                    commands.push(`q ${number(x - 4.5)} ${number(HEIGHT - 86.5)} 4.5 9 re W n`);
+                    dot(commands, x, HEIGHT - 82, 4.5, GREEN);
+                    commands.push('Q');
+                }
+                const labelX = Math.max(CHART_LEFT, Math.min(CHART_RIGHT - label.length * 3.5, x - label.length * 1.7));
+                text(commands, label, labelX, HEIGHT - 98, false, 7, MUTED);
             }
         }
         y = HEIGHT - 121;
@@ -84,7 +90,7 @@ export function createDashboardSrlPdf({dashboard, topPanel = {}, generatedAt = n
     };
     newPage();
     let rowIndex = 0;
-    const drawRow = (system, level, count = null) => {
+    const drawRow = (system, count = null) => {
         const bold = system.codeLevel === 1;
         const dots = (String(system.code).match(/\./g) || []).length;
         const indent = bold ? 0 : Math.min(90, dots * 10);
@@ -106,10 +112,19 @@ export function createDashboardSrlPdf({dashboard, topPanel = {}, generatedAt = n
             }
             if (offset === 0) {
                 if (count !== null) text(commands, count, COUNT_X, y - 14, bold);
-                if (level !== null && dashboard.levels.length) {
-                    const end = chartX(level, dashboard.levels);
+                const markerLevels = [system.level, system.descendantAverage].filter(Number.isFinite);
+                if (markerLevels.length && dashboard.levels.length) {
+                    const end = chartX(Math.max(...markerLevels), dashboard.levels);
                     line(commands, CHART_LEFT, y - 12, end);
-                    dot(commands, end, y - 12, 2.5, RED);
+                    if (system.level !== null) dot(commands, chartX(system.level, dashboard.levels), y - 12, 5, RED);
+                    if (Number.isFinite(system.descendantAverage)) {
+                        const x = chartX(system.descendantAverage, dashboard.levels);
+                        const combined = system.level === system.descendantAverage;
+                        // Paint only the left half green when both values share a dot.
+                        if (combined) commands.push(`q ${number(x - 5)} ${number(y - 17)} 5 10 re W n`);
+                        dot(commands, x, y - 12, 5, GREEN);
+                        if (combined) commands.push('Q');
+                    }
                 } else text(commands, 'Not calculated', CHART_LEFT, y - 14, false, 7, MUTED);
             }
             line(commands, MARGIN, y - partHeight, WIDTH - MARGIN, BORDER);
@@ -120,8 +135,8 @@ export function createDashboardSrlPdf({dashboard, topPanel = {}, generatedAt = n
         rowIndex++;
     };
     for (const group of dashboard.groups) {
-        drawRow(group.system, group.summary ? Math.round(group.summary.average) : null, String(group.children.length));
-        for (const system of group.children) drawRow(system, system.level);
+        drawRow(group.system, String(group.children.length));
+        for (const system of group.children) drawRow(system);
     }
     if (!dashboard.rows.length) text(commands, 'No active systems in this project.', MARGIN, y - 18);
     pages.forEach((page, index) => {

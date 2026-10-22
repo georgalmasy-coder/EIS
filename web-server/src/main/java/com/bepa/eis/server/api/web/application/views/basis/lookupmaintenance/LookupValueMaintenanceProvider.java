@@ -2,6 +2,8 @@ package com.bepa.eis.server.api.web.application.views.basis.lookupmaintenance;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.project.ClassificationType;
+import com.bepa.eis.common.enums.entity.EntityDataElement;
+import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.common.providers.GenericProvider;
 import com.bepa.eis.server.dataprovider.cache.EhcacheProvider;
 import org.slf4j.Logger;
@@ -156,28 +158,132 @@ public class LookupValueMaintenanceProvider extends GenericProvider {
         validateRow(lookupRow);
 
         try (Connection connection = getDataSource().getConnection()) {
-            connection.setAutoCommit(false);
-
-            try {
-                switch (lookupType) {
-                    case TRL -> saveTrlRow(connection, customerId, projectId, lookupRow);
-                    case IRL -> saveIrlRow(connection, customerId, projectId, lookupRow);
-                    case SRL -> saveSrlRow(connection, customerId, projectId, lookupRow);
-                    case CLASSIFICATION -> throw new IllegalArgumentException("Classification rows must be saved through saveClassificationRow.");
-                }
-
-                connection.commit();
-            } catch (SQLException | RuntimeException e) {
-                connection.rollback();
-                throw e;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            saveLookupRow(connection, customerId, projectId, lookupRow);
 
             EhcacheProvider.clearCacheEntry(customerId);
         } catch (SQLException e) {
             log.error("Error saving lookup row {}", lookupRow, e);
             throw new RuntimeException(e);
+        }
+    }
+
+    // One transaction covers usage validation and every affected lookup row.
+    void saveLookupRow(Connection connection, Integer customerId, Integer projectId, LookupRow lookupRow) throws SQLException {
+        LookupType lookupType = lookupRow.lookupType();
+        connection.setAutoCommit(false);
+
+        try {
+            LookupRow stored = loadStoredRow(connection, customerId, projectId, lookupRow);
+            boolean sharedLevel = stored.level() >= 1 && stored.level() <= 9;
+            if (!lookupRow.active()) {
+                if (sharedLevel) {
+                    ensureTrlIsUnused(connection, customerId, projectId, stored.level());
+                }
+                ensureIrlIsUnused(connection, customerId, projectId,
+                        sharedLevel ? stored.level() + 1 : resolveIrlOrder(stored.code()));
+            }
+
+            // Use the persisted level/code for cascades, never values supplied by the browser.
+            lookupRow = new LookupRow(lookupType, stored.rowId(), stored.level(), stored.code(),
+                    lookupRow.name(), lookupRow.description(), lookupRow.active(), lookupRow.color());
+            switch (lookupType) {
+                case TRL -> saveTrlRow(connection, customerId, projectId, lookupRow);
+                case IRL -> saveIrlRow(connection, customerId, projectId, lookupRow);
+                case SRL -> saveSrlRow(connection, customerId, projectId, lookupRow);
+                case CLASSIFICATION -> throw new IllegalArgumentException("Classification rows must be saved through saveClassificationRow.");
+            }
+
+            if (sharedLevel) {
+                synchronizeActive(connection, customerId, projectId, stored.level(), lookupRow.active());
+            }
+
+            connection.commit();
+        } catch (SQLException | RuntimeException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
+        }
+
+    }
+
+    private LookupRow loadStoredRow(Connection connection, Integer customerId, Integer projectId, LookupRow row) throws SQLException {
+        String sql = switch (row.lookupType()) {
+            case TRL -> "SELECT * FROM dbo.TRL WITH (UPDLOCK, HOLDLOCK) WHERE CustomerId = ? AND ProjectId = ? AND TRLId = ?";
+            case IRL -> "SELECT * FROM dbo.IRL WITH (UPDLOCK, HOLDLOCK) WHERE CustomerId = ? AND ProjectId = ? AND IRLPK = ?";
+            case SRL -> "SELECT * FROM dbo.SRL WITH (UPDLOCK, HOLDLOCK) WHERE CustomerId = ? AND ProjectId = ? AND SrlId = ?";
+            case CLASSIFICATION -> throw new IllegalArgumentException("Classification rows must be saved through saveClassificationRow.");
+        };
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            setInt(statement, row.rowId(), 3);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    throw new IllegalArgumentException("Lookup row was not found for current customer and project.");
+                }
+                return switch (row.lookupType()) {
+                    case TRL -> mapTrlRow(resultSet);
+                    case IRL -> mapIrlRow(resultSet);
+                    case SRL -> mapSrlRow(resultSet);
+                    case CLASSIFICATION -> throw new IllegalArgumentException("Unsupported lookup type.");
+                };
+            }
+        }
+    }
+
+    private void ensureTrlIsUnused(Connection connection, Integer customerId, Integer projectId, int level) throws SQLException {
+        // TrlId in ENTITY_ELEMENT contains TRLLevel, not the TRL table's primary key.
+        String sql = "SELECT TOP 1 1 FROM dbo.ENTITY E WITH (HOLDLOCK) " +
+                "JOIN dbo.ENTITY_ELEMENT EE WITH (HOLDLOCK) ON EE.CustomerId = E.CustomerId AND EE.ProjectId = E.ProjectId " +
+                "AND EE.EntityType = E.EntityType AND EE.EntityId = E.EntityId AND EE.Version = E.Version " +
+                "WHERE E.CustomerId = ? AND E.ProjectId = ? AND E.Latest = 1 " +
+                "AND E.EntityType = ? AND EE.EntityDataElementType = ? AND EE.IntegerValue >= ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            statement.setInt(3, EntityType.SYSTEMS_BREAKDOWN.getId());
+            statement.setInt(4, EntityDataElement.TRLID.getId());
+            statement.setInt(5, level);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    throw new IllegalArgumentException("Cannot deactivate readiness level " + level +
+                            " and higher: TRL " + level + " or higher is used by a latest system version in the current project (including inactive systems).");
+                }
+            }
+        }
+    }
+
+    private void ensureIrlIsUnused(Connection connection, Integer customerId, Integer projectId, int order) throws SQLException {
+        String sql = "SELECT TOP 1 1 FROM dbo.INTERFACES I WITH (HOLDLOCK) " +
+                "JOIN dbo.IRL R WITH (HOLDLOCK) ON R.CustomerId = I.CustomerId AND R.ProjectId = I.ProjectId AND R.IrlId = I.IrlId " +
+                "WHERE I.CustomerId = ? AND I.ProjectId = ? AND I.Latest = 1 AND " + irlSortExpression("R.IRLCode") + " >= ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, customerId, 1);
+            setInt(statement, projectId, 2);
+            statement.setInt(3, order);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    throw new IllegalArgumentException("Cannot deactivate readiness levels: an affected IRL level is used by a latest interface version in the current project (all entity types, including inactive entities).");
+                }
+            }
+        }
+    }
+
+    private void synchronizeActive(Connection connection, Integer customerId, Integer projectId, int level, boolean active) throws SQLException {
+        String comparison = active ? " = ?" : " >= ?";
+        List<String> statements = List.of(
+                "UPDATE dbo.TRL SET Active = ? WHERE CustomerId = ? AND ProjectId = ? AND TRLLevel" + comparison,
+                "UPDATE dbo.IRL SET Active = ? WHERE CustomerId = ? AND ProjectId = ? AND IRLLevel" + comparison,
+                "UPDATE dbo.SRL SET Active = ? WHERE CustomerId = ? AND ProjectId = ? AND SRLLevel" + comparison);
+        for (String sql : statements) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setBoolean(1, active);
+                setInt(statement, customerId, 2);
+                setInt(statement, projectId, 3);
+                statement.setInt(4, level);
+                statement.executeUpdate();
+            }
         }
     }
 

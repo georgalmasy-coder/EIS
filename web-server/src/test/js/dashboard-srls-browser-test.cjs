@@ -34,6 +34,16 @@ const server = http.createServer((req, res) => {
     if (url.pathname === '/master/srlcalculation') {
         res.setHeader('Content-Type', 'application/xml');
         if (mode === 'error') { res.writeHead(500); return res.end(); }
+        if (mode === 'diagnostics' || mode === 'markers' || mode === 'prl-pair') return res.end(`<SrlCalculationDocument><srlCalculation><meta>
+            <lookupMaxima maxTrlId="9" maxIrlId="9"/>
+            <systemsMeta><system entityId="1" code="S-1" codeLevel="1" name="Root" trlId="4" normalizedTrl="0.444"/>
+            <system entityId="2" code="S-1.2" codeLevel="2" name="Child" trlId="4" normalizedTrl="0.444"/>
+            <system entityId="3" code="S-1.2.3" codeLevel="3" name="Grandchild" trlId="4" normalizedTrl="0.444"/></systemsMeta>
+            <srlMeta><srl srlId="1"/><srl srlId="2"/><srl srlId="3"/><srl srlId="6" code="Readiness 6"/><srl srlId="7"/><srl srlId="9"/></srlMeta></meta>
+            <calculation><SystemsInterfaces>${[2, 3].map(id => `<systemInterface fromEntityId="${id}" toEntityId="${id}" irlValue="9"/>`).join('')}</SystemsInterfaces>
+            <componentSrl>${mode === 'diagnostics' ? '<component entityId="1" measuredSrlId="6" weightedTrlSum="0.444" interfaceCount="1" srl="0.444" measuredSrlRange="0.377 - 0.524"/>' : mode === 'markers' ? '<component entityId="1" measuredSrlId="2"/>' : ''}${[2, 3].map(id => `<component entityId="${id}" measuredSrlId="${mode === 'prl-pair' && id === 3 ? 7 : mode === 'markers' && id === 3 ? 3 : 6}" weightedTrlSum="0.444" interfaceCount="1" srl="0.444" measuredSrlRange="0.377 - 0.524"/>`).join('')}</componentSrl>
+            <srlTransitionModel><level srlId="6" referenceValue="0.444" lowerBound="0.377" upperBound="0.525" upperBoundInclusive="false"/></srlTransitionModel>
+            </calculation></srlCalculation></SrlCalculationDocument>`);
         const systems = mode === 'empty' ? '' : mode === 'complete'
             ? '<system entityId="10" code="S-1" codeLevel="1" name="One"/><system entityId="2" code="S-2" codeLevel="1" name="Two"/>'
             : '<system entityId="1" code="S-1" codeLevel="1" name="Group One"/><system entityId="10" code="S-1.10" codeLevel="2" name="Ten &amp; more"/><system entityId="2" code="S-1.2" codeLevel="2" name="Two"/><system entityId="3" code="S-1.2.1" codeLevel="3" name="Missing"/><system entityId="4" code="S-2" codeLevel="1" name="Group Two"/>';
@@ -139,10 +149,11 @@ async function main() {
     })()`), 'subsystem header aligns with counts');
     assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"), 'rgb(0, 138, 101)');
     assert.equal(await run("document.querySelectorAll('#srlSystems .dashboard-srls-summary-item').length"), 0);
-    assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').getAttribute('aria-label')"), 'Readiness 4');
+    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').getAttribute('aria-label')"), /Descendant average SRL: 4/);
     assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-marker').style.left"), '37.5%');
-    assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), 'Readiness 4');
-    assert.equal(await run("document.querySelector('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track').title"), 'Readiness 3');
+    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 4/);
+    assert.match(await run("document.querySelector('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track').title"), /Own SRL: 3.*Readiness 3\nDescendant average SRL: 4/);
+    assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-system-marker--average')).backgroundColor"), await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"));
     assert.equal(await run("document.querySelector('.dashboard-srls-summary-item--average').title"), 'Readiness 4');
     await run("document.querySelector('.dashboard-srls-group-toggle').click()");
     assert.equal(await run("document.querySelectorAll('#srlSystems tr:not([hidden])').length"), 5);
@@ -224,7 +235,7 @@ async function main() {
         return style.whiteSpace === 'nowrap' && style.textOverflow === 'ellipsis' && style.overflow === 'hidden';
     })()`), 'System Name remains on one line');
     assert.equal(await run("document.querySelector('#pageHeading').textContent"), 'SRL fixture');
-    assert.equal(await run("document.querySelectorAll('.dashboard-srls-system-marker').length"), 3);
+    assert.equal(await run("document.querySelectorAll('.dashboard-srls-system-marker').length"), 6);
     assert.equal(await run("document.querySelector('#srlWorkspace').hidden"), false);
     assert(await run("document.querySelector('.dashboard-srls-frame').getBoundingClientRect().bottom <= innerHeight"));
     const screenshot = await send('Page.captureScreenshot', {format: 'png'});
@@ -253,11 +264,58 @@ async function main() {
     mode = 'legacy';
     await send('Page.reload');
     await wait("!document.querySelector('#srlWorkspace').hidden && document.querySelectorAll('#srlSystems tr').length === 5");
-    assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), 'Readiness 4');
+    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 4/);
     const srlHeaderTypography = await run(`(() => {
         const typography = node => { const s = getComputedStyle(node); return [s.fontFamily, s.fontSize, s.fontWeight, s.lineHeight, s.color]; };
         return [...document.querySelectorAll('.dashboard-srls-table thead th[data-resize-column], #srlScale span')].map(typography);
     })()`);
+    mode = 'diagnostics';
+    await send('Page.reload');
+    await wait("document.querySelectorAll('#srlSystems tr').length === 3");
+    for (const selector of ['.dashboard-srls-group', '.dashboard-srls-group-name', '.dashboard-srls-group-name .dashboard-srls-name', '.dashboard-srls-group .dashboard-srls-system-track', '.dashboard-srls-group .dashboard-srls-system-marker']) {
+        assert.match(await run(`document.querySelector('${selector}').title`), /SRL calculation \(temporary test details\): S-1\n/,
+            'Level 1 calculation details are available on the collapsed group row, name and marker');
+    }
+    await run("document.querySelector('.dashboard-srls-group-toggle').click()");
+    for (const selector of ['#srlSystems tr:not(.dashboard-srls-group)', '#srlSystems tr:last-child']) {
+        const tooltip = await run(`document.querySelector('${selector} .dashboard-srls-system-track').title`);
+        assert.match(tooltip, /Readiness 6/);
+        assert.match(tooltip, /9\/9 × 4\/9/);
+        assert.match(tooltip, /unrounded AA \/ 1 ≈ 0\.444/);
+        assert.equal(await run(`document.querySelector('${selector}').title`), tooltip);
+        assert.match(await run(`document.querySelector('${selector} .dashboard-srls-name').title`), /SRL calculation/);
+    }
+    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 6/);
+    assert.deepEqual(await run(`([...document.querySelectorAll('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track')].map(track => {
+        const marker = track.querySelector('.dashboard-srls-system-marker--combined');
+        return [track.querySelectorAll('.dashboard-srls-system-marker').length, marker?.style.left,
+            marker ? getComputedStyle(marker).backgroundImage : null];
+    }))`), [[1, '62.5%', 'linear-gradient(to right, rgb(0, 138, 101) 50%, rgb(220, 38, 38) 50%)'],
+        [1, '62.5%', 'linear-gradient(to right, rgb(0, 138, 101) 50%, rgb(220, 38, 38) 50%)']],
+    'Matching SRLs render one dot with green on the left and red on the right');
+    assert.deepEqual(await run("[...document.querySelectorAll('#srlProjectSummary .dashboard-srls-summary-item')].map(n => n.textContent)"), ['Low / Current Level / High']);
+    assert(await run(`(() => {
+        const style = getComputedStyle(document.querySelector('.dashboard-srls-summary-item--combined .dashboard-srls-project-marker'));
+        return style.backgroundImage === 'linear-gradient(to right, rgb(0, 138, 101) 50%, ' + style.borderTopColor + ' 50%)';
+    })()`));
+    mode = 'prl-pair';
+    await send('Page.reload');
+    await wait("document.querySelector('#srlProjectSummary')?.textContent.includes('Current Level / High') && document.querySelectorAll('#srlProjectSummary .dashboard-srls-summary-item').length === 2");
+    assert.deepEqual(await run("[...document.querySelectorAll('#srlProjectSummary .dashboard-srls-summary-item')].map(n => n.textContent)"), ['Low', 'Current Level / High']);
+    mode = 'markers';
+    await send('Page.reload');
+    await wait("document.querySelectorAll('#srlSystems tr').length === 3");
+    await run("document.querySelector('.dashboard-srls-group-toggle').click()");
+    assert.deepEqual(await run(`(() => {
+        const tracks = [...document.querySelectorAll('#srlSystems .dashboard-srls-system-track')];
+        return tracks.map(track => [
+            track.querySelector('.dashboard-srls-system-marker:not(.dashboard-srls-system-marker--average)')?.style.left,
+            track.querySelector('.dashboard-srls-system-marker--average')?.style.left || null,
+            track.querySelector('.dashboard-srls-progress').style.width
+        ]);
+    })()`), [['12.5%', '50%', '50%'], ['62.5%', '50%', '62.5%'], ['25%', '50%', '50%']],
+    'Own XML level stays red, every descendant inherits the level 1 green mean, and each line reaches the rightmost marker');
+    mode = 'normal';
     await send('Page.navigate', {url: `http://127.0.0.1:${server.address().port}/web/view?page=dashboard-irls`});
     await wait("document.querySelectorAll('.dashboard-irls-row').length === 4");
     await checkN2Button();
