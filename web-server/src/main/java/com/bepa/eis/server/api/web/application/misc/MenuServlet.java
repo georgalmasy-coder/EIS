@@ -67,6 +67,7 @@ public class MenuServlet extends GenericServlet {
                 Menu menu = menuProvider.getMenuItems(getSessionId(req));
 
                 Document document = menu.toXmlDocument();
+                document.getDocumentElement().setAttribute("development-mode", String.valueOf(GlobalConfiguration.isUdvMode()));
                 appendTopPanel(document, webSession);
 
                 appendProjects(document, webSession);

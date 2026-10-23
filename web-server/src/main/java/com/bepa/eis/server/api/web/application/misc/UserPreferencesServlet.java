@@ -1,6 +1,7 @@
 package com.bepa.eis.server.api.web.application.misc;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.providers.UserPreferenceProvider;
 import com.bepa.eis.common.utilities.JsonUtil;
 import com.bepa.eis.server.api.generic.GenericServlet;
@@ -43,6 +44,15 @@ public class UserPreferencesServlet extends GenericServlet {
         boolean remove = "true".equalsIgnoreCase(request.getParameter("remove"));
 
         try {
+            if (HelpLanguage.PREFERENCE_KEY.equals(key)) {
+                if (!GlobalConfiguration.isUdvMode()) {
+                    JsonUtil.writeJson(response, HttpServletResponse.SC_FORBIDDEN, "{\"error\":\"Language selection is only available in development mode\"}");
+                    return;
+                }
+                if (!remove && !HelpLanguage.isSupported(value)) {
+                    throw new IllegalArgumentException("Unsupported language");
+                }
+            }
             new UserPreferenceProvider(webSession).setSetting(webSession.getUserId(), key, remove ? null : value);
             JsonUtil.writeJson(response, HttpServletResponse.SC_OK, "{\"ok\":true}");
         } catch (IllegalArgumentException e) {

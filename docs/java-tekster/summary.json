@@ -1,0 +1,98 @@
+{
+  "scannedFiles": 620,
+  "allLiterals": 13838,
+  "selected": {
+    "occurrences": 2157,
+    "unique": 1727,
+    "files": 208
+  },
+  "groups": {
+    "Log": {
+      "occurrences": 500,
+      "unique": 469,
+      "files": 113
+    },
+    "Teknisk / ikke udvalgt": {
+      "occurrences": 8003,
+      "unique": 3214,
+      "files": 436
+    },
+    "Øvrige tekstkandidater": {
+      "occurrences": 514,
+      "unique": 417,
+      "files": 70
+    },
+    "Fejl og exceptions": {
+      "occurrences": 534,
+      "unique": 403,
+      "files": 115
+    },
+    "SQL": {
+      "occurrences": 2446,
+      "unique": 1204,
+      "files": 139
+    },
+    "Korte tekstkandidater": {
+      "occurrences": 95,
+      "unique": 38,
+      "files": 17
+    },
+    "Svar og validering": {
+      "occurrences": 13,
+      "unique": 13,
+      "files": 5
+    },
+    "Udeladt efter ønske": {
+      "occurrences": 732,
+      "unique": 416,
+      "files": 143
+    },
+    "Indlejret HTML/XML": {
+      "occurrences": 2,
+      "unique": 2,
+      "files": 2
+    },
+    "Eksport og import": {
+      "occurrences": 79,
+      "unique": 43,
+      "files": 14
+    },
+    "Enum-tekster": {
+      "occurrences": 901,
+      "unique": 820,
+      "files": 29
+    },
+    "SQL med gemt fejltekst": {
+      "occurrences": 3,
+      "unique": 3,
+      "files": 2
+    },
+    "Skærmtekster og metadata": {
+      "occurrences": 16,
+      "unique": 16,
+      "files": 1
+    }
+  },
+  "modules": {
+    "web-server": {
+      "occurrences": 947,
+      "unique": 678,
+      "files": 137
+    },
+    "common": {
+      "occurrences": 1096,
+      "unique": 1005,
+      "files": 60
+    },
+    "integration-server": {
+      "occurrences": 41,
+      "unique": 36,
+      "files": 3
+    },
+    "timesheet-app": {
+      "occurrences": 73,
+      "unique": 59,
+      "files": 8
+    }
+  }
+}
