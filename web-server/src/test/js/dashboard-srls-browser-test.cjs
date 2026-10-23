@@ -151,10 +151,10 @@ async function main() {
     assert.equal(await run("document.querySelectorAll('#srlSystems .dashboard-srls-summary-item').length"), 0);
     assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').getAttribute('aria-label')"), /Descendant average SRL: 4/);
     assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-marker').style.left"), '37.5%');
-    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 4/);
-    assert.match(await run("document.querySelector('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track').title"), /Own SRL: 3.*Readiness 3\nDescendant average SRL: 4/);
+    assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-group .dashboard-srls-system-track'))"), /Descendant average SRL: 4/);
+    assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track'))"), /Own SRL: 3.*Readiness 3\nDescendant average SRL: 4/);
     assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-system-marker--average')).backgroundColor"), await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"));
-    assert.equal(await run("document.querySelector('.dashboard-srls-summary-item--average').title"), 'Readiness 4');
+    assert.equal(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-summary-item--average'))"), 'Readiness 4');
     await run("document.querySelector('.dashboard-srls-group-toggle').click()");
     assert.equal(await run("document.querySelectorAll('#srlSystems tr:not([hidden])').length"), 5);
     assert.equal(await run("document.querySelector('.dashboard-srls-group-summary')"), null);
@@ -264,7 +264,7 @@ async function main() {
     mode = 'legacy';
     await send('Page.reload');
     await wait("!document.querySelector('#srlWorkspace').hidden && document.querySelectorAll('#srlSystems tr').length === 5");
-    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 4/);
+    assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-group .dashboard-srls-system-track'))"), /Descendant average SRL: 4/);
     const srlHeaderTypography = await run(`(() => {
         const typography = node => { const s = getComputedStyle(node); return [s.fontFamily, s.fontSize, s.fontWeight, s.lineHeight, s.color]; };
         return [...document.querySelectorAll('.dashboard-srls-table thead th[data-resize-column], #srlScale span')].map(typography);
@@ -273,19 +273,41 @@ async function main() {
     await send('Page.reload');
     await wait("document.querySelectorAll('#srlSystems tr').length === 3");
     for (const selector of ['.dashboard-srls-group', '.dashboard-srls-group-name', '.dashboard-srls-group-name .dashboard-srls-name', '.dashboard-srls-group .dashboard-srls-system-track', '.dashboard-srls-group .dashboard-srls-system-marker']) {
-        assert.match(await run(`document.querySelector('${selector}').title`), /SRL calculation \(temporary test details\): S-1\n/,
+        assert.match(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector}'))`), /SRL calculation \(temporary test details\): S-1\n/,
             'Level 1 calculation details are available on the collapsed group row, name and marker');
     }
     await run("document.querySelector('.dashboard-srls-group-toggle').click()");
     for (const selector of ['#srlSystems tr:not(.dashboard-srls-group)', '#srlSystems tr:last-child']) {
-        const tooltip = await run(`document.querySelector('${selector} .dashboard-srls-system-track').title`);
+        const tooltip = await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector} .dashboard-srls-system-track'))`);
         assert.match(tooltip, /Readiness 6/);
         assert.match(tooltip, /9\/9 × 4\/9/);
         assert.match(tooltip, /unrounded AA \/ 1 ≈ 0\.444/);
-        assert.equal(await run(`document.querySelector('${selector}').title`), tooltip);
-        assert.match(await run(`document.querySelector('${selector} .dashboard-srls-name').title`), /SRL calculation/);
+        assert.equal(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector}'))`), tooltip);
+        assert.match(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector} .dashboard-srls-name'))`), /SRL calculation/);
     }
-    assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').title"), /Descendant average SRL: 6/);
+    assert(await run(`(() => {
+        const row = document.querySelector('#srlSystems tr:last-child');
+        row.dispatchEvent(new PointerEvent('pointerover', {bubbles: true, clientX: innerWidth - 10, clientY: innerHeight - 10}));
+        const popup = document.querySelector('#srlCalculationTooltip');
+        const rect = popup.getBoundingClientRect();
+        return !popup.hidden && popup.textContent === row.dataset.srlTooltip
+            && popup.textContent.includes('Result: SRL 6') && !row.hasAttribute('title') && !row.querySelector('[title]')
+            && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight;
+    })()`), 'Custom tooltip displays complete result and stays within viewport');
+    await send('Emulation.setDeviceMetricsOverride', {width: 650, height: 400, deviceScaleFactor: 1, mobile: false});
+    assert(await run(`(() => {
+        const row = document.querySelector('#srlSystems tr:last-child');
+        row.focus();
+        const popup = document.querySelector('#srlCalculationTooltip');
+        popup.scrollTop = popup.scrollHeight;
+        return !popup.hidden && popup.scrollHeight > popup.clientHeight && popup.scrollTop > 0
+            && getComputedStyle(popup).whiteSpace === 'pre-wrap'
+            && row.getAttribute('aria-describedby') === popup.id;
+    })()`), 'Long tooltip wraps and scrolls to final lines on a small screen, including keyboard focus');
+    await run("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}))");
+    assert(await run("document.querySelector('#srlCalculationTooltip').hidden"), 'Escape closes tooltip');
+    await send('Emulation.setDeviceMetricsOverride', {width: 1500, height: 950, deviceScaleFactor: 1, mobile: false});
+    assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-group .dashboard-srls-system-track'))"), /Descendant average SRL: 6/);
     assert.deepEqual(await run(`([...document.querySelectorAll('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track')].map(track => {
         const marker = track.querySelector('.dashboard-srls-system-marker--combined');
         return [track.querySelectorAll('.dashboard-srls-system-marker').length, marker?.style.left,

@@ -14,6 +14,7 @@ let loadedDashboard = null;
 let loadedTopPanel = {};
 
 document.addEventListener("DOMContentLoaded", () => {
+    initializeCalculationTooltips();
     initializeColumnResize();
     mountTopbar();
     initMenu().then(() => {
@@ -118,9 +119,9 @@ function renderDashboard(dashboard) {
             row.querySelector(".dashboard-srls-name").title = system.name;
             const valueCell = document.createElement("td");
             const track = renderSystemTrack(system, dashboard.levels, dashboard.levelCodes);
-            applyCalculationTooltip(row, track, system);
             valueCell.append(track);
             row.append(valueCell);
+            applyCalculationTooltip(row, track, system);
             fragment.append(row);
         }
         toggle.setAttribute("aria-controls", children.map(row => row.id).join(" "));
@@ -146,6 +147,66 @@ function applyCalculationTooltip(row, track, system) {
     if (name) name.title = `${system.name}\n\n${tooltip}`;
     const groupName = row.querySelector(".dashboard-srls-group-name");
     if (groupName) groupName.title = `${system.name}\n\n${tooltip}`;
+    for (const target of [row, ...row.querySelectorAll("[title]")]) {
+        target.dataset.srlTooltip = target.title;
+        target.removeAttribute("title");
+    }
+    if (!row.querySelector("button")) row.tabIndex = 0;
+}
+
+function initializeCalculationTooltips() {
+    const popup = element("div", "dashboard-srls-calculation-tooltip");
+    popup.id = "srlCalculationTooltip";
+    popup.setAttribute("role", "tooltip");
+    popup.hidden = true;
+    document.body.append(popup);
+    let owner = null;
+    let hideTimer;
+    const hide = () => {
+        clearTimeout(hideTimer);
+        owner?.removeAttribute("aria-describedby");
+        owner = null;
+        popup.hidden = true;
+    };
+    const deferHide = () => {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(hide, 180);
+    };
+    const show = (target, event) => {
+        clearTimeout(hideTimer);
+        if (owner === target && !popup.hidden) return;
+        hide();
+        owner = target;
+        popup.textContent = target.dataset.srlTooltip;
+        popup.scrollTop = 0;
+        popup.hidden = false;
+        target.setAttribute("aria-describedby", popup.id);
+        const anchor = target.getBoundingClientRect();
+        const x = event.type === "pointerover" ? event.clientX : anchor.left;
+        const y = event.type === "pointerover" ? event.clientY + 16 : anchor.bottom + 8;
+        popup.style.left = `${Math.max(8, Math.min(x, innerWidth - popup.offsetWidth - 8))}px`;
+        popup.style.top = `${Math.max(8, Math.min(y, innerHeight - popup.offsetHeight - 8))}px`;
+    };
+    document.addEventListener("pointerover", event => {
+        if (popup.contains(event.target)) {
+            clearTimeout(hideTimer);
+            return;
+        }
+        const target = event.target.closest("[data-srl-tooltip]");
+        if (target) show(target, event);
+        else deferHide();
+    });
+    document.addEventListener("pointerout", event => {
+        if (event.target.closest("[data-srl-tooltip]") || popup.contains(event.target)) deferHide();
+    });
+    document.addEventListener("focusin", event => {
+        const target = event.target.closest("[data-srl-tooltip]");
+        if (target) show(target, event);
+    });
+    document.addEventListener("focusout", deferHide);
+    document.addEventListener("keydown", event => { if (event.key === "Escape") hide(); });
+    window.addEventListener("resize", hide);
+    document.querySelector(".dashboard-srls-scroll")?.addEventListener("scroll", hide);
 }
 
 function renderSystemTrack(system, levels, levelCodes) {
