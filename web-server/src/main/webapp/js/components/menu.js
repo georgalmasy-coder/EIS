@@ -10,6 +10,7 @@ const MENU_COLLAPSED_WIDTH = 72;
 const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
 const MENU_COLLAPSED_STORAGE_KEY = "eis.menu.collapsed";
 const USER_MENU_CLOSE_DELAY_MS = 2000;
+const LANGUAGE_PREFERENCE_KEY = "eis.language";
 const SESSION_EXPIRED_PATH = "/session-expired.html";
 const COLLAPSE_ICON_SVG = `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -35,6 +36,8 @@ const state = {
         userName: "-"
     },
     userMenu: null,
+    developmentMode: false,
+    savingLanguage: false,
     projectSettingsMenu: null,
     organisationSettingsMenu: null
 };
@@ -266,6 +269,7 @@ function buildMenu(doc, statusElement, rootElement) {
 
     if (!mainItems.length) {
         setText(statusElement, "Ingen menupunkter blev returneret.", "");
+        refreshSidebarChrome();
         return;
     }
 
@@ -796,11 +800,11 @@ function refreshSidebarChrome() {
     }
 
     if (moreBtn) {
-        const shouldShow = !state.collapsed && state.userMenu != null;
+        const shouldShow = !state.collapsed && (state.userMenu != null || state.developmentMode);
         moreBtn.style.display = shouldShow ? "flex" : "none";
     }
 
-    if (subMenu && state.userMenu) {
+    if (subMenu) {
         renderUserSubMenu(subMenu, state.userMenu);
     }
 
@@ -811,9 +815,9 @@ function refreshSidebarChrome() {
 
 function renderUserSubMenu(container, userMenuNode) {
     container.replaceChildren();
-    const subItems = Array.from(userMenuNode.getElementsByTagName("submain-menu-item"));
+    const subItems = Array.from(userMenuNode?.getElementsByTagName("submain-menu-item") || []);
 
-    if (subItems.length === 0) {
+    if (subItems.length === 0 && !state.developmentMode) {
         container.hidden = true;
         return;
     }
@@ -834,6 +838,53 @@ function renderUserSubMenu(container, userMenuNode) {
     });
 
     container.appendChild(ul);
+    if (state.developmentMode) {
+        appendLanguageChoices(ul);
+    }
+}
+
+function appendLanguageChoices(list) {
+    const selected = userPreferences.getItem(LANGUAGE_PREFERENCE_KEY) === "dk" ? "dk" : "en";
+    for (const [language, label] of [["dk", "Dansk"], ["en", "Engelsk"]]) {
+        const item = document.createElement("li");
+        item.className = "menu-language-item";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "menu-language-choice";
+        button.dataset.language = language;
+        button.setAttribute("aria-pressed", String(language === selected));
+        button.disabled = state.savingLanguage;
+        const flag = document.createElement("img");
+        flag.src = `/svg/flags/${language}.svg`;
+        flag.alt = "";
+        flag.width = 24;
+        flag.height = 16;
+        const text = document.createElement("span");
+        text.textContent = label;
+        const check = document.createElement("span");
+        check.className = "menu-language-check";
+        check.setAttribute("aria-hidden", "true");
+        check.textContent = language === selected ? "\u2713" : "";
+        button.append(flag, text, check);
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (state.savingLanguage || language === selected) return;
+            state.savingLanguage = true;
+            refreshSidebarChrome();
+            try {
+                await userPreferences.setItemAsync(LANGUAGE_PREFERENCE_KEY, language);
+            } catch (error) {
+                console.error("Could not save help language.", error);
+                window.alert("Could not save language. Please try again.");
+            } finally {
+                state.savingLanguage = false;
+                refreshSidebarChrome();
+            }
+        });
+        item.appendChild(button);
+        list.appendChild(item);
+    }
 }
 
 function updateSidebarBrandLogo() {
@@ -1000,6 +1051,7 @@ export async function initMenu() {
         }
 
         const doc = await fetchXml(MENU_URL);
+        state.developmentMode = doc.documentElement?.getAttribute("development-mode") === "true";
         state.topPanel = readMenuTopPanel(doc);
         state.projects = readProjectsFromXml(doc);
         await ensureProjectSelection();

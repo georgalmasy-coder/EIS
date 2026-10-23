@@ -31,7 +31,7 @@ function loadSync() {
     loaded = true;
 }
 
-async function persist(key, value, remove = false) {
+async function persist(key, value, remove = false, failOnError = false) {
     if (document.body?.dataset.sessionExpired === "true") {
         return;
     }
@@ -49,6 +49,9 @@ async function persist(key, value, remove = false) {
             "Accept": "application/json"
         }
     }).catch((error) => {
+        if (failOnError) {
+            throw error;
+        }
         console.warn("Could not save user preference.", error);
     });
 }
@@ -66,6 +69,12 @@ export const userPreferences = {
         const normalizedValue = String(value ?? "");
         values.set(key, normalizedValue);
         void persist(key, normalizedValue);
+    },
+
+    async setItemAsync(key, value) {
+        const normalizedValue = String(value ?? "");
+        await persist(key, normalizedValue, false, true);
+        values.set(key, normalizedValue);
     },
 
     removeItem(key) {
