@@ -181,7 +181,8 @@ public class GenericServlet extends HttpServlet {
         if (GlobalConfiguration.isUdvMode()) {
             ws = new WebSession();
             ws.setId(1);
-            ws.setSessionId("georg.almasy@mail.com");
+            ws.setSessionId(com.bepa.eis.common.providers.security.SessionIdGenerator.create());
+            ws.setEmail("georg.almasy@mail.com");
             ws.setCustomerId(GlobalConfiguration.getDefaultCustomerId());
             ws.setProjectId(GlobalConfiguration.getDefaultProjectId());
             ws.setUserId(1);

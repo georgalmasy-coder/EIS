@@ -2,172 +2,81 @@ package com.bepa.eis.common.providers.security;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.providers.SessionProvider;
+import com.bepa.eis.common.providers.UserProvider;
 import com.bepa.eis.common.providers.misc.AuditEventProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.sql.SQLException;
 import java.util.Date;
 
 public class SessionManager {
-
     private static final Logger log = LoggerFactory.getLogger(SessionManager.class);
+    private static final SessionManager INSTANCE = new SessionManager();
+    private final SessionProvider sessions;
+    private final UserProvider users;
 
-    private static SessionManager instance = null;
+    public SessionManager() { this(new SessionProvider(null), new UserProvider(null)); }
 
-    public static SessionManager getInstance() {
-        if (instance == null) {
-            instance = new SessionManager();
+    SessionManager(SessionProvider sessions, UserProvider users) {
+        this.sessions = sessions;
+        this.users = users;
+    }
+
+    public static SessionManager getInstance() { return INSTANCE; }
+
+    public void login(String sessionId, Integer userId, String ipAddress, String userAgent,
+                      GeoIpService.GeoIpResult geoIpResult) {
+        if (!SessionIdGenerator.isValid(sessionId) || userId == null || userId <= 0) {
+            throw new IllegalArgumentException("A unique session id and user id are required");
         }
-
-        return instance;
-    }
-
-    public void login(String sessionId) {
-        login(
-                sessionId,
-                null,
-                null,
-                null,
-                null
-        );
-    }
-
-    public void login(
-            String sessionId,
-            Integer userId,
-            String ipAddress,
-            String userAgent,
-            GeoIpService.GeoIpResult geoIpResult
-    ) {
-        logout(sessionId);
-
-        GeoIpService.GeoIpResult safeGeoIpResult = geoIpResult != null
-                ? geoIpResult
-                : GeoIpService.GeoIpResult.unknown();
-
-        WebSession webSession = new WebSession();
-        webSession.setSessionId(sessionId);
-        webSession.setUserId(userId);
-        webSession.setIpAddress(ipAddress);
-        webSession.setUserAgent(userAgent);
-        webSession.setCountryCode(safeGeoIpResult.countryCode());
-        webSession.setCountryName(safeGeoIpResult.countryName());
-        webSession.setRegionName(safeGeoIpResult.regionName());
-        webSession.setCity(safeGeoIpResult.city());
-        webSession.setLatitude(safeGeoIpResult.latitude());
-        webSession.setLongitude(safeGeoIpResult.longitude());
-        webSession.setLoginAt(new Date());
-        webSession.setLastAccessed(new Date());
-
+        GeoIpService.GeoIpResult geo = geoIpResult != null ? geoIpResult : GeoIpService.GeoIpResult.unknown();
+        WebSession ws = new WebSession();
+        ws.setSessionId(sessionId);
+        ws.setUserId(userId);
+        ws.setEmail(users.getEmailByUserId(userId));
+        ws.setIpAddress(ipAddress);
+        ws.setUserAgent(userAgent);
+        ws.setCountryCode(geo.countryCode());
+        ws.setCountryName(geo.countryName());
+        ws.setRegionName(geo.regionName());
+        ws.setCity(geo.city());
+        ws.setLatitude(geo.latitude());
+        ws.setLongitude(geo.longitude());
+        ws.setLoginAt(new Date());
+        ws.setLastAccessed(new Date());
         try {
-            SessionProvider sessionProvider = new SessionProvider(null);
-            sessionProvider.upsertSession(webSession);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "SESSION_CREATED",
-                    "Login session was created",
-                    "OK"
-            );
+            // Creating one login must never delete another login for the same user.
+            sessions.createSession(ws);
+            audit(ws, "SESSION_CREATED", "Login session was created", "OK");
         } catch (SQLException e) {
-            log.error("Error inserting session: {}", e.getMessage(), e);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "SESSION_CREATE_FAILED",
-                    "Login session could not be created",
-                    "Warning"
-            );
-
-            throw new RuntimeException(e);
+            audit(ws, "SESSION_CREATE_FAILED", "Login session could not be created", "Warning");
+            throw new IllegalStateException("Unable to create session", e);
         }
     }
 
-    public void logout(String sessionId) {
-        if (sessionId == null || sessionId.isBlank()) {
-            return;
-        }
+    public void logout(String sessionId) { end(sessionId, "LOGOUT", "LOGOUT", "User logged out", "OK"); }
+    public void expire(String sessionId) { end(sessionId, "EXPIRED", "SESSION_EXPIRED", "Session expired", "Warning"); }
 
+    private void end(String sessionId, String reason, String eventType, String description, String status) {
+        if (!SessionIdGenerator.isValid(sessionId)) return;
+        WebSession ws = null;
         try {
-            SessionProvider sessionProvider = new SessionProvider(null);
-            sessionProvider.endSession(sessionId, "LOGOUT");
-            sessionProvider.deleteBySessionId(sessionId);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "LOGOUT",
-                    "User logged out",
-                    "OK"
-            );
+            SessionProvider provider = sessions;
+            ws = provider.getBySessionId(sessionId);
+            provider.endSession(sessionId, reason);
+            provider.deleteBySessionId(sessionId);
+            if (ws != null) audit(ws, eventType, description, status);
         } catch (SQLException e) {
-            log.error("Error deleting session: {}", e.getMessage(), e);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "LOGOUT_FAILED",
-                    "User logout failed",
-                    "Warning"
-            );
-
-            throw new RuntimeException(e);
+            audit(ws, eventType + "_FAILED", "Session could not be ended", "Warning");
+            throw new IllegalStateException("Unable to end session", e);
         }
     }
 
-    public void expire(String sessionId) {
-        if (sessionId == null || sessionId.isBlank()) {
-            return;
-        }
-
+    protected void audit(WebSession ws, String eventType, String description, String status) {
         try {
-            SessionProvider sessionProvider = new SessionProvider(null);
-            sessionProvider.endSession(sessionId, "EXPIRED");
-            sessionProvider.deleteBySessionId(sessionId);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "SESSION_EXPIRED",
-                    "Session expired",
-                    "Warning"
-            );
-        } catch (SQLException e) {
-            log.error("Error expiring session: {}", e.getMessage(), e);
-
-            logAuditLoginEvent(
-                    sessionId,
-                    "SESSION_EXPIRE_FAILED",
-                    "Session expiration failed",
-                    "Warning"
-            );
-
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void logAuditLoginEvent(
-            String actorEmail,
-            String eventType,
-            String description,
-            String status
-    ) {
-        try {
-            AuditEventProvider auditEventProvider = new AuditEventProvider(null);
-            auditEventProvider.logLoginEvent(
-                    safeActor(actorEmail),
-                    eventType,
-                    description,
-                    status
-            );
+            new AuditEventProvider(ws).logLoginEvent(ws == null ? "unknown" : ws.getEmail(), eventType, description, status);
         } catch (Exception e) {
-            log.warn("Could not write session audit event. eventType={}, actor={}", eventType, actorEmail, e);
+            log.warn("Could not write session audit event. eventType={}", eventType, e);
         }
-    }
-
-    private String safeActor(String actorEmail) {
-        if (actorEmail == null || actorEmail.isBlank()) {
-            return "unknown";
-        }
-
-        return actorEmail;
     }
 }

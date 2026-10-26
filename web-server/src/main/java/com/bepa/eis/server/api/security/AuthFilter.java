@@ -157,12 +157,6 @@ public class AuthFilter implements Filter {
             }
         }
 
-        String headerSessionId = req.getHeader("X-Session-ID");
-
-        if (headerSessionId != null && !headerSessionId.isBlank()) {
-            return headerSessionId;
-        }
-
         return null;
     }
 

@@ -90,24 +90,26 @@ public class ProjectSelectedServlet extends GenericServlet {
     }
 
     private void logAuditEvent(
-            String actorEmail,
+            String sessionId,
             String eventType,
             String description,
             String status
     ) {
         try {
-            AuditEventProvider auditEventProvider = new AuditEventProvider(null);
+            WebSession ws = new SessionProvider(null).getBySessionId(sessionId);
+            String actorEmail = ws == null ? "unknown" : ws.getEmail();
+            AuditEventProvider auditEventProvider = new AuditEventProvider(ws);
 
             auditEventProvider.logEvent(new AuditEventProvider.AuditEvent(
                     safeActor(actorEmail),
                     eventType,
                     "SESSION",
-                    safeActor(actorEmail),
+                    ws == null ? "unknown" : String.valueOf(ws.getUserId()),
                     description,
                     status
             ));
         } catch (Exception e) {
-            log.warn("Could not write project selection audit event. eventType={}, actor={}", eventType, actorEmail, e);
+            log.warn("Could not write project selection audit event. eventType={}", eventType, e);
         }
     }
 

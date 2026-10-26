@@ -5,7 +5,7 @@ import java.time.ZoneId;
 
 public record CleanupJobSettings(boolean enabled, String cron, ZoneId zone, int retentionDays) {
     public enum Type {
-        SESSION("session", "SESSION", "Created", 1),
+        SESSION("session", "SESSION", "LastAccessed", 1),
         INCIDENTS("incidents", "INCIDENTS", "LogCreated", 120),
         PERFORMANCE("performance", "PERFORMANCE", "Created", 120);
 
@@ -24,11 +24,13 @@ public record CleanupJobSettings(boolean enabled, String cron, ZoneId zone, int 
 
     public static CleanupJobSettings load(String key, int defaultDays) {
         String prefix = "cleanup." + key + ".job.";
-        CronJobSettings job = CronJobSettings.load("cleanup." + key + ".job", "0 2 * * *");
+        CronJobSettings job = CronJobSettings.load("cleanup." + key + ".job",
+                "session".equals(key) ? "*/15 * * * *" : "0 2 * * *");
         if (!job.enabled()) {
             return new CleanupJobSettings(false, job.cron(), job.zone(), defaultDays);
         }
-        int days = Integer.parseInt(GlobalConfiguration.getString(prefix + "retention.days", String.valueOf(defaultDays)));
+        int days = "session".equals(key) ? defaultDays
+                : Integer.parseInt(GlobalConfiguration.getString(prefix + "retention.days", String.valueOf(defaultDays)));
         if (days < 1 || days > 36500) throw new IllegalArgumentException(prefix + "retention.days must be between 1 and 36500");
         return new CleanupJobSettings(true, job.cron(), job.zone(), days);
     }

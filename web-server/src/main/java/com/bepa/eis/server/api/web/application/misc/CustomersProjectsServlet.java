@@ -26,14 +26,16 @@ public class CustomersProjectsServlet extends GenericServlet {
     private static final Logger log = LoggerFactory.getLogger(CustomersProjectsServlet.class);
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, jakarta.servlet.ServletException {
 
         setXmlResponse(resp);
 
         String xml;
         try {
-            CustomerProjectProvider customerProjectProvider = new CustomerProjectProvider(null);
-            CustomerProject customerProject = customerProjectProvider.getCustomerProject( getSessionId(req) );
+            var webSession = getWebSessionFromRequest(req, resp);
+            if (webSession == null) return;
+            CustomerProjectProvider customerProjectProvider = new CustomerProjectProvider(webSession);
+            CustomerProject customerProject = customerProjectProvider.getCustomerProject(webSession.getUserId());
             xml = toXmlString(customerProject.toXmlDocument());
 
         } catch (ParserConfigurationException | TransformerException e) {

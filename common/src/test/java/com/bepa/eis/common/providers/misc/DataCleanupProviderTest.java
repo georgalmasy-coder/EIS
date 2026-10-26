@@ -1,6 +1,7 @@
 package com.bepa.eis.common.providers.misc;
 
 import com.bepa.eis.common.scheduling.CleanupJobSettings.Type;
+import com.bepa.eis.common.GlobalConfiguration;
 import java.lang.reflect.Proxy;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import javax.sql.DataSource;
 public class DataCleanupProviderTest {
     public static void main(String[] args) throws Exception {
         for (Type type : Type.values()) {
-            FakeDatabase database = new FakeDatabase(type.defaultDays);
+            FakeDatabase database = new FakeDatabase(type);
             DataCleanupProvider provider = new DataCleanupProvider(database.source());
             long deleted = provider.deleteExpired(type, type.defaultDays);
             check(deleted == 2501, "All expired rows deleted across batches");
@@ -36,9 +37,12 @@ public class DataCleanupProviderTest {
         String deleteSql;
         int deleteCalls;
         boolean fail;
-        FakeDatabase(int retention) {
-            this.retention = retention;
-            cutoff = Timestamp.valueOf(LocalDateTime.of(2026, 10, 9, 2, 0).minusDays(retention));
+        final Type type;
+        FakeDatabase(Type type) {
+            this.type = type;
+            this.retention = type == Type.SESSION ? GlobalConfiguration.getSessionTimeoutMinutes() : type.defaultDays;
+            LocalDateTime now = LocalDateTime.of(2026, 10, 9, 2, 0);
+            cutoff = Timestamp.valueOf(type == Type.SESSION ? now.minusMinutes(retention) : now.minusDays(retention));
             for (int i = 0; i < 2501; i++) rows.add(Timestamp.valueOf(cutoff.toLocalDateTime().minusSeconds(1)));
             rows.add(cutoff); rows.add(Timestamp.valueOf(cutoff.toLocalDateTime().plusSeconds(1))); rows.add(null);
         }
@@ -52,8 +56,12 @@ public class DataCleanupProviderTest {
             return proxy(PreparedStatement.class, (name, args) -> {
                 if (name.equals("setInt")) check((Integer) args[1] == retention, "Retention bound as parameter");
                 if (name.equals("setTimestamp")) check(cutoff.equals(args[1]), "Stable cutoff reused");
-                if (name.equals("executeQuery")) return proxy(ResultSet.class,
-                        (method, ignored) -> method.equals("next") ? true : method.equals("getTimestamp") ? cutoff : null);
+                if (name.equals("executeQuery")) {
+                    check(sql.equals(type == Type.SESSION ? "SELECT DATEADD(minute, -?, GETDATE())"
+                            : "SELECT DATEADD(day, -?, GETDATE())"), "Sessions expire by inactivity in minutes; other data by days");
+                    return proxy(ResultSet.class,
+                            (method, ignored) -> method.equals("next") ? true : method.equals("getTimestamp") ? cutoff : null);
+                }
                 if (name.equals("executeUpdate")) {
                     if (fail) throw new SQLException("Simulated deletion failure");
                     deleteSql = sql; deleteCalls++;

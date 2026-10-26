@@ -29,11 +29,7 @@ public class CustomerProjectProvider extends GenericProvider {
                     "WHERE P.ProjectId IN ( " +
                     "    SELECT ProjectId " +
                     "    FROM USER_PROJECT " +
-                    "    WHERE UserId IN ( " +
-                    "        SELECT UserId " +
-                    "        FROM USERS " +
-                    "        WHERE Email = ? " +
-                    "    ) " +
+                    "    WHERE UserId = ? " +
                     ") " +
                     "AND P.Latest = 1 " +
                     "AND P.ProjectStatus IN (" + ACTIVE_PROJECT_STATUS_IDS + ") " +
@@ -69,19 +65,19 @@ public class CustomerProjectProvider extends GenericProvider {
     }
 
     /**
-     * Retrieves the customer projects associated with the given session id.
+     * Retrieves projects associated with the authenticated user.
      *
-     * @param sessionId the session/user identifier used by the existing lookup flow
+     * @param userId the immutable user identifier
      * @return customer/project structure for the user
      */
-    public CustomerProject getCustomerProject(String sessionId) {
+    public CustomerProject getCustomerProject(Integer userId) {
         CustomerProject customerProject = new CustomerProject();
 
         try {
             try (Connection con = getDataSource().getConnection();
                  PreparedStatement ps = con.prepareStatement(CUSTOMER_PROJECT_SQL)) {
 
-                setString(ps, sessionId, 1);
+                setInt(ps, userId, 1);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {

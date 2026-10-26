@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.web.application.admin;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.enums.SeverityType;
 import com.bepa.eis.common.enums.customer.CustomerStatus;
 import com.bepa.eis.common.providers.GenericProvider;
@@ -18,7 +19,33 @@ public class AdminDashboardOverviewProvider extends GenericProvider {
     }
 
     public OverviewResponse loadOverview() throws SQLException {
+        return loadOverview(null);
+    }
+
+    public OverviewResponse loadOverview(String currentSessionId) throws SQLException {
         try (Connection connection = getDataSource().getConnection()) {
+            int timeoutMinutes = GlobalConfiguration.getSessionTimeoutMinutes();
+            int onlineUsers;
+            int otherOnlineUsers;
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    SELECT COUNT(DISTINCT S.UserId) AS OnlineUsers,
+                           COUNT(DISTINCT CASE WHEN CurrentUser.UserId IS NULL
+                               THEN S.UserId END) AS OtherOnlineUsers
+                    FROM [dbo].[SESSION] S
+                    INNER JOIN [dbo].[USERS] U ON U.UserId = S.UserId AND U.Active = 1
+                    LEFT JOIN (SELECT DISTINCT UserId FROM [dbo].[SESSION] WHERE SessionId = ?) CurrentUser
+                        ON CurrentUser.UserId = S.UserId
+                    WHERE S.LastAccessed >= DATEADD(minute, -?, GETDATE())
+                      AND S.LogoutAt IS NULL AND S.ExpiredAt IS NULL
+                    """)) {
+                statement.setString(1, currentSessionId);
+                statement.setInt(2, timeoutMinutes);
+                try (ResultSet rows = statement.executeQuery()) {
+                    rows.next();
+                    onlineUsers = rows.getInt("OnlineUsers");
+                    otherOnlineUsers = rows.getInt("OtherOnlineUsers");
+                }
+            }
             int activeCustomers = count(connection, """
                     SELECT COUNT(*) FROM CUSTOMER WHERE Latest = 1 AND CustomerStatus IN (?, ?, ?, ?, ?, ?)
                     """, CustomerStatus.TRIAL_ACTIVE.getId(), CustomerStatus.PENDING_SUBSCRIPTION_CONFIRMATION.getId(),
@@ -73,7 +100,8 @@ public class AdminDashboardOverviewProvider extends GenericProvider {
             }
             return new OverviewResponse(ComponentHealthProvider.score(components), activeCustomers, activeUsers, criticalAlerts, paymentErrors,
                     pendingConfirmations, retrying, undelivered, failedIntegrations, lockedUsers, activity, distribution, events,
-                    components.stream().map(component -> new StatusRow(component.label(), component.status(), component.lastObservedAt())).toList(), components);
+                    components.stream().map(component -> new StatusRow(component.label(), component.status(), component.lastObservedAt())).toList(), components,
+                    onlineUsers, otherOnlineUsers, timeoutMinutes);
         }
     }
 

@@ -65,7 +65,7 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
 
         try {
             Object body = switch (path) {
-                case "/admin/api/dashboard/overview" -> buildOverviewResponse();
+                case "/admin/api/dashboard/overview" -> buildOverviewResponse(request);
                 case "/admin/api/dashboard/system-status" -> buildSystemStatusResponse(requestStartedNanos);
                 case "/admin/api/dashboard/customers" -> buildCustomersResponse();
                 case "/admin/api/dashboard/users" -> buildUsersResponse();
@@ -98,8 +98,8 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
         }
     }
 
-    private OverviewResponse buildOverviewResponse() throws SQLException {
-        return new AdminDashboardOverviewProvider().loadOverview();
+    private OverviewResponse buildOverviewResponse(HttpServletRequest request) throws SQLException {
+        return new AdminDashboardOverviewProvider().loadOverview(getSessionIdFromRequest(request));
     }
 
     private int safeInt(Integer value) {
@@ -806,7 +806,10 @@ public class AdminDashboardServlet extends GenericDataProviderServlet {
             List<ChartItem> healthDistribution,
             List<EventRow> latestEvents,
             List<StatusRow> serviceStatus,
-            List<com.bepa.eis.common.providers.misc.ComponentHealthProvider.Component> healthComponents
+            List<com.bepa.eis.common.providers.misc.ComponentHealthProvider.Component> healthComponents,
+            int onlineUsers,
+            int otherOnlineUsers,
+            int sessionTimeoutMinutes
     ) {
     }
 

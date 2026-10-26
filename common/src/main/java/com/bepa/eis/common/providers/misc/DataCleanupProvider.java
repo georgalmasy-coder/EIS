@@ -15,9 +15,13 @@ public class DataCleanupProvider extends GenericProvider {
         String sql = "DELETE TOP (1000) FROM [dbo].[" + type.table + "] WHERE [" + type.dateColumn + "] < ?";
         try (Connection connection = (dataSource == null ? getDataSource() : dataSource).getConnection()) {
             Timestamp cutoff;
-            try (PreparedStatement statement = connection.prepareStatement("SELECT DATEADD(day, -?, GETDATE())")) {
+            // Sessions use the shared inactivity timeout in minutes; other data retains its age in days.
+            try (PreparedStatement statement = connection.prepareStatement(type == Type.SESSION
+                    ? "SELECT DATEADD(minute, -?, GETDATE())"
+                    : "SELECT DATEADD(day, -?, GETDATE())")) {
                 statement.setQueryTimeout(60);
-                statement.setInt(1, retentionDays);
+                statement.setInt(1, type == Type.SESSION
+                        ? com.bepa.eis.common.GlobalConfiguration.getSessionTimeoutMinutes() : retentionDays);
                 try (ResultSet rows = statement.executeQuery()) { rows.next(); cutoff = rows.getTimestamp(1); }
             }
             long deleted = 0;

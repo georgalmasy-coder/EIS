@@ -27,6 +27,7 @@ public class SessionProvider extends GenericProvider {
                 CustomerId,
                 ProjectId,
                 U.UserId,
+                U.Email,
                 U.ThemeId,
                 COALESCE(CurrentSubscription.ModuleCode, LatestCustomerModule.ModuleCode) AS SubscriptionModuleCode,
                 S.Created,
@@ -61,7 +62,8 @@ public class SessionProvider extends GenericProvider {
                   AND CM.Latest = 1
                 ORDER BY CM.UpdatedAt DESC, CM.CustomerModuleId DESC
             ) LatestCustomerModule
-            WHERE S.SessionId = ?
+            WHERE S.SessionId = ? AND U.Active = 1
+              AND S.LogoutAt IS NULL AND S.ExpiredAt IS NULL
             """;
 
     private static final String UPDATE_SESSION_INFO_SQL = """
@@ -69,90 +71,21 @@ public class SessionProvider extends GenericProvider {
             SET
                 CustomerId = ?,
                 ProjectId = ?,
-                UserId = (SELECT TOP 1 UserId FROM [dbo].[USERS] WHERE Email = ?),
                 LastAccessed = GETDATE()
-            WHERE SessionId = ?
+            WHERE SessionId = ? AND UserId = ?
             """;
 
-    private static final String UPSERT_SESSION_SQL = """
-            MERGE INTO [dbo].[SESSION] WITH (HOLDLOCK) AS tgt
-            USING (
-                VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                )
-            ) AS src (
-                SessionId,
-                CustomerId,
-                ProjectId,
-                UserId,
-                IpAddress,
-                UserAgent,
-                CountryCode,
-                CountryName,
-                RegionName,
-                City,
-                Latitude,
-                Longitude,
-                LoginAt,
-                LastAccessed
-            )
-            ON tgt.SessionId = src.SessionId
-            WHEN MATCHED THEN
-                UPDATE SET
-                    tgt.CustomerId = src.CustomerId,
-                    tgt.ProjectId = src.ProjectId,
-                    tgt.UserId = src.UserId,
-                    tgt.IpAddress = src.IpAddress,
-                    tgt.UserAgent = src.UserAgent,
-                    tgt.CountryCode = src.CountryCode,
-                    tgt.CountryName = src.CountryName,
-                    tgt.RegionName = src.RegionName,
-                    tgt.City = src.City,
-                    tgt.Latitude = src.Latitude,
-                    tgt.Longitude = src.Longitude,
-                    tgt.LoginAt = ISNULL(tgt.LoginAt, src.LoginAt),
-                    tgt.LastAccessed = GETDATE()
-            WHEN NOT MATCHED THEN
-                INSERT (
-                    SessionId,
-                    CustomerId,
-                    ProjectId,
-                    UserId,
-                    Created,
-                    LastAccessed,
-                    IpAddress,
-                    UserAgent,
-                    CountryCode,
-                    CountryName,
-                    RegionName,
-                    City,
-                    Latitude,
-                    Longitude,
-                    LoginAt
-                )
-                VALUES (
-                    src.SessionId,
-                    src.CustomerId,
-                    src.ProjectId,
-                    src.UserId,
-                    GETDATE(),
-                    GETDATE(),
-                    src.IpAddress,
-                    src.UserAgent,
-                    src.CountryCode,
-                    src.CountryName,
-                    src.RegionName,
-                    src.City,
-                    src.Latitude,
-                    src.Longitude,
-                    ISNULL(src.LoginAt, GETDATE())
-                );
+    private static final String INSERT_SESSION_SQL = """
+            INSERT INTO [dbo].[SESSION] (
+                SessionId, CustomerId, ProjectId, UserId, IpAddress, UserAgent,
+                CountryCode, CountryName, RegionName, City, Latitude, Longitude,
+                LoginAt, LastAccessed, Created
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
             """;
 
     private static final String END_SESSION_SQL = """
             UPDATE [dbo].[SESSION]
             SET
-                LastAccessed = GETDATE(),
                 LogoutAt = CASE WHEN ? = 'LOGOUT' THEN GETDATE() ELSE LogoutAt END,
                 ExpiredAt = CASE WHEN ? <> 'LOGOUT' THEN GETDATE() ELSE ExpiredAt END,
                 EndedReason = ?
@@ -162,11 +95,32 @@ public class SessionProvider extends GenericProvider {
     private static final String VERIFY_PASSWORD_SQL = """
             SELECT [Password]
             FROM [dbo].[USERS]
-            WHERE Email = ?
+            WHERE Email = ? AND Active = 1
             """;
 
     public SessionProvider(WebSession webSession) {
         super(webSession);
+    }
+
+    /** Refresh only a live session; an expired session must never be revived by a request. */
+    public boolean recordActivity(String sessionId, int timeoutMinutes) throws SQLException {
+        if (sessionId == null || sessionId.isBlank() || timeoutMinutes < 1) {
+            return false;
+        }
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement("""
+                     UPDATE [dbo].[SESSION]
+                     SET LastAccessed = GETDATE()
+                     WHERE SessionId = ?
+                       AND LastAccessed >= DATEADD(minute, -?, GETDATE())
+                       AND LogoutAt IS NULL AND ExpiredAt IS NULL
+                       AND EXISTS (SELECT 1 FROM [dbo].[USERS] U
+                                   WHERE U.UserId = [dbo].[SESSION].UserId AND U.Active = 1)
+                     """)) {
+            ps.setString(1, sessionId);
+            ps.setInt(2, timeoutMinutes);
+            return ps.executeUpdate() > 0;
+        }
     }
 
     public boolean deleteBySessionId(String sessionId) throws SQLException {
@@ -191,7 +145,7 @@ public class SessionProvider extends GenericProvider {
 
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) {
-                        throw new SQLException("No session found for sessionId: " + sessionId);
+                        return null;
                     }
 
                     return mapWebSession(rs);
@@ -202,7 +156,8 @@ public class SessionProvider extends GenericProvider {
         if (GlobalConfiguration.isUdvMode()) {
             WebSession ws = new WebSession();
             ws.setId(1);
-            ws.setSessionId("georg.almasy@mail.com");
+            ws.setSessionId(com.bepa.eis.common.providers.security.SessionIdGenerator.create());
+            ws.setEmail("georg.almasy@mail.com");
             ws.setCustomerId(GlobalConfiguration.getDefaultCustomerId());
             ws.setProjectId(GlobalConfiguration.getDefaultProjectId());
             ws.setUserId(1);
@@ -212,9 +167,9 @@ public class SessionProvider extends GenericProvider {
         return null;
     }
 
-    public boolean upsertSession(WebSession webSession) throws SQLException {
+    public boolean createSession(WebSession webSession) throws SQLException {
         try (Connection con = getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(UPSERT_SESSION_SQL)) {
+             PreparedStatement ps = con.prepareStatement(INSERT_SESSION_SQL)) {
 
             ps.setString(1, webSession.getSessionId());
             setNullableInt(ps, 2, webSession.getCustomerId());
@@ -242,7 +197,7 @@ public class SessionProvider extends GenericProvider {
             setNullableInt(ps, 1, webSession.getCustomerId());
             setNullableInt(ps, 2, webSession.getProjectId());
             ps.setString(3, webSession.getSessionId());
-            ps.setString(4, webSession.getSessionId());
+            setNullableInt(ps, 4, webSession.getUserId());
 
             return ps.executeUpdate() > 0;
         }
@@ -294,6 +249,7 @@ public class SessionProvider extends GenericProvider {
 
         ws.setId(rs.getInt("ID"));
         ws.setSessionId(rs.getString("SessionId"));
+        ws.setEmail(rs.getString("Email"));
         ws.setCustomerId(getNullableInt(rs, "CustomerId"));
         ws.setProjectId(getNullableInt(rs, "ProjectId"));
         ws.setUserId(rs.getInt("UserId"));

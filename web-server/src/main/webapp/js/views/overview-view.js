@@ -62,11 +62,10 @@ export function createViewController(context) {
         }).join("");
     }
     function render(data) {
+        setText(root, '[data-field="onlineUsers"]', data.onlineUsers ?? "—");
+        setText(root, '[data-field="otherOnlineUsers"]', `Other users (excluding you): ${data.otherOnlineUsers ?? "—"}`);
+        setText(root, '[data-field="onlineWindow"]', `Server activity within the last ${data.sessionTimeoutMinutes ?? "—"} minutes (including background requests)`);
         const components = Array.isArray(data.healthComponents) ? data.healthComponents : [];
-        const measured = components.filter(component => component.status !== "Unknown").length;
-        setText(root, '[data-field="healthCoverage"]', `${measured} of ${components.length} components measured`);
-        setText(root, '[data-field="healthUnit"]', data.systemHealth == null ? "" : "%");
-        setText(root, '[data-field="systemHealth"]', (data.systemHealth == null ? "—" : formatMetric(data.systemHealth, 0)));
         setText(root, '[data-field="activeCustomers"]', data.activeCustomers ?? "—");
         setText(root, '[data-field="activeUsers"]', data.activeUsers ?? "—");
         setText(root, '[data-field="criticalAlerts"]', data.criticalAlerts ?? "—");
@@ -77,7 +76,6 @@ export function createViewController(context) {
         setText(root, '[data-field="failedIntegrations"]', data.failedIntegrations ?? "—");
         setText(root, '[data-field="lockedUsers"]', data.lockedUsers ?? "—");
 
-        setBar(root, '[data-bar="systemHealth"]', data.systemHealth, 100);
         setBar(root, '[data-bar="activeCustomers"]', data.activeCustomers, 250);
         setBar(root, '[data-bar="activeUsers"]', data.activeUsers, 5000);
         setBar(root, '[data-bar="criticalAlerts"]', data.criticalAlerts, 10);

@@ -10,9 +10,11 @@ customer.workflow.job.cron=*/10 * * * *
 customer.workflow.job.timezone=Europe/Copenhagen
 
 cleanup.session.job.enabled=true
-cleanup.session.job.cron=0 2 * * *
+cleanup.session.job.cron=*/15 * * * *
 cleanup.session.job.timezone=Europe/Copenhagen
-cleanup.session.job.retention.days=1
+# Session cleanup uses LastAccessed and security.session.timeout.minutes.
+# The old cleanup.session.job.retention.days setting is ignored.
+security.session.timeout.minutes=30
 
 cleanup.incidents.job.enabled=true
 cleanup.incidents.job.cron=0 2 * * *

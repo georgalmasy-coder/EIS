@@ -379,7 +379,8 @@ public class LoginServlet extends GenericServlet {
     }
 
     public static void restoreSelectedProject(WebSession webSession) throws SQLException {
-        if (webSession == null || webSession.getCustomerId() == null || webSession.getUserId() == null) {
+        if (webSession == null || webSession.getCustomerId() == null || webSession.getUserId() == null
+                || webSession.getProjectId() != null) {
             return;
         }
 
@@ -463,6 +464,10 @@ public class LoginServlet extends GenericServlet {
         HttpSession oldSession = req.getSession(false);
 
         if (oldSession != null) {
+            Object previousId = oldSession.getAttribute("sessionID");
+            if (previousId instanceof String id) {
+                SessionManager.getInstance().logout(id);
+            }
             oldSession.invalidate();
         }
 
@@ -835,16 +840,15 @@ public class LoginServlet extends GenericServlet {
         HttpSession oldSession = req.getSession(false);
 
         if (oldSession != null) {
+            Object previousId = oldSession.getAttribute("sessionID");
+            if (previousId instanceof String id) {
+                SessionManager.getInstance().logout(id);
+            }
             oldSession.invalidate();
         }
 
         HttpSession session = req.getSession(true);
-        String sessionId = username;
-
-        session.setAttribute(
-                "sessionID",
-                sessionId
-        );
+        String sessionId = com.bepa.eis.common.providers.security.SessionIdGenerator.create();
 
         session.setMaxInactiveInterval(GlobalConfiguration.getSessionTimeoutMinutes() * 60);
 
@@ -855,6 +859,9 @@ public class LoginServlet extends GenericServlet {
                 userAgent,
                 geoIpResult
         );
+
+        // Publish authentication only after the database session was successfully created.
+        session.setAttribute("sessionID", sessionId);
 
         logSuccessfulLoginAttempt(
                 userId,

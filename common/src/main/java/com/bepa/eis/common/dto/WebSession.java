@@ -11,6 +11,7 @@ public class WebSession {
     private Integer customerId;
     private Integer projectId;
     private Integer userId;
+    private String email;
     private Integer themeId;
     private Subscription subscription;
     private Date created;
@@ -38,6 +39,14 @@ public class WebSession {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setCustomerId(Integer customerId) {

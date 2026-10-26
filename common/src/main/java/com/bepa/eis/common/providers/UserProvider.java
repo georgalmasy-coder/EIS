@@ -32,7 +32,7 @@ public class UserProvider extends GenericProvider {
                 Active,
                 LockedUntil
             FROM [dbo].[USERS]
-            WHERE Email = ?
+            WHERE Email = ? AND Active = 1
             """;
 
     private static final String SELECT_EMAIL_BY_USER_ID_SQL = """
@@ -52,7 +52,7 @@ public class UserProvider extends GenericProvider {
     private static final String SELECT_USER_ID_BY_EMAIL_SQL = """
             SELECT UserId
             FROM [dbo].[USERS]
-            WHERE Email = ?
+            WHERE Email = ? AND Active = 1
             """;
 
     private static final String SELECT_USER_MFA_BY_USER_ID_SQL = """
@@ -78,7 +78,7 @@ public class UserProvider extends GenericProvider {
                 UserMfaPolicy,
                 MfaResetRequired
             FROM [dbo].[USERS]
-            WHERE Email = ?
+            WHERE Email = ? AND Active = 1
             """;
 
     private static final String SELECT_CUSTOMER_MFA_POLICY_BY_CUSTOMER_ID_SQL = """

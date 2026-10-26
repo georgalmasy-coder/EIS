@@ -16,6 +16,7 @@ public class AuditEventProvider extends GenericProvider {
     private static final String INSERT_AUDIT_EVENT_SQL = """
             INSERT INTO [dbo].[AUDIT_EVENT] (
                 EventTime,
+                ActorUserId,
                 ActorEmail,
                 EventType,
                 EntityType,
@@ -25,6 +26,7 @@ public class AuditEventProvider extends GenericProvider {
             )
             VALUES (
                 GETDATE(),
+                ?,
                 ?,
                 ?,
                 ?,
@@ -46,12 +48,13 @@ public class AuditEventProvider extends GenericProvider {
         try (Connection connection = getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(INSERT_AUDIT_EVENT_SQL)) {
 
-            statement.setString(1, safeText(auditEvent.actorEmail(), "system"));
-            statement.setString(2, safeText(auditEvent.eventType(), "UNKNOWN"));
-            statement.setString(3, safeText(auditEvent.entityType(), "SYSTEM"));
-            statement.setString(4, safeText(auditEvent.entityId(), "unknown"));
-            statement.setString(5, safeText(auditEvent.description(), auditEvent.eventType()));
-            statement.setString(6, safeText(auditEvent.status(), "OK"));
+            setInt(statement, getWebSession() == null ? null : getWebSession().getUserId(), 1);
+            statement.setString(2, safeText(auditEvent.actorEmail(), "system"));
+            statement.setString(3, safeText(auditEvent.eventType(), "UNKNOWN"));
+            statement.setString(4, safeText(auditEvent.entityType(), "SYSTEM"));
+            statement.setString(5, safeText(auditEvent.entityId(), "unknown"));
+            statement.setString(6, safeText(auditEvent.description(), auditEvent.eventType()));
+            statement.setString(7, safeText(auditEvent.status(), "OK"));
 
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {

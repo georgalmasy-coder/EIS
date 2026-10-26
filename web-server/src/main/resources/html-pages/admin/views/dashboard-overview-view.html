@@ -10,15 +10,11 @@
 
     <section class="dashboard-kpi-grid">
         <article class="dashboard-card dashboard-kpi-card">
-            <div class="dashboard-kpi-icon">●</div>
-            <div class="dashboard-kpi-label">System Health</div>
-            <div class="dashboard-kpi-help" data-field="healthCoverage">No observations yet</div>
-            <div class="dashboard-kpi-value">
-                <span data-field="systemHealth">—</span><span class="dashboard-kpi-unit" data-field="healthUnit"></span>
-            </div>
-            <div class="dashboard-mini-bar">
-                <div class="dashboard-mini-bar-fill" data-bar="systemHealth"></div>
-            </div>
+            <div class="dashboard-kpi-label">Users with active sessions</div>
+            <div class="dashboard-kpi-help" data-field="onlineWindow">Recent server activity</div>
+            <div class="dashboard-kpi-value" data-field="onlineUsers">—</div>
+            <div class="dashboard-kpi-help" data-field="otherOnlineUsers">Other users: —</div>
+            <div class="dashboard-kpi-help">Refreshes every 20 seconds. Idle pages may still contain unsaved work.</div>
         </article>
 
         <article class="dashboard-card dashboard-kpi-card">
@@ -33,8 +29,8 @@
 
         <article class="dashboard-card dashboard-kpi-card">
             <div class="dashboard-kpi-icon"></div>
-            <div class="dashboard-kpi-label">Active Users</div>
-            <div class="dashboard-kpi-help">Users active today</div>
+            <div class="dashboard-kpi-label">Users logged in today</div>
+            <div class="dashboard-kpi-help">Distinct users with a successful login today</div>
             <div class="dashboard-kpi-value" data-field="activeUsers">—</div>
             <div class="dashboard-mini-bar">
                 <div class="dashboard-mini-bar-fill" data-bar="activeUsers"></div>

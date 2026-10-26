@@ -766,13 +766,16 @@ public final class GlobalConfiguration {
         content.append("cleanup.logs.job.web-server.directory=").append(lineSeparator);
         content.append("cleanup.logs.job.integration-server.directory=").append(lineSeparator);
         content.append("# Cleanup jobs: five-field cron (minute hour day month weekday)").append(lineSeparator);
-        content.append("# Each job defaults to daily at 02:00, Europe/Copenhagen.").append(lineSeparator);
+        content.append("# Sessions: every 15 minutes, using security.session.timeout.minutes; other jobs: daily 02:00.").append(lineSeparator);
         for (com.bepa.eis.common.scheduling.CleanupJobSettings.Type type : com.bepa.eis.common.scheduling.CleanupJobSettings.Type.values()) {
             String prefix = "cleanup." + type.key + ".job.";
             content.append(prefix).append("enabled=true").append(lineSeparator);
-            content.append(prefix).append("cron=0 2 * * *").append(lineSeparator);
+            content.append(prefix).append(type == com.bepa.eis.common.scheduling.CleanupJobSettings.Type.SESSION
+                    ? "cron=*/15 * * * *" : "cron=0 2 * * *").append(lineSeparator);
             content.append(prefix).append("timezone=Europe/Copenhagen").append(lineSeparator);
-            content.append(prefix).append("retention.days=").append(type.defaultDays).append(lineSeparator);
+            if (type != com.bepa.eis.common.scheduling.CleanupJobSettings.Type.SESSION) {
+                content.append(prefix).append("retention.days=").append(type.defaultDays).append(lineSeparator);
+            }
         }
         content.append(lineSeparator);
     }

@@ -13,8 +13,10 @@ public class DataCleanupJob {
         scheduled = new ScheduledCronJob<>(type.componentId(), type.label(),
                 () -> CleanupJobSettings.load(type), CleanupJobSettings::cronJob, settings -> {
                     long deleted = new DataCleanupProvider().deleteExpired(type, settings.retentionDays());
-                    LoggerFactory.getLogger(DataCleanupJob.class).info("{} completed: deletedRows={}, retentionDays={}",
-                            type.label(), deleted, settings.retentionDays());
+                    LoggerFactory.getLogger(DataCleanupJob.class).info("{} completed: deletedRows={}, {}={}",
+                            type.label(), deleted, type == Type.SESSION ? "inactivityMinutes" : "retentionDays",
+                            type == Type.SESSION ? com.bepa.eis.common.GlobalConfiguration.getSessionTimeoutMinutes()
+                                    : settings.retentionDays());
                     return "OK";
                 });
     }
