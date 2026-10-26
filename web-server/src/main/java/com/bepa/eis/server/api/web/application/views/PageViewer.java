@@ -44,6 +44,7 @@ public class PageViewer extends GenericServlet {
                 html = mergeThemeClass(webSession, html);
 
                 html = mergeBuildNumber(html);
+                html = html.replace("{{udvMode}}", Boolean.toString(GlobalConfiguration.isUdvMode()));
 
                 setContextInResponse(response);
                 response.getWriter().write(html);

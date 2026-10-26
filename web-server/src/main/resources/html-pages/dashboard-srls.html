@@ -11,9 +11,9 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/dashboard-srls.css?v=20261022-scrollable-tooltips" />
+    <link rel="stylesheet" href="../css/dashboard-srls.css?v=20261026-blue-current-level" />
 </head>
-<body class="dashboard-srls-document">
+<body class="dashboard-srls-document" data-udv-mode="{{udvMode}}">
 <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">&gt;</button>
 <div id="leftHoverZone" class="left-hover-zone" aria-hidden="true"></div>
 <nav id="sideMenu" class="side-menu" aria-label="Side menu">
@@ -47,6 +47,18 @@
             </div>
             <div id="srlStatus" class="dashboard-srls-status" role="status" aria-live="polite">Loading SRL calculations...</div>
             <div id="srlWorkspace" class="dashboard-srls-workspace" hidden>
+                <div class="dashboard-srls-legend" role="group" aria-label="Dashboard SRL information">
+                    <div class="dashboard-srls-info-item">
+                        <span class="dashboard-srls-info-label">Number of Physical Architecture:</span>
+                        <strong id="srlStructureCount">-</strong>
+                    </div>
+                    <div class="dashboard-srls-legend-items" role="group" aria-label="System SRL marker legend">
+                    <strong>System SRL:</strong>
+                    <span class="dashboard-srls-legend-item"><span class="dashboard-srls-legend-marker dashboard-srls-legend-marker--average" aria-hidden="true"></span>Group average</span>
+                    <span class="dashboard-srls-legend-item"><span class="dashboard-srls-legend-marker" aria-hidden="true"></span>System's own SRL</span>
+                    <span class="dashboard-srls-legend-item"><span class="dashboard-srls-legend-marker dashboard-srls-legend-marker--combined" aria-hidden="true"></span>Own SRL equals group average</span>
+                    </div>
+                </div>
                 <div class="table-frame page-frame dashboard-srls-frame">
                     <div class="table-scroll dashboard-srls-scroll">
                         <table class="data-table page-table dashboard-srls-table" aria-label="SRL by system">
@@ -64,7 +76,7 @@
         </section>
     </div>
 </main>
-<script type="module" src="../js/pages/dashboard-srls-page.js?v=20261022-scrollable-tooltips"></script>
+<script type="module" src="../js/pages/dashboard-srls-page.js?v=20261026-udv-tooltips"></script>
 <script src="../js/tabs-list.js"></script>
 </body>
 </html>

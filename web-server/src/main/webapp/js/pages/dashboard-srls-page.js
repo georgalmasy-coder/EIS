@@ -14,7 +14,7 @@ let loadedDashboard = null;
 let loadedTopPanel = {};
 
 document.addEventListener("DOMContentLoaded", () => {
-    initializeCalculationTooltips();
+    if (document.body.dataset.udvMode === "true") initializeCalculationTooltips();
     initializeColumnResize();
     mountTopbar();
     initMenu().then(() => {
@@ -133,11 +133,12 @@ function renderDashboard(dashboard) {
         });
     }
     document.getElementById("srlSystems").replaceChildren(fragment);
+    setText("srlStructureCount", String(dashboard.rows.length));
     setText("srlSystemCount", `${dashboard.rows.length} systems · ${dashboard.measuredCount} calculated`);
 }
 
 function applyCalculationTooltip(row, track, system) {
-    if (!system.calculationTooltip) return;
+    if (document.body.dataset.udvMode !== "true" || !system.calculationTooltip) return;
     const tooltip = [track.title, system.calculationTooltip].filter(Boolean).join("\n\n");
     row.title = tooltip;
     track.title = tooltip;

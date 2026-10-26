@@ -7,6 +7,7 @@ const webapp = path.resolve(__dirname, '../../main/webapp');
 const output = path.resolve(__dirname, '../../../target/dashboard-srls-test');
 fs.mkdirSync(output, {recursive: true});
 let mode = 'normal';
+let udvMode = true;
 let includeN2Route = true;
 const preferences = {};
 const server = http.createServer((req, res) => {
@@ -29,7 +30,7 @@ const server = http.createServer((req, res) => {
         res.setHeader('Content-Type', 'text/html');
         if (url.searchParams.get('page') === 'systemsbreakdown-edit') return res.end('<html><body>Edit fixture</body></html>');
         if (url.searchParams.get('page') === 'dashboard-irls') return res.end(fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/dashboard-irls.html')));
-        return res.end(fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/dashboard-srls.html')));
+        return res.end(fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/dashboard-srls.html'), 'utf8').replace('{{udvMode}}', String(udvMode)));
     }
     if (url.pathname === '/master/srlcalculation') {
         res.setHeader('Content-Type', 'application/xml');
@@ -147,13 +148,13 @@ async function main() {
         const center = node => {const r = node.getBoundingClientRect(); return r.left + r.width / 2;};
         return Math.abs(center(document.querySelector('.dashboard-srls-count-heading')) - center(document.querySelector('.dashboard-srls-group-count'))) < 1;
     })()`), 'subsystem header aligns with counts');
-    assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"), 'rgb(0, 138, 101)');
+    assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"), 'rgb(37, 99, 235)');
     assert.equal(await run("document.querySelectorAll('#srlSystems .dashboard-srls-summary-item').length"), 0);
     assert.match(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-track').getAttribute('aria-label')"), /Descendant average SRL: 4/);
     assert.equal(await run("document.querySelector('.dashboard-srls-group .dashboard-srls-system-marker').style.left"), '37.5%');
     assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-group .dashboard-srls-system-track'))"), /Descendant average SRL: 4/);
     assert.match(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('#srlSystems tr:not(.dashboard-srls-group) .dashboard-srls-system-track'))"), /Own SRL: 3.*Readiness 3\nDescendant average SRL: 4/);
-    assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-system-marker--average')).backgroundColor"), await run("getComputedStyle(document.querySelector('.dashboard-srls-summary-item--average .dashboard-srls-project-marker')).backgroundColor"));
+    assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-srls-system-marker--average')).backgroundColor"), 'rgb(0, 138, 101)');
     assert.equal(await run("(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('.dashboard-srls-summary-item--average'))"), 'Readiness 4');
     await run("document.querySelector('.dashboard-srls-group-toggle').click()");
     assert.equal(await run("document.querySelectorAll('#srlSystems tr:not([hidden])').length"), 5);
@@ -270,6 +271,15 @@ async function main() {
         return [...document.querySelectorAll('.dashboard-srls-table thead th[data-resize-column], #srlScale span')].map(typography);
     })()`);
     mode = 'diagnostics';
+    udvMode = false;
+    await send('Page.reload');
+    await wait("document.querySelectorAll('#srlSystems tr').length === 3");
+    assert.equal(await run("document.querySelectorAll('[data-srl-tooltip], #srlCalculationTooltip').length"), 0,
+        'Development tooltips are absent when udv.mode=false');
+    assert.equal(await run("[...document.querySelectorAll('[title]')].some(node => node.title.includes('temporary test details'))"), false);
+    assert.match(await run("document.querySelector('.dashboard-srls-system-marker').title"), /Own SRL/,
+        'Normal marker descriptions remain available');
+    udvMode = true;
     await send('Page.reload');
     await wait("document.querySelectorAll('#srlSystems tr').length === 3");
     for (const selector of ['.dashboard-srls-group', '.dashboard-srls-group-name', '.dashboard-srls-group-name .dashboard-srls-name', '.dashboard-srls-group .dashboard-srls-system-track', '.dashboard-srls-group .dashboard-srls-system-marker']) {
@@ -318,7 +328,7 @@ async function main() {
     assert.deepEqual(await run("[...document.querySelectorAll('#srlProjectSummary .dashboard-srls-summary-item')].map(n => n.textContent)"), ['Low / Current Level / High']);
     assert(await run(`(() => {
         const style = getComputedStyle(document.querySelector('.dashboard-srls-summary-item--combined .dashboard-srls-project-marker'));
-        return style.backgroundImage === 'linear-gradient(to right, rgb(0, 138, 101) 50%, ' + style.borderTopColor + ' 50%)';
+        return style.backgroundImage === 'linear-gradient(to right, rgb(37, 99, 235) 50%, ' + style.borderTopColor + ' 50%)';
     })()`));
     mode = 'prl-pair';
     await send('Page.reload');
