@@ -35,14 +35,10 @@ function init() {
 
     window.onStakeholderDataLoaded = (count) => {
         document.getElementById("stakeholderCount").textContent = count;
-        // Re-apply help metadata in case it was overwritten by XML load
-        applyTopbarMetadata(document, { helpFileName: "requirements" });
     };
 
     window.onSystemDataLoaded = (count) => {
         document.getElementById("systemCount").textContent = count;
-        // Re-apply help metadata in case it was overwritten by XML load
-        applyTopbarMetadata(document, { helpFileName: "requirements" });
     };
 
     setupTabEvents();
