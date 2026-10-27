@@ -80,6 +80,7 @@ public final class SystemBreakdownImporters extends GenericImporters {
 
         for (SBSCodeTypes type : types) {
             if (type.isActive()) {
+                prefixes.add(type.getPrefix() + entityType.getIdPrefix());
                 prefixes.add(type.getPrefix());
             }
         }
