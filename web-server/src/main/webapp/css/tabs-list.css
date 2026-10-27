@@ -149,6 +149,13 @@
     line-height: 1.35;
 }
 
+.data-table-cell-value.is-description{
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: unset;
+}
+
 .data-table-cell-value.select-chip{
     display: flex;
     align-items: center;

@@ -1717,8 +1717,10 @@ function renderListCell(requirement, column) {
     if (column.isActiveColumn) {
         return `
             <td title="${requirement.active ? "Active" : "Inactive"}">
-                <span class="stakeholderrequirement-active-state" aria-label="${requirement.active ? "Active" : "Inactive"}">
-                    <span class="stakeholderrequirement-active-dot ${requirement.active ? "is-active" : "is-inactive"}" aria-hidden="true"></span>
+                <span class="data-table-cell-value">
+                    <span class="stakeholderrequirement-active-state" aria-label="${requirement.active ? "Active" : "Inactive"}">
+                        <span class="stakeholderrequirement-active-dot ${requirement.active ? "is-active" : "is-inactive"}" aria-hidden="true"></span>
+                    </span>
                 </span>
             </td>
         `;
@@ -1747,7 +1749,8 @@ function renderListCell(requirement, column) {
 
     const cellValue = isTopLevelCode ? `<strong>${escapeHtml(displayValue)}</strong>` : escapeHtml(displayValue);
     const topLevelClass = isTopLevelCode ? " is-top-level-code" : "";
-    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}${topLevelClass}"${styleAttr}>${cellValue}</span></td>`;
+    const descriptionClass = column.key.toLowerCase().includes("description") ? " is-description" : "";
+    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}${topLevelClass}${descriptionClass}"${styleAttr}>${cellValue}</span></td>`;
 }
 
 function formatListCellValue(value, control) {

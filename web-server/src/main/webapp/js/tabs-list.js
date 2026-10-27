@@ -124,7 +124,7 @@
             return;
         }
 
-        const visibleCount = getFooterCount(table, "filteredRowCount", countVisibleRows(table));
+        const visibleCount = getFooterCount(table, "filteredRowCount", null) ?? countVisibleRows(table);
         const totalCount = getFooterCount(table, "totalRowCount", visibleCount);
 
         countElement.textContent = `${visibleCount} of ${totalCount}`;
@@ -133,12 +133,22 @@
     function syncDataTableFooters(root = document) {
         const scope = root && root.querySelectorAll ? root : document;
 
+        if (scope.matches?.(".data-table")) {
+            syncTableFooter(scope);
+        }
         scope.querySelectorAll(".data-table").forEach(syncTableFooter);
     }
 
     function observeTableChanges() {
         const observer = new MutationObserver((mutations) => {
+            const tables = new Set();
+
             mutations.forEach((mutation) => {
+                const targetTable = mutation.target.closest?.(".data-table");
+                if (targetTable) {
+                    tables.add(targetTable);
+                }
+
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType !== Node.ELEMENT_NODE) {
                         return;
@@ -146,21 +156,26 @@
 
                     if (node.matches && node.matches(".data-table tbody td")) {
                         wrapCellContent(node);
-                        return;
+                    } else {
+                        wrapTableCells(node);
                     }
-
-                    wrapTableCells(node);
 
                     const table = node.matches?.(".data-table")
                         ? node
                         : node.closest?.(".data-table");
 
                     if (table) {
-                        syncTableFooter(table);
+                        tables.add(table);
                     } else {
-                        syncDataTableFooters(node);
+                        node.querySelectorAll(".data-table").forEach((nestedTable) => tables.add(nestedTable));
                     }
                 });
+            });
+
+            tables.forEach((table) => {
+                if (table.isConnected) {
+                    syncTableFooter(table);
+                }
             });
         });
 
