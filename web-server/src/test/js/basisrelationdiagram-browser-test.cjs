@@ -16,7 +16,7 @@ const server = http.createServer((req, res) => {
         fs.createReadStream(xmlPath).pipe(res);
     } else if (req.url.startsWith('/css/')) {
         res.setHeader('Content-Type', 'text/css');
-        res.end(fs.readFileSync(path.join(root, 'webapp', req.url)));
+        res.end(fs.readFileSync(path.join(root, 'webapp', req.url.split('?')[0])));
     } else {
         res.setHeader('Content-Type', 'text/html');
         res.end(html);
@@ -62,8 +62,10 @@ async function main() {
     const source = fs.readFileSync(path.join(root, 'webapp/js/pages/basisrelationdiagram-page.js'), 'utf8')
         .replace(/^import .*;\r?\n/gm, '')
         .replace(/if \(document.readyState === "loading"\) \{\s*document.addEventListener\("DOMContentLoaded", startBasisRelationDiagramPage\);\s*\} else \{\s*startBasisRelationDiagramPage\(\);\s*\}/, '');
+    const loaderSource = fs.readFileSync(path.join(root, 'webapp/js/components/relation-diagram-loader.js'), 'utf8').replace(/^export /gm, '');
     const xmlHelpers = fs.readFileSync(path.join(root, 'webapp/js/core/xml.js'), 'utf8').replace(/^export /gm, '');
-    await run(xmlHelpers + '\n' + source + `
+    await run(loaderSource + '\n' + xmlHelpers + '\n' + source + `
+        function applyPageHeaderFromDocument() {}
         function setText(id, text) { const node = document.getElementById(id); if (node) node.textContent = text; }
         function naturalCompare(a, b) { return a.localeCompare(b, 'da', {numeric:true}); }
         window.testErrors=[];
@@ -175,6 +177,66 @@ async function main() {
     })()`);
     console.log('Regression:', JSON.stringify(regression));
     assert.equal(regression.traceComparisons, 320);
+    const lazy = await run(`(async () => {
+        const d=makeDiagram(); setRelationDiagramState(d);
+        const traces=new Map([...state.requirementsByInternalId.keys()].map(id=>[id,getFocusedTrace(id)]));
+        for(const requirement of state.requirementsByInternalId.values()) requirement.hasRelations=requirement.internalId!=='c';
+        const calls=[];
+        diagramLoader=createRelationDiagramLoader({snapshotId:'s', onExpired:()=>{}, request:async(kind,key)=>{
+            calls.push([kind,key]); await new Promise(resolve=>setTimeout(resolve,key==='a'?60:10));
+            return {snapshotId:'s',data:kind==='trace'?{visibleIds:[...traces.get(key).visibleIds],relations:[...traces.get(key).relations]}:kind==='search'?['c']:{description:'description only',relatedIds:['x']}};
+        }});
+        state.relations=[]; renderRelationDiagram(); await flush();
+        check(calls.length===0,'initial rendering fetched relation traces');
+        document.getElementById('filterOnlyWithoutRelations').checked=true;applyFiltersAndRedraw();await flush();
+        check(!state.cardsByInternalId.get('c').classList.contains('is-hidden-by-filter'),'compact hasRelations filter failed');
+        document.getElementById('filterOnlyWithoutRelations').checked=false;applyFiltersAndRedraw();await flush();
+        state.hoverInternalId='a';scheduleDiagramUpdate();await flush();
+        await new Promise(resolve=>setTimeout(resolve,135));
+        state.hoverInternalId='x';scheduleDiagramUpdate();await flush();
+        await new Promise(resolve=>setTimeout(resolve,220));await flush();
+        check(JSON.stringify(pathIds())===JSON.stringify([...traces.get('x').relations].map(r=>r.id).sort()),'late hover trace replaced current trace');
+        setFocusedRequirement('b');await new Promise(resolve=>setTimeout(resolve,90));await flush();
+        check(JSON.stringify(pathIds())===JSON.stringify([...traces.get('b').relations].map(r=>r.id).sort()),'lazy focus trace failed');
+        clearFocusedRequirement();state.hoverInternalId=null;
+        document.getElementById('filterRequirementText').value='description';applyFiltersAndRedraw();
+        await new Promise(resolve=>setTimeout(resolve,70));await flush();
+        check(!state.cardsByInternalId.get('c').classList.contains('is-hidden-by-filter'),'server description search failed');
+        check(state.cardsByInternalId.get('a').classList.contains('is-hidden-by-filter'),'search did not hide nonmatch');
+        openRequirementDialog(state.requirementsByInternalId.get('a'));
+        check(document.getElementById('dialogFocusButton').dataset.internalId==='a','loading dialog retains stale focus button');
+        openRequirementDialog(state.requirementsByInternalId.get('b'));
+        await new Promise(resolve=>setTimeout(resolve,120));await flush();
+        check(document.getElementById('dialogRequirementId').textContent==='b','stale details replaced current entity');
+        check(document.getElementById('dialogRequirementDescription').textContent==='description only','lazy details missing');
+        check(document.getElementById('dialogRelatedGroups').textContent.includes('x'),'lazy direct neighbors missing');
+        document.getElementById('requirementDialog').close();
+        diagramLoader.dispose();diagramLoader=null;clearTimeout(traceTimer);traceRequestId=null;
+        document.getElementById('filterRequirementText').value='';searchRequest=searchResults=null;
+        check(testErrors.length===0,'lazy browser errors: '+testErrors.join('; '));
+        return {requests:calls.length,interactions:'passed'};
+    })()`);
+    console.log('Lazy loading:', JSON.stringify(lazy));
+    await run(`(async () => {
+        const originalFetch=window.fetch, calls=[];
+        window.fetch=async(url,options)=>{
+            check(options.method==='POST','diagram API must use POST');
+            calls.push(url);
+            if(url.endsWith('cmd=snapshot'))return new Response('<RelationDiagramDocument><relationDiagram snapshotId="api"><stakeholderRequirements><requirement id="STK-1" entityType="5" entityId="1" hasRelations="true"><code>S1</code><name>One</name></requirement></stakeholderRequirements><systemRequirements><requirement id="SYS-REQ-2" entityType="6" entityId="2" hasRelations="true"><code>R2</code><name>Two</name></requirement></systemRequirements><systemsBreakdowns/></relationDiagram></RelationDiagramDocument>');
+            check(options.body.get('snapshotId')==='api','missing snapshot id in POST');
+            return new Response(JSON.stringify({snapshotId:'api',data:{visibleIds:['STK-1','SYS-REQ-2'],relations:[{id:'r',from:'STK-1',to:'SYS-REQ-2',type:'confirmed'}]}}));
+        };
+        await loadRelationDiagram();await flush();
+        check(calls.length===1 && state.relations.length===0,'initial API request must be compact');
+        state.hoverInternalId='STK-1';scheduleDiagramUpdate();await flush();
+        await new Promise(resolve=>setTimeout(resolve,200));await flush();
+        check(pathIds().join()==='r','API trace response did not render relation');
+        check(calls.length===2,'unexpected background requests');
+        diagramLoader.dispose();diagramLoader=null;clearTimeout(traceTimer);traceRequestId=null;
+        window.fetch=originalFetch;
+    })()`);
+    console.log('Snapshot/trace POST integration: passed');
+
     if (xmlPath) {
         const measured = await run(`(async () => {
             let t=performance.now();const text=await(await fetch('/data.xml')).text();const readMs=performance.now()-t;

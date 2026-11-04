@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/nflprelationdiagram.css" />
+    <link rel="stylesheet" href="../css/nflprelationdiagram.css?rev=diagram-lazy-1" />
 </head>
 
 <body class="relationdiagram-document nflprelationdiagram-document">
@@ -293,7 +293,7 @@
             loadStatus.textContent = "Booting";
         }
 
-        import("../js/pages/nflprelationdiagram-page.js?rev=directional-trace-2").catch(function (error) {
+        import("../js/pages/nflprelationdiagram-page.js?rev=diagram-lazy-1").catch(function (error) {
             console.error("Failed to load RFLP relation diagram module", error);
 
             if (loadStatus) {

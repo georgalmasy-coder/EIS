@@ -2,7 +2,8 @@ package com.bepa.eis.server.api.web.application.views.basis.relationdiagram;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
-import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider.DiagramRelation;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
@@ -24,6 +25,10 @@ import org.w3c.dom.Element;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import static com.bepa.eis.common.enums.entity.EntityType.*;
 
@@ -33,21 +38,30 @@ public class RelationDiagramDocument extends GenericXmlDocument {
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
+    private final boolean compact;
+    private RelationDiagramSnapshot snapshot;
 
     private List<SystemRequirementEntity> listOfSystemRequirements;
     private List<StakeholderRequirementEntity> listOfStakeholderRequirements;
     private List<SystemBreakdownEntity> listOfSystemBreakdowns;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToSystemBreakdownRelations;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToSystemBreakdownRelations;
 
-    private List<EntityRelationRecord> listOfStakeholderRequirementToStakeholderRequirementRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfSystemBreakdownToSystemBreakdownRelations;
+    private List<DiagramRelation> relations;
+    private static final Set<EntityType> DIAGRAM_TYPES = Set.of(
+            STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN);
+    // Legacy basis XML has one group per unordered type pair; retain the stored endpoint direction.
+    private record RelationGroup(int first, int second) {
+        static RelationGroup of(int from, int to) { return new RelationGroup(Math.min(from, to), Math.max(from, to)); }
+    }
+    private final Map<RelationGroup, List<DiagramRelation>> relationGroups = new HashMap<>();
 
     public RelationDiagramDocument(WebSession webSession) throws Exception {
+        this(webSession, false);
+    }
+
+    RelationDiagramDocument(WebSession webSession, boolean compact) throws Exception {
 
         super(webSession);
+        this.compact = compact;
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
@@ -56,6 +70,7 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         rootElement.addElement(topPanel.getTopPanelElements());
 
         relationDiagramDocument();
+        if (compact) snapshot = buildSnapshot();
 
         Element relationDiagramElement = buildRelationDiagramElement();
         getRoot().appendChild(relationDiagramElement);
@@ -63,28 +78,50 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         relationDiagramElement.appendChild(getStakeholderRequirementElement());
         relationDiagramElement.appendChild(getSystemRequirementElement());
         relationDiagramElement.appendChild(getSystemBreakdownElement());
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemRequirementRelations", listOfStakeholderRequirementToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemsBreakdownRelations", listOfSystemRequirementToSystemBreakdownRelations));
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemsBreakdownRelations", listOfStakeholderRequirementToSystemBreakdownRelations));
+        if (compact) return;
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemRequirementRelations", STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemsBreakdownRelations", SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemsBreakdownRelations", STAKEHOLDER_REQUIREMENT, SYSTEMS_BREAKDOWN));
 
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToStakeholderRequirementRelations", listOfStakeholderRequirementToStakeholderRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemRequirementRelations", listOfSystemRequirementToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemsBreakdownRelations", listOfSystemBreakdownToSystemBreakdownRelations));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToStakeholderRequirementRelations", STAKEHOLDER_REQUIREMENT, STAKEHOLDER_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemRequirementRelations", SYSTEM_REQUIREMENT, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemsBreakdownRelations", SYSTEMS_BREAKDOWN, SYSTEMS_BREAKDOWN));
+    }
+
+    RelationDiagramSnapshot snapshot() { return snapshot; }
+
+    private RelationDiagramSnapshot buildSnapshot() {
+        var nodes = new java.util.ArrayList<RelationDiagramSnapshot.Node>();
+        for (var entity : listOfStakeholderRequirements) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(STAKEHOLDER_REQUIREMENT, entity.getEntityId().getValue()), 5, entity.getEntityId().getValue(),
+                entity.getRequirementCode().getValue(), entity.getRequirementName().getValue(), entity.getRequirementDescription().getValue()));
+        for (var entity : listOfSystemRequirements) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(SYSTEM_REQUIREMENT, entity.getEntityId().getValue()), 6, entity.getEntityId().getValue(),
+                entity.getRequirementCode().getValue(), entity.getRequirementName().getValue(), entity.getRequirementDescription().getValue()));
+        for (var entity : listOfSystemBreakdowns) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(SYSTEMS_BREAKDOWN, entity.getEntityId().getValue()), 2, entity.getEntityId().getValue(),
+                entity.getSbsCode().getValue(), entity.getSystemName().getValue(), entity.getDescription()));
+        var edges = new java.util.ArrayList<RelationDiagramSnapshot.Edge>();
+        for (var relation : relations) edges.add(new RelationDiagramSnapshot.Edge("relation-" + relation.relationId(),
+                formatEntityId(EntityType.fromId(relation.entityType()), relation.entityId()),
+                formatEntityId(EntityType.fromId(relation.relatedEntityType()), relation.relatedEntityId()), RelationType.CONFIRMED.getDescription()));
+        return new RelationDiagramSnapshot(nodes, edges);
     }
 
     private void relationDiagramDocument () throws SQLException {
+        long start = System.nanoTime();
         listOfSystemRequirements = getSystemRequirements();
         listOfStakeholderRequirements = getStakeholderRequirements();
         listOfSystemBreakdowns = getSystemBreakdowns();
 
-        listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT);
-        listOfSystemRequirementToSystemBreakdownRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN);
-        listOfStakeholderRequirementToSystemBreakdownRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, SYSTEMS_BREAKDOWN);
-
-        listOfStakeholderRequirementToStakeholderRequirementRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, STAKEHOLDER_REQUIREMENT);
-        listOfSystemRequirementToSystemRequirementRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEM_REQUIREMENT);
-        listOfSystemBreakdownToSystemBreakdownRelations = getEntityRelations(SYSTEMS_BREAKDOWN, SYSTEMS_BREAKDOWN);
-
+        long relationStart = System.nanoTime();
+        relations = new EntityRelationProvider(getWebSession()).getConfirmedDiagramRelations(DIAGRAM_TYPES);
+        log.info("Load Entity Relations: {} records in {} ms (total {} ms)", relations.size(),
+                (System.nanoTime() - relationStart) / 1_000_000, (System.nanoTime() - start) / 1_000_000);
+        if (!compact) for (var relation : relations) {
+            relationGroups.computeIfAbsent(RelationGroup.of(relation.entityType(), relation.relatedEntityType()),
+                    ignored -> new ArrayList<>()).add(relation);
+        }
     }
 
     private List<StakeholderRequirementEntity> getStakeholderRequirements() throws SQLException {
@@ -120,11 +157,6 @@ public class RelationDiagramDocument extends GenericXmlDocument {
         );
     }
 
-    private List<EntityRelationRecord> getEntityRelations(EntityType entityType, EntityType relatedEentityType) throws SQLException {
-        EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());
-        return entityRelationProvider.getAllConfirmedEntityRelationRecordsByProjectId(entityType, relatedEentityType);
-    }
-
     private Element getStakeholderRequirementElement() {
         Element stakeholderRequirements = getDoc().createElement("stakeholderRequirements");
         if (listOfStakeholderRequirements != null) {
@@ -136,7 +168,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
-                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 stakeholderRequirements.appendChild(requirementElement);
             }
         }
@@ -154,7 +187,8 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
-                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 systemRequirements.appendChild(requirementElement);
             }
         }
@@ -172,24 +206,24 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(requirementElement, system.getEntityId());
                 addElement(requirementElement, "code", system.getSbsCode().getValue());
                 addElement(requirementElement, "name", system.getSystemName().getValue());
-                addElement(requirementElement, "description", system.getDescription());
+                if (!compact) addElement(requirementElement, "description", system.getDescription());
+                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 systemRequirements.appendChild(requirementElement);
             }
         }
         return systemRequirements;
     }
 
-
-    private Element getRelationsElement(String elementName, List<EntityRelationRecord> listOfEntityRelationRecords) {
+    private Element getRelationsElement(String elementName, EntityType fromType, EntityType toType) {
         Element relationsElement = getDoc().createElement(elementName);
-        for (EntityRelationRecord relation : listOfEntityRelationRecords) {
+        for (var relation : relationGroups.getOrDefault(RelationGroup.of(fromType.getId(), toType.getId()), List.of())) {
             Element relationElement = getDoc().createElement("relation");
 
-            String fromId = formatEntityId(relation.getEntityType(), relation.getEntityId());
+            String fromId = formatEntityId(EntityType.fromId(relation.entityType()), relation.entityId());
             addElement(relationElement, "from",fromId);
-            String toId = formatEntityId(relation.getRelatedEntityType(), relation.getRelatedEntityId());
+            String toId = formatEntityId(EntityType.fromId(relation.relatedEntityType()), relation.relatedEntityId());
             addElement(relationElement, "to", toId);
-            addElement(relationElement, "type", relation.getRelationType().getDescription());
+            addElement(relationElement, "type", RelationType.CONFIRMED.getDescription());
 
             relationsElement.appendChild(relationElement);
 
@@ -197,7 +231,6 @@ public class RelationDiagramDocument extends GenericXmlDocument {
 
         return relationsElement;
     }
-
 
     private void addElement(Element parentelement, String elementName, String value) {
         Element element = getDoc().createElement(elementName);
@@ -225,6 +258,5 @@ public class RelationDiagramDocument extends GenericXmlDocument {
             element.setAttribute("entityId",entityId.toString());
         }
     }
-
 
 }

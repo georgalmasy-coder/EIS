@@ -16,6 +16,56 @@ import org.w3c.dom.Element;
 public class RelationDiagramServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(RelationDiagramServlet.class);
+    private final RelationDiagramSnapshotStore snapshots = new RelationDiagramSnapshotStore();
+    private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws jakarta.servlet.ServletException {
+        String command = getCommandParameter(request);
+        if (!java.util.Set.of("snapshot", "trace", "details", "search").contains(command == null ? "" : command)) {
+            super.doPost(request, response); return;
+        }
+        WebSession session = getWebSessionFromRequest(request, response);
+        if (session == null) return;
+        setWebSession(session);
+        long start = System.currentTimeMillis();
+        try {
+            response.setCharacterEncoding("UTF-8"); response.setHeader("Cache-Control", "no-store");
+            if ("snapshot".equals(command)) {
+                var document = new RelationDiagramDocument(session, true);
+                String id = snapshots.put(session, document.snapshot());
+                ((Element) document.getRoot().getElementsByTagName("relationDiagram").item(0)).setAttribute("snapshotId", id);
+                response.setContentType("application/xml; charset=UTF-8");
+                response.getWriter().write(document.toXmlString(false));
+            } else {
+                var graph = snapshots.get(session, required(request, "snapshotId"));
+                Object data = switch (command) {
+                    case "trace" -> graph.trace(required(request, "internalId"));
+                    case "details" -> graph.details(required(request, "internalId"));
+                    case "search" -> graph.search(java.util.Objects.toString(request.getParameter("text"), ""));
+                    default -> throw new IllegalArgumentException("Invalid command");
+                };
+                response.setContentType("application/json; charset=UTF-8");
+                json.writeValue(response.getWriter(), java.util.Map.of("snapshotId", required(request, "snapshotId"), "data", data));
+                log.info("Relation diagram {} snapshot={} entity={} took {} ms", command, request.getParameter("snapshotId"), request.getParameter("internalId"), System.currentTimeMillis() - start);
+            }
+        } catch (Exception error) {
+            try {
+                response.setStatus(error instanceof RelationDiagramSnapshotStore.Expired ? 409 : 400);
+                response.setContentType("application/json; charset=UTF-8");
+                json.writeValue(response.getWriter(), java.util.Map.of("error", java.util.Objects.toString(error.getMessage(), "Diagram error")));
+                if (!(error instanceof RelationDiagramSnapshotStore.Expired)) log.error("Relation diagram {} failed", command, error);
+            } catch (java.io.IOException writeError) { throw new jakarta.servlet.ServletException(writeError); }
+        } finally {
+            getPerformanceProvider().logPerformance(request.getServletPath() + "." + command, System.currentTimeMillis() - start);
+        }
+    }
+
+    private String required(HttpServletRequest request, String name) {
+        String value = request.getParameter(name);
+        if (value == null || value.isBlank()) throw new IllegalArgumentException("Missing " + name);
+        return value;
+    }
 
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {

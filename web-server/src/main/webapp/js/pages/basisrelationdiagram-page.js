@@ -6,8 +6,9 @@ import {setText} from "../core/dom.js";
 import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
 import {directTextOf, hasXmlParseError} from "../core/xml.js";
 import {naturalCompare} from "../components/sortable-table.js";
+import {createRelationDiagramLoader} from "../components/relation-diagram-loader.js?rev=diagram-lazy-1";
 
-const RELATION_DIAGRAM_ENDPOINT = "/basis/relationdiagram?cmd=overview";
+const RELATION_DIAGRAM_ENDPOINT = "/basis/relationdiagram?cmd=snapshot";
 const RELATION_CREATE_ENDPOINT = "/basis/entityrelations/createrelation";
 
 const ENTITY_TYPE_LABELS = {
@@ -67,6 +68,14 @@ let diagramFrame = null;
 let filtersPending = false;
 let geometryPending = false;
 let layoutPending = false;
+let diagramLoader = null;
+let diagramLoadSequence = 0;
+let traceRequestId = null;
+let traceTimer = null;
+let searchRequest = null;
+let searchResults = null;
+let dialogRequest = 0;
+let lastSnapshotRecovery = 0;
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startBasisRelationDiagramPage);
@@ -243,12 +252,16 @@ function clearAllFilters() {
 }
 
 async function loadRelationDiagram() {
+    const sequence = ++diagramLoadSequence;
+    diagramLoader?.dispose(); diagramLoader = null;
+    clearTimeout(traceTimer); traceRequestId = null;
+    searchRequest = searchResults = null; dialogRequest++;
     showEmptyState("Loading relation diagram…");
     setText("loadStatus", "Loading", "");
 
     try {
         const response = await fetch(RELATION_DIAGRAM_ENDPOINT, {
-            method: "GET",
+            method: "POST",
             headers: {
                 "Accept": "application/xml,text/xml,*/*"
             },
@@ -260,6 +273,7 @@ async function loadRelationDiagram() {
         }
 
         const xmlText = await response.text();
+        if (sequence !== diagramLoadSequence) return;
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
@@ -267,6 +281,21 @@ async function loadRelationDiagram() {
         }
 
         const diagram = parseRelationDiagramDocument(xmlDocument);
+        const snapshotId = xmlDocument.querySelector("relationDiagram").getAttribute("snapshotId");
+        if (!snapshotId) throw new Error("Missing relation diagram snapshot id");
+        diagramLoader = createRelationDiagramLoader({snapshotId,
+            request: async (command, key) => {
+                const response = await fetch(`/basis/relationdiagram?cmd=${command}`, {method:"POST",cache:"no-store",
+                    body:new URLSearchParams({snapshotId,...(command === "search" ? {text:key} : {internalId:key})})});
+                if (!response.ok) { const error=new Error(`Could not load diagram ${command} (HTTP ${response.status})`);error.status=response.status;throw error; }
+                return response.json();
+            },
+            onExpired: () => {
+                if (sequence !== diagramLoadSequence) return;
+                if (Date.now()-lastSnapshotRecovery < 30_000) { window.alert("Diagram snapshot expired. Reload the page to try again."); return; }
+                lastSnapshotRecovery=Date.now(); loadRelationDiagram();
+            }
+        });
 
         applyTopPanel(xmlDocument);
         setRelationDiagramState(diagram);
@@ -274,6 +303,7 @@ async function loadRelationDiagram() {
 
         setText("loadStatus", "Loaded", "");
     } catch (error) {
+        if (sequence !== diagramLoadSequence) return;
         console.error("Failed to load relation diagram", error);
         setText("loadStatus", "Error", "");
         showEmptyState(`Could not load relation diagram. ${error.message}`);
@@ -336,6 +366,7 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
             visibleId: directTextOf(requirementElement, "code") || directTextOf(requirementElement, "id") || "—",
             name: directTextOf(requirementElement, "name") || "—",
             description: directTextOf(requirementElement, "description") || "",
+            hasRelations: requirementElement.getAttribute("hasRelations") === "true",
             type: requirementType,
             entityId,
             entityTypeId,
@@ -566,7 +597,9 @@ function applyFilters() {
     const onlyWithoutRelations = document.getElementById("filterOnlyWithoutRelations")?.checked === true;
     const onlyWithRelations = document.getElementById("filterOnlyWithRelations")?.checked === true;
     const searchText = document.getElementById("filterRequirementText")?.value?.trim().toLowerCase() || "";
-    const focusVisibleIds = state.focusedInternalId ? getFocusedVisibleIds(state.focusedInternalId) : null;
+    const focusTrace = state.focusedInternalId ? getFocusedTrace(state.focusedInternalId) : null;
+    const focusVisibleIds = focusTrace && !focusTrace.loading ? focusTrace.visibleIds : null;
+    if (diagramLoader && searchText && !state.focusedInternalId) ensureDiagramSearch(searchText);
 
     const cards = state.cardsByInternalId.values();
 
@@ -604,6 +637,12 @@ function getFocusedVisibleIds(internalId) {
 }
 
 function getFocusedTrace(internalId) {
+    if (diagramLoader) {
+        const cached = diagramLoader.peek("trace", internalId);
+        if (cached) return cached;
+        ensureDiagramTrace(internalId);
+        return {visibleIds:new Set([internalId]), relations:new Set(), loading:true};
+    }
     if (state.traceCache?.internalId === internalId) return state.traceCache.trace;
     const visibleIds = new Set([internalId]);
     const relations = new Set();
@@ -635,6 +674,39 @@ function getFocusedTrace(internalId) {
     // Keep only the latest trace so repeated hovers cannot retain the entire graph.
     state.traceCache = {internalId, trace};
     return trace;
+}
+
+function ensureDiagramTrace(internalId) {
+    if (traceRequestId === internalId) return;
+    traceRequestId = internalId; clearTimeout(traceTimer);
+    const loader = diagramLoader;
+    traceTimer = setTimeout(async () => {
+        if (loader !== diagramLoader || getActiveInternalId() !== internalId) { traceRequestId = null; return; }
+        try {
+            await loader.load("trace", internalId);
+            if (loader === diagramLoader && traceRequestId === internalId) traceRequestId = null;
+            if (loader !== diagramLoader || getActiveInternalId() !== internalId) return;
+            state.highlightedInternalId = undefined;
+            scheduleDiagramUpdate({filters:Boolean(state.focusedInternalId), geometry:true});
+        } catch (error) {
+            if (loader === diagramLoader && getActiveInternalId() === internalId && error.status !== 409) {
+                setText("loadStatus", "Error", ""); window.alert(error.message);
+            }
+        }
+    }, state.focusedInternalId || state.selectedInternalId === internalId ? 0 : 120);
+}
+
+function ensureDiagramSearch(text) {
+    if (searchResults?.text === text || searchRequest === text) return;
+    searchRequest = text;
+    const loader = diagramLoader;
+    loader.load("search", text).then(ids => {
+        if (loader === diagramLoader && searchRequest === text) searchRequest = null;
+        if (loader !== diagramLoader || document.getElementById("filterRequirementText")?.value.trim().toLowerCase() !== text) return;
+        searchResults = {text, ids:new Set(ids)}; scheduleDiagramUpdate({filters:true});
+    }).catch(error => {
+        if (loader === diagramLoader && searchRequest === text && error.status !== 409) window.alert(error.message);
+    });
 }
 
 function getActiveInternalId() {
@@ -912,6 +984,7 @@ function parseEntityId(internalId, fallbackValue) {
 }
 
 function requirementMatchesSearch(requirement, searchText) {
+    if (diagramLoader) return searchResults?.text === searchText ? searchResults.ids.has(requirement?.internalId) : true;
     if (!requirement) {
         return false;
     }
@@ -1068,6 +1141,9 @@ function updateHighlight(trace = getActiveTrace()) {
         card.classList.toggle("is-selected", isSelected);
         card.classList.toggle("is-related", isRelated);
         card.classList.toggle("is-muted", shouldMute);
+        card.classList.toggle("is-trace-loading", isSelected && trace?.loading === true);
+        if (isSelected && trace?.loading) card.setAttribute("aria-busy", "true");
+        else card.removeAttribute("aria-busy");
     }
 
     // Only active trace lines are rendered; scroll need not revisit card classes.
@@ -1122,6 +1198,28 @@ function renderRelatedGroups(requirement) {
 }
 
 function openRequirementDialog(requirement) {
+    const cachedDetails = diagramLoader?.peek("details", requirement.internalId);
+    if (diagramLoader && !cachedDetails) {
+        const loader = diagramLoader, token = ++dialogRequest;
+        setText("dialogTitle", requirement.visibleId, "");
+        setText("dialogRequirementId", requirement.visibleId, "");
+        setText("dialogRequirementName", requirement.name, "");
+        setText("dialogRequirementDescription", "Loading…", "");
+        document.getElementById("dialogRelatedGroups")?.replaceChildren();
+        const focusButton = document.getElementById("dialogFocusButton");
+        if (focusButton) focusButton.dataset.internalId = requirement.internalId;
+        const editButton = document.getElementById("dialogEditButton");
+        if (editButton) editButton.hidden = !getRequirementEditConfig(requirement);
+        updateFocusDropZone();
+        const dialog = document.getElementById("requirementDialog");
+        if (dialog && !dialog.open) dialog.showModal();
+        loader.load("details", requirement.internalId).then(details => {
+            if (loader !== diagramLoader || token !== dialogRequest || !dialog?.open) return;
+            openRequirementDialog(requirement);
+        }).catch(error => { if (loader === diagramLoader && token === dialogRequest && error.status !== 409) setText("dialogRequirementDescription", error.message, ""); });
+        return;
+    }
+    dialogRequest++;
     const dialog = document.getElementById("requirementDialog");
 
     if (!dialog) {
@@ -1139,7 +1237,7 @@ function openRequirementDialog(requirement) {
     );
     setText("dialogRequirementId", requirement.visibleId, "");
     setText("dialogRequirementName", requirement.name, "");
-    setText("dialogRequirementDescription", requirement.description || "—", "");
+    setText("dialogRequirementDescription", cachedDetails?.description || requirement.description || "—", "");
 
     const dialogFocusButton = document.getElementById("dialogFocusButton");
     const dialogEditButton = document.getElementById("dialogEditButton");
@@ -1213,6 +1311,7 @@ function getRequirementEditConfig(requirement) {
 }
 
 function getRelatedRequirementIds(internalId) {
+    if (diagramLoader) return new Set(diagramLoader.peek("details", internalId)?.relatedIds || []);
     return state.relationNeighbors.get(internalId) || new Set();
 }
 
@@ -1227,6 +1326,7 @@ function getRelatedRequirements(internalId, predicate = () => true) {
 }
 
 function hasAnyRelation(internalId) {
+    if (diagramLoader) return state.requirementsByInternalId.get(internalId)?.hasRelations === true;
     return state.relationNeighbors.has(internalId);
 }
 

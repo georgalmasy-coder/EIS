@@ -805,3 +805,7 @@ body.relationdiagram-document .side-menu {
         min-width: 180px;
     }
 }
+
+/* Trace data is fetched for the active card. */
+.relationdiagram-requirement-card.is-trace-loading { cursor: progress; }
+.relationdiagram-requirement-card.is-trace-loading::after { content: "\231B"; margin-inline-start: .4rem; }

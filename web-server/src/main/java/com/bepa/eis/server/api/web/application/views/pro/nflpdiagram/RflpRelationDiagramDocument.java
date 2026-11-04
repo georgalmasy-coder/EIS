@@ -1,8 +1,10 @@
 package com.bepa.eis.server.api.web.application.views.pro.nflpdiagram;
 
 import com.bepa.eis.common.dto.WebSession;
+import com.bepa.eis.server.api.web.application.views.basis.relationdiagram.RelationDiagramSnapshot;
 import com.bepa.eis.common.enums.entity.EntityType;
-import com.bepa.eis.common.providers.entityrelation.EntityRelationRecord;
+import com.bepa.eis.common.enums.entity.RelationType;
+import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvider.DiagramRelation;
 import com.bepa.eis.server.api.DTO.TopPanel;
 import com.bepa.eis.server.api.generic.GenericXmlDocument;
 import com.bepa.eis.server.api.web.application.enums.PageType;
@@ -24,6 +26,10 @@ import org.w3c.dom.Element;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import static com.bepa.eis.common.enums.entity.EntityType.*;
 
@@ -33,6 +39,8 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
+    private final boolean compact;
+    private RelationDiagramSnapshot snapshot;
 
     private List<SystemRequirementEntity> listOfSystemRequirements;
     private List<StakeholderRequirementEntity> listOfStakeholderRequirements;
@@ -40,40 +48,18 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
     private List<FunctionalStructureEntity> listOfFunctionalStructures;
     private List<LogicalStructureEntity> listOfLogicalStructures;
 
-    private List<EntityRelationRecord> listOfStakeholderRequirementToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToFunctionalStructureRelations;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToLogicalStructureRelations;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToSystemsBreakdownRelations;
-    private List<EntityRelationRecord> listOfStakeholderRequirementToStakeholderRequirementRelations;
+    private List<DiagramRelation> relations;
+    private record RelationGroup(int fromType, int toType) {}
+    private final Map<RelationGroup, List<DiagramRelation>> relationGroups = new HashMap<>();
+    private static final Set<EntityType> DIAGRAM_TYPES = Set.of(
+            STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT, FUNCTIONAL_STRUCTURE, LOGICAL_STRUCTURE, SYSTEMS_BREAKDOWN);
 
-    private List<EntityRelationRecord> listOfSystemRequirementToStakeholderRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToFunctionalStructureRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToLogicalStructureRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToSystemsBreakdownRelations;
-    private List<EntityRelationRecord> listOfSystemRequirementToSystemRequirementRelations;
+    public RflpRelationDiagramDocument(WebSession webSession) throws Exception { this(webSession, false); }
 
-    private List<EntityRelationRecord> listOfFunctionalStructureToStakeholderRequirementRelations;
-    private List<EntityRelationRecord> listOfFunctionalStructureToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfFunctionalStructureToLogicalStructureRelations;
-    private List<EntityRelationRecord> listOfFunctionalStructureToSystemsBreakdownRelations;
-    private List<EntityRelationRecord> listOfFunctionalStructureToFunctionalStructureRelations;
-
-    private List<EntityRelationRecord> listOfLogicalStructureToStakeholderRequirementRelations;
-    private List<EntityRelationRecord> listOfLogicalStructureToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfLogicalStructureToFunctionalStructureRelations;
-    private List<EntityRelationRecord> listOfLogicalStructureToSystemsBreakdownRelations;
-    private List<EntityRelationRecord> listOfLogicalStructureToLogicalStructureRelations;
-
-    private List<EntityRelationRecord> listOfSystemBreakdownToStakeholderRequirementRelations;
-    private List<EntityRelationRecord> listOfSystemBreakdownToSystemRequirementRelations;
-    private List<EntityRelationRecord> listOfSystemBreakdownToLogicalStructureRelations;
-    private List<EntityRelationRecord> listOfSystemBreakdownToFunctionalStructureRelations;
-    private List<EntityRelationRecord> listOfSystemBreakdownToSystemBreakdownRelations;
-
-
-    public RflpRelationDiagramDocument(WebSession webSession) throws Exception {
+    RflpRelationDiagramDocument(WebSession webSession, boolean compact) throws Exception {
 
         super(webSession);
+        this.compact = compact;
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
@@ -82,6 +68,7 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         rootElement.addElement(topPanel.getTopPanelElements());
 
         relationDiagramDocument();
+        if (compact) snapshot = buildSnapshot();
 
         Element relationDiagramElement = buildRelationDiagramElement();
         getRoot().appendChild(relationDiagramElement);
@@ -92,79 +79,88 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         relationDiagramElement.appendChild(getLogicalStructureElement());
         relationDiagramElement.appendChild(getSystemBreakdownElement());
 
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemRequirementRelations", listOfStakeholderRequirementToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToFunctionalStructureRelations", listOfStakeholderRequirementToFunctionalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToLogicalStructureRelations", listOfStakeholderRequirementToLogicalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemsBreakdownRelations", listOfStakeholderRequirementToSystemsBreakdownRelations));
-        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToStakeholderRequirementRelations", listOfStakeholderRequirementToStakeholderRequirementRelations));
+        if (compact) return;
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemRequirementRelations", STAKEHOLDER_REQUIREMENT, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToFunctionalStructureRelations", STAKEHOLDER_REQUIREMENT, FUNCTIONAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToLogicalStructureRelations", STAKEHOLDER_REQUIREMENT, LOGICAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToSystemsBreakdownRelations", STAKEHOLDER_REQUIREMENT, SYSTEMS_BREAKDOWN));
+        relationDiagramElement.appendChild(getRelationsElement("StakeholderRequirementToStakeholderRequirementRelations", STAKEHOLDER_REQUIREMENT, STAKEHOLDER_REQUIREMENT));
 
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToStakeholderRequirementRelations", SYSTEM_REQUIREMENT, STAKEHOLDER_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToFunctionalStructureRelations", SYSTEM_REQUIREMENT, FUNCTIONAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToLogicalStructureRelations", SYSTEM_REQUIREMENT, LOGICAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemsBreakdownRelations", SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN));
+        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemRequirementRelations", SYSTEM_REQUIREMENT, SYSTEM_REQUIREMENT));
 
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToStakeholderRequirementRelations", listOfSystemRequirementToStakeholderRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToFunctionalStructureRelations", listOfSystemRequirementToFunctionalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToLogicalStructureRelations", listOfSystemRequirementToLogicalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemsBreakdownRelations", listOfSystemRequirementToSystemsBreakdownRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemRequirementToSystemRequirementRelations", listOfSystemRequirementToSystemRequirementRelations));
+        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToStakeholderRequirementRelations", FUNCTIONAL_STRUCTURE, STAKEHOLDER_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToSystemRequirementRelations", FUNCTIONAL_STRUCTURE, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToLogicalStructureRelations", FUNCTIONAL_STRUCTURE, LOGICAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToSystemsBreakdownRelations", FUNCTIONAL_STRUCTURE, SYSTEMS_BREAKDOWN));
+        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToFunctionalStructureRelations", FUNCTIONAL_STRUCTURE, FUNCTIONAL_STRUCTURE));
 
-        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToStakeholderRequirementRelations", listOfFunctionalStructureToStakeholderRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToSystemRequirementRelations", listOfFunctionalStructureToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToLogicalStructureRelations", listOfFunctionalStructureToLogicalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToSystemsBreakdownRelations", listOfFunctionalStructureToSystemsBreakdownRelations));
-        relationDiagramElement.appendChild(getRelationsElement("FunctionalStructureToFunctionalStructureRelations", listOfFunctionalStructureToFunctionalStructureRelations));
+        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToStakeholderRequirementRelations", LOGICAL_STRUCTURE, STAKEHOLDER_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToSystemRequirementRelations", LOGICAL_STRUCTURE, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToFunctionalStructureRelations", LOGICAL_STRUCTURE, FUNCTIONAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToSystemsBreakdownRelations", LOGICAL_STRUCTURE, SYSTEMS_BREAKDOWN));
+        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToLogicalStructureRelations", LOGICAL_STRUCTURE, LOGICAL_STRUCTURE));
 
-        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToStakeholderRequirementRelations", listOfLogicalStructureToStakeholderRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToSystemRequirementRelations", listOfLogicalStructureToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToFunctionalStructureRelations", listOfLogicalStructureToFunctionalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToSystemsBreakdownRelations", listOfLogicalStructureToSystemsBreakdownRelations));
-        relationDiagramElement.appendChild(getRelationsElement("LogicalStructureToLogicalStructureRelations", listOfLogicalStructureToLogicalStructureRelations));
-
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToStakeholderRequirementRelations", listOfSystemBreakdownToStakeholderRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemRequirementRelations", listOfSystemBreakdownToSystemRequirementRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToFunctionalStructureRelations", listOfSystemBreakdownToFunctionalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToLogicalStructureRelations", listOfSystemBreakdownToLogicalStructureRelations));
-        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemsBreakdownRelations", listOfSystemBreakdownToSystemBreakdownRelations));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToStakeholderRequirementRelations", SYSTEMS_BREAKDOWN, STAKEHOLDER_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemRequirementRelations", SYSTEMS_BREAKDOWN, SYSTEM_REQUIREMENT));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToFunctionalStructureRelations", SYSTEMS_BREAKDOWN, FUNCTIONAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToLogicalStructureRelations", SYSTEMS_BREAKDOWN, LOGICAL_STRUCTURE));
+        relationDiagramElement.appendChild(getRelationsElement("SystemsBreakdownToSystemsBreakdownRelations", SYSTEMS_BREAKDOWN, SYSTEMS_BREAKDOWN));
 
     }
 
+    RelationDiagramSnapshot snapshot() { return snapshot; }
+
+    private RelationDiagramSnapshot buildSnapshot() {
+        var nodes = new java.util.ArrayList<RelationDiagramSnapshot.Node>();
+        for (var entity : listOfStakeholderRequirements) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(STAKEHOLDER_REQUIREMENT, entity.getEntityId().getValue()), STAKEHOLDER_REQUIREMENT.getId(), entity.getEntityId().getValue(),
+                entity.getRequirementCode().getValue(), entity.getRequirementName().getValue(), entity.getRequirementDescription().getValue()));
+        for (var entity : listOfSystemRequirements) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(SYSTEM_REQUIREMENT, entity.getEntityId().getValue()), SYSTEM_REQUIREMENT.getId(), entity.getEntityId().getValue(),
+                entity.getRequirementCode().getValue(), entity.getRequirementName().getValue(), entity.getRequirementDescription().getValue()));
+        for (var entity : listOfFunctionalStructures) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(FUNCTIONAL_STRUCTURE, entity.getEntityId().getValue()), FUNCTIONAL_STRUCTURE.getId(), entity.getEntityId().getValue(),
+                entity.getFunctionalCode().getValue(), entity.getFunctionalName().getValue(), entity.getFunctionalDescription().getValue()));
+        for (var entity : listOfLogicalStructures) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(LOGICAL_STRUCTURE, entity.getEntityId().getValue()), LOGICAL_STRUCTURE.getId(), entity.getEntityId().getValue(),
+                entity.getLogicalCode().getValue(), entity.getLogicalName().getValue(), entity.getLogicalDescription().getValue()));
+        for (var entity : listOfSystemBreakdowns) nodes.add(new RelationDiagramSnapshot.Node(
+                formatEntityId(SYSTEMS_BREAKDOWN, entity.getEntityId().getValue()), SYSTEMS_BREAKDOWN.getId(), entity.getEntityId().getValue(),
+                entity.getSbsCode().getValue(), entity.getSystemName().getValue(), entity.getDescription()));
+        var edges = new java.util.ArrayList<RelationDiagramSnapshot.Edge>();
+        for (var relation : relations) edges.add(new RelationDiagramSnapshot.Edge("relation-" + relation.relationId(),
+                formatEntityId(EntityType.fromId(relation.entityType()), relation.entityId()),
+                formatEntityId(EntityType.fromId(relation.relatedEntityType()), relation.relatedEntityId()), RelationType.CONFIRMED.getDescription()));
+        return new RelationDiagramSnapshot(nodes, edges);
+    }
+
     private void relationDiagramDocument () throws SQLException {
+        long start = System.currentTimeMillis();
+
         listOfSystemRequirements = getSystemRequirements();
+        log.info("Load System Requirements {}", System.currentTimeMillis()-start);
         listOfStakeholderRequirements = getStakeholderRequirements();
+        log.info("Load Stakeholder Requirements {}", System.currentTimeMillis()-start);
         listOfSystemBreakdowns = getSystemBreakdowns();
+        log.info("Load System Breakdowns {}", System.currentTimeMillis()-start);
         listOfFunctionalStructures = getFunctionalStructures();
+        log.info("Load Functional Structures {}", System.currentTimeMillis()-start);
         listOfLogicalStructures = getLogicalStructures();
+        log.info("Load Logical Structures {}", System.currentTimeMillis()-start);
 
-        listOfStakeholderRequirementToSystemRequirementRelations = getEntityRelations(EntityType.STAKEHOLDER_REQUIREMENT, EntityType.SYSTEM_REQUIREMENT);
-        listOfStakeholderRequirementToSystemsBreakdownRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, SYSTEMS_BREAKDOWN);
-        listOfStakeholderRequirementToFunctionalStructureRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, FUNCTIONAL_STRUCTURE);
-        listOfStakeholderRequirementToLogicalStructureRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, LOGICAL_STRUCTURE);
-        listOfStakeholderRequirementToStakeholderRequirementRelations = getEntityRelations(STAKEHOLDER_REQUIREMENT, STAKEHOLDER_REQUIREMENT);
-
-
-        listOfSystemRequirementToStakeholderRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, STAKEHOLDER_REQUIREMENT);
-        listOfSystemRequirementToFunctionalStructureRelations = getEntityRelations(EntityType.SYSTEM_REQUIREMENT, FUNCTIONAL_STRUCTURE);
-        listOfSystemRequirementToLogicalStructureRelations = getEntityRelations(SYSTEM_REQUIREMENT, LOGICAL_STRUCTURE);
-        listOfSystemRequirementToSystemsBreakdownRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEMS_BREAKDOWN);
-        listOfSystemRequirementToSystemRequirementRelations = getEntityRelations(SYSTEM_REQUIREMENT, SYSTEM_REQUIREMENT);
-
-
-        listOfFunctionalStructureToStakeholderRequirementRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, STAKEHOLDER_REQUIREMENT);
-        listOfFunctionalStructureToSystemRequirementRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, SYSTEM_REQUIREMENT);
-        listOfFunctionalStructureToLogicalStructureRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, LOGICAL_STRUCTURE);
-        listOfFunctionalStructureToSystemsBreakdownRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, SYSTEMS_BREAKDOWN);
-        listOfFunctionalStructureToFunctionalStructureRelations = getEntityRelations(FUNCTIONAL_STRUCTURE, FUNCTIONAL_STRUCTURE);
-
-
-        listOfLogicalStructureToStakeholderRequirementRelations = getEntityRelations(LOGICAL_STRUCTURE, STAKEHOLDER_REQUIREMENT);
-        listOfLogicalStructureToSystemRequirementRelations = getEntityRelations(LOGICAL_STRUCTURE, SYSTEM_REQUIREMENT);
-        listOfLogicalStructureToFunctionalStructureRelations = getEntityRelations(LOGICAL_STRUCTURE, FUNCTIONAL_STRUCTURE);;
-        listOfLogicalStructureToSystemsBreakdownRelations = getEntityRelations(LOGICAL_STRUCTURE, SYSTEMS_BREAKDOWN);
-        listOfLogicalStructureToLogicalStructureRelations = getEntityRelations(LOGICAL_STRUCTURE, LOGICAL_STRUCTURE);
-
-
-        listOfSystemBreakdownToStakeholderRequirementRelations = getEntityRelations(SYSTEMS_BREAKDOWN, STAKEHOLDER_REQUIREMENT);
-        listOfSystemBreakdownToSystemRequirementRelations = getEntityRelations(SYSTEMS_BREAKDOWN, SYSTEM_REQUIREMENT);
-        listOfSystemBreakdownToFunctionalStructureRelations = getEntityRelations(SYSTEMS_BREAKDOWN, FUNCTIONAL_STRUCTURE);
-        listOfSystemBreakdownToLogicalStructureRelations = getEntityRelations(SYSTEMS_BREAKDOWN, LOGICAL_STRUCTURE);
-        listOfSystemBreakdownToSystemBreakdownRelations = getEntityRelations(SYSTEMS_BREAKDOWN, SYSTEMS_BREAKDOWN);
+        long relationStart = System.nanoTime();
+        relations = new EntityRelationProvider(getWebSession()).getConfirmedDiagramRelations(DIAGRAM_TYPES);
+        log.info("Load Entity Relations: {} records in {} ms (total {} ms)", relations.size(),
+                (System.nanoTime() - relationStart) / 1_000_000, System.currentTimeMillis() - start);
+        // The lazy snapshot consumes the flat list directly; only legacy XML needs groups.
+        if (!compact) for (var relation : relations) {
+            relationGroups.computeIfAbsent(new RelationGroup(relation.entityType(), relation.relatedEntityType()),
+                    ignored -> new ArrayList<>()).add(relation);
+        }
     }
 
     private List<StakeholderRequirementEntity> getStakeholderRequirements() {
@@ -216,11 +212,6 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
         );
     }
 
-    private List<EntityRelationRecord> getEntityRelations(EntityType entityType, EntityType relatedEentityType) throws SQLException {
-        EntityRelationProvider entityRelationProvider = new EntityRelationProvider(getWebSession());
-        return entityRelationProvider.getAllConfirmedEntityRelationRecordsByProjectId(entityType, relatedEentityType);
-    }
-
     private Element getStakeholderRequirementElement() {
         Element stakeholderRequirements = getDoc().createElement("stakeholderRequirements");
         if (listOfStakeholderRequirements != null) {
@@ -232,7 +223,8 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
-                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 stakeholderRequirements.appendChild(requirementElement);
             }
         }
@@ -250,7 +242,8 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(requirementElement, requirement.getEntityId());
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
-                addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
+                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 systemRequirements.appendChild(requirementElement);
             }
         }
@@ -268,7 +261,8 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(functionalElement, functionalStructure.getEntityId());
                 addElement(functionalElement, "code", functionalStructure.getFunctionalCode().getValue());
                 addElement(functionalElement, "name", functionalStructure.getFunctionalName().getValue());
-                addElement(functionalElement, "description", functionalStructure.getFunctionalDescription().getValue());
+                if (!compact) addElement(functionalElement, "description", functionalStructure.getFunctionalDescription().getValue());
+                if (compact) functionalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 functionalStructures.appendChild(functionalElement);
             }
         }
@@ -286,13 +280,13 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(logicalElement, logicalStructure.getEntityId());
                 addElement(logicalElement, "code", logicalStructure.getLogicalCode().getValue());
                 addElement(logicalElement, "name", logicalStructure.getLogicalName().getValue());
-                addElement(logicalElement, "description", logicalStructure.getLogicalDescription().getValue());
+                if (!compact) addElement(logicalElement, "description", logicalStructure.getLogicalDescription().getValue());
+                if (compact) logicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 logicalStructures.appendChild(logicalElement);
             }
         }
         return logicalStructures;
     }
-
 
     private Element getSystemBreakdownElement() {
         Element systemRequirements = getDoc().createElement("systemsBreakdowns");
@@ -305,31 +299,30 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addEntityIdAttribute(physicalElement, system.getEntityId());
                 addElement(physicalElement, "code", system.getSbsCode().getValue());
                 addElement(physicalElement, "name", system.getSystemName().getValue());
-                addElement(physicalElement, "description", system.getDescription());
+                if (!compact) addElement(physicalElement, "description", system.getDescription());
+                if (compact) physicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
                 systemRequirements.appendChild(physicalElement);
             }
         }
         return systemRequirements;
     }
 
-
-    private Element getRelationsElement(String elementName, List<EntityRelationRecord> listOfEntityRelationRecords) {
+    private Element getRelationsElement(String elementName, EntityType fromType, EntityType toType) {
         Element relationsElement = getDoc().createElement(elementName);
-        for (EntityRelationRecord relation : listOfEntityRelationRecords) {
+        for (var relation : relationGroups.getOrDefault(new RelationGroup(fromType.getId(), toType.getId()), List.of())) {
             Element relationElement = getDoc().createElement("relation");
 
-            String fromId = formatEntityId(relation.getEntityType(), relation.getEntityId());
+            String fromId = formatEntityId(fromType, relation.entityId());
             addElement(relationElement, "from",fromId);
-            String toId = formatEntityId(relation.getRelatedEntityType(), relation.getRelatedEntityId());
+            String toId = formatEntityId(toType, relation.relatedEntityId());
             addElement(relationElement, "to", toId);
-            addElement(relationElement, "type", relation.getRelationType().getDescription());
+            addElement(relationElement, "type", RelationType.CONFIRMED.getDescription());
 
             relationsElement.appendChild(relationElement);
         }
 
         return relationsElement;
     }
-
 
     private void addElement(Element parentelement, String elementName, String value) {
         Element element = getDoc().createElement(elementName);

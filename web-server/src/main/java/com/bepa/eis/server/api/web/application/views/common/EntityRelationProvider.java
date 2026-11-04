@@ -21,10 +21,60 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collections;
 
 public class EntityRelationProvider extends GenericProvider {
 
     private static final Logger log = LoggerFactory.getLogger(EntityRelationProvider.class);
+
+    /** Minimal confirmed relation used by diagram snapshots; direction and database identity are retained. */
+    public record DiagramRelation(int relationId, int entityType, int entityId,
+                                  int relatedEntityType, int relatedEntityId) {}
+
+    public List<DiagramRelation> getConfirmedDiagramRelations(Set<EntityType> entityTypes) throws SQLException {
+        if (entityTypes.isEmpty() || getWebSession() == null || getWebSession().getProjectId() == null) return List.of();
+        try (Connection connection = getDataSource().getConnection()) {
+            return getConfirmedDiagramRelations(connection, entityTypes);
+        }
+    }
+
+    List<DiagramRelation> getConfirmedDiagramRelations(Connection connection, Set<EntityType> entityTypes) throws SQLException {
+        if (entityTypes.isEmpty()) return List.of();
+        var typeIds = entityTypes.stream().map(EntityType::getId).sorted().toList();
+        String parameters = String.join(",", Collections.nCopies(typeIds.size(), "?"));
+        // EXISTS preserves endpoint filters without multiplying a relation if an endpoint matches more than once.
+        String sql = """
+                SELECT ER.EntityRelationPK, ER.EntityType, ER.EntityId, ER.RelatedEntityType, ER.RelatedEntityId
+                FROM ENTITY_RELATIONS ER
+                WHERE ER.CustomerId = ? AND ER.ProjectId = ?
+                  AND ER.Latest = 1 AND ER.RelationType = 1
+                  AND ER.EntityType IN (%s) AND ER.RelatedEntityType IN (%s)
+                  AND EXISTS (
+                    SELECT 1 FROM ENTITY E1
+                    WHERE E1.CustomerId = ER.CustomerId AND E1.ProjectId = ER.ProjectId
+                      AND E1.EntityType = ER.EntityType AND E1.EntityId = ER.EntityId
+                      AND E1.Latest = 1 AND E1.Active = 1)
+                  AND EXISTS (
+                    SELECT 1 FROM ENTITY E2
+                    WHERE E2.CustomerId = ER.CustomerId AND E2.ProjectId = ER.ProjectId
+                      AND E2.EntityType = ER.RelatedEntityType AND E2.EntityId = ER.RelatedEntityId
+                      AND E2.Latest = 1 AND E2.Active = 1)
+                """.formatted(parameters, parameters);
+        List<DiagramRelation> relations = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, getWebSession().getCustomerId());
+            statement.setInt(2, getWebSession().getProjectId());
+            int parameter = 3;
+            for (int typeId : typeIds) statement.setInt(parameter++, typeId);
+            for (int typeId : typeIds) statement.setInt(parameter++, typeId);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) relations.add(new DiagramRelation(result.getInt(1), result.getInt(2),
+                        result.getInt(3), result.getInt(4), result.getInt(5)));
+            }
+        }
+        return relations;
+    }
 
     private static final String GET_ENTITY_RELATIONS_BY_ENTITY_ID_SQL_1 =
             "SELECT ER.EntityRelationPK, ER.RelationType, ER.EntityType, ER.EntityId,  ER.RelatedEntityType, ER.RelatedEntityId, ER.CreatedById, ER.CreatedTime " +
