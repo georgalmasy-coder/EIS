@@ -780,3 +780,13 @@ body.traceability-document .side-menu {
         grid-template-columns: 1fr;
     }
 }
+.traceability-cell.is-loading {
+    background: #ffffff !important;
+    cursor: default;
+}
+
+.traceability-loading-icon {
+    width: 22px;
+    height: 22px;
+    color: #64748b;
+}

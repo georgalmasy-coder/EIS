@@ -12,6 +12,7 @@ import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
 /** Request-local index; both stored relation directions use stakeholder/system id order. */
 final class TraceabilityRelationIndex {
     private final Map<Integer, Map<Integer, EntityRelationRecord>> byStakeholder = new HashMap<>();
+    private final Map<Integer, Integer> systemCounts = new HashMap<>();
 
     TraceabilityRelationIndex(List<EntityRelationRecord> relations) {
         for (EntityRelationRecord relation : relations) {
@@ -29,9 +30,25 @@ final class TraceabilityRelationIndex {
                 continue;
             }
             // Preserve the previous index's last-record-wins behavior for duplicates.
-            byStakeholder.computeIfAbsent(stakeholderId, ignored -> new HashMap<>()).put(systemId, relation);
+            put(stakeholderId, systemId, relation);
         }
     }
+
+    void put(int stakeholderId, int systemId, EntityRelationRecord relation) {
+        var row = byStakeholder.computeIfAbsent(stakeholderId, ignored -> new HashMap<>());
+        boolean existed = row.containsKey(systemId);
+        if (relation.getRelationType() == com.bepa.eis.common.enums.entity.RelationType.DELETED) {
+            row.remove(systemId);
+            if (existed) systemCounts.compute(systemId, (key, count) -> count == null || count <= 1 ? null : count - 1);
+            if (row.isEmpty()) byStakeholder.remove(stakeholderId);
+        } else {
+            row.put(systemId, relation);
+            if (!existed) systemCounts.merge(systemId, 1, Integer::sum);
+        }
+    }
+
+    boolean hasStakeholderRelations(int id) { return byStakeholder.containsKey(id); }
+    boolean hasSystemRelations(int id) { return systemCounts.containsKey(id); }
 
     EntityRelationRecord get(Integer stakeholderId, Integer systemId) {
         Map<Integer, EntityRelationRecord> row = byStakeholder.get(stakeholderId);

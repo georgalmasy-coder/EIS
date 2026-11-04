@@ -1,6 +1,10 @@
 import {getDynamicStyleClass} from "../core/css.js";
 
 export function getTraceabilityCell(matrix, row, column) {
+    if (matrix.snapshotId && !matrix.loadedBlocks.has(
+        `${Math.floor(row.index / matrix.blockSize) * matrix.blockSize}:${Math.floor(column.index / matrix.blockSize) * matrix.blockSize}`)) {
+        return {rowIndex: row.index, columnIndex: column.index, value: "", style: "loading", loading: true};
+    }
     return matrix.cellsByRow.get(row.index)?.get(column.index) || {
         rowIndex: row.index,
         columnIndex: column.index,
@@ -12,7 +16,7 @@ export function getTraceabilityCell(matrix, row, column) {
 // Only the viewport and a small buffer have DOM nodes. Positions are array
 // positions; XML indices can be non-contiguous and are used only for data lookup.
 export function createTraceabilityMatrixView({root, scroll, createIcon, cellTooltip,
-    rowTooltip, columnTooltip, onCellDoubleClick, onCellContextMenu, onRowEdit, onColumnEdit}) {
+    rowTooltip, columnTooltip, onCellDoubleClick, onCellContextMenu, onRowEdit, onColumnEdit, onRangeChange}) {
     let matrix;
     let mode;
     let frame = 0;
@@ -66,6 +70,7 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
         const range = `${rowStart}:${rowEnd}:${colStart}:${colEnd}`;
         if (!force && range === lastRange) return;
         lastRange = range;
+        onRangeChange?.({rowStart, rowEnd, colStart, colEnd});
         const cellFragment = document.createDocumentFragment();
         const rowFragment = document.createDocumentFragment();
         const columnFragment = document.createDocumentFragment();
@@ -108,7 +113,11 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
                 element.setAttribute("aria-colindex", String(c + 2));
                 element.dataset.rowPosition = r;
                 element.dataset.columnPosition = c;
-                if (mode === "icons") {
+                element.classList.toggle("is-loading", cell.loading === true);
+                if (cell.loading) {
+                    element.setAttribute("aria-busy", "true");
+                    element.appendChild(createLoadingIcon());
+                } else if (mode === "icons") {
                     const icon = createIcon(cell.style);
                     if (icon) element.appendChild(icon);
                 }
@@ -143,6 +152,7 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
         if (!hit) return;
         event.preventDefault();
         if (hit.row && hit.column) {
+            if (getTraceabilityCell(matrix, hit.row, hit.column).loading) return;
             event.stopPropagation();
             onCellDoubleClick(hit.row, hit.column);
         }
@@ -153,6 +163,7 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
         const hit = target(event);
         if (!hit?.row || !hit.column) return;
         event.preventDefault();
+        if (getTraceabilityCell(matrix, hit.row, hit.column).loading) return;
         event.stopPropagation();
         onCellContextMenu(event, hit.row, hit.column,
             getTraceabilityCell(matrix, hit.row, hit.column), hit.element);
@@ -191,6 +202,24 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
             layout();
             render(true);
         },
-        getSizes() {return {...sizes};}
+        getSizes() {return {...sizes};},
+        refresh() { render(true); }
     };
+}
+
+function createLoadingIcon() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("traceability-loading-icon");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.7");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Loading");
+    const path = document.createElementNS(svg.namespaceURI, "path");
+    path.setAttribute("d", "M5 3h14M5 21h14M7 3v4c0 2 3 4 5 5-2 1-5 3-5 5v4M17 3v4c0 2-3 4-5 5 2 1 5 3 5 5v4M9 18h6");
+    svg.appendChild(path);
+    return svg;
 }

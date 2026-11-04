@@ -65,7 +65,15 @@ public final class TraceabilityRelationIndexTest {
                 check(numeric.get(stakeholder, system) == expected, "Previous lookup semantics preserved");
             }
         }
-        System.out.println("TraceabilityRelationIndex checks passed; 12,544 lookups match the previous index");
+        var mutable = new TraceabilityRelationIndex(List.of());
+        mutable.put(1,2,relation(1,2,false,RelationType.CONFIRMED));
+        mutable.put(3,2,relation(3,2,false,RelationType.NOT_RELEVANT));
+        check(mutable.hasStakeholderRelations(1)&&mutable.hasSystemRelations(2),"confirmed header state");
+        mutable.put(1,2,relation(1,2,false,RelationType.DELETED));
+        check(!mutable.hasStakeholderRelations(1)&&mutable.hasSystemRelations(2),"column remains normal while another relation exists");
+        mutable.put(3,2,relation(3,2,false,RelationType.DELETED));
+        check(!mutable.hasSystemRelations(2)&&mutable.get(3,2)==null,"last relation removal clears column state and cell lookup");
+        System.out.println("TraceabilityRelationIndex checks passed; 12,544 lookups match the previous index; header status tracks relation edits");
     }
 
     private static String endpoint(Integer id, EntityType type) {

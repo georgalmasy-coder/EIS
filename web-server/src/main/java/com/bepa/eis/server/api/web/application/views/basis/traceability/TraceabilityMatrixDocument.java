@@ -45,7 +45,7 @@ import static com.bepa.eis.common.enums.entity.EntityType.SYSTEM_REQUIREMENT;
  * 4. No rule matched:
  *    value = "", style = "normal"
  */
-public class TraceabilityMatrixDocument extends GenericXmlDocument {
+public class TraceabilityMatrixDocument extends GenericXmlDocument implements TraceabilitySnapshotStore.Source {
 
     private static final Logger log = LoggerFactory.getLogger(TraceabilityMatrixDocument.class);
 
@@ -82,10 +82,11 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
     private MatrixCellsData matrixCellsData;
 
     protected TraceabilityMatrixDocument(WebSession webSession) throws Exception {
+        this(webSession, false);
+    }
+
+    TraceabilityMatrixDocument(WebSession webSession, boolean lazy) throws Exception {
         super(webSession);
-
-        long startTime = System.currentTimeMillis();
-
         textMatcher = new RequirementTextMatcher(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
@@ -94,9 +95,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         topPanel = topPanelProvider.getTopPanelBySession(PageType.TRACEABILITY_MATRIX_PAGE);
         rootElement.addElement(topPanel.getTopPanelElements());
 
-        buildTraceabilityMatrixDocument();
-
-        log.info("buildTraceabilityMatrixDocument took {} ms", System.currentTimeMillis() - startTime);
+        buildTraceabilityMatrixDocument(lazy);
 
         Element matrixElement = buildMatrixElement();
         getRoot().appendChild(matrixElement);
@@ -105,21 +104,15 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         matrixElement.appendChild(matrixColumnsData.getColumnElement(getDoc()));
         matrixElement.appendChild(matrixRowsData.getRowElement(getDoc()));
         matrixElement.appendChild(matrixCellsData.getCellElement(getDoc()));
-        log.info("buildTraceabilityMatrixDocument build xml took {} ms", System.currentTimeMillis() - startTime);
     }
 
-    private void buildTraceabilityMatrixDocument() throws SQLException {
-        long startTime = System.currentTimeMillis();
+    private void buildTraceabilityMatrixDocument(boolean lazy) throws SQLException {
 
         matrixMetaData = createMatrixMetaData();
-        log.info("buildTraceabilityMatrixDocument create matrixMetaData took {} ms", System.currentTimeMillis() - startTime);
         matrixStylesData = createMatrixStylesData();
-        log.info("buildTraceabilityMatrixDocument create matrixStylesData took {} ms", System.currentTimeMillis() - startTime);
 
         listOfSystemRequirementWrappers = getSystemRequirements();
-        log.info("buildTraceabilityMatrixDocument getSystemRequirements took {} ms", System.currentTimeMillis() - startTime);
         listOfStakeholderRequirementWrappers = getStakeholderRequirements(listOfSystemRequirementWrappers);
-        log.info("buildTraceabilityMatrixDocument getStakeholderRequirements took {} ms", System.currentTimeMillis() - startTime);
 
         setListOfStakeholderRequirementsOnAllSystemRequirements();
 
@@ -127,16 +120,12 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         relationIndex = new TraceabilityRelationIndex(listOfEntityRelations);
 
         mapOfStakeholderRequirementRelations  = buildMapRelations(STAKEHOLDER_REQUIREMENT, listOfEntityRelations);
-        log.info("buildTraceabilityMatrixDocument build mapOfStakeholderRequirementRelations took {} ms", System.currentTimeMillis() - startTime);
         mapOfSystemRequirementRelations = buildMapRelations(SYSTEM_REQUIREMENT, listOfEntityRelations);
-        log.info("buildTraceabilityMatrixDocument build mapOfSystemRequirementRelations took {} ms", System.currentTimeMillis() - startTime);
 
         matrixColumnsData = createMatrixColumnsData(listOfSystemRequirementWrappers, mapOfSystemRequirementRelations);
-        log.info("buildTraceabilityMatrixDocument create matrixColumnsData took {} ms", System.currentTimeMillis() - startTime);
         matrixRowsData = createMatrixRowsData(listOfStakeholderRequirementWrappers, mapOfStakeholderRequirementRelations);
-        log.info("buildTraceabilityMatrixDocument create matrixRowsData took {} ms", System.currentTimeMillis() - startTime);
-        matrixCellsData = applyRules(listOfStakeholderRequirementWrappers);
-        log.info("buildTraceabilityMatrixDocument applyRules took {} ms", System.currentTimeMillis() - startTime);
+        matrixCellsData = lazy ? new MatrixCellsData(STYLE_NORMAL, VALUE_EMPTY)
+                : applyRules(listOfStakeholderRequirementWrappers);
     }
 
     private void setListOfStakeholderRequirementsOnAllSystemRequirements() {
@@ -296,6 +285,49 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         }
 
         return new RuleResult(VALUE_EMPTY, STYLE_NORMAL);
+    }
+
+    public int rowCount() { return listOfStakeholderRequirementWrappers.size(); }
+    public int columnCount() { return listOfSystemRequirementWrappers.size(); }
+
+    // Called under the snapshot lock: prepared words are request-local mutable data.
+    public List<BlockCell> calculateBlock(int rowStart, int columnStart, int rowEnd, int columnEnd) {
+        List<BlockCell> cells = new ArrayList<>();
+        for (int r = rowStart; r < rowEnd; r++) {
+            for (int c = columnStart; c < columnEnd; c++) {
+                RuleResult result = applyRule(listOfStakeholderRequirementWrappers.get(r), listOfSystemRequirementWrappers.get(c));
+                if (!STYLE_NORMAL.equals(result.getStyle()) || !VALUE_EMPTY.equals(result.getValue())) {
+                    cells.add(new BlockCell(r, c, result.getValue(), result.getStyle()));
+                }
+            }
+        }
+        return List.copyOf(cells);
+    }
+
+    record BlockCell(int rowIndex, int columnIndex, String value, String style) {}
+
+    public void validatePair(int rowId, int columnId) {
+        if (rowPosition(rowId) < 0 || columnPosition(columnId) < 0) throw new IllegalArgumentException("Requirement is not in this snapshot");
+    }
+
+    private int rowPosition(int id) {
+        for (int i = 0; i < rowCount(); i++) if (listOfStakeholderRequirementWrappers.get(i).getEntityId().getValue() == id) return i;
+        return -1;
+    }
+
+    private int columnPosition(int id) {
+        for (int i = 0; i < columnCount(); i++) if (listOfSystemRequirementWrappers.get(i).getEntityId().getValue() == id) return i;
+        return -1;
+    }
+
+    public TraceabilitySnapshotStore.CellUpdate updateRelation(int rowId, int columnId, EntityRelationRecord relation) {
+        validatePair(rowId, columnId);
+        int r = rowPosition(rowId), c = columnPosition(columnId);
+        relationIndex.put(rowId, columnId, relation);
+        RuleResult result = applyRule(listOfStakeholderRequirementWrappers.get(r), listOfSystemRequirementWrappers.get(c));
+        return new TraceabilitySnapshotStore.CellUpdate(r, c, result.getValue(), result.getStyle(),
+                relationIndex.hasStakeholderRelations(rowId) ? STYLE_NORMAL : STYLE_RED,
+                relationIndex.hasSystemRelations(columnId) ? STYLE_NORMAL : STYLE_RED);
     }
 
     private boolean hasPossibleTextBasedRelation(

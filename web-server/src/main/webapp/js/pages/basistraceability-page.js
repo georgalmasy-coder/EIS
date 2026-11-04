@@ -1,6 +1,7 @@
 import {initMenu} from "../components/menu.js";
 import {userPreferences} from "../core/user-preferences.js";
-import {createTraceabilityMatrixView, getTraceabilityCell} from "../components/traceability-matrix-view.js";
+import {createTraceabilityMatrixView, getTraceabilityCell} from "../components/traceability-matrix-view.js?rev=traceability-blocks-4";
+import {createTraceabilityBlockLoader} from "../components/traceability-block-loader.js?rev=traceability-blocks-4";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -11,6 +12,11 @@ import {getAttribute, getBooleanAttribute, getChildText, getNumberAttribute, has
 import {getDynamicStyleClass, sanitizeCssColor} from "../core/css.js";
 
 const TRACEABILITY_ENDPOINT = "/basis/basistraceability?cmd=overview";
+const TRACEABILITY_SNAPSHOT_ENDPOINT = "/basis/basistraceability?cmd=snapshot";
+let blockLoader;
+let matrixLoadSequence = 0;
+let refreshFrame = 0;
+let lastSnapshotRecovery = 0;
 let requirementDialogRequest = 0;
 let matrixView;
 
@@ -77,7 +83,8 @@ function initializeEvents() {
         onCellContextMenu: (event, row, column, cell, element) =>
             openTraceabilityContextMenu(event.clientX, event.clientY, row, column, cell, element),
         onRowEdit: openStakeholderRequirementEditPage,
-        onColumnEdit: openSystemRequirementEditPage
+        onColumnEdit: openSystemRequirementEditPage,
+        onRangeChange: range => blockLoader?.requestRange(range)
     });
     updateViewModeControl();
     document.getElementById("traceabilityViewToggle")?.addEventListener("click", () => {
@@ -94,9 +101,20 @@ function initializeEvents() {
     document.getElementById("traceabilityExcelButton")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
         const matrix = state.matrix;
-        if (button.disabled || !canExportTraceabilityMatrix(matrix)) return;
+        if (button.disabled || !matrix || state.relationUpdating) return;
+        if (!canExportTraceabilityMatrix(matrix)) {
+            window.alert("The matrix exceeds the export limit of 1,000,000 cells or Excel's row/column limits and cannot be exported.");
+            return;
+        }
+        const count = matrix.rows.length * matrix.columns.length;
+        if (count > 22_500 && !window.confirm(`The matrix contains ${count.toLocaleString()} data cells. Export requires calculating the entire matrix and may take a long time. Continue?`)) return;
+        state.exporting = true;
         button.disabled = true;
         try {
+            if (matrix.snapshotId) {
+                await blockLoader.ensureAll((done, total) => setText("loadStatus", `Export ${Math.round(100 * done / total)}%`, ""));
+                if (state.matrix !== matrix) throw new Error("The matrix changed during export. Please try again.");
+            }
             const snapshot = await snapshotTraceabilityMatrix(matrix);
             const {downloadInterfaceXlsx} = await import("../components/interface-xlsx-export.js?rev=matrix-snapshot-1");
             await downloadInterfaceXlsx({snapshot, endpoint: "/basis/basistraceability",
@@ -105,6 +123,8 @@ function initializeEvents() {
         } catch (error) {
             window.alert(error.message);
         } finally {
+            state.exporting = false;
+            setText("loadStatus", "Loaded", "");
             updateTraceabilityExportButton(state.matrix);
         }
     });
@@ -113,14 +133,17 @@ function initializeEvents() {
 }
 
 async function loadTraceabilityMatrix() {
+    const sequence = ++matrixLoadSequence;
+    blockLoader?.dispose();
+    blockLoader = null;
     const excelButton = document.getElementById("traceabilityExcelButton");
     if (excelButton) excelButton.disabled = true;
     showEmptyState("Loading traceability matrix…");
     setText("loadStatus", "Loading", "");
 
     try {
-        const response = await fetch(TRACEABILITY_ENDPOINT, {
-            method: "GET",
+        const response = await fetch(TRACEABILITY_SNAPSHOT_ENDPOINT, {
+            method: "POST",
             headers: {
                 "Accept": "application/xml,text/xml,*/*"
             },
@@ -132,6 +155,7 @@ async function loadTraceabilityMatrix() {
         }
 
         const xmlText = await response.text();
+        if (sequence !== matrixLoadSequence) return;
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
@@ -139,7 +163,47 @@ async function loadTraceabilityMatrix() {
         }
 
         const matrix = parseTraceabilityMatrixDocument(xmlDocument);
+        const matrixElement = xmlDocument.querySelector("traceabilityMatrix");
+        matrix.snapshotId = matrixElement.getAttribute("snapshotId");
+        matrix.blockSize = Number(matrixElement.getAttribute("blockSize"));
+        if (!matrix.snapshotId || !Number.isInteger(matrix.blockSize) || matrix.blockSize < 1) throw new Error("Invalid traceability snapshot metadata");
+        matrix.loadedBlocks = new Set();
         state.matrix = matrix;
+        let blockErrorReported = false;
+        blockLoader = createTraceabilityBlockLoader({matrix,
+            fetchBlock: async (rowStart, columnStart) => {
+                const response = await fetch("/basis/basistraceability?cmd=block", {
+                    method: "POST", cache: "no-store", credentials: "same-origin",
+                    body: new URLSearchParams({snapshotId: matrix.snapshotId, rowStart, columnStart})
+                });
+                if (!response.ok) {
+                    const error = new Error(`Could not load traceability cells (HTTP ${response.status}). Reload the matrix to retry.`);
+                    error.status = response.status;
+                    throw error;
+                }
+                return response.json();
+            },
+            onUpdate: () => {
+                if (state.matrix !== matrix || refreshFrame) return;
+                refreshFrame = requestAnimationFrame(() => { refreshFrame = 0; matrixView.refresh(); });
+            },
+            onError: error => {
+                if (state.matrix !== matrix || blockErrorReported) return;
+                blockErrorReported = true;
+                setText("loadStatus", "Error", "");
+                window.alert(error.message);
+            },
+            onExpired: () => {
+                if (state.matrix !== matrix) return;
+                if (Date.now() - lastSnapshotRecovery < 30_000) {
+                    setText("loadStatus", "Error", "");
+                    window.alert("The traceability snapshot is no longer available. Reload the page to try again.");
+                    return;
+                }
+                lastSnapshotRecovery = Date.now();
+                loadTraceabilityMatrix();
+            }
+        });
 
         applyTopPanel(xmlDocument);
         injectTraceabilityStyles(matrix.styles);
@@ -148,6 +212,7 @@ async function loadTraceabilityMatrix() {
 
         setText("loadStatus", "Loaded", "");
     } catch (error) {
+        if (sequence !== matrixLoadSequence) return;
         console.error("Failed to load traceability matrix", error);
         setText("loadStatus", "Error", "");
         showEmptyState(`Could not load traceability matrix. ${error.message}`);
@@ -420,7 +485,7 @@ function renderTraceabilityMatrix(matrix) {
 
 async function snapshotTraceabilityMatrix(matrix) {
     if (!canExportTraceabilityMatrix(matrix)) {
-        throw new Error("Excel export is available for matrices with at most 22,500 data cells (150 × 150).");
+        throw new Error("The matrix exceeds the export limit of 1,000,000 cells or Excel's row/column limits and cannot be exported.");
     }
     // Match the existing export endpoint's limits before allocating a snapshot.
     if ((matrix.rows.length + 1) * (matrix.columns.length + 2) > 1_000_000
@@ -491,16 +556,15 @@ async function snapshotTraceabilityMatrix(matrix) {
 
 function canExportTraceabilityMatrix(matrix) {
     return Boolean(matrix?.rows.length && matrix.columns.length
-        && matrix.rows.length * matrix.columns.length <= 150 * 150);
+        && (matrix.rows.length + 1) * (matrix.columns.length + 2) <= 1_000_000
+        && matrix.columns.length + 2 <= 16384 && matrix.rows.length + 1 <= 1048573);
 }
 
 function updateTraceabilityExportButton(matrix) {
     const button = document.getElementById("traceabilityExcelButton");
     if (!button) return;
-    button.disabled = !canExportTraceabilityMatrix(matrix);
-    button.title = button.disabled
-        ? "Excel export requires 1–22,500 data cells (maximum 150 × 150)."
-        : "Export traceability matrix to Excel";
+    button.disabled = state.exporting || state.relationUpdating || !matrix?.rows.length || !matrix.columns.length;
+    button.title = "Export traceability matrix to Excel";
 }
 
 function openSystemRequirementEditPage(column) {
@@ -756,6 +820,12 @@ async function handleTraceabilityContextAction(action) {
 }
 
 async function executeTraceabilityRelationAction(endpoint, row, column, cell, cellElement) {
+    if (state.relationUpdating || state.exporting) return;
+    const matrix = state.matrix;
+    const previousSnapshotId = matrix?.snapshotId;
+    state.relationUpdating = true;
+    blockLoader?.pause();
+    updateTraceabilityExportButton(matrix);
     setCellBusy(cellElement, true);
     setText("loadStatus", "Updating", "");
 
@@ -774,16 +844,37 @@ async function executeTraceabilityRelationAction(endpoint, row, column, cell, ce
         });
 
         if (!response.ok) {
+            if (response.status === 409) {
+                if (state.matrix === matrix) await loadTraceabilityMatrix();
+                return; // Never retry a write: it may already have been committed.
+            }
             throw new Error(`HTTP ${response.status} ${response.statusText}`);
         }
 
-        await response.json();
-        await loadTraceabilityMatrix();
+        const update = await response.json();
+        if (state.matrix !== matrix || matrix.snapshotId !== previousSnapshotId) return;
+        const changed = update.cell;
+        if (!update.snapshotId || changed?.rowIndex !== row.index || changed.columnIndex !== column.index) {
+            throw new Error("Invalid traceability relation response");
+        }
+        blockLoader.rebase(update.snapshotId);
+        let rowCells = matrix.cellsByRow.get(row.index);
+        if (!rowCells) matrix.cellsByRow.set(row.index, rowCells = new Map());
+        rowCells.set(column.index, {rowIndex: row.index, columnIndex: column.index, style: changed.style, value: changed.value});
+        row.style = changed.rowStyle;
+        column.style = changed.columnStyle;
+        setText("loadStatus", "Loaded", "");
     } catch (error) {
         console.error("Failed to update traceability relation", error);
         setText("loadStatus", "Error", "");
         window.alert(`Could not update relation. ${error.message}`);
     } finally {
+        state.relationUpdating = false;
+        if (state.matrix === matrix) {
+            blockLoader?.resume();
+            matrixView.refresh();
+        }
+        updateTraceabilityExportButton(state.matrix);
         setCellBusy(cellElement, false);
         clearContextState();
     }
@@ -791,6 +882,7 @@ async function executeTraceabilityRelationAction(endpoint, row, column, cell, ce
 
 function buildRelationActionPayload(row, column, cell) {
     const payload = new URLSearchParams();
+    payload.set("snapshotId", state.matrix?.snapshotId || "");
 
     payload.set("rowId", row?.id || "");
     payload.set("rowCode", row?.code || "");

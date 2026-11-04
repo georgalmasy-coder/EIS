@@ -95,6 +95,8 @@ async function main() {
         result.legacyColors = Array.from(body.querySelectorAll('.traceability-cell'), cell => getComputedStyle(cell).backgroundColor);
         result.preferenceRequests = preferenceRequests;
         let exportWork = 0;
+        window.confirm = () => false;
+        window.alert = () => {};
         snapshotTraceabilityMatrix = async () => {exportWork++; throw Error('Unexpected export work');};
         const oversized = {...matrix, rows:Array(151).fill(matrix.rows[0]), columns:Array(150).fill(matrix.columns[0])};
         state.matrix = oversized;
@@ -102,6 +104,13 @@ async function main() {
         const exportButton = document.getElementById('traceabilityExcelButton');
         result.exportDisabled = exportButton.disabled;
         exportButton.dispatchEvent(new MouseEvent('click', {bubbles:true}));
+        result.cancelledExportWork = exportWork;
+        window.confirm = () => true;
+        exportButton.dispatchEvent(new MouseEvent('click', {bubbles:true}));
+        await new Promise(resolve=>setTimeout(resolve,0));
+        result.acceptedExportWork = exportWork;
+        exportWork = 0;
+        state.matrix = {...oversized, rows:Array(1000).fill(matrix.rows[0]), columns:Array(1000).fill(matrix.columns[0])};
         // Even a synthetic click on an enabled button must respect the data limit.
         exportButton.disabled = false;
         exportButton.dispatchEvent(new MouseEvent('click', {bubbles:true}));
@@ -110,8 +119,72 @@ async function main() {
     })()`);
     assert.equal(result.rows, 1);
     assert.equal(result.columns, 3);
-    assert.equal(result.exportDisabled, true);
+    assert.equal(result.exportDisabled, false);
+    assert.equal(result.cancelledExportWork, 0);
+    assert.equal(result.acceptedExportWork, 1);
     assert.equal(result.oversizedExportWork, 0);
+    const blockSource = fs.readFileSync(path.resolve(__dirname, '../../main/webapp/js/components/traceability-block-loader.js'), 'utf8').replace(/^export /gm, '');
+    const headerXml = xml.replace('<traceabilityMatrix ', '<traceabilityMatrix snapshotId="test-snapshot" blockSize="2" ')
+        .replace(/<cells>[\s\S]*?<\/cells>/, '<cells/>');
+    const lazy = await run(blockSource + '\n' + `(async () => {
+        window.applyPageHeaderFromDocument = () => {};
+        const requests = [], pending = [];
+        window.fetch = async (url, options) => {
+            requests.push({url,method:options.method});
+            if(url.includes('cmd=snapshot')) return {ok:true,text:async()=>${JSON.stringify(headerXml)}};
+            if(url.includes('cmd=block')) return await new Promise(resolve=>pending.push({resolve,r:Number(options.body.get('rowStart')),c:Number(options.body.get('columnStart'))}));
+            throw Error('unexpected URL '+url);
+        };
+        await loadTraceabilityMatrix();
+        clearContextState();
+        const unloaded = document.querySelector('.traceability-cell');
+        const background = getComputedStyle(unloaded).backgroundColor;
+        const colorHourglass = !!unloaded.querySelector('svg.traceability-loading-icon[aria-label="Loading"]');
+        const busy = unloaded.getAttribute('aria-busy');
+        document.getElementById('traceabilityViewToggle').click();
+        const iconHourglass = !!document.querySelector('.traceability-cell svg.traceability-loading-icon');
+        document.getElementById('traceabilityViewToggle').click();
+        unloaded.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));
+        const blocked = state.contextCell === null;
+        const before = state.matrix.loadedBlocks.size;
+        for(const item of pending) item.resolve({ok:true,json:async()=>({snapshotId:'test-snapshot',rowStart:item.r,columnStart:item.c,
+            rowEnd:1,columnEnd:Math.min(item.c+2,3),cells:item.c===0?[{rowIndex:0,columnIndex:0,value:'X',style:'green'}]:[]})});
+        await new Promise(resolve=>setTimeout(resolve,60));
+        const after = state.matrix.loadedBlocks.size;
+        const first = getTraceabilityCell(state.matrix,state.matrix.rows[0],state.matrix.columns[0]);
+        const empty = getTraceabilityCell(state.matrix,state.matrix.rows[0],state.matrix.columns[2]);
+        const color = getComputedStyle(document.querySelector('.traceability-cell')).backgroundColor;
+        const sameMatrix=state.matrix, scroll=document.getElementById('traceabilityTableScroll');
+        const scrollBefore=[scroll.scrollTop,scroll.scrollLeft];
+        let actionSnapshot;
+        window.fetch=async (url,options)=>{
+            requests.push({url,method:options.method});
+            if(!url.includes('relationnotrelevant'))throw Error('relation update unexpectedly reloaded the matrix');
+            actionSnapshot=options.body.get('snapshotId');
+            return {ok:true,json:async()=>({snapshotId:'updated-snapshot',cell:{rowIndex:0,columnIndex:0,value:'NR',style:'grayItalic',rowStyle:'normal',columnStyle:'normal'}})};
+        };
+        const r=sameMatrix.rows[0],c=sameMatrix.columns[0];
+        await executeTraceabilityRelationAction('/basis/basistraceability/relationnotrelevant',r,c,first,document.querySelector('.traceability-cell'));
+        const action={sameMatrix:state.matrix===sameMatrix,snapshot:state.matrix.snapshotId,cell:getTraceabilityCell(state.matrix,r,c).style,
+            rowStyle:r.style,columnStyle:c.style,loadedBlocks:state.matrix.loadedBlocks.size,actionSnapshot,
+            scrollUnchanged:scrollBefore[0]===scroll.scrollTop&&scrollBefore[1]===scroll.scrollLeft};
+        blockLoader.dispose();
+        return {action,background,colorHourglass,iconHourglass,busy,remainingHourglasses:document.querySelectorAll('.traceability-loading-icon').length,blocked,before,after,first:first.style,empty:empty.style,emptyLoaded:!empty.loading,color,requests};
+    })()`);
+    assert.equal(lazy.background, 'rgb(255, 255, 255)');
+    assert.equal(lazy.colorHourglass, true);
+    assert.equal(lazy.iconHourglass, true);
+    assert.equal(lazy.busy, 'true');
+    assert.equal(lazy.remainingHourglasses, 0);
+    assert.equal(lazy.blocked, true);
+    assert.equal(lazy.before, 0);
+    assert.equal(lazy.after, 2);
+    assert.equal(lazy.first, 'green');
+    assert.equal(lazy.empty, 'normal');
+    assert.equal(lazy.emptyLoaded, true);
+    assert.equal(lazy.color, 'rgb(0, 255, 0)');
+    assert.deepEqual(lazy.action,{sameMatrix:true,snapshot:'updated-snapshot',cell:'grayItalic',rowStyle:'normal',columnStyle:'normal',loadedBlocks:2,actionSnapshot:'test-snapshot',scrollUnchanged:true});
+    assert.ok(lazy.requests.every(request => request.method === 'POST'));
     assert.deepEqual(result.cells, [
         {text:'', color:'rgb(0, 255, 0)'},
         {text:'', color:'rgb(204, 204, 204)'},
@@ -136,6 +209,6 @@ async function main() {
     assert.ok(result.contextActions.includes('removeConfirmedRelation'));
     assert.deepEqual(result.iconSnapshot.cells.filter(cell => cell.row === 1 && cell.column >= 2).map(cell => [cell.text, cell.background, cell.foreground]), [['✓','FFFFFF','287A45'],['⊘','FFFFFF','62666B'],['?','FFFFFF','996600']]);
     fs.writeFileSync(path.join(output, 'icon-snapshot.json'), JSON.stringify(result.iconSnapshot));
-    console.log('Passed: icon/color toggle, exact colors, white backgrounds, legend, persisted user preference, context actions and both XLSX snapshots.');
+    console.log('Passed: icon/color toggle, POST snapshot/block loading, hourglass loading cells, sparse empty blocks, blocked unloaded actions, export confirmation/cancellation/limit, preferences and both XLSX snapshots.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => {socket?.close(); browser?.kill();});

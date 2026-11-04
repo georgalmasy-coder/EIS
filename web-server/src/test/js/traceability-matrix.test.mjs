@@ -144,12 +144,12 @@ test("traceability: sparse parsing, two-axis viewport, interactions and full-mod
             updateTraceabilityExportButton(boundary);
             check(!exportButton.disabled, "export allowed at exactly 22500 data cells");
             updateTraceabilityExportButton({...boundary, columns:matrix.columns.slice(0,151)});
-            check(exportButton.disabled, "export disabled above 22500 data cells");
+            check(!exportButton.disabled, "export remains available above the confirmation threshold");
             check(!canExportTraceabilityMatrix({rows:{length:1},columns:{length:22501}}), "exact cell-count limit");
             const getSizes = matrixView.getSizes;
             matrixView.getSizes = () => {throw Error("export layout must not be read");};
             let rejected=false;
-            try {await snapshotTraceabilityMatrix(matrix);} catch(error) {rejected=error.message.includes("22,500");}
+            try {await snapshotTraceabilityMatrix({...matrix,rows:{length:1000},columns:{length:1000}});} catch(error) {rejected=error.message.includes("1,000,000");}
             check(rejected, "oversized export stops before layout, DOM or snapshot work");
             matrixView.getSizes = getSizes;
             updateTraceabilityExportButton({...matrix, rows:[]});
