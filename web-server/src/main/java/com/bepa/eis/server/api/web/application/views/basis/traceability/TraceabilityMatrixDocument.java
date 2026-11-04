@@ -11,7 +11,6 @@ import com.bepa.eis.server.api.web.application.views.common.EntityRelationProvid
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.dataprovider.entities.StakeholderRequirementProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemRequirementProvider;
-import com.bepa.eis.server.dataprovider.fields.integers.ids.EntityId;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.stakeholderrequirement.StakeholderRequirementEntity;
 import com.bepa.eis.server.entites.systemrequirement.SystemRequirementEntity;
@@ -51,7 +50,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
     private static final Logger log = LoggerFactory.getLogger(TraceabilityMatrixDocument.class);
 
     private final RequirementTextMatcher textMatcher;
-    private final Map<Object, Set<String>> requirementWords = new IdentityHashMap<>();
+    private final Map<Object, RequirementTextMatcher.PreparedWords> requirementWords = new IdentityHashMap<>();
 
     protected static final String STYLE_NORMAL = "normal";
     protected static final String STYLE_RED = "red";
@@ -72,7 +71,7 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
     private List<SystemRequirementWrapper> listOfSystemRequirementWrappers;
     private List<StakeholderRequirementWrapper> listOfStakeholderRequirementWrappers;
     private List<EntityRelationRecord> listOfEntityRelations;
-    private ConcurrentMap<String, EntityRelationRecord> mapOfEntityRelations;
+    private TraceabilityRelationIndex relationIndex;
 
     private ConcurrentMap<Integer, RelationToEntity> mapOfStakeholderRequirementRelations;
     private ConcurrentMap<Integer, RelationToEntity> mapOfSystemRequirementRelations;
@@ -84,6 +83,9 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
     protected TraceabilityMatrixDocument(WebSession webSession) throws Exception {
         super(webSession);
+
+        long startTime = System.currentTimeMillis();
+
         textMatcher = new RequirementTextMatcher(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
@@ -94,6 +96,8 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
 
         buildTraceabilityMatrixDocument();
 
+        log.info("buildTraceabilityMatrixDocument took {} ms", System.currentTimeMillis() - startTime);
+
         Element matrixElement = buildMatrixElement();
         getRoot().appendChild(matrixElement);
         matrixElement.appendChild(matrixMetaData.getMetaElement(getDoc()));
@@ -101,53 +105,44 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         matrixElement.appendChild(matrixColumnsData.getColumnElement(getDoc()));
         matrixElement.appendChild(matrixRowsData.getRowElement(getDoc()));
         matrixElement.appendChild(matrixCellsData.getCellElement(getDoc()));
+        log.info("buildTraceabilityMatrixDocument build xml took {} ms", System.currentTimeMillis() - startTime);
     }
 
     private void buildTraceabilityMatrixDocument() throws SQLException {
+        long startTime = System.currentTimeMillis();
+
         matrixMetaData = createMatrixMetaData();
+        log.info("buildTraceabilityMatrixDocument create matrixMetaData took {} ms", System.currentTimeMillis() - startTime);
         matrixStylesData = createMatrixStylesData();
+        log.info("buildTraceabilityMatrixDocument create matrixStylesData took {} ms", System.currentTimeMillis() - startTime);
 
         listOfSystemRequirementWrappers = getSystemRequirements();
+        log.info("buildTraceabilityMatrixDocument getSystemRequirements took {} ms", System.currentTimeMillis() - startTime);
         listOfStakeholderRequirementWrappers = getStakeholderRequirements(listOfSystemRequirementWrappers);
+        log.info("buildTraceabilityMatrixDocument getStakeholderRequirements took {} ms", System.currentTimeMillis() - startTime);
 
         setListOfStakeholderRequirementsOnAllSystemRequirements();
 
         listOfEntityRelations = getEntityRelations();
-        mapOfEntityRelations  = buildMapOfEntityRelations(listOfEntityRelations);
+        relationIndex = new TraceabilityRelationIndex(listOfEntityRelations);
 
         mapOfStakeholderRequirementRelations  = buildMapRelations(STAKEHOLDER_REQUIREMENT, listOfEntityRelations);
+        log.info("buildTraceabilityMatrixDocument build mapOfStakeholderRequirementRelations took {} ms", System.currentTimeMillis() - startTime);
         mapOfSystemRequirementRelations = buildMapRelations(SYSTEM_REQUIREMENT, listOfEntityRelations);
-
-        setAllRelationsFromSystemRequirementToStakeholderRequirement(
-                listOfSystemRequirementWrappers,
-                mapOfEntityRelations
-        );
+        log.info("buildTraceabilityMatrixDocument build mapOfSystemRequirementRelations took {} ms", System.currentTimeMillis() - startTime);
 
         matrixColumnsData = createMatrixColumnsData(listOfSystemRequirementWrappers, mapOfSystemRequirementRelations);
+        log.info("buildTraceabilityMatrixDocument create matrixColumnsData took {} ms", System.currentTimeMillis() - startTime);
         matrixRowsData = createMatrixRowsData(listOfStakeholderRequirementWrappers, mapOfStakeholderRequirementRelations);
+        log.info("buildTraceabilityMatrixDocument create matrixRowsData took {} ms", System.currentTimeMillis() - startTime);
         matrixCellsData = applyRules(listOfStakeholderRequirementWrappers);
+        log.info("buildTraceabilityMatrixDocument applyRules took {} ms", System.currentTimeMillis() - startTime);
     }
 
     private void setListOfStakeholderRequirementsOnAllSystemRequirements() {
         for (SystemRequirementWrapper systemRequirementWrapper : listOfSystemRequirementWrappers) {
             systemRequirementWrapper.setListOfStakeholderRequirements(listOfStakeholderRequirementWrappers);
         }
-    }
-
-    private ConcurrentMap<String, EntityRelationRecord> buildMapOfEntityRelations(List<EntityRelationRecord> listOfEntityRelations) {
-        ConcurrentMap<String, EntityRelationRecord> mapOfEntityRelations = new ConcurrentHashMap<>();
-        for (EntityRelationRecord relation : listOfEntityRelations) {
-
-            String ent1 = relation.getEntityId() + "_" + relation.getEntityType().getId();
-            String ent2  = relation.getRelatedEntityId() + "_" + relation.getRelatedEntityType().getId();
-
-            String key1 = ent1 + "_" + ent2;
-            String key2 = ent2 + "_" + ent1;
-
-            mapOfEntityRelations.put(key1, relation);
-            mapOfEntityRelations.put(key2, relation);
-        }
-        return mapOfEntityRelations;
     }
 
     private ConcurrentMap<Integer, RelationToEntity> buildMapRelations(EntityType entityType, List<EntityRelationRecord> listOfEntityRelations) {
@@ -251,31 +246,8 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         );
     }
 
-    private void setAllRelationsFromSystemRequirementToStakeholderRequirement(
-            List<SystemRequirementWrapper> systemRequirementWrappers,
-            ConcurrentMap<String, EntityRelationRecord> mapOfEntityRelations) {
-
-        for (SystemRequirementWrapper systemRequirementWrapper : systemRequirementWrappers) {
-            EntityId currentEntityId = systemRequirementWrapper.getEntityId();
-            EntityType currentEntityType = systemRequirementWrapper.getEntityType();
-
-            for (EntityRelationRecord relation : mapOfEntityRelations.values()) {
-                if (Objects.equals(relation.getEntityId(), currentEntityId.getValue()) && relation.getEntityType() == currentEntityType) {
-
-                    systemRequirementWrapper.addRelationToStakeholderRequirement(relation);
-
-                    log.debug(
-                            "Relation found for system requirement {} and stakeholder requirement {}",
-                            currentEntityId,
-                            relation.getRelatedEntityId()
-                    );
-                }
-            }
-        }
-    }
-
     private MatrixCellsData applyRules(List<StakeholderRequirementWrapper> stakeholderRequirementWrappers) {
-        MatrixCellsData matrixCellsData = new MatrixCellsData();
+        MatrixCellsData matrixCellsData = new MatrixCellsData(STYLE_NORMAL, VALUE_EMPTY);
 
         long start = System.currentTimeMillis();
 
@@ -302,18 +274,20 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         }
 
         long end = System.currentTimeMillis();
-        log.debug("It took {}ms to apply all rules", end - start);
+        log.info("It took {}ms to apply all rules", end - start);
 
         return matrixCellsData;
     }
 
     private RuleResult applyRule(StakeholderRequirementWrapper stakeholderRequirementWrapper, SystemRequirementWrapper systemRequirementWrapper) {
 
-        if (hasConfirmedRelation(stakeholderRequirementWrapper, systemRequirementWrapper)) {
+        EntityRelationRecord relation = relationIndex.get(stakeholderRequirementWrapper.getEntityId().getValue(),
+                systemRequirementWrapper.getEntityId().getValue());
+        if (relation != null && relation.getRelationType() == RelationType.CONFIRMED) {
             return new RuleResult(VALUE_CONFIRMED_RELATION, STYLE_GREEN);
         }
 
-        if (hasNotRelevantRelation(stakeholderRequirementWrapper, systemRequirementWrapper)) {
+        if (relation != null && relation.getRelationType() == RelationType.NOT_RELEVANT) {
             return new RuleResult(VALUE_NOT_RELEVANT, STYLE_GRAY_ITALIC);
         }
 
@@ -324,53 +298,15 @@ public class TraceabilityMatrixDocument extends GenericXmlDocument {
         return new RuleResult(VALUE_EMPTY, STYLE_NORMAL);
     }
 
-    private boolean hasConfirmedRelation(
-            StakeholderRequirementWrapper stakeholderRequirementWrapper,
-            SystemRequirementWrapper systemRequirementWrapper
-    ) {
-
-        String ent1 = stakeholderRequirementWrapper.getEntityId() + "_" + stakeholderRequirementWrapper.getEntityType().getId();
-        String ent2  = systemRequirementWrapper.getEntityId() + "_" + systemRequirementWrapper.getEntityType().getId();
-
-        String key1 = ent1 + "_" + ent2;
-        String key2 = ent2 + "_" + ent1;
-
-        EntityRelationRecord relation = mapOfEntityRelations.get(key1);
-        if (relation == null) {
-            relation = mapOfEntityRelations.get(key2);
-        }
-
-        return relation != null && relation.getRelationType() == RelationType.CONFIRMED;
-    }
-
-    private boolean hasNotRelevantRelation(
-            StakeholderRequirementWrapper stakeholderRequirementWrapper,
-            SystemRequirementWrapper systemRequirementWrapper
-    ) {
-
-        String ent1 = stakeholderRequirementWrapper.getEntityId() + "_" + stakeholderRequirementWrapper.getEntityType().getId();
-        String ent2  = systemRequirementWrapper.getEntityId() + "_" + systemRequirementWrapper.getEntityType().getId();
-
-        String key1 = ent1 + "_" + ent2;
-        String key2 = ent2 + "_" + ent1;
-
-        EntityRelationRecord relation = mapOfEntityRelations.get(key1);
-        if (relation == null) {
-            relation = mapOfEntityRelations.get(key2);
-        }
-
-        return relation != null && relation.getRelationType() == RelationType.NOT_RELEVANT;
-    }
-
     private boolean hasPossibleTextBasedRelation(
             StakeholderRequirementWrapper stakeholderRequirementWrapper,
             SystemRequirementWrapper systemRequirementWrapper
     ) {
-        Set<String> stakeholderWords = requirementWords.computeIfAbsent(stakeholderRequirementWrapper,
-                ignored -> RequirementTextMatcher.words(stakeholderRequirementWrapper.getRequirementName(),
+        RequirementTextMatcher.PreparedWords stakeholderWords = requirementWords.computeIfAbsent(stakeholderRequirementWrapper,
+                ignored -> textMatcher.prepare(stakeholderRequirementWrapper.getRequirementName(),
                         stakeholderRequirementWrapper.getRequirementDescription()));
-        Set<String> systemWords = requirementWords.computeIfAbsent(systemRequirementWrapper,
-                ignored -> RequirementTextMatcher.words(systemRequirementWrapper.getRequirementName(),
+        RequirementTextMatcher.PreparedWords systemWords = requirementWords.computeIfAbsent(systemRequirementWrapper,
+                ignored -> textMatcher.prepare(systemRequirementWrapper.getRequirementName(),
                         systemRequirementWrapper.getRequirementDescription()));
         return textMatcher.matches(stakeholderWords, systemWords);
     }

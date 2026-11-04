@@ -291,6 +291,64 @@ body.traceability-document {
     background: var(--app-surface-background);
 }
 
+.traceability-virtual-grid {
+    position: relative;
+    font-size: 0.84rem;
+    color: var(--app-text-primary);
+}
+
+.traceability-virtual-cells,
+.traceability-virtual-rows,
+.traceability-virtual-columns {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.traceability-virtual-rows { z-index: 40; }
+.traceability-virtual-columns { z-index: 55; }
+
+.traceability-virtual-grid .traceability-cell,
+.traceability-virtual-grid .traceability-row-header,
+.traceability-virtual-grid .traceability-column-header,
+.traceability-virtual-grid .traceability-virtual-axis,
+.traceability-virtual-grid .traceability-virtual-corner {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--traceability-border-color);
+    border-bottom: 1px solid var(--traceability-border-color);
+    padding: 0.3rem;
+    overflow: hidden;
+}
+
+.traceability-virtual-grid .traceability-row-header {
+    justify-content: flex-start;
+}
+
+.traceability-virtual-grid .traceability-column-header,
+.traceability-virtual-grid .traceability-row-header {
+    font-weight: 700;
+}
+
+.traceability-virtual-grid .traceability-virtual-axis {
+    z-index: 60;
+    align-items: flex-start;
+    background: var(--app-table-header-background);
+}
+
+.traceability-virtual-grid .traceability-virtual-corner {
+    z-index: 85;
+    max-width: none;
+    background: var(--app-table-header-background);
+}
+
+.traceability-virtual-axis .traceability-axis-label {
+    position: static;
+}
+
 .traceability-table {
     border-collapse: separate;
     border-spacing: 0;

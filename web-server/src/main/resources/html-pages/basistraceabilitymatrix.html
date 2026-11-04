@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/basisstakeholderrequirement.css" />
-    <link rel="stylesheet" href="../css/basistraceability.css?rev=status-icons-1" />
+    <link rel="stylesheet" href="../css/basistraceability.css" />
 </head>
 
 <body class="traceability-document">
@@ -84,10 +84,7 @@
             <div class="page-body traceability-body">
                 <div class="traceability-frame" aria-label="Traceability matrix frame">
                     <div class="traceability-table-scroll" id="traceabilityTableScroll">
-                        <table class="traceability-table" aria-label="Traceability matrix">
-                            <thead id="traceabilityTableHead"></thead>
-                            <tbody id="traceabilityTableBody"></tbody>
-                        </table>
+                        <div id="traceabilityGrid" role="grid" aria-label="Traceability matrix"></div>
 
                         <div class="traceability-empty is-visible" id="traceabilityEmptyState">
                             Loading traceability matrix…
@@ -181,7 +178,7 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/basistraceability-page.js?rev=center-icons-1"></script>
+<script type="module" src="../js/pages/basistraceability-page.js"></script>
 </body>
 </html>
 

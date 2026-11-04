@@ -5,7 +5,6 @@ import {createRelationCreationDialogController} from "../components/relation-cre
 import {setText} from "../core/dom.js";
 import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
 import {directTextOf, hasXmlParseError} from "../core/xml.js";
-import {cssEscape} from "../core/css.js";
 import {naturalCompare} from "../components/sortable-table.js";
 
 const RELATION_DIAGRAM_ENDPOINT = "/basis/relationdiagram?cmd=overview";
@@ -48,6 +47,10 @@ const state = {
     requirementsByInternalId: new Map(),
     relations: [],
     relationNeighbors: new Map(),
+    relationsByInternalId: new Map(),
+    cardsByInternalId: new Map(),
+    traceCache: null,
+    highlightedInternalId: undefined,
     columnVisibility: {
         stakeholder: true,
         system: true,
@@ -60,6 +63,10 @@ const state = {
 };
 
 let relationCreationDialog = null;
+let diagramFrame = null;
+let filtersPending = false;
+let geometryPending = false;
+let layoutPending = false;
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startBasisRelationDiagramPage);
@@ -207,12 +214,7 @@ function initializeEvents() {
     });
 
 
-    window.addEventListener("resize", debounce(() => {
-        const frame = document.getElementById("relationdiagramFrame");
-        if (frame) updateGridLayout(frame);
-        drawRelations();
-        updateHighlight();
-    }, 80));
+    window.addEventListener("resize", () => scheduleDiagramUpdate({ layout: true }));
 }
 
 function clearAllFilters() {
@@ -377,11 +379,19 @@ function setRelationDiagramState(diagram) {
     state.systemsBreakdowns = diagram.systemsBreakdowns;
     state.relations = diagram.relations;
     state.relationNeighbors = new Map();
-    for (const {from, to} of state.relations) {
+    state.relationsByInternalId = new Map();
+    state.traceCache = null;
+    state.highlightedInternalId = undefined;
+    for (const relation of state.relations) {
+        const {from, to} = relation;
         if (!state.relationNeighbors.has(from)) state.relationNeighbors.set(from, new Set());
         if (!state.relationNeighbors.has(to)) state.relationNeighbors.set(to, new Set());
         state.relationNeighbors.get(from).add(to);
         state.relationNeighbors.get(to).add(from);
+        if (!state.relationsByInternalId.has(from)) state.relationsByInternalId.set(from, []);
+        if (!state.relationsByInternalId.has(to)) state.relationsByInternalId.set(to, []);
+        state.relationsByInternalId.get(from).push(relation);
+        if (from !== to) state.relationsByInternalId.get(to).push(relation);
     }
     state.focusedInternalId = null;
     state.selectedInternalId = null;
@@ -419,6 +429,9 @@ function renderRelationDiagram() {
     stakeholderList.innerHTML = "";
     systemList.innerHTML = "";
     systemsBreakdownsList.innerHTML = "";
+    state.cardsByInternalId.clear();
+    state.highlightedInternalId = undefined;
+    document.getElementById("relationsSvgGlobal")?.replaceChildren();
 
     if (!state.stakeholderRequirements.length && !state.systemRequirements.length && !state.systemsBreakdowns.length) {
         showEmptyState("No requirements returned from endpoint.");
@@ -436,9 +449,7 @@ function renderRelationDiagram() {
     setupScrollListeners();
     setupResizeObserver();
 
-    requestAnimationFrame(() => {
-        applyFiltersAndRedraw();
-    });
+    applyFiltersAndRedraw();
 }
 
 function renderRequirementCards(container, requirements) {
@@ -462,17 +473,17 @@ function renderRequirementCards(container, requirements) {
 
         card.addEventListener("mouseenter", () => {
             state.hoverInternalId = requirement.internalId;
-            updateHighlight();
+            scheduleDiagramUpdate();
         });
 
         card.addEventListener("mouseleave", () => {
             state.hoverInternalId = null;
-            updateHighlight();
+            scheduleDiagramUpdate();
         });
 
         card.addEventListener("click", () => {
             state.selectedInternalId = requirement.internalId;
-            updateHighlight();
+            scheduleDiagramUpdate();
             openRequirementDialog(requirement);
         });
 
@@ -495,6 +506,7 @@ function renderRequirementCards(container, requirements) {
         });
 
         container.appendChild(card);
+        state.cardsByInternalId.set(requirement.internalId, card);
     }
 }
 
@@ -508,10 +520,7 @@ function setupScrollListeners() {
     systemsBreakdownsList?.addEventListener("scroll", handleDiagramScroll, { passive: true });
 }
 
-const handleDiagramScroll = debounce(() => {
-    drawRelations();
-    updateHighlight();
-}, 20);
+const handleDiagramScroll = () => scheduleDiagramUpdate({ geometry: true });
 
 function setupResizeObserver() {
     const frame = document.getElementById("relationdiagramFrame");
@@ -524,20 +533,32 @@ function setupResizeObserver() {
         state.resizeObserver.disconnect();
     }
 
-    state.resizeObserver = new ResizeObserver(debounce(() => {
-        drawRelations();
-        updateHighlight();
-    }, 60));
+    state.resizeObserver = new ResizeObserver(() => scheduleDiagramUpdate({ geometry: true }));
 
     state.resizeObserver.observe(frame);
 }
 
 function applyFiltersAndRedraw() {
-    applyFilters();
+    scheduleDiagramUpdate({ filters: true });
+}
 
-    requestAnimationFrame(() => {
-        drawRelations();
-        updateHighlight();
+// Events in the same frame share filtering, tracing and one geometry pass.
+function scheduleDiagramUpdate({ filters = false, geometry = false, layout = false } = {}) {
+    filtersPending ||= filters;
+    geometryPending ||= geometry || filters || layout;
+    layoutPending ||= layout;
+    if (diagramFrame !== null) return;
+    diagramFrame = requestAnimationFrame(() => {
+        diagramFrame = null;
+        if (layoutPending) {
+            const frame = document.getElementById("relationdiagramFrame");
+            if (frame) updateGridLayout(frame);
+        }
+        if (filtersPending) applyFilters();
+        const trace = getActiveTrace();
+        const highlightChanged = updateHighlight(trace);
+        if (geometryPending || highlightChanged) drawRelations(trace);
+        filtersPending = geometryPending = layoutPending = false;
     });
 }
 
@@ -547,7 +568,7 @@ function applyFilters() {
     const searchText = document.getElementById("filterRequirementText")?.value?.trim().toLowerCase() || "";
     const focusVisibleIds = state.focusedInternalId ? getFocusedVisibleIds(state.focusedInternalId) : null;
 
-    const cards = document.querySelectorAll(".relationdiagram-requirement-card");
+    const cards = state.cardsByInternalId.values();
 
     for (const card of cards) {
         const internalId = card.dataset.internalId;
@@ -583,8 +604,9 @@ function getFocusedVisibleIds(internalId) {
 }
 
 function getFocusedTrace(internalId) {
+    if (state.traceCache?.internalId === internalId) return state.traceCache.trace;
     const visibleIds = new Set([internalId]);
-    const relationKeys = new Set();
+    const relations = new Set();
     for (const direction of [-1, 1]) {
         // A node reached upstream must still be traversable in the downstream pass.
         const visited = new Set([internalId]);
@@ -593,14 +615,14 @@ function getFocusedTrace(internalId) {
         for (let index = 0; index < pending.length; index++) {
             const currentId = pending[index];
             const currentOrder = TYPE_ORDER[state.requirementsByInternalId.get(currentId)?.type];
-            for (const relatedId of state.relationNeighbors.get(currentId) || []) {
+            for (const relation of state.relationsByInternalId.get(currentId) || []) {
+                const relatedId = relation.from === currentId ? relation.to : relation.from;
                 const relatedOrder = TYPE_ORDER[state.requirementsByInternalId.get(relatedId)?.type];
                 if (currentOrder == null || relatedOrder == null) continue;
                 // Equal groups are allowed; jumps may only continue in this pass's direction.
                 if ((relatedOrder - currentOrder) * direction < 0) continue;
                 // Keep the actual permitted edges, rather than all edges between found nodes.
-                relationKeys.add(JSON.stringify([currentId, relatedId]));
-                relationKeys.add(JSON.stringify([relatedId, currentId]));
+                relations.add(relation);
                 if (visited.has(relatedId)) continue;
                 visited.add(relatedId);
                 visibleIds.add(relatedId);
@@ -609,7 +631,19 @@ function getFocusedTrace(internalId) {
         }
     }
 
-    return {visibleIds, relationKeys};
+    const trace = {visibleIds, relations};
+    // Keep only the latest trace so repeated hovers cannot retain the entire graph.
+    state.traceCache = {internalId, trace};
+    return trace;
+}
+
+function getActiveInternalId() {
+    return state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
+}
+
+function getActiveTrace() {
+    const internalId = getActiveInternalId();
+    return internalId ? getFocusedTrace(internalId) : null;
 }
 
 function setFocusedRequirement(internalId) {
@@ -891,8 +925,8 @@ function requirementMatchesSearch(requirement, searchText) {
         || description.includes(searchText);
 }
 
-function drawRelations() {
-    drawGlobalRelations("relationsSvgGlobal");
+function drawRelations(trace = getActiveTrace()) {
+    drawGlobalRelations("relationsSvgGlobal", trace);
 
     const oldSvgs = ["relationsSvgStakeholderSystem", "relationsSvgSystemBreakdown"];
     for (const id of oldSvgs) {
@@ -901,7 +935,7 @@ function drawRelations() {
     }
 }
 
-function drawGlobalRelations(svgId) {
+function drawGlobalRelations(svgId, trace) {
     const svg = document.getElementById(svgId);
     const frame = document.getElementById("relationdiagramFrame");
 
@@ -909,48 +943,34 @@ function drawGlobalRelations(svgId) {
         return;
     }
 
-    svg.innerHTML = "";
+    if (!trace) {
+        svg.replaceChildren();
+        return;
+    }
 
+    // Read geometry before changing the SVG. A card is measured once per draw,
+    // even when hundreds of relations share the same endpoint.
     const frameRect = frame.getBoundingClientRect();
-    svg.setAttribute("viewBox", `0 0 ${frameRect.width} ${frameRect.height}`);
-    svg.setAttribute("width", String(frameRect.width));
-    svg.setAttribute("height", String(frameRect.height));
-
-    const { stakeholder, system, systemsBreakdown } = state.columnVisibility;
-    const focusTrace = state.focusedInternalId ? getFocusedTrace(state.focusedInternalId) : null;
-
-    for (const relation of state.relations) {
-        if (focusTrace && !focusTrace.relationKeys.has(JSON.stringify([relation.from, relation.to]))) continue;
+    const rects = new Map();
+    for (const internalId of trace.visibleIds) {
+        const requirement = state.requirementsByInternalId.get(internalId);
+        const card = state.cardsByInternalId.get(internalId);
+        if (!card || !state.columnVisibility[requirement?.type]
+            || card.classList.contains("is-hidden-by-filter")) continue;
+        const rect = card.getBoundingClientRect();
+        if (rect.width && rect.height) rects.set(internalId, rect);
+    }
+    const fragment = document.createDocumentFragment();
+    for (const relation of trace.relations) {
         const fromRequirement = state.requirementsByInternalId.get(relation.from);
         const toRequirement = state.requirementsByInternalId.get(relation.to);
-
-        if (!fromRequirement || !toRequirement) {
-            continue;
-        }
-
-        // Tjek synlighed af kolonner
-        if (fromRequirement.type === "stakeholder" && !stakeholder) continue;
-        if (toRequirement.type === "stakeholder" && !stakeholder) continue;
-        if (fromRequirement.type === "system" && !system) continue;
-        if (toRequirement.type === "system" && !system) continue;
-        if (fromRequirement.type === "systemsBreakdown" && !systemsBreakdown) continue;
-        if (toRequirement.type === "systemsBreakdown" && !systemsBreakdown) continue;
-
-        const fromCard = findVisibleRequirementCard(relation.from);
-        const toCard = findVisibleRequirementCard(relation.to);
-
-        if (!fromCard || !toCard) {
-            continue;
-        }
-
-        const points = getGlobalRelationPoints(fromCard, toCard, frameRect, fromRequirement, toRequirement);
-
-        if (!points) {
-            continue;
-        }
+        const fromRect = rects.get(relation.from);
+        const toRect = rects.get(relation.to);
+        if (!fromRect || !toRect) continue;
+        const points = getGlobalRelationPoints(fromRect, toRect, frameRect, fromRequirement, toRequirement);
 
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.classList.add("relationdiagram-line");
+        path.classList.add("relationdiagram-line", "is-active");
         path.dataset.relationId = relation.id;
         path.dataset.from = relation.from;
         path.dataset.to = relation.to;
@@ -961,14 +981,15 @@ function drawGlobalRelations(svgId) {
             path.setAttribute("d", buildCurvePath(points));
         }
 
-        svg.appendChild(path);
+        fragment.appendChild(path);
     }
+    svg.setAttribute("viewBox", `0 0 ${frameRect.width} ${frameRect.height}`);
+    svg.setAttribute("width", String(frameRect.width));
+    svg.setAttribute("height", String(frameRect.height));
+    svg.replaceChildren(fragment);
 }
 
-function getGlobalRelationPoints(fromCard, toCard, frameRect, fromRequirement, toRequirement) {
-    const fromRect = fromCard.getBoundingClientRect();
-    const toRect = toCard.getBoundingClientRect();
-
+function getGlobalRelationPoints(fromRect, toRect, frameRect, fromRequirement, toRequirement) {
     const fromOrder = TYPE_ORDER[fromRequirement.type];
     const toOrder = TYPE_ORDER[toRequirement.type];
 
@@ -1030,12 +1051,13 @@ function buildCurvePath(points) {
     return `M ${points.x1} ${points.y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${points.x2} ${points.y2}`;
 }
 
-function updateHighlight() {
-    const activeInternalId = state.focusedInternalId || state.hoverInternalId || state.selectedInternalId;
-    const trace = activeInternalId ? getFocusedTrace(activeInternalId) : null;
+function updateHighlight(trace = getActiveTrace()) {
+    const activeInternalId = getActiveInternalId();
+    if (state.highlightedInternalId === activeInternalId) return false;
+    state.highlightedInternalId = activeInternalId;
     const relatedIds = trace ? trace.visibleIds : new Set();
 
-    const cards = document.querySelectorAll(".relationdiagram-requirement-card");
+    const cards = state.cardsByInternalId.values();
 
     for (const card of cards) {
         const internalId = card.dataset.internalId;
@@ -1048,16 +1070,8 @@ function updateHighlight() {
         card.classList.toggle("is-muted", shouldMute);
     }
 
-    const lines = document.querySelectorAll(".relationdiagram-line");
-
-    for (const line of lines) {
-        const from = line.dataset.from;
-        const to = line.dataset.to;
-        const isActive = Boolean(activeInternalId) && trace.relationKeys.has(JSON.stringify([from, to]));
-
-        line.classList.toggle("is-active", isActive);
-        line.classList.toggle("is-muted", Boolean(activeInternalId) && !isActive);
-    }
+    // Only active trace lines are rendered; scroll need not revisit card classes.
+    return true;
 }
 
 function renderRelatedGroups(requirement) {
@@ -1199,19 +1213,7 @@ function getRequirementEditConfig(requirement) {
 }
 
 function getRelatedRequirementIds(internalId) {
-    const relatedIds = new Set();
-
-    for (const relation of state.relations) {
-        if (relation.from === internalId) {
-            relatedIds.add(relation.to);
-        }
-
-        if (relation.to === internalId) {
-            relatedIds.add(relation.from);
-        }
-    }
-
-    return relatedIds;
+    return state.relationNeighbors.get(internalId) || new Set();
 }
 
 
@@ -1226,22 +1228,6 @@ function getRelatedRequirements(internalId, predicate = () => true) {
 
 function hasAnyRelation(internalId) {
     return state.relationNeighbors.has(internalId);
-}
-
-function findVisibleRequirementCard(internalId) {
-    const card = document.querySelector(`.relationdiagram-requirement-card[data-internal-id="${cssEscape(internalId)}"]`);
-
-    if (!card || card.classList.contains("is-hidden-by-filter") || card.closest(".is-hidden-by-view")) {
-        return null;
-    }
-
-    const rect = card.getBoundingClientRect();
-
-    if (rect.width === 0 || rect.height === 0) {
-        return null;
-    }
-
-    return card;
 }
 
 function showEmptyState(message) {
@@ -1296,10 +1282,7 @@ function applyViewMode(unused, options = {}) {
     updateGridLayout(frame);
 
     if (options.redraw !== false) {
-        requestAnimationFrame(() => {
-            drawRelations();
-            updateHighlight();
-        });
+        scheduleDiagramUpdate({ geometry: true });
     }
 }
 

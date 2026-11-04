@@ -48,12 +48,12 @@ function excelColor(value, fallback) {
     return channels.slice(0, 3).map(channel => Math.round(channel).toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 
-export async function downloadInterfaceXlsx({table, endpoint, title, project}) {
+export async function downloadInterfaceXlsx({table, snapshot, endpoint, title, project}) {
     const response = await fetch(`${endpoint}?cmd=export`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
         credentials: 'same-origin',
-        body: JSON.stringify(snapshotInterfaceMatrix(table, title, project))
+        body: JSON.stringify(snapshot || snapshotInterfaceMatrix(table, title, project))
     });
     if (!response.ok || !response.headers.get('Content-Type')?.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
         throw new Error('Could not export the matrix to Excel.');

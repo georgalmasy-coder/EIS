@@ -88,7 +88,8 @@ public class GenericXmlDocument {
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
 
         String xmlAsString = writer.toString();
-        log.debug("Created XML : {}", xmlAsString);
+        log.debug("Created {} XML: {} characters", getClass().getSimpleName(), xmlAsString.length());
+//        log.debug("Created XML : {}", xmlAsString);
 
         return xmlAsString;
     }

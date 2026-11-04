@@ -187,7 +187,7 @@ public class EntityRelationProvider extends GenericProvider {
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
 
             findRelationsToOtherEntities(GET_CONFIRMED_AND_NOT_RELEVANT_ENTITY_RELATIONS_BY_PROJECT_ID_SQL, entityRelationRecordList, relatedEntityType, currEntityType);
-            log.debug("Number of relations found : {}", entityRelationRecordList.size());
+            //log.debug("Number of relations found : {}", entityRelationRecordList.size());
         }
 
         return entityRelationRecordList;
@@ -200,7 +200,7 @@ public class EntityRelationProvider extends GenericProvider {
         if (getWebSession() != null && getWebSession().getProjectId() != null) {
 
             findRelationsToOtherEntities(GET_CONFIRMED_ENTITY_RELATIONS_BY_PROJECT_ID_SQL, entityRelationRecordList, relatedEntityType, currEntityType);
-            log.debug("Number of relations found : {}", entityRelationRecordList.size());
+            //log.debug("Number of relations found : {}", entityRelationRecordList.size());
         }
 
         return entityRelationRecordList;

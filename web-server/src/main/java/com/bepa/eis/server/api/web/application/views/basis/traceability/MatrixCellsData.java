@@ -5,17 +5,25 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MatrixCellsData {
 
     private final List<Cell> cellList = new ArrayList<>() ;
+    private final String defaultStyle;
+    private final String defaultValue;
 
-    protected void addCell(Integer rowindex, Integer colindex, String value, String style) {
-        cellList.add(new Cell(rowindex, colindex, value, style));
+    protected MatrixCellsData(String defaultStyle, String defaultValue) {
+        this.defaultStyle = defaultStyle;
+        this.defaultValue = defaultValue;
     }
 
-    private String valueOrDefault(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
+    protected void addCell(Integer rowindex, Integer colindex, String value, String style) {
+        // Missing cells are represented by the defaults on traceabilityMatrix.
+        if (Objects.equals(defaultValue, value) && Objects.equals(defaultStyle, style)) {
+            return;
+        }
+        cellList.add(new Cell(rowindex, colindex, value, style));
     }
 
     protected Element getCellElement(Document doc) {

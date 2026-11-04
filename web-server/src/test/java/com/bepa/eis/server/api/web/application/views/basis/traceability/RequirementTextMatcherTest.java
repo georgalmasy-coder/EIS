@@ -73,6 +73,21 @@ public final class RequirementTextMatcherTest {
         RequirementTextMatcher filtered = new RequirementTextMatcher(true, 1, 4, 8, 1, 2, "their");
         check(filtered, "their", "theirs", false);
         check(filtered, "theirs", "their", false);
+        var source = RequirementTextMatcher.words("and system", "chocolate");
+        var target = RequirementTextMatcher.words("and sytem", "chocolatte");
+        var originalSource = new java.util.LinkedHashSet<>(source);
+        var originalTarget = new java.util.LinkedHashSet<>(target);
+        fuzzy.matches(source, target);
+        fuzzy.matchingWords(source, target);
+        if (!source.equals(originalSource) || !target.equals(originalTarget)) {
+            throw new AssertionError("Matching must not modify caller-owned word sets");
+        }
+        var prepared = fuzzy.prepare("abcde abcdf", null);
+        if (!fuzzy.matches(prepared, fuzzy.prepare("abcdg abcxe", null))
+                || fuzzy.matches(prepared, fuzzy.prepare("unrelated words", null))
+                || !fuzzy.matches(prepared, fuzzy.prepare("abcdg abcxe", null))) {
+            throw new AssertionError("Prepared words must be reusable across fuzzy comparisons");
+        }
         System.out.println("RequirementTextMatcher regression checks passed");
     }
 
@@ -85,6 +100,10 @@ public final class RequirementTextMatcherTest {
                 RequirementTextMatcher.words(right, null));
         if (actual != expected) {
             throw new AssertionError(left + " / " + right + ": expected " + expected + ", got " + actual);
+        }
+        boolean prepared = matcher.matches(matcher.prepare(left, null), matcher.prepare(right, null));
+        if (prepared != expected) {
+            throw new AssertionError("Prepared: " + left + " / " + right + ": expected " + expected + ", got " + prepared);
         }
     }
 }

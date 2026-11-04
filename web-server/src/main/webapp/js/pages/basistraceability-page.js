@@ -1,6 +1,6 @@
 import {initMenu} from "../components/menu.js";
 import {userPreferences} from "../core/user-preferences.js";
-import {downloadInterfaceXlsx} from "../components/interface-xlsx-export.js?rev=center-icons-1";
+import {createTraceabilityMatrixView, getTraceabilityCell} from "../components/traceability-matrix-view.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -12,6 +12,7 @@ import {getDynamicStyleClass, sanitizeCssColor} from "../core/css.js";
 
 const TRACEABILITY_ENDPOINT = "/basis/basistraceability?cmd=overview";
 let requirementDialogRequest = 0;
+let matrixView;
 
 const CONFIRM_RELATION_ENDPOINT = "/basis/basistraceability/confirmrelation";
 const REMOVE_CONFIRMED_RELATION_ENDPOINT = "/basis/basistraceability/removeconfirmedrelation";
@@ -65,6 +66,19 @@ function initializePageShell() {
 }
 
 function initializeEvents() {
+    matrixView = createTraceabilityMatrixView({
+        root: document.getElementById("traceabilityGrid"),
+        scroll: document.getElementById("traceabilityTableScroll"),
+        createIcon: createStatusIcon,
+        cellTooltip: buildCellTooltip,
+        rowTooltip: buildRowTooltip,
+        columnTooltip: buildHeaderTooltip,
+        onCellDoubleClick: openTraceabilityRequirementDialog,
+        onCellContextMenu: (event, row, column, cell, element) =>
+            openTraceabilityContextMenu(event.clientX, event.clientY, row, column, cell, element),
+        onRowEdit: openStakeholderRequirementEditPage,
+        onColumnEdit: openSystemRequirementEditPage
+    });
     updateViewModeControl();
     document.getElementById("traceabilityViewToggle")?.addEventListener("click", () => {
         state.viewMode = state.viewMode === "icons" ? "colors" : "icons";
@@ -79,17 +93,19 @@ function initializeEvents() {
     });
     document.getElementById("traceabilityExcelButton")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
-        const table = document.querySelector(".traceability-table");
-        if (!table?.tBodies[0]?.rows.length) return;
+        const matrix = state.matrix;
+        if (button.disabled || !canExportTraceabilityMatrix(matrix)) return;
         button.disabled = true;
         try {
-            await downloadInterfaceXlsx({table, endpoint: "/basis/basistraceability",
+            const snapshot = await snapshotTraceabilityMatrix(matrix);
+            const {downloadInterfaceXlsx} = await import("../components/interface-xlsx-export.js?rev=matrix-snapshot-1");
+            await downloadInterfaceXlsx({snapshot, endpoint: "/basis/basistraceability",
                 title: "Traceability Matrix",
                 project: document.getElementById("projectName")?.textContent || ""});
         } catch (error) {
             window.alert(error.message);
         } finally {
-            button.disabled = !table.tBodies[0]?.rows.length;
+            updateTraceabilityExportButton(state.matrix);
         }
     });
     initializeContextMenuEvents();
@@ -243,64 +259,42 @@ function parseRows(matrixElement) {
 
 function parseCells(matrixElement) {
     const cellsByRow = new Map();
+    const defaultStyle = getAttribute(matrixElement, "defaultCellStyle", FALLBACK_STYLE_ID);
+    const defaultValue = getAttribute(matrixElement, "defaultCellValue", "");
 
-    const flatCellElements = matrixElement.querySelectorAll(":scope > cells > cell");
-
-    for (const cellElement of flatCellElements) {
-        const rowIndex = getNumberAttribute(cellElement, "row", -1);
-        const columnIndex = getNumberAttribute(cellElement, "col", -1);
-
-        if (rowIndex < 0 || columnIndex < 0) {
-            continue;
+    function readCell(element, rowIndex) {
+        const columnIndex = getNumberAttribute(element, "col", -1);
+        if (rowIndex < 0 || columnIndex < 0) return;
+        const value = element.hasAttribute("value") ? element.getAttribute("value").trim() : defaultValue;
+        const style = getAttribute(element, "style", defaultStyle);
+        if (value === defaultValue && style === defaultStyle) {
+            const rowCells = cellsByRow.get(rowIndex);
+            rowCells?.delete(columnIndex);
+            if (rowCells?.size === 0) cellsByRow.delete(rowIndex);
+            return;
         }
-
-        addCell(cellsByRow, rowIndex, columnIndex, {
-            rowIndex,
-            columnIndex,
-            value: getAttribute(cellElement, "value", ""),
-            style: getAttribute(cellElement, "style", FALLBACK_STYLE_ID)
-        });
+        let rowCells = cellsByRow.get(rowIndex);
+        if (!rowCells) {
+            rowCells = new Map();
+            cellsByRow.set(rowIndex, rowCells);
+        }
+        rowCells.set(columnIndex, {rowIndex, columnIndex, value, style});
     }
 
-    const groupedCellRows = matrixElement.querySelectorAll(":scope > cellRows > cellRow");
-
-    for (const cellRowElement of groupedCellRows) {
-        const rowIndex = getNumberAttribute(cellRowElement, "row", -1);
-
-        if (rowIndex < 0) {
-            continue;
-        }
-
-        const cellElements = cellRowElement.querySelectorAll(":scope > cell");
-
-        for (const cellElement of cellElements) {
-            const columnIndex = getNumberAttribute(cellElement, "col", -1);
-
-            if (columnIndex < 0) {
-                continue;
-            }
-
-            addCell(cellsByRow, rowIndex, columnIndex, {
-                rowIndex,
-                columnIndex,
-                value: getAttribute(cellElement, "value", ""),
-                style: getAttribute(cellElement, "style", FALLBACK_STYLE_ID)
-            });
+    // Iterate siblings instead of retaining a NodeList for millions of cells.
+    const flatCells = matrixElement.querySelector(":scope > cells");
+    for (let cell = flatCells?.firstElementChild; cell; cell = cell.nextElementSibling) {
+        if (cell.tagName === "cell") readCell(cell, getNumberAttribute(cell, "row", -1));
+    }
+    const groupedRows = matrixElement.querySelector(":scope > cellRows");
+    for (let row = groupedRows?.firstElementChild; row; row = row.nextElementSibling) {
+        if (row.tagName !== "cellRow") continue;
+        const rowIndex = getNumberAttribute(row, "row", -1);
+        for (let cell = row.firstElementChild; cell; cell = cell.nextElementSibling) {
+            if (cell.tagName === "cell") readCell(cell, rowIndex);
         }
     }
-
     return cellsByRow;
-}
-
-function addCell(cellsByRow, rowIndex, columnIndex, cell) {
-    let rowCells = cellsByRow.get(rowIndex);
-
-    if (!rowCells) {
-        rowCells = new Map();
-        cellsByRow.set(rowIndex, rowCells);
-    }
-
-    rowCells.set(columnIndex, cell);
 }
 
 function applyTopPanel(xmlDocument) {
@@ -411,165 +405,102 @@ function createStatusIcon(styleId) {
 
 function renderTraceabilityMatrix(matrix) {
     updateViewModeControl();
-    const excelButton = document.getElementById("traceabilityExcelButton");
-    if (excelButton) excelButton.disabled = !matrix.rows.length || !matrix.columns.length;
+    updateTraceabilityExportButton(matrix);
     setText("traceabilityRowCount", String(matrix.rows.length || matrix.rowCount), "");
     setText("traceabilityColumnCount", String(matrix.columns.length || matrix.columnCount), "");
     setText("traceabilityColumnGroupLabel", matrix.columnGroupLabel || "Systems Requirement", "");
 
-    const tableHead = document.getElementById("traceabilityTableHead");
-    const tableBody = document.getElementById("traceabilityTableBody");
-
-    if (!tableHead || !tableBody) {
-        throw new Error("Missing table elements.");
-    }
-
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = "";
-
+    matrixView.setMatrix(matrix, state.viewMode);
     if (!matrix.rows.length || !matrix.columns.length) {
         showEmptyState("No traceability rows or columns returned from endpoint.");
-        return;
+    } else {
+        hideEmptyState();
     }
-
-    hideEmptyState();
-
-    renderHeader(tableHead, matrix);
-    renderBody(tableBody, matrix);
 }
 
-function renderHeader(tableHead, matrix) {
-    const headerRow = document.createElement("tr");
-
-    const axisCorner = document.createElement("th");
-    axisCorner.className = "traceability-second-corner-axis";
-    axisCorner.scope = "col";
-    axisCorner.title = matrix.rowGroupLabel;
-    headerRow.appendChild(axisCorner);
-
-    const rowHeaderCorner = document.createElement("th");
-    rowHeaderCorner.className = "traceability-second-corner-row";
-    rowHeaderCorner.scope = "col";
-    rowHeaderCorner.textContent = "";
-    rowHeaderCorner.title = matrix.rowGroupLabel;
-    headerRow.appendChild(rowHeaderCorner);
-
-    for (const column of matrix.columns) {
-        const th = document.createElement("th");
-        th.className = `traceability-column-header ${getDynamicStyleClass(column.style, "traceability-xml-style")}`;
-        th.scope = "col";
-        th.title = buildHeaderTooltip(matrix.columnGroupLabel, column);
-        th.setAttribute("data-column-id", column.id || "");
-        th.setAttribute("data-column-code", column.code || "");
-        th.setAttribute("data-column-index", String(column.index));
-
-        const span = document.createElement("span");
-        span.className = "traceability-header-text";
-        span.textContent = column.label || column.code || column.id;
-
-        th.appendChild(span);
-
-        th.addEventListener("dblclick", () => {
-            openSystemRequirementEditPage(column);
-        });
-
-        headerRow.appendChild(th);
+async function snapshotTraceabilityMatrix(matrix) {
+    if (!canExportTraceabilityMatrix(matrix)) {
+        throw new Error("Excel export is available for matrices with at most 22,500 data cells (150 × 150).");
     }
-
-    tableHead.appendChild(headerRow);
-}
-
-function renderBody(tableBody, matrix) {
-    const defaultCell = {
-        value: matrix.defaultCellValue || "",
-        style: matrix.defaultCellStyle || FALLBACK_STYLE_ID
+    // Match the existing export endpoint's limits before allocating a snapshot.
+    if ((matrix.rows.length + 1) * (matrix.columns.length + 2) > 1_000_000
+        || matrix.columns.length + 2 > 16384 || matrix.rows.length + 1 > 1048573) {
+        throw new Error("The Excel export endpoint supports matrices up to 1,000,000 cells. This matrix exceeds that limit.");
+    }
+    const sizes = matrixView.getSizes();
+    const snapshot = {
+        title: "Traceability Matrix",
+        project: document.getElementById("projectName")?.textContent || "",
+        widths: [sizes.axis, sizes.rowHeader, ...matrix.columns.map(() => sizes.cell)],
+        heights: [sizes.header * 0.75, ...matrix.rows.map(() => sizes.row * 0.75)],
+        cells: []
     };
-
-    matrix.rows.forEach((row, rowIndexInArray) => {
-        const rowIndex = Number.isFinite(row.index) ? row.index : rowIndexInArray;
-        const tr = document.createElement("tr");
-
-        if (rowIndexInArray === 0) {
-            const axisCell = document.createElement("th");
-            axisCell.className = "traceability-axis-cell";
-            axisCell.rowSpan = matrix.rows.length;
-            axisCell.scope = "rowgroup";
-            axisCell.title = matrix.rowGroupLabel;
-
-            const axisLabel = document.createElement("div");
-            axisLabel.className = "traceability-axis-label";
-
-            const axisText = document.createElement("span");
-            axisText.textContent = matrix.rowGroupLabel;
-
-            axisLabel.appendChild(axisText);
-            axisCell.appendChild(axisLabel);
-            tr.appendChild(axisCell);
-        }
-
-        const rowHeader = document.createElement("th");
-        rowHeader.className = `traceability-row-header ${getDynamicStyleClass(row.style, "traceability-xml-style")}`;
-        rowHeader.scope = "row";
-        rowHeader.title = `${buildRowTooltip(row)}\nDouble-click to edit Stakeholder Requirement`;
-        rowHeader.setAttribute("data-row-id", row.id || "");
-        rowHeader.setAttribute("data-row-code", row.code || "");
-        rowHeader.setAttribute("data-row-index", String(rowIndex));
-
-        const rowHeaderText = document.createElement("span");
-        rowHeaderText.className = "traceability-row-header-text";
-        rowHeaderText.textContent = row.label || row.code || row.id;
-
-        rowHeader.appendChild(rowHeaderText);
-
-        rowHeader.addEventListener("dblclick", () => {
-            openStakeholderRequirementEditPage(row);
-        });
-
-        tr.appendChild(rowHeader);
-
-        const rowCells = matrix.cellsByRow.get(rowIndex);
-
-        for (let columnIndexInArray = 0; columnIndexInArray < matrix.columns.length; columnIndexInArray += 1) {
-            const column = matrix.columns[columnIndexInArray];
-            const columnIndex = Number.isFinite(column.index) ? column.index : columnIndexInArray;
-            const cell = rowCells?.get(columnIndex) || { ...defaultCell, rowIndex, columnIndex };
-
-            const td = document.createElement("td");
-            td.className = `traceability-cell ${getDynamicStyleClass(cell.style, "traceability-xml-style")}`;
-            td.title = buildCellTooltip(row, column);
-            td.setAttribute("data-row-id", row.id || "");
-            td.setAttribute("data-row-code", row.code || "");
-            td.setAttribute("data-row-index", String(rowIndex));
-            td.setAttribute("data-column-id", column.id || "");
-            td.setAttribute("data-column-code", column.code || "");
-            td.setAttribute("data-column-index", String(columnIndex));
-            td.setAttribute("data-cell-style", cell.style || FALLBACK_STYLE_ID);
-            td.setAttribute("data-cell-value", cell.value || "");
-            if (state.viewMode === "icons") {
-                const icon = createStatusIcon(cell.style);
-                if (icon) {
-                    td.appendChild(icon);
-                    td.title += `\n${icon.getAttribute("aria-label")}`;
-                }
-            }
-
-            td.addEventListener("dblclick", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                openTraceabilityRequirementDialog(row, column);
+    const samples = document.createElement("div");
+    samples.className = "traceability-virtual-grid";
+    Object.assign(samples.style, {position: "fixed", visibility: "hidden", width: "0", height: "0", overflow: "hidden"});
+    document.body.appendChild(samples);
+    const appearances = new Map();
+    const icons = state.viewMode === "icons";
+    function color(value, fallback) {
+        const channels = value.match(/[\d.]+/g)?.map(Number);
+        if (!channels || channels.length < 3 || channels[3] === 0) return fallback;
+        return channels.slice(0, 3).map(channel => Math.round(channel).toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+    function appearance(kind, styleId) {
+        const key = `${kind}:${styleId}`;
+        if (appearances.has(key)) return appearances.get(key);
+        const sample = document.createElement("div");
+        const styled = ["traceability-cell", "traceability-row-header", "traceability-column-header"].includes(kind);
+        sample.className = `${kind}${styled ? ` ${getDynamicStyleClass(styleId, "traceability-xml-style")}` : ""}`;
+        samples.appendChild(sample);
+        const css = getComputedStyle(sample);
+        const definition = kind === "traceability-cell" && icons ? STATUS_ICONS[String(styleId).toLowerCase()] : null;
+        const result = {background: color(css.backgroundColor, "FFFFFF"),
+            foreground: definition ? definition.color.slice(1).toUpperCase() : color(css.color, "111827"),
+            bold: kind !== "traceability-cell", centered: Boolean(definition),
+            text: definition?.symbol || ""};
+        appearances.set(key, result);
+        sample.remove();
+        return result;
+    }
+    function add(row, column, text, kind, styleId, rowSpan = 1, rotation = 0) {
+        snapshot.cells.push({...appearance(kind, styleId), row, column, rowSpan, colSpan: 1,
+            ...(text === null ? {} : {text}), rotation});
+    }
+    try {
+        add(0, 0, "", "traceability-second-corner-axis", "normal");
+        add(0, 1, "", "traceability-second-corner-row", "normal");
+        matrix.columns.forEach((column, c) => add(0, c + 2, column.label || column.code || column.id,
+            "traceability-column-header", column.style));
+        add(1, 0, matrix.rowGroupLabel, "traceability-axis-cell", "normal", matrix.rows.length, 90);
+        for (let r = 0; r < matrix.rows.length; r++) {
+            const row = matrix.rows[r];
+            add(r + 1, 1, row.label || row.code || row.id, "traceability-row-header", row.style);
+            matrix.columns.forEach((column, c) => {
+                const cell = getTraceabilityCell(matrix, row, column);
+                add(r + 1, c + 2, null, "traceability-cell", cell.style);
             });
-
-            td.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                openTraceabilityContextMenu(event.clientX, event.clientY, row, column, cell, td);
-            });
-
-            tr.appendChild(td);
+            // Let the browser paint the disabled export button and remain responsive.
+            if (r % 32 === 0) await new Promise(resolve => setTimeout(resolve, 0));
         }
+        return snapshot;
+    } finally {
+        samples.remove();
+    }
+}
 
-        tableBody.appendChild(tr);
-    });
+function canExportTraceabilityMatrix(matrix) {
+    return Boolean(matrix?.rows.length && matrix.columns.length
+        && matrix.rows.length * matrix.columns.length <= 150 * 150);
+}
+
+function updateTraceabilityExportButton(matrix) {
+    const button = document.getElementById("traceabilityExcelButton");
+    if (!button) return;
+    button.disabled = !canExportTraceabilityMatrix(matrix);
+    button.title = button.disabled
+        ? "Excel export requires 1–22,500 data cells (maximum 150 × 150)."
+        : "Export traceability matrix to Excel";
 }
 
 function openSystemRequirementEditPage(column) {

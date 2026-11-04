@@ -39,6 +39,7 @@ async function main() {
 
     const pageSource = fs.readFileSync(path.resolve(__dirname, '../../main/webapp/js/pages/basistraceability-page.js'), 'utf8').replace(/^import .*;\r?\n/gm, '');
     const exportSource = fs.readFileSync(path.resolve(__dirname, '../../main/webapp/js/components/interface-xlsx-export.js'), 'utf8').replace(/^export /gm, '');
+    const viewSource = fs.readFileSync(path.resolve(__dirname, '../../main/webapp/js/components/traceability-matrix-view.js'), 'utf8').replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
     const html = fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/basistraceabilitymatrix.html'), 'utf8');
     assert.match(html, /traceability-back-button[\s\S]*?<\/a>\s*<button id="traceabilityExcelButton"/);
     const helperSource = ['xml', 'css'].map(name => fs.readFileSync(path.resolve(__dirname, '../../main/webapp/js/core', name + '.js'), 'utf8').replace(/^export /gm, '')).join('\n');
@@ -59,31 +60,30 @@ async function main() {
     const css = ['common', 'app', 'basistraceability'].map(name => fs.readFileSync(path.resolve(__dirname, '../../main/webapp/css', name + '.css'), 'utf8')).join('\n');
     await run(`const style = document.createElement('style'); style.textContent = ${JSON.stringify(css)}; document.head.appendChild(style);`);
     const xml = '<TraceabilityMatrixDocument><traceabilityMatrix rowCount="1" columnCount="3"><styles><style id="green" backgroundColor="#00FF00"/><style id="grayItalic" backgroundColor="#CCCCCC"/><style id="yellow" backgroundColor="#FFFF00"/></styles><columns><column index="0" id="2"/><column index="1" id="3"/><column index="2" id="4"/></columns><rows><row index="0" id="1"/></rows><cells><cell row="0" col="0" value="X" style="green"/><cell row="0" col="1" value="NR" style="grayItalic"/><cell row="0" col="2" value="" style="yellow"/></cells></traceabilityMatrix></TraceabilityMatrixDocument>';
-    const result = await run(preferenceApi + '\n' + preferencesSource + '\n' + helperSource + '\n' + pageSource + '\n' + exportSource + '\n' + `(() => {
+    const result = await run(preferenceApi + '\n' + preferencesSource + '\n' + helperSource + '\n' + viewSource + '\n' + pageSource + '\n' + exportSource + '\n' + `(async () => {
         const matrix = parseTraceabilityMatrixDocument(new DOMParser().parseFromString(${JSON.stringify(xml)}, 'application/xml'));
         injectTraceabilityStyles(matrix.styles);
-        const table = document.createElement('table');
-        const head = document.createElement('thead');
-        const body = document.createElement('tbody');
-        table.className = 'traceability-table';
-        head.id = 'traceabilityTableHead';
-        body.id = 'traceabilityTableBody';
-        table.append(head, body);
-        document.body.appendChild(table);
-        document.body.insertAdjacentHTML('beforeend', ${JSON.stringify(html.match(/<button id="traceabilityViewToggle"[\s\S]*?<\/button>/)[0])} + '<div id="traceabilityLegend"></div>');
+        const scroll = document.createElement('div');
+        scroll.id = 'traceabilityTableScroll';
+        scroll.className = 'traceability-table-scroll';
+        scroll.style.cssText = 'width:1000px;height:500px;flex:none';
+        const body = document.createElement('div');
+        body.id = 'traceabilityGrid';
+        scroll.appendChild(body);
+        document.body.appendChild(scroll);
+        document.body.insertAdjacentHTML('beforeend', ${JSON.stringify(html.match(/<button id="traceabilityViewToggle"[\s\S]*?<\/button>/)[0])} + '<div id="traceabilityLegend"></div><button id="traceabilityExcelButton"></button>');
         initializeEvents();
         state.matrix = matrix;
-        renderHeader(head, matrix);
-        renderBody(body, matrix);
-        const result = {rows:matrix.rows.length, columns:matrix.columns.length, cells:Array.from(body.querySelectorAll('td'), cell => ({text:cell.textContent, color:getComputedStyle(cell).backgroundColor})), snapshot:snapshotInterfaceMatrix(table,'Traceability Matrix','Test project')};
+        renderTraceabilityMatrix(matrix);
+        const result = {rows:matrix.rows.length, columns:matrix.columns.length, cells:Array.from(body.querySelectorAll('.traceability-cell'), cell => ({text:cell.textContent, color:getComputedStyle(cell).backgroundColor})), snapshot:await snapshotTraceabilityMatrix(matrix)};
         const toggle = document.getElementById('traceabilityViewToggle');
         toggle.click();
-        result.iconCells = Array.from(body.querySelectorAll('td'), cell => ({
+        result.iconCells = Array.from(body.querySelectorAll('.traceability-cell'), cell => ({
             background:getComputedStyle(cell).backgroundColor,
             color:getComputedStyle(cell.querySelector('svg')).color,
             label:cell.querySelector('svg').getAttribute('aria-label')
         }));
-        result.iconSnapshot = snapshotInterfaceMatrix(table,'Traceability Matrix','Test project');
+        result.iconSnapshot = await snapshotTraceabilityMatrix(matrix);
         result.iconLegendCount = document.querySelectorAll('#traceabilityLegend .traceability-status-icon').length;
         result.pressed = toggle.getAttribute('aria-pressed');
         result.contextActions = getTraceabilityCellActions({style:'green'}).map(action => action.action);
@@ -92,12 +92,26 @@ async function main() {
         result.restored = userPreferences.getItem(VIEW_MODE_KEY);
         toggle.click();
         result.legacyIcons = body.querySelectorAll('.traceability-status-icon').length;
-        result.legacyColors = Array.from(body.querySelectorAll('td'), cell => getComputedStyle(cell).backgroundColor);
+        result.legacyColors = Array.from(body.querySelectorAll('.traceability-cell'), cell => getComputedStyle(cell).backgroundColor);
         result.preferenceRequests = preferenceRequests;
+        let exportWork = 0;
+        snapshotTraceabilityMatrix = async () => {exportWork++; throw Error('Unexpected export work');};
+        const oversized = {...matrix, rows:Array(151).fill(matrix.rows[0]), columns:Array(150).fill(matrix.columns[0])};
+        state.matrix = oversized;
+        updateTraceabilityExportButton(oversized);
+        const exportButton = document.getElementById('traceabilityExcelButton');
+        result.exportDisabled = exportButton.disabled;
+        exportButton.dispatchEvent(new MouseEvent('click', {bubbles:true}));
+        // Even a synthetic click on an enabled button must respect the data limit.
+        exportButton.disabled = false;
+        exportButton.dispatchEvent(new MouseEvent('click', {bubbles:true}));
+        result.oversizedExportWork = exportWork;
         return result;
     })()`);
     assert.equal(result.rows, 1);
     assert.equal(result.columns, 3);
+    assert.equal(result.exportDisabled, true);
+    assert.equal(result.oversizedExportWork, 0);
     assert.deepEqual(result.cells, [
         {text:'', color:'rgb(0, 255, 0)'},
         {text:'', color:'rgb(204, 204, 204)'},

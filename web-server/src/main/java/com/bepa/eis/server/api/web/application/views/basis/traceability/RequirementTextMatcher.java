@@ -59,39 +59,73 @@ final class RequirementTextMatcher {
     }
 
     boolean matches(Set<String> source, Set<String> target) {
+        return matches(prepare(source), prepare(target));
+    }
+
+    static final class PreparedWords {
+        private final Set<String> words;
+
+        private PreparedWords(Set<String> words) {
+            this.words = words;
+        }
+    }
+
+    PreparedWords prepare(String name, String description) {
+        Set<String> prepared = words(name, description);
+        prepared.removeAll(stopwords);
+        return new PreparedWords(prepared);
+    }
+
+    private PreparedWords prepare(Set<String> words) {
+        Set<String> prepared = new LinkedHashSet<>(words);
+        prepared.removeAll(stopwords);
+        return new PreparedWords(prepared);
+    }
+
+    boolean matches(PreparedWords sourceWords, PreparedWords targetWords) {
+        Set<String> source = sourceWords.words;
+        Set<String> target = targetWords.words;
         if (Math.min(source.size(), target.size()) < minimumMatches) {
             return false;
         }
-        return findMatches(source, target, minimumMatches).size() >= minimumMatches;
+        Set<String> smaller = source.size() <= target.size() ? source : target;
+        Set<String> larger = smaller == source ? target : source;
+        int exactCount = 0;
+        for (String word : smaller) {
+            if (larger.contains(word) && ++exactCount >= minimumMatches) {
+                return true;
+            }
+        }
+        if (!fuzzyEnabled) return false;
+        return findFuzzyMatches(unmatched(source, target), unmatched(target, source),
+                minimumMatches - exactCount, null) >= minimumMatches - exactCount;
     }
 
     List<WordMatch> matchingWords(Set<String> source, Set<String> target) {
-        return findMatches(source, target, Integer.MAX_VALUE);
+        Set<String> left = prepare(source).words;
+        Set<String> right = prepare(target).words;
+        List<WordMatch> result = new ArrayList<>();
+        for (String word : left) {
+            if (right.contains(word)) result.add(new WordMatch(word, word));
+        }
+        if (fuzzyEnabled) {
+            findFuzzyMatches(unmatched(left, right), unmatched(right, left), Integer.MAX_VALUE, result);
+        }
+        return result;
     }
 
     record WordMatch(String source, String target) { }
 
-    private List<WordMatch> findMatches(Set<String> source, Set<String> target, int stopAfter) {
-        // Filter both sides before exact or fuzzy comparisons, also for dialog highlights.
-        source = new LinkedHashSet<>(source);
-        target = new LinkedHashSet<>(target);
-        source.removeAll(stopwords);
-        target.removeAll(stopwords);
-        Set<String> exact = new LinkedHashSet<>(source);
-        exact.retainAll(target);
-        List<WordMatch> result = new ArrayList<>();
-        for (String word : exact) {
-            result.add(new WordMatch(word, word));
+    private List<String> unmatched(Set<String> source, Set<String> target) {
+        List<String> result = new ArrayList<>();
+        for (String word : source) {
+            if (!target.contains(word)) result.add(word);
         }
-        int count = exact.size();
-        if (count >= stopAfter || !fuzzyEnabled) {
-            return result;
-        }
-        List<String> left = new ArrayList<>(source);
-        List<String> right = new ArrayList<>(target);
-        left.removeAll(exact);
-        right.removeAll(exact);
+        return result;
+    }
 
+    private int findFuzzyMatches(List<String> left, List<String> right, int stopAfter, List<WordMatch> result) {
+        int count = 0;
         // Build candidate edges once; augmenting paths avoid order-dependent greedy matches.
         List<List<Integer>> candidates = new ArrayList<>();
         int[] owners = new int[right.size()];
@@ -108,12 +142,14 @@ final class RequirementTextMatcher {
                 break;
             }
         }
-        for (int j = 0; j < owners.length; j++) {
-            if (owners[j] != -1) {
-                result.add(new WordMatch(left.get(owners[j]), right.get(j)));
+        if (result != null) {
+            for (int j = 0; j < owners.length; j++) {
+                if (owners[j] != -1) {
+                    result.add(new WordMatch(left.get(owners[j]), right.get(j)));
+                }
             }
         }
-        return result;
+        return count;
     }
 
     private boolean assign(int source, List<List<Integer>> candidates, int[] owners, boolean[] visited) {
