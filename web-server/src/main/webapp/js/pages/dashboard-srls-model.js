@@ -75,14 +75,14 @@ function groupSystems(rows) {
     return groups.sort((a, b) => codeOrder.compare(a.system.code, b.system.code));
 }
 
-export function parseSrlDashboard(xml) {
+export function parseSrlDashboard(xml, {includeDiagnostics = false} = {}) {
     const root = xml.querySelector("srlCalculation");
     if (!root) throw new Error("Missing SRL calculation data.");
     const systems = [...root.querySelectorAll("meta > systemsMeta > system")].map(system => ({
         entityId: system.getAttribute("entityId"), code: system.getAttribute("code") || "",
         name: system.getAttribute("name") || "", codeLevel: readNumber(system.getAttribute("codeLevel"))
     }));
-    const diagnostics = readCalculationTooltips(root);
+    const diagnostics = includeDiagnostics ? readCalculationTooltips(root) : new Map();
     const components = [...root.querySelectorAll("calculation > componentSrl > component")].map(component => ({
         entityId: component.getAttribute("entityId"),
         calculationTooltip: diagnostics.get(component.getAttribute("entityId")) || "",
@@ -97,7 +97,7 @@ export function parseSrlDashboard(xml) {
 
 // Temporary test diagnostics. Use server results for totals and level selection;
 // rounded XML values must never be used to recalculate the dashboard result.
-function readCalculationTooltips(root) {
+export function readCalculationTooltips(root, entityId = null) {
     const read = (selector, attributes) => [...(root.querySelectorAll(selector) || [])].map(node =>
         Object.fromEntries(attributes.map(key => [key, node.getAttribute(key) || ""])));
     const systems = read("meta > systemsMeta > system", ["entityId", "code", "codeLevel", "trlId", "normalizedTrl"]);
@@ -115,7 +115,7 @@ function readCalculationTooltips(root) {
         ["srlId", "referenceValue", "lowerBound", "upperBound", "upperBoundInclusive"]);
     return new Map(read("calculation > componentSrl > component",
         ["entityId", "weightedTrlSum", "interfaceCount", "srl", "measuredSrlId", "measuredSrlRange"])
-        .filter(component => systemsById.has(component.entityId))
+        .filter(component => systemsById.has(component.entityId) && (entityId === null || component.entityId === String(entityId)))
         .map(component => [component.entityId, formatSrlCalculationTooltip({
             system: systemsById.get(component.entityId), component, maxima, systemsById,
             interfaces: bySource.get(component.entityId) || [], transitions

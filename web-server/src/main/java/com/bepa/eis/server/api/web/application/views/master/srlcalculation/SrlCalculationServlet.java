@@ -14,7 +14,10 @@ public class SrlCalculationServlet extends GenericDataProviderServlet {
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request,
                                              HttpServletResponse response) throws Exception {
-        return new SrlCalculationDocument(webSession);
+        String detail = request.getParameter("detailEntityId");
+        Integer detailEntityId = detail == null ? null : Integer.valueOf(detail);
+        if (detailEntityId != null && detailEntityId <= 0) throw new IllegalArgumentException("Invalid system ID");
+        return new SrlCalculationDocument(webSession, detailEntityId);
     }
 
     @Override

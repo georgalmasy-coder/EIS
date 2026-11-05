@@ -7,6 +7,7 @@ const webapp = path.resolve(__dirname, '../../main/webapp');
 const output = path.resolve(__dirname, '../../../target/dashboard-srls-test');
 fs.mkdirSync(output, {recursive: true});
 let mode = 'normal';
+let detailRequests = [];
 let udvMode = true;
 let includeN2Route = true;
 const preferences = {};
@@ -32,8 +33,9 @@ const server = http.createServer((req, res) => {
         if (url.searchParams.get('page') === 'dashboard-irls') return res.end(fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/dashboard-irls.html')));
         return res.end(fs.readFileSync(path.resolve(__dirname, '../../main/resources/html-pages/dashboard-srls.html'), 'utf8').replace('{{udvMode}}', String(udvMode)));
     }
-    if (url.pathname === '/master/srlcalculation') {
+    if (url.pathname === '/master/srlcalculation' || url.pathname === '/master/srlcalculation/details') {
         res.setHeader('Content-Type', 'application/xml');
+        if (url.searchParams.has('detailEntityId')) detailRequests.push(url.searchParams.get('detailEntityId'));
         if (mode === 'error') { res.writeHead(500); return res.end(); }
         if (mode === 'diagnostics' || mode === 'markers' || mode === 'prl-pair') return res.end(`<SrlCalculationDocument><srlCalculation><meta>
             <lookupMaxima maxTrlId="9" maxIrlId="9"/>
@@ -282,28 +284,24 @@ async function main() {
     udvMode = true;
     await send('Page.reload');
     await wait("document.querySelectorAll('#srlSystems tr').length === 3");
-    for (const selector of ['.dashboard-srls-group', '.dashboard-srls-group-name', '.dashboard-srls-group-name .dashboard-srls-name', '.dashboard-srls-group .dashboard-srls-system-track', '.dashboard-srls-group .dashboard-srls-system-marker']) {
-        assert.match(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector}'))`), /SRL calculation \(temporary test details\): S-1\n/,
-            'Level 1 calculation details are available on the collapsed group row, name and marker');
-    }
+    assert.equal(detailRequests.length, 0, 'Initial load never requests calculation details');
+    assert.equal(await run("[...document.querySelectorAll('[data-srl-tooltip]')].some(n => n.dataset.srlTooltip.includes('temporary test details'))"), false,
+        'Initial load never formats calculation details');
     await run("document.querySelector('.dashboard-srls-group-toggle').click()");
-    for (const selector of ['#srlSystems tr:not(.dashboard-srls-group)', '#srlSystems tr:last-child']) {
-        const tooltip = await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector} .dashboard-srls-system-track'))`);
-        assert.match(tooltip, /Readiness 6/);
-        assert.match(tooltip, /9\/9 × 4\/9/);
-        assert.match(tooltip, /unrounded AA \/ 1 ≈ 0\.444/);
-        assert.equal(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector}'))`), tooltip);
-        assert.match(await run(`(node => node.dataset.srlTooltip ?? node.title)(document.querySelector('${selector} .dashboard-srls-name'))`), /SRL calculation/);
-    }
+    await run("document.querySelector('#srlSystems tr:last-child').dispatchEvent(new PointerEvent('pointerover', {bubbles: true}))");
+    await new Promise(resolve => setTimeout(resolve, 650));
+    assert.equal(detailRequests.length, 0, 'Pointerover caused by rendering never requests details');
+    await run(`document.querySelector('#srlSystems tr:last-child').dispatchEvent(new PointerEvent('pointermove',
+        {bubbles: true, clientX: innerWidth - 10, clientY: innerHeight - 10}))`);
+    await wait("document.querySelector('#srlCalculationTooltip').textContent.includes('Result: SRL 6')");
+    assert.deepEqual(detailRequests, ['3'], 'Only the hovered system is requested');
+    assert.match(await run("document.querySelector('#srlCalculationTooltip').textContent"), /9\/9 \u00d7 4\/9/);
+    assert.match(await run("document.querySelector('#srlCalculationTooltip').textContent"), /unrounded AA \/ 1 \u2248 0\.444/);
     assert(await run(`(() => {
-        const row = document.querySelector('#srlSystems tr:last-child');
-        row.dispatchEvent(new PointerEvent('pointerover', {bubbles: true, clientX: innerWidth - 10, clientY: innerHeight - 10}));
         const popup = document.querySelector('#srlCalculationTooltip');
         const rect = popup.getBoundingClientRect();
-        return !popup.hidden && popup.textContent === row.dataset.srlTooltip
-            && popup.textContent.includes('Result: SRL 6') && !row.hasAttribute('title') && !row.querySelector('[title]')
-            && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight;
-    })()`), 'Custom tooltip displays complete result and stays within viewport');
+        return !popup.hidden && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight;
+    })()`), 'Lazy tooltip stays within viewport');
     await send('Emulation.setDeviceMetricsOverride', {width: 650, height: 400, deviceScaleFactor: 1, mobile: false});
     assert(await run(`(() => {
         const row = document.querySelector('#srlSystems tr:last-child');

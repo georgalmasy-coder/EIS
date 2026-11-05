@@ -7,10 +7,11 @@ import {downloadDashboardSrlPdf} from "./dashboard-srls-pdf.js?v=20261022-prl-ov
 import {setText} from "../core/dom.js";
 import {applyTopPanelFromDocument} from "../core/page-header.js";
 import {hasXmlParseError} from "../core/xml.js";
-import {parseSrlDashboard, srlPosition, buildPrlMarkers} from "./dashboard-srls-model.js?v=20261022-all-level-tooltips";
+import {parseSrlDashboard, srlPosition, buildPrlMarkers, readCalculationTooltips} from "./dashboard-srls-model.js?v=20261105-compact";
 
 const ENDPOINT = "/master/srlcalculation?cmd=overview";
 let loadedDashboard = null;
+const calculationDetails = new Map();
 let loadedTopPanel = {};
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -36,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadDashboard() {
     const workspace = document.getElementById("srlWorkspace");
     loadedDashboard = null;
+    calculationDetails.clear();
     document.getElementById("btnDownloadPdf").disabled = true;
     workspace.hidden = true;
     setText("srlStatus", "Loading SRL calculations...");
@@ -138,7 +140,7 @@ function renderDashboard(dashboard) {
 }
 
 function applyCalculationTooltip(row, track, system) {
-    if (document.body.dataset.udvMode !== "true" || !system.calculationTooltip) return;
+    if (document.body.dataset.udvMode !== "true") return;
     const tooltip = [track.title, system.calculationTooltip].filter(Boolean).join("\n\n");
     row.title = tooltip;
     track.title = tooltip;
@@ -149,6 +151,7 @@ function applyCalculationTooltip(row, track, system) {
     const groupName = row.querySelector(".dashboard-srls-group-name");
     if (groupName) groupName.title = `${system.name}\n\n${tooltip}`;
     for (const target of [row, ...row.querySelectorAll("[title]")]) {
+        target.dataset.srlEntityId = system.entityId;
         target.dataset.srlTooltip = target.title;
         target.removeAttribute("title");
     }
@@ -163,7 +166,11 @@ function initializeCalculationTooltips() {
     document.body.append(popup);
     let owner = null;
     let hideTimer;
+    let showTimer;
+    let pendingTarget = null;
     const hide = () => {
+        clearTimeout(showTimer);
+        pendingTarget = null;
         clearTimeout(hideTimer);
         owner?.removeAttribute("aria-describedby");
         owner = null;
@@ -173,7 +180,7 @@ function initializeCalculationTooltips() {
         clearTimeout(hideTimer);
         hideTimer = setTimeout(hide, 180);
     };
-    const show = (target, event) => {
+    const show = async (target, event) => {
         clearTimeout(hideTimer);
         if (owner === target && !popup.hidden) return;
         hide();
@@ -183,26 +190,66 @@ function initializeCalculationTooltips() {
         popup.hidden = false;
         target.setAttribute("aria-describedby", popup.id);
         const anchor = target.getBoundingClientRect();
-        const x = event.type === "pointerover" ? event.clientX : anchor.left;
-        const y = event.type === "pointerover" ? event.clientY + 16 : anchor.bottom + 8;
+        const x = event.type.startsWith("pointer") ? event.clientX : anchor.left;
+        const y = event.type.startsWith("pointer") ? event.clientY + 16 : anchor.bottom + 8;
         popup.style.left = `${Math.max(8, Math.min(x, innerWidth - popup.offsetWidth - 8))}px`;
         popup.style.top = `${Math.max(8, Math.min(y, innerHeight - popup.offsetHeight - 8))}px`;
+        const entityId = target.dataset.srlEntityId;
+        if (!entityId) return;
+        const dashboard = loadedDashboard;
+        try {
+            if (!calculationDetails.has(entityId)) {
+                if (calculationDetails.size >= 32) calculationDetails.delete(calculationDetails.keys().next().value);
+                const pending = fetch(ENDPOINT.replace('?cmd=', '/details?cmd=') + '&detailEntityId=' + encodeURIComponent(entityId),
+                    {headers: {Accept: "application/xml"}, cache: "no-store"}).then(async response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const xml = new DOMParser().parseFromString(await response.text(), "application/xml");
+                    if (hasXmlParseError(xml)) throw new Error('Invalid XML response');
+                    return readCalculationTooltips(xml.querySelector("srlCalculation"), entityId).get(entityId) || "";
+                });
+                calculationDetails.set(entityId, pending);
+                pending.catch(() => { if (calculationDetails.get(entityId) === pending) calculationDetails.delete(entityId); });
+            }
+            const details = await calculationDetails.get(entityId);
+            if (owner !== target || loadedDashboard !== dashboard) return;
+            popup.textContent = [target.dataset.srlTooltip, details].filter(Boolean).join("\n\n");
+            popup.style.left = `${Math.max(8, Math.min(x, innerWidth - popup.offsetWidth - 8))}px`;
+            popup.style.top = `${Math.max(8, Math.min(y, innerHeight - popup.offsetHeight - 8))}px`;
+        } catch (error) {
+            if (owner === target) popup.textContent += "\nCalculation details could not be loaded. Hover again to retry.";
+        }
+    };
+    const scheduleShow = (target, event) => {
+        clearTimeout(hideTimer);
+        if (pendingTarget === target || (owner === target && !popup.hidden)) return;
+        clearTimeout(showTimer);
+        pendingTarget = target;
+        showTimer = setTimeout(() => { pendingTarget = null; show(target, event); }, 500);
     };
     document.addEventListener("pointerover", event => {
         if (popup.contains(event.target)) {
             clearTimeout(hideTimer);
             return;
         }
+        // Layout changes during initial rendering can fire pointerover without
+        // user input. Fetch details only after movement or keyboard focus.
+    });
+    document.addEventListener("pointermove", event => {
+        if (popup.contains(event.target)) return;
         const target = event.target.closest("[data-srl-tooltip]");
-        if (target) show(target, event);
+        if (target) scheduleShow(target, event);
         else deferHide();
     });
     document.addEventListener("pointerout", event => {
+        if (pendingTarget && !pendingTarget.contains(event.relatedTarget)) {
+            clearTimeout(showTimer);
+            pendingTarget = null;
+        }
         if (event.target.closest("[data-srl-tooltip]") || popup.contains(event.target)) deferHide();
     });
     document.addEventListener("focusin", event => {
         const target = event.target.closest("[data-srl-tooltip]");
-        if (target) show(target, event);
+        if (target) scheduleShow(target, event);
     });
     document.addEventListener("focusout", deferHide);
     document.addEventListener("keydown", event => { if (event.key === "Escape") hide(); });

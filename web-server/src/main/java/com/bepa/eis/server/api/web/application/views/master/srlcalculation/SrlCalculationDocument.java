@@ -40,13 +40,17 @@ public class SrlCalculationDocument extends GenericXmlDocument {
     private final ListOfElements rootElements;
 
     protected SrlCalculationDocument(WebSession webSession) throws Exception {
+        this(webSession, null);
+    }
+
+    SrlCalculationDocument(WebSession webSession, Integer detailEntityId) throws Exception {
         this(webSession,
                 CustomerLookupCache.getTrlLookupValues(webSession),
                 CustomerLookupCache.getIrlLookupValues(webSession),
                 CustomerLookupCache.getSrlLookupValues(webSession),
                 new SystemBreakdownProvider(webSession).getAllSystemBreakdown(false),
                 new InterfaceMatrixProvider(webSession, SYSTEMS_BREAKDOWN).getLatestInterfaceRecords(
-                        webSession.getCustomerId(), webSession.getProjectId(), SYSTEMS_BREAKDOWN));
+                        webSession.getCustomerId(), webSession.getProjectId(), SYSTEMS_BREAKDOWN), detailEntityId);
         rootElements.addElement(new TopPanelProvider(webSession)
                 .getTopPanelBySession(PageType.DASHBOARD_SRLS_PAGE).getTopPanelElements());
     }
@@ -54,6 +58,12 @@ public class SrlCalculationDocument extends GenericXmlDocument {
     SrlCalculationDocument(WebSession webSession, List<LookupValue> trls, List<LookupValue> irls,
                            List<LookupValue> srls, List<SystemBreakdownEntity> systems,
                            List<InterfaceMatrixProvider.InterfaceRecord> interfaces) throws Exception {
+        this(webSession, trls, irls, srls, systems, interfaces, -1);
+    }
+
+    SrlCalculationDocument(WebSession webSession, List<LookupValue> trls, List<LookupValue> irls,
+                           List<LookupValue> srls, List<SystemBreakdownEntity> systems,
+                           List<InterfaceMatrixProvider.InterfaceRecord> interfaces, Integer detailEntityId) throws Exception {
         super(webSession);
         rootElements = initXmlDocument(getClass().getSimpleName());
         Element calculation = appendElement(getRoot(), "srlCalculation");
@@ -99,22 +109,24 @@ public class SrlCalculationDocument extends GenericXmlDocument {
                     : "0");
         }
 
-        Element interfacesMeta = appendElement(meta, "interfacesMeta");
-        for (InterfaceMatrixProvider.InterfaceRecord record : interfaces) {
-            // INTERFACES has no Active flag. Only latest records between active systems belong here.
-            if (isIncludedInterface(record, activeEntityIds)) {
-                Element element = appendElement(interfacesMeta, "interface");
-                attribute(element, "fromEntityId", record.fromEntityId());
-                attribute(element, "toEntityId", record.toEntityId());
-                attribute(element, "irlId", record.irlId() == null ? null : record.irlId() - 2);
-            }
-        }
-
         Element calculationElement = appendElement(calculation, "calculation");
-        Element systemsInterfaces = appendSystemsInterfaces(
-                calculationElement, systems, interfaces, activeEntityIds, highestIrlId);
-        Element normalisedInterfaces = appendNormalisedTrlAndIrl(calculationElement, systemsInterfaces);
-        Element components = appendComponentSrl(calculationElement, systemsMeta, normalisedInterfaces);
+        // Diagnostic matrices are created only on demand for the selected source.
+        if (detailEntityId != null) {
+            Element interfacesMeta = appendElement(meta, "interfacesMeta");
+            for (InterfaceMatrixProvider.InterfaceRecord record : interfaces) {
+                if (isIncludedInterface(record, activeEntityIds)
+                        && (detailEntityId == -1 || detailEntityId.equals(record.fromEntityId()))) {
+                    Element element = appendElement(interfacesMeta, "interface");
+                    attribute(element, "fromEntityId", record.fromEntityId());
+                    attribute(element, "toEntityId", record.toEntityId());
+                    attribute(element, "irlId", record.irlId() - 2);
+                }
+            }
+            Element systemsInterfaces = appendSystemsInterfaces(
+                    calculationElement, systems, interfaces, activeEntityIds, highestIrlId, detailEntityId);
+            appendNormalisedTrlAndIrl(calculationElement, systemsInterfaces);
+        }
+        Element components = appendComponentSrl(calculationElement, systems, interfaces, activeEntityIds, highestIrlId);
         Element transitionModel = appendSrlTransitionModel(calculationElement, srls);
         NavigableMap<BigDecimal, Element> levelIndex = indexSrlLevels(transitionModel);
         appendComponentSrlLevels(components, levelIndex);
@@ -226,7 +238,7 @@ public class SrlCalculationDocument extends GenericXmlDocument {
 
     private Element appendSystemsInterfaces(Element calculation, List<SystemBreakdownEntity> systems,
                                          List<InterfaceMatrixProvider.InterfaceRecord> interfaces,
-                                         Set<Integer> activeEntityIds, int highestIrlId) {
+                                         Set<Integer> activeEntityIds, int highestIrlId, Integer detailEntityId) {
         Element matrix = appendElement(calculation, "SystemsInterfaces");
         Map<Integer, SystemBreakdownEntity> systemsById = new HashMap<>();
 
@@ -234,12 +246,14 @@ public class SrlCalculationDocument extends GenericXmlDocument {
         for (SystemBreakdownEntity system : systems) {
             Integer entityId = system.getEntityId().getValue();
             systemsById.put(entityId, system);
-            appendInterfaceCell(matrix, system, system, highestIrlId);
+            if (detailEntityId == -1 || detailEntityId.equals(entityId))
+                appendInterfaceCell(matrix, system, system, highestIrlId);
         }
 
         for (InterfaceMatrixProvider.InterfaceRecord record : interfaces) {
             if (isIncludedInterface(record, activeEntityIds)
-                    && !Objects.equals(record.fromEntityId(), record.toEntityId())) {
+                    && !Objects.equals(record.fromEntityId(), record.toEntityId())
+                    && (detailEntityId == -1 || detailEntityId.equals(record.fromEntityId()))) {
                 appendInterfaceCell(matrix, systemsById.get(record.fromEntityId()),
                         systemsById.get(record.toEntityId()), record.irlId());
             }
@@ -267,35 +281,40 @@ public class SrlCalculationDocument extends GenericXmlDocument {
         return normalised;
     }
 
-    private Element appendComponentSrl(Element calculation, Element systemsMeta, Element normalisedInterfaces) {
+    private Element appendComponentSrl(Element calculation, List<SystemBreakdownEntity> systems,
+                                       List<InterfaceMatrixProvider.InterfaceRecord> interfaces,
+                                       Set<Integer> activeIds, int highestIrlId) {
         Element components = appendElement(calculation, "componentSrl");
-        Map<String, BigDecimal> trlsById = new HashMap<>();
-        Map<String, ComponentSrlTotals> totalsById = new HashMap<>();
-        for (Node node = systemsMeta.getFirstChild(); node != null; node = node.getNextSibling()) {
-            Element system = (Element) node;
-            String entityId = system.getAttribute("entityId");
-            trlsById.put(entityId, (BigDecimal) system.getUserData(PRECISE_NORMALIZED_VALUE));
-            totalsById.put(entityId, new ComponentSrlTotals());
+        Map<Integer, BigDecimal> trls = new HashMap<>();
+        Map<Integer, ComponentSrlTotals> totalsById = new HashMap<>();
+        for (SystemBreakdownEntity system : systems) {
+            int id = system.getEntityId().getValue();
+            BigDecimal trl = system.getTrlId() == null ? BigDecimal.ZERO
+                    : normalize(BigDecimal.valueOf(system.getTrlId()), trlFactor);
+            trls.put(id, trl);
+            ComponentSrlTotals totals = new ComponentSrlTotals();
+            if (highestIrlId > 2) {
+                totals.weightedTrlSum = normalize(BigDecimal.valueOf(highestIrlId - 2), irlFactor).multiply(trl);
+                totals.interfaceCount = 1;
+            }
+            totalsById.put(id, totals);
         }
-        for (Node node = normalisedInterfaces.getFirstChild(); node != null; node = node.getNextSibling()) {
-            Element relation = (Element) node;
-            BigDecimal irl = (BigDecimal) relation.getUserData(PRECISE_NORMALIZED_VALUE);
-            if (irl.signum() <= 0) continue;
-            ComponentSrlTotals totals = totalsById.get(relation.getAttribute("fromEntityId"));
-            // AA: SUMPRODUCT of the row's IRL values and the target systems' normalised TRLs.
+        for (var record : interfaces) {
+            if (!isIncludedInterface(record, activeIds) || Objects.equals(record.fromEntityId(), record.toEntityId())) continue;
+            if (irlFactor.signum() <= 0)
+                throw new IllegalStateException("Cannot normalise interface cells: maximum active IRL ID must exceed 2");
+            ComponentSrlTotals totals = totalsById.get(record.fromEntityId());
             totals.weightedTrlSum = totals.weightedTrlSum.add(
-                    irl.multiply(trlsById.get(relation.getAttribute("toEntityId"))));
+                    normalize(BigDecimal.valueOf(record.irlId() - 2), irlFactor).multiply(trls.get(record.toEntityId())));
             totals.interfaceCount++;
         }
-        for (Node node = systemsMeta.getFirstChild(); node != null; node = node.getNextSibling()) {
-            Element system = (Element) node;
-            ComponentSrlTotals totals = totalsById.get(system.getAttribute("entityId"));
+        for (SystemBreakdownEntity system : systems) {
+            ComponentSrlTotals totals = totalsById.get(system.getEntityId().getValue());
             Element component = appendElement(components, "component");
-            attribute(component, "entityId", system.getAttribute("entityId"));
-            attribute(component, "code", system.getAttribute("code"));
+            attribute(component, "entityId", system.getEntityId().getValue());
+            attribute(component, "code", system.getCode());
             attribute(component, "weightedTrlSum", totals.weightedTrlSum.setScale(3, RoundingMode.HALF_UP));
             attribute(component, "interfaceCount", totals.interfaceCount);
-            // AB: divide the unrounded sum by COUNTIF(row, ">0"), including the diagonal.
             BigDecimal srl = totals.interfaceCount == 0 ? BigDecimal.ZERO
                     : totals.weightedTrlSum.divide(BigDecimal.valueOf(totals.interfaceCount), 32, RoundingMode.HALF_UP);
             component.setUserData(PRECISE_NORMALIZED_VALUE, srl, null);

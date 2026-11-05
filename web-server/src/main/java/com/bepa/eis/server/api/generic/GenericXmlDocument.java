@@ -89,7 +89,7 @@ public class GenericXmlDocument {
 
         String xmlAsString = writer.toString();
 //        log.debug("Created {} XML: {} characters", getClass().getSimpleName(), xmlAsString.length());
-        log.info("Created XML : {}", xmlAsString);
+//        log.info("Created XML : {}", xmlAsString);
 
         return xmlAsString;
     }

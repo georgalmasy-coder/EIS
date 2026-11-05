@@ -50,6 +50,7 @@ public final class SrlCalculationDocumentTest {
         check(emptyMaxima.getAttribute("maxTrlId").equals("0")
                 && emptyMaxima.getAttribute("maxIrlId").equals("0")
                 && emptyMaxima.getAttribute("maxSrlId").equals("0"), "Empty lookup maxima are zero");
+        testCompactDashboard();
         testSystemsInterfaces();
         testLookupMaximumCorrection();
         testExcludedInterfaceIrlValues();
@@ -162,6 +163,42 @@ public final class SrlCalculationDocumentTest {
         Element roundingMatrix = (Element) rounding.getDoc().getElementsByTagName("NormalisedTrlAndIrl").item(0);
         check(((Element) roundingMatrix.getLastChild()).getAttribute("normalizedValue").equals("0.167"),
                 "Round repeating fraction upward");
+    }
+
+    private static void testCompactDashboard() throws Exception {
+        var systems = new ArrayList<SystemBreakdownEntity>();
+        var interfaces = new ArrayList<InterfaceRecord>();
+        for (int id = 1; id <= 1900; id++) {
+            systems.add(system(id, id % 10 == 0 ? null : id % 9 + 1));
+            for (int offset = 1; offset <= 20; offset++)
+                interfaces.add(record(id, (id + offset - 1) % 1900 + 1, offset % 11 + 1));
+        }
+        var trls = List.of(irl(9, true));
+        var irls = List.of(irl(11, true));
+        var srls = List.of(irl(1, true), irl(4, true), irl(9, true));
+        var compact = new SrlCalculationDocument(null, trls, irls, srls, systems, interfaces, null);
+        var detailed = new SrlCalculationDocument(null, trls, irls, srls, systems, interfaces, 1);
+        check(compact.getDoc().getElementsByTagName("interface").getLength() == 0
+                && compact.getDoc().getElementsByTagName("systemInterface").getLength() == 0
+                && compact.getDoc().getElementsByTagName("normalisedInterface").getLength() == 0,
+                "Compact dashboard must not construct interface XML");
+        var left = compact.getDoc().getElementsByTagName("component");
+        var right = detailed.getDoc().getElementsByTagName("component");
+        check(left.getLength() == 1900, "One result per system");
+        for (int i = 0; i < left.getLength(); i++) {
+            for (String field : List.of("entityId", "weightedTrlSum", "interfaceCount", "srl", "measuredSrlId", "measuredSrlRange"))
+                check(((Element) left.item(i)).getAttribute(field).equals(((Element) right.item(i)).getAttribute(field)),
+                        "Diagnostic and compact results must agree: " + field);
+        }
+        var cells = detailed.getDoc().getElementsByTagName("systemInterface");
+        check(cells.getLength() <= 21, "Diagnostic response contains only selected system's outgoing interfaces");
+        for (int i = 0; i < cells.getLength(); i++)
+            check(((Element) cells.item(i)).getAttribute("fromEntityId").equals("1"), "No other source details");
+        var noInterfaces = new SrlCalculationDocument(null, trls, irls, srls, systems, List.of(), null);
+        int bytes = compact.toXmlString(false).length();
+        check(bytes < noInterfaces.toXmlString(false).length() * 1.1,
+                "Dashboard response size must scale with systems, not interface count");
+        System.out.println("Compact SRL: 1900 systems, 38000 interfaces, " + bytes + " XML characters; selected diagnostics only");
     }
 
     private static void testLargeSparseMatrix() throws Exception {
