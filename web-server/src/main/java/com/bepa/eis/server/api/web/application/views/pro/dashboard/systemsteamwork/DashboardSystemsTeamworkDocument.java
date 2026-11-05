@@ -36,6 +36,8 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     private final Map<Integer, SystemBreakdownEntity> mapOfPhysicalStructures = new HashMap<>();
     private List<InterfaceMatrixProvider.InterfaceRecord> interfaces = new ArrayList<>();
     private final List<SystemsTeamworkRecord> listOfSystemsTeamworkRecords = new ArrayList<>();
+    private record InterfaceKey(String fromId, String toId) {}
+    private final Map<InterfaceKey, SystemsTeamworkRecord> interfacesByDirection = new HashMap<>();
 
     private DashboardMetaData dashboardMetaData;
 
@@ -85,7 +87,23 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         EntityType entityType = EntityType.SYSTEMS_BREAKDOWN;
         InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(), entityType);
         interfaces = interfaceManagementProvider.getAllInterfaceRecords(entityType);
+        buildSystemsTeamwork(interfaces);
+    }
 
+    DashboardSystemsTeamworkDocument(WebSession session, List<SystemBreakdownEntity> activeSystems,
+                                    List<InterfaceMatrixProvider.InterfaceRecord> interfaceRecords) throws Exception {
+        super(session);
+        rootElement = initXmlDocument(getClass().getSimpleName());
+        topPanel = null;
+        for (SystemBreakdownEntity system : activeSystems)
+            mapOfPhysicalStructures.put(system.getEntityId().getValue(), system);
+        buildSystemsTeamwork(interfaceRecords);
+        getRoot().appendChild(getInterfaceElements());
+    }
+
+    private void buildSystemsTeamwork(List<InterfaceMatrixProvider.InterfaceRecord> interfaces) {
+        int skipped = 0;
+        InterfaceMatrixProvider.InterfaceRecord firstSkipped = null;
         if (interfaces != null) {
             for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {
 
@@ -93,6 +111,12 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
 
                 SystemBreakdownEntity fromEntity = mapOfPhysicalStructures.get(interfaceRecord.fromEntityId());
                 SystemBreakdownEntity toEntity = mapOfPhysicalStructures.get(interfaceRecord.toEntityId());
+                // Interfaces may outlive either endpoint's active version.
+                if (fromEntity == null || toEntity == null) {
+                    skipped++;
+                    if (firstSkipped == null) firstSkipped = interfaceRecord;
+                    continue;
+                }
 
                 record.setFromEntityId(fromEntity.getEntityId());
                 record.setFromSbsCode(fromEntity.getSbsCode());
@@ -104,10 +128,6 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 record.setFromClassificationIds(interfaceRecord.classificationIds());
                 record.setNextIrlMeeting(interfaceRecord.nextIrlMeeting());
 
-                record.setToEntityId(fromEntity.getEntityId());
-                record.setToSbsCode(fromEntity.getSbsCode());
-                record.setToSystemName(fromEntity.getSystemName());
-
                 record.setToEntityId(toEntity.getEntityId());
                 record.setToSbsCode(toEntity.getSbsCode());
                 record.setToSystemName(toEntity.getSystemName());
@@ -118,23 +138,26 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 addInterfaceToList(record);
             }
         }
+        if (skipped > 0) {
+            log.warn("Systems teamwork skipped {} interfaces with an endpoint outside active systems. customerId={}, projectId={}, firstFromEntityId={}, firstToEntityId={}",
+                    skipped, getWebSession() == null ? null : getWebSession().getCustomerId(),
+                    getWebSession() == null ? null : getWebSession().getProjectId(),
+                    firstSkipped.fromEntityId(), firstSkipped.toEntityId());
+        }
     }
 
     private void addInterfaceToList(SystemsTeamworkRecord newRecord) {
-        for ( SystemsTeamworkRecord recordFromList  : listOfSystemsTeamworkRecords) {
-
-            if (recordFromList.getFromEntityId().equals(newRecord.getToEntityId()) &&
-                recordFromList.getToEntityId().equals(newRecord.getFromEntityId())) {
-
-                // We found an instance of this interface, so we don't need to add it again.
-                // but we need to update the IRL and Classification Ids.
-                recordFromList.setToIrlId(newRecord.getFromIrlId());
-                recordFromList.setToClassificationIds(newRecord.getFromClassificationIds());
-
-                return;
-            }
+        SystemsTeamworkRecord reverse = interfacesByDirection.get(
+                new InterfaceKey(newRecord.getToEntityId(), newRecord.getFromEntityId()));
+        if (reverse != null) {
+            reverse.setToIrlId(newRecord.getFromIrlId());
+            reverse.setToClassificationIds(newRecord.getFromClassificationIds());
+            return;
         }
         listOfSystemsTeamworkRecords.add(newRecord);
+        // Preserve the first matching row and input order, as the former list scan did.
+        interfacesByDirection.putIfAbsent(
+                new InterfaceKey(newRecord.getFromEntityId(), newRecord.getToEntityId()), newRecord);
     }
 
     private Element getTrlMetaDataElement() {

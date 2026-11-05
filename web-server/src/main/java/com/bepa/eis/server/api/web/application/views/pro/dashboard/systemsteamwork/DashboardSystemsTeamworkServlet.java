@@ -51,7 +51,7 @@ public class DashboardSystemsTeamworkServlet extends GenericDataProviderServlet 
         try {
             return new DashboardSystemsTeamworkDocument(webSession);
         } catch (Exception e) {
-            log.error("Error getting dashboard IRL : {}", e.getMessage(), e);
+            log.error("Error getting systems teamwork dashboard: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }

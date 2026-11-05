@@ -417,7 +417,7 @@ body.dashboard-systems-teamwork-document {
     box-sizing: border-box;
 }
 
-.dashboard-systems-teamwork-row:nth-child(even) .dashboard-systems-teamwork-cell {
+.dashboard-systems-teamwork-row.is-even .dashboard-systems-teamwork-cell {
     background: var(--dashboard-teamwork-cell-alt-bg);
 }
 
@@ -598,3 +598,5 @@ body.dashboard-systems-teamwork-document .left-hover-zone {
 body.dashboard-systems-teamwork-document .side-menu {
     z-index: 1001;
 }
+
+.dashboard-systems-teamwork-table .teamwork-viewport-spacer td { padding: 0; border: 0; line-height: 0; font-size: 0; }

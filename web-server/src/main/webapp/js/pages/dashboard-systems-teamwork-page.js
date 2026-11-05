@@ -1,3 +1,4 @@
+import {createTeamworkViewport} from "../components/teamwork-viewport.js?rev=teamwork-virtual-1";
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
@@ -32,6 +33,8 @@ const COLUMN_DEFINITIONS = [
     { key: "toSystemOwnerId", label: "System Owner", source: "toSystemOwnerId", widthIndex: 11, lookup: "user", editable: true },
     { key: "toSystemDepartmentId", label: "Department", source: "toSystemDepartmentId", widthIndex: 12, lookup: "department", editable: true }
 ];
+
+let teamworkViewport = null;
 
 const state = {
     document: null,
@@ -223,6 +226,7 @@ function renderDashboard(dashboard) {
         throw new Error("Missing systems teamwork table elements.");
     }
 
+    teamworkViewport?.dispose(); teamworkViewport = null;
     header.innerHTML = "";
     tableBody.innerHTML = "";
     colGroup.innerHTML = "";
@@ -409,24 +413,21 @@ function buildHeaderContent(label, sublabel) {
 }
 
 function renderBody(tableBody, dashboard, records) {
-    const fragment = document.createDocumentFragment();
-
-    for (const record of records) {
-        const tr = document.createElement("tr");
-        tr.className = "dashboard-systems-teamwork-row";
-
-        COLUMN_DEFINITIONS.forEach((column, index) => {
-            const td = column.dual
-                ? buildDualCell(record, column, dashboard.lookup)
-                : buildSingleCell(record, column, dashboard.lookup);
-
-            tr.appendChild(td);
-        });
-
-        fragment.appendChild(tr);
-    }
-
-    tableBody.replaceChildren(fragment);
+    const scroller = document.getElementById("dashboardSystemsTeamworkTableScroll");
+    scroller.scrollTop = 0;
+    teamworkViewport = createTeamworkViewport({scroller, body: tableBody, records,
+        columns: COLUMN_DEFINITIONS.length,
+        afterRender: applyColumnWidths,
+        createRow(record) {
+            const tr = document.createElement("tr");
+            tr.className = "dashboard-systems-teamwork-row";
+            for (const column of COLUMN_DEFINITIONS) {
+                tr.appendChild(column.dual ? buildDualCell(record, column, dashboard.lookup)
+                    : buildSingleCell(record, column, dashboard.lookup));
+            }
+            return tr;
+        }
+    });
 }
 
 function buildSingleCell(record, column, lookup) {
@@ -1005,6 +1006,7 @@ function updateColumnWidth(columnIndex, widthPx) {
 
     applyColumnWidths();
     applyHeaderLayout();
+    teamworkViewport?.remeasure();
 }
 
 function loadStoredColumnWidths() {
