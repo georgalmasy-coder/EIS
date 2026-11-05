@@ -310,18 +310,20 @@ public class BaselineProvider extends GenericProvider {
                 changeRow.setLastModifiedById(entityRecord.getChangedByUserId());
             }
 
-            listOfChanges = buildListOfDecoratedAndSortedChanges( entityProvider, entityType, mapOfChanges);
+            listOfChanges = buildListOfDecoratedAndSortedChanges(entityType, mapOfChanges);
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error getting entity records for baseline: " + baseline);
+            throw new RuntimeException("Error getting entity records for baseline: " + baseline, e);
         }
 
         return listOfChanges;
     }
 
-    private List<BaselineChangeRow> buildListOfDecoratedAndSortedChanges(EntityProvider entityProvider, EntityType entityType, Map<Integer, BaselineChangeRow> mapOfChanges) throws SQLException{
+    private List<BaselineChangeRow> buildListOfDecoratedAndSortedChanges(EntityType entityType, Map<Integer, BaselineChangeRow> mapOfChanges) throws SQLException{
 
         List<BaselineChangeRow> listOfChanges = new ArrayList<>();
+        if (mapOfChanges.isEmpty()) return listOfChanges;
+        Map<Integer, String[]> labels = getLatestEntityLabels(entityType, mapOfChanges);
 
         for (BaselineChangeRow changeRow : mapOfChanges.values()) {
 
@@ -335,10 +337,9 @@ public class BaselineProvider extends GenericProvider {
                 changeRow.setActivity(changeRow.isActive() ? "Modified" : "Inactivated");
             }
 
-            String code = entityProvider.getEntityColumnValue(entityType, entityType.getEntityCodeColumn(), changeRow.getEntityId());
-            String name = entityProvider.getEntityColumnValue(entityType, entityType.getEntityNameColumn(), changeRow.getEntityId());
-            changeRow.setId(code);;
-            changeRow.setName(name);
+            String[] label = labels.get(changeRow.getEntityId());
+            changeRow.setId(label == null ? "" : label[0]);
+            changeRow.setName(label == null ? "" : label[1]);
 
             listOfChanges.add(changeRow);
 
@@ -346,6 +347,40 @@ public class BaselineProvider extends GenericProvider {
 
         listOfChanges.sort(EntityComparators.bySortKey(BaselineChangeRow::getId));
         return listOfChanges;
+    }
+
+    // Keep the existing latest-version labels, including inactive entities, while
+    // fetching both fields in one query instead of two queries per changed entity.
+    private Map<Integer, String[]> getLatestEntityLabels(EntityType entityType,
+                                                        Map<Integer, BaselineChangeRow> changes) throws SQLException {
+        String sql = "SELECT E.EntityId, EE.EntityDataElementType, EE.StringValue " +
+                "FROM ENTITY E INNER JOIN ENTITY_ELEMENT EE " +
+                "ON E.CustomerId = EE.CustomerId AND E.ProjectId = EE.ProjectId " +
+                "AND E.EntityType = EE.EntityType AND E.EntityId = EE.EntityId AND E.Version = EE.Version " +
+                "WHERE E.CustomerId = ? AND E.ProjectId = ? AND E.EntityType = ? AND E.Latest = 1 " +
+                "AND EE.EntityDataElementType IN (?, ?)";
+        int codeType = entityType.getEntityCodeColumn().getId();
+        int nameType = entityType.getEntityNameColumn().getId();
+        Map<Integer, String[]> labels = new HashMap<>();
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            setInt(statement, getWebSession().getCustomerId(), 1);
+            setInt(statement, getWebSession().getProjectId(), 2);
+            setInt(statement, entityType.getId(), 3);
+            setInt(statement, codeType, 4);
+            setInt(statement, nameType, 5);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    int entityId = result.getInt("EntityId");
+                    if (!changes.containsKey(entityId)) continue;
+                    String[] label = labels.computeIfAbsent(entityId, ignored -> new String[]{"", ""});
+                    int fieldType = result.getInt("EntityDataElementType");
+                    if (fieldType == codeType) label[0] = result.getString("StringValue");
+                    if (fieldType == nameType) label[1] = result.getString("StringValue");
+                }
+            }
+        }
+        return labels;
     }
 
     private boolean baselineExists(String tagName) {

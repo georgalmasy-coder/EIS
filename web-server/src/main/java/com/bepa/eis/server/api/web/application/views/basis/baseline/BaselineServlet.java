@@ -221,7 +221,7 @@ public class BaselineServlet extends GenericDataProviderServlet {
                 baselineProvider.getPhysicalStructureChanges(baseline)
         );
 
-        log.debug("BaselineServlet.handleGetEntity: baseline={}", xmlDocument.toXmlString());
+        //log.debug("BaselineServlet.handleGetEntity: baseline={}", xmlDocument.toXmlString());
 
         return xmlDocument;
     }
