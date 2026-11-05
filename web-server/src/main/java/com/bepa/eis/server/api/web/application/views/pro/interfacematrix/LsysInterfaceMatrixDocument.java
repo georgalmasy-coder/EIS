@@ -62,7 +62,11 @@ public class LsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
     }
 
     protected LsysInterfaceMatrixDocument(WebSession webSession, EntityType entityType) throws Exception {
-        super(webSession);
+        this(webSession, entityType, false);
+    }
+
+    LsysInterfaceMatrixDocument(WebSession webSession, EntityType entityType, boolean lazy) throws Exception {
+        super(webSession, lazy);
         this.entityType = entityType;
     }
 

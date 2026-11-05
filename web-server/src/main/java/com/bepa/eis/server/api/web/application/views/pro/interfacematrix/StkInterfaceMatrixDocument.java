@@ -14,7 +14,11 @@ public class StkInterfaceMatrixDocument extends InterfaceMatrixDocument {
     private List<StakeholderRequirementEntity> listOfStakeholderRequirementEntities = null;
 
     protected StkInterfaceMatrixDocument(WebSession webSession) throws Exception {
-        super(webSession);
+        this(webSession, false);
+    }
+
+    StkInterfaceMatrixDocument(WebSession webSession, boolean lazy) throws Exception {
+        super(webSession, lazy);
     }
 
     @Override

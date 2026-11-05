@@ -44,7 +44,9 @@ abstract class InterfaceMatrixDocument extends GenericXmlDocument {
     abstract public Element getEntityElements();
     abstract public String getEntityCount();
 
-    protected InterfaceMatrixDocument(WebSession webSession) throws Exception {
+    protected InterfaceMatrixDocument(WebSession webSession) throws Exception { this(webSession,false); }
+
+    protected InterfaceMatrixDocument(WebSession webSession, boolean lazy) throws Exception {
         super(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
@@ -65,7 +67,14 @@ abstract class InterfaceMatrixDocument extends GenericXmlDocument {
         matrixElement.appendChild(matrixLookupMetaData.getDepartmentElement(getDoc()));
         matrixElement.appendChild(getEntityElements());
 
-        matrixElement.appendChild(matrixCellsData.getCellElement(getDoc()));
+        if (!lazy) matrixElement.appendChild(matrixCellsData.getCellElement(getDoc()));
+    }
+
+    InterfaceMatrixSnapshotStore.Source snapshotSource() {
+        var ids = new java.util.ArrayList<String>();
+        var entities = getRoot().getElementsByTagName("entity");
+        for (int i=0;i<entities.getLength();i++) ids.add(((Element)entities.item(i)).getElementsByTagName("entityId").item(0).getTextContent());
+        return new InterfaceMatrixSnapshotStore.Source(ids,matrixCellsData.snapshotCells());
     }
 
     private void buildInterfaceMatrixDocument() throws Exception {

@@ -18,6 +18,27 @@
     --interfaces-panel-bg: var(--app-surface-background);
 }
 
+/* Fixed geometry lets the matrix recycle both axes without creating N squared cells. */
+.interfaces-virtual-table .interfaces-virtual-spacer {
+    padding: 0 !important;
+    border: 0 !important;
+    font-size: 0;
+    line-height: 0;
+    background: var(--interfaces-white);
+    pointer-events: none;
+}
+.interfaces-virtual-table .interfaces-cell,
+.interfaces-virtual-table .interfaces-row-header { height: 120px; max-height: 120px; }
+.interfaces-virtual-table .interfaces-cell-content,
+.interfaces-virtual-table .interfaces-row-header .interfaces-header-content,
+.interfaces-virtual-table .interfaces-cell-self .interfaces-header-content {
+    max-height: 108px;
+    overflow: hidden;
+}
+.interfaces-virtual-table .interfaces-column-header { width:126px; min-width:126px; max-width:126px; }
+.interfaces-export-surface { position:fixed; left:-1000000px; top:0; visibility:hidden; pointer-events:none; }
+.interfaces-cell-loading { text-align:center; font-size:1.2rem; cursor:progress; }
+
 html,
 body.interfaces-document {
     height: 100%;

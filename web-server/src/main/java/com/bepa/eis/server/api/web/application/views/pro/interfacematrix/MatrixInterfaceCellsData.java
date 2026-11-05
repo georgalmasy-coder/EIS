@@ -21,6 +21,17 @@ public class MatrixInterfaceCellsData {
         this.cellList = interfaceMatrixProvider.getLatestInterfaceRecords(entityType);
     }
 
+    List<InterfaceMatrixSnapshotStore.Cell> snapshotCells() {
+        return cellList.stream().map(MatrixInterfaceCellsData::snapshotCell).toList();
+    }
+
+    static InterfaceMatrixSnapshotStore.Cell snapshotCell(InterfaceMatrixProvider.InterfaceRecord c) {
+        if(c==null)return null;
+        return new InterfaceMatrixSnapshotStore.Cell(String.valueOf(c.fromEntityId()),
+                String.valueOf(c.toEntityId()), c.irlId()==null?"":c.irlId().toString(), c.classificationIds(),
+                c.nextIrlMeeting(), c.changedByUserId()==null?"":c.changedByUserId().toString(), formatChangedDateTime(c.changedDateTime()));
+    }
+
     protected Element getCellElement(Document doc) {
         Element cellsElement = doc.createElement("cells");
 
@@ -53,7 +64,7 @@ public class MatrixInterfaceCellsData {
         element.setAttribute(name, text);
     }
 
-    private String formatChangedDateTime(Timestamp changedDateTime) {
+    private static String formatChangedDateTime(Timestamp changedDateTime) {
         if (changedDateTime == null) {
             return "";
         }

@@ -21,6 +21,9 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
 
     private static final Logger log = LoggerFactory.getLogger(InterfaceMatrixServlet.class);
 
+    private final InterfaceMatrixSnapshotStore snapshots = new InterfaceMatrixSnapshotStore();
+    private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
+
     abstract GenericXmlDocument buildInterfaceMatrix (WebSession webSession, EntityType entityType);
 
     @Override
@@ -30,8 +33,12 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
         setWebSession(webSession);
 
         String module = request.getServletPath() +  "." + getCommandParameter(request);
+        long started = System.nanoTime();
+        String command = getCommandParameter(request);
         try {
-            if ("export".equals(getCommandParameter(request))) {
+            if ("snapshot".equals(command) || "block".equals(command) || "view".equals(command) || "refresh".equals(command)) {
+                handleLazy(webSession,request,response,command);
+            } else if ("export".equals(getCommandParameter(request))) {
                 handleExport(webSession, request, response);
             } else if ("remove".equals(getCommandParameter(request))) {
                 handleRemove(webSession, request, response);
@@ -39,11 +46,61 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
                 super.doPost(request, response);
             }
         } catch (Throwable throwable) {
-            IncidentProvider incidentProvider = new IncidentProvider(webSession);
-            incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
-            log.error("Error processing traceability matrix action: {}", throwable.getMessage(), throwable);
+            if (!(throwable instanceof InterfaceMatrixSnapshotStore.Expired)) {
+                IncidentProvider incidentProvider = new IncidentProvider(webSession);
+                incidentProvider.createProviderServiceIncident(SeverityType.HIGH, module, throwable);
+                log.error("Error processing interface matrix action: {}", throwable.getMessage(), throwable);
+            }
             writeJsonError(response, throwable);
+            if (throwable instanceof InterfaceMatrixSnapshotStore.Expired) response.setStatus(409);
+        } finally {
+            if (java.util.Set.of("snapshot","block","view","refresh").contains(command == null ? "" : command))
+                getPerformanceProvider().logPerformance(module, (System.nanoTime()-started)/1_000_000);
         }
+    }
+
+    private void handleLazy(WebSession session, HttpServletRequest request, HttpServletResponse response, String command) throws Exception {
+        EntityType type = resolveEntityType(request);
+        response.setCharacterEncoding("UTF-8"); response.setHeader("Cache-Control","no-store");
+        if ("snapshot".equals(command)) {
+            InterfaceMatrixDocument document = switch(type) {
+                case SYSTEMS_BREAKDOWN -> new PsysInterfaceMatrixDocument(session,type,true);
+                case LOGICAL_STRUCTURE -> new LsysInterfaceMatrixDocument(session,type,true);
+                case FUNCTIONAL_STRUCTURE -> new FsysInterfaceMatrixDocument(session,true);
+                case STAKEHOLDER_REQUIREMENT -> new StkInterfaceMatrixDocument(session,true);
+                case SYSTEM_REQUIREMENT -> new SysInterfaceMatrixDocument(session,true);
+                default -> throw new IllegalArgumentException("Unsupported interface entity type");
+            };
+            String id=snapshots.put(session,type,document.snapshotSource());
+            ((Element)document.getRoot().getElementsByTagName("interfaceMatrix").item(0)).setAttribute("snapshotId",id);
+            response.setContentType("application/xml; charset=UTF-8");
+            response.getWriter().write(document.toXmlString(false));return;
+        }
+        String id=request.getParameter("snapshotId");
+        var source=snapshots.get(session,type,id);
+        Object data;
+        if ("refresh".equals(command)) {
+            String from=request.getParameter("fromEntityId"),to=request.getParameter("toEntityId");
+            source.validatePair(from,to);
+            var provider=new InterfaceMatrixProvider(session,type);
+            var forward=MatrixInterfaceCellsData.snapshotCell(provider.getLatestInterfaceRecord(Integer.valueOf(from),Integer.valueOf(to),type));
+            var reverse=MatrixInterfaceCellsData.snapshotCell(provider.getLatestInterfaceRecord(Integer.valueOf(to),Integer.valueOf(from),type));
+            var update=snapshots.update(session,type,id,java.util.List.of(
+                    new InterfaceMatrixSnapshotStore.Patch(from,to,forward),new InterfaceMatrixSnapshotStore.Patch(to,from,reverse)));
+            id=update.snapshotId();data=update;
+            log.info("Refreshed interface pair from={} to={} snapshot={}",from,to,id);
+        } else if ("block".equals(command)) {
+            int row=Integer.parseInt(request.getParameter("row")),column=Integer.parseInt(request.getParameter("column"));
+            data=new InterfaceMatrixSnapshotStore.Block(id,row,column,source.block(row,column));
+            log.info("Interface block snapshot={} row={} column={}",id,row,column);
+        } else {
+            String irlText=java.util.Objects.toString(request.getParameter("irlIds"),"");
+            if(irlText.length()>2000) throw new IllegalArgumentException("Too many IRL filters");
+            var irls=java.util.Arrays.stream(irlText.split(",")).filter(v->!v.isBlank()).collect(java.util.stream.Collectors.toSet());
+            data=source.filter(Boolean.parseBoolean(request.getParameter("overdue")),irls,java.time.LocalDate.now());
+        }
+        response.setContentType("application/json; charset=UTF-8");
+        json.writeValue(response.getWriter(),java.util.Map.of("snapshotId",id,"data",data));
     }
 
     private void handleRemove(WebSession webSession, HttpServletRequest request, HttpServletResponse response) {

@@ -292,7 +292,7 @@ async function saveCurrentInterface(state) {
 
         setText("interfaceDialogStatus", "Saved.");
         closeInterfaceDialog(state);
-        state.onSaved?.();
+        await state.onSaved?.(draft);
     } catch (error) {
         console.error("Failed to save interface cell", error);
         setText("interfaceDialogStatus", `Save failed. ${error.message}`);

@@ -14,7 +14,11 @@ public class FsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
     private List<FunctionalStructureEntity> listOfFunctionalStructuresEntities = null;
 
     protected FsysInterfaceMatrixDocument(WebSession webSession) throws Exception {
-        super(webSession);
+        this(webSession, false);
+    }
+
+    FsysInterfaceMatrixDocument(WebSession webSession, boolean lazy) throws Exception {
+        super(webSession, lazy);
     }
 
     @Override

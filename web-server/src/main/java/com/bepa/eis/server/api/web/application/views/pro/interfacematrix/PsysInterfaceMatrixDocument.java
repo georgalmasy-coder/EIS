@@ -66,7 +66,11 @@ public class PsysInterfaceMatrixDocument extends InterfaceMatrixDocument {
     }
 
     protected PsysInterfaceMatrixDocument(WebSession webSession, EntityType entityType) throws Exception {
-        super(webSession);
+        this(webSession, entityType, false);
+    }
+
+    PsysInterfaceMatrixDocument(WebSession webSession, EntityType entityType, boolean lazy) throws Exception {
+        super(webSession, lazy);
         this.entityType = entityType;
     }
 

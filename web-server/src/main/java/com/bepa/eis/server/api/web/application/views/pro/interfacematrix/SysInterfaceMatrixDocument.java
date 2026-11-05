@@ -14,7 +14,11 @@ public class SysInterfaceMatrixDocument extends InterfaceMatrixDocument {
     private List<SystemRequirementEntity> listOfSystemRequirementEntities = null;
 
     protected SysInterfaceMatrixDocument(WebSession webSession) throws Exception {
-        super(webSession);
+        this(webSession, false);
+    }
+
+    SysInterfaceMatrixDocument(WebSession webSession, boolean lazy) throws Exception {
+        super(webSession, lazy);
     }
 
     @Override

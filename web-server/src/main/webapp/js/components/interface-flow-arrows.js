@@ -1,6 +1,6 @@
 // Draw each part inside its own cell so backgrounds stay below the arrows and
 // existing content, tooltips and mouse interactions stay above them.
-export function installInterfaceFlowArrows(tableBody) {
+export function installInterfaceFlowArrows(tableBody, {getDiagonalRect} = {}) {
     let activeCell = null;
     let arrows = [];
 
@@ -21,11 +21,11 @@ export function installInterfaceFlowArrows(tableBody) {
         const to = cell.dataset.toEntityId;
         const source = cells.find(item => item.dataset.fromEntityId === from && item.dataset.toEntityId === from);
         const target = cells.find(item => item.dataset.fromEntityId === to && item.dataset.toEntityId === to);
-        if (!source || !target) return;
+        const a = source?.getBoundingClientRect() || getDiagonalRect?.(from);
+        const b = target?.getBoundingClientRect() || getDiagonalRect?.(to);
+        if (!a || !b) return;
         activeCell = cell;
 
-        const a = source.getBoundingClientRect();
-        const b = target.getBoundingClientRect();
         const ax = a.left + a.width / 2;
         const ay = a.top + a.height / 2;
         const bx = b.left + b.width / 2;
@@ -77,5 +77,6 @@ export function installInterfaceFlowArrows(tableBody) {
     });
     tableBody.addEventListener("mouseleave", clear);
     window.addEventListener("resize", clear);
+    tableBody.closest(".interfaces-table-scroll")?.addEventListener("scroll", clear, {passive:true});
     return clear;
 }

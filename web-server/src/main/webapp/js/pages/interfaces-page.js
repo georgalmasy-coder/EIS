@@ -1,22 +1,28 @@
+import {createInterfaceBlockLoader} from "../components/interface-block-loader.js?rev=interfaces-updates-3";
 import {initMenu} from "../components/menu.js";
-import {downloadInterfaceXlsx} from "../components/interface-xlsx-export.js";
-import {installInterfaceFlowArrows} from "../components/interface-flow-arrows.js?rev=2";
+import {createInterfaceViewport, INTERFACE_GRID} from "../components/interface-matrix-viewport.js?rev=interfaces-updates-3";
+import {snapshotInterfaceMatrix, downloadInterfaceXlsx} from "../components/interface-xlsx-export.js";
+import {installInterfaceFlowArrows} from "../components/interface-flow-arrows.js?rev=interfaces-virtual-1";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
-import {initInterfaceEditDialog, openInterfaceEditDialog} from "../components/interface-edit-dialog.js";
+import {initInterfaceEditDialog, openInterfaceEditDialog} from "../components/interface-edit-dialog.js?rev=interfaces-updates-3";
 import {closeDialogElement, setInputValue, setText, showDialog} from "../core/dom.js";
 import {formatNumber} from "../core/format.js";
 import {applyTopPanelFromDocument as applyPageHeaderFromDocument} from "../core/page-header.js";
 import {getAttribute, getChildText, hasXmlParseError, serializeXml} from "../core/xml.js";
 
 const INTERFACE_BASE_PATH = document.body.dataset.interfaceBasePath || "/master/psys/interfacematrix";
-const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=overview`;
+const INTERFACE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=snapshot`;
 const INTERFACE_SAVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=save`;
 const INTERFACE_REMOVE_ENDPOINT = `${INTERFACE_BASE_PATH}?cmd=remove`;
 const INTERFACE_STRUCTURE_LABEL = document.body.dataset.interfaceStructureLabel || "Physical Architecture";
 const INTERFACE_EDIT_PAGE = document.body.dataset.interfaceEditPage || "systemsbreakdown-edit";
 const FALLBACK_DATE = "";
+
+let interfaceViewport = null, virtualView = null, virtualGroups = null, clearFlowArrows = null;
+let interfaceRefreshChain=Promise.resolve();
+let interfaceLoadSequence = 0, exportRunning = false, interfacePaintFrame = null, lastInterfaceRecovery = 0;
 
 const state = {
     matrix: null,
@@ -49,20 +55,23 @@ function initializePageShell() {
 function initializeEvents() {
     document.getElementById("interfacesExcelButton")?.addEventListener("click", async (event) => {
         const button = event.currentTarget;
-        const table = document.querySelector(".interfaces-table");
-        if (!table?.tBodies[0]?.rows.length) return;
-        button.disabled = true;
+        if (exportRunning || !state.matrix || state.matrix.refreshing) return;
+        const view = buildVisibleMatrix(state.matrix, state.showOverdueOnly, state.selectedIrlIds);
+        const rows = view.rowStructures || view.structures, columns = view.columnStructures || view.structures;
+        const total = (rows.length + 1) * (columns.length + 2);
+        if (!rows.length || !columns.length) return;
+        if (total > 1_000_000) { window.alert("The matrix is too large to export to Excel (more than 1,000,000 cells)."); return; }
+        if (rows.length * columns.length > 22_500 && !window.confirm("The matrix contains many cells. Export may take a long time. Continue?")) return;
+        exportRunning=true; button.disabled = true;
         try {
-            await downloadInterfaceXlsx({table, endpoint: INTERFACE_BASE_PATH,
-                title: `N² - ${INTERFACE_STRUCTURE_LABEL}`,
-                project: document.getElementById("projectName")?.textContent || ""});
-        } catch (error) {
-            window.alert(error.message);
-        } finally {
-            button.disabled = !table.tBodies[0]?.rows.length;
-        }
+            const title = `N² - ${INTERFACE_STRUCTURE_LABEL}`, project = document.getElementById("projectName")?.textContent || "";
+            const snapshot = await buildFullInterfaceExport(view, title, project);
+            await downloadInterfaceXlsx({snapshot, endpoint:INTERFACE_BASE_PATH, title, project});
+        } catch (error) { window.alert(error.message); }
+        finally { exportRunning=false; button.disabled = !!state.matrix?.refreshing || !state.matrix?.structures.length; }
+
     });
-    installInterfaceFlowArrows(document.getElementById("interfacesTableBody"));
+    clearFlowArrows = installInterfaceFlowArrows(document.getElementById("interfacesTableBody"), {getDiagonalRect:virtualDiagonalRect});
     initializeDialogEvents();
     initializeContextMenuEvents();
     initializeFilterEvents();
@@ -70,6 +79,9 @@ function initializeEvents() {
 }
 
 async function loadInterfaceMatrix() {
+    const sequence = ++interfaceLoadSequence;
+    state.matrix?.blockLoader?.dispose();
+    interfaceViewport?.dispose(); interfaceViewport=null; virtualView=null; clearFlowArrows?.();
     const excelButton = document.getElementById("interfacesExcelButton");
     if (excelButton) excelButton.disabled = true;
     showEmptyState("Loading interface matrix...");
@@ -77,7 +89,7 @@ async function loadInterfaceMatrix() {
 
     try {
         const response = await fetch(INTERFACE_ENDPOINT, {
-            method: "GET",
+            method: "POST",
             headers: {
                 "Accept": "application/xml,text/xml,*/*"
             },
@@ -89,18 +101,44 @@ async function loadInterfaceMatrix() {
         }
 
         const xmlText = await response.text();
+        if (sequence !== interfaceLoadSequence) return;
         const xmlDocument = new DOMParser().parseFromString(xmlText, "application/xml");
 
         if (hasXmlParseError(xmlDocument)) {
             throw new Error("The interface endpoint returned invalid XML.");
         }
 
-        state.matrix = parseInterfaceMatrixDocument(xmlDocument);
+        const matrix = parseInterfaceMatrixDocument(xmlDocument);
+        const snapshotId=xmlDocument.querySelector("interfaceMatrix")?.getAttribute("snapshotId");
+        if(!snapshotId) throw new Error("Missing interface snapshot id. Reload the page after updating the server.");
+        matrix.lazy=true; matrix.snapshotId=snapshotId; matrix.filterVersion=0; matrix.filterResults=new Map(); matrix.filterRequests=new Map();
+        const expired=()=>{
+            if(sequence!==interfaceLoadSequence)return;
+            if(Date.now()-lastInterfaceRecovery<30_000){window.alert("Interface snapshot expired. Reload the page.");return;}
+            lastInterfaceRecovery=Date.now();loadInterfaceMatrix();
+        };
+        matrix.request=async(command,parameters)=>{
+            const requestSnapshotId=matrix.snapshotId;
+            const response=await fetch(`${INTERFACE_BASE_PATH}?cmd=${command}`,{method:"POST",cache:"no-store",
+                body:new URLSearchParams({snapshotId:requestSnapshotId,...parameters})});
+            if(!response.ok){const error=new Error(`Could not load interface ${command} (HTTP ${response.status})`);error.status=response.status;if(error.status===409 && matrix.snapshotId===requestSnapshotId && (!matrix.refreshing || command==='refresh'))expired();throw error;}
+            const reply=await response.json();if(matrix.snapshotId!==requestSnapshotId){const e=new Error("Interface snapshot changed");e.cancelled=true;throw e;}
+            if(command!=='refresh' && reply.snapshotId!==requestSnapshotId)throw new Error("Interface snapshot mismatch");
+            if(command==='block') reply.data.cells=reply.data.cells.map(c=>decodeInterfaceCell(c,matrix.lookup));
+            return reply;
+        };
+        matrix.blockLoader=createInterfaceBlockLoader({snapshotId,structures:matrix.structures,request:matrix.request,
+            onUpdate:()=>scheduleInterfacePaint(matrix),onExpired:expired,
+            onError:error=>{if(state.matrix===matrix){setText("loadStatus","Block failed","");window.alert(error.message);}}});
+        matrix.cellsByKey={get:key=>{const [from,to]=key.split('|');return matrix.blockLoader.getCell(from,to);}};
+        matrix.isLoaded=(a,b)=>matrix.blockLoader.isLoaded(a,b);
+        state.matrix = matrix;
         applyTopPanel(xmlDocument);
         renderInterfaceMatrix(state.matrix);
 
         setText("loadStatus", "Loaded", "");
     } catch (error) {
+        if (sequence !== interfaceLoadSequence) return;
         console.error("Failed to load interface matrix", error);
         setText("loadStatus", "Error", "");
         showEmptyState(`Could not load interface matrix. ${error.message}`);
@@ -235,11 +273,76 @@ function applyTopPanel(xmlDocument) {
     });
 }
 
+function refreshInterfacePair(pair) {
+    const run=async()=>{
+        const matrix=state.matrix;
+        if(!matrix?.lazy || !pair?.fromEntityId || !pair?.toEntityId){await loadInterfaceMatrix();return;}
+        const scroller=document.getElementById("interfacesTableScroll"),top=scroller.scrollTop,left=scroller.scrollLeft;
+        matrix.refreshing=true;matrix.blockLoader.pause();matrix.filterVersion++;matrix.filterResults.clear();matrix.filterRequests.clear();
+        document.getElementById("interfacesExcelButton").disabled=true;
+        setText("loadStatus","Updating interface","");
+        try {
+            const reply=await matrix.request('refresh',{fromEntityId:pair.fromEntityId,toEntityId:pair.toEntityId});
+            if(state.matrix!==matrix)return;
+            matrix.snapshotId=reply.snapshotId;
+            matrix.refreshing=false;
+            const patches=reply.data.patches.map(p=>({...p,cell:p.cell?decodeInterfaceCell(p.cell,matrix.lookup):null}));
+            matrix.blockLoader.rotate(reply.snapshotId,patches);
+            if(state.showOverdueOnly || state.selectedIrlIds.length) { matrix.restoreScroll={top,left};renderInterfaceMatrix(matrix); }
+            else if(interfaceViewport)interfaceViewport.refresh();else renderInterfaceMatrix(matrix);
+            scroller.scrollTop=top;scroller.scrollLeft=left;
+            if(!state.showOverdueOnly && !state.selectedIrlIds.length)
+                document.getElementById("interfacesExcelButton").disabled=exportRunning || !matrix.structures.length;
+            setText("loadStatus","Loaded","");
+        } catch(error) {
+            matrix.refreshing=false;
+            if(state.matrix!==matrix || error.status===409)return;
+            setText("loadStatus","Refresh failed","");
+            window.alert("The interface was saved, but the display could not be updated. Reloading the matrix.");
+            await loadInterfaceMatrix();
+        }
+    };
+    interfaceRefreshChain=interfaceRefreshChain.then(run,run);return interfaceRefreshChain;
+}
+
+function decodeInterfaceCell(cell,lookup) {
+    const classificationIds=(cell.classificationIds || "").split(',').map(s=>s.trim()).filter(Boolean);
+    return {...cell,classificationIds,irlCode:resolveLookupCode(lookup.irlById,cell.irlId),irlColor:resolveLookupColor(lookup.irlById,cell.irlId),
+        classificationCodes:classificationIds.map(id=>resolveLookupCode(lookup.classificationById,id))};
+}
+function interfaceFilterKey(){return JSON.stringify([state.showOverdueOnly,[...state.selectedIrlIds].sort()]);}
+function ensureInterfaceFilter(matrix) {
+    if(matrix.refreshing)return false;
+    if(!state.showOverdueOnly && !state.selectedIrlIds.length)return true;
+    const key=interfaceFilterKey();if(matrix.filterResults.has(key))return true;
+    document.getElementById("interfacesExcelButton").disabled=true;setText("loadStatus","Filtering","");
+    if(!matrix.filterRequests.has(key)) {
+        const version=matrix.filterVersion;
+        const request=matrix.request('view',{overdue:state.showOverdueOnly,irlIds:state.selectedIrlIds.join(',')}).then(reply=>{
+            if(state.matrix!==matrix || matrix.filterVersion!==version)return;
+            while(matrix.filterResults.size>=16)matrix.filterResults.delete(matrix.filterResults.keys().next().value);
+            matrix.filterResults.set(key,new Set(reply.data));
+            if(interfaceFilterKey()===key){setText("loadStatus","Loaded","");renderInterfaceMatrix(matrix);}
+        }).catch(error=>{if(state.matrix===matrix && matrix.filterVersion===version && interfaceFilterKey()===key && error.status!==409){setText("loadStatus","Filter failed","");window.alert(error.message);}});
+        matrix.filterRequests.set(key,request);
+        request.then(()=>{if(matrix.filterVersion===version && matrix.filterResults.has(key))matrix.filterRequests.delete(key);});
+    }
+    return false;
+}
+function scheduleInterfacePaint(matrix) {
+    if(state.matrix!==matrix || interfacePaintFrame!==null)return;
+    interfacePaintFrame=requestAnimationFrame(()=>{
+        interfacePaintFrame=null;if(state.matrix!==matrix)return;
+        if(interfaceViewport)interfaceViewport.refresh();else renderInterfaceMatrix(matrix);
+    });
+}
+
 function renderInterfaceMatrix(matrix) {
+    if (matrix.lazy && !ensureInterfaceFilter(matrix)) return;
     const view = buildVisibleMatrix(matrix, state.showOverdueOnly, state.selectedIrlIds);
     const excelButton = document.getElementById("interfacesExcelButton");
     if (excelButton) {
-        excelButton.disabled = !(view.rowStructures || view.structures).length
+        excelButton.disabled = exportRunning || !(view.rowStructures || view.structures).length
             || !(view.columnStructures || view.structures).length;
     }
     const structureCount = matrix.structures.length;
@@ -268,6 +371,10 @@ function renderInterfaceMatrix(matrix) {
         throw new Error("Missing table elements.");
     }
 
+    interfaceViewport?.dispose(); interfaceViewport=null; virtualView=null; clearFlowArrows?.();
+    const table = tableHead.closest("table");
+    table.classList.remove("interfaces-virtual-table"); table.style.width=""; table.querySelector("colgroup")?.remove();
+    table.removeAttribute("aria-rowcount"); table.removeAttribute("aria-colcount");
     tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
@@ -283,8 +390,96 @@ function renderInterfaceMatrix(matrix) {
 
     hideEmptyState();
     const headerGroups = buildHeaderGroups(view.columnStructures || view.structures);
-    renderHeader(tableHead, view, headerGroups);
-    renderBody(tableBody, view, headerGroups);
+    const rows = view.rowStructures || view.structures, columns = view.columnStructures || view.structures;
+    if (matrix.lazy || rows.length * columns.length > 2500) {
+        virtualView=view; virtualGroups=headerGroups;
+        table.classList.add("interfaces-virtual-table");
+        interfaceViewport = createInterfaceViewport(document.getElementById("interfacesTableScroll"), renderInterfaceViewport);
+        interfaceViewport.setSize(rows.length, columns.length);
+    } else {
+        renderHeader(tableHead, view, headerGroups); renderBody(tableBody, view, headerGroups);
+    }
+    if(matrix.restoreScroll) {
+        const scroll=document.getElementById("interfacesTableScroll");
+        scroll.scrollTop=matrix.restoreScroll.top;scroll.scrollLeft=matrix.restoreScroll.left;
+        delete matrix.restoreScroll;
+    }
+}
+
+function renderInterfaceViewport(range) {
+    if (!virtualView) return;
+    clearFlowArrows?.(); closeInterfaceContextMenu();
+    const rows = virtualView.rowStructures || virtualView.structures;
+    const columns = virtualView.columnStructures || virtualView.structures;
+    const view = {...virtualView, rowStructures:rows.slice(range.rowStart,range.rowEnd),
+        columnStructures:columns.slice(range.columnStart,range.columnEnd)};
+    virtualView.blockLoader?.want(view.rowStructures,view.columnStructures);
+    const head = document.getElementById("interfacesTableHead"), body = document.getElementById("interfacesTableBody");
+    const table = head.closest("table"), g = INTERFACE_GRID;
+    renderHeader(head, view, virtualGroups); renderBody(body, view, virtualGroups);
+    const left = range.columnStart*g.columnWidth, right = (columns.length-range.columnEnd)*g.columnWidth;
+    const widths = [58,260,...(left?[left]:[]),...view.columnStructures.map(()=>g.columnWidth),...(right?[right]:[])];
+    const colgroup = document.createElement("colgroup");
+    for (const width of widths) { const col=document.createElement("col");col.style.width=`${width}px`;colgroup.append(col); }
+    table.querySelector("colgroup")?.remove();table.prepend(colgroup);
+    table.style.width=`${g.frozenWidth+columns.length*g.columnWidth}px`;
+    function gap(row, width, before) {
+        if (!width) return;
+        const cell=document.createElement(row.parentElement===head?"th":"td");
+        cell.className="interfaces-virtual-spacer";cell.setAttribute("aria-hidden","true");
+        cell.style.width=cell.style.minWidth=cell.style.maxWidth=`${width}px`;
+        row.insertBefore(cell,before || null);
+    }
+    gap(head.rows[0],left,head.rows[0].cells[2]);gap(head.rows[0],right);
+    [...body.rows].forEach((row,index)=>{
+        const headerCells=index===0?2:1;
+        gap(row,left,row.cells[headerCells]);gap(row,right);
+        row.style.height=`${g.rowHeight}px`;row.setAttribute("aria-rowindex",String(range.rowStart+index+2));
+    });
+    function rowGap(count, before) {
+        if (!count) return;
+        const row=document.createElement("tr"),cell=document.createElement("td");
+        row.className="interfaces-virtual-spacer";row.setAttribute("aria-hidden","true");
+        cell.className="interfaces-virtual-spacer";cell.colSpan=widths.length;
+        cell.style.height=`${count*g.rowHeight}px`;row.append(cell);body.insertBefore(row,before);
+    }
+    rowGap(range.rowStart,body.firstChild);rowGap(rows.length-range.rowEnd,null);
+    table.setAttribute("aria-rowcount",String(rows.length+1));table.setAttribute("aria-colcount",String(columns.length+2));
+}
+
+function virtualDiagonalRect(entityId) {
+    if (!virtualView) return null;
+    const rows=virtualView.rowStructures || virtualView.structures, columns=virtualView.columnStructures || virtualView.structures;
+    const r=rows.findIndex(s=>s.entityId===entityId),c=columns.findIndex(s=>s.entityId===entityId);
+    if(r<0 || c<0) return null;
+    const scroller=document.getElementById("interfacesTableScroll"),bounds=scroller.getBoundingClientRect(),g=INTERFACE_GRID;
+    return {left:bounds.left+g.frozenWidth+c*g.columnWidth-scroller.scrollLeft,
+        top:bounds.top+g.headerHeight+r*g.rowHeight-scroller.scrollTop,width:g.columnWidth,height:g.rowHeight};
+}
+
+// Build the complete filtered export in small batches, independently of the visible window.
+async function buildFullInterfaceExport(view, title, project) {
+    const host=document.createElement("div");host.className="interfaces-export-surface";
+    const table=document.createElement("table");table.className="interfaces-table";
+    const head=table.createTHead(),body=table.createTBody();host.append(table);document.body.append(host);
+    const rows=view.rowStructures || view.structures, groups=buildHeaderGroups(view.columnStructures || view.structures);
+    try {
+        renderHeader(head,view,groups);
+        const snapshot=snapshotInterfaceMatrix({rows:head.rows},title,project);
+        let lastYield=performance.now();
+        for(let r=0;r<rows.length;r++) {
+            await view.blockLoader?.loadRows([rows[r]],view.columnStructures || view.structures);
+            renderBody(body,{...view,rowStructures:[rows[r]]},groups);
+            const part=snapshotInterfaceMatrix({rows:body.rows},title,project);
+            snapshot.heights.push(part.heights[0]);
+            for(const cell of part.cells) {
+                if(cell.column===0 && r>0) continue;
+                snapshot.cells.push({...cell,row:r+1,...(cell.column===0?{rowSpan:rows.length}:{})});
+            }
+            if(performance.now()-lastYield>16) { await new Promise(resolve=>setTimeout(resolve,0));lastYield=performance.now(); }
+        }
+        return snapshot;
+    } finally { host.remove(); }
 }
 
 function buildHeaderGroups(structures) {
@@ -392,7 +587,9 @@ function renderBody(tableBody, matrix, headerGroups) {
             td.dataset.toEntityId = toStructure.entityId || "";
             td.title = buildCellTooltip(fromStructure, toStructure, cell, matrix.lookup, isSelfReference);
 
-            if (!isSelfReference) {
+            if (!isSelfReference && matrix.isLoaded && !matrix.isLoaded(fromStructure.entityId,toStructure.entityId)) {
+                td.classList.add("interfaces-cell-loading");td.textContent="\u231b";td.title="Loading interface...";td.setAttribute("aria-busy","true");
+            } else if (!isSelfReference) {
                 applyBackgroundColor(td, cell?.irlColor || "");
                 td.addEventListener("dblclick", (event) => {
                     event.preventDefault();
@@ -425,6 +622,14 @@ function renderBody(tableBody, matrix, headerGroups) {
 
 function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
     const selectedIrlSet = new Set(selectedIrlIds || []);
+    if(matrix.lazy) {
+        if(!showOverdueOnly && !selectedIrlSet.size)return matrix;
+        const ids=matrix.filterResults.get(interfaceFilterKey()),visible=matrix.structures.filter(s=>ids?.has(s.entityId));
+        return {...matrix,rowStructures:visible,columnStructures:visible,cellsByKey:{get:key=>{
+            const cell=matrix.cellsByKey.get(key);
+            return cell && (!showOverdueOnly || isCellOverdue(cell)) && (!selectedIrlSet.size || selectedIrlSet.has(cell.irlId))?cell:null;
+        }}};
+    }
 
     if (!showOverdueOnly && selectedIrlSet.size === 0) {
         return matrix;
@@ -600,7 +805,7 @@ function initializeDialogEvents() {
         basePath: INTERFACE_BASE_PATH,
         structureLabel: INTERFACE_STRUCTURE_LABEL,
         lookup: state.matrix?.lookup,
-        onSaved: () => window.location.reload()
+        onSaved: refreshInterfacePair
     });
 
     const removeDialog = document.getElementById("interfaceRemoveDialog");
@@ -628,7 +833,7 @@ function initializeContextMenuEvents() {
                 fromStructure: target.fromStructure,
                 toStructure: target.toStructure,
                 cell: target.cell,
-                onSaved: () => window.location.reload()
+                onSaved: refreshInterfacePair
             });
         }
     });
@@ -799,7 +1004,7 @@ function openInterfaceDialog(fromStructure, toStructure, cell) {
         fromStructure,
         toStructure,
         cell,
-        onSaved: () => window.location.reload()
+        onSaved: refreshInterfacePair
     });
     return;
 
@@ -1113,7 +1318,7 @@ async function saveCurrentInterface() {
         setText("interfaceDialogStatus", "Saved.");
         setText("loadStatus", "Saved", "");
         closeInterfaceDialog(document.getElementById("interfaceDialog"));
-        window.location.reload();
+        await refreshInterfacePair(draft);
     } catch (error) {
         console.error("Failed to save interface cell", error);
         setText("interfaceDialogStatus", `Save failed. ${error.message}`);
@@ -1148,7 +1353,7 @@ async function removeCurrentInterface() {
         }
 
         closeRemoveInterfaceDialog();
-        await loadInterfaceMatrix();
+        await refreshInterfacePair({fromEntityId,toEntityId});
     } catch (error) {
         console.error("Failed to remove interface cell", error);
         setText("interfaceRemoveDialogStatus", `Remove failed. ${error.message}`);
