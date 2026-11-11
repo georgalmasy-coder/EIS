@@ -7,6 +7,107 @@
 
     <display-name>HelloWorld</display-name>
 
+    <!--
+        Rate limiting for hver applikationsinstans (ikke en delt graense mellem flere servere).
+        Alle indgaaende HTTP-requests taelles, ogsaa HTML, CSS, JavaScript og billeder.
+        En request skal have plads i baade klientens og den globale token bucket.
+        Afviste requests faar HTTP 429, Retry-After i hele sekunder og Cache-Control: no-store.
+        Retry-After er et forslag til ventetid, ikke en reservation ved fortsat trafik.
+        Alle parametre skal vaere positive heltal. 0 deaktiverer ikke begraensningen.
+        Aendringer indlaeses ved genstart/genindlaesning af applikationen.
+
+        En klient identificeres med request.getRemoteAddr(), altsaa IP-adressen set af
+        servlet-containeren. Flere brugere bag samme NAT/router deler derfor graensen.
+        Bag en reverse proxy skal containeren konfigureres til kun at acceptere klient-IP
+        fra betroede proxyer; ellers deler alle proxyens IP og dermed samme graense.
+        Filteret stoler ikke selv paa Forwarded eller X-Forwarded-For fra requests.
+    -->
+    <filter>
+        <filter-name>RequestRateLimitFilter</filter-name>
+        <filter-class>com.bepa.eis.server.api.security.RequestRateLimitFilter</filter-class>
+        <!--
+            requestsPerSecond: Antal nye request-tilladelser pr. sekund for hver klient-IP.
+            Genopfyldning sker loebende, ikke ved faste sekundgraenser. 20 betyder fx en ny
+            tilladelse hver 50 ms. Hver accepteret request bruger en tilladelse. Naar den
+            opsparede kapacitet er brugt, kan klienten over tid sende 20 requests/sekund.
+            Dette er ikke et loft paa samtidige requests eller et fast sekundvindue.
+        -->
+        <init-param>
+            <param-name>requestsPerSecond</param-name>
+            <param-value>20</param-value>
+<!--            <param-value>20</param-value> -->
+        </init-param>
+        <!--
+            burstCapacity: Maksimalt antal tilladelser en klient-IP kan spare op.
+            Nye klienter starter med fuld kapacitet. 100 tillader derfor op til 100
+            requests umiddelbart efter hinanden, hvis den globale graense ogsaa tillader
+            det. Med 20 requestsPerSecond tager en helt tom bucket 5 sekunder at fylde,
+            hvis klienten ikke sender flere requests. Bruges bl.a. ved indlaesning af
+            sider med mange ressourcer. Det er ikke et separat loft pr. sekund.
+        -->
+        <init-param>
+            <param-name>burstCapacity</param-name>
+            <param-value>100</param-value>
+        </init-param>
+        <!--
+            globalRequestsPerSecond: Loebende genopfyldning af den faelles bucket for
+            alle klient-IP'er tilsammen i denne applikationsinstans. 500 tillader over
+            tid 500 accepterede requests/sekund, naar den globale opsparing er brugt.
+            Dette loft gaelder ogsaa, selv om hver enkelt klient er under sin IP-graense.
+            Afviste requests bruger ingen tilladelser i nogen af de to buckets.
+        -->
+        <init-param>
+            <param-name>globalRequestsPerSecond</param-name>
+            <param-value>500</param-value>
+        </init-param>
+        <!--
+            globalBurstCapacity: Maksimal faelles opsparing for alle klienter.
+            Applikationen starter med fuld kapacitet. 1000 tillader en samlet kort
+            spidsbelastning paa op til 1000 requests; hver klient er stadig underlagt
+            sin egen graense. Med globalRequestsPerSecond=500 tager fuld genopfyldning
+            fra tom tilstand 2 sekunder uden trafik. Begraenser ikke samtidighed eller
+            varigheden af arbejde, som allerede er accepteret.
+        -->
+        <init-param>
+            <param-name>globalBurstCapacity</param-name>
+            <param-value>1000</param-value>
+        </init-param>
+        <!--
+            maxTrackedClients: Maksimalt antal IP-buckets i hukommelsen, saa mange
+            forskellige IP-adresser ikke kan faa registret til at vokse ubegrænset.
+            Ved fuldt register forsoeges oprydning hoejst en gang pr. sekund; kun
+            buckets, der er helt genopfyldt, fjernes, saa deres restgraense ikke tabes.
+            Er registret stadig fuldt, faar nye IP'er HTTP 429 med den konfigurerede
+            Retry-After-ventetid (mindst 1 sekund).
+            Allerede registrerede IP'er kan fortsat bruge deres resterende kapacitet.
+            Dette er ikke et loft paa antallet af forbindelser eller login-sessioner.
+        -->
+        <init-param>
+            <param-name>maxTrackedClients</param-name>
+            <param-value>10000</param-value>
+        </init-param>
+        <!--
+            retryAfterSeconds: Anbefalet minimumsventetid i hele sekunder, som sendes
+            i HTTP-headeren Retry-After ved ALLE afvisninger med HTTP 429, baade ved
+            klientgraensen, den globale graense og et fuldt klientregister.
+            60 betyder, at klienten boer vente mindst 60 sekunder foer et nyt forsoeg.
+            Hvis limiteren beregner en laengere ventetid, sendes den laengere tid.
+            Dette er kun en anbefaling til klienten, IKKE en fast blokering i 60 sekunder:
+            nye requests vurderes fortsat ud fra den aktuelle kapacitet i buckets.
+            Browser/JavaScript skal selv haandtere ventetid og eventuelle nye forsoeg.
+            Skal vaere et positivt heltal. Udelades parameteren, bruges 60 sekunder.
+        -->
+        <init-param>
+            <param-name>retryAfterSeconds</param-name>
+            <param-value>60</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>RequestRateLimitFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
     <resource-ref>
         <description>UserManager SQL Server database</description>
         <res-ref-name>jdbc/EISDatabase</res-ref-name>
