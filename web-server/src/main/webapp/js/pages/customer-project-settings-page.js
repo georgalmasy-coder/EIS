@@ -96,6 +96,7 @@ async function load() {
     try {
         render(await responseJson(await fetch("/api/customer-settings", {cache: "no-store"})));
         status("");
+        document.dispatchEvent(new Event("eis:initial-view-ready"));
     } catch (error) { status(error.message, true); byId("retrySettings").hidden = false; }
     finally { busy = false; updateActions(); }
 }

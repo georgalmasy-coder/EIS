@@ -9,6 +9,7 @@ async function init() {
     applyTopbarMetadata(document, getTopbarMetadata());
     
     renderSettings();
+    document.dispatchEvent(new Event("eis:initial-view-ready"));
 }
 
 function renderSettings() {

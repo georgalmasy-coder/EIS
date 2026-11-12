@@ -36,7 +36,7 @@ function renderList() {
 }
 async function load() {
     el.refreshTemplates.disabled = true; message(el.listMessage, 'Loading templates...');
-    try { const data = await request(api); templates = data.templates; csrfToken = data.csrfToken; renderList(); message(el.listMessage, ''); }
+    try { const data = await request(api); templates = data.templates; csrfToken = data.csrfToken; renderList(); message(el.listMessage, ''); document.dispatchEvent(new Event("eis:initial-view-ready")); }
     catch (error) { message(el.listMessage, error.message, true); }
     finally { el.refreshTemplates.disabled = false; }
 }

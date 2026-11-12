@@ -47,6 +47,7 @@ public class PageViewer extends GenericServlet {
                 for (MenuIcon icon : MenuIcon.values()) {
                     html = html.replace("{{menuIcon." + icon.name() + "}}", icon.getSvgCode());
                 }
+                html = html.replace("</head>", "<script defer src=\"/js/core/page-performance.js\"></script></head>");
                 html = mergeBuildNumber(html);
                 html = html.replace("{{udvMode}}", Boolean.toString(GlobalConfiguration.isUdvMode()));
 
