@@ -1,6 +1,7 @@
-package com.bepa.eis.server.api.web.application.views.pro.dashboard.systemsteamwork;
+package com.bepa.eis.server.api.web.application.views.pro.dashboard.teamwork;
 
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider.InterfaceRecord;
+import com.bepa.eis.server.entites.AbstractEntity;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import org.w3c.dom.Element;
 
@@ -32,7 +33,7 @@ public class DashboardSystemsTeamworkDocumentTest {
     }
 
     private static void testLargeInterfaceSet() throws Exception {
-        var systems = new ArrayList<SystemBreakdownEntity>();
+        var systems = new ArrayList<AbstractEntity>();
         var interfaces = new ArrayList<InterfaceRecord>();
         for (int id = 1; id <= 500; id++) {
             var system = new SystemBreakdownEntity(null);

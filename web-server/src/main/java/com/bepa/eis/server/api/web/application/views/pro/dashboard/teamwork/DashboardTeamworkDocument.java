@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.views.pro.dashboard.systemsteamwork;
+package com.bepa.eis.server.api.web.application.views.pro.dashboard.teamwork;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
@@ -8,9 +8,8 @@ import com.bepa.eis.server.api.web.application.enums.PageType;
 import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
-import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
-import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
+import com.bepa.eis.server.entites.AbstractEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -21,29 +20,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
+abstract class DashboardTeamworkDocument extends GenericXmlDocument {
 
-    private static final Logger log = LoggerFactory.getLogger(DashboardSystemsTeamworkDocument.class);
+    private static final Logger log = LoggerFactory.getLogger(DashboardTeamworkDocument.class);
 
     private final ListOfElements rootElement;
     private final TopPanel topPanel;
 
-    private final Map<Integer, SystemBreakdownEntity> mapOfPhysicalStructures = new HashMap<>();
+    protected final Map<Integer, AbstractEntity> mapOfEntities = new HashMap<>();
     private List<InterfaceMatrixProvider.InterfaceRecord> interfaces = new ArrayList<>();
-    private final List<SystemsTeamworkRecord> listOfSystemsTeamworkRecords = new ArrayList<>();
+    private final List<TeamworkRecord> listOfSystemsTeamworkRecords = new ArrayList<>();
     private record InterfaceKey(String fromId, String toId) {}
-    private final Map<InterfaceKey, SystemsTeamworkRecord> interfacesByDirection = new HashMap<>();
+    private final Map<InterfaceKey, TeamworkRecord> interfacesByDirection = new HashMap<>();
 
     private DashboardMetaData dashboardMetaData;
 
-    public DashboardSystemsTeamworkDocument(WebSession webSession) throws Exception {
+    abstract protected PageType getPageType();
+    abstract protected EntityType getEntityType();
+    abstract protected void loadEntities();
+
+    public DashboardTeamworkDocument(WebSession webSession) throws Exception {
 
         super(webSession);
 
         rootElement = initXmlDocument(this.getClass().getSimpleName());
 
         TopPanelProvider topPanelProvider = new TopPanelProvider(webSession);
-        topPanel = topPanelProvider.getTopPanelBySession(PageType.DASHBOARD_SYSTEMS_TEAMWORK_PAGE);
+        topPanel = topPanelProvider.getTopPanelBySession(getPageType());
         rootElement.addElement(topPanel.getTopPanelElements());
 
         dashboardDocument();
@@ -61,37 +64,28 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         dashboardElement.appendChild(getSystemElements());
     }
 
+    DashboardTeamworkDocument(WebSession session, List<AbstractEntity> activeSystems,
+                              List<InterfaceMatrixProvider.InterfaceRecord> interfaceRecords) throws Exception {
+        super(session);
+        rootElement = initXmlDocument(getClass().getSimpleName());
+        topPanel = null;
+        for (AbstractEntity entity : activeSystems) {
+            mapOfEntities.put(entity.getEntityId().getValue(), entity);
+        }
+        buildSystemsTeamwork(interfaceRecords);
+        getRoot().appendChild(getInterfaceElements());
+    }
+
     private void dashboardDocument() throws SQLException {
-        loadPhysicalStructures();
+        loadEntities();
         buildSystemsTeamwork();
         dashboardMetaData = new DashboardMetaData(getWebSession());
     }
 
-    private void loadPhysicalStructures() {
-        SystemBreakdownProvider systemBreakdownProvider = new SystemBreakdownProvider(getWebSession());
-        List<SystemBreakdownEntity> listOfPhysicalStructures = systemBreakdownProvider.getAllSystemBreakdown(false);
-
-        for (SystemBreakdownEntity systemBreakdownEntity : listOfPhysicalStructures) {
-            mapOfPhysicalStructures.put(systemBreakdownEntity.getEntityId().getValue(), systemBreakdownEntity);
-        }
-    }
-
     private void buildSystemsTeamwork() throws SQLException  {
-        EntityType entityType = EntityType.SYSTEMS_BREAKDOWN;
-        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(), entityType);
-        interfaces = interfaceManagementProvider.getAllInterfaceRecords(entityType);
+        InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(), getEntityType());
+        interfaces = interfaceManagementProvider.getAllInterfaceRecords(getEntityType());
         buildSystemsTeamwork(interfaces);
-    }
-
-    DashboardSystemsTeamworkDocument(WebSession session, List<SystemBreakdownEntity> activeSystems,
-                                    List<InterfaceMatrixProvider.InterfaceRecord> interfaceRecords) throws Exception {
-        super(session);
-        rootElement = initXmlDocument(getClass().getSimpleName());
-        topPanel = null;
-        for (SystemBreakdownEntity system : activeSystems)
-            mapOfPhysicalStructures.put(system.getEntityId().getValue(), system);
-        buildSystemsTeamwork(interfaceRecords);
-        getRoot().appendChild(getInterfaceElements());
     }
 
     private void buildSystemsTeamwork(List<InterfaceMatrixProvider.InterfaceRecord> interfaces) {
@@ -100,10 +94,10 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         if (interfaces != null) {
             for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {
 
-                SystemsTeamworkRecord record = new SystemsTeamworkRecord();
+                TeamworkRecord record = new TeamworkRecord();
 
-                SystemBreakdownEntity fromEntity = mapOfPhysicalStructures.get(interfaceRecord.fromEntityId());
-                SystemBreakdownEntity toEntity = mapOfPhysicalStructures.get(interfaceRecord.toEntityId());
+                AbstractEntity fromEntity = mapOfEntities.get(interfaceRecord.fromEntityId());
+                AbstractEntity toEntity = mapOfEntities.get(interfaceRecord.toEntityId());
                 // Interfaces may outlive either endpoint's active version.
                 if (fromEntity == null || toEntity == null) {
                     skipped++;
@@ -112,21 +106,21 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 }
 
                 record.setFromEntityId(fromEntity.getEntityId());
-                record.setFromSbsCode(fromEntity.getSbsCode());
-                record.setFromSystemName(fromEntity.getSystemName());
-                record.setFromTrl(fromEntity.getTrl());
-                record.setFromSystemOwner(fromEntity.getSystemOwner());
-                record.setFromSystemDepartment(fromEntity.getSystemDepartment());
+                record.setFromEntityCode(fromEntity.getCode());
+                record.setFromEntityName(fromEntity.getName());
+                record.setFromEntityTrl(fromEntity.getEntityTrl());
+                record.setFromEntityOwner(fromEntity.getEntityOwner());
+                record.setFromDepartment(fromEntity.getEntityDepartment());
                 record.setFromIrlId(interfaceRecord.irlId());
                 record.setFromClassificationIds(interfaceRecord.classificationIds());
                 record.setNextIrlMeeting(interfaceRecord.nextIrlMeeting());
 
                 record.setToEntityId(toEntity.getEntityId());
-                record.setToSbsCode(toEntity.getSbsCode());
-                record.setToSystemName(toEntity.getSystemName());
-                record.setToTrlId(toEntity.getTrl());
-                record.setToSystemOwner(toEntity.getSystemOwner());
-                record.setToSystemDepartment(toEntity.getSystemDepartment());
+                record.setToCode(toEntity.getCode());
+                record.setToName(toEntity.getName());
+                record.setToTrlId(toEntity.getEntityTrl());
+                record.setToOwner(toEntity.getEntityOwner());
+                record.setToDepartment(toEntity.getEntityDepartment());
 
                 addInterfaceToList(record);
             }
@@ -139,9 +133,8 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         }
     }
 
-    private void addInterfaceToList(SystemsTeamworkRecord newRecord) {
-        SystemsTeamworkRecord reverse = interfacesByDirection.get(
-                new InterfaceKey(newRecord.getToEntityId(), newRecord.getFromEntityId()));
+    private void addInterfaceToList(TeamworkRecord newRecord) {
+        TeamworkRecord reverse = interfacesByDirection.get(new InterfaceKey(newRecord.getToEntityId(), newRecord.getFromEntityId()));
         if (reverse != null) {
             reverse.setToIrlId(newRecord.getFromIrlId());
             reverse.setToClassificationIds(newRecord.getFromClassificationIds());
@@ -175,21 +168,21 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
 
     private Element getSystemElements() {
         Element systems = getDoc().createElement("systems");
-        for (SystemBreakdownEntity entity : mapOfPhysicalStructures.values()) {
-            SystemsTeamworkRecord record = new SystemsTeamworkRecord();
+        for (AbstractEntity entity : mapOfEntities.values()) {
+            TeamworkRecord record = new TeamworkRecord();
             record.setFromEntityId(entity.getEntityId());
-            record.setFromSbsCode(entity.getSbsCode());
-            record.setFromSystemName(entity.getSystemName());
-            record.setFromTrl(entity.getTrl());
-            record.setFromSystemOwner(entity.getSystemOwner());
-            record.setFromSystemDepartment(entity.getSystemDepartment());
+            record.setFromEntityCode(entity.getCode());
+            record.setFromEntityName(entity.getName());
+            record.setFromEntityTrl(entity.getEntityTrl());
+            record.setFromEntityOwner(entity .getEntityOwner());
+            record.setFromDepartment(entity.getEntityDepartment());
             Element system = getDoc().createElement("system");
             addElement(system, "fromEntityId", record.getFromEntityId());
-            addElement(system, "fromSbsCode", record.getFromSbsCode());
-            addElement(system, "fromSystemName", record.getFromSystemName());
+            addElement(system, "fromSbsCode", record.getFromEntityCode());
+            addElement(system, "fromSystemName", record.getFromEntityName());
             addElement(system, "fromTrlId", record.getFromTrlId());
-            addElement(system, "fromSystemOwnerId", record.getFromSystemOwnerId());
-            addElement(system, "fromSystemDepartmentId", record.getFromSystemDepartmentId());
+            addElement(system, "fromSystemOwnerId", record.getFromOwnerId());
+            addElement(system, "fromSystemDepartmentId", record.getFromDepartmentId());
             systems.appendChild(system);
         }
         return systems;
@@ -198,14 +191,14 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     private Element getInterfaceElements() {
         Element interfaceElements = getDoc().createElement("interfaces");
         if (listOfSystemsTeamworkRecords != null) {
-            for (SystemsTeamworkRecord record : listOfSystemsTeamworkRecords) {
+            for (TeamworkRecord record : listOfSystemsTeamworkRecords) {
                 Element interfaceElement = getDoc().createElement("interface");
                 addElement(interfaceElement, "fromEntityId", record.getFromEntityId());
-                addElement(interfaceElement, "fromSbsCode", record.getFromSbsCode());
-                addElement(interfaceElement, "fromSystemName", record.getFromSystemName());
+                addElement(interfaceElement, "fromSbsCode", record.getFromEntityCode());
+                addElement(interfaceElement, "fromSystemName", record.getFromEntityName());
                 addElement(interfaceElement, "fromTrlId", record.getFromTrlId());
-                addElement(interfaceElement, "fromSystemOwnerId", record.getFromSystemOwnerId());
-                addElement(interfaceElement, "fromSystemDepartmentId", record.getFromSystemDepartmentId());
+                addElement(interfaceElement, "fromSystemOwnerId", record.getFromOwnerId());
+                addElement(interfaceElement, "fromSystemDepartmentId", record.getFromDepartmentId());
 
                 if (record.getFromIrlId() != null && !record.getFromIrlId().isBlank()) {
                     addElement(interfaceElement, "fromIrlId", record.getFromIrlId());
@@ -215,11 +208,11 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
                 }
 
                 addElement(interfaceElement, "toEntityId", record.getToEntityId());
-                addElement(interfaceElement, "toSbsCode", record.getToSbsCode());
-                addElement(interfaceElement, "toSystemName", record.getToSystemName());
-                addElement(interfaceElement, "toTrlId", record.getToTrlId());
-                addElement(interfaceElement, "toSystemOwnerId", record.getToSystemOwnerId());
-                addElement(interfaceElement, "toSystemDepartmentId", record.getToSystemDepartmentId());
+                addElement(interfaceElement, "toSbsCode", record.getToEntityCode());
+                addElement(interfaceElement, "toSystemName", record.getToName());
+                //addElement(interfaceElement, "toTrlId", record.getToTrlId());
+                addElement(interfaceElement, "toSystemOwnerId", record.getToOwnerId());
+                addElement(interfaceElement, "toSystemDepartmentId", record.getToDepartmentId());
 
                 if (record.getToIrlId() != null && !record.getToIrlId().isBlank()) {
                     addElement(interfaceElement, "toIrlId", record.getToIrlId());
@@ -247,6 +240,5 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     private Element buildDashboardIrlElement() {
         return getDoc().createElement("dashboardIrl");
     }
-
 
 }

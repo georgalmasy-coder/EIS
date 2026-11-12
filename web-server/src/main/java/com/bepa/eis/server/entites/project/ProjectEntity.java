@@ -41,6 +41,21 @@ public class ProjectEntity extends AbstractEntity {
     }
 
     @Override
+    public String getEntityOwner() {
+        return "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return "";
+    }
+
+    @Override
     public void initializeFields() {
         projectName = new ProjectName();
     }

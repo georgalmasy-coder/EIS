@@ -45,6 +45,21 @@ public class StakeholderEntity extends AbstractEntity {
     }
 
     @Override
+    public String getEntityOwner() {
+        return "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return "";
+    }
+
+    @Override
     public void initializeFields() {
         stakeholderName = new StakeholderName();
         stakeholderDescription = new StakeholderDescription();

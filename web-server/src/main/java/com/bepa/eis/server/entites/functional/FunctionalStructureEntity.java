@@ -57,6 +57,21 @@ public class FunctionalStructureEntity extends AbstractEntity {
     }
 
     @Override
+    public String getEntityOwner() {
+        return functionOwner != null ? functionOwner.getValue().toString() : "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return "";
+    }
+
+    @Override
     public String getSortKey() {
         return getSortKeyValue(getCode());
     }
@@ -330,7 +345,6 @@ public class FunctionalStructureEntity extends AbstractEntity {
     public FunctionOwner getOwner() {
         return functionOwner;
     }
-
     public void setStatusId(Integer statusId) {
         this.functionStatus.setValue(statusId);
     }

@@ -8,24 +8,6 @@ import static com.bepa.eis.common.enums.entity.EntityType.CONTRACTOR;
 
 public class ContractorEntity extends AbstractEntity {
 
-/* GFA
-    private ContractorRow x;
-
-    public AbstractEntity convertXmlRowToElements(ContractorRow row) {
-        setProjectId(row.projectId());
-        setCustomerId((Integer) null);
-        setEntityId(row.supplierId());
-        setVersion(1);
-
-        setDateOfChange(row.dateOfChange());
-        setChangedByUserId(row.changedByUserId() != null ? row.changedByUserId() : "1");
-
-        addDataElement(new StringDataElement("ContractorName", row.supplierName()));
-        addDataElement(new BooleanDataElement("Active", row.active()));
-
-        return this;
-    }
-*/
     @Override
     public EntityType getEntityType() {
         return CONTRACTOR;
@@ -43,6 +25,21 @@ public class ContractorEntity extends AbstractEntity {
 
     @Override
     public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public String getEntityOwner() {
+        return "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
         return "";
     }
 

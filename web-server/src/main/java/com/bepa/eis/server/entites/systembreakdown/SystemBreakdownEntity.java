@@ -62,6 +62,21 @@ public class SystemBreakdownEntity extends AbstractEntity {
     }
 
     @Override
+    public String getEntityOwner() {
+        return systemOwner != null && systemOwner.getValue() != null ? systemOwner.getValue().toString(): "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return systemDepartment != null && systemDepartment.getValue() != null ? systemDepartment.getValue().toString(): "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return getTrl() != null && getTrl().getValue() != null ? getTrl().getValue().toString() : "";
+    }
+
+    @Override
     public String getSortKey() {
         return getSortKeyValue(getSbsCode().getValue());
     }

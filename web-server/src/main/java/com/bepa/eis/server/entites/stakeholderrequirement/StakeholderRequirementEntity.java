@@ -51,6 +51,21 @@ public class StakeholderRequirementEntity extends AbstractEntity {
     }
 
     @Override
+    public String getEntityOwner() {
+        return requirementOwner != null && requirementOwner.getValue() != null ? requirementOwner.getValue().toString() : "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return "";
+    }
+
+    @Override
     public String getSortKey() {
         return getSortKeyValue(getRequirementCode().getSortKey());
     }

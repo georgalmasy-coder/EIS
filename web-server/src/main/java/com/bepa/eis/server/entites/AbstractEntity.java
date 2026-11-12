@@ -129,6 +129,9 @@ abstract public class AbstractEntity {
     abstract public String getCode();
     abstract public String getName();
     abstract public String getDescription();
+    abstract public String getEntityOwner();
+    abstract public String getEntityDepartment();
+    abstract public String getEntityTrl();
 
     abstract public void initializeFields();
     abstract public void addAllFieldElementsForList(Entity entityElement);

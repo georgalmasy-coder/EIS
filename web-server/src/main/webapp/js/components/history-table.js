@@ -177,6 +177,7 @@ export function createHistoryTable(config = {}) {
     }
 
     function notifyAfterRender() {
+        updateDiffButton();
         if (typeof state.config.onAfterRender === "function") {
             state.config.onAfterRender(getRows());
         }
@@ -188,6 +189,7 @@ export function createHistoryTable(config = {}) {
             ...state.config,
             ...context
         };
+        updateDiffButton();
 
         if (options.render !== false) {
             render();
@@ -205,6 +207,7 @@ export function createHistoryTable(config = {}) {
     function setEntityId(id, options = {}) {
         if (normalizeText(id).trim() !== state.config.id) state.selectedVersions.clear();
         state.config.id = normalizeText(id).trim();
+        updateDiffButton();
 
         if (options.render !== false) {
             render();
@@ -232,6 +235,7 @@ export function createHistoryTable(config = {}) {
 
         state.rows = parseHistoryRows(historyNode, state.config.entrySelector);
         state.selectedVersions.clear();
+        updateDiffButton();
 
         if (options.render !== false) {
             render();
@@ -352,6 +356,24 @@ export function createHistoryTable(config = {}) {
     }
 
     let contextMenu = null;
+    let diffButton = null;
+    let historyPanel = null;
+    let historyPanelObserver = null;
+
+    function updateDiffButton() {
+        if (!diffButton) return;
+        diffButton.hidden = !historyPanel?.classList.contains("is-active") || historyPanel.hidden;
+        diffButton.disabled = ![2, 3].includes(state.selectedVersions.size)
+            || !state.config.buildVersionUrl || !state.config.findDetailNode;
+    }
+
+    function showSelectedDiff() {
+        updateDiffButton();
+        if (!diffButton || diffButton.hidden || diffButton.disabled) return;
+        const versions = [...state.selectedVersions].sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
+        closeContextMenu();
+        openHistoryDiff({versions, historyRows: versions.map(getRowByVersion).filter(Boolean), id: state.config.id, buildVersionUrl: state.config.buildVersionUrl, findDetailNode: state.config.findDetailNode});
+    }
 
     function closeContextMenu() {
         contextMenu?.remove();
@@ -363,6 +385,7 @@ export function createHistoryTable(config = {}) {
         const version = event.target.closest("tr[data-version]").dataset.version;
         if (event.target.checked) state.selectedVersions.add(version);
         else state.selectedVersions.delete(version);
+        updateDiffButton();
         closeContextMenu();
     }
 
@@ -421,6 +444,15 @@ export function createHistoryTable(config = {}) {
 
         const elements = getElements();
 
+        diffButton = byId("btnShowHistoryDiff");
+        historyPanel = elements.body?.closest('[role="tabpanel"]');
+        if (diffButton && historyPanel) {
+            diffButton.addEventListener("click", showSelectedDiff);
+            historyPanelObserver = new MutationObserver(updateDiffButton);
+            historyPanelObserver.observe(historyPanel, {attributes: true, attributeFilter: ["class", "hidden"]});
+            updateDiffButton();
+        }
+
         elements.body?.addEventListener("dblclick", handleTableDoubleClick);
         elements.body?.addEventListener("change", handleSelection);
 
@@ -437,6 +469,15 @@ export function createHistoryTable(config = {}) {
     }
 
     function destroy() {
+        historyPanelObserver?.disconnect();
+        historyPanelObserver = null;
+        diffButton?.removeEventListener("click", showSelectedDiff);
+        if (diffButton) {
+            diffButton.hidden = true;
+            diffButton.disabled = true;
+        }
+        diffButton = null;
+        historyPanel = null;
         const body = getElements().body;
         body?.removeEventListener("dblclick", handleTableDoubleClick);
         body?.removeEventListener("change", handleSelection);

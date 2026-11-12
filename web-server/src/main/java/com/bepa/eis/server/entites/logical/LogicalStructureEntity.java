@@ -61,6 +61,22 @@ public class LogicalStructureEntity extends AbstractEntity {
         return logicalDescription.getValue();
     }
 
+
+    @Override
+    public String getEntityOwner() {
+        return logicalOwner != null ? logicalOwner.getValue().toString() : "";
+    }
+
+    @Override
+    public String getEntityDepartment() {
+        return "";
+    }
+
+    @Override
+    public String getEntityTrl() {
+        return "";
+    }
+
     @Override
     public String getSortKey() {
         return getSortKeyValue(getCode());

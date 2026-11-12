@@ -1,4 +1,4 @@
-package com.bepa.eis.server.api.web.application.views.pro.dashboard.systemsteamwork;
+package com.bepa.eis.server.api.web.application.views.pro.dashboard.teamwork;
 
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.api.generic.GenericDataProviderServlet;
@@ -11,11 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
-@WebServlet(name = "DashboardSystemsTeamworkServlet", urlPatterns = {"/master/systemsteamwork"})
+@WebServlet(name = "DashboardSystemsTeamworkServlet", urlPatterns = {"/master/teamwork"})
 @MultipartConfig
-public class DashboardSystemsTeamworkServlet extends GenericDataProviderServlet {
+public class DashboardTeamworkServlet extends GenericDataProviderServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(DashboardSystemsTeamworkServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(DashboardTeamworkServlet.class);
 
     @Override
     public GenericXmlDocument handleOverview(WebSession webSession, HttpServletRequest request, HttpServletResponse response) throws Throwable {
@@ -51,7 +51,7 @@ public class DashboardSystemsTeamworkServlet extends GenericDataProviderServlet 
         try {
             return new DashboardSystemsTeamworkDocument(webSession);
         } catch (Exception e) {
-            log.error("Error getting systems teamwork dashboard: {}", e.getMessage(), e);
+            log.error("Error getting teamwork dashboard: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }

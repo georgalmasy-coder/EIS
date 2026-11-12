@@ -145,16 +145,25 @@ class Element {
 const body = new Element();
 const table = new Element();
 const head = new Element();
-body.closest = () => table;
+const diffButton = new Element();
+const historyPanel = {hidden: true, classList: {contains: () => !historyPanel.hidden}};
+let notifyPanelChange;
+let observerDisconnected = false;
+body.closest = selector => selector === '[role="tabpanel"]' ? historyPanel : table;
 table.querySelector = () => head;
 const document = new Element();
 document.body = new Element();
-document.getElementById = id => id === "historyBody" ? body : new Element();
+document.getElementById = id => id === "historyBody" ? body : id === "btnShowHistoryDiff" ? diffButton : new Element();
 document.createElement = () => new Element();
 let opened;
 const source = (await readFile(new URL("../../main/webapp/js/components/history-table.js", import.meta.url), "utf8"))
     .replace(/^import[^\n]+;\r?\n/gm, "").replace("export function", "function");
 const sandbox = {
+    MutationObserver: class {
+        constructor(callback) { notifyPanelChange = callback; }
+        observe() {}
+        disconnect() { observerDisconnected = true; }
+    },
     document, window: Object.assign(new Element(), {innerWidth: 1000, innerHeight: 800}),
     escapeHtml: value => String(value),
     applySortIndicators() {}, compareSortableValues: (a, b) => String(a).localeCompare(String(b)),
@@ -167,6 +176,13 @@ assert.equal((rowMarkup.match(/<td\b/g) || []).length, 4, "history rows must inc
 assert.match(rowMarkup, /<td class="history-select-cell"><input type="checkbox"[^>]*checked/);
 const history = sandbox.history;
 history.bind();
+assert.equal(diffButton.hidden, true, "Compare version starts hidden outside History");
+assert.equal(diffButton.disabled, true, "zero selected versions disables Compare version");
+historyPanel.hidden = false;
+notifyPanelChange();
+assert.equal(diffButton.hidden, false, "Compare version is visible on History");
+diffButton.events.click();
+assert.equal(opened, undefined, "disabled Compare version cannot open comparison");
 function select(version, checked = true) {
     body.events.change({target: {matches: () => true, checked, closest: () => ({dataset: {version}})}});
 }
@@ -180,9 +196,18 @@ assert.equal(document.body.children.at(-1).children[0].disabled, true);
 document.body.children.at(-1).children[0].events.click();
 assert.equal(opened, undefined, "disabled action cannot open comparison");
 select("10");
+assert.equal(diffButton.disabled, true, "one version disables Compare version");
 assert.equal(menu(), true);
 assert.equal(document.body.children.at(-1).children[0].disabled, true);
 select("2");
+assert.equal(diffButton.disabled, false, "two versions enable Compare version");
+diffButton.events.click();
+assert.deepEqual(Array.from(opened.versions), ["2", "10"]);
+historyPanel.hidden = true;
+notifyPanelChange();
+assert.equal(diffButton.hidden, true, "leaving History hides Compare version");
+historyPanel.hidden = false;
+notifyPanelChange();
 assert.equal(menu(), true);
 let button = document.body.children.at(-1).children[0];
 assert.equal(button.disabled, false);
@@ -193,6 +218,9 @@ button = document.body.children.at(-1).children[0];
 button.events.click();
 assert.deepEqual(Array.from(opened.versions), ["2", "10"]);
 select("3");
+assert.equal(diffButton.disabled, false, "three versions enable Compare version");
+diffButton.events.click();
+assert.deepEqual(Array.from(opened.versions), ["2", "3", "10"]);
 assert.equal(menu(), true);
 assert.equal(document.body.children.at(-1).children[0].disabled, false, "three versions enable comparison");
 button = document.body.children.at(-1).children[0];
@@ -200,21 +228,27 @@ assert.equal(button.textContent, "Compare Version 2, version 3 and version 10");
 button.events.click();
 assert.deepEqual(Array.from(opened.versions), ["2", "3", "10"]);
 select("4");
+assert.equal(diffButton.disabled, true, "four versions disable Compare version");
 assert.equal(menu(), true);
 assert.equal(document.body.children.at(-1).children[0].disabled, true, "four versions disable comparison");
 select("4", false);
 select("3", false);
 assert.equal(menu(), true);
 history.setContext({id: "another-entity"}, {render: false});
+assert.equal(diffButton.disabled, true, "resetting entity disables Compare version");
 assert.equal(menu(), true);
 assert.equal(document.body.children.at(-1).children[0].disabled, true, "selection is reset for another entity");
 history.destroy();
+assert.equal(observerDisconnected, true);
+assert.equal(diffButton.hidden, true);
+assert.equal(diffButton.events.click, undefined);
 assert.equal(table.events.contextmenu, undefined);
 for (const name of ["stakeholder", "stakeholderrequirement", "systemrequirement", "functionalstructure", "logicalstructure", "systemsbreakdown"]) {
     const page = await readFile(new URL(`../../main/webapp/js/pages/${name}-edit-page.js`, import.meta.url), "utf8");
     const html = await readFile(new URL(`../../main/resources/html-pages/${name}-edit.html`, import.meta.url), "utf8");
     assert.ok(page.includes("buildVersionUrl: ({id, version})"), `${name}: version API configured`);
-    assert.ok(page.includes('history-table.js?rev=diff-interface-text-2026-10-16"'), `${name}: updated history component bypasses cached imports`);
+    assert.ok(page.includes('history-table.js?rev=show-diff-2026-11-12"'), `${name}: updated history component bypasses cached imports`);
+    assert.match(html, /id="btnShowHistoryDiff"[^>]*hidden disabled>Compare version<\/button>\s*<button id="btnSave"/, `${name}: Compare version immediately before Save`);
     assert.ok(page.includes("    findDetailNode,"), `${name}: uses Basis Info detail node`);
     assert.ok(html.includes('scope="col">Select</th>'), `${name}: Select header`);
 }
