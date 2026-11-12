@@ -240,6 +240,7 @@ abstract public class GenericDataProviderServlet extends GenericServlet {
 
     private void setOkResponse(HttpServletResponse response, GenericXmlDocument xmlDocument) throws IOException, ParserConfigurationException, TransformerException {
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/xml; charset=UTF-8");
         response.getWriter().write(xmlDocument.toXmlString());
     }
 
