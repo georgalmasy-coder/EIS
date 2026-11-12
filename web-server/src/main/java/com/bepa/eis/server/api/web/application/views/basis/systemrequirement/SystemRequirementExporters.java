@@ -57,7 +57,7 @@ public final class SystemRequirementExporters extends GenericExporters {
 
     @Override
     public String getXmlRootNodeName() {
-        return "systemRequirementsExport";
+        return "SystemRequirements";
     }
 
     @Override

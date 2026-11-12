@@ -45,7 +45,7 @@ public final class StakeholderRequirementExporters extends GenericExporters {
 
     @Override
     public String getXmlRootNodeName() {
-        return "stakeholderRequirementsExport";
+        return "StakeholderRequirements";
     }
 
     @Override

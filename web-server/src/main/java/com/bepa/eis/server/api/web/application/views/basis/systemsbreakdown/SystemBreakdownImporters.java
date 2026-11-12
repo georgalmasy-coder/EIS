@@ -101,7 +101,10 @@ public final class SystemBreakdownImporters extends GenericImporters {
         document.getDocumentElement().normalize();
 
         List<SystemBreakdownExportRow> rows = new ArrayList<>();
-        var nodes = document.getElementsByTagName("physicalStructures");
+        var nodes = document.getElementsByTagName("physicalStructure");
+        if (nodes.getLength() == 0) {
+            nodes = document.getElementsByTagName("physicalStructures");
+        }
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);

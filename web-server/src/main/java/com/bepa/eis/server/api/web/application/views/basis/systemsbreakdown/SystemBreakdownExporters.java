@@ -53,7 +53,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
 
     @Override
     public String getXmlRootNodeName() {
-        return "PhysicalStructureExport";
+        return "PhysicalStructures";
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
     public void buildXmlRow(StringBuilder xml, Object rowData) {
         SystemBreakdownExportRow row = (SystemBreakdownExportRow) rowData;
 
-        xml.append("  <physicalStructures>").append(NEW_LINE);
+        xml.append("  <physicalStructure>").append(NEW_LINE);
         xml.append(tag(getHeaders()[0], row.id()));
         xml.append(tag(getHeaders()[1], row.level()));
         xml.append(tag(getHeaders()[2], row.name()));
@@ -102,7 +102,7 @@ public final class SystemBreakdownExporters extends GenericExporters {
         xml.append(tag(getHeaders()[8], row.changedBy()));
         xml.append(tag(getHeaders()[9], row.changed()));
         xml.append(tag(getHeaders()[10], row.active()));
-        xml.append("  </physicalStructures>").append(NEW_LINE);
+        xml.append("  </physicalStructure>").append(NEW_LINE);
     }
 
     @Override

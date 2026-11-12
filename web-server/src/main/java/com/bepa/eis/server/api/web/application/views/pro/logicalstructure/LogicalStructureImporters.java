@@ -106,7 +106,10 @@ public final class LogicalStructureImporters extends GenericImporters {
         document.getDocumentElement().normalize();
 
         List<LogicalStructureExportRow> rows = new ArrayList<>();
-        var nodes = document.getElementsByTagName("logicalStructures");
+        var nodes = document.getElementsByTagName("logicalStructure");
+        if (nodes.getLength() == 0) {
+            nodes = document.getElementsByTagName("logicalStructures");
+        }
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);

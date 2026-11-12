@@ -89,7 +89,7 @@ public final class FunctionalStructureExporters extends GenericExporters {
 
     @Override
     public String getXmlRootNodeName() {
-        return "functionalArchitectureExport";
+        return "FunctionalStructures";
     }
 
     @Override
@@ -119,12 +119,12 @@ public final class FunctionalStructureExporters extends GenericExporters {
     public void buildXmlRow(StringBuilder xml, Object rowData) {
         FunctionalStructureExportRow row = (FunctionalStructureExportRow) rowData;
 
-        xml.append("  <functionStructures>").append(NEW_LINE);
+        xml.append("  <functionalStructure>").append(NEW_LINE);
         String[] values = rowStrings(row);
         for (int i = 0; i < values.length; i++) {
             xml.append(tag(XML_TAGS[i], values[i]));
         }
-        xml.append("  </functionStructures>").append(NEW_LINE);
+        xml.append("  </functionalStructure>").append(NEW_LINE);
     }
 
     @Override

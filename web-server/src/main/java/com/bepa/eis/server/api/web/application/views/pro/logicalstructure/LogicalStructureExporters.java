@@ -104,7 +104,7 @@ public final class LogicalStructureExporters extends GenericExporters {
 
     @Override
     public String getXmlRootNodeName() {
-        return "logicalArchitectureExport";
+        return "LogicalStructures";
     }
 
     @Override
@@ -134,12 +134,12 @@ public final class LogicalStructureExporters extends GenericExporters {
     public void buildXmlRow(StringBuilder xml, Object rowData) {
         LogicalStructureExportRow row = (LogicalStructureExportRow) rowData;
 
-        xml.append("  <logicalStructures>").append(NEW_LINE);
+        xml.append("  <logicalStructure>").append(NEW_LINE);
         String[] values = rowStrings(row);
         for (int i = 0; i < values.length; i++) {
             xml.append(tag(XML_TAGS[i], values[i]));
         }
-        xml.append("  </logicalStructures>").append(NEW_LINE);
+        xml.append("  </logicalStructure>").append(NEW_LINE);
     }
 
     @Override

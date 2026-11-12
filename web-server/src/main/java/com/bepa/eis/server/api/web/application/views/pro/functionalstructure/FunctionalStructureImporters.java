@@ -101,7 +101,10 @@ public final class FunctionalStructureImporters extends GenericImporters {
         document.getDocumentElement().normalize();
 
         List<FunctionalStructureExportRow> rows = new ArrayList<>();
-        var nodes = document.getElementsByTagName("functionStructures");
+        var nodes = document.getElementsByTagName("functionalStructure");
+        if (nodes.getLength() == 0) {
+            nodes = document.getElementsByTagName("functionStructures");
+        }
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);

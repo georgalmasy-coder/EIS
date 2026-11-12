@@ -86,17 +86,17 @@ public final class SystemBreakdownImportersTest {
             }
         }
         StringBuilder content = new StringBuilder();
-        if (format.equals("xml")) content.append("<PhysicalStructureExport>");
+        if (format.equals("xml")) content.append("<PhysicalStructures>");
         for (String id : ids) {
             int level = id.split("\\.").length;
             if (format.equals("xml")) {
-                content.append("<physicalStructures><SBS>").append(id).append("</SBS><Level>")
-                        .append(level).append("</Level><Name>Test boat</Name></physicalStructures>");
+                content.append("<physicalStructure><SBS>").append(id).append("</SBS><Level>")
+                        .append(level).append("</Level><Name>Test boat</Name></physicalStructure>");
             } else {
                 content.append(id).append(',').append(level).append(",Test boat\n");
             }
         }
-        if (format.equals("xml")) content.append("</PhysicalStructureExport>");
+        if (format.equals("xml")) content.append("</PhysicalStructures>");
         return content.toString().getBytes(StandardCharsets.UTF_8);
     }
 
