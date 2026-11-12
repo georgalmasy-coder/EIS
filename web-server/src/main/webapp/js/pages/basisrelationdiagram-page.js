@@ -1,3 +1,4 @@
+import {decorateRelationDiagramHierarchy} from "../components/relation-diagram-hierarchy.js?rev=level-one-1";
 import {initMenu} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -138,18 +139,18 @@ function initializeEvents() {
     const viewSystem = document.getElementById("viewSystem");
     const viewSystemsBreakdown = document.getElementById("viewSystemsBreakdown");
 
-    viewStakeholder?.addEventListener("change", () => {
-        state.columnVisibility.stakeholder = viewStakeholder.checked;
+    viewStakeholder?.addEventListener("click", () => {
+        state.columnVisibility.stakeholder = !state.columnVisibility.stakeholder;
         applyViewMode();
     });
 
-    viewSystem?.addEventListener("change", () => {
-        state.columnVisibility.system = viewSystem.checked;
+    viewSystem?.addEventListener("click", () => {
+        state.columnVisibility.system = !state.columnVisibility.system;
         applyViewMode();
     });
 
-    viewSystemsBreakdown?.addEventListener("change", () => {
-        state.columnVisibility.systemsBreakdown = viewSystemsBreakdown.checked;
+    viewSystemsBreakdown?.addEventListener("click", () => {
+        state.columnVisibility.systemsBreakdown = !state.columnVisibility.systemsBreakdown;
         applyViewMode();
     });
 
@@ -367,6 +368,7 @@ function parseRequirements(parentElement, groupSelector, itemSelector) {
             name: directTextOf(requirementElement, "name") || "—",
             description: directTextOf(requirementElement, "description") || "",
             hasRelations: requirementElement.getAttribute("hasRelations") === "true",
+                relationCount: parseInteger(requirementElement.getAttribute("relationCount")),
             type: requirementType,
             entityId,
             entityTypeId,
@@ -500,7 +502,16 @@ function renderRequirementCards(container, requirements) {
         name.className = "relationdiagram-requirement-name";
         name.textContent = requirement.name;
 
-        card.append(code, name);
+        const count = document.createElement("span");
+        count.className = "relationdiagram-requirement-count";
+        const relationCount = requirement.relationCount ?? state.relations.filter(
+            relation => relation.from === requirement.internalId || relation.to === requirement.internalId
+        ).length;
+        count.textContent = String(relationCount);
+        count.title = relationCount + " direct relations";
+        count.setAttribute("aria-label", count.title);
+
+        card.append(code, name, count);
 
         card.addEventListener("mouseenter", () => {
             state.hoverInternalId = requirement.internalId;
@@ -539,6 +550,7 @@ function renderRequirementCards(container, requirements) {
         container.appendChild(card);
         state.cardsByInternalId.set(requirement.internalId, card);
     }
+    decorateRelationDiagramHierarchy(container, requirements, applyFiltersAndRedraw);
 }
 
 function setupScrollListeners() {
@@ -626,7 +638,7 @@ function applyFilters() {
             shouldShow = requirementMatchesSearch(requirement, searchText);
         }
 
-        card.classList.toggle("is-hidden-by-filter", !shouldShow);
+        card.classList.toggle("is-hidden-by-filter", !shouldShow || card.dataset.hierarchyHidden === "true");
     }
 }
 
@@ -1352,6 +1364,9 @@ function hideEmptyState() {
 }
 
 function applyViewMode(unused, options = {}) {
+    document.querySelectorAll("button[data-column-type]").forEach(button => {
+        button.setAttribute("aria-pressed", String(state.columnVisibility[button.dataset.columnType]));
+    });
     const frame = document.getElementById("relationdiagramFrame");
     if (!frame) {
         return;

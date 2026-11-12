@@ -1,0 +1,74 @@
+/* Shared list presentation for functional/logical architecture and requirements. */
+table.hierarchy-table{
+    font-family: var(--app-navigation-font, "Segoe UI", system-ui, sans-serif);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+table.hierarchy-table thead th{
+    padding: 10px 12px;
+    background: var(--app-table-header-background);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    text-transform: none;
+    letter-spacing: 0;
+}
+table.hierarchy-table tbody td{
+    padding: 6px 12px;
+    height: 44px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e5ec;
+}
+table.hierarchy-table .data-table-cell-value{
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 400;
+}
+table.hierarchy-table tbody tr.hierarchy-root-row > td{
+    background: #f3f4f6;
+}
+table.hierarchy-table .hierarchy-root-row .hierarchy-code-cell,
+table.hierarchy-table .hierarchy-root-row .hierarchy-code-cell .data-table-cell-value,
+table.hierarchy-table .hierarchy-root-row .hierarchy-name-cell .data-table-cell-value{
+    font-weight: 700;
+}
+.hierarchy-code-cell{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: calc(var(--hierarchy-depth, 0) * 18px);
+}
+.hierarchy-toggle,
+.hierarchy-toggle-spacer{
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+}
+.hierarchy-toggle{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #e0e5ec;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.hierarchy-toggle svg{
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.hierarchy-toggle[aria-expanded="true"] svg{ transform: rotate(90deg); }
+.hierarchy-toggle:hover{ background: var(--app-accent-soft); }
+.hierarchy-toggle:focus-visible{
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: 2px;
+}
+table.hierarchy-table tr[hidden]{ display: none; }

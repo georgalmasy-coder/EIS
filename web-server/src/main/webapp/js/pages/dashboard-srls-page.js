@@ -1,3 +1,6 @@
+import {mountHierarchyControls} from "../components/hierarchy-controls.js";
+import {createDashboardHierarchy, decorateDashboardCode, focusDashboardToggle} from "../components/dashboard-hierarchy.js";
+const hierarchy = createDashboardHierarchy();
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu, menuHasRoute} from "../components/menu.js";
 import {mountTopbar} from "../components/topbar.js";
@@ -16,6 +19,10 @@ let loadedTopPanel = {};
 
 document.addEventListener("DOMContentLoaded", () => {
     if (document.body.dataset.udvMode === "true") initializeCalculationTooltips();
+    mountHierarchyControls("dashboard-srlsHierarchyToolbar", expanded => {
+        hierarchy.setAll(loadedDashboard?.groups.map(group => group.system.code) || [], expanded);
+        if (loadedDashboard) renderDashboard(loadedDashboard);
+    }, {container: true});
     initializeColumnResize();
     mountTopbar();
     initMenu().then(() => {
@@ -79,43 +86,43 @@ function renderDashboard(dashboard) {
         label.style.left = `${srlPosition(level, dashboard.levels)}%`;
         scale.append(label);
     }
+    document.querySelector(".dashboard-srls-table").classList.add("hierarchy-table");
     const fragment = document.createDocumentFragment();
     for (const [index, group] of dashboard.groups.entries()) {
         const header = document.createElement("tr");
         header.className = "dashboard-srls-group";
-        const heading = element("td", "dashboard-srls-group-heading");
-        heading.colSpan = 4;
-        const toggle = element("button", "dashboard-srls-group-toggle");
-        toggle.type = "button";
-        toggle.setAttribute("aria-expanded", "false");
-        const icon = element("span", "", "\u25b8");
-        icon.setAttribute("aria-hidden", "true");
-        const title = element("strong", "dashboard-srls-group-title");
-        title.textContent = group.system.code;
-        const count = element("span", "dashboard-srls-group-count", String(group.children.length));
-        count.setAttribute("aria-label", `${group.children.length} underlying systems`);
-        const label = element("span", "dashboard-srls-group-label");
-        label.append(icon, title);
-        const name = element("span", "dashboard-srls-group-name");
-        name.append(element("strong", "dashboard-srls-name", group.system.name));
+        header.classList.add("hierarchy-root-row");
+        const heading = element("th", "dashboard-srls-code");
+        heading.append(element("span", "dashboard-srls-code-text", group.system.code));
+        heading.title = group.system.code;
+        heading.scope = "row";
+        const expanded = hierarchy.expanded(group.system.code);
+        decorateDashboardCode(heading, group.system.code, group.system.name, group.children.length > 0, expanded, () => {
+            hierarchy.toggle(group.system.code);
+            renderDashboard(dashboard);
+            focusDashboardToggle(document.getElementById("srlSystems"), group.system.code);
+        });
+        const name = element("td", "dashboard-srls-name hierarchy-name-cell", group.system.name);
         name.title = group.system.name;
+        const count = element("td", "dashboard-srls-group-count", String(group.children.length));
+        const valueCell = document.createElement("td");
         const track = renderSystemTrack(group.system, dashboard.levels, dashboard.levelCodes);
-        toggle.append(label, name, count, track);
+        valueCell.append(track);
         bindSystemEditor(header, group.system.entityId);
-        heading.append(toggle);
-        header.append(heading);
+        header.append(heading, name, count, valueCell);
         applyCalculationTooltip(header, track, group.system);
         fragment.append(header);
         const children = [];
         for (const system of group.children) {
             const row = document.createElement("tr");
             row.id = `srl-group-${index}-system-${children.length}`;
-            row.hidden = true;
+            row.hidden = !expanded;
             children.push(row);
-            const code = element("th", "dashboard-srls-code", system.code);
+            const code = element("th", "dashboard-srls-code");
+            code.append(element("span", "dashboard-srls-code-text", system.code));
+            code.title = system.code;
             code.scope = "row";
-            const depth = (String(system.code).match(/\./g) || []).length;
-            code.style.paddingLeft = `${32 + depth * 15}px`;
+            decorateDashboardCode(code, system.code, system.name, false, true, () => {});
             bindSystemEditor(row, system.entityId);
             row.append(code, element("td", "dashboard-srls-name", system.name), document.createElement("td"));
             row.querySelector(".dashboard-srls-name").title = system.name;
@@ -126,13 +133,7 @@ function renderDashboard(dashboard) {
             applyCalculationTooltip(row, track, system);
             fragment.append(row);
         }
-        toggle.setAttribute("aria-controls", children.map(row => row.id).join(" "));
-        toggle.addEventListener("click", () => {
-            const expanded = toggle.getAttribute("aria-expanded") !== "true";
-            toggle.setAttribute("aria-expanded", String(expanded));
-            icon.textContent = expanded ? "\u25be" : "\u25b8";
-            for (const row of children) row.hidden = !expanded;
-        });
+
     }
     document.getElementById("srlSystems").replaceChildren(fragment);
     setText("srlStructureCount", String(dashboard.rows.length));

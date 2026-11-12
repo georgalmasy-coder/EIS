@@ -9,7 +9,6 @@ import com.bepa.eis.server.api.web.application.views.common.TopPanelProvider;
 import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.dataprovider.entities.SystemBreakdownProvider;
-import com.bepa.eis.server.dataprovider.fields.lookups.system.TRL;
 import com.bepa.eis.server.dataprovider.generic.ListOfElements;
 import com.bepa.eis.server.entites.systembreakdown.SystemBreakdownEntity;
 import org.slf4j.Logger;
@@ -17,10 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +35,6 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
     private final Map<InterfaceKey, SystemsTeamworkRecord> interfacesByDirection = new HashMap<>();
 
     private DashboardMetaData dashboardMetaData;
-
-    private final Timestamp now = Timestamp.from(Instant.now());
-    private LocalDate today = now.toLocalDateTime().toLocalDate();
 
     public DashboardSystemsTeamworkDocument(WebSession webSession) throws Exception {
 
@@ -66,6 +58,7 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         dashboardElement.appendChild(getUserMetaDataElement());
         dashboardElement.appendChild(getDepartmentMetaDataElement());
         dashboardElement.appendChild(getInterfaceElements());
+        dashboardElement.appendChild(getSystemElements());
     }
 
     private void dashboardDocument() throws SQLException {
@@ -180,6 +173,28 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
         return dashboardMetaData.getDepartmentElement(getDoc());
     }
 
+    private Element getSystemElements() {
+        Element systems = getDoc().createElement("systems");
+        for (SystemBreakdownEntity entity : mapOfPhysicalStructures.values()) {
+            SystemsTeamworkRecord record = new SystemsTeamworkRecord();
+            record.setFromEntityId(entity.getEntityId());
+            record.setFromSbsCode(entity.getSbsCode());
+            record.setFromSystemName(entity.getSystemName());
+            record.setFromTrl(entity.getTrl());
+            record.setFromSystemOwner(entity.getSystemOwner());
+            record.setFromSystemDepartment(entity.getSystemDepartment());
+            Element system = getDoc().createElement("system");
+            addElement(system, "fromEntityId", record.getFromEntityId());
+            addElement(system, "fromSbsCode", record.getFromSbsCode());
+            addElement(system, "fromSystemName", record.getFromSystemName());
+            addElement(system, "fromTrlId", record.getFromTrlId());
+            addElement(system, "fromSystemOwnerId", record.getFromSystemOwnerId());
+            addElement(system, "fromSystemDepartmentId", record.getFromSystemDepartmentId());
+            systems.appendChild(system);
+        }
+        return systems;
+    }
+
     private Element getInterfaceElements() {
         Element interfaceElements = getDoc().createElement("interfaces");
         if (listOfSystemsTeamworkRecords != null) {
@@ -221,22 +236,6 @@ public class DashboardSystemsTeamworkDocument extends GenericXmlDocument {
             }
         }
         return interfaceElements;
-    }
-
-    private String getTrlValue(TRL trl) {
-        if (trl != null && trl.getValue() != null) {
-            return trl.getValue().toString();
-        }
-        return "";
-    }
-
-    private String getDaysUntil(LocalDate deadlineNextTRL) {
-        Long days = daysUntil(deadlineNextTRL);
-        return days != null && days > 0 ? daysUntil(deadlineNextTRL) + " days" : "Overdue";
-    }
-
-    private Long daysUntil(LocalDate nextTrlDeadline) {
-        return nextTrlDeadline == null ? 0L : ChronoUnit.DAYS.between(today,nextTrlDeadline);
     }
 
     private void addElement(Element parentelement, String elementName, String value) {

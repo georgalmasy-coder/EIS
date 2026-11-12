@@ -1,0 +1,57 @@
+/* Same list typography and hierarchy controls as the architecture lists. */
+table.hierarchy-table tbody :is(td, th){
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 400;
+}
+table.hierarchy-table tbody th{
+    padding: 6px 12px;
+    height: 44px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e5ec;
+}
+table.hierarchy-table tbody .hierarchy-root-row > :is(td, th){
+    background: #f3f4f6;
+    padding: 6px 12px;
+    height: 44px;
+    border-bottom: 1px solid #e0e5ec;
+}
+table.hierarchy-table .hierarchy-root-row :is(.hierarchy-code-cell, .hierarchy-name-cell){
+    font-weight: 700;
+}
+table.hierarchy-table tbody tr:not(.teamwork-viewport-spacer):hover > :is(td, th){
+    background: var(--app-table-row-hover);
+}
+table.hierarchy-table .hierarchy-code-cell > :last-child{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+table.hierarchy-table .hierarchy-code-cell{ white-space: nowrap; }
+table.hierarchy-table .hierarchy-name-cell{ overflow-wrap: anywhere; }
+table.hierarchy-table .dashboard-systems-teamwork-cell-text{
+    font-weight: inherit;
+}
+.dashboard-irls-table.hierarchy-table .dashboard-irls-header-cell--id,
+.dashboard-irls-table.hierarchy-table .dashboard-irls-cell--id{
+    width: 180px; min-width: 180px; max-width: 180px;
+}
+.dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--name, .dashboard-irls-cell--name){ left: 180px; }
+.dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--trl, .dashboard-irls-cell--trl){ left: 370px; }
+.dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--days, .dashboard-irls-cell--days){ left: 414px; }
+.dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--interfaces, .dashboard-irls-cell--interfaces){ left: 488px; }
+.dashboard-srls-table.hierarchy-table .dashboard-srls-group-count{
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+.dashboard-systems-teamwork-table.hierarchy-table .teamwork-viewport-spacer td{
+    padding: 0; border: 0; height: auto; line-height: 0;
+}
+@media (max-width: 960px){
+    .dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--trl, .dashboard-irls-cell--trl){ left: 400px; }
+    .dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--days, .dashboard-irls-cell--days){ left: 444px; }
+    .dashboard-irls-table.hierarchy-table :is(.dashboard-irls-header-cell--interfaces, .dashboard-irls-cell--interfaces){ left: 554px; }
+}

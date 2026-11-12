@@ -95,6 +95,10 @@ body.dashboard-systems-teamwork-document {
     fill: currentColor;
 }
 
+.dashboard-systems-teamwork-icon-button[hidden] {
+    display: none;
+}
+
 .dashboard-systems-teamwork-icon-button:hover {
     background: var(--app-topbar-help-hover-background);
     border-color: var(--app-topbar-help-border);
@@ -316,6 +320,7 @@ body.dashboard-systems-teamwork-document {
 .dashboard-systems-teamwork-header-cell {
     display: flex;
     align-items: stretch;
+    padding: 10px 12px;
     height: 72px;
     text-align: left;
     font-size: 0.82rem;

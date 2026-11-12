@@ -33,6 +33,13 @@ public class InterfaceMatrixSnapshotStoreTest {
         rejected(()->source.block(96,0),IllegalArgumentException.class);
         check(source.filter(true,Set.of("4"),LocalDate.of(2026,11,5)).equals(List.of("1","2","64","65")),"global IRL/overdue filtering and stable axes");
         check(source.filter(false,Set.of(),LocalDate.now()).equals(ids),"unfiltered axes");
+        check(source.filter(false,Set.of(),LocalDate.now(),true).equals(List.of("1","2","33","34","64","65")),
+                "Connected-only removes isolated entities and retains incoming/outgoing endpoints");
+        check(source.filter(true,Set.of("4"),LocalDate.of(2026,11,5),true).equals(List.of("1","2","64","65")),
+                "Connected-only combines with overdue and IRL filters");
+        var diagonalOnly = new InterfaceMatrixSnapshotStore.Source(List.of("1","2"),List.of(cell("1","1","4","2020-01-01")));
+        check(diagonalOnly.filter(false,Set.of(),LocalDate.now(),true).isEmpty(),
+                "Self references do not make an item connected to another item");
         AtomicLong clock=new AtomicLong();var store=new InterfaceMatrixSnapshotStore(clock::get);
         var owner=session("a",6,1);var type=EntityType.SYSTEMS_BREAKDOWN;
         String id=store.put(owner,type,source);

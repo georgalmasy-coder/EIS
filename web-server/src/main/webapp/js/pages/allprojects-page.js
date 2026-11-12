@@ -4,7 +4,7 @@ import {openEditDialog} from "../components/edit-dialog.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 
 const DATA_URL = "/project/myprojects?cmd=list&page=allprojects";
-const SELECT_PROJECT_URL = "/project/myprojects?cmd=select&projectId=";
+const SELECT_PROJECT_URL = "/Menu";
 
 let allProjects = [];
 let currentFilter = "active";
@@ -227,12 +227,34 @@ function renderProjects() {
             </div>
         `;
         
-        card.querySelector(".btn-open-project").addEventListener("click", () => {
-            window.location.href = SELECT_PROJECT_URL + project.id;
-        });
+        const openButton = card.querySelector(".btn-open-project");
+        openButton.addEventListener("click", () => openProject(project.id, openButton));
         
         projectsList.appendChild(card);
     });
+}
+
+async function openProject(projectId, button) {
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+        const body = new URLSearchParams({cmd: "selectproject", projectId});
+        const response = await fetch(SELECT_PROJECT_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Accept": "application/xml, text/xml"
+            },
+            credentials: "same-origin",
+            body
+        });
+        if (!response.ok) throw new Error("Project selection failed (HTTP " + response.status + ").");
+        window.location.href = "/web/view?page=projectoverview";
+    } catch (error) {
+        console.error("Could not open project", error);
+        window.alert("Could not open the project. Please try again.");
+        button.disabled = false;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", init);

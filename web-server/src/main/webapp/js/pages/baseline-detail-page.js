@@ -125,7 +125,6 @@ function bindEvents() {
     document.querySelectorAll("[data-collapse-section]").forEach(function (section) {
         const toggle = section.querySelector("[data-collapse-toggle]");
         const panel = section.querySelector("[data-collapse-panel]");
-        const icon = section.querySelector(".baseline-collapse-icon");
 
         if (!toggle || !panel) {
             return;
@@ -134,9 +133,6 @@ function bindEvents() {
         toggle.setAttribute("aria-expanded", "false");
         panel.hidden = true;
 
-        if (icon) {
-            icon.textContent = "▸";
-        }
 
         toggle.addEventListener("click", function () {
             const isOpen = toggle.getAttribute("aria-expanded") === "true";
@@ -149,9 +145,6 @@ function bindEvents() {
 
             panel.hidden = !nextOpen;
 
-            if (icon) {
-                icon.textContent = nextOpen ? "▾" : "▸";
-            }
         });
     });
 }

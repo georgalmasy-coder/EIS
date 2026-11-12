@@ -694,9 +694,34 @@ body.baseline-document {
 }
 
 .baseline-collapse-icon {
-    width: 18px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid var(--app-border-default);
+    border-radius: 6px;
     color: var(--app-text-secondary);
-    font-size: 15px;
+}
+
+.baseline-collapse-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.baseline-collapse-header[aria-expanded="true"] .baseline-collapse-icon svg {
+    transform: rotate(90deg);
+}
+
+.baseline-collapse-header:focus-visible {
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: -2px;
 }
 
 .baseline-collapse-panel {

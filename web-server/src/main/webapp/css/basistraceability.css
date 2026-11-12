@@ -790,3 +790,10 @@ body.traceability-document .side-menu {
     height: 22px;
     color: #64748b;
 }
+
+.traceability-row-header.traceability-header-hover,
+.traceability-column-header.traceability-header-hover,
+.traceability-row-header:hover,
+.traceability-column-header:hover {
+    box-shadow: inset 0 -2px 0 var(--app-text-secondary);
+}

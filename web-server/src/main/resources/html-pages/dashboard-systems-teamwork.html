@@ -13,7 +13,10 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/dashboard-systems-teamwork.css?rev=teamwork-virtual-1" />
+    <link rel="stylesheet" href="../css/dashboard-systems-teamwork.css?rev=teamwork-header-padding-2" />
+    <link rel="stylesheet" href="../css/hierarchy-table.css" />
+    <link rel="stylesheet" href="../css/dashboard-hierarchy.css" />
+    <link rel="stylesheet" href="../css/table-row-highlights.css?rev=row-highlights-1" />
 </head>
 
 <body class="dashboard-systems-teamwork-document">
@@ -50,6 +53,18 @@
                 </div>
 
                 <div class="dashboard-systems-teamwork-actions" aria-label="Page actions">
+                    <a
+                            id="btnInterfaceManagement"
+                            class="dashboard-systems-teamwork-icon-button"
+                            href="/web/view?page=psys-interfaces"
+                            hidden
+                            aria-label="Interface Management - Physical Architecture"
+                            title="Interface Management - Physical Architecture"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="currentColor">N2</text>
+                        </svg>
+                    </a>
                     <button
                             id="btnDownloadPdf"
                             class="dashboard-systems-teamwork-icon-button dashboard-systems-teamwork-pdf-button"
@@ -67,7 +82,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-systems-teamwork-filter-bar" aria-label="Systems teamwork filters">
+            <div id="dashboard-systems-teamworkHierarchyToolbar" class="dashboard-systems-teamwork-filter-bar" aria-label="Systems teamwork filters">
                 <div class="dashboard-systems-teamwork-filter-group">
                     <div class="dashboard-systems-teamwork-filter-slot">
                         <span class="dashboard-systems-teamwork-filter-slot-label">TRL</span>
@@ -98,7 +113,7 @@
                 <div class="table-frame page-frame has-table-footer dashboard-systems-teamwork-frame" aria-label="Systems teamwork table frame">
                     <div class="table-scroll dashboard-systems-teamwork-table-scroll" id="dashboardSystemsTeamworkTableScroll">
                         <div class="dashboard-systems-teamwork-header" id="dashboardSystemsTeamworkHeader"></div>
-                        <table class="dashboard-systems-teamwork-table" aria-label="Systems teamwork">
+                        <table class="dashboard-systems-teamwork-table app-striped-table" aria-label="Systems teamwork">
                             <colgroup id="dashboardSystemsTeamworkColGroup"></colgroup>
                             <tbody id="dashboardSystemsTeamworkTableBody"></tbody>
                         </table>
@@ -133,7 +148,7 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/dashboard-systems-teamwork-page.js?rev=teamwork-virtual-1"></script>
+<script type="module" src="../js/pages/dashboard-systems-teamwork-page.js?rev=teamwork-n2-6"></script>
 <script src="../js/tabs-list.js"></script>
 </body>
 </html>

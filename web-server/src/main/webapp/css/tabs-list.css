@@ -1,3 +1,45 @@
+.hierarchy-bulk-controls{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    height: min(32px, var(--hierarchy-control-height, 32px));
+}
+
+.hierarchy-bulk-controls[hidden]{ display: none; }
+
+.hierarchy-bulk-controls button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 30px;
+    height: 100%;
+    min-height: 0;
+    padding: 3px;
+    border: 1px solid var(--app-input-border);
+    border-radius: 6px;
+    background: var(--app-input-background);
+    color: var(--app-text-primary);
+}
+
+.hierarchy-bulk-controls button:hover{ background: var(--app-accent-soft); }
+.hierarchy-bulk-controls button:focus-visible{
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: 2px;
+}
+
+.hierarchy-bulk-controls svg{
+    width: 18px;
+    height: 18px;
+    max-height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .tabs{
     flex: 1;
     min-height: 0;

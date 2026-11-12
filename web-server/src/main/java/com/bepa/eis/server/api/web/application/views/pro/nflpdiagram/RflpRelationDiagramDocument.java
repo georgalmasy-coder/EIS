@@ -224,7 +224,10 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
-                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    requirementElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 stakeholderRequirements.appendChild(requirementElement);
             }
         }
@@ -243,7 +246,10 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
-                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    requirementElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 systemRequirements.appendChild(requirementElement);
             }
         }
@@ -262,7 +268,10 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addElement(functionalElement, "code", functionalStructure.getFunctionalCode().getValue());
                 addElement(functionalElement, "name", functionalStructure.getFunctionalName().getValue());
                 if (!compact) addElement(functionalElement, "description", functionalStructure.getFunctionalDescription().getValue());
-                if (compact) functionalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    functionalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    functionalElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 functionalStructures.appendChild(functionalElement);
             }
         }
@@ -281,7 +290,10 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addElement(logicalElement, "code", logicalStructure.getLogicalCode().getValue());
                 addElement(logicalElement, "name", logicalStructure.getLogicalName().getValue());
                 if (!compact) addElement(logicalElement, "description", logicalStructure.getLogicalDescription().getValue());
-                if (compact) logicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    logicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    logicalElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 logicalStructures.appendChild(logicalElement);
             }
         }
@@ -300,7 +312,10 @@ public class RflpRelationDiagramDocument extends GenericXmlDocument {
                 addElement(physicalElement, "code", system.getSbsCode().getValue());
                 addElement(physicalElement, "name", system.getSystemName().getValue());
                 if (!compact) addElement(physicalElement, "description", system.getDescription());
-                if (compact) physicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    physicalElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    physicalElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 systemRequirements.appendChild(physicalElement);
             }
         }

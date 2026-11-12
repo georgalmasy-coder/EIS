@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/interfaces.css?rev=interfaces-updates-3" />
+    <link rel="stylesheet" href="../css/interfaces.css?rev=interfaces-connected-filter-1" />
 </head>
 
 <body class="interfaces-document" data-interface-base-path="/master/fsys/interfacematrix" data-interface-structure-label="Function" data-interface-edit-page="functionalstructure-edit">
@@ -73,6 +73,11 @@
                     <input id="interfacesOverdueOnlyToggle" type="checkbox" />
                     <span>Show overdue only</span>
                 </label>
+                <label class="interfaces-filter-toggle">
+                    <input id="interfacesConnectedOnlyToggle" type="checkbox" />
+                    <span>Connected items only</span>
+                </label>
+                <button id="interfacesClearFiltersButton" class="interfaces-clear-filters" type="button">Clear filters</button>
 
                 <div class="interfaces-irl-filter-inline" aria-label="IRL filter">
                     <span class="interfaces-irl-filter-inline-label">IRL:</span>
@@ -208,6 +213,6 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/interfaces-page.js?rev=interfaces-updates-3"></script>
+<script type="module" src="../js/pages/interfaces-page.js?rev=interfaces-connected-filter-1"></script>
 </body>
 </html>

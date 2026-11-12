@@ -1,0 +1,25 @@
+/* Keep list columns at their configured width, with full values in cell tooltips. */
+table.app-truncated-table :is(td, th) {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+table.app-truncated-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+table.app-truncated-table .data-table-cell-value,
+table.app-truncated-table thead th .sort {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    -webkit-line-clamp: unset;
+}
+table.app-truncated-table :is(.hierarchy-code-cell, .systemsbreakdown-code-cell) > .data-table-cell-value {
+    flex: 1 1 auto;
+}

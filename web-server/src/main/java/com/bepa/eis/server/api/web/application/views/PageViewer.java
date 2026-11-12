@@ -3,6 +3,7 @@ package com.bepa.eis.server.api.web.application.views;
 import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.SeverityType;
+import com.bepa.eis.common.enums.menu.MenuIcon;
 import com.bepa.eis.common.providers.misc.IncidentProvider;
 import com.bepa.eis.server.api.generic.BuildInfo;
 import com.bepa.eis.server.api.generic.GenericServlet;
@@ -43,6 +44,9 @@ public class PageViewer extends GenericServlet {
                 html = mergeTitle(pageType, webSession, html);
                 html = mergeThemeClass(webSession, html);
 
+                for (MenuIcon icon : MenuIcon.values()) {
+                    html = html.replace("{{menuIcon." + icon.name() + "}}", icon.getSvgCode());
+                }
                 html = mergeBuildNumber(html);
                 html = html.replace("{{udvMode}}", Boolean.toString(GlobalConfiguration.isUdvMode()));
 

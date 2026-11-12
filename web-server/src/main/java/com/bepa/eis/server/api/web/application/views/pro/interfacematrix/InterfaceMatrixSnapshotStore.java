@@ -57,9 +57,13 @@ final class InterfaceMatrixSnapshotStore {
             return blocks.getOrDefault(key(row/BLOCK_SIZE,column/BLOCK_SIZE),List.of());
         }
         List<String> filter(boolean overdue, Set<String> irls, LocalDate today) {
-            if(!overdue && irls.isEmpty()) return entities;
+            return filter(overdue, irls, today, false);
+        }
+        List<String> filter(boolean overdue, Set<String> irls, LocalDate today, boolean connectedOnly) {
+            if(!overdue && irls.isEmpty() && !connectedOnly) return entities;
             Set<String> matched=new HashSet<>();
             for(var block:blocks.values()) for(var cell:block) {
+                if(connectedOnly && cell.fromEntityId().equals(cell.toEntityId())) continue;
                 if(!irls.isEmpty() && !irls.contains(cell.irlId())) continue;
                 if(overdue) {
                     try { if(!LocalDate.parse(cell.nextIrlMeeting()).isBefore(today)) continue; }

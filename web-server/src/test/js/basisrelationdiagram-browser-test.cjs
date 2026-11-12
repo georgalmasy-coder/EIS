@@ -62,9 +62,10 @@ async function main() {
     const source = fs.readFileSync(path.join(root, 'webapp/js/pages/basisrelationdiagram-page.js'), 'utf8')
         .replace(/^import .*;\r?\n/gm, '')
         .replace(/if \(document.readyState === "loading"\) \{\s*document.addEventListener\("DOMContentLoaded", startBasisRelationDiagramPage\);\s*\} else \{\s*startBasisRelationDiagramPage\(\);\s*\}/, '');
+    const hierarchySource = fs.readFileSync(path.join(root, 'webapp/js/components/relation-diagram-hierarchy.js'), 'utf8').replace(/^export /gm, '');
     const loaderSource = fs.readFileSync(path.join(root, 'webapp/js/components/relation-diagram-loader.js'), 'utf8').replace(/^export /gm, '');
     const xmlHelpers = fs.readFileSync(path.join(root, 'webapp/js/core/xml.js'), 'utf8').replace(/^export /gm, '');
-    await run(loaderSource + '\n' + xmlHelpers + '\n' + source + `
+    await run(hierarchySource + '\n' + loaderSource + '\n' + xmlHelpers + '\n' + source + `
         function applyPageHeaderFromDocument() {}
         function setText(id, text) { const node = document.getElementById(id); if (node) node.textContent = text; }
         function naturalCompare(a, b) { return a.localeCompare(b, 'da', {numeric:true}); }
@@ -222,12 +223,22 @@ async function main() {
         window.fetch=async(url,options)=>{
             check(options.method==='POST','diagram API must use POST');
             calls.push(url);
-            if(url.endsWith('cmd=snapshot'))return new Response('<RelationDiagramDocument><relationDiagram snapshotId="api"><stakeholderRequirements><requirement id="STK-1" entityType="5" entityId="1" hasRelations="true"><code>S1</code><name>One</name></requirement></stakeholderRequirements><systemRequirements><requirement id="SYS-REQ-2" entityType="6" entityId="2" hasRelations="true"><code>R2</code><name>Two</name></requirement></systemRequirements><systemsBreakdowns/></relationDiagram></RelationDiagramDocument>');
+            if(url.endsWith('cmd=snapshot'))return new Response('<RelationDiagramDocument><relationDiagram snapshotId="api"><stakeholderRequirements><requirement id="STK-1" entityType="5" entityId="1" hasRelations="true" relationCount="7"><code>S1</code><name>One</name></requirement></stakeholderRequirements><systemRequirements><requirement id="SYS-REQ-2" entityType="6" entityId="2" hasRelations="true" relationCount="7"><code>R2</code><name>Two</name></requirement></systemRequirements><systemsBreakdowns/></relationDiagram></RelationDiagramDocument>');
             check(options.body.get('snapshotId')==='api','missing snapshot id in POST');
             return new Response(JSON.stringify({snapshotId:'api',data:{visibleIds:['STK-1','SYS-REQ-2'],relations:[{id:'r',from:'STK-1',to:'SYS-REQ-2',type:'confirmed'}]}}));
         };
         await loadRelationDiagram();await flush();
         check(calls.length===1 && state.relations.length===0,'initial API request must be compact');
+        const toggle = document.getElementById('viewStakeholder');
+        check(toggle.tagName==='BUTTON','column toggle must be a button');
+        toggle.click(); await new Promise(resolve=>setTimeout(resolve,180)); await flush();
+        check(toggle.getAttribute('aria-pressed')==='false','hidden toggle state missing');
+        check(document.querySelector('.relationdiagram-column-left').classList.contains('is-hidden-by-view'),'column did not hide');
+        check(getComputedStyle(toggle.querySelector('.relationdiagram-column-icon')).opacity==='0.3','hidden icon must be dimmed');
+        toggle.click(); await flush();
+        check(toggle.getAttribute('aria-pressed')==='true','restored toggle state missing');
+        check(!document.querySelector('.relationdiagram-column-left').classList.contains('is-hidden-by-view'),'column did not return');
+        check(state.cardsByInternalId.get('STK-1').querySelector('.relationdiagram-requirement-count').textContent==='7','snapshot count must render before traces load');
         state.hoverInternalId='STK-1';scheduleDiagramUpdate();await flush();
         await new Promise(resolve=>setTimeout(resolve,200));await flush();
         check(pathIds().join()==='r','API trace response did not render relation');
@@ -257,6 +268,38 @@ async function main() {
         console.log('Dataset:', JSON.stringify(measured));
         fs.writeFileSync(path.join(output,'measurements.json'),JSON.stringify(measured,null,2));
     }
+    await run(`(() => {
+        const container = document.createElement('div');
+        document.body.append(container);
+        const requirements = ['1','1.1','1.1.1','1.2','2'].map(code => ({internalId:'tree-'+code, visibleId:code}));
+        for (const requirement of requirements) {
+            const card = document.createElement('button');
+            card.className = 'relationdiagram-requirement-card';
+            card.dataset.internalId = requirement.internalId;
+            container.append(card);
+        }
+        let changes = 0;
+        const update = () => {
+            changes++;
+            container.querySelectorAll('.relationdiagram-requirement-card').forEach(card =>
+                card.classList.toggle('is-hidden-by-filter', card.dataset.hierarchyHidden==='true'));
+        };
+        decorateRelationDiagramHierarchy(container, requirements, update);
+        const rows = [...container.children];
+        check(rows[0].querySelector('.is-level-one'), 'level one background class missing');
+        check(rows[1].style.getPropertyValue('--hierarchy-depth')==='1' && rows[2].style.getPropertyValue('--hierarchy-depth')==='1', 'all descendants must have identical indentation');
+        const rootToggle = rows[0].querySelector('.relationdiagram-hierarchy-toggle');
+        check(rows.slice(1,4).every(row => !row.querySelector('.relationdiagram-hierarchy-toggle')), 'only level one may have toggles');
+        rootToggle.click();
+        check(rows.slice(1,4).every(row => getComputedStyle(row).display==='none'), 'entire branch did not collapse');
+        check(getComputedStyle(rows[4]).display!=='none', 'unrelated root collapsed');
+        rootToggle.click();
+        check(rows.slice(1,4).every(row => getComputedStyle(row).display!=='none'), 'all descendants must expand together');
+        check(rootToggle.getAttribute('aria-expanded')==='true' && changes===2, 'toggle accessibility or callback failed');
+        container.remove();
+    })()`);
+    console.log('Hierarchy collapse/expand: passed');
+
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => {
     socket?.close(); browser?.kill(); server.close();

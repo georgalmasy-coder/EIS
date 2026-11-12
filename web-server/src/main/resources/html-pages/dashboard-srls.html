@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/dashboard-srls.css?v=20261026-blue-current-level" />
+    <link rel="stylesheet" href="../css/dashboard-srls.css?rev=sbs-code-ellipsis-1" />
+    <link rel="stylesheet" href="../css/hierarchy-table.css" />
+    <link rel="stylesheet" href="../css/dashboard-hierarchy.css" />
 </head>
 <body class="dashboard-srls-document" data-udv-mode="{{udvMode}}">
 <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sideMenu" aria-expanded="false">&gt;</button>
@@ -47,7 +49,7 @@
             </div>
             <div id="srlStatus" class="dashboard-srls-status" role="status" aria-live="polite">Loading SRL calculations...</div>
             <div id="srlWorkspace" class="dashboard-srls-workspace" hidden>
-                <div class="dashboard-srls-legend" role="group" aria-label="Dashboard SRL information">
+                <div id="dashboard-srlsHierarchyToolbar" class="dashboard-srls-legend" role="group" aria-label="Dashboard SRL information">
                     <div class="dashboard-srls-info-item">
                         <span class="dashboard-srls-info-label">Number of Physical Architecture:</span>
                         <strong id="srlStructureCount">-</strong>
@@ -76,7 +78,7 @@
         </section>
     </div>
 </main>
-<script type="module" src="../js/pages/dashboard-srls-page.js?v=20261105-hover"></script>
+<script type="module" src="../js/pages/dashboard-srls-page.js?rev=sbs-code-ellipsis-1"></script>
 <script src="../js/tabs-list.js"></script>
 </body>
 </html>

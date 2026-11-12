@@ -1,3 +1,29 @@
+// Delegation also covers headers/cells replaced by the virtual matrix viewport.
+export function installInterfaceHeaderHover(table) {
+    if (!table) return;
+    let marked = [];
+    const clear = () => {
+        marked.forEach(header => header.classList.remove("interfaces-header-hover"));
+        marked = [];
+    };
+    table.addEventListener("mouseover", event => {
+        const target = event.target.closest(".interfaces-cell, .interfaces-row-header, .interfaces-column-header");
+        clear();
+        if (!target) return;
+        if (target.matches(".interfaces-row-header, .interfaces-column-header")) {
+            marked = [target];
+        } else {
+            marked = Array.from(table.querySelectorAll(".interfaces-row-header, .interfaces-column-header"))
+                .filter(header => header.dataset.entityId === (header.classList.contains("interfaces-row-header")
+                    ? target.dataset.fromEntityId : target.dataset.toEntityId));
+        }
+        marked.forEach(header => header.classList.add("interfaces-header-hover"));
+    });
+    table.addEventListener("mouseleave", clear);
+    table.closest(".interfaces-table-scroll")?.addEventListener("scroll", clear, {passive: true});
+    window.addEventListener("blur", clear);
+}
+
 // Draw each part inside its own cell so backgrounds stay below the arrows and
 // existing content, tooltips and mouse interactions stay above them.
 export function installInterfaceFlowArrows(tableBody, {getDiagonalRect} = {}) {

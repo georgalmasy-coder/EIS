@@ -1,3 +1,4 @@
+import {mountHierarchyControls, setHierarchyControlsVisible} from "../components/hierarchy-controls.js";
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu, menuHasRoute} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
@@ -83,6 +84,7 @@ const state = {
     hiddenColumns: loadHiddenColumns(),
     groupBy: loadGroupBy(),
     collapsedGroupPaths: loadCollapsedGroupPaths(),
+    collapsedSystemCodes: new Set(),
     contextTargetType: "",
     contextSystem: null,
     fixedView: Object.values(VIEW_TYPES).includes(FIXED_VIEW) ? FIXED_VIEW : "",
@@ -160,6 +162,18 @@ function initializeStateFromStorage() {
 }
 
 function initializeEvents() {
+    mountHierarchyControls("filterSystemText", (expanded) => {
+        state.collapsedSystemCodes.clear();
+        if (!expanded) state.systems.filter((item) => item.id && !item.id.includes(".")).forEach((item) => state.collapsedSystemCodes.add(item.id));
+        if (state.groupBy.length) {
+            const paths = new Set();
+            collectGroupPaths(state.filteredSystems, 0, [], paths);
+            state.collapsedGroupPaths = expanded ? [] : Array.from(paths);
+            persistCollapsedGroupPaths();
+        }
+        renderListView();
+    });
+
     document.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
             const viewType = button.getAttribute("data-view-type");
@@ -875,6 +889,7 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    setHierarchyControlsVisible("filterSystemText", isListView);
     const hasSystems = state.systems.length > 0;
 
     setElementHidden("btnImport", !isListView || hasSystems);
@@ -1573,11 +1588,25 @@ function renderListView() {
 
     tbody.innerHTML = state.groupBy.length
         ? renderGroupedRows(rows, columns)
-        : rows.map((system) => `
-            <tr data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
-                ${columns.map((column) => renderListCell(system, column)).join("")}
-            </tr>
-        `).join("");
+        : rows.filter((system) => !isSystemHiddenByAncestor(system))
+            .map((system) => renderSystemRow(system, columns)).join("");
+
+    tbody.querySelectorAll(".systemsbreakdown-system-toggle").forEach((button) => {
+        button.addEventListener("dblclick", (event) => event.stopPropagation());
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const code = button.getAttribute("data-system-code");
+            if (state.collapsedSystemCodes.has(code)) {
+                state.collapsedSystemCodes.delete(code);
+            } else {
+                state.collapsedSystemCodes.add(code);
+            }
+            renderListView();
+            Array.from(tbody.querySelectorAll(".systemsbreakdown-system-toggle"))
+                .find((candidate) => candidate.getAttribute("data-system-code") === code)
+                ?.focus({preventScroll: true});
+        });
+    });
 
     tbody.querySelectorAll("tr[data-system-index]").forEach((row) => {
         const system = getSystemFromRow(row);
@@ -1599,7 +1628,12 @@ function renderListView() {
 
     tbody.querySelectorAll(".systemsbreakdown-group-toggle").forEach((button) => {
         button.addEventListener("click", () => {
-            toggleGroupCollapse(button.getAttribute("data-group-path") || "");
+            const groupPath = button.getAttribute("data-group-path") || "";
+            toggleGroupCollapse(groupPath);
+            // Rendering replaces the button; retain keyboard focus on its replacement.
+            Array.from(tbody.querySelectorAll(".systemsbreakdown-group-toggle"))
+                .find((candidate) => candidate.getAttribute("data-group-path") === groupPath)
+                ?.focus({preventScroll: true});
         });
     });
 
@@ -1648,16 +1682,16 @@ function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
             const nextRows = collapsed ? "" : renderGroupedRows(groupRows, columns, depth + 1, nextPathParts);
 
             return `
-                <tr class="systemsbreakdown-group-row ${collapsed ? "is-collapsed" : ""}" data-group-path="${escapeHtml(groupPath)}">
+                <tr class="systemsbreakdown-group-row ${collapsed ? "is-collapsed" : ""}" data-group-level="${depth + 1}" style="--group-depth: ${depth}" data-group-path="${escapeHtml(groupPath)}">
                     <td colspan="${columns.length}">
                         <div class="systemsbreakdown-group-row-inner">
                             <button
                                     type="button"
                                     class="systemsbreakdown-group-toggle"
                                     data-group-path="${escapeHtml(groupPath)}"
-                                    aria-label="${collapsed ? "Expand group" : "Collapse group"}"
+                                    aria-label="${collapsed ? "Expand group" : "Collapse group"}: ${escapeHtml(labelForGroupKey(groupKey))}: ${escapeHtml(groupValue)}"
                                     aria-expanded="${collapsed ? "false" : "true"}"
-                            >${collapsed ? "›" : "⌄"}</button>
+                            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 6 6 6-6 6"/></svg></button>
                             <span class="systemsbreakdown-group-label">${escapeHtml(labelForGroupKey(groupKey))}: ${escapeHtml(groupValue)}</span>
                             <span class="systemsbreakdown-group-count">(${groupRows.length})</span>
                         </div>
@@ -1671,10 +1705,22 @@ function renderGroupedRows(rows, columns, depth = 0, pathParts = []) {
 
 function renderSystemRow(system, columns) {
     return `
-        <tr data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
+        <tr class="${!system.id.includes(".") ? "systemsbreakdown-root-row" : ""}" data-entity-id="${escapeHtml(system.entityId)}" data-system-index="${system.index}">
             ${columns.map((column) => renderListCell(system, column)).join("")}
         </tr>
     `;
+}
+
+function isSystemHiddenByAncestor(system) {
+    const visited = new Set([system.id]);
+    let parentCode = system.parentCode;
+    while (parentCode && !visited.has(parentCode)) {
+        if (state.collapsedSystemCodes.has(parentCode)) return true;
+        visited.add(parentCode);
+        parentCode = state.systems.find((candidate) => candidate.id === parentCode)?.parentCode;
+    }
+    return Array.from(state.collapsedSystemCodes)
+        .some((code) => system.id.startsWith(`${code}.`));
 }
 
 function initializeColumnResize(headerRow, colGroup, table, columns) {
@@ -1820,6 +1866,17 @@ function renderListCell(system, column) {
     const colorStyle = displayColor ? ` style="${escapeHtml(buildColorChipStyle(displayColor))}"` : "";
     const colorClass = displayColor ? " select-chip" : "";
 
+    const codeColumn = ["SBSCode", "SystemCode", "SystemBreakdownCode", "SystemId", "Code"].includes(column.key);
+    if (codeColumn) {
+        const hasChildren = !system.id.includes(".") && !state.groupBy.length && state.systems.some((candidate) =>
+            candidate.parentCode === system.id || candidate.id.startsWith(`${system.id}.`));
+        const expanded = !state.collapsedSystemCodes.has(system.id);
+        const toggle = hasChildren
+            ? `<button type="button" class="systemsbreakdown-system-toggle" data-system-code="${escapeHtml(system.id)}" aria-expanded="${expanded}" aria-label="${expanded ? "Collapse" : "Expand"} ${escapeHtml(system.name)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 6 6 6-6 6"/></svg></button>`
+            : '<span class="systemsbreakdown-system-toggle-spacer" aria-hidden="true"></span>';
+        return `<td title="${escapeHtml(displayValue)}"><div class="systemsbreakdown-code-cell" style="--system-depth: ${(system.id.match(/\./g) || []).length}">${toggle}<span class="data-table-cell-value">${escapeHtml(displayValue)}</span></div></td>`;
+    }
+
     let indentationStyle = "";
     let isTopLevelCode = false;
     const isCodeColumn = ["SBSCode", "SystemCode", "SystemBreakdownCode", "SystemId", "Code"].includes(column.key);
@@ -1841,7 +1898,8 @@ function renderListCell(system, column) {
     const cellValue = isTopLevelCode ? `<strong>${escapeHtml(displayValue)}</strong>` : escapeHtml(displayValue);
     const topLevelClass = isTopLevelCode ? " is-top-level-code" : "";
     const descriptionClass = column.key.toLowerCase().includes("description") ? " is-description" : "";
-    return `<td title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}${topLevelClass}${descriptionClass}"${styleAttr}>${cellValue}</span></td>`;
+    const nameClass = ["SystemName", "SystemBreakdownName", "Name", "Title"].includes(column.key) ? ' class="systemsbreakdown-name-cell"' : "";
+    return `<td${nameClass} title="${escapeHtml(displayValue)}"><span class="data-table-cell-value${colorClass}${topLevelClass}${descriptionClass}"${styleAttr}>${cellValue}</span></td>`;
 }
 
 function formatListCellValue(value, control) {

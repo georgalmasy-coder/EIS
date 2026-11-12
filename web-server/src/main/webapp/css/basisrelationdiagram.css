@@ -4,9 +4,10 @@
     --relationdiagram-panel-bg: var(--app-page-background);
     --relationdiagram-list-bg: var(--relationdiagram-panel-bg);
     --relationdiagram-card-bg: #ffffff;
-    --relationdiagram-card-hover-bg: #b3ecff;
-    --relationdiagram-card-active-bg: #b3ecff;
-    --relationdiagram-card-related-bg: #bbf7d0;
+    --relationdiagram-card-hover-bg: var(--relationdiagram-card-bg);
+    --relationdiagram-card-active-bg: var(--relationdiagram-card-bg);
+    --relationdiagram-card-related-bg: #fff5f5;
+    --relationdiagram-card-related-border: #e58b8b;
     --relationdiagram-card-muted-opacity: 0.35;
 
     --relationdiagram-line-normal: #6b7280;
@@ -174,6 +175,7 @@ body.relationdiagram-document {
 }
 
 .relationdiagram-legend-swatch-selected {
+    border-color: var(--relationdiagram-blue);
     background: var(--relationdiagram-card-active-bg);
 }
 
@@ -428,6 +430,26 @@ body.relationdiagram-document {
     letter-spacing: 0.015em;
 }
 
+.relationdiagram-column-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.relationdiagram-column-icon {
+    display: inline-flex;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.relationdiagram-column-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .relationdiagram-column-count {
     display: inline-flex;
     align-items: center;
@@ -458,9 +480,9 @@ body.relationdiagram-document {
     display: block;
     width: 100%;
     margin: 0 0 0.55rem 0;
-    padding: 0.6rem 0.7rem;
+    padding: 0.6rem 2.8rem 0.6rem 0.7rem;
     border: 1px solid #d5deea;
-    border-left: 4px solid #94a3b8;
+    border-left: 1px solid #94a3b8;
     border-radius: 0.45rem;
     background: var(--relationdiagram-card-bg);
     color: var(--app-text-primary);
@@ -477,21 +499,23 @@ body.relationdiagram-document {
 
 .relationdiagram-requirement-card:hover {
     background: var(--relationdiagram-card-hover-bg);
-    border-color: #93c5fd;
-    box-shadow: 0 2px 7px rgba(25, 118, 210, 0.16);
+    border-color: var(--relationdiagram-blue);
+    border-left-color: var(--relationdiagram-blue);
+    box-shadow: none;
 }
 
 .relationdiagram-requirement-card.is-selected {
     background: var(--relationdiagram-card-active-bg);
     border-color: var(--relationdiagram-blue);
     border-left-color: var(--relationdiagram-blue);
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.22);
+    box-shadow: none;
 }
 
 .relationdiagram-requirement-card.is-related {
     background: var(--relationdiagram-card-related-bg);
-    border-color: #86efac;
-    border-left-color: var(--relationdiagram-green);
+    border-color: var(--relationdiagram-card-related-border);
+    border-left-color: var(--relationdiagram-card-related-border);
+    box-shadow: none;
 }
 
 .relationdiagram-requirement-card.is-muted {
@@ -511,6 +535,22 @@ body.relationdiagram-document {
     border-left-color: var(--relationdiagram-blue);
     box-shadow: 0 2px 8px rgba(25, 118, 210, 0.26);
     transform: translateY(-1px);
+}
+
+.relationdiagram-requirement-count {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    transform: translateY(-50%);
+    min-width: 1.25rem;
+    padding: 0.15rem 0.3rem;
+    border-radius: 0.3rem;
+    background: #e8f3f0;
+    color: #39766b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
 }
 
 .relationdiagram-requirement-code {
@@ -809,3 +849,74 @@ body.relationdiagram-document .side-menu {
 /* Trace data is fetched for the active card. */
 .relationdiagram-requirement-card.is-trace-loading { cursor: progress; }
 .relationdiagram-requirement-card.is-trace-loading::after { content: "\231B"; margin-inline-start: .4rem; }
+
+button.relationdiagram-view-option {
+    justify-content: center;
+    padding: 0.3rem;
+    border: 1px solid transparent;
+    border-radius: 0.4rem;
+    background: transparent;
+}
+
+button.relationdiagram-view-option:hover {
+    background: var(--app-surface-background);
+    border-color: var(--app-border-default);
+}
+
+button.relationdiagram-view-option:focus-visible {
+    outline: 2px solid var(--relationdiagram-blue);
+    outline-offset: 2px;
+}
+
+button.relationdiagram-view-option .relationdiagram-column-icon {
+    transition: opacity 120ms ease;
+}
+
+button.relationdiagram-view-option[aria-pressed="false"] .relationdiagram-column-icon {
+    opacity: 0.3;
+}
+
+.relationdiagram-hierarchy-row {
+    position: relative;
+    padding-left: calc(16px + var(--hierarchy-depth) * 12px);
+}
+.relationdiagram-hierarchy-row.is-child::before {
+    content: "";
+    position: absolute;
+    left: calc(4px + var(--hierarchy-depth) * 12px);
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #e58b8b;
+}
+.relationdiagram-hierarchy-row:has(> .is-hidden-by-filter) { display: none; }
+.relationdiagram-requirement-card.is-level-one:not(:hover):not(.is-selected):not(.is-related) {
+    background: #e8efec;
+}
+.relationdiagram-hierarchy-toggle {
+    position: absolute;
+    left: calc(var(--hierarchy-depth) * 12px);
+    top: 0.6rem;
+    width: 16px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+}
+.relationdiagram-hierarchy-toggle svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+.relationdiagram-hierarchy-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+.relationdiagram-hierarchy-toggle:focus-visible { outline: 1px solid var(--relationdiagram-blue); }
+
+.relationdiagram-filter-bar > .relationdiagram-view-toggle {
+    margin-left: auto;
+    flex: 0 0 auto;
+}

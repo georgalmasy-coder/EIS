@@ -1,3 +1,5 @@
+import {mountHierarchyControls, setHierarchyControlsVisible} from "../components/hierarchy-controls.js";
+import {createHierarchyTable} from "../components/hierarchy-table.js";
 import {userPreferences} from "../core/user-preferences.js";
 import {initMenu, menuHasRoute} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
@@ -67,6 +69,8 @@ const MAX_REQUIREMENT_LEVEL = 4;
 const DIAGRAM_NODE_WIDTH = 260;
 const PROJECT_NODE_HEIGHT = 124;
 const REQUIREMENT_NODE_HEIGHT = 124;
+
+const hierarchyTable = createHierarchyTable(["FunctionalCode"]);
 
 const state = {
     xmlDocument: null,
@@ -158,6 +162,17 @@ function initializeStateFromStorage() {
 }
 
 function initializeEvents() {
+    mountHierarchyControls("filterRequirementText", (expanded) => {
+        hierarchyTable.setAll(state.requirements, expanded);
+        if (state.groupBy.length) {
+            const paths = new Set();
+            collectGroupPaths(state.filteredRequirements, 0, [], paths);
+            state.collapsedGroupPaths = expanded ? [] : Array.from(paths);
+            persistCollapsedGroupPaths();
+        }
+        renderListView();
+    });
+
     document.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
             const viewType = button.getAttribute("data-view-type");
@@ -769,6 +784,7 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    setHierarchyControlsVisible("filterRequirementText", isListView);
     const hasRequirements = state.requirements.length > 0;
 
     setElementHidden("btnImport", !isListView || hasRequirements);
@@ -1459,6 +1475,8 @@ function renderListView() {
                 ${columns.map((column) => renderListCell(requirement, column)).join("")}
             </tr>
         `).join("");
+
+    hierarchyTable.apply(tbody, state.requirements, columns, state.groupBy.length > 0);
 
     tbody.querySelectorAll("tr[data-requirement-index]").forEach((row) => {
         const requirement = getRequirementFromRow(row);

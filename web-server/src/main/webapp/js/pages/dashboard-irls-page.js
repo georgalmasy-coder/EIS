@@ -1,3 +1,7 @@
+import {mountHierarchyControls} from "../components/hierarchy-controls.js";
+import {createDashboardHierarchy, decorateDashboardCode, focusDashboardToggle} from "../components/dashboard-hierarchy.js";
+const hierarchy = createDashboardHierarchy();
+let hierarchyDashboard = null;
 import {initMenu, menuHasRoute} from "../components/menu.js";
 import {mountTopbar} from "../components/topbar.js";
 import {initHelpDialog} from "../components/help-dialog.js";
@@ -9,6 +13,7 @@ import {getAttribute, getChildText, hasXmlParseError} from "../core/xml.js";
 
 const DASHBOARD_ENDPOINT = "/pro/dashboardirl?cmd=overview";
 const SYSTEMS_BREAKDOWN_EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
+const codeOrder = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
 
 const state = {
     document: null,
@@ -46,6 +51,10 @@ function initializePageShell() {
 }
 
 function initializeEvents() {
+    mountHierarchyControls("dashboard-irlsHierarchyToolbar", expanded => {
+        hierarchy.setAll(hierarchyDashboard?.structures.map(item => item.id) || [], expanded);
+        if (hierarchyDashboard) renderDashboard(hierarchyDashboard);
+    }, {container: true});
     initializeFilterEvents();
     initializeTrlFilterEvents();
 }
@@ -171,7 +180,7 @@ function parsePhysicalStructures(dashboardElement, lookup) {
             daysNextTrl: getChildText(structureElement, "daysNextTrl", ""),
             irlCounts
         };
-    });
+    }).sort((a, b) => codeOrder.compare(a.id, b.id) || codeOrder.compare(a.entityId, b.entityId));
 }
 
 function parseIrlCounts(structureElement) {
@@ -217,6 +226,7 @@ function applyTopPanel(xmlDocument) {
 }
 
 function renderDashboard(dashboard) {
+    hierarchyDashboard = dashboard;
     const filterToggle = document.getElementById("dashboardIrlOverdueOnlyToggle");
     if (filterToggle) {
         filterToggle.checked = state.filterMode === "overdue";
@@ -329,7 +339,10 @@ function buildHeaderContent(label, sublabel) {
 function renderBody(tableBody, dashboard, rows) {
     const fragment = document.createDocumentFragment();
 
-    for (const structure of rows) {
+    tableBody.closest("table").classList.add("hierarchy-table");
+    const childRoots = new Set(dashboard.structures.filter(item => item.id.includes(".")).map(item => item.id.split(".")[0]));
+    const visibleRows = rows.filter(item => hierarchy.visible(item.id));
+    for (const structure of visibleRows) {
         const tr = document.createElement("tr");
         tr.className = isOverdue(structure) ? "dashboard-irls-row dashboard-irls-row--overdue" : "dashboard-irls-row";
         tr.dataset.entityId = structure.entityId || "";
@@ -346,9 +359,15 @@ function renderBody(tableBody, dashboard, rows) {
         if (dots > 0) {
             idCell.style.paddingLeft = `${dots * 15}px`;
         }
+        tr.classList.toggle("hierarchy-root-row", Boolean(structure.id) && dots === 0);
+        decorateDashboardCode(idCell, structure.id, structure.name, dots === 0 && childRoots.has(structure.id), hierarchy.expanded(structure.id), () => {
+            hierarchy.toggle(structure.id);
+            renderDashboard(dashboard);
+            focusDashboardToggle(tableBody, structure.id);
+        });
         tr.appendChild(idCell);
 
-        tr.appendChild(buildTextCell("dashboard-irls-cell dashboard-irls-cell--name", structure.name, structure.description));
+        tr.appendChild(buildTextCell("dashboard-irls-cell dashboard-irls-cell--name hierarchy-name-cell", structure.name, structure.description));
         tr.appendChild(buildTextCell(
             "dashboard-irls-cell dashboard-irls-cell--trl dashboard-irls-cell--center",
             structure.trlCode,
@@ -371,7 +390,7 @@ function renderBody(tableBody, dashboard, rows) {
     }
 
     tableBody.replaceChildren(fragment);
-    updateTableFooter(rows.length, dashboard.structures.length);
+    updateTableFooter(visibleRows.length, dashboard.structures.length);
 }
 
 function updateTableFooter(visibleCount, totalCount) {

@@ -57,7 +57,7 @@ async function main() {
     await pause(500);
 
     const read = file => fs.readFileSync(path.join(root,'webapp/js',file),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'');
-    const result = await run(read('components/teamwork-viewport.js') + '\n' + read('pages/dashboard-systems-teamwork-page.js') + `
+    const result = await run(read('components/dashboard-hierarchy.js') + '\n' + read('components/hierarchy-controls.js') + '\n' + read('components/teamwork-viewport.js') + '\n' + read('pages/dashboard-systems-teamwork-page.js') + `
         function setText(id,text) { const n=typeof id==='string'?document.getElementById(id):id;if(n)n.textContent=text; }
         let edited=null, pdf=null;
         function openEditDialog(options) { edited=options; }

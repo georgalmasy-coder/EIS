@@ -7,7 +7,7 @@ const MENU_URL = "/Menu";
 const MENU_SELECT_PROJECT_CMD = "selectproject";
 const MENU_WIDTH = 272;
 const MENU_COLLAPSED_WIDTH = 72;
-const MENU_TRANSITION = "transform 1200ms cubic-bezier(.22,.61,.36,1)";
+const MENU_TRANSITION = "width 160ms ease, padding 160ms ease, transform 160ms ease";
 const MENU_COLLAPSED_STORAGE_KEY = "eis.menu.collapsed";
 const USER_MENU_CLOSE_DELAY_MS = 2000;
 const LANGUAGE_PREFERENCE_KEY = "eis.language";
@@ -129,13 +129,14 @@ function primeMenuFromStorage() {
 
 function applyMenuTransitionStyles() {
     const app = document.querySelector(".app");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (app) {
-        app.style.setProperty("transition", "padding-left 1200ms cubic-bezier(.22,.61,.36,1)", "important");
+        app.style.setProperty("transition", reducedMotion ? "none" : "padding-left 160ms ease", "important");
     }
 
     if (sideMenu) {
-        sideMenu.style.setProperty("transition", MENU_TRANSITION, "important");
+        sideMenu.style.setProperty("transition", reducedMotion ? "none" : MENU_TRANSITION, "important");
     }
 }
 
@@ -250,6 +251,17 @@ function setActiveLinks(root) {
     root.querySelectorAll("a[data-url]").forEach((link) => {
         const linkKey = getActiveRouteKey(link.getAttribute("data-url"));
         link.classList.toggle("is-active", linkKey === currentKey);
+        if (linkKey === currentKey) {
+            link.setAttribute("aria-current", "page");
+            const group = link.closest(".menu-main");
+            const button = group?.querySelector(".menu-main-btn");
+            if (button) {
+                group.classList.add("is-open");
+                button.setAttribute("aria-expanded", "true");
+            }
+        } else {
+            link.removeAttribute("aria-current");
+        }
     });
 }
 
@@ -257,6 +269,7 @@ function closeAllExcept(root, exceptLi) {
     root.querySelectorAll(".menu-main.is-open").forEach((li) => {
         if (li !== exceptLi) {
             li.classList.remove("is-open");
+            li.querySelector(".menu-main-btn")?.setAttribute("aria-expanded", "false");
         }
     });
 }
@@ -351,6 +364,7 @@ function buildMenu(doc, statusElement, rootElement) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "menu-main-btn";
+        button.setAttribute("aria-expanded", "false");
 
         if (mainIconSvg) {
             button.appendChild(createIconSpan(mainIconSvg));
@@ -362,14 +376,18 @@ function buildMenu(doc, statusElement, rootElement) {
         button.append(label);
 
         if (subItems.length > 0) {
-            const badge = document.createElement("span");
-            badge.className = "menu-item-badge";
-            badge.textContent = subItems.length;
-            button.appendChild(badge);
+            const chevron = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            chevron.setAttribute("class", "menu-chevron");
+            chevron.setAttribute("viewBox", "0 0 24 24");
+            chevron.setAttribute("aria-hidden", "true");
+            chevron.innerHTML = '<path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+            button.appendChild(chevron);
         }
 
         const ulSub = document.createElement("ul");
         ulSub.className = "menu-sub";
+        ulSub.id = `menu-sub-${rootElement.children.length}`;
+        button.setAttribute("aria-controls", ulSub.id);
 
         subItems.forEach((subItem) => {
             const subText = textOf(subItem, "display") || "Untitled";
@@ -391,6 +409,7 @@ function buildMenu(doc, statusElement, rootElement) {
 
             closeAllExcept(rootElement, li);
             li.classList.toggle("is-open", willOpen);
+            button.setAttribute("aria-expanded", String(willOpen));
         });
 
         li.append(button, ulSub);

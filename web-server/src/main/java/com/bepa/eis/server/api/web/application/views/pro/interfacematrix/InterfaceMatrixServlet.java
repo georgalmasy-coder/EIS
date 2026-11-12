@@ -97,7 +97,8 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
             String irlText=java.util.Objects.toString(request.getParameter("irlIds"),"");
             if(irlText.length()>2000) throw new IllegalArgumentException("Too many IRL filters");
             var irls=java.util.Arrays.stream(irlText.split(",")).filter(v->!v.isBlank()).collect(java.util.stream.Collectors.toSet());
-            data=source.filter(Boolean.parseBoolean(request.getParameter("overdue")),irls,java.time.LocalDate.now());
+            data=source.filter(Boolean.parseBoolean(request.getParameter("overdue")),irls,java.time.LocalDate.now(),
+                    Boolean.parseBoolean(request.getParameter("connectedOnly")));
         }
         response.setContentType("application/json; charset=UTF-8");
         json.writeValue(response.getWriter(),java.util.Map.of("snapshotId",id,"data",data));

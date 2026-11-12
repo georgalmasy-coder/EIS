@@ -810,6 +810,9 @@ body.systemsbreakdown-main-document{
     min-width: 1420px;
     table-layout: fixed;
     border-collapse: collapse;
+    font-family: var(--app-navigation-font, "Segoe UI", system-ui, sans-serif);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
 
 .systemsbreakdown-table th{
@@ -817,10 +820,80 @@ body.systemsbreakdown-main-document{
 }
 
 .systemsbreakdown-table td{
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--app-border-default);
+    line-height: 1.5;
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: normal;
     vertical-align: top;
+}
+
+/* System hierarchy: parent rows keep their data in the normal columns. */
+.systemsbreakdown-table tbody td{
+    padding: 6px 12px;
+    height: 44px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    border-bottom-color: #e0e5ec;
+}
+
+.systemsbreakdown-table tbody tr.systemsbreakdown-root-row > td{
+    background: #f3f4f6;
+}
+
+.systemsbreakdown-root-row .systemsbreakdown-code-cell,
+.systemsbreakdown-root-row .systemsbreakdown-name-cell .data-table-cell-value{
+    font-weight: 700;
+}
+
+.systemsbreakdown-code-cell{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: calc(var(--system-depth, 0) * 18px);
+}
+
+.systemsbreakdown-system-toggle,
+.systemsbreakdown-system-toggle-spacer{
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+}
+
+.systemsbreakdown-system-toggle{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #e0e5ec;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.systemsbreakdown-system-toggle svg{
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.systemsbreakdown-system-toggle[aria-expanded="true"] svg{
+    transform: rotate(90deg);
+}
+
+.systemsbreakdown-system-toggle:hover{
+    background: var(--app-accent-soft);
+}
+
+.systemsbreakdown-system-toggle:focus-visible{
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: 2px;
 }
 
 .systemsbreakdown-table thead th{
@@ -829,6 +902,12 @@ body.systemsbreakdown-main-document{
     z-index: 3;
     background: var(--app-table-header-background);
     color: var(--app-text-primary);
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .systemsbreakdown-table tbody tr{
@@ -860,6 +939,18 @@ body.systemsbreakdown-main-document{
     background: rgba(230,239,232,.9);
     font-weight: 600;
     color: var(--app-text-primary);
+    padding: 8px 12px;
+}
+
+.systemsbreakdown-group-row[data-group-level="1"] td{
+    background: var(--app-surface-strong-background);
+    border-top: 1px solid var(--app-border-strong);
+    font-weight: 700;
+}
+
+.systemsbreakdown-table .data-table-cell-value{
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .systemsbreakdown-group-row.is-collapsed td{
@@ -871,18 +962,52 @@ body.systemsbreakdown-main-document{
     align-items: center;
     gap: 8px;
     min-width: 0;
+    padding-left: calc(var(--group-depth, 0) * 18px);
 }
 
 .systemsbreakdown-group-toggle{
     border: 0;
     background: transparent;
     padding: 0;
-    width: 18px;
-    flex: 0 0 18px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
     cursor: pointer;
     color: inherit;
     line-height: 1;
     text-align: center;
+}
+
+.systemsbreakdown-group-toggle svg{
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 160ms ease;
+}
+
+.systemsbreakdown-group-toggle[aria-expanded="true"] svg{
+    transform: rotate(90deg);
+}
+
+.systemsbreakdown-group-toggle:hover{
+    background: var(--app-accent-soft);
+}
+
+.systemsbreakdown-group-toggle:focus-visible{
+    outline: 2px solid var(--app-accent-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .systemsbreakdown-group-toggle svg{ transition: none; }
 }
 
 .systemsbreakdown-group-label{

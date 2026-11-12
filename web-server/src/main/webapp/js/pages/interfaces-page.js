@@ -2,7 +2,7 @@ import {createInterfaceBlockLoader} from "../components/interface-block-loader.j
 import {initMenu} from "../components/menu.js";
 import {createInterfaceViewport, INTERFACE_GRID} from "../components/interface-matrix-viewport.js?rev=interfaces-updates-3";
 import {snapshotInterfaceMatrix, downloadInterfaceXlsx} from "../components/interface-xlsx-export.js";
-import {installInterfaceFlowArrows} from "../components/interface-flow-arrows.js?rev=interfaces-virtual-1";
+import {installInterfaceFlowArrows, installInterfaceHeaderHover} from "../components/interface-flow-arrows.js?rev=interfaces-header-hover-1";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -31,6 +31,7 @@ const state = {
     currentCell: null,
     contextTarget: null,
     showOverdueOnly: false,
+    showConnectedOnly: false,
     selectedIrlIds: []
 };
 
@@ -72,6 +73,7 @@ function initializeEvents() {
 
     });
     clearFlowArrows = installInterfaceFlowArrows(document.getElementById("interfacesTableBody"), {getDiagonalRect:virtualDiagonalRect});
+    installInterfaceHeaderHover(document.getElementById("interfacesTableBody")?.closest("table"));
     initializeDialogEvents();
     initializeContextMenuEvents();
     initializeFilterEvents();
@@ -288,10 +290,10 @@ function refreshInterfacePair(pair) {
             matrix.refreshing=false;
             const patches=reply.data.patches.map(p=>({...p,cell:p.cell?decodeInterfaceCell(p.cell,matrix.lookup):null}));
             matrix.blockLoader.rotate(reply.snapshotId,patches);
-            if(state.showOverdueOnly || state.selectedIrlIds.length) { matrix.restoreScroll={top,left};renderInterfaceMatrix(matrix); }
+            if(state.showOverdueOnly || state.showConnectedOnly || state.selectedIrlIds.length) { matrix.restoreScroll={top,left};renderInterfaceMatrix(matrix); }
             else if(interfaceViewport)interfaceViewport.refresh();else renderInterfaceMatrix(matrix);
             scroller.scrollTop=top;scroller.scrollLeft=left;
-            if(!state.showOverdueOnly && !state.selectedIrlIds.length)
+            if(!state.showOverdueOnly && !state.showConnectedOnly && !state.selectedIrlIds.length)
                 document.getElementById("interfacesExcelButton").disabled=exportRunning || !matrix.structures.length;
             setText("loadStatus","Loaded","");
         } catch(error) {
@@ -310,15 +312,15 @@ function decodeInterfaceCell(cell,lookup) {
     return {...cell,classificationIds,irlCode:resolveLookupCode(lookup.irlById,cell.irlId),irlColor:resolveLookupColor(lookup.irlById,cell.irlId),
         classificationCodes:classificationIds.map(id=>resolveLookupCode(lookup.classificationById,id))};
 }
-function interfaceFilterKey(){return JSON.stringify([state.showOverdueOnly,[...state.selectedIrlIds].sort()]);}
+function interfaceFilterKey(){return JSON.stringify([state.showOverdueOnly,state.showConnectedOnly,[...state.selectedIrlIds].sort()]);}
 function ensureInterfaceFilter(matrix) {
     if(matrix.refreshing)return false;
-    if(!state.showOverdueOnly && !state.selectedIrlIds.length)return true;
+    if(!state.showOverdueOnly && !state.showConnectedOnly && !state.selectedIrlIds.length)return true;
     const key=interfaceFilterKey();if(matrix.filterResults.has(key))return true;
     document.getElementById("interfacesExcelButton").disabled=true;setText("loadStatus","Filtering","");
     if(!matrix.filterRequests.has(key)) {
         const version=matrix.filterVersion;
-        const request=matrix.request('view',{overdue:state.showOverdueOnly,irlIds:state.selectedIrlIds.join(',')}).then(reply=>{
+        const request=matrix.request('view',{overdue:state.showOverdueOnly,connectedOnly:state.showConnectedOnly,irlIds:state.selectedIrlIds.join(',')}).then(reply=>{
             if(state.matrix!==matrix || matrix.filterVersion!==version)return;
             while(matrix.filterResults.size>=16)matrix.filterResults.delete(matrix.filterResults.keys().next().value);
             matrix.filterResults.set(key,new Set(reply.data));
@@ -349,7 +351,7 @@ function renderInterfaceMatrix(matrix) {
 
     setText(
         "interfacesStructureCount",
-        (state.showOverdueOnly || state.selectedIrlIds.length > 0)
+        (state.showOverdueOnly || state.showConnectedOnly || state.selectedIrlIds.length > 0)
             ? `${view.rowStructures.length} rows, ${view.columnStructures.length} cols`
             : String(structureCount),
         ""
@@ -362,6 +364,8 @@ function renderInterfaceMatrix(matrix) {
         filterToggle.checked = state.showOverdueOnly;
     }
 
+    const connectedToggle = document.getElementById("interfacesConnectedOnlyToggle");
+    if (connectedToggle) connectedToggle.checked = state.showConnectedOnly;
     renderIrlCheckboxList();
 
     const tableHead = document.getElementById("interfacesTableHead");
@@ -383,8 +387,8 @@ function renderInterfaceMatrix(matrix) {
         return;
     }
 
-    if (state.showOverdueOnly && (!view.rowStructures.length || !view.columnStructures.length)) {
-        showEmptyState("No overdue interfaces found.");
+    if (!((view.rowStructures || view.structures).length) || !((view.columnStructures || view.structures).length)) {
+        showEmptyState("No interfaces match the current filters.");
         return;
     }
 
@@ -620,10 +624,10 @@ function renderBody(tableBody, matrix, headerGroups) {
     tableBody.replaceChildren(fragment);
 }
 
-function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
+function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds, connectedOnly = state.showConnectedOnly) {
     const selectedIrlSet = new Set(selectedIrlIds || []);
     if(matrix.lazy) {
-        if(!showOverdueOnly && !selectedIrlSet.size)return matrix;
+        if(!showOverdueOnly && !connectedOnly && !selectedIrlSet.size)return matrix;
         const ids=matrix.filterResults.get(interfaceFilterKey()),visible=matrix.structures.filter(s=>ids?.has(s.entityId));
         return {...matrix,rowStructures:visible,columnStructures:visible,cellsByKey:{get:key=>{
             const cell=matrix.cellsByKey.get(key);
@@ -631,7 +635,7 @@ function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
         }}};
     }
 
-    if (!showOverdueOnly && selectedIrlSet.size === 0) {
+    if (!showOverdueOnly && !connectedOnly && selectedIrlSet.size === 0) {
         return matrix;
     }
 
@@ -639,6 +643,7 @@ function buildVisibleMatrix(matrix, showOverdueOnly, selectedIrlIds) {
     const visibleCells = new Map();
 
     for (const cell of matrix.cellsByKey.values()) {
+        if (connectedOnly && cell.fromEntityId === cell.toEntityId) continue;
         if (showOverdueOnly && !isCellOverdue(cell)) {
             continue;
         }
@@ -896,6 +901,16 @@ function closeInterfaceContextMenu() {
 }
 
 function initializeFilterEvents() {
+    document.getElementById("interfacesConnectedOnlyToggle")?.addEventListener("change", event => {
+        state.showConnectedOnly = Boolean(event.target.checked);
+        if (state.matrix) renderInterfaceMatrix(state.matrix);
+    });
+    document.getElementById("interfacesClearFiltersButton")?.addEventListener("click", () => {
+        state.showOverdueOnly = false;
+        state.showConnectedOnly = false;
+        state.selectedIrlIds = [];
+        if (state.matrix) renderInterfaceMatrix(state.matrix);
+    });
     const toggle = document.getElementById("interfacesOverdueOnlyToggle");
 
     toggle?.addEventListener("change", () => {

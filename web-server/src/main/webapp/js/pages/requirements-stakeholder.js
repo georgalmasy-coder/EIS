@@ -1,3 +1,5 @@
+import {mountHierarchyControls, setHierarchyControlsVisible} from "../components/hierarchy-controls.js";
+import {createHierarchyTable} from "../components/hierarchy-table.js";
 import {userPreferences} from "../core/user-preferences.js";
 import {openEditDialog} from "../components/edit-dialog.js";
 import {createExportDialog} from "../components/export-dialog.js";
@@ -65,6 +67,8 @@ const DIAGRAM_NODE_WIDTH = 260;
 const PROJECT_NODE_HEIGHT = 104;
 const REQUIREMENT_NODE_HEIGHT = 124;
 let pdfDownloadInProgress = false;
+
+const hierarchyTable = createHierarchyTable(["StakeholderReqCode","StakeholderRequirementCode","RequirementCode","Code"]);
 
 const state = {
     xmlDocument: null,
@@ -175,6 +179,17 @@ function initializeStateFromStorage() {
 }
 
 function initializeEvents() {
+    mountHierarchyControls("stakeholderSearchInput", (expanded) => {
+        hierarchyTable.setAll(state.requirements, expanded);
+        if (state.groupBy.length) {
+            const paths = new Set();
+            collectGroupPaths(state.filteredRequirements, 0, [], paths);
+            state.collapsedGroupPaths = expanded ? [] : Array.from(paths);
+            persistCollapsedGroupPaths();
+        }
+        renderListView();
+    });
+
     const headerActions = document.getElementById("stakeholderHeaderActions");
     headerActions?.querySelectorAll("[data-view-type]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -819,6 +834,7 @@ function applyView(viewType, options = {}) {
 
 function updateActionButtonsForView(viewType) {
     const isListView = viewType === VIEW_TYPES.list;
+    setHierarchyControlsVisible("stakeholderSearchInput", isListView);
     const hasRequirements = state.requirements.length > 0;
 
     setElementHidden("stakeholderBtnImport", !isListView || hasRequirements);
@@ -1465,6 +1481,8 @@ function renderListView() {
                 ${columns.map((column) => renderListCell(requirement, column)).join("")}
             </tr>
         `).join("");
+
+    hierarchyTable.apply(stakeholdertbody, state.requirements, columns, state.groupBy.length > 0);
 
     stakeholdertbody.querySelectorAll("tr[data-requirement-index]").forEach((row) => {
         const requirement = getRequirementFromRow(row);

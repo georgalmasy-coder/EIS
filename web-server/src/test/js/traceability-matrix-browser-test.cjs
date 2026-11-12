@@ -88,6 +88,17 @@ async function main() {
         result.pressed = toggle.getAttribute('aria-pressed');
         result.contextActions = getTraceabilityCellActions({style:'green'}).map(action => action.action);
         // Reload preferences from the mocked API to verify the persisted selection.
+        const hoverCell = body.querySelector('.traceability-cell');
+        hoverCell.dispatchEvent(new MouseEvent('mouseover', {bubbles:true}));
+        const hoverHeaders = [...body.querySelectorAll('.traceability-header-hover')];
+        if (hoverHeaders.length !== 2 || !hoverHeaders.every(header => getComputedStyle(header).boxShadow.includes('-2px'))) throw Error('Cell hover must underline both headers');
+        scroll.dispatchEvent(new Event('scroll'));
+        if (body.querySelector('.traceability-header-hover')) throw Error('Scroll must clear hover');
+        const rowHeader = body.querySelector('.traceability-row-header');
+        rowHeader.dispatchEvent(new MouseEvent('mouseover', {bubbles:true}));
+        if (!rowHeader.classList.contains('traceability-header-hover') || body.querySelectorAll('.traceability-header-hover').length !== 1) throw Error('Header hover must mark only that header');
+        body.dispatchEvent(new MouseEvent('mouseleave'));
+        if (body.querySelector('.traceability-header-hover')) throw Error('Mouse leave must clear hover');
         values.clear(); loaded = false; loadSync();
         result.restored = userPreferences.getItem(VIEW_MODE_KEY);
         toggle.click();

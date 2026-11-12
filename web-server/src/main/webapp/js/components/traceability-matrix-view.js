@@ -30,6 +30,29 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
     root.replaceChildren(cells, rows, columns, axis, corner);
     root.classList.add("traceability-virtual-grid");
 
+    let hoveredHeaders = [];
+    function clearHeaderHover() {
+        hoveredHeaders.forEach(header => header.classList.remove("traceability-header-hover"));
+        hoveredHeaders = [];
+    }
+    root.addEventListener("mouseover", event => {
+        clearHeaderHover();
+        const hit = target(event);
+        if (!hit) return;
+        if (hit.element.matches(".traceability-row-header, .traceability-column-header")) {
+            hoveredHeaders = [hit.element];
+        } else {
+            hoveredHeaders = Array.from(root.querySelectorAll(".traceability-row-header, .traceability-column-header"))
+                .filter(header => header.classList.contains("traceability-row-header")
+                    ? header.dataset.rowPosition === hit.element.dataset.rowPosition
+                    : header.dataset.columnPosition === hit.element.dataset.columnPosition);
+        }
+        hoveredHeaders.forEach(header => header.classList.add("traceability-header-hover"));
+    });
+    root.addEventListener("mouseleave", clearHeaderHover);
+    scroll.addEventListener("scroll", clearHeaderHover, {passive: true});
+    window.addEventListener("blur", clearHeaderHover);
+
     function layer(className) {
         const element = document.createElement("div");
         element.className = className;
@@ -127,6 +150,7 @@ export function createTraceabilityMatrixView({root, scroll, createIcon, cellTool
             }
             cellFragment.appendChild(rowElement);
         }
+        clearHeaderHover();
         cells.replaceChildren(cellFragment);
         rows.replaceChildren(rowFragment);
         columns.replaceChildren(columnFragment);

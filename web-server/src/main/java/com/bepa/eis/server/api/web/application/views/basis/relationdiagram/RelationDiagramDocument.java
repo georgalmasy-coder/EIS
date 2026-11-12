@@ -169,7 +169,10 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
-                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    requirementElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 stakeholderRequirements.appendChild(requirementElement);
             }
         }
@@ -188,7 +191,10 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addElement(requirementElement, "code", requirement.getRequirementCode().getValue());
                 addElement(requirementElement, "name", requirement.getRequirementName().getValue());
                 if (!compact) addElement(requirementElement, "description", requirement.getRequirementDescription().getValue());
-                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    requirementElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 systemRequirements.appendChild(requirementElement);
             }
         }
@@ -207,7 +213,10 @@ public class RelationDiagramDocument extends GenericXmlDocument {
                 addElement(requirementElement, "code", system.getSbsCode().getValue());
                 addElement(requirementElement, "name", system.getSystemName().getValue());
                 if (!compact) addElement(requirementElement, "description", system.getDescription());
-                if (compact) requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                if (compact) {
+                    requirementElement.setAttribute("hasRelations", Boolean.toString(snapshot.hasRelations(id)));
+                    requirementElement.setAttribute("relationCount", Integer.toString(snapshot.relationCount(id)));
+                }
                 systemRequirements.appendChild(requirementElement);
             }
         }

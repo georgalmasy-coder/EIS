@@ -1,3 +1,4 @@
+import {decorateRelationDiagramHierarchy} from "../components/relation-diagram-hierarchy.js?rev=level-one-1";
 import {initMenu} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -207,28 +208,28 @@ function initializeEvents() {
     const viewLogical = document.getElementById("viewLogical");
     const viewPhysical = document.getElementById("viewPhysical");
 
-    viewStakeholder?.addEventListener("change", () => {
-        state.columnVisibility.stakeholder = viewStakeholder.checked;
+    viewStakeholder?.addEventListener("click", () => {
+        state.columnVisibility.stakeholder = !state.columnVisibility.stakeholder;
         applyViewMode();
     });
 
-    viewSystem?.addEventListener("change", () => {
-        state.columnVisibility.system = viewSystem.checked;
+    viewSystem?.addEventListener("click", () => {
+        state.columnVisibility.system = !state.columnVisibility.system;
         applyViewMode();
     });
 
-    viewFunctional?.addEventListener("change", () => {
-        state.columnVisibility.functional = viewFunctional.checked;
+    viewFunctional?.addEventListener("click", () => {
+        state.columnVisibility.functional = !state.columnVisibility.functional;
         applyViewMode();
     });
 
-    viewLogical?.addEventListener("change", () => {
-        state.columnVisibility.logical = viewLogical.checked;
+    viewLogical?.addEventListener("click", () => {
+        state.columnVisibility.logical = !state.columnVisibility.logical;
         applyViewMode();
     });
 
-    viewPhysical?.addEventListener("change", () => {
-        state.columnVisibility.physical = viewPhysical.checked;
+    viewPhysical?.addEventListener("click", () => {
+        state.columnVisibility.physical = !state.columnVisibility.physical;
         applyViewMode();
     });
 
@@ -418,6 +419,7 @@ function parseRequirementGroup(parentElement, groupSelector, itemSelector, type)
                 visibleId: directTextOf(requirementElement, "code") || directTextOf(requirementElement, "id") || "-",
                 name: directTextOf(requirementElement, "name") || "-",
                 hasRelations: requirementElement.getAttribute("hasRelations") === "true",
+                relationCount: parseInteger(requirementElement.getAttribute("relationCount")),
                 description: directTextOf(requirementElement, "description") || "",
                 type,
                 entityTypeId: parseInteger(requirementElement.getAttribute("entityType")),
@@ -554,7 +556,16 @@ function renderRequirementCards(container, requirements) {
         name.className = "relationdiagram-requirement-name";
         name.textContent = requirement.name;
 
-        card.append(code, name);
+        const count = document.createElement("span");
+        count.className = "relationdiagram-requirement-count";
+        const relationCount = requirement.relationCount ?? state.relations.filter(
+            relation => relation.from === requirement.internalId || relation.to === requirement.internalId
+        ).length;
+        count.textContent = String(relationCount);
+        count.title = relationCount + " direct relations";
+        count.setAttribute("aria-label", count.title);
+
+        card.append(code, name, count);
 
         card.addEventListener("mouseenter", () => {
             state.hoverInternalId = requirement.internalId;
@@ -600,6 +611,7 @@ function renderRequirementCards(container, requirements) {
 
         container.appendChild(card);
     });
+    decorateRelationDiagramHierarchy(container, requirements, applyFiltersAndRedraw);
 }
 
 function setupScrollListeners() {
@@ -678,7 +690,7 @@ function applyFilters() {
             shouldShow = requirementMatchesSearch(requirement, searchText);
         }
 
-        card.classList.toggle("is-hidden-by-filter", !shouldShow);
+        card.classList.toggle("is-hidden-by-filter", !shouldShow || card.dataset.hierarchyHidden === "true");
     });
 }
 
@@ -1417,6 +1429,9 @@ function hideEmptyState() {
 }
 
 function applyViewMode() {
+    document.querySelectorAll("button[data-column-type]").forEach(button => {
+        button.setAttribute("aria-pressed", String(state.columnVisibility[button.dataset.columnType]));
+    });
     updateGridLayout();
 
     requestAnimationFrame(() => {

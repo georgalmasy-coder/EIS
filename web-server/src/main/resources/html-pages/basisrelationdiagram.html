@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="../css/help-dialog.css" />
     <link rel="stylesheet" href="../css/basisstakeholderrequirement.css" />
     <link rel="stylesheet" href="../css/basistraceability.css" />
-    <link rel="stylesheet" href="../css/basisrelationdiagram.css?rev=diagram-lazy-1" />
+    <link rel="stylesheet" href="../css/basisrelationdiagram.css?rev=diagram-toolbar-1" />
 </head>
 
 <body class="relationdiagram-document">
@@ -49,40 +49,6 @@
                     <div id="pageEyebrow" class="workspace-eyebrow relationdiagram-workspace-eyebrow"></div>
                     <div id="pageHeading" class="workspace-heading relationdiagram-workspace-heading"></div>
                     <div id="pageHelpText" class="workspace-helptext relationdiagram-workspace-helptext"></div>
-                </div>
-            </div>
-
-            <div class="relationdiagram-info-bar" aria-label="Relation diagram information">
-                <div class="relationdiagram-legend" aria-label="Relation diagram color legend">
-                    <span class="relationdiagram-legend-item relationdiagram-legend-item-normal">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-normal"></span>
-                        Normal relation
-                    </span>
-                    <span class="relationdiagram-legend-item">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-active"></span>
-                        Highlighted relation
-                    </span>
-                    <span class="relationdiagram-legend-item">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-selected"></span>
-                        Selected entity
-                    </span>
-                </div>
-
-                <div class="relationdiagram-info-actions">
-                    <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view modes">
-                        <label class="relationdiagram-view-option" title="Show or hide Stakeholder Requirements">
-                            <input id="viewStakeholder" type="checkbox" checked>
-                            <span>STK</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Systems Requirements">
-                            <input id="viewSystem" type="checkbox" checked>
-                            <span>SYS-REQ</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Physical Architecture">
-                            <input id="viewSystemsBreakdown" type="checkbox" checked>
-                            <span>P-ARC</span>
-                        </label>
-                    </div>
                 </div>
             </div>
 
@@ -139,13 +105,24 @@
                 <button id="btnClearSelection" class="relationdiagram-secondary-button" type="button">
                     Clear filter
                 </button>
+                <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view modes">
+                        <button id="viewStakeholder" class="relationdiagram-view-option" type="button" data-column-type="stakeholder" title="Stakeholder Requirements" aria-label="Stakeholder Requirements" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span>
+                        </button>
+                        <button id="viewSystem" class="relationdiagram-view-option" type="button" data-column-type="system" title="Systems Requirements" aria-label="Systems Requirements" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span>
+                        </button>
+                        <button id="viewSystemsBreakdown" class="relationdiagram-view-option" type="button" data-column-type="systemsBreakdown" title="Physical Architecture" aria-label="Physical Architecture" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.PHYSICAL}}</span>
+                        </button>
+                    </div>
             </div>
 
             <div class="page-body relationdiagram-body">
                 <div class="relationdiagram-frame" id="relationdiagramFrame" aria-label="Relation diagram frame">
                     <div class="relationdiagram-column relationdiagram-column-left" aria-label="Stakeholder requirements">
                         <div class="relationdiagram-column-header">
-                            <span>Stakeholder Requirements</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span><span>Stakeholder Requirements</span></span>
                             <strong class="relationdiagram-column-count" id="stakeholderRequirementCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="stakeholderRequirementsList"></div>
@@ -157,7 +134,7 @@
 
                     <div class="relationdiagram-column relationdiagram-column-middle" aria-label="System requirements">
                         <div class="relationdiagram-column-header">
-                            <span>Systems Requirements</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span><span>Systems Requirements</span></span>
                             <strong class="relationdiagram-column-count" id="systemRequirementCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
@@ -169,7 +146,7 @@
 
                     <div class="relationdiagram-column relationdiagram-column-right" aria-label="Systems breakdown">
                         <div class="relationdiagram-column-header">
-                            <span>Physical Architecture</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.PHYSICAL}}</span><span>Physical Architecture</span></span>
                             <strong class="relationdiagram-column-count" id="systemsBreakdownCount">—</strong>
                         </div>
                         <div class="relationdiagram-list" id="systemsBreakdownsList"></div>
@@ -261,6 +238,6 @@
     </form>
 </dialog>
 
-<script type="module" src="../js/pages/basisrelationdiagram-page.js?rev=diagram-lazy-1"></script>
+<script type="module" src="../js/pages/basisrelationdiagram-page.js?rev=diagram-toolbar-1"></script>
 </body>
 </html>

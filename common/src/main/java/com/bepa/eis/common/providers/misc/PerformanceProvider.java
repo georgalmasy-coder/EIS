@@ -51,11 +51,10 @@ public class PerformanceProvider extends GenericProvider {
                 SUM(CASE WHEN PE.DurationMs BETWEEN 1000 AND 2999 THEN 1 ELSE 0 END) AS AcceptablePerformanceCount,
                 SUM(CASE WHEN PE.DurationMs >= 3000 THEN 1 ELSE 0 END) AS PoorPerformanceCount
             FROM PERFORMANCE PE
-            LEFT JOIN CUSTOMER C
-                ON PE.CustomerId = C.CustomerId
             LEFT JOIN PROJECT P
                 ON PE.ProjectId = P.ProjectId
                AND PE.CustomerId = P.CustomerId
+               AND P.Latest = 1
             WHERE PE.Created >= DATEADD(DAY, -7, SYSUTCDATETIME())
             GROUP BY
                 ISNULL(P.ProjectName, ''),
@@ -81,9 +80,11 @@ public class PerformanceProvider extends GenericProvider {
             FROM PERFORMANCE PE
             LEFT JOIN CUSTOMER C
                 ON PE.CustomerId = C.CustomerId
+               AND C.Latest = 1
             LEFT JOIN PROJECT P
                 ON PE.ProjectId = P.ProjectId
                AND PE.CustomerId = P.CustomerId
+               AND P.Latest = 1
             ORDER BY PE.PerformanceId DESC
             """;
 

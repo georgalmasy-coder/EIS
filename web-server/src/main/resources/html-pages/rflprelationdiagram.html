@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/nflprelationdiagram.css?rev=diagram-lazy-1" />
+    <link rel="stylesheet" href="../css/nflprelationdiagram.css?rev=diagram-toolbar-1" />
 </head>
 
 <body class="relationdiagram-document nflprelationdiagram-document">
@@ -47,49 +47,6 @@
                     <div id="pageEyebrow" class="workspace-eyebrow relationdiagram-workspace-eyebrow"></div>
                     <div id="pageHeading" class="workspace-heading relationdiagram-workspace-heading"></div>
                     <div id="pageHelpText" class="workspace-helptext relationdiagram-workspace-helptext"></div>
-                </div>
-            </div>
-
-            <div class="relationdiagram-info-bar" aria-label="Relation diagram information">
-                <div class="relationdiagram-legend" aria-label="Relation diagram color legend">
-                    <span class="relationdiagram-legend-item relationdiagram-legend-item-normal">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-normal"></span>
-                        Normal relation
-                    </span>
-                    <span class="relationdiagram-legend-item">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-active"></span>
-                        Highlighted relation
-                    </span>
-                    <span class="relationdiagram-legend-item">
-                        <span class="relationdiagram-legend-swatch relationdiagram-legend-swatch-selected"></span>
-                        Selected entity
-                    </span>
-                </div>
-
-                <div class="relationdiagram-info-actions">
-                    <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view options">
-                        <label class="relationdiagram-view-option" title="Show or hide Stakeholder Requirements">
-                            <input id="viewStakeholder" type="checkbox" checked>
-                            <span>STK</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Systems Requirements">
-                            <input id="viewSystem" type="checkbox" checked>
-                            <span>SYS-REG</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Functional Structures">
-                            <input id="viewFunctional" type="checkbox" checked>
-                            <span>F-ELM</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Logical Structures">
-                            <input id="viewLogical" type="checkbox" checked>
-                            <span>L-ELM</span>
-                        </label>
-                        <label class="relationdiagram-view-option" title="Show or hide Physical Architecture">
-                            <input id="viewPhysical" type="checkbox" checked>
-                            <span>P-ARC</span>
-                        </label>
-                    </div>
-
                 </div>
             </div>
 
@@ -146,13 +103,30 @@
                 <button id="btnClearSelection" class="relationdiagram-secondary-button" type="button">
                     Clear filter
                 </button>
+                <div class="relationdiagram-view-toggle" role="group" aria-label="Relation diagram view options">
+                        <button id="viewStakeholder" class="relationdiagram-view-option" type="button" data-column-type="stakeholder" title="Stakeholder Requirements" aria-label="Stakeholder Requirements" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span>
+                        </button>
+                        <button id="viewSystem" class="relationdiagram-view-option" type="button" data-column-type="system" title="Systems Requirements" aria-label="Systems Requirements" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span>
+                        </button>
+                        <button id="viewFunctional" class="relationdiagram-view-option" type="button" data-column-type="functional" title="Functional Structures" aria-label="Functional Structures" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.FUNCTIONAL}}</span>
+                        </button>
+                        <button id="viewLogical" class="relationdiagram-view-option" type="button" data-column-type="logical" title="Logical Structures" aria-label="Logical Structures" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.LOGICAL}}</span>
+                        </button>
+                        <button id="viewPhysical" class="relationdiagram-view-option" type="button" data-column-type="physical" title="Physical Architecture" aria-label="Physical Architecture" aria-pressed="true">
+                            <span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.PHYSICAL}}</span>
+                        </button>
+                    </div>
             </div>
 
             <div class="page-body relationdiagram-body">
                 <div class="relationdiagram-frame" id="relationdiagramFrame" aria-label="Relation diagram frame">
                     <div class="relationdiagram-column" data-entity-type="stakeholder" aria-label="Stakeholder requirements">
                         <div class="relationdiagram-column-header">
-                            <span>Stakeholder Requirements</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span><span>Stakeholder Requirements</span></span>
                             <strong class="relationdiagram-column-count" id="stakeholderRequirementCount">-</strong>
                         </div>
                         <div class="relationdiagram-list" id="stakeholderRequirementsList"></div>
@@ -162,7 +136,7 @@
 
                     <div class="relationdiagram-column" data-entity-type="system" aria-label="System requirements">
                         <div class="relationdiagram-column-header">
-                            <span>Systems Requirements</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.REQUIREMENT}}</span><span>Systems Requirements</span></span>
                             <strong class="relationdiagram-column-count" id="systemRequirementCount">-</strong>
                         </div>
                         <div class="relationdiagram-list" id="systemRequirementsList"></div>
@@ -172,7 +146,7 @@
 
                     <div class="relationdiagram-column" data-entity-type="functional" aria-label="Functional structures">
                         <div class="relationdiagram-column-header">
-                            <span>Functional Structures</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.FUNCTIONAL}}</span><span>Functional Structures</span></span>
                             <strong class="relationdiagram-column-count" id="functionalStructureCount">-</strong>
                         </div>
                         <div class="relationdiagram-list" id="functionalStructuresList"></div>
@@ -182,7 +156,7 @@
 
                     <div class="relationdiagram-column" data-entity-type="logical" aria-label="Logical structures">
                         <div class="relationdiagram-column-header">
-                            <span>Logical Structures</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.LOGICAL}}</span><span>Logical Structures</span></span>
                             <strong class="relationdiagram-column-count" id="logicalStructureCount">-</strong>
                         </div>
                         <div class="relationdiagram-list" id="logicalStructuresList"></div>
@@ -192,7 +166,7 @@
 
                     <div class="relationdiagram-column" data-entity-type="physical" aria-label="Physical Architecture">
                         <div class="relationdiagram-column-header">
-                            <span>Physical Architecture</span>
+                            <span class="relationdiagram-column-title"><span class="relationdiagram-column-icon" aria-hidden="true">{{menuIcon.PHYSICAL}}</span><span>Physical Architecture</span></span>
                             <strong class="relationdiagram-column-count" id="physicalStructureCount">-</strong>
                         </div>
                         <div class="relationdiagram-list" id="physicalStructuresList"></div>
@@ -293,7 +267,7 @@
             loadStatus.textContent = "Booting";
         }
 
-        import("../js/pages/nflprelationdiagram-page.js?rev=diagram-lazy-1").catch(function (error) {
+        import("../js/pages/nflprelationdiagram-page.js?rev=diagram-toolbar-1").catch(function (error) {
             console.error("Failed to load RFLP relation diagram module", error);
 
             if (loadStatus) {

@@ -1,5 +1,6 @@
 package com.bepa.eis.server.api.generic;
 
+import com.bepa.eis.common.GlobalConfiguration;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.server.dataprovider.fields.AbstractField;
 import com.bepa.eis.server.dataprovider.fields.lookups.common.AbstractLookup;
@@ -30,7 +31,7 @@ public class GenericXmlDocument {
     private final DocumentBuilder db;
     private final Document doc;
     private Element root;
-    private WebSession webSession;
+    private final WebSession webSession;
 
     private ListOfElements listOfElements = null;
 
@@ -89,6 +90,9 @@ public class GenericXmlDocument {
 
         String xmlAsString = writer.toString();
 //        log.debug("Created {} XML: {} characters", getClass().getSimpleName(), xmlAsString.length());
+        if (log.isInfoEnabled() && GlobalConfiguration.isUdvMode()) {
+            log.info("Created XML : {}", xmlAsString);
+        }
 //        log.info("Created XML : {}", xmlAsString);
 
         return xmlAsString;
@@ -182,7 +186,7 @@ public class GenericXmlDocument {
                     lookup.getOptions().forEach(option -> {
                         Element optionElement = doc.createElement("Option");
                         optionElement.setTextContent(option.getLabel());
-                        optionElement.setAttribute("value", option.getValue() != null ? option.getValue().toString() : "" );
+                        optionElement.setAttribute("value", option.getValue() != null ? option.getValue() : "" );
                         if (option.isSelected()) {
                             optionElement.setAttribute("selected", "true");
                         }

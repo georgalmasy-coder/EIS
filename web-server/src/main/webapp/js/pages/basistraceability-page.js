@@ -1,7 +1,7 @@
 import {initMenu} from "../components/menu.js";
 import {userPreferences} from "../core/user-preferences.js";
-import {createTraceabilityMatrixView, getTraceabilityCell} from "../components/traceability-matrix-view.js?rev=traceability-blocks-4";
-import {createTraceabilityBlockLoader} from "../components/traceability-block-loader.js?rev=traceability-blocks-4";
+import {createTraceabilityMatrixView, getTraceabilityCell} from "../components/traceability-matrix-view.js?rev=traceability-header-hover-1";
+import {createTraceabilityBlockLoader} from "../components/traceability-block-loader.js?rev=traceability-header-hover-1";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";

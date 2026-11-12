@@ -82,12 +82,32 @@ public class DashboardIrlDocument extends GenericXmlDocument {
         InterfaceMatrixProvider interfaceManagementProvider = new InterfaceMatrixProvider(getWebSession(),entityType);
         List<InterfaceMatrixProvider.InterfaceRecord> interfaces = interfaceManagementProvider.getAllInterfaceRecords(entityType);
 
-        for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {
-            PhysicalStructureWrapper fromSys = mapOfPhysicalStructures.get(interfaceRecord.fromEntityId());
-            fromSys.countIrl(interfaceRecord.irlId());
+        calculateIrlCounts(mapOfPhysicalStructures, interfaces);
+    }
 
-            PhysicalStructureWrapper toSys = mapOfPhysicalStructures.get(interfaceRecord.toEntityId());
-            toSys.countIrl(interfaceRecord.irlId());
+    static void calculateIrlCounts(Map<Integer, PhysicalStructureWrapper> physicalStructures,
+                                   List<InterfaceMatrixProvider.InterfaceRecord> interfaces) {
+
+        for (InterfaceMatrixProvider.InterfaceRecord interfaceRecord : interfaces) {
+            PhysicalStructureWrapper fromSys = physicalStructures.get(interfaceRecord.fromEntityId());
+            PhysicalStructureWrapper toSys = physicalStructures.get(interfaceRecord.toEntityId());
+
+            // Inactive or removed systems can still be referenced by an interface.
+            // Count each endpoint that belongs to the dashboard's system list.
+            if (fromSys != null) {
+                fromSys.countIrl(interfaceRecord.irlId());
+            }
+            if (toSys != null) {
+                toSys.countIrl(interfaceRecord.irlId());
+            }
+            /*
+            if (fromSys == null || toSys == null) {
+                log.warn("IRL dashboard interface references a system outside the loaded system list: "
+                                + "interfacePk={}, fromEntityId={}, toEntityId={}",
+                        interfaceRecord.interfacePk(), interfaceRecord.fromEntityId(), interfaceRecord.toEntityId());
+            }
+
+             */
 
         }
     }
@@ -159,7 +179,7 @@ public class DashboardIrlDocument extends GenericXmlDocument {
         return getDoc().createElement("dashboardIrl");
     }
 
-    private static class PhysicalStructureWrapper {
+    static class PhysicalStructureWrapper {
         SystemBreakdownEntity physicalStructureEntity;
         IrlCounts irlCounts = new IrlCounts();
 
@@ -222,7 +242,7 @@ public class DashboardIrlDocument extends GenericXmlDocument {
 
     }
 
-    private static class IrlCounts {
+    static class IrlCounts {
 
         Map<Integer, Integer> irlCounts = new HashMap<>();
 

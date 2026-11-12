@@ -121,6 +121,26 @@ async function main() {
         })()
     `);
     console.log('Interface virtual matrix:',JSON.stringify(result));
+    const connected=await run(`(()=>{
+        const check=(v,m)=>{if(!v)throw new Error(m);};
+        const structures=['1','2','3'].map(entityId=>({entityId,id:'S-'+entityId,name:'System '+entityId}));
+        const cell={fromEntityId:'1',toEntityId:'2',irlId:'4',irlCode:'IRL 4',classificationCodes:[],classificationIds:[],nextIrlMeeting:'2020-01-02'};
+        const matrix={...state.matrix,lazy:false,structures,cellsByKey:new Map([[buildCellKey('1','2'),cell],[buildCellKey('3','3'),{...cell,fromEntityId:'3',toEntityId:'3'}]])};
+        state.matrix=matrix;state.showOverdueOnly=false;state.selectedIrlIds=[];state.showConnectedOnly=false;
+        renderInterfaceMatrix(matrix);
+        const toggle=document.getElementById('interfacesConnectedOnlyToggle');toggle.checked=true;toggle.dispatchEvent(new Event('change'));
+        check(document.querySelectorAll('td.interfaces-cell').length===4,'connected-only must exclude isolated/self-only items');
+        check(buildVisibleMatrix(matrix,false,[]).rowStructures.map(s=>s.entityId).join(',')==='1,2','both incoming/outgoing endpoints retained');
+        state.selectedIrlIds=['9'];renderInterfaceMatrix(matrix);
+        check(document.getElementById('interfacesEmptyState').textContent.includes('No interfaces match'),'empty combined filter message');
+        state.showOverdueOnly=true;
+        document.getElementById('interfacesClearFiltersButton').click();
+        check(!state.showConnectedOnly&&!state.showOverdueOnly&&state.selectedIrlIds.length===0,'clear filters did not reset state');
+        check(!toggle.checked&&!document.getElementById('interfacesOverdueOnlyToggle').checked,'checkboxes not reset');
+        check(document.querySelectorAll('td.interfaces-cell').length===9,'clear filters did not restore full matrix');
+        return 'passed';
+    })()`);
+    console.log('Connected-only and clear filters:',connected);
     const lazy=await run(`(async()=>{
         const check=(v,m)=>{if(!v)throw new Error(m);};
         const flush=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));

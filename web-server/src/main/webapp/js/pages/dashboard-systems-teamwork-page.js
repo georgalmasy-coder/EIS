@@ -1,6 +1,9 @@
+import {mountHierarchyControls} from "../components/hierarchy-controls.js";
+import {createDashboardHierarchy, decorateDashboardCode, focusDashboardToggle, groupTeamworkRecords} from "../components/dashboard-hierarchy.js?rev=teamwork-root-data-3";
+const hierarchy = createDashboardHierarchy();
 import {createTeamworkViewport} from "../components/teamwork-viewport.js?rev=teamwork-virtual-1";
 import {userPreferences} from "../core/user-preferences.js";
-import {initMenu} from "../components/menu.js";
+import {initMenu, menuHasRoute} from "../components/menu.js";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
 import {openEditDialog} from "../components/edit-dialog.js";
@@ -14,7 +17,7 @@ const EDIT_PAGE_URL = "/web/view?page=systemsbreakdown-edit";
 const STORAGE_KEY = "basis.dashboard.systems.teamwork.tableColumnWidths";
 const FILTER_TYPES = ["trl", "owner", "department", "classification", "irl"];
 
-const DEFAULT_COLUMN_WIDTHS = [84, 62, 170, 120, 112, 150, 140, 112, 84, 62, 170, 120, 112];
+const DEFAULT_COLUMN_WIDTHS = [180, 62, 170, 120, 112, 150, 140, 112, 84, 62, 170, 120, 112];
 const STICKY_COLUMN_COUNT = 5;
 const MIN_COLUMN_WIDTH = 60;
 
@@ -61,6 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initializePageShell() {
+    mountHierarchyControls("dashboard-systems-teamworkHierarchyToolbar", expanded => {
+        hierarchy.setAll(state.dashboard?.interfaces.map(item => item.fromSbsCode) || [], expanded);
+        if (state.dashboard) renderDashboard(state.dashboard);
+    }, {container: true});
     state.columnWidths = loadStoredColumnWidths();
     setText("customerName", "-", "");
     setText("projectName", "-", "");
@@ -68,7 +75,10 @@ function initializePageShell() {
     setText("loadStatus", "Loading", "");
 
     mountTopbar(document);
-    initMenu(document);
+    initMenu(document).then(() => {
+        const button = document.getElementById("btnInterfaceManagement");
+        if (button) button.hidden = !menuHasRoute("/web/view?page=psys-interfaces");
+    });
     initHelpDialog();
 
     const pdfButton = document.getElementById("btnDownloadPdf");
@@ -135,6 +145,7 @@ function parseDashboardDocument(xmlDocument) {
     return {
         title: "Systems Teamwork",
         interfaces,
+        systems: parseInterfaces(dashboardElement, ":scope > systems > system"),
         lookup
     };
 }
@@ -193,8 +204,8 @@ function parseLookupMap(parentElement, selector, idAttribute) {
     return map;
 }
 
-function parseInterfaces(dashboardElement) {
-    const elements = Array.from(dashboardElement.querySelectorAll(":scope > interfaces > interface"));
+function parseInterfaces(dashboardElement, selector = ":scope > interfaces > interface") {
+    const elements = Array.from(dashboardElement.querySelectorAll(selector));
 
     return elements.map((element) => ({
         fromEntityId: getChildText(element, "fromEntityId", ""),
@@ -415,16 +426,51 @@ function buildHeaderContent(label, sublabel) {
 function renderBody(tableBody, dashboard, records) {
     const scroller = document.getElementById("dashboardSystemsTeamworkTableScroll");
     scroller.scrollTop = 0;
-    teamworkViewport = createTeamworkViewport({scroller, body: tableBody, records,
+    tableBody.closest("table").classList.add("hierarchy-table");
+    const groupedRecords = groupTeamworkRecords(records, hierarchy, dashboard.systems);
+    teamworkViewport = createTeamworkViewport({scroller, body: tableBody, records: groupedRecords,
         columns: COLUMN_DEFINITIONS.length,
         afterRender: applyColumnWidths,
-        createRow(record) {
+        createRow(entry) {
+            if (entry.group) {
+                const tr = document.createElement("tr");
+                tr.className = "hierarchy-root-row dashboard-teamwork-group";
+                const code = entry.record
+                    ? buildSingleCell(entry.record, COLUMN_DEFINITIONS[0], dashboard.lookup)
+                    : document.createElement("td");
+                code.classList.add("dashboard-systems-teamwork-cell", "dashboard-systems-teamwork-cell--fromSbsCode");
+                if (!entry.record) code.textContent = entry.code;
+                decorateDashboardCode(code, entry.code, entry.name, true, hierarchy.expanded(entry.code), () => {
+                    const scrollTop = scroller.scrollTop;
+                    hierarchy.toggle(entry.code);
+                    renderDashboard(dashboard);
+                    scroller.scrollTop = scrollTop;
+                    teamworkViewport?.remeasure();
+                    focusDashboardToggle(tableBody, entry.code);
+                });
+                tr.append(code);
+                for (const column of COLUMN_DEFINITIONS.slice(1)) {
+                    if (entry.record) {
+                        tr.appendChild(column.dual ? buildDualCell(entry.record, column, dashboard.lookup)
+                            : buildSingleCell(entry.record, column, dashboard.lookup));
+                        continue;
+                    }
+                    const cell = document.createElement("td");
+                    cell.className = 'dashboard-systems-teamwork-cell dashboard-systems-teamwork-cell--' + column.key;
+                    if (column.key === "fromSystemName") { cell.textContent = entry.name; cell.classList.add("hierarchy-name-cell"); }
+                    tr.append(cell);
+                }
+                return tr;
+            }
+            const record = entry.record;
             const tr = document.createElement("tr");
             tr.className = "dashboard-systems-teamwork-row";
             for (const column of COLUMN_DEFINITIONS) {
                 tr.appendChild(column.dual ? buildDualCell(record, column, dashboard.lookup)
                     : buildSingleCell(record, column, dashboard.lookup));
             }
+            const code = tr.firstElementChild;
+            decorateDashboardCode(code, record.fromSbsCode, record.fromSystemName, false, true, () => {});
             return tr;
         }
     });

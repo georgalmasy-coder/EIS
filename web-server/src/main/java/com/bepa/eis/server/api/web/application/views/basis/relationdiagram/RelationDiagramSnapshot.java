@@ -21,6 +21,7 @@ public final class RelationDiagramSnapshot {
             if (!edge.from().equals(edge.to())) adjacency.computeIfAbsent(edge.to(), ignored -> new ArrayList<>()).add(edge);
         }
     }
+    public int relationCount(String id) { return adjacency.getOrDefault(id, List.of()).size(); }
     public boolean hasRelations(String id) { return adjacency.containsKey(id); }
     private Node node(String id) {
         Node node = nodes.get(id);

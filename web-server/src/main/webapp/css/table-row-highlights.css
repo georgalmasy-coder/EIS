@@ -1,0 +1,10 @@
+/* Shared row colors for workspace lists, including sticky cells. */
+table.app-striped-table tbody tr:not(.teamwork-viewport-spacer) > :is(td, th) {
+    background: var(--app-surface-background);
+}
+table.app-striped-table tbody tr:not(.teamwork-viewport-spacer):nth-child(odd of :not([hidden]):not(.teamwork-viewport-spacer)) > :is(td, th) {
+    background: var(--app-surface-subtle-background);
+}
+table.app-striped-table tbody tr:not(.teamwork-viewport-spacer):hover > :is(td, th) {
+    background: var(--app-table-row-hover);
+}
