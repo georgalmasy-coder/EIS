@@ -41,6 +41,8 @@ public class PageViewer extends GenericServlet {
             if (pageType != PageType.NONE) {
 
                 String html = loadHtmlPage(pageType.getPath());
+                // Install before page scripts, including in iframe editors, to capture startup failures.
+                html = html.replace("<head>", "<head><script src=\"/js/core/client-incidents.js\"></script>");
                 html = mergeTitle(pageType, webSession, html);
                 html = mergeThemeClass(webSession, html);
 

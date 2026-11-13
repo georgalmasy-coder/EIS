@@ -163,6 +163,10 @@ public class IncidentProvider extends GenericProvider {
         createIncident(ServiceType.PROVIDER_SERVICE, module, severityType, throwable);
     }
 
+    public void createJavaScriptIncident(String module, String message, String moduleInfo, String trace) {
+        createIncident(ServiceType.CLIENT_JAVASCRIPT, module, SeverityType.HIGH, message, moduleInfo, trace);
+    }
+
     public List<RecentIncident> getRecentIncidents() throws SQLException {
         return getRecentIncidents(GET_RECENT_INCIDENTS_SQL);
     }
@@ -358,6 +362,12 @@ public class IncidentProvider extends GenericProvider {
     }
 
     private void createIncident(ServiceType serviceType, String module, SeverityType severityType, Throwable throwable) {
+        createIncident(serviceType, module, severityType, getErrorMessage(throwable),
+                getModuleInfo(throwable), throwableToString(throwable));
+    }
+
+    private void createIncident(ServiceType serviceType, String module, SeverityType severityType,
+                                String message, String moduleInfo, String trace) {
 
         try {
             try (Connection con = getDataSource().getConnection();
@@ -369,16 +379,16 @@ public class IncidentProvider extends GenericProvider {
                 setNullableInt(ps, 3, getWebSession().getUserId());
                 ps.setInt(4, serviceType.getId());
                 ps.setInt(5, severityType.getId());
-                ps.setString(6, getErrorMessage(throwable));
+                ps.setString(6, message);
                 ps.setString(7, module);
-                ps.setString(8, getModuleInfo(throwable));
-                ps.setString(9, throwableToString(throwable));
+                ps.setString(8, moduleInfo);
+                ps.setString(9, trace);
                 ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
 
                 int rows = ps.executeUpdate();
 
                 if (rows == 0) {
-                    throw new SQLException("Insert incident failed : " + serviceType.getDescription() + " " + severityType.getDescription() + " " + getErrorMessage(throwable));
+                    throw new SQLException("Insert incident failed : " + serviceType.getDescription() + " " + severityType.getDescription() + " " + message);
                 }
             }
         } catch (Exception ignored) {

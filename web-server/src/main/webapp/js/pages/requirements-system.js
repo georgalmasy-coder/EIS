@@ -4,7 +4,7 @@ import {userPreferences} from "../core/user-preferences.js";
 import {openEditDialog} from "../components/edit-dialog.js";
 import {createExportDialog} from "../components/export-dialog.js";
 import {createImportDialog} from "../components/import-dialog.js";
-import {createEntityMoveSelection} from "../components/entity-move-selection.js?rev=unselect-1";
+import {createEntityMoveSelection} from "../components/entity-move-selection.js?rev=edit-entity-label-1";
 import {downloadSystemRequirementDiagramPdf} from "./systemrequirement-diagram-pdf.js";
 import {setText} from "../core/dom.js";
 import {

@@ -5,6 +5,7 @@ public enum ServiceType {
     WEBSERVICE (1, "Web service"),
     PROVIDER_SERVICE (2, "Provider Service"),
     ENTITY_PROCESSING(3, "Entity processing"),
+    CLIENT_JAVASCRIPT(4, "Client JavaScript"),
     INVALID_SERVICE_TYPE(-1, "Invalid Service Type");
 
     private final int id;

@@ -41,11 +41,16 @@ export function createEntityMoveSelection({ menuId, entityType, scopeRoot }) {
     function prepareContextMenu(entity) {
         contextEntity = normalizeEntity(entity);
         const menu = document.getElementById(menuId);
+        const editButton = menu?.querySelector('[data-context-action="edit-system"], [data-context-action="edit-requirement"]');
         const selectButton = menu?.querySelector(`[data-context-action="${ACTION_SELECT}"]`);
         const unselectButton = menu?.querySelector(`[data-context-action="${ACTION_UNSELECT}"]`);
         const moveButton = menu?.querySelector(`[data-context-action="${ACTION_MOVE}"]`);
         const moveRootButton = menu?.querySelector(`[data-context-action="${ACTION_MOVE_ROOT}"]`);
         const hasTarget = Boolean(contextEntity?.entityId);
+
+        if (editButton) {
+            editButton.textContent = hasTarget ? `Edit ${formatEntityLabel(contextEntity)}` : "Edit";
+        }
 
         if (selectButton) {
             selectButton.textContent = hasTarget ? `Select ${formatEntityLabel(contextEntity)}` : "Select";
