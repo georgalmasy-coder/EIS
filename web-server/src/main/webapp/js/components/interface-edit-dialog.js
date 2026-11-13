@@ -51,6 +51,9 @@ function createInterfaceEditDialog(initialOptions = {}) {
         },
         open(options = {}) {
             this.configure(options);
+            state.selectableEndpoint = options.selectableEndpoint || null;
+            state.structures = options.structures || [];
+            state.createOnly = !options.cell;
             openDialog(state, options.fromStructure, options.toStructure, options.cell);
         }
     };
@@ -147,11 +150,48 @@ function openDialog(state, fromStructure, toStructure, cell) {
 
     renderStructureCard("interfaceFromFields", fromStructure);
     renderStructureCard("interfaceToFields", toStructure);
+    if (state.selectableEndpoint) {
+        renderStructureSelect(state);
+    }
+    document.getElementById("interfaceDialogSaveButton").disabled = !!state.selectableEndpoint;
     renderIrlSelect(state, cell?.irlId || "");
     renderNextIrlMeeting(cell?.nextIrlMeeting || "");
     renderClassificationList(state, cell?.classificationIds || []);
 
     showDialog("interfaceDialog");
+}
+
+function renderStructureSelect(state) {
+    const from = state.selectableEndpoint === "from";
+    const containerId = from ? "interfaceFromFields" : "interfaceToFields";
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const label = document.createElement("label");
+    label.className = "interfaces-dialog-field";
+    const title = document.createElement("span");
+    title.textContent = from ? "Select From" : "Select To";
+    const select = document.createElement("select");
+    select.id = "interfaceDialogEntitySelect";
+    select.required = true;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select entity";
+    select.appendChild(placeholder);
+    for (const structure of state.structures) {
+        const option = document.createElement("option");
+        option.value = structure.entityId;
+        option.textContent = [structure.id, structure.name].filter(Boolean).join(" - ");
+        select.appendChild(option);
+    }
+    const details = document.createElement("div");
+    select.addEventListener("change", () => {
+        const structure = state.structures.find(item => item.entityId === select.value) || null;
+        state[from ? "fromStructure" : "toStructure"] = structure;
+        details.textContent = structure?.name || "";
+        document.getElementById("interfaceDialogSaveButton").disabled = !structure;
+    });
+    label.append(title, select);
+    container.replaceChildren(label, details);
 }
 
 function renderStructureCard(containerId, structure) {
@@ -269,6 +309,11 @@ async function saveCurrentInterface(state) {
         return;
     }
 
+    if (String(draft.fromEntityId) === String(draft.toEntityId)) {
+        window.alert("An entity cannot have an interface to itself.");
+        return;
+    }
+
     if (!draft.irlId) {
         window.alert("IRL is required.");
         return;
@@ -276,7 +321,7 @@ async function saveCurrentInterface(state) {
 
     try {
         setText("interfaceDialogStatus", "Saving...");
-        const response = await fetch(`${state.basePath}?cmd=save`, {
+        const response = await fetch(`${state.basePath}?cmd=save${state.createOnly ? "&createOnly=true" : ""}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/xml; charset=UTF-8",

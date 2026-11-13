@@ -3,14 +3,16 @@ package com.bepa.eis.server.api.web.application.views.common;
 import com.bepa.eis.common.dto.WebSession;
 import com.bepa.eis.common.enums.entity.EntityType;
 import com.bepa.eis.server.api.web.application.views.pro.dashboard.common.DashboardMetaData;
-import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixEntityOrder;
+import com.bepa.eis.server.api.web.application.views.pro.interfacematrix.InterfaceMatrixProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EditInterfaceElements {
@@ -35,6 +37,7 @@ public class EditInterfaceElements {
         Element editInterfacesElement = doc.createElement("editInterfaces");
         editInterfacesElement.setAttribute("entityType", String.valueOf(entityType.getId()));
         editInterfacesElement.setAttribute("entityTypeName", entityType.getDescription());
+        editInterfacesElement.setAttribute("readOnly", String.valueOf(version != null));
         if (entityId != null) {
             editInterfacesElement.setAttribute("entityId", String.valueOf(entityId));
         }
@@ -47,61 +50,71 @@ public class EditInterfaceElements {
         Element rightInterfaces = doc.createElement("rightInterfaces");
         editInterfacesElement.appendChild(leftInterfaces);
         editInterfacesElement.appendChild(rightInterfaces);
-        appendInterfaceRows(doc, leftInterfaces, rightInterfaces);
+        appendInterfaceRows(doc, editInterfacesElement, leftInterfaces, rightInterfaces);
 
         return editInterfacesElement;
     }
 
-    private void appendInterfaceRows(Document doc, Element leftInterfaces, Element rightInterfaces) throws SQLException {
+    private void appendInterfaceRows(Document doc, Element root, Element outgoing, Element incoming) throws SQLException {
         if (entityId == null || entityId < 0) {
             return;
         }
 
-        InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
-        List<InterfaceMatrixProvider.EditInterfaceRecord> records =
-                interfaceMatrixProvider.getInterfaceRecordsByFrom(entityId, entityType, version);
-        if (records.isEmpty()) {
-            return;
+        InterfaceMatrixProvider provider = new InterfaceMatrixProvider(webSession, entityType);
+        List<InterfaceMatrixProvider.EditInterfaceRecord> records = new ArrayList<>(
+                provider.getInterfaceRecordsByFrom(entityId, entityType, version));
+        records.addAll(provider.getInterfaceRecordsByTo(entityId, entityType, version));
+        Map<Integer, Integer> positions = new HashMap<>();
+        Element candidates = doc.createElement("entities");
+        root.appendChild(candidates);
+        for (var entity : InterfaceMatrixEntityOrder.getEntities(webSession, entityType)) {
+            Integer id = entity.getEntityId().getValue();
+            positions.put(id, positions.size());
+            if (version == null) {
+                Element candidate = doc.createElement("entity");
+                addElement(doc, candidate, "entityId", id);
+                addElement(doc, candidate, "id", entity.getCode());
+                addElement(doc, candidate, "name", entity.getName());
+                candidates.appendChild(candidate);
+            }
         }
-        Map<Integer, Integer> positions = InterfaceMatrixEntityOrder.getPositions(webSession, entityType);
         if (version != null) {
-            // Keep historical interfaces even when a target is no longer in the current matrix.
-            positions.putIfAbsent(entityId, positions.size());
-            for (var record : records) positions.putIfAbsent(record.toEntityId(), positions.size());
+            for (var record : records) {
+                positions.putIfAbsent(record.fromEntityId(), positions.size());
+                positions.putIfAbsent(record.toEntityId(), positions.size());
+            }
         }
-        appendInterfaceRows(doc, leftInterfaces, rightInterfaces, entityId, records, positions);
+        appendInterfaceRows(doc, outgoing, incoming, entityId, records, positions);
     }
 
-    static void appendInterfaceRows(Document doc, Element leftInterfaces, Element rightInterfaces,
+    static void appendInterfaceRows(Document doc, Element outgoing, Element incoming,
                                     Integer entityId, List<InterfaceMatrixProvider.EditInterfaceRecord> records,
                                     Map<Integer, Integer> positions) {
-        Integer currentPosition = positions.get(entityId);
-        if (currentPosition == null) {
-            return;
-        }
-        records.sort(Comparator.comparingInt(record -> positions.getOrDefault(record.toEntityId(), Integer.MAX_VALUE)));
+        records.sort(Comparator.comparingInt(record -> positions.getOrDefault(
+                record.fromEntityId().equals(entityId) ? record.toEntityId() : record.fromEntityId(), Integer.MAX_VALUE)));
 
-        for (InterfaceMatrixProvider.EditInterfaceRecord record : records) {
-            Integer targetPosition = positions.get(record.toEntityId());
-            // The diagonal is not an interface cell; targets absent from the matrix are not shown.
-            if (targetPosition == null || targetPosition.equals(currentPosition)) {
+        for (var record : records) {
+            boolean isOutgoing = record.fromEntityId().equals(entityId);
+            Integer otherId = isOutgoing ? record.toEntityId() : record.fromEntityId();
+            if (otherId.equals(entityId) || !positions.containsKey(otherId)
+                    || (!isOutgoing && !record.toEntityId().equals(entityId))) {
                 continue;
             }
-            Element interfaceElement = doc.createElement("interface");
-            addElement(doc, interfaceElement, "fromEntityId", record.fromEntityId());
-            addElement(doc, interfaceElement, "toEntityId", record.toEntityId());
-            addElement(doc, interfaceElement, "toEntityCode", record.toEntityCode());
-            addElement(doc, interfaceElement, "toEntityName", record.toEntityName());
-            addElement(doc, interfaceElement, "fromTrlId", record.fromTrlId());
-            addElement(doc, interfaceElement, "toTrlId", record.toTrlId());
-            addElement(doc, interfaceElement, "fromIrlId", record.irlId());
-            addElement(doc, interfaceElement, "fromClassificationIds", record.classificationIds());
-            addElement(doc, interfaceElement, "toIrlId", record.reverseIrlId());
-            addElement(doc, interfaceElement, "toClassificationIds", record.reverseClassificationIds());
-            addElement(doc, interfaceElement, "nextIrlMeeting", record.nextIrlMeeting());
-            (targetPosition < currentPosition ? leftInterfaces : rightInterfaces).appendChild(interfaceElement);
+            Element element = doc.createElement("interface");
+            addElement(doc, element, "fromEntityId", record.fromEntityId());
+            addElement(doc, element, "toEntityId", record.toEntityId());
+            // Provider code/name fields describe the endpoint opposite the edited entity.
+            addElement(doc, element, isOutgoing ? "toEntityCode" : "fromEntityCode", record.toEntityCode());
+            addElement(doc, element, isOutgoing ? "toEntityName" : "fromEntityName", record.toEntityName());
+            addElement(doc, element, "fromTrlId", record.fromTrlId());
+            addElement(doc, element, "toTrlId", record.toTrlId());
+            addElement(doc, element, "fromIrlId", record.irlId());
+            addElement(doc, element, "fromClassificationIds", record.classificationIds());
+            addElement(doc, element, "toIrlId", record.reverseIrlId());
+            addElement(doc, element, "toClassificationIds", record.reverseClassificationIds());
+            addElement(doc, element, "nextIrlMeeting", record.nextIrlMeeting());
+            (isOutgoing ? outgoing : incoming).appendChild(element);
         }
-
     }
 
     private static void addElement(Document doc, Element parentElement, String elementName, Object value) {

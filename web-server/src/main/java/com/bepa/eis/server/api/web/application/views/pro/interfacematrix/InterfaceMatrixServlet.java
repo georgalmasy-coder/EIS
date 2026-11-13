@@ -150,7 +150,7 @@ abstract class InterfaceMatrixServlet extends GenericDataProviderServlet {
             InterfaceMatrixProvider.InterfaceSaveRecord saveRecord = parseSaveRecord(cellElement);
             EntityType entityType = resolveEntityType(request);
             InterfaceMatrixProvider interfaceMatrixProvider = new InterfaceMatrixProvider(webSession, entityType);
-            interfaceMatrixProvider.saveInterfaceRecord(saveRecord);
+            interfaceMatrixProvider.saveInterfaceRecord(saveRecord, Boolean.parseBoolean(request.getParameter("createOnly")));
 
             log.info(
                     "Saved interface cell. fromEntityId={}, toEntityId={}, irlId={}",

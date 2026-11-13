@@ -54,6 +54,10 @@ export function requestEditDialogSaved(payload = {}) {
     return postDialogMessage("saved", payload);
 }
 
+export function requestEditDialogRefresh(payload = {}) {
+    return postDialogMessage("request-refresh", payload);
+}
+
 export function requestEditDialogOpenHistory(payload = {}) {
     return postDialogMessage("open-history", payload);
 }

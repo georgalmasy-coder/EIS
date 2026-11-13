@@ -227,7 +227,7 @@
                 <section class="tab-panel" id="tabPanel7" role="tabpanel" aria-labelledby="tabBtn7">
                     <div class="table-frame edit-interfaces-frame">
                         <div class="table-scroll">
-                            <table class="data-table edit-interfaces-table edit-interfaces-table--left" aria-label="Stakeholder requirement interfaces">
+                            <table class="data-table edit-interfaces-table edit-interfaces-table--left" aria-label="Outgoing interfaces">
                                 <colgroup>
                                     <col style="width: 30%;">
                                     <col style="width: 18%;">
@@ -250,19 +250,25 @@
                                 </thead>
                                 <tbody id="interfacesBody"></tbody>
                             </table>
-                            <div class="empty edit-interfaces-empty" id="interfacesEmpty">No interfaces to the left of the diagonal.</div>
+                            <div class="empty edit-interfaces-empty" id="interfacesEmpty">No outgoing interfaces.</div>
                         </div>
-                        <div class="edit-interfaces-footer"><span id="interfacesCount">0</span> interfaces</div>
+                        <div class="edit-interfaces-footer">
+                            <span><span id="interfacesCount">0</span> outgoing interfaces</span>
+                            <button id="addInterfaceToButton" type="button" hidden>Add Interface To</button>
+                        </div>
                     </div>
                     <div class="table-frame edit-interfaces-frame">
                         <div class="table-scroll">
-                            <table class="data-table edit-interfaces-table edit-interfaces-table--right" aria-label="Interfaces to the right of the matrix diagonal">
+                            <table class="data-table edit-interfaces-table edit-interfaces-table--right" aria-label="Incoming interfaces">
                                 <thead></thead>
                                 <tbody id="rightInterfacesBody"></tbody>
                             </table>
-                            <div class="empty edit-interfaces-empty" id="rightInterfacesEmpty">No interfaces to the right of the diagonal.</div>
+                            <div class="empty edit-interfaces-empty" id="rightInterfacesEmpty">No incoming interfaces.</div>
                         </div>
-                        <div class="edit-interfaces-footer"><span id="rightInterfacesCount">0</span> interfaces</div>
+                        <div class="edit-interfaces-footer">
+                            <span><span id="rightInterfacesCount">0</span> incoming interfaces</span>
+                            <button id="addInterfaceFromButton" type="button" hidden>Add Interface From</button>
+                        </div>
                     </div>
                 </section>
             </div>

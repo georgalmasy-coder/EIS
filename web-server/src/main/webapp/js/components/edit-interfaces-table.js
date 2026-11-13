@@ -1,5 +1,6 @@
 import {getAttribute, getChildText} from "../core/xml.js";
-import {openInterfaceEditDialog, resolveInterfaceBasePath} from "./interface-edit-dialog.js";
+import {openInterfaceEditDialog, resolveInterfaceBasePath} from "./interface-edit-dialog.js?rev=interface-directions-2026-11-12";
+import {requestEditDialogRefresh} from "./edit-dialog-bridge.js?rev=interface-refresh-2026-11-13";
 
 const COLUMN_DEFINITIONS = [
     { key: "fromTrl", label: "TRL", source: "fromTrlId", type: "trl", width: "11%", physicalOnly: true, group: "From" },
@@ -13,14 +14,19 @@ const COLUMN_DEFINITIONS = [
 
 const PHYSICAL_ARCHITECTURE_ENTITY_TYPE = "2";
 const RIGHT_COLUMN_DEFINITIONS = [
-    { ...COLUMN_DEFINITIONS[4], width: "12%" },
-    { ...COLUMN_DEFINITIONS[5], width: "21%" },
-    { ...COLUMN_DEFINITIONS[6], width: "6%" },
+    { ...COLUMN_DEFINITIONS[4], key: "fromEntityCode", source: "fromEntityCode", group: "From", width: "12%" },
+    { ...COLUMN_DEFINITIONS[5], key: "fromEntityName", source: "fromEntityName", group: "From", width: "21%" },
+    { ...COLUMN_DEFINITIONS[0], width: "6%" },
     ...COLUMN_DEFINITIONS.filter((column) => column.group === "Interface"),
-    { ...COLUMN_DEFINITIONS[0], width: "6%" }
+    { ...COLUMN_DEFINITIONS[6], width: "6%" }
 ];
 
 export function createEditInterfacesTable(options = {}) {
+    function onInterfaceSaved(draft, basePath) {
+        requestEditDialogRefresh({kind: "interface", basePath, ...draft});
+        return options.onSaved ? options.onSaved(draft) : window.location.reload();
+    }
+
     function loadFromDocument(xmlDocument) {
         const rootElement = xmlDocument?.querySelector("editInterfaces");
         const data = parseEditInterfaces(rootElement, xmlDocument);
@@ -43,6 +49,26 @@ export function createEditInterfacesTable(options = {}) {
             return;
         }
 
+        const addButton = document.getElementById(right ? "addInterfaceFromButton" : "addInterfaceToButton");
+        if (addButton) {
+            addButton.hidden = data.readOnly || !data.entityId || Number(data.entityId) < 0;
+            const candidates = getInterfaceCandidates(data, right);
+            addButton.disabled = candidates.length === 0;
+            addButton.title = candidates.length ? "" : "No available entities in this direction.";
+            addButton.onclick = () => {
+                if (data.readOnly || !candidates.length) return;
+                const current = {entityId: data.entityId, id: data.fromEntityCode, name: data.fromEntityName};
+                openInterfaceEditDialog({
+                    basePath, structureLabel, lookup: data.lookup,
+                    fromStructure: right ? null : current,
+                    toStructure: right ? current : null,
+                    selectableEndpoint: right ? "from" : "to",
+                    structures: candidates,
+                    onSaved: draft => onInterfaceSaved(draft, basePath)
+                });
+            };
+        }
+
         const columns = getColumns(data, right);
         const fragment = document.createDocumentFragment();
 
@@ -52,7 +78,7 @@ export function createEditInterfacesTable(options = {}) {
             const row = document.createElement("tr");
             row.className = "edit-interfaces-row";
             row.dataset.interfaceIndex = String(index);
-            row.title = "Double-click to edit interface";
+            row.title = data.readOnly ? "Historical interface" : "Double-click to edit interface";
             row.tabIndex = 0;
             row.addEventListener("dblclick", (event) => {
                 event.preventDefault();
@@ -83,33 +109,43 @@ export function createEditInterfacesTable(options = {}) {
     };
 
     function openRecord(record, data, basePath, structureLabel) {
+        if (data.readOnly) return;
+        const incoming = record.toEntityId === data.entityId;
         openInterfaceEditDialog({
             basePath,
             structureLabel,
             lookup: data.lookup,
             fromStructure: {
                 entityId: record.fromEntityId || data.entityId,
-                id: data.fromEntityCode || data.entityId,
-                name: data.fromEntityName || ""
+                id: incoming ? record.fromEntityCode : data.fromEntityCode || data.entityId,
+                name: incoming ? record.fromEntityName : data.fromEntityName || ""
             },
             toStructure: {
                 entityId: record.toEntityId,
-                id: record.toEntityCode,
-                name: record.toEntityName
+                id: incoming ? data.fromEntityCode : record.toEntityCode,
+                name: incoming ? data.fromEntityName : record.toEntityName
             },
             cell: {
                 irlId: record.fromIrlId,
                 classificationIds: splitIds(record.fromClassificationIds),
                 nextIrlMeeting: record.nextIrlMeeting
             },
-            onSaved: options.onSaved || (() => window.location.reload())
+            onSaved: draft => onInterfaceSaved(draft, basePath)
         });
     }
+}
+
+export function getInterfaceCandidates(data, incoming) {
+    const existing = new Set((incoming ? data.rightInterfaces : data.leftInterfaces)
+        .map(record => incoming ? record.fromEntityId : record.toEntityId));
+    return data.entities.filter(entity => entity.entityId !== data.entityId && !existing.has(entity.entityId));
 }
 
 function parseEditInterfaces(rootElement, xmlDocument) {
     if (!rootElement) {
         return {
+            readOnly: true,
+            entities: [],
             entityId: "",
             entityType: "",
             entityTypeName: "",
@@ -131,6 +167,12 @@ function parseEditInterfaces(rootElement, xmlDocument) {
     return {
         entityId: getAttribute(rootElement, "entityId", "") || currentEntity.entityId,
         entityType,
+        readOnly: getAttribute(rootElement, "readOnly", "false") === "true",
+        entities: Array.from(rootElement.querySelectorAll(":scope > entities > entity")).map(element => ({
+            entityId: getChildText(element, "entityId", ""),
+            id: getChildText(element, "id", ""),
+            name: getChildText(element, "name", "")
+        })),
         entityTypeName: getAttribute(rootElement, "entityTypeName", ""),
         fromEntityCode: currentEntity.code,
         fromEntityName: currentEntity.name,
@@ -149,7 +191,7 @@ export function getInterfaceComparisonTables(xmlDocument) {
     return [false, true].map(right => {
         const columns = getColumns(data, right);
         return {
-            title: right ? "Interfaces to the right of the matrix diagonal" : "Interfaces to the left of the matrix diagonal",
+            title: right ? "Incoming interfaces" : "Outgoing interfaces",
             columns: columns.map(column => ({label: column.label, group: column.group})),
             rows: (right ? data.rightInterfaces : data.leftInterfaces).map(record => ({
                 key: `${record.fromEntityId}:${record.toEntityId}`,
@@ -165,6 +207,8 @@ export function getInterfaceComparisonTables(xmlDocument) {
 function parseInterfaceRecords(rootElement, container) {
     return Array.from(rootElement.querySelectorAll(`:scope > ${container} > interface`)).map((element) => ({
         fromEntityId: getChildText(element, "fromEntityId", ""),
+        fromEntityCode: getChildText(element, "fromEntityCode", ""),
+        fromEntityName: getChildText(element, "fromEntityName", ""),
         fromIrlId: getChildText(element, "fromIrlId", ""),
         fromClassificationIds: getChildText(element, "fromClassificationIds", ""),
         toIrlId: getChildText(element, "toIrlId", ""),

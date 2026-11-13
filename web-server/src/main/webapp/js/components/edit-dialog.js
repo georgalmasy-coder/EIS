@@ -32,6 +32,13 @@ function handleDialogMessage(event) {
         return;
     }
 
+    if (data.type === "request-refresh") {
+        if (event.source === record.iframe.contentWindow) {
+            record.baseOptions.onRequestRefresh?.(data.payload || {});
+        }
+        return;
+    }
+
     if (data.type === "status") {
         if (typeof record.onStatus === "function") {
             record.onStatus(data.payload || {});

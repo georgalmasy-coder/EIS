@@ -211,6 +211,14 @@ public class InterfaceMatrixProvider extends GenericProvider {
     }
 
     public List<EditInterfaceRecord> getInterfaceRecordsByFrom(Integer fromEntityId, EntityType entityType, Integer version) throws SQLException {
+        return getEditInterfaceRecords(fromEntityId, entityType, version, false);
+    }
+
+    public List<EditInterfaceRecord> getInterfaceRecordsByTo(Integer toEntityId, EntityType entityType, Integer version) throws SQLException {
+        return getEditInterfaceRecords(toEntityId, entityType, version, true);
+    }
+
+    private List<EditInterfaceRecord> getEditInterfaceRecords(Integer fromEntityId, EntityType entityType, Integer version, boolean incoming) throws SQLException {
         validateSession();
 
         if (fromEntityId == null || entityType == null) {
@@ -220,6 +228,12 @@ public class InterfaceMatrixProvider extends GenericProvider {
         List<EditInterfaceRecord> records = new ArrayList<>();
         var snapshot = version == null ? null : new EntityHistorySnapshot(entityType, fromEntityId, version);
         String sql = SELECT_LATEST_INTERFACES_BY_FROM_SQL;
+        if (incoming) {
+            // The code/name fields describe the other endpoint; keep the actual interface direction.
+            sql = sql.replace("E.[EntityId] = I.[ToEntityId]", "E.[EntityId] = I.[FromEntityId]")
+                    .replace("AND I.[FromEntityId] = ?", "AND I.[ToEntityId] = ?")
+                    .replace("ORDER BY I.[ToEntityId]", "ORDER BY I.[FromEntityId]");
+        }
         if (snapshot != null) {
             sql = sql.replace("REVERSE_I.[Latest] = 1", snapshot.predicate("INTERFACES", "REVERSE_I", "ChangedDateTime", "EntityType", "FromEntityId", "ToEntityId"))
                     .replace("I.[Latest] = 1", snapshot.predicate("INTERFACES", "I", "ChangedDateTime", "EntityType", "FromEntityId", "ToEntityId"))
@@ -379,6 +393,10 @@ public class InterfaceMatrixProvider extends GenericProvider {
     }
 
     public InterfaceRecord saveInterfaceRecord(InterfaceSaveRecord saveRecord) throws SQLException {
+        return saveInterfaceRecord(saveRecord, false);
+    }
+
+    public InterfaceRecord saveInterfaceRecord(InterfaceSaveRecord saveRecord, boolean createOnly) throws SQLException {
         validateSession();
 
         if (saveRecord == null) {
@@ -393,6 +411,10 @@ public class InterfaceMatrixProvider extends GenericProvider {
             throw new IllegalArgumentException("IrlId is required.");
         }
 
+        if (saveRecord.fromEntityId().equals(saveRecord.toEntityId())) {
+            throw new IllegalArgumentException("An entity cannot have an interface to itself.");
+        }
+
         Connection connection = getDataSource().getConnection();
         boolean originalAutoCommit = connection.getAutoCommit();
 
@@ -400,6 +422,9 @@ public class InterfaceMatrixProvider extends GenericProvider {
             connection.setAutoCommit(false);
 
             InterfaceRecord latest = getLatestInterfaceRecord(connection, saveRecord.fromEntityId(), saveRecord.toEntityId());
+            if (createOnly && latest != null) {
+                throw new IllegalArgumentException("An interface already exists in this direction. Reopen the entity to refresh the list.");
+            }
             int nextVersion = latest == null ? 1 : latest.version() + 1;
             Timestamp changedDateTime = Timestamp.valueOf(LocalDateTime.now());
 

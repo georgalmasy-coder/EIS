@@ -69,6 +69,8 @@ async function main() {
         function applyPageHeaderFromDocument() {}
         let edited=null;
         function openInterfaceEditDialog(options) { edited=options; }
+        let entityEditOptions;
+        function openEditDialog(options) { entityEditOptions=options; }
         const check=(ok,message)=>{if(!ok)throw new Error(message);};
         const flush=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
         (async()=>{
@@ -194,7 +196,8 @@ async function main() {
         check(maxActive<=2,'too many parallel block requests');
         scroll.scrollTop=4800;scroll.scrollLeft=5040;await flush();await flush();
         const savedTop=scroll.scrollTop,savedLeft=scroll.scrollLeft,count=calls.length;
-        await refreshInterfacePair({fromEntityId:'41',toEntityId:'42'});await flush();await flush();
+        openStructureEditPage({entityId:'41'});
+        await entityEditOptions.onRequestRefresh({kind:'interface',basePath:INTERFACE_BASE_PATH,fromEntityId:'41',toEntityId:'42'});await flush();await flush();
         check(calls.length===count+1 && calls.at(-1).command==='refresh','save reloaded snapshot or unchanged blocks');
         check(scroll.scrollTop===savedTop && scroll.scrollLeft===savedLeft,'save lost scroll position');
         const updated=table.querySelector('td[data-from-entity-id="41"][data-to-entity-id="42"]');

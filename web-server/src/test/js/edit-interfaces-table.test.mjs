@@ -15,8 +15,8 @@ for (const name of ["systemsbreakdown", "systemrequirement", "stakeholderrequire
     const page = await readFile(new URL(`../../main/webapp/js/pages/${name}-edit-page.js`, import.meta.url), "utf8");
     const versionedHtml = html.replaceAll('.js"></script>', '.js?v=test-build"></script>');
     assert.ok(versionedHtml.includes(`${name}-edit-page.js?v=test-build`), `${name}: entry module must receive build version`);
-    assert.ok(page.includes('edit-interfaces-table.js?rev=interface-matrix-sides-2026-10-13'), `${name}: current component import`);
-    for (const id of ["interfacesBody", "interfacesEmpty", "interfacesCount", "rightInterfacesBody", "rightInterfacesEmpty", "rightInterfacesCount"]) {
+    assert.ok(page.includes('edit-interfaces-table.js?rev=interface-refresh-2026-11-13'), `${name}: current component import`);
+    for (const id of ["interfacesBody", "interfacesEmpty", "interfacesCount", "rightInterfacesBody", "rightInterfacesEmpty", "rightInterfacesCount", "addInterfaceToButton", "addInterfaceFromButton"]) {
         assert.ok(html.includes(`id="${id}"`), `${name}: missing table element ${id}`);
     }
 }
@@ -53,7 +53,10 @@ for (const prefix of ["interfaces", "rightInterfaces"]) {
     nodes.set(`${prefix}Empty`, new Node("div"));
     nodes.set(`${prefix}Count`, new Node("span"));
 }
+nodes.set("addInterfaceToButton", new Node("button"));
+nodes.set("addInterfaceFromButton", new Node("button"));
 let opened;
+let refreshRequested;
 const sandbox = {
     document: {
         getElementById: id => nodes.get(id),
@@ -64,6 +67,7 @@ const sandbox = {
     getAttribute: (node, name, fallback) => node?.attributes?.[name] ?? fallback,
     getChildText: (node, name, fallback) => node?.fields?.[name] ?? fallback,
     resolveInterfaceBasePath: type => `/interfaces/${type}`,
+    requestEditDialogRefresh: payload => { refreshRequested = payload; },
     openInterfaceEditDialog: options => { opened = options; }
 };
 vm.createContext(sandbox);
@@ -74,14 +78,15 @@ const left = {fields: {
     fromIrlId: "7", fromClassificationIds: "AA", nextIrlMeeting: "2026-10-13", fromTrlId: "4", toTrlId: "8"
 }};
 const right = {fields: {
-    fromEntityId: "10", toEntityCode: "C", toEntityName: "Receiver C", toEntityId: "30",
+    fromEntityId: "30", fromEntityCode: "C", fromEntityName: "Sender C", toEntityId: "10",
     fromIrlId: "2", fromClassificationIds: "BB", nextIrlMeeting: "2026-11-14", fromTrlId: "6", toTrlId: "4"
 }};
 
-function load(type, leftRows = [left], rightRows = [right]) {
+function load(type, leftRows = [left], rightRows = [right], readOnly = false) {
     const root = {
-        attributes: {entityId: "10", entityType: type},
+        attributes: {entityId: "10", entityType: type, readOnly: String(readOnly)},
         querySelectorAll(selector) {
+            if (selector === ":scope > entities > entity") return ["10", "20", "30", "40"].map(id => ({fields: {entityId: id, id, name: "Entity " + id}}));
             if (selector === ":scope > leftInterfaces > interface") return leftRows;
             if (selector === ":scope > rightInterfaces > interface") return rightRows;
             return [];
@@ -108,7 +113,7 @@ for (const type of ["2", "5", "6", "8", "9"]) {
     assert.equal(comparison.length, 2);
     assert.equal(comparison[0].columns.length, type === "2" ? 7 : 5);
     assert.equal(comparison[1].columns[0].label, "ID");
-    assert.equal(comparison[1].rows[0].key, "10:30");
+    assert.equal(comparison[1].rows[0].key, "30:10");
     assert.equal(comparison[0].rows[0].key, "10:20");
     const leftBody = nodes.get("interfacesBody");
     const rightBody = nodes.get("rightInterfacesBody");
@@ -117,7 +122,7 @@ for (const type of ["2", "5", "6", "8", "9"]) {
     assert.equal(leftBody.children[0].children.length, type === "2" ? 7 : 5);
     assert.equal(rightBody.children[0].children.length, type === "2" ? 7 : 5);
     assert.equal(rightBody.children[0].children[0].children[0].textContent, "C");
-    assert.equal(rightBody.children[0].children[1].children[0].textContent, "Receiver C");
+    assert.equal(rightBody.children[0].children[1].children[0].textContent, "Sender C");
     assert.equal(nodes.get("interfacesCount").textContent, "1");
     assert.equal(nodes.get("rightInterfacesCount").textContent, "1");
     doubleClick(leftBody.children[0]);
@@ -125,13 +130,33 @@ for (const type of ["2", "5", "6", "8", "9"]) {
     assert.equal(opened.toStructure.entityId, "20");
     assert.equal(opened.cell.irlId, "7");
     doubleClick(rightBody.children[0]);
-    assert.equal(opened.fromStructure.entityId, "10");
-    assert.equal(opened.fromStructure.id, "A");
-    assert.equal(opened.toStructure.entityId, "30");
-    assert.equal(opened.toStructure.id, "C");
+    assert.equal(opened.fromStructure.entityId, "30");
+    assert.equal(opened.fromStructure.id, "C");
+    assert.equal(opened.toStructure.entityId, "10");
+    assert.equal(opened.toStructure.id, "A");
     assert.equal(opened.cell.irlId, "2");
     assert.equal(opened.cell.classificationIds.join(","), "BB");
     assert.equal(opened.cell.nextIrlMeeting, "2026-11-14");
+    opened.onSaved({fromEntityId: "30", toEntityId: "10"});
+    assert.equal(refreshRequested.kind, "interface");
+    assert.equal(refreshRequested.basePath, '/interfaces/' + type);
+    assert.equal(refreshRequested.fromEntityId, "30");
+    assert.equal(refreshRequested.toEntityId, "10");
+    const incomingHeaders = nodes.get("rightInterfacesBody").closest("table").querySelector("thead").children[0];
+    assert.equal(incomingHeaders.children[0].textContent, "From");
+    nodes.get("addInterfaceToButton").onclick();
+    assert.equal(opened.selectableEndpoint, "to");
+    assert.equal(opened.fromStructure.entityId, "10");
+    assert.equal(opened.toStructure, null);
+    assert.equal(opened.structures.map(item => item.entityId).join(","), "30,40");
+    opened.onSaved({fromEntityId: "10", toEntityId: "40"});
+    assert.equal(refreshRequested.fromEntityId, "10");
+    assert.equal(refreshRequested.toEntityId, "40");
+    nodes.get("addInterfaceFromButton").onclick();
+    assert.equal(opened.selectableEndpoint, "from");
+    assert.equal(opened.toStructure.entityId, "10");
+    assert.equal(opened.fromStructure, null);
+    assert.equal(opened.structures.map(item => item.entityId).join(","), "20,40");
 }
 load("2", [], [right]);
 assert.equal(nodes.get("interfacesEmpty").hidden, false);
@@ -146,4 +171,13 @@ load("2", [left], [right, {...right, fields: {...right.fields, toEntityId: "40"}
     {...right, fields: {...right.fields, toEntityId: "50"}}]);
 assert.equal(nodes.get("interfacesCount").textContent, "1");
 assert.equal(nodes.get("rightInterfacesCount").textContent, "3");
-console.log("Interface table tests passed for both matrix sides and all five entity types.");
+load("2", [left], [right], true);
+assert.equal(nodes.get("addInterfaceToButton").hidden, true);
+assert.equal(nodes.get("addInterfaceFromButton").hidden, true);
+opened = null;
+doubleClick(nodes.get("rightInterfacesBody").children[0]);
+assert.equal(opened, null);
+load("2", [left, {...left, fields: {...left.fields, toEntityId: "30"}}, {...left, fields: {...left.fields, toEntityId: "40"}}], []);
+assert.equal(nodes.get("addInterfaceToButton").disabled, true);
+assert.equal(nodes.get("addInterfaceFromButton").disabled, false);
+console.log("Interface direction, editing and creation tests passed for all five entity types.");

@@ -16,7 +16,7 @@ import {createNotesTable} from "../components/notes-table.js";
 import {createAttachmentsTable} from "../components/attachments-table.js";
 import {createLinksTable} from "../components/links-table.js";
 import {createEntityRelationsTable} from "../components/entity-relations-table.js";
-import {createEditInterfacesTable} from "../components/edit-interfaces-table.js?rev=interface-matrix-sides-2026-10-13";
+import {createEditInterfacesTable} from "../components/edit-interfaces-table.js?rev=interface-refresh-2026-11-13";
 import {setText} from "../core/dom.js";
 import {getDirectChild, getDirectText, hasXmlParseError, serializeXml} from "../core/xml.js";
 import {fieldEditable, fieldRequired, fieldVisible} from "../core/field-display.js";

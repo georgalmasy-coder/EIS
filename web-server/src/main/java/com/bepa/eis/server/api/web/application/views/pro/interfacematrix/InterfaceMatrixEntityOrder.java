@@ -23,6 +23,15 @@ public final class InterfaceMatrixEntityOrder {
     }
 
     public static Map<Integer, Integer> getPositions(WebSession session, EntityType entityType) {
+        List<? extends AbstractEntity> entities = getEntities(session, entityType);
+        Map<Integer, Integer> positions = new HashMap<>();
+        for (int index = 0; index < entities.size(); index++) {
+            positions.put(entities.get(index).getEntityId().getValue(), index);
+        }
+        return positions;
+    }
+
+    public static List<? extends AbstractEntity> getEntities(WebSession session, EntityType entityType) {
         List<? extends AbstractEntity> entities = switch (entityType) {
             case SYSTEMS_BREAKDOWN -> new SystemBreakdownProvider(session).getAllSystemBreakdown(false);
             case STAKEHOLDER_REQUIREMENT -> new StakeholderRequirementProvider(session).getAllStakeholderRequirement(false);
@@ -32,10 +41,6 @@ public final class InterfaceMatrixEntityOrder {
             default -> throw new IllegalArgumentException("Unsupported interface entity type: " + entityType);
         };
         sort(entities);
-        Map<Integer, Integer> positions = new HashMap<>();
-        for (int index = 0; index < entities.size(); index++) {
-            positions.put(entities.get(index).getEntityId().getValue(), index);
-        }
-        return positions;
+        return entities;
     }
 }

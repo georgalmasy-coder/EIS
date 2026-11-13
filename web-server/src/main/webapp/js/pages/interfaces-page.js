@@ -5,7 +5,7 @@ import {snapshotInterfaceMatrix, downloadInterfaceXlsx} from "../components/inte
 import {installInterfaceFlowArrows, installInterfaceHeaderHover} from "../components/interface-flow-arrows.js?rev=interfaces-header-hover-1";
 import {initHelpDialog} from "../components/help-dialog.js";
 import {mountTopbar} from "../components/topbar.js";
-import {openEditDialog} from "../components/edit-dialog.js";
+import {openEditDialog} from "../components/edit-dialog.js?rev=interface-refresh-2026-11-13";
 import {initInterfaceEditDialog, openInterfaceEditDialog} from "../components/interface-edit-dialog.js?rev=interfaces-updates-3";
 import {closeDialogElement, setInputValue, setText, showDialog} from "../core/dom.js";
 import {formatNumber} from "../core/format.js";
@@ -801,6 +801,11 @@ function openStructureEditPage(structure) {
         mode: "edit",
         id,
         title: `Edit ${INTERFACE_STRUCTURE_LABEL}`,
+        onRequestRefresh: payload => {
+            if (payload.kind === "interface" && payload.basePath === INTERFACE_BASE_PATH) {
+                return refreshInterfacePair(payload);
+            }
+        },
         onSaved: () => window.location.reload()
     });
 }
