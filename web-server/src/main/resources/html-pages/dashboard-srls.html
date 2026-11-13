@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../css/generel.css" />
     <link rel="stylesheet" href="../css/topbar.css" />
     <link rel="stylesheet" href="../css/help-dialog.css" />
-    <link rel="stylesheet" href="../css/dashboard-srls.css?rev=sbs-code-ellipsis-1" />
+    <link rel="stylesheet" href="../css/dashboard-srls.css?rev=prl-legend-1" />
     <link rel="stylesheet" href="../css/hierarchy-table.css" />
     <link rel="stylesheet" href="../css/dashboard-hierarchy.css" />
 </head>
@@ -53,6 +53,12 @@
                     <div class="dashboard-srls-info-item">
                         <span class="dashboard-srls-info-label">Number of Physical Architecture:</span>
                         <strong id="srlStructureCount">-</strong>
+                    </div>
+                    <div class="dashboard-srls-legend-items" role="group" aria-label="Project PRL marker legend">
+                    <strong>Project PRL:</strong>
+                    <span class="dashboard-srls-legend-item" title="Lowest and highest calculated SRL in the project"><span class="dashboard-srls-legend-marker dashboard-srls-legend-marker--prl" aria-hidden="true"></span>Low/High</span>
+                    <span class="dashboard-srls-legend-item" title="Average calculated SRL, rounded to the nearest whole number"><span class="dashboard-srls-legend-marker dashboard-srls-legend-marker--prl-current" aria-hidden="true"></span>Current Level</span>
+                    <span class="dashboard-srls-legend-item" title="Two or more PRL reference points share the same rounded SRL"><span class="dashboard-srls-legend-marker dashboard-srls-legend-marker--prl-combined" aria-hidden="true"></span>Overlapping levels</span>
                     </div>
                     <div class="dashboard-srls-legend-items" role="group" aria-label="System SRL marker legend">
                     <strong>System SRL:</strong>

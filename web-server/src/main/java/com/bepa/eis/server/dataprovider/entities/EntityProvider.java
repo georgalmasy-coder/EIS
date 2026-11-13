@@ -193,7 +193,7 @@ abstract public class EntityProvider extends GenericProvider {
             "   AND E.Latest = 1 " +
             "   AND E.EntityId = EE.EntityId " +
             "   AND EE.EntityDataElementType = ? " +
-            "   AND EE.StringValue like ? " +
+            "   AND %s " +
             ")";
 
     private static final String CLEAR_LATEST_ON_SQL =
@@ -1189,14 +1189,15 @@ abstract public class EntityProvider extends GenericProvider {
 
             if (entityCodeColumn == null || entityCode == null || entityCode.isBlank()) {
                 log.debug(
-                        "Skipping child active status update for {} entityId={} because no entity code column/code is configured.",
+                        "Skipping hierarchy active status update for {} entityId={} because no entity code column/code is configured.",
                         entity.getEntityType().getDescription(),
                         entity.getEntityId().getValue()
                 );
                 return;
             }
 
-            try (PreparedStatement ps = con.prepareStatement(UPDATE_ENTITY_ACTIVE_STATUS_SQL)) {
+            try (PreparedStatement ps = con.prepareStatement(
+                    UPDATE_ENTITY_ACTIVE_STATUS_SQL.formatted("EE.StringValue like ?"))) {
 
                 ps.setBoolean(1, entity.isActive());
                 ps.setInt(2, entity.getCustomerId().getValue());
@@ -1211,6 +1212,26 @@ abstract public class EntityProvider extends GenericProvider {
                     log.info("Active status on {} {} entities has been updated to {}",  rows, entity.getEntityType().getDescription(), entity.isActive());
                 }
 
+            }
+
+            if (entity.isActive()) {
+                // Update ancestors directly so their other descendants remain unchanged.
+                try (PreparedStatement ps = con.prepareStatement(
+                        UPDATE_ENTITY_ACTIVE_STATUS_SQL.formatted("EE.StringValue = ?"))) {
+                    ps.setBoolean(1, true);
+                    ps.setInt(2, entity.getCustomerId().getValue());
+                    ps.setInt(3, entity.getProjectId().getValue());
+                    ps.setInt(4, entity.getEntityType().getId());
+                    ps.setInt(5, entityCodeColumn.getId());
+
+                    String ancestorCode = entityCode;
+                    int separator;
+                    while ((separator = ancestorCode.lastIndexOf('.')) > 0) {
+                        ancestorCode = ancestorCode.substring(0, separator);
+                        ps.setString(6, ancestorCode);
+                        ps.executeUpdate();
+                    }
+                }
             }
         }
     }

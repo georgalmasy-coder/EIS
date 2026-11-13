@@ -23,6 +23,9 @@ html, body.dashboard-srls-document { height: 100%; overflow: hidden; }
 .dashboard-srls-info-label { color: var(--app-text-secondary); font-weight: 600; }
 .dashboard-srls-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
 .dashboard-srls-legend-marker { flex: 0 0 auto; width: 20px; height: 20px; border: 1px solid var(--app-surface-background); border-radius: 50%; background: var(--app-status-error-text); }
+.dashboard-srls-legend-marker--prl { background: var(--app-text-primary); }
+.dashboard-srls-legend-marker--prl-current { background: #2563eb; }
+.dashboard-srls-legend-marker--prl-combined { background: linear-gradient(to right, #2563eb 50%, var(--app-text-primary) 50%); }
 .dashboard-srls-table thead .dashboard-srls-summary td { padding: 16px; background: var(--app-surface-background); color: var(--app-text-primary); border: 0; }
 .dashboard-srls-summary h2 { margin: 0; color: var(--app-text-primary); font-size: 1.25rem; white-space: nowrap; }
 .dashboard-srls-summary-track { position: relative; margin: 0 56px; height: 60px; }
