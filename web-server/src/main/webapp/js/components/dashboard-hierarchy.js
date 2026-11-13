@@ -50,14 +50,18 @@ export function groupTeamworkRecords(records, hierarchy, systems = []) {
         if (!groups.has(code)) groups.set(code, []);
         groups.get(code).push(record);
     }
-    // A parent may only occur as the target of an interface. Show that pair
-    // from the parent's perspective too, preserving both directional values.
+    // Every endpoint must also be visible as a source, including descendants.
+    // Index existing orientations to avoid duplicates and growing-list searches.
+    const endpoint = (record, side) => String(record[`${side}EntityId`] || record[`${side}SbsCode`] || "");
+    const pairKey = (from, to) => JSON.stringify([from, to]);
+    const orientations = new Set(records.map(record => pairKey(endpoint(record, "from"), endpoint(record, "to"))));
     for (const record of records) {
-        const code = record.toSbsCode;
-        if (!code || code !== hierarchyRoot(code) || record.fromSbsCode === code) continue;
+        const code = hierarchyRoot(record.toSbsCode);
+        const key = pairKey(endpoint(record, "to"), endpoint(record, "from"));
+        if (!code || orientations.has(key)) continue;
+        orientations.add(key);
         if (!groups.has(code)) groups.set(code, []);
         const members = groups.get(code);
-        if (members.some(item => item.fromSbsCode === code && item.toEntityId === record.fromEntityId)) continue;
         const reversed = {...record};
         for (const key of Object.keys(record)) {
             if (key.startsWith("from") || key.startsWith("to")) {

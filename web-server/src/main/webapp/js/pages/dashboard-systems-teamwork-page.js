@@ -1,5 +1,5 @@
 import {mountHierarchyControls} from "../components/hierarchy-controls.js";
-import {createDashboardHierarchy, decorateDashboardCode, focusDashboardToggle, groupTeamworkRecords} from "../components/dashboard-hierarchy.js?rev=teamwork-root-data-3";
+import {createDashboardHierarchy, decorateDashboardCode, focusDashboardToggle, groupTeamworkRecords} from "../components/dashboard-hierarchy.js?rev=teamwork-both-endpoints-4";
 const hierarchy = createDashboardHierarchy();
 import {createTeamworkViewport} from "../components/teamwork-viewport.js?rev=teamwork-virtual-1";
 import {userPreferences} from "../core/user-preferences.js";
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function initializePageShell() {
     mountHierarchyControls("dashboard-systems-teamworkHierarchyToolbar", expanded => {
-        hierarchy.setAll(state.dashboard?.interfaces.map(item => item.fromSbsCode) || [], expanded);
+        hierarchy.setAll(state.dashboard?.interfaces.flatMap(item => [item.fromSbsCode, item.toSbsCode]) || [], expanded);
         if (state.dashboard) renderDashboard(state.dashboard);
     }, {container: true});
     state.columnWidths = loadStoredColumnWidths();

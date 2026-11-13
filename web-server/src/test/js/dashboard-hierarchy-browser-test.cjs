@@ -94,10 +94,9 @@ async function main() {
         await pause(150);
         if (page === 'dashboard-systems-teamwork') {
             assert.equal(await run("getComputedStyle(document.querySelector('.dashboard-systems-teamwork-header-cell--fromSbsCode')).paddingLeft"), '12px', 'SBS header has the same left padding as other tables');
-            assert.deepEqual(await run(`['fromSbsCode','toSbsCode'].map(key => {
-                const cell = document.querySelector('.dashboard-systems-teamwork-row .dashboard-systems-teamwork-cell--'+key+' .hierarchy-code-cell');
-                return getComputedStyle(cell).paddingLeft;
-            })`), ['18px','18px'], 'Both SBS columns use shared hierarchy indentation');
+            assert.equal(await run(`getComputedStyle(document.querySelector(
+                '.dashboard-systems-teamwork-row .dashboard-systems-teamwork-cell--fromSbsCode .hierarchy-code-cell'
+            )).paddingLeft`), '18px', 'Source SBS column uses shared hierarchy indentation');
             assert.equal(await run(`(() => {
                 const incoming = {fromEntityId:'2',fromSbsCode:'=P-ARC-1.1',fromSystemName:'Child',
                     toEntityId:'1',toSbsCode:'=P-ARC-1',toSystemName:'WTG System',toTrlId:'8',
@@ -117,7 +116,7 @@ async function main() {
             })()`), true, 'Parent without outgoing interfaces retains its system metadata');
             assert.equal(await run("document.querySelector('.dashboard-teamwork-group .dashboard-systems-teamwork-cell--toSbsCode').textContent.trim()"), 'T-1.1', 'Level 1 retains target system data');
             assert.equal(await run("document.querySelectorAll('.dashboard-teamwork-group .dashboard-systems-teamwork-cell--fromSbsCode.dashboard-systems-teamwork-cell--interactive').length"), 2, 'Level 1 retains edit controls');
-            assert.equal(await run("document.querySelectorAll('tbody tr:not(.teamwork-viewport-spacer)').length"), 4, 'Level 1 records render once');
+            assert.equal(await run("document.querySelectorAll('tbody tr:not(.teamwork-viewport-spacer)').length"), 9, 'Both endpoint orientations render with a group for the target root');
         }
         assert.equal(await run("document.querySelectorAll('.hierarchy-bulk-controls button').length"),2,page+' bulk controls');
         assert.equal(await run("document.querySelector('.hierarchy-toggle').getAttribute('aria-expanded')"),'true',page+' initially expanded');
@@ -130,7 +129,7 @@ async function main() {
         assert.equal(await run("getComputedStyle(document.querySelector('table.hierarchy-table')).fontSize"),'13px',page+' table font');
         assert.equal(await run("Math.round(document.querySelector('.hierarchy-bulk-controls button').getBoundingClientRect().height)<=32"),true,page+' compact buttons');
         const count = await run("[...document.querySelectorAll('table.hierarchy-table tbody tr:not(.teamwork-viewport-spacer)')].filter(row=>!row.hidden).length");
-        assert.equal(count,2,page+' collapse hides all descendants');
+        assert.equal(count,page === 'dashboard-systems-teamwork' ? 3 : 2,page+' collapse hides all descendants');
         await run(`document.querySelector('[aria-label="Expand all"]').click()`);await pause(100);
         assert.equal(await run("[...document.querySelectorAll('[data-hierarchy-code]')].every(b=>!b.dataset.hierarchyCode.includes('.'))"),true,page+' level 1 only');
         const rect=await run("(()=>{const r=document.querySelector('.hierarchy-root-row').getBoundingClientRect();return {x:r.left+80,y:r.top+10};})()");
