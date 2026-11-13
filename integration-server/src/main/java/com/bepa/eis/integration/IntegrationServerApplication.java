@@ -28,7 +28,9 @@ public class IntegrationServerApplication {
     private final IntegrationDatabaseInstaller databaseInstaller = new IntegrationDatabaseInstaller();
     private final LogArchiveCleanupJob logArchiveCleanupJob = new LogArchiveCleanupJob();
     private final List<DataCleanupJob> cleanupJobs = List.of(
-            new DataCleanupJob(Type.SESSION), new DataCleanupJob(Type.INCIDENTS), new DataCleanupJob(Type.PERFORMANCE));
+            // Temporarily disabled to preserve SESSION records.
+            // new DataCleanupJob(Type.SESSION),
+            new DataCleanupJob(Type.INCIDENTS), new DataCleanupJob(Type.PERFORMANCE));
 
     private final ScheduledCronJob<CronJobSettings> scheduledMail = new ScheduledCronJob<>(
             ComponentHealthProvider.MAIL_JOB, "Mail queue job",

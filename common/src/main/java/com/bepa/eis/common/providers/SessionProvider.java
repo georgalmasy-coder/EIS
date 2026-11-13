@@ -16,6 +16,12 @@ public class SessionProvider extends GenericProvider {
     private static final Logger log = LoggerFactory.getLogger(SessionProvider.class);
 
     private static final String DELETE_SESSION_SQL = """
+            UPDATE [dbo].[SESSION]
+            SET SessionId = 'DELETED-' + SessionId
+            WHERE SessionId = ?
+            """;
+
+    private static final String OLD_DELETE_SESSION_SQL = """
             DELETE FROM [dbo].[SESSION]
             WHERE SessionId = ?
             """;
